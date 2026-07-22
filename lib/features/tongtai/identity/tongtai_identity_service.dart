@@ -9,7 +9,7 @@ import 'tongtai_identity_store.dart';
 /// same value — the id is stable for the life of the install.
 class TongtaiIdentityService {
   TongtaiIdentityService(this._store, {Uuid? uuid})
-      : _uuid = uuid ?? const Uuid();
+    : _uuid = uuid ?? const Uuid();
 
   final TongtaiIdentityStore _store;
   final Uuid _uuid;

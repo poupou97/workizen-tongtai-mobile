@@ -54,16 +54,16 @@ void main() {
     expect(find.text('1 supplier'), findsOneWidget);
   });
 
-  testWidgets('shows real-time suggestions and applies one on tap',
-      (tester) async {
+  testWidgets('shows real-time suggestions and applies one on tap', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
     await tester.enterText(find.byType(TextField), 'tech');
     await tester.pumpAndSettle();
 
     // A suggestion tile appears as the user types.
-    final suggestionTile =
-        find.widgetWithText(ListTile, 'TechPro Wholesale');
+    final suggestionTile = find.widgetWithText(ListTile, 'TechPro Wholesale');
     expect(suggestionTile, findsOneWidget);
 
     await tester.tap(suggestionTile);
@@ -138,7 +138,9 @@ void main() {
     expect(find.text('0 suppliers'), findsOneWidget);
   });
 
-  testWidgets('results grid reflows: single column in portrait', (tester) async {
+  testWidgets('results grid reflows: single column in portrait', (
+    tester,
+  ) async {
     addTearDown(tester.view.reset);
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(390, 900); // portrait phone
@@ -151,8 +153,7 @@ void main() {
     expect(delegate.crossAxisCount, 1);
   });
 
-  testWidgets('results grid reflows: two columns in landscape',
-      (tester) async {
+  testWidgets('results grid reflows: two columns in landscape', (tester) async {
     addTearDown(tester.view.reset);
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(844, 390); // landscape phone

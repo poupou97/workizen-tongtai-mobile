@@ -42,12 +42,11 @@ class TongtaiDeepLinkState {
   TongtaiDeepLinkState _next({
     TongtaiRoute? activeRoute,
     TongtaiDeepLinkFailure? lastFailure,
-  }) =>
-      TongtaiDeepLinkState(
-        activeRoute: activeRoute,
-        lastFailure: lastFailure,
-        sequence: sequence + 1,
-      );
+  }) => TongtaiDeepLinkState(
+    activeRoute: activeRoute,
+    lastFailure: lastFailure,
+    sequence: sequence + 1,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -68,8 +67,8 @@ class TongtaiDeepLinkState {
 /// Controls deep-link resolution and the resulting navigation.
 final tongtaiDeepLinkControllerProvider =
     NotifierProvider<TongtaiDeepLinkController, TongtaiDeepLinkState>(
-  TongtaiDeepLinkController.new,
-);
+      TongtaiDeepLinkController.new,
+    );
 
 class TongtaiDeepLinkController extends Notifier<TongtaiDeepLinkState> {
   /// The parser used to resolve links. Overridable in tests, though the

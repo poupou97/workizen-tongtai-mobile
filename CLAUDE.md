@@ -2,6 +2,19 @@
 
 Working agreement for AI-assisted development on this repository.
 
+## ⭐ New agent? Read IN THIS ORDER (bắt buộc)
+
+1. `docs/00-START-HERE/AGENT-ONBOARDING.md`
+2. `docs/00-START-HERE/PRODUCT-CONTEXT.md`
+3. `docs/02-ARCHITECTURE/CURRENT-STATE-ARCHITECTURE.md`
+4. `docs/03-DECISIONS/ADR-INDEX.md`
+5. `docs/00-START-HERE/CURRENT-STATUS.md`
+6. `.claude/README.md`
+
+Everything you need is in THIS repo — no Hub repo, no old conversations.
+`.claude`/memory is operating context only; decisions live version-controlled
+under `docs/` (see `docs/00-START-HERE/SOURCE-OF-TRUTH.md`).
+
 ## What this is
 
 **Tổng Tài** ("I Like a Boss") — an **AI-First Business OS** for SME

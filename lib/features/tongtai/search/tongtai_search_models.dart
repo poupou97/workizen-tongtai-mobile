@@ -28,21 +28,20 @@ enum TongtaiSearchTab {
 
   /// English tab label.
   String get labelEn => switch (this) {
-        TongtaiSearchTab.suppliers => 'Suppliers',
-        TongtaiSearchTab.products => 'Products',
-        TongtaiSearchTab.collections => 'Collections',
-      };
+    TongtaiSearchTab.suppliers => 'Suppliers',
+    TongtaiSearchTab.products => 'Products',
+    TongtaiSearchTab.collections => 'Collections',
+  };
 
   /// Vietnamese tab label (this is a Vietnamese-first product).
   String get labelVi => switch (this) {
-        TongtaiSearchTab.suppliers => 'Nhà cung cấp',
-        TongtaiSearchTab.products => 'Sản phẩm',
-        TongtaiSearchTab.collections => 'Tổng hợp',
-      };
+    TongtaiSearchTab.suppliers => 'Nhà cung cấp',
+    TongtaiSearchTab.products => 'Sản phẩm',
+    TongtaiSearchTab.collections => 'Tổng hợp',
+  };
 
   /// Label for a language code ('vi' -> Vietnamese, otherwise English).
-  String label(String languageCode) =>
-      languageCode == 'vi' ? labelVi : labelEn;
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
 /// A supplier row projected for the search UI.
@@ -113,22 +112,23 @@ class TongtaiProductResult {
     this.createdAt,
   });
 
-  factory TongtaiProductResult.fromRow(ProductsTableData row) =>
-      TongtaiProductResult(
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        category: row.category,
-        // Prefer the live selling price when set, else the list price.
-        price: row.currentPrice ?? row.listPrice,
-        stock: row.totalStock,
-        // Products carry no rating/reviews column; the WTM-74 ranker scores a
-        // null rating as neutral, so products rank on text/recency/personalization.
-        rating: null,
-        reviewCount: null,
-        updatedAt: row.updatedAt,
-        createdAt: row.createdAt,
-      );
+  factory TongtaiProductResult.fromRow(
+    ProductsTableData row,
+  ) => TongtaiProductResult(
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    category: row.category,
+    // Prefer the live selling price when set, else the list price.
+    price: row.currentPrice ?? row.listPrice,
+    stock: row.totalStock,
+    // Products carry no rating/reviews column; the WTM-74 ranker scores a
+    // null rating as neutral, so products rank on text/recency/personalization.
+    rating: null,
+    reviewCount: null,
+    updatedAt: row.updatedAt,
+    createdAt: row.createdAt,
+  );
 
   final String id;
   final String name;
@@ -176,10 +176,10 @@ class TongtaiSearchResults {
 
   /// The number of results shown under [tab] (Collections spans both types).
   int countFor(TongtaiSearchTab tab) => switch (tab) {
-        TongtaiSearchTab.suppliers => supplierCount,
-        TongtaiSearchTab.products => productCount,
-        TongtaiSearchTab.collections => totalCount,
-      };
+    TongtaiSearchTab.suppliers => supplierCount,
+    TongtaiSearchTab.products => productCount,
+    TongtaiSearchTab.collections => totalCount,
+  };
 }
 
 /// The advanced-filter facets that refine the search scope (WTM-73 AC4).

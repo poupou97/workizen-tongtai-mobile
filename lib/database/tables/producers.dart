@@ -6,7 +6,8 @@ import 'businesses.dart';
 @TableIndex(name: 'producers_business_id', columns: {#businessId})
 class ProducersTable extends Table {
   TextColumn get id => text()();
-  TextColumn get businessId => text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get businessId =>
+      text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
   TextColumn get name => text()();
   TextColumn get category => text().nullable()();
   TextColumn get country => text().nullable()();

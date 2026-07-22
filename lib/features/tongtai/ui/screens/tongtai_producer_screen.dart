@@ -44,9 +44,7 @@ class TongtaiProducerScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFFF0FDF4),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0xFF10B981),
-                        ),
+                        border: Border.all(color: const Color(0xFF10B981)),
                       ),
                       child: const Text(
                         'Analyzing supplier opportunities and market trends...',
@@ -71,12 +69,30 @@ class TongtaiProducerScreen extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _CapabilityPill(label: 'Opportunity Scoring', color: Color(0xFF10B981)),
-                _CapabilityPill(label: 'Supplier Ranking', color: Color(0xFF10B981)),
-                _CapabilityPill(label: 'Market Trends', color: Color(0xFF10B981)),
-                _CapabilityPill(label: 'Price Analysis', color: Color(0xFF10B981)),
-                _CapabilityPill(label: 'Quality Rating', color: Color(0xFF10B981)),
-                _CapabilityPill(label: 'Delivery Time', color: Color(0xFF10B981)),
+                _CapabilityPill(
+                  label: 'Opportunity Scoring',
+                  color: Color(0xFF10B981),
+                ),
+                _CapabilityPill(
+                  label: 'Supplier Ranking',
+                  color: Color(0xFF10B981),
+                ),
+                _CapabilityPill(
+                  label: 'Market Trends',
+                  color: Color(0xFF10B981),
+                ),
+                _CapabilityPill(
+                  label: 'Price Analysis',
+                  color: Color(0xFF10B981),
+                ),
+                _CapabilityPill(
+                  label: 'Quality Rating',
+                  color: Color(0xFF10B981),
+                ),
+                _CapabilityPill(
+                  label: 'Delivery Time',
+                  color: Color(0xFF10B981),
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -109,9 +125,7 @@ class TongtaiProducerScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text('No suppliers connected yet'),
-              ),
+              child: const Center(child: Text('No suppliers connected yet')),
             ),
           ],
         ),
@@ -124,10 +138,7 @@ class _CapabilityPill extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _CapabilityPill({
-    required this.label,
-    required this.color,
-  });
+  const _CapabilityPill({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {

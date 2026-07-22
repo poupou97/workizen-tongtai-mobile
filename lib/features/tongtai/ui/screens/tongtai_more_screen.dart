@@ -154,10 +154,7 @@ class _SettingsSection extends StatelessWidget {
   final String title;
   final List<_SettingsItem> items;
 
-  const _SettingsSection({
-    required this.title,
-    required this.items,
-  });
+  const _SettingsSection({required this.title, required this.items});
 
   @override
   Widget build(BuildContext context) {

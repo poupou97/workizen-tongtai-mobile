@@ -56,10 +56,7 @@ class TongtaiHomeScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     const Text(
                       'Your AI-powered business assistant for sourcing, inventory, customers, and more.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF6B7280),
-                      ),
+                      style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
                     ),
                     const SizedBox(height: 16),
                     // Module summary cards
@@ -81,9 +78,7 @@ class TongtaiHomeScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text('No missions yet'),
-              ),
+              child: const Center(child: Text('No missions yet')),
             ),
             const SizedBox(height: 24),
             // Placeholder for opportunities section
@@ -98,9 +93,7 @@ class TongtaiHomeScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text('No opportunities available'),
-              ),
+              child: const Center(child: Text('No opportunities available')),
             ),
             const SizedBox(height: 24),
             // Placeholder for KPIs section
@@ -115,9 +108,7 @@ class TongtaiHomeScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text('KPI metrics will appear here'),
-              ),
+              child: const Center(child: Text('KPI metrics will appear here')),
             ),
           ],
         ),
@@ -184,18 +175,12 @@ class _ModuleCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, color: color),
           ),
           const SizedBox(height: 4),
           Text(
             count,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
       ),

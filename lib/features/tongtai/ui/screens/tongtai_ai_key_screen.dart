@@ -289,8 +289,9 @@ class _KeySetBadge extends StatelessWidget {
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
       decoration: BoxDecoration(
         color: TongtaiDesignTokens.success.withValues(alpha: 0.10),
-        borderRadius:
-            BorderRadius.circular(TongtaiDesignTokens.componentBorderRadius),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.componentBorderRadius,
+        ),
         border: Border.all(
           color: TongtaiDesignTokens.success.withValues(alpha: 0.4),
         ),
@@ -351,8 +352,9 @@ class _KeyField extends StatelessWidget {
       autocorrect: false,
       enableSuggestions: false,
       maxLines: 1,
-      style: TongtaiDesignTokens.bodyStyle
-          .copyWith(color: TongtaiDesignTokens.lightTextPrimary),
+      style: TongtaiDesignTokens.bodyStyle.copyWith(
+        color: TongtaiDesignTokens.lightTextPrimary,
+      ),
       decoration: InputDecoration(
         hintText: hint,
         errorText: errorText,
@@ -366,8 +368,9 @@ class _KeyField extends StatelessWidget {
           onPressed: onToggleObscure,
         ),
         border: OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(TongtaiDesignTokens.componentBorderRadius),
+          borderRadius: BorderRadius.circular(
+            TongtaiDesignTokens.componentBorderRadius,
+          ),
         ),
       ),
     );
@@ -398,8 +401,9 @@ class _StatusBanner extends StatelessWidget {
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius:
-            BorderRadius.circular(TongtaiDesignTokens.componentBorderRadius),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.componentBorderRadius,
+        ),
         border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(

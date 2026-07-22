@@ -28,7 +28,7 @@ enum TongtaiAiErrorKind {
   badResponse,
 
   /// Anything not covered above.
-  unknown;
+  unknown,
 }
 
 /// A friendly, user-facing AI failure. The message never echoes the raw

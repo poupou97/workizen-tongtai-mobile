@@ -49,9 +49,9 @@ void main() {
     });
 
     test('toJson/fromJson round-trips', () {
-      final s = const TongtaiTabState(scrollOffset: 120.5)
-          .withFormValue('name', 'Anh Tổng')
-          .withFormValue('qty', '7');
+      final s = const TongtaiTabState(
+        scrollOffset: 120.5,
+      ).withFormValue('name', 'Anh Tổng').withFormValue('qty', '7');
       final restored = TongtaiTabState.fromJson(s.toJson());
       expect(restored, s);
       expect(restored.scrollOffset, 120.5);
@@ -86,17 +86,16 @@ void main() {
       final store = InMemoryTongtaiTabStateStore();
       final data = {
         TongtaiTabs.home: const TongtaiTabState(scrollOffset: 15),
-        TongtaiTabs.producer:
-            const TongtaiTabState().withFormValue('q', 'gao'),
+        TongtaiTabs.producer: const TongtaiTabState().withFormValue('q', 'gao'),
       };
       await store.writeAll(data);
       expect(store.readAll(), data);
     });
 
     test('clear empties the store', () async {
-      final store = InMemoryTongtaiTabStateStore(
-        {TongtaiTabs.home: const TongtaiTabState(scrollOffset: 5)},
-      );
+      final store = InMemoryTongtaiTabStateStore({
+        TongtaiTabs.home: const TongtaiTabState(scrollOffset: 5),
+      });
       await store.clear();
       expect(store.readAll(), isEmpty);
     });
@@ -111,8 +110,9 @@ void main() {
 
       final writer = SharedPrefsTongtaiTabStateStore(prefs);
       await writer.writeAll({
-        TongtaiTabs.inventory: const TongtaiTabState(scrollOffset: 88.0)
-            .withFormValue('sku', 'ABC-123'),
+        TongtaiTabs.inventory: const TongtaiTabState(
+          scrollOffset: 88.0,
+        ).withFormValue('sku', 'ABC-123'),
       });
 
       // A brand-new store over the same prefs = a fresh app launch.
@@ -125,9 +125,9 @@ void main() {
     test('writeAll with empty map removes the persisted key', () async {
       final prefs = await SharedPreferences.getInstance();
       final store = SharedPrefsTongtaiTabStateStore(prefs);
-      await store.writeAll(
-        {TongtaiTabs.home: const TongtaiTabState(scrollOffset: 3)},
-      );
+      await store.writeAll({
+        TongtaiTabs.home: const TongtaiTabState(scrollOffset: 3),
+      });
       await store.writeAll({});
       expect(prefs.getString(TongtaiTabStateStore.storageKey), isNull);
       expect(store.readAll(), isEmpty);
@@ -181,8 +181,10 @@ void main() {
       expect(s.formValues['phone'], '0900');
 
       await ctrl.clearFormValue(TongtaiTabs.consumer, 'phone');
-      expect(ctrl.stateFor(TongtaiTabs.consumer).formValues.containsKey('phone'),
-          isFalse);
+      expect(
+        ctrl.stateFor(TongtaiTabs.consumer).formValues.containsKey('phone'),
+        isFalse,
+      );
       expect(ctrl.stateFor(TongtaiTabs.consumer).formValues['name'], 'Chị Lan');
     });
 
@@ -199,22 +201,24 @@ void main() {
       expect(store.readAll()[TongtaiTabs.inventory]?.formValues['sku'], 'X1');
     });
 
-    test('AC3: a fresh controller hydrates from persisted storage (restart)',
-        () async {
-      final store = InMemoryTongtaiTabStateStore();
+    test(
+      'AC3: a fresh controller hydrates from persisted storage (restart)',
+      () async {
+        final store = InMemoryTongtaiTabStateStore();
 
-      // Session 1: save some state.
-      final c1 = makeContainer(store);
-      await c1
-          .read(tongtaiTabStateProvider.notifier)
-          .saveScrollOffset(TongtaiTabs.home, 199.0);
-      c1.dispose();
+        // Session 1: save some state.
+        final c1 = makeContainer(store);
+        await c1
+            .read(tongtaiTabStateProvider.notifier)
+            .saveScrollOffset(TongtaiTabs.home, 199.0);
+        c1.dispose();
 
-      // Session 2: brand new container over the same store = app restart.
-      final c2 = makeContainer(store);
-      final hydrated = c2.read(tongtaiTabStateProvider);
-      expect(hydrated[TongtaiTabs.home]?.scrollOffset, 199.0);
-    });
+        // Session 2: brand new container over the same store = app restart.
+        final c2 = makeContainer(store);
+        final hydrated = c2.read(tongtaiTabStateProvider);
+        expect(hydrated[TongtaiTabs.home]?.scrollOffset, 199.0);
+      },
+    );
 
     test('AC4: refreshTab clears that tab and resets to fresh data', () async {
       final store = InMemoryTongtaiTabStateStore();
@@ -234,35 +238,41 @@ void main() {
       expect(ctrl.stateFor(TongtaiTabs.home).scrollOffset, 10.0);
     });
 
-    test('AC5: clearAll wipes memory + storage (logout / user switch)',
-        () async {
-      final store = InMemoryTongtaiTabStateStore();
-      final container = makeContainer(store);
-      final ctrl = container.read(tongtaiTabStateProvider.notifier);
+    test(
+      'AC5: clearAll wipes memory + storage (logout / user switch)',
+      () async {
+        final store = InMemoryTongtaiTabStateStore();
+        final container = makeContainer(store);
+        final ctrl = container.read(tongtaiTabStateProvider.notifier);
 
-      await ctrl.saveScrollOffset(TongtaiTabs.home, 40.0);
-      await ctrl.saveFormValue(TongtaiTabs.consumer, 'name', 'A');
+        await ctrl.saveScrollOffset(TongtaiTabs.home, 40.0);
+        await ctrl.saveFormValue(TongtaiTabs.consumer, 'name', 'A');
 
-      await ctrl.clearAll();
+        await ctrl.clearAll();
 
-      expect(container.read(tongtaiTabStateProvider), isEmpty);
-      expect(store.readAll(), isEmpty);
-    });
+        expect(container.read(tongtaiTabStateProvider), isEmpty);
+        expect(store.readAll(), isEmpty);
+      },
+    );
 
-    test('empty states are pruned so storage does not grow unbounded',
-        () async {
-      final store = InMemoryTongtaiTabStateStore();
-      final container = makeContainer(store);
-      final ctrl = container.read(tongtaiTabStateProvider.notifier);
+    test(
+      'empty states are pruned so storage does not grow unbounded',
+      () async {
+        final store = InMemoryTongtaiTabStateStore();
+        final container = makeContainer(store);
+        final ctrl = container.read(tongtaiTabStateProvider.notifier);
 
-      // Set then reset a field back to nothing.
-      await ctrl.saveFormValue(TongtaiTabs.home, 'note', 'x');
-      await ctrl.clearFormValue(TongtaiTabs.home, 'note');
+        // Set then reset a field back to nothing.
+        await ctrl.saveFormValue(TongtaiTabs.home, 'note', 'x');
+        await ctrl.clearFormValue(TongtaiTabs.home, 'note');
 
-      expect(container.read(tongtaiTabStateProvider).containsKey(TongtaiTabs.home),
-          isFalse);
-      expect(store.readAll(), isEmpty);
-    });
+        expect(
+          container.read(tongtaiTabStateProvider).containsKey(TongtaiTabs.home),
+          isFalse,
+        );
+        expect(store.readAll(), isEmpty);
+      },
+    );
   });
 
   group('TongtaiPersistentScrollView widget', () {
@@ -288,11 +298,12 @@ void main() {
       return sv.controller!.offset;
     }
 
-    testWidgets('restores a previously saved scroll offset on build',
-        (tester) async {
-      final store = InMemoryTongtaiTabStateStore(
-        {TongtaiTabs.home: const TongtaiTabState(scrollOffset: 250.0)},
-      );
+    testWidgets('restores a previously saved scroll offset on build', (
+      tester,
+    ) async {
+      final store = InMemoryTongtaiTabStateStore({
+        TongtaiTabs.home: const TongtaiTabState(scrollOffset: 250.0),
+      });
       final c = container(store);
 
       await tester.pumpWidget(
@@ -312,8 +323,9 @@ void main() {
       expect(offsetOf(tester), 250.0);
     });
 
-    testWidgets('saves the offset back to the cache when scrolling settles',
-        (tester) async {
+    testWidgets('saves the offset back to the cache when scrolling settles', (
+      tester,
+    ) async {
       final store = InMemoryTongtaiTabStateStore();
       final c = container(store);
 
@@ -332,7 +344,9 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.drag(
-          find.byType(SingleChildScrollView), const Offset(0, -120));
+        find.byType(SingleChildScrollView),
+        const Offset(0, -120),
+      );
       await tester.pumpAndSettle();
 
       final saved = c
@@ -343,11 +357,12 @@ void main() {
       expect(saved, offsetOf(tester));
     });
 
-    testWidgets('scrolls back to top when the tab is refreshed',
-        (tester) async {
-      final store = InMemoryTongtaiTabStateStore(
-        {TongtaiTabs.home: const TongtaiTabState(scrollOffset: 250.0)},
-      );
+    testWidgets('scrolls back to top when the tab is refreshed', (
+      tester,
+    ) async {
+      final store = InMemoryTongtaiTabStateStore({
+        TongtaiTabs.home: const TongtaiTabState(scrollOffset: 250.0),
+      });
       final c = container(store);
 
       await tester.pumpWidget(
@@ -365,7 +380,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(offsetOf(tester), 250.0);
 
-      await c.read(tongtaiTabStateProvider.notifier).refreshTab(TongtaiTabs.home);
+      await c
+          .read(tongtaiTabStateProvider.notifier)
+          .refreshTab(TongtaiTabs.home);
       await tester.pumpAndSettle();
 
       expect(offsetOf(tester), 0.0);
@@ -389,12 +406,12 @@ void main() {
     }
 
     testWidgets('restores a previously entered value on build', (tester) async {
-      final store = InMemoryTongtaiTabStateStore(
-        {
-          TongtaiTabs.consumer:
-              const TongtaiTabState().withFormValue('name', 'Chị Mai'),
-        },
-      );
+      final store = InMemoryTongtaiTabStateStore({
+        TongtaiTabs.consumer: const TongtaiTabState().withFormValue(
+          'name',
+          'Chị Mai',
+        ),
+      });
       final c = container(store);
 
       await tester.pumpWidget(
@@ -437,12 +454,12 @@ void main() {
     });
 
     testWidgets('clears the field when the tab is refreshed', (tester) async {
-      final store = InMemoryTongtaiTabStateStore(
-        {
-          TongtaiTabs.consumer:
-              const TongtaiTabState().withFormValue('note', 'draft'),
-        },
-      );
+      final store = InMemoryTongtaiTabStateStore({
+        TongtaiTabs.consumer: const TongtaiTabState().withFormValue(
+          'note',
+          'draft',
+        ),
+      });
       final c = container(store);
 
       await tester.pumpWidget(

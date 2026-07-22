@@ -24,10 +24,7 @@ void main() {
     });
 
     test('rejects an empty / whitespace-only key', () {
-      expect(
-        TongtaiAiKeyValidator.validate('').issue,
-        TongtaiAiKeyIssue.empty,
-      );
+      expect(TongtaiAiKeyValidator.validate('').issue, TongtaiAiKeyIssue.empty);
       expect(
         TongtaiAiKeyValidator.validate('    ').issue,
         TongtaiAiKeyIssue.empty,

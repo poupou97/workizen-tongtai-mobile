@@ -21,8 +21,9 @@ void main() {
   tearDown(() => db.close());
 
   Future<int> count(String table) async {
-    final row =
-        await db.customSelect('SELECT count(*) AS c FROM $table').getSingle();
+    final row = await db
+        .customSelect('SELECT count(*) AS c FROM $table')
+        .getSingle();
     return row.read<int>('c');
   }
 
@@ -57,21 +58,27 @@ void main() {
   });
 
   test('does not seed when the catalogue already has data', () async {
-    await db.into(db.usersTable).insert(
+    await db
+        .into(db.usersTable)
+        .insert(
           UsersTableCompanion.insert(
             id: 'u1',
             email: 'real@shop.test',
             name: 'Real owner',
           ),
         );
-    await db.into(db.businessesTable).insert(
+    await db
+        .into(db.businessesTable)
+        .insert(
           BusinessesTableCompanion.insert(
             id: 'b1',
             ownerId: 'u1',
             name: 'Real shop',
           ),
         );
-    await db.into(db.producersTable).insert(
+    await db
+        .into(db.producersTable)
+        .insert(
           ProducersTableCompanion.insert(
             id: 'real-sup',
             businessId: 'b1',

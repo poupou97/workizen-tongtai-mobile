@@ -205,7 +205,8 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
           listenable: _controller,
           builder: (context, _) {
             final suggestions = _controller.suggestions;
-            final showSuggestions = _queryFocus.hasFocus &&
+            final showSuggestions =
+                _queryFocus.hasFocus &&
                 _controller.query.trim().isNotEmpty &&
                 suggestions.isNotEmpty;
             return Column(
@@ -226,8 +227,7 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
                         : 'Search suppliers, products…',
                     onChanged: _controller.setQuery,
                     onSubmitted: _onSubmit,
-                    onClear:
-                        _controller.query.isEmpty ? null : _clearQuery,
+                    onClear: _controller.query.isEmpty ? null : _clearQuery,
                   ),
                 ),
                 if (showSuggestions)
@@ -635,20 +635,14 @@ class _ResultsArea extends StatelessWidget {
           ],
         ),
         if (controller.isSearching && results.isEmpty)
-          const Expanded(
-            child: Center(child: CircularProgressIndicator()),
-          )
+          const Expanded(child: Center(child: CircularProgressIndicator()))
         else
           Expanded(
             child: TabBarView(
               controller: tabController,
               children: [
                 for (final tab in tabs)
-                  _ResultsTabView(
-                    lang: lang,
-                    tab: tab,
-                    results: results,
-                  ),
+                  _ResultsTabView(lang: lang, tab: tab, results: results),
               ],
             ),
           ),

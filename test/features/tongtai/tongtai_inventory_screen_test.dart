@@ -14,9 +14,7 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dar
 /// culled) so those counts are exact.
 void main() {
   Future<void> pumpScreen(WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: TongtaiInventoryScreen()),
-    );
+    await tester.pumpWidget(const MaterialApp(home: TongtaiInventoryScreen()));
     await tester.pumpAndSettle();
   }
 
@@ -26,8 +24,9 @@ void main() {
     tester.view.physicalSize = const Size(420, 3200);
   }
 
-  testWidgets('renders header, search, filters and the results count',
-      (tester) async {
+  testWidgets('renders header, search, filters and the results count', (
+    tester,
+  ) async {
     useTallViewport(tester);
     await pumpScreen(tester);
 
@@ -41,8 +40,9 @@ void main() {
     expect(find.text('Page 1 of 2'), findsOneWidget);
   });
 
-  testWidgets('a product row shows name, SKU, quantity and price',
-      (tester) async {
+  testWidgets('a product row shows name, SKU, quantity and price', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
     // Isolate a single product by its SKU so the assertion doesn't depend on
@@ -103,8 +103,9 @@ void main() {
     expect(find.text('Page 1 of 1'), findsOneWidget);
   });
 
-  testWidgets('shows a color-coded status label for an out-of-stock product',
-      (tester) async {
+  testWidgets('shows a color-coded status label for an out-of-stock product', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
     // "Khăn tắm cotton" is the only match and is out of stock (quantity 0).
@@ -121,7 +122,9 @@ void main() {
 
     // Default sort is Name, ascending.
     expect(
-      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Name')).selected,
+      tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Name'))
+          .selected,
       isTrue,
     );
     expect(find.byIcon(Icons.arrow_upward), findsOneWidget);
@@ -130,11 +133,15 @@ void main() {
     await tester.tap(find.widgetWithText(ChoiceChip, 'Price'));
     await tester.pumpAndSettle();
     expect(
-      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Price')).selected,
+      tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Price'))
+          .selected,
       isTrue,
     );
     expect(
-      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Name')).selected,
+      tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Name'))
+          .selected,
       isFalse,
     );
 

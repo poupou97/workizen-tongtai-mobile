@@ -65,7 +65,7 @@ class SupplierSearchFilter {
 /// touching callers.
 class SupplierSearchService {
   SupplierSearchService(List<Supplier> suppliers)
-      : _suppliers = List.unmodifiable(suppliers);
+    : _suppliers = List.unmodifiable(suppliers);
 
   /// Convenience constructor seeded with the built-in sample directory.
   factory SupplierSearchService.sample() =>

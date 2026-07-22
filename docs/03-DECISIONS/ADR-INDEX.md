@@ -1,0 +1,26 @@
+# ADR Index — quyết định kiến trúc đang hiệu lực
+
+| ADR | Quyết định | Trạng thái | Ngày |
+|---|---|---|---|
+| [ADR-TON-001](ADR-TON-001-app-separation-single-app-flavors.md) | App separation: single-app (nay = repo riêng này); tách rõ Platform/Product layer; không phụ thuộc code feature Hub; module phải extractable | ✅ ACCEPTED (Founder) | 2026-07-16, thực thi split 2026-07-22 |
+| [ADR-TON-002](ADR-TON-002-di-riverpod.md) | DI/state = **Riverpod duy nhất** (GetIt trong AC cũ = lỗi spec) | ✅ ACCEPTED (Founder) | 2026-07-16 |
+
+## Quyết định Founder khác (chưa thành ADR riêng)
+
+| Quyết định | Nội dung | Nguồn |
+|---|---|---|
+| D-2 Package ID | `com.workizen.tongtai` (Android + iOS) | Founder GO khi split, đã implement |
+| Model policy | Dev agent: Opus 4.8 mặc định; task khó/retry → Fable 5 | Founder 2026-07-16 |
+| Evidence-Driven Runtime | Verdict từ evidence, không tin agent report; cấm placebo test | Founder 2026-07-14 |
+| Self-planning | Runtime tự lập kế hoạch trong phạm vi feature branch; Founder giữ Vision/Direction/Goals/Architecture/main | Founder 2026-07-16 |
+
+## Còn mở (chưa quyết)
+
+Xem [OPEN-DECISIONS.md](OPEN-DECISIONS.md) — đáng chú ý: mascot (business fox)
+chưa chốt → icon/splash còn placeholder; auth strategy MVP (hiện: local UUID,
+không account); analytics (hiện: không có, privacy-first).
+
+## Quy tắc
+
+Không silently mâu thuẫn ADR. Thay đổi = ADR mới `ADR-TON-00N-*.md` ghi rõ
+supersede, chờ Founder duyệt, cập nhật index này.

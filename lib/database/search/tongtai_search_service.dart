@@ -60,15 +60,17 @@ class TongtaiSearchService {
     final match = buildTongtaiFtsMatchQuery(query);
     if (match == null) return const [];
 
-    final rows = await _db.customSelect(
-      'SELECT p.* FROM $kProductsFtsTable f '
-      'JOIN products_table p ON p.rowid = f.rowid '
-      'WHERE $kProductsFtsTable MATCH ? '
-      'ORDER BY bm25($kProductsFtsTable) '
-      'LIMIT ?',
-      variables: [Variable<String>(match), Variable<int>(limit)],
-      readsFrom: {_db.productsTable},
-    ).get();
+    final rows = await _db
+        .customSelect(
+          'SELECT p.* FROM $kProductsFtsTable f '
+          'JOIN products_table p ON p.rowid = f.rowid '
+          'WHERE $kProductsFtsTable MATCH ? '
+          'ORDER BY bm25($kProductsFtsTable) '
+          'LIMIT ?',
+          variables: [Variable<String>(match), Variable<int>(limit)],
+          readsFrom: {_db.productsTable},
+        )
+        .get();
 
     return rows.map((r) => _db.productsTable.map(r.data)).toList();
   }
@@ -84,15 +86,17 @@ class TongtaiSearchService {
     final match = buildTongtaiFtsMatchQuery(query);
     if (match == null) return const [];
 
-    final rows = await _db.customSelect(
-      'SELECT s.* FROM $kSuppliersFtsTable f '
-      'JOIN producers_table s ON s.rowid = f.rowid '
-      'WHERE $kSuppliersFtsTable MATCH ? '
-      'ORDER BY bm25($kSuppliersFtsTable) '
-      'LIMIT ?',
-      variables: [Variable<String>(match), Variable<int>(limit)],
-      readsFrom: {_db.producersTable},
-    ).get();
+    final rows = await _db
+        .customSelect(
+          'SELECT s.* FROM $kSuppliersFtsTable f '
+          'JOIN producers_table s ON s.rowid = f.rowid '
+          'WHERE $kSuppliersFtsTable MATCH ? '
+          'ORDER BY bm25($kSuppliersFtsTable) '
+          'LIMIT ?',
+          variables: [Variable<String>(match), Variable<int>(limit)],
+          readsFrom: {_db.producersTable},
+        )
+        .get();
 
     return rows.map((r) => _db.producersTable.map(r.data)).toList();
   }

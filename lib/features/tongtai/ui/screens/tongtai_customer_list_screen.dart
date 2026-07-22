@@ -9,11 +9,11 @@ import '../../navigation/tongtai_design_tokens.dart';
 /// high-value customers). Pulled out as a pure function so the mapping is
 /// directly unit-testable without pumping a widget.
 Color tongtaiCustomerTierColor(CustomerTier tier) => switch (tier) {
-      CustomerTier.vip => const Color(0xFFD4AF37), // gold
-      CustomerTier.gold => TongtaiDesignTokens.warning, // amber
-      CustomerTier.silver => TongtaiDesignTokens.neutral, // gray
-      CustomerTier.bronze => const Color(0xFFB45309), // bronze
-    };
+  CustomerTier.vip => const Color(0xFFD4AF37), // gold
+  CustomerTier.gold => TongtaiDesignTokens.warning, // amber
+  CustomerTier.silver => TongtaiDesignTokens.neutral, // gray
+  CustomerTier.bronze => const Color(0xFFB45309), // bronze
+};
 
 /// Customer list screen (WTM-75) — Customer Intelligence / CRM hub.
 ///
@@ -74,8 +74,10 @@ class _TongtaiCustomerListScreenState extends State<TongtaiCustomerListScreen> {
   }
 
   void _toggleDirection() {
-    setState(() =>
-        _query = _query.copyWith(ascending: !_query.ascending, pageIndex: 0));
+    setState(
+      () =>
+          _query = _query.copyWith(ascending: !_query.ascending, pageIndex: 0),
+    );
   }
 
   void _goToPage(int index) {
@@ -134,8 +136,9 @@ class _TongtaiCustomerListScreenState extends State<TongtaiCustomerListScreen> {
                 onPrevious: page.hasPrevious
                     ? () => _goToPage(page.pageIndex - 1)
                     : null,
-                onNext:
-                    page.hasNext ? () => _goToPage(page.pageIndex + 1) : null,
+                onNext: page.hasNext
+                    ? () => _goToPage(page.pageIndex + 1)
+                    : null,
               ),
           ],
         ),
@@ -174,8 +177,9 @@ class _SearchField extends StatelessWidget {
         filled: true,
         fillColor: TongtaiDesignTokens.lightHover,
         border: OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(TongtaiDesignTokens.componentBorderRadius),
+          borderRadius: BorderRadius.circular(
+            TongtaiDesignTokens.componentBorderRadius,
+          ),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -265,11 +269,7 @@ class _SortBar extends StatelessWidget {
 /// A labelled, horizontally-scrolling row of chips with an optional trailing
 /// action — shared chrome for the location and sort rows.
 class _ChipsRow extends StatelessWidget {
-  const _ChipsRow({
-    required this.label,
-    required this.children,
-    this.trailing,
-  });
+  const _ChipsRow({required this.label, required this.children, this.trailing});
 
   final String label;
   final List<Widget> children;
@@ -348,8 +348,7 @@ class _CustomerList extends StatelessWidget {
       itemCount: customers.length,
       separatorBuilder: (context, _) =>
           const SizedBox(height: TongtaiDesignTokens.spacing3),
-      itemBuilder: (context, index) =>
-          _CustomerRow(customer: customers[index]),
+      itemBuilder: (context, index) => _CustomerRow(customer: customers[index]),
     );
   }
 }
@@ -365,8 +364,9 @@ class _CustomerRow extends StatelessWidget {
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
       decoration: BoxDecoration(
         color: TongtaiDesignTokens.lightBackground,
-        borderRadius:
-            BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
         border: Border.all(color: TongtaiDesignTokens.lightBorder),
         boxShadow: TongtaiDesignTokens.elevation1,
       ),
@@ -502,9 +502,7 @@ class _PaginationBar extends StatelessWidget {
       ),
       decoration: const BoxDecoration(
         color: TongtaiDesignTokens.lightBackground,
-        border: Border(
-          top: BorderSide(color: TongtaiDesignTokens.lightBorder),
-        ),
+        border: Border(top: BorderSide(color: TongtaiDesignTokens.lightBorder)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

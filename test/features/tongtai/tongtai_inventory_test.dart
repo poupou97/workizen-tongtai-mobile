@@ -36,15 +36,21 @@ void main() {
     });
 
     test('at or below the reorder level is low stock', () {
-      expect(product(quantity: 5, reorderLevel: 5).stockStatus,
-          StockStatus.lowStock);
-      expect(product(quantity: 3, reorderLevel: 5).stockStatus,
-          StockStatus.lowStock);
+      expect(
+        product(quantity: 5, reorderLevel: 5).stockStatus,
+        StockStatus.lowStock,
+      );
+      expect(
+        product(quantity: 3, reorderLevel: 5).stockStatus,
+        StockStatus.lowStock,
+      );
     });
 
     test('above the reorder level is in stock', () {
-      expect(product(quantity: 6, reorderLevel: 5).stockStatus,
-          StockStatus.inStock);
+      expect(
+        product(quantity: 6, reorderLevel: 5).stockStatus,
+        StockStatus.inStock,
+      );
     });
 
     test('stockValue is unit price times quantity', () {
@@ -59,12 +65,18 @@ void main() {
 
   group('tongtaiStockStatusColor', () {
     test('maps each status to its semantic color', () {
-      expect(tongtaiStockStatusColor(StockStatus.inStock),
-          TongtaiDesignTokens.success);
-      expect(tongtaiStockStatusColor(StockStatus.lowStock),
-          TongtaiDesignTokens.warning);
-      expect(tongtaiStockStatusColor(StockStatus.outOfStock),
-          TongtaiDesignTokens.error);
+      expect(
+        tongtaiStockStatusColor(StockStatus.inStock),
+        TongtaiDesignTokens.success,
+      );
+      expect(
+        tongtaiStockStatusColor(StockStatus.lowStock),
+        TongtaiDesignTokens.warning,
+      );
+      expect(
+        tongtaiStockStatusColor(StockStatus.outOfStock),
+        TongtaiDesignTokens.error,
+      );
     });
 
     test('the three statuses have distinct colors', () {
@@ -79,8 +91,14 @@ void main() {
     test('English and Vietnamese labels differ and language switch works', () {
       expect(StockStatus.lowStock.labelEn, 'Low stock');
       expect(StockStatus.lowStock.labelVi, isNot('Low stock'));
-      expect(StockStatus.outOfStock.label('vi'), StockStatus.outOfStock.labelVi);
-      expect(StockStatus.outOfStock.label('en'), StockStatus.outOfStock.labelEn);
+      expect(
+        StockStatus.outOfStock.label('vi'),
+        StockStatus.outOfStock.labelVi,
+      );
+      expect(
+        StockStatus.outOfStock.label('en'),
+        StockStatus.outOfStock.labelEn,
+      );
     });
   });
 
@@ -120,8 +138,10 @@ void main() {
     test('matches product name case-insensitively', () {
       final results = service.filter(const ProductQuery(text: 'bluetooth'));
       expect(results, isNotEmpty);
-      expect(results.every((p) => p.name.toLowerCase().contains('bluetooth')),
-          isTrue);
+      expect(
+        results.every((p) => p.name.toLowerCase().contains('bluetooth')),
+        isTrue,
+      );
     });
 
     test('matches SKU', () {
@@ -144,8 +164,9 @@ void main() {
     final service = ProductInventoryService.sample();
 
     test('keeps only products in that category', () {
-      final results =
-          service.filter(const ProductQuery(category: 'Electronics'));
+      final results = service.filter(
+        const ProductQuery(category: 'Electronics'),
+      );
       expect(results, isNotEmpty);
       expect(results.every((p) => p.category == 'Electronics'), isTrue);
     });
@@ -175,15 +196,18 @@ void main() {
       );
       final ascNames = keys(asc, (p) => p.name.toLowerCase());
       expect(ascNames, orderedByAscending);
-      expect(keys(desc, (p) => p.name.toLowerCase()),
-          ascNames.reversed.toList());
+      expect(
+        keys(desc, (p) => p.name.toLowerCase()),
+        ascNames.reversed.toList(),
+      );
     });
 
     test('by price ascending puts the cheapest first', () {
       final asc = service.filter(const ProductQuery(sort: ProductSort.price));
       expect(keys(asc, (p) => p.pricePerUnit), orderedByAscending);
-      final min =
-          service.all.map((p) => p.pricePerUnit).reduce((a, b) => a < b ? a : b);
+      final min = service.all
+          .map((p) => p.pricePerUnit)
+          .reduce((a, b) => a < b ? a : b);
       expect(asc.first.pricePerUnit, min);
     });
 
@@ -192,19 +216,18 @@ void main() {
         const ProductQuery(sort: ProductSort.quantity, ascending: false),
       );
       expect(keys(desc, (p) => p.quantity), orderedByDescending);
-      final max =
-          service.all.map((p) => p.quantity).reduce((a, b) => a > b ? a : b);
+      final max = service.all
+          .map((p) => p.quantity)
+          .reduce((a, b) => a > b ? a : b);
       expect(desc.first.quantity, max);
     });
 
     test('by last updated', () {
-      final asc =
-          service.filter(const ProductQuery(sort: ProductSort.lastUpdated));
+      final asc = service.filter(
+        const ProductQuery(sort: ProductSort.lastUpdated),
+      );
       for (var i = 0; i + 1 < asc.length; i++) {
-        expect(
-          asc[i].updatedAt.isAfter(asc[i + 1].updatedAt),
-          isFalse,
-        );
+        expect(asc[i].updatedAt.isAfter(asc[i + 1].updatedAt), isFalse);
       }
     });
   });
@@ -235,14 +258,17 @@ void main() {
       expect(p1.lastItemNumber, total);
     });
 
-    test('the union of all pages equals the full filtered set with no gaps', () {
-      final full = service.filter(const ProductQuery());
-      final collected = <Product>[
-        ...service.page(const ProductQuery(pageIndex: 0)).items,
-        ...service.page(const ProductQuery(pageIndex: 1)).items,
-      ];
-      expect(collected, full);
-    });
+    test(
+      'the union of all pages equals the full filtered set with no gaps',
+      () {
+        final full = service.filter(const ProductQuery());
+        final collected = <Product>[
+          ...service.page(const ProductQuery(pageIndex: 0)).items,
+          ...service.page(const ProductQuery(pageIndex: 1)).items,
+        ];
+        expect(collected, full);
+      },
+    );
 
     test('page size is clamped into the 20–50 bound', () {
       expect(service.page(const ProductQuery(pageSize: 5)).pageSize, 20);

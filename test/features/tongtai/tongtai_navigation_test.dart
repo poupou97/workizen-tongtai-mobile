@@ -4,8 +4,7 @@ import 'package:tongtai/features/tongtai/tongtai.dart';
 
 void main() {
   group('Tổng Tài Navigation Tests', () {
-    testWidgets('BottomNav renders all 5 tabs',
-        (WidgetTester tester) async {
+    testWidgets('BottomNav renders all 5 tabs', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -25,8 +24,9 @@ void main() {
       expect(find.text('More'), findsOneWidget);
     });
 
-    testWidgets('BottomNav tab selection callback works',
-        (WidgetTester tester) async {
+    testWidgets('BottomNav tab selection callback works', (
+      WidgetTester tester,
+    ) async {
       int selectedTab = 0;
 
       await tester.pumpWidget(
@@ -62,46 +62,29 @@ void main() {
       expect(selectedTab, equals(4));
     });
 
-    testWidgets('All 5 screens render without errors',
-        (WidgetTester tester) async {
+    testWidgets('All 5 screens render without errors', (
+      WidgetTester tester,
+    ) async {
       // Test Home Screen
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: TongtaiHomeScreen(),
-        ),
-      );
+      await tester.pumpWidget(const MaterialApp(home: TongtaiHomeScreen()));
       expect(find.text('Home Dashboard'), findsOneWidget);
 
       // Test Producer Screen
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: TongtaiProducerScreen(),
-        ),
-      );
+      await tester.pumpWidget(const MaterialApp(home: TongtaiProducerScreen()));
       expect(find.text('Producer Hub'), findsOneWidget);
 
       // Test Inventory Screen (WTM-68: product list; AppBar title "Inventory")
       await tester.pumpWidget(
-        const MaterialApp(
-          home: TongtaiInventoryScreen(),
-        ),
+        const MaterialApp(home: TongtaiInventoryScreen()),
       );
       expect(find.text('Inventory'), findsOneWidget);
 
       // Test Consumer Screen
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: TongtaiConsumerScreen(),
-        ),
-      );
+      await tester.pumpWidget(const MaterialApp(home: TongtaiConsumerScreen()));
       expect(find.text('Customer Intelligence'), findsOneWidget);
 
       // Test More Screen
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: TongtaiMoreScreen(),
-        ),
-      );
+      await tester.pumpWidget(const MaterialApp(home: TongtaiMoreScreen()));
       expect(find.text('More'), findsOneWidget);
     });
 

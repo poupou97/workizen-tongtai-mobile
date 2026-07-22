@@ -9,10 +9,11 @@ import 'tongtai_ai_provider_kind.dart';
 
 /// Builds a [TongtaiAiClient] bound to a per-provider key loader. Injectable so
 /// tests can hand the service a fake client without real HTTP.
-typedef TongtaiAiClientFactory = TongtaiAiClient Function(
-  TongtaiAiProviderKind provider,
-  Future<String?> Function() apiKey,
-);
+typedef TongtaiAiClientFactory =
+    TongtaiAiClient Function(
+      TongtaiAiProviderKind provider,
+      Future<String?> Function() apiKey,
+    );
 
 /// App-facing coordinator for BYOK AI (WTM-61): validate → store → retrieve →
 /// test → chat, over any [TongtaiAiProviderKind]. The UI talks only to this
@@ -42,20 +43,17 @@ class TongtaiAiService {
   /// The stored key for [provider], or null (WTM-61 AC: "retrieved on startup").
   Future<String?> loadKey({
     TongtaiAiProviderKind provider = TongtaiAiProviderKind.xai,
-  }) =>
-      _store.read(provider);
+  }) => _store.read(provider);
 
   /// Whether a usable key is stored for [provider].
   Future<bool> hasKey({
     TongtaiAiProviderKind provider = TongtaiAiProviderKind.xai,
-  }) =>
-      _store.hasKey(provider);
+  }) => _store.hasKey(provider);
 
   /// Remove the stored key for [provider].
   Future<void> deleteKey({
     TongtaiAiProviderKind provider = TongtaiAiProviderKind.xai,
-  }) =>
-      _store.delete(provider);
+  }) => _store.delete(provider);
 
   /// Live connectivity + validity check against the provider using the stored
   /// key. Throws [TongtaiAiException.missingKey] when no key is set, otherwise a

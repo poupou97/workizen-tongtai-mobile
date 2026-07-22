@@ -28,8 +28,10 @@ class TongtaiAppShell extends ConsumerWidget {
     // Surface deep-link failures gracefully. We compare the [sequence] counter
     // so repeated identical links still notify, and only act on states that
     // actually carry a new failure.
-    ref.listen<TongtaiDeepLinkState>(tongtaiDeepLinkControllerProvider,
-        (previous, next) {
+    ref.listen<TongtaiDeepLinkState>(tongtaiDeepLinkControllerProvider, (
+      previous,
+      next,
+    ) {
       final failure = next.lastFailure;
       final isNewEvent = previous == null || previous.sequence != next.sequence;
       if (failure == null || !isNewEvent) return;

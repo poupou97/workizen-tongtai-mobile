@@ -46,8 +46,9 @@ class SharedPrefsTongtaiTabStateStore implements TongtaiTabStateStore {
       decoded.forEach((key, value) {
         final tabIndex = int.tryParse('$key');
         if (tabIndex != null && value is Map) {
-          result[tabIndex] =
-              TongtaiTabState.fromJson(Map<String, dynamic>.from(value));
+          result[tabIndex] = TongtaiTabState.fromJson(
+            Map<String, dynamic>.from(value),
+          );
         }
       });
       return result;
@@ -76,7 +77,7 @@ class SharedPrefsTongtaiTabStateStore implements TongtaiTabStateStore {
 /// In-memory store for tests (no platform channels required).
 class InMemoryTongtaiTabStateStore implements TongtaiTabStateStore {
   InMemoryTongtaiTabStateStore([Map<int, TongtaiTabState>? seed])
-      : _states = {...?seed};
+    : _states = {...?seed};
 
   final Map<int, TongtaiTabState> _states;
 

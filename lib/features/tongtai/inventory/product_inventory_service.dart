@@ -11,11 +11,11 @@ enum ProductSort {
   lastUpdated;
 
   String get labelEn => switch (this) {
-        ProductSort.name => 'Name',
-        ProductSort.price => 'Price',
-        ProductSort.quantity => 'Quantity',
-        ProductSort.lastUpdated => 'Updated',
-      };
+    ProductSort.name => 'Name',
+    ProductSort.price => 'Price',
+    ProductSort.quantity => 'Quantity',
+    ProductSort.lastUpdated => 'Updated',
+  };
 }
 
 /// Minimum / maximum products shown per page (WTM-68 AC: 20–50 per page). The
@@ -106,8 +106,7 @@ class ProductPage {
   final int totalCount;
 
   /// Total number of pages (always at least 1, even when empty).
-  int get pageCount =>
-      totalCount == 0 ? 1 : ((totalCount - 1) ~/ pageSize) + 1;
+  int get pageCount => totalCount == 0 ? 1 : ((totalCount - 1) ~/ pageSize) + 1;
 
   /// Whether there is a page before this one.
   bool get hasPrevious => pageIndex > 0;
@@ -133,7 +132,7 @@ class ProductPage {
 /// can later replace the data source without touching callers.
 class ProductInventoryService {
   ProductInventoryService(List<Product> products)
-      : _products = List.unmodifiable(products);
+    : _products = List.unmodifiable(products);
 
   /// Convenience constructor seeded with the built-in sample catalog.
   factory ProductInventoryService.sample() =>
@@ -193,8 +192,9 @@ class ProductInventoryService {
   void _sort(List<Product> list, ProductSort sort, bool ascending) {
     int compare(Product a, Product b) {
       final int c = switch (sort) {
-        ProductSort.name =>
-          a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        ProductSort.name => a.name.toLowerCase().compareTo(
+          b.name.toLowerCase(),
+        ),
         ProductSort.price => a.pricePerUnit.compareTo(b.pricePerUnit),
         ProductSort.quantity => a.quantity.compareTo(b.quantity),
         ProductSort.lastUpdated => a.updatedAt.compareTo(b.updatedAt),

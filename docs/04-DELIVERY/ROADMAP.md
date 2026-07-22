@@ -1,3 +1,5 @@
+> ⚠️ **HISTORICAL PLANNING SNAPSHOT (2026-07-13, Phase 1B)** — trạng thái thật xem `docs/00-START-HERE/CURRENT-STATUS.md` (SOURCE-OF-TRUTH rule).
+
 # Tổng Tài — Product Roadmap (4-Phase)
 
 ## English

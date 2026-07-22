@@ -21,24 +21,23 @@ enum OrderStatus {
   }
 
   String get labelEn => switch (this) {
-        OrderStatus.pending => 'Pending',
-        OrderStatus.confirmed => 'Confirmed',
-        OrderStatus.shipped => 'Shipped',
-        OrderStatus.delivered => 'Delivered',
-        OrderStatus.cancelled => 'Cancelled',
-      };
+    OrderStatus.pending => 'Pending',
+    OrderStatus.confirmed => 'Confirmed',
+    OrderStatus.shipped => 'Shipped',
+    OrderStatus.delivered => 'Delivered',
+    OrderStatus.cancelled => 'Cancelled',
+  };
 
   String get labelVi => switch (this) {
-        OrderStatus.pending => 'Chờ xử lý',
-        OrderStatus.confirmed => 'Đã xác nhận',
-        OrderStatus.shipped => 'Đang giao',
-        OrderStatus.delivered => 'Đã giao',
-        OrderStatus.cancelled => 'Đã hủy',
-      };
+    OrderStatus.pending => 'Chờ xử lý',
+    OrderStatus.confirmed => 'Đã xác nhận',
+    OrderStatus.shipped => 'Đang giao',
+    OrderStatus.delivered => 'Đã giao',
+    OrderStatus.cancelled => 'Đã hủy',
+  };
 
   /// Label for a language code ('vi' -> Vietnamese, otherwise English).
-  String label(String languageCode) =>
-      languageCode == 'vi' ? labelVi : labelEn;
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
 /// Business Journey progress state.
@@ -56,21 +55,20 @@ enum JourneyStatus {
   }
 
   String get labelEn => switch (this) {
-        JourneyStatus.notStarted => 'Not started',
-        JourneyStatus.inProgress => 'In progress',
-        JourneyStatus.blocked => 'Blocked',
-        JourneyStatus.done => 'Done',
-      };
+    JourneyStatus.notStarted => 'Not started',
+    JourneyStatus.inProgress => 'In progress',
+    JourneyStatus.blocked => 'Blocked',
+    JourneyStatus.done => 'Done',
+  };
 
   String get labelVi => switch (this) {
-        JourneyStatus.notStarted => 'Chưa bắt đầu',
-        JourneyStatus.inProgress => 'Đang thực hiện',
-        JourneyStatus.blocked => 'Bị chặn',
-        JourneyStatus.done => 'Hoàn thành',
-      };
+    JourneyStatus.notStarted => 'Chưa bắt đầu',
+    JourneyStatus.inProgress => 'Đang thực hiện',
+    JourneyStatus.blocked => 'Bị chặn',
+    JourneyStatus.done => 'Hoàn thành',
+  };
 
-  String label(String languageCode) =>
-      languageCode == 'vi' ? labelVi : labelEn;
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
 /// AI-discovered opportunity category.
@@ -88,19 +86,18 @@ enum OpportunityType {
   }
 
   String get labelEn => switch (this) {
-        OpportunityType.arbitrage => 'Arbitrage',
-        OpportunityType.seasonal => 'Seasonal',
-        OpportunityType.crossBorder => 'Cross-border',
-        OpportunityType.trend => 'Trend',
-      };
+    OpportunityType.arbitrage => 'Arbitrage',
+    OpportunityType.seasonal => 'Seasonal',
+    OpportunityType.crossBorder => 'Cross-border',
+    OpportunityType.trend => 'Trend',
+  };
 
   String get labelVi => switch (this) {
-        OpportunityType.arbitrage => 'Chênh lệch giá',
-        OpportunityType.seasonal => 'Theo mùa',
-        OpportunityType.crossBorder => 'Xuyên biên giới',
-        OpportunityType.trend => 'Xu hướng',
-      };
+    OpportunityType.arbitrage => 'Chênh lệch giá',
+    OpportunityType.seasonal => 'Theo mùa',
+    OpportunityType.crossBorder => 'Xuyên biên giới',
+    OpportunityType.trend => 'Xu hướng',
+  };
 
-  String label(String languageCode) =>
-      languageCode == 'vi' ? labelVi : labelEn;
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }

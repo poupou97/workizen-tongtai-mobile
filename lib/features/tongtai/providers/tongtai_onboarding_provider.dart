@@ -20,8 +20,8 @@ final tongtaiOnboardingStoreProvider = Provider<TongtaiOnboardingStore>((ref) {
 /// [TongtaiOnboardingController.reset] (replay from Settings).
 final tongtaiOnboardingProvider =
     NotifierProvider<TongtaiOnboardingController, bool>(
-  TongtaiOnboardingController.new,
-);
+      TongtaiOnboardingController.new,
+    );
 
 class TongtaiOnboardingController extends Notifier<bool> {
   TongtaiOnboardingStore get _store => ref.read(tongtaiOnboardingStoreProvider);

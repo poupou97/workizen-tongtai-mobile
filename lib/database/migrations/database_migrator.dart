@@ -82,8 +82,8 @@ class TongtaiDatabaseMigrator {
   TongtaiDatabaseMigrator({
     required GeneratedDatabase database,
     required SchemaVersionStore versionStore,
-  })  : _db = database,
-        _store = versionStore;
+  }) : _db = database,
+       _store = versionStore;
 
   final GeneratedDatabase _db;
   final SchemaVersionStore _store;
@@ -136,13 +136,15 @@ class TongtaiDatabaseMigrator {
 /// Kept dependency-injectable ([database]/[versionStore]) so it can also be
 /// driven from tests or a data-reset flow without touching platform channels.
 Future<({AppDatabase database, MigrationReport report})>
-    bootstrapTongtaiDatabase({
+bootstrapTongtaiDatabase({
   AppDatabase? database,
   required SchemaVersionStore versionStore,
 }) async {
   final db = database ?? AppDatabase();
-  final migrator =
-      TongtaiDatabaseMigrator(database: db, versionStore: versionStore);
+  final migrator = TongtaiDatabaseMigrator(
+    database: db,
+    versionStore: versionStore,
+  );
   final report = await migrator.ensureMigrated();
 
   if (!report.isSuccessful) {

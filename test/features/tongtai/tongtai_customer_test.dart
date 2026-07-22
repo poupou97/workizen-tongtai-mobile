@@ -32,26 +32,39 @@ void main() {
   group('Customer.tier', () {
     test('at or above the VIP threshold is VIP', () {
       expect(customer(totalSpent: kCustomerTierVipMin).tier, CustomerTier.vip);
-      expect(customer(totalSpent: kCustomerTierVipMin + 1).tier,
-          CustomerTier.vip);
+      expect(
+        customer(totalSpent: kCustomerTierVipMin + 1).tier,
+        CustomerTier.vip,
+      );
     });
 
     test('between Gold and VIP thresholds is Gold', () {
-      expect(customer(totalSpent: kCustomerTierGoldMin).tier, CustomerTier.gold);
-      expect(customer(totalSpent: kCustomerTierVipMin - 1).tier,
-          CustomerTier.gold);
+      expect(
+        customer(totalSpent: kCustomerTierGoldMin).tier,
+        CustomerTier.gold,
+      );
+      expect(
+        customer(totalSpent: kCustomerTierVipMin - 1).tier,
+        CustomerTier.gold,
+      );
     });
 
     test('between Silver and Gold thresholds is Silver', () {
-      expect(customer(totalSpent: kCustomerTierSilverMin).tier,
-          CustomerTier.silver);
-      expect(customer(totalSpent: kCustomerTierGoldMin - 1).tier,
-          CustomerTier.silver);
+      expect(
+        customer(totalSpent: kCustomerTierSilverMin).tier,
+        CustomerTier.silver,
+      );
+      expect(
+        customer(totalSpent: kCustomerTierGoldMin - 1).tier,
+        CustomerTier.silver,
+      );
     });
 
     test('below the Silver threshold is Bronze', () {
-      expect(customer(totalSpent: kCustomerTierSilverMin - 1).tier,
-          CustomerTier.bronze);
+      expect(
+        customer(totalSpent: kCustomerTierSilverMin - 1).tier,
+        CustomerTier.bronze,
+      );
       expect(customer(totalSpent: 0).tier, CustomerTier.bronze);
     });
 
@@ -96,10 +109,14 @@ void main() {
 
   group('tongtaiCustomerTierColor', () {
     test('maps each tier to its color', () {
-      expect(tongtaiCustomerTierColor(CustomerTier.gold),
-          TongtaiDesignTokens.warning);
-      expect(tongtaiCustomerTierColor(CustomerTier.silver),
-          TongtaiDesignTokens.neutral);
+      expect(
+        tongtaiCustomerTierColor(CustomerTier.gold),
+        TongtaiDesignTokens.warning,
+      );
+      expect(
+        tongtaiCustomerTierColor(CustomerTier.silver),
+        TongtaiDesignTokens.neutral,
+      );
     });
 
     test('the four tiers have distinct colors', () {
@@ -146,13 +163,14 @@ void main() {
     test('matches customer name case-insensitively', () {
       final results = service.filter(const CustomerQuery(text: 'phương'));
       expect(results, isNotEmpty);
-      expect(results.every((c) => c.name.toLowerCase().contains('phương')),
-          isTrue);
+      expect(
+        results.every((c) => c.name.toLowerCase().contains('phương')),
+        isTrue,
+      );
     });
 
     test('matches phone number', () {
-      final results =
-          service.filter(const CustomerQuery(text: '+84912345678'));
+      final results = service.filter(const CustomerQuery(text: '+84912345678'));
       expect(results.map((c) => c.phone), contains('+84912345678'));
       expect(results.length, 1);
     });
@@ -172,8 +190,7 @@ void main() {
     final service = CustomerDirectoryService.sample();
 
     test('keeps only customers in that location', () {
-      final results =
-          service.filter(const CustomerQuery(location: 'Hà Nội'));
+      final results = service.filter(const CustomerQuery(location: 'Hà Nội'));
       expect(results, isNotEmpty);
       expect(results.every((c) => c.location == 'Hà Nội'), isTrue);
     });
@@ -203,15 +220,18 @@ void main() {
       );
       final ascNames = keys(asc, (c) => c.name.toLowerCase());
       expect(ascNames, orderedByAscending);
-      expect(keys(desc, (c) => c.name.toLowerCase()),
-          ascNames.reversed.toList());
+      expect(
+        keys(desc, (c) => c.name.toLowerCase()),
+        ascNames.reversed.toList(),
+      );
     });
 
     test('by spent ascending puts the lowest-value customer first', () {
       final asc = service.filter(const CustomerQuery(sort: CustomerSort.spent));
       expect(keys(asc, (c) => c.totalSpent), orderedByAscending);
-      final min =
-          service.all.map((c) => c.totalSpent).reduce((a, b) => a < b ? a : b);
+      final min = service.all
+          .map((c) => c.totalSpent)
+          .reduce((a, b) => a < b ? a : b);
       expect(asc.first.totalSpent, min);
     });
 
@@ -220,14 +240,16 @@ void main() {
         const CustomerQuery(sort: CustomerSort.frequency, ascending: false),
       );
       expect(keys(desc, (c) => c.orderCount), orderedByDescending);
-      final max =
-          service.all.map((c) => c.orderCount).reduce((a, b) => a > b ? a : b);
+      final max = service.all
+          .map((c) => c.orderCount)
+          .reduce((a, b) => a > b ? a : b);
       expect(desc.first.orderCount, max);
     });
 
     test('by recency (last purchase date)', () {
-      final asc =
-          service.filter(const CustomerQuery(sort: CustomerSort.recency));
+      final asc = service.filter(
+        const CustomerQuery(sort: CustomerSort.recency),
+      );
       for (var i = 0; i + 1 < asc.length; i++) {
         expect(
           asc[i].lastPurchaseDate.isAfter(asc[i + 1].lastPurchaseDate),
@@ -263,14 +285,17 @@ void main() {
       expect(p1.lastItemNumber, total);
     });
 
-    test('the union of all pages equals the full filtered set with no gaps', () {
-      final full = service.filter(const CustomerQuery());
-      final collected = <Customer>[
-        ...service.page(const CustomerQuery(pageIndex: 0)).items,
-        ...service.page(const CustomerQuery(pageIndex: 1)).items,
-      ];
-      expect(collected, full);
-    });
+    test(
+      'the union of all pages equals the full filtered set with no gaps',
+      () {
+        final full = service.filter(const CustomerQuery());
+        final collected = <Customer>[
+          ...service.page(const CustomerQuery(pageIndex: 0)).items,
+          ...service.page(const CustomerQuery(pageIndex: 1)).items,
+        ];
+        expect(collected, full);
+      },
+    );
 
     test('page size is clamped into the 20–50 bound', () {
       expect(service.page(const CustomerQuery(pageSize: 5)).pageSize, 20);

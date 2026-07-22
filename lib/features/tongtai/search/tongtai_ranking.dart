@@ -105,13 +105,13 @@ enum TongtaiMatchQuality {
 
   /// The [0,1] relevance weight of this match class.
   double get score => switch (this) {
-        TongtaiMatchQuality.exact => 1.0,
-        TongtaiMatchQuality.prefix => 0.85,
-        TongtaiMatchQuality.wordPrefix => 0.7,
-        TongtaiMatchQuality.contains => 0.55,
-        TongtaiMatchQuality.fuzzy => 0.35,
-        TongtaiMatchQuality.none => 0.0,
-      };
+    TongtaiMatchQuality.exact => 1.0,
+    TongtaiMatchQuality.prefix => 0.85,
+    TongtaiMatchQuality.wordPrefix => 0.7,
+    TongtaiMatchQuality.contains => 0.55,
+    TongtaiMatchQuality.fuzzy => 0.35,
+    TongtaiMatchQuality.none => 0.0,
+  };
 }
 
 /// Classifies how [query] matches [text] (both diacritic-folded first).
@@ -396,18 +396,17 @@ class TongtaiRankingExperiment {
   /// ranker, split 50/50.
   static const TongtaiRankingExperiment defaultExperiment =
       TongtaiRankingExperiment(
-    variants: [
-      TongtaiRankingVariant.control,
-      TongtaiRankingVariant.balanced,
-    ],
-  );
+        variants: [
+          TongtaiRankingVariant.control,
+          TongtaiRankingVariant.balanced,
+        ],
+      );
 
   /// Deterministically assigns [unitId] (e.g. the local user id) to a variant by
   /// allocation. Same id + same experiment → same variant, always.
   TongtaiRankingVariant assign(String unitId) {
     if (variants.length == 1) return variants.first;
-    final total =
-        variants.fold<double>(0, (sum, v) => sum + v.allocation);
+    final total = variants.fold<double>(0, (sum, v) => sum + v.allocation);
     final point = _hashUnitInterval('$salt:$unitId') * total;
     var cumulative = 0.0;
     for (final variant in variants) {

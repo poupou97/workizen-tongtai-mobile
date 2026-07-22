@@ -58,9 +58,11 @@ const List<TongtaiOnboardingPage> kTongtaiOnboardingPages = [
     accentColor: TongtaiDesignTokens.copilotViolet,
     headlineEn: 'Welcome to Tổng Tài',
     headlineVi: 'Chào mừng đến Tổng Tài',
-    bodyEn: 'Your AI-powered business partner for sourcing, inventory, '
+    bodyEn:
+        'Your AI-powered business partner for sourcing, inventory, '
         'customers, and growth — all in one app.',
-    bodyVi: 'Trợ lý kinh doanh AI của bạn cho việc tìm nguồn hàng, quản lý kho, '
+    bodyVi:
+        'Trợ lý kinh doanh AI của bạn cho việc tìm nguồn hàng, quản lý kho, '
         'khách hàng và tăng trưởng — tất cả trong một ứng dụng.',
   ),
   TongtaiOnboardingPage(
@@ -69,9 +71,11 @@ const List<TongtaiOnboardingPage> kTongtaiOnboardingPages = [
     accentColor: TongtaiDesignTokens.producerGreen,
     headlineEn: 'Scan & Source Suppliers',
     headlineVi: 'Quét & Tìm Nhà Cung Cấp',
-    bodyEn: 'Scan supplier cards and invoices — Tổng Tài captures the details '
+    bodyEn:
+        'Scan supplier cards and invoices — Tổng Tài captures the details '
         'so you can find and compare suppliers in seconds.',
-    bodyVi: 'Quét danh thiếp và hóa đơn nhà cung cấp — Tổng Tài tự động lưu '
+    bodyVi:
+        'Quét danh thiếp và hóa đơn nhà cung cấp — Tổng Tài tự động lưu '
         'thông tin để bạn tìm và so sánh nhà cung cấp trong vài giây.',
   ),
   TongtaiOnboardingPage(
@@ -80,9 +84,11 @@ const List<TongtaiOnboardingPage> kTongtaiOnboardingPages = [
     accentColor: TongtaiDesignTokens.inventoryOrange,
     headlineEn: 'Manage Your Inventory',
     headlineVi: 'Quản Lý Kho Hàng',
-    bodyEn: 'Track products, stock levels, and warehouses in one place — so '
+    bodyEn:
+        'Track products, stock levels, and warehouses in one place — so '
         'you never run out or over-order again.',
-    bodyVi: 'Theo dõi sản phẩm, tồn kho và kho hàng ở một nơi — để bạn không '
+    bodyVi:
+        'Theo dõi sản phẩm, tồn kho và kho hàng ở một nơi — để bạn không '
         'bao giờ hết hàng hay nhập dư.',
   ),
   TongtaiOnboardingPage(
@@ -91,9 +97,11 @@ const List<TongtaiOnboardingPage> kTongtaiOnboardingPages = [
     accentColor: TongtaiDesignTokens.consumerBlue,
     headlineEn: 'Know Your Customers',
     headlineVi: 'Hiểu Rõ Khách Hàng',
-    bodyEn: 'Keep customer profiles, orders, and history close at hand, so '
+    bodyEn:
+        'Keep customer profiles, orders, and history close at hand, so '
         'every relationship keeps growing.',
-    bodyVi: 'Lưu hồ sơ, đơn hàng và lịch sử khách hàng trong tầm tay, để mỗi '
+    bodyVi:
+        'Lưu hồ sơ, đơn hàng và lịch sử khách hàng trong tầm tay, để mỗi '
         'mối quan hệ luôn phát triển.',
   ),
   TongtaiOnboardingPage(
@@ -102,9 +110,11 @@ const List<TongtaiOnboardingPage> kTongtaiOnboardingPages = [
     accentColor: TongtaiDesignTokens.copilotViolet,
     headlineEn: 'Ask Your AI Copilot',
     headlineVi: 'Trò Chuyện Cùng Trợ Lý AI',
-    bodyEn: 'Chat with your AI assistant for advice, summaries, and quick '
+    bodyEn:
+        'Chat with your AI assistant for advice, summaries, and quick '
         'answers about your business — anytime.',
-    bodyVi: 'Trò chuyện với trợ lý AI để nhận lời khuyên, tóm tắt và câu trả '
+    bodyVi:
+        'Trò chuyện với trợ lý AI để nhận lời khuyên, tóm tắt và câu trả '
         'lời nhanh về việc kinh doanh — bất cứ lúc nào.',
   ),
   TongtaiOnboardingPage(
@@ -113,9 +123,11 @@ const List<TongtaiOnboardingPage> kTongtaiOnboardingPages = [
     accentColor: TongtaiDesignTokens.financePurple,
     headlineEn: 'Build Business Journeys',
     headlineVi: 'Tạo Hành Trình Kinh Doanh',
-    bodyEn: 'Turn your goals into guided journeys — Tổng Tài maps the steps and '
+    bodyEn:
+        'Turn your goals into guided journeys — Tổng Tài maps the steps and '
         "helps you follow through. You're all set!",
-    bodyVi: 'Biến mục tiêu thành hành trình có hướng dẫn — Tổng Tài vạch ra các '
+    bodyVi:
+        'Biến mục tiêu thành hành trình có hướng dẫn — Tổng Tài vạch ra các '
         'bước và đồng hành cùng bạn. Bạn đã sẵn sàng!',
   ),
 ];

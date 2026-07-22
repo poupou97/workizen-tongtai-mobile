@@ -50,11 +50,9 @@ class _TongtaiPersistentTextFieldState
   }
 
   void _onChanged() {
-    ref.read(tongtaiTabStateProvider.notifier).saveFormValue(
-          widget.tabIndex,
-          widget.fieldKey,
-          _textController.text,
-        );
+    ref
+        .read(tongtaiTabStateProvider.notifier)
+        .saveFormValue(widget.tabIndex, widget.fieldKey, _textController.text);
   }
 
   @override

@@ -3,8 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tongtai/core/prefs.dart'
-    show sharedPreferencesProvider;
+import 'package:tongtai/core/prefs.dart' show sharedPreferencesProvider;
 import 'package:tongtai/features/tongtai/tongtai.dart';
 
 /// Real tests for the Onboarding Flow Tutorial (WTM-59).
@@ -26,14 +25,17 @@ void main() {
 
     test('covers welcome + the five core features', () {
       final ids = kTongtaiOnboardingPages.map((p) => p.id).toList();
-      expect(ids, containsAll(<String>[
-        'welcome',
-        'suppliers', // scanning suppliers
-        'inventory', // managing inventory
-        'customers', // tracking customers
-        'ai_chat', // using AI chat
-        'journeys', // creating business journeys
-      ]));
+      expect(
+        ids,
+        containsAll(<String>[
+          'welcome',
+          'suppliers', // scanning suppliers
+          'inventory', // managing inventory
+          'customers', // tracking customers
+          'ai_chat', // using AI chat
+          'journeys', // creating business journeys
+        ]),
+      );
     });
 
     test('page ids are unique', () {
@@ -43,8 +45,16 @@ void main() {
 
     test('every page has a non-empty headline + body in EN and VI', () {
       for (final page in kTongtaiOnboardingPages) {
-        expect(page.headlineEn.trim(), isNotEmpty, reason: '${page.id} headlineEn');
-        expect(page.headlineVi.trim(), isNotEmpty, reason: '${page.id} headlineVi');
+        expect(
+          page.headlineEn.trim(),
+          isNotEmpty,
+          reason: '${page.id} headlineEn',
+        );
+        expect(
+          page.headlineVi.trim(),
+          isNotEmpty,
+          reason: '${page.id} headlineVi',
+        );
         expect(page.bodyEn.trim(), isNotEmpty, reason: '${page.id} bodyEn');
         expect(page.bodyVi.trim(), isNotEmpty, reason: '${page.id} bodyVi');
       }
@@ -93,15 +103,17 @@ void main() {
       expect(SharedPrefsTongtaiOnboardingStore(prefs).isCompleted(), isFalse);
     });
 
-    test('completion persists across store instances (app-restart scenario)',
-        () async {
-      final prefs = await SharedPreferences.getInstance();
-      await SharedPrefsTongtaiOnboardingStore(prefs).markCompleted();
+    test(
+      'completion persists across store instances (app-restart scenario)',
+      () async {
+        final prefs = await SharedPreferences.getInstance();
+        await SharedPrefsTongtaiOnboardingStore(prefs).markCompleted();
 
-      // A brand-new store over the same prefs = a fresh app launch.
-      final reader = SharedPrefsTongtaiOnboardingStore(prefs);
-      expect(reader.isCompleted(), isTrue);
-    });
+        // A brand-new store over the same prefs = a fresh app launch.
+        final reader = SharedPrefsTongtaiOnboardingStore(prefs);
+        expect(reader.isCompleted(), isTrue);
+      },
+    );
 
     test('reset removes the persisted flag', () async {
       final prefs = await SharedPreferences.getInstance();
@@ -128,11 +140,13 @@ void main() {
       expect(container.read(tongtaiOnboardingProvider), isFalse);
     });
 
-    test('a fresh controller over a completed store stays completed (restart)',
-        () {
-      final container = makeContainer(InMemoryTongtaiOnboardingStore(true));
-      expect(container.read(tongtaiOnboardingProvider), isTrue);
-    });
+    test(
+      'a fresh controller over a completed store stays completed (restart)',
+      () {
+        final container = makeContainer(InMemoryTongtaiOnboardingStore(true));
+        expect(container.read(tongtaiOnboardingProvider), isTrue);
+      },
+    );
 
     test('complete() flips state and writes through to storage', () async {
       final store = InMemoryTongtaiOnboardingStore();
@@ -144,17 +158,19 @@ void main() {
       expect(store.isCompleted(), isTrue);
     });
 
-    test('reset() flips state back and clears storage (Settings replay)',
-        () async {
-      final store = InMemoryTongtaiOnboardingStore(true);
-      final container = makeContainer(store);
-      expect(container.read(tongtaiOnboardingProvider), isTrue);
+    test(
+      'reset() flips state back and clears storage (Settings replay)',
+      () async {
+        final store = InMemoryTongtaiOnboardingStore(true);
+        final container = makeContainer(store);
+        expect(container.read(tongtaiOnboardingProvider), isTrue);
 
-      await container.read(tongtaiOnboardingProvider.notifier).reset();
+        await container.read(tongtaiOnboardingProvider.notifier).reset();
 
-      expect(container.read(tongtaiOnboardingProvider), isFalse);
-      expect(store.isCompleted(), isFalse);
-    });
+        expect(container.read(tongtaiOnboardingProvider), isFalse);
+        expect(store.isCompleted(), isFalse);
+      },
+    );
   });
 
   // ── AC1 + AC3: the onboarding screen widget ───────────────────────────────
@@ -177,20 +193,25 @@ void main() {
     Finder primaryButton() =>
         find.byKey(const ValueKey('tongtai_onboarding_next'));
 
-    testWidgets('shows the first screen: illustration + headline + body',
-        (tester) async {
+    testWidgets('shows the first screen: illustration + headline + body', (
+      tester,
+    ) async {
       await tester.pumpWidget(host(() {}));
       await tester.pumpAndSettle();
 
       // Illustration (icon) present.
       expect(find.byIcon(kTongtaiOnboardingPages.first.icon), findsOneWidget);
       // Headline + body present.
-      expect(find.text(kTongtaiOnboardingPages.first.headlineEn), findsOneWidget);
+      expect(
+        find.text(kTongtaiOnboardingPages.first.headlineEn),
+        findsOneWidget,
+      );
       expect(find.text(kTongtaiOnboardingPages.first.bodyEn), findsOneWidget);
     });
 
-    testWidgets('AC1: Next advances through every screen with animation',
-        (tester) async {
+    testWidgets('AC1: Next advances through every screen with animation', (
+      tester,
+    ) async {
       await tester.pumpWidget(host(() {}));
       await tester.pumpAndSettle();
 
@@ -205,8 +226,9 @@ void main() {
       }
     });
 
-    testWidgets('AC1: page content is wrapped in a fade+slide transition',
-        (tester) async {
+    testWidgets('AC1: page content is wrapped in a fade+slide transition', (
+      tester,
+    ) async {
       await tester.pumpWidget(host(() {}));
       await tester.pumpAndSettle();
       // The transition primitives are present in the tree (Opacity + Transform
@@ -215,29 +237,36 @@ void main() {
       expect(find.byType(Transform), findsWidgets);
     });
 
-    testWidgets('AC3: Skip appears on every screen and dismisses the tutorial',
-        (tester) async {
-      var finished = 0;
-      await tester.pumpWidget(host(() => finished++));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'AC3: Skip appears on every screen and dismisses the tutorial',
+      (tester) async {
+        var finished = 0;
+        await tester.pumpWidget(host(() => finished++));
+        await tester.pumpAndSettle();
 
-      // Skip is present on each screen as we advance.
-      for (var i = 0; i < kTongtaiOnboardingPages.length; i++) {
-        expect(skipButton(), findsOneWidget, reason: 'skip missing on page $i');
-        if (i < kTongtaiOnboardingPages.length - 1) {
-          await tester.tap(primaryButton());
-          await tester.pumpAndSettle();
+        // Skip is present on each screen as we advance.
+        for (var i = 0; i < kTongtaiOnboardingPages.length; i++) {
+          expect(
+            skipButton(),
+            findsOneWidget,
+            reason: 'skip missing on page $i',
+          );
+          if (i < kTongtaiOnboardingPages.length - 1) {
+            await tester.tap(primaryButton());
+            await tester.pumpAndSettle();
+          }
         }
-      }
 
-      // Tapping Skip fires onFinished.
-      await tester.tap(skipButton());
-      await tester.pump();
-      expect(finished, 1);
-    });
+        // Tapping Skip fires onFinished.
+        await tester.tap(skipButton());
+        await tester.pump();
+        expect(finished, 1);
+      },
+    );
 
-    testWidgets('the last screen shows Get Started and it finishes',
-        (tester) async {
+    testWidgets('the last screen shows Get Started and it finishes', (
+      tester,
+    ) async {
       var finished = 0;
       await tester.pumpWidget(host(() => finished++));
       await tester.pumpAndSettle();
@@ -256,8 +285,9 @@ void main() {
       expect(finished, 1);
     });
 
-    testWidgets('AC2: renders Vietnamese copy under the vi locale',
-        (tester) async {
+    testWidgets('AC2: renders Vietnamese copy under the vi locale', (
+      tester,
+    ) async {
       await tester.pumpWidget(host(() {}, locale: const Locale('vi')));
       await tester.pumpAndSettle();
 
@@ -301,8 +331,9 @@ void main() {
         find.byKey(const ValueKey('tongtai_onboarding_skip'));
     Finder appShell() => find.byType(TongtaiBottomNav);
 
-    testWidgets('AC4: shows the tutorial on first launch (not completed)',
-        (tester) async {
+    testWidgets('AC4: shows the tutorial on first launch (not completed)', (
+      tester,
+    ) async {
       final c = makeContainer(InMemoryTongtaiOnboardingStore());
       await tester.pumpWidget(host(c));
       await tester.pumpAndSettle();
@@ -311,35 +342,40 @@ void main() {
       expect(appShell(), findsNothing);
     });
 
-    testWidgets('AC4: skips the tutorial when already completed (later launch)',
-        (tester) async {
-      final c = makeContainer(InMemoryTongtaiOnboardingStore(true));
-      await tester.pumpWidget(host(c));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'AC4: skips the tutorial when already completed (later launch)',
+      (tester) async {
+        final c = makeContainer(InMemoryTongtaiOnboardingStore(true));
+        await tester.pumpWidget(host(c));
+        await tester.pumpAndSettle();
 
-      expect(onboarding(), findsNothing);
-      expect(appShell(), findsOneWidget);
-    });
+        expect(onboarding(), findsNothing);
+        expect(appShell(), findsOneWidget);
+      },
+    );
 
-    testWidgets('AC4: finishing the tutorial persists + reveals the app shell',
-        (tester) async {
-      final store = InMemoryTongtaiOnboardingStore();
-      final c = makeContainer(store);
-      await tester.pumpWidget(host(c));
-      await tester.pumpAndSettle();
-      expect(onboarding(), findsOneWidget);
+    testWidgets(
+      'AC4: finishing the tutorial persists + reveals the app shell',
+      (tester) async {
+        final store = InMemoryTongtaiOnboardingStore();
+        final c = makeContainer(store);
+        await tester.pumpWidget(host(c));
+        await tester.pumpAndSettle();
+        expect(onboarding(), findsOneWidget);
 
-      // Tap Skip → gate should flip to the app shell and persist completion.
-      await tester.tap(onboarding());
-      await tester.pumpAndSettle();
+        // Tap Skip → gate should flip to the app shell and persist completion.
+        await tester.tap(onboarding());
+        await tester.pumpAndSettle();
 
-      expect(onboarding(), findsNothing);
-      expect(appShell(), findsOneWidget);
-      expect(store.isCompleted(), isTrue); // stored locally
-    });
+        expect(onboarding(), findsNothing);
+        expect(appShell(), findsOneWidget);
+        expect(store.isCompleted(), isTrue); // stored locally
+      },
+    );
 
-    testWidgets('AC5: resetting the flag re-triggers the tutorial',
-        (tester) async {
+    testWidgets('AC5: resetting the flag re-triggers the tutorial', (
+      tester,
+    ) async {
       final store = InMemoryTongtaiOnboardingStore(true);
       final c = makeContainer(store);
       await tester.pumpWidget(host(c));
@@ -357,8 +393,9 @@ void main() {
 
   // ── AC5: Settings "Replay Tutorial" entry point ───────────────────────────
   group('TongtaiMoreScreen replay entry (AC5)', () {
-    testWidgets('tapping "Replay Tutorial" clears the completed flag',
-        (tester) async {
+    testWidgets('tapping "Replay Tutorial" clears the completed flag', (
+      tester,
+    ) async {
       final store = InMemoryTongtaiOnboardingStore(true);
       final c = ProviderContainer(
         overrides: [tongtaiOnboardingStoreProvider.overrideWithValue(store)],

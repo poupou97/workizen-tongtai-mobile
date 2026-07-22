@@ -59,7 +59,8 @@ abstract interface class TongtaiSearchHistoryStore {
 
 /// Production store backed by [SharedPreferences] (a plain string list — the
 /// queries carry nothing sensitive, so no secure storage is needed).
-class SharedPrefsTongtaiSearchHistoryStore implements TongtaiSearchHistoryStore {
+class SharedPrefsTongtaiSearchHistoryStore
+    implements TongtaiSearchHistoryStore {
   SharedPrefsTongtaiSearchHistoryStore(
     this._prefs, {
     this.limit = kTongtaiSearchHistoryLimit,
@@ -81,8 +82,7 @@ class SharedPrefsTongtaiSearchHistoryStore implements TongtaiSearchHistoryStore 
   }
 
   @override
-  Future<void> clear() =>
-      _prefs.remove(TongtaiSearchHistoryStore.storageKey);
+  Future<void> clear() => _prefs.remove(TongtaiSearchHistoryStore.storageKey);
 }
 
 /// In-memory store for tests and standalone screen previews (no platform

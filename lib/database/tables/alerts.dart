@@ -5,7 +5,8 @@ import 'businesses.dart';
 /// Alert entity: Notifications and AI recommendations.
 class AlertsTable extends Table {
   TextColumn get id => text()();
-  TextColumn get businessId => text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get businessId =>
+      text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
   TextColumn get type => text()();
   TextColumn get severity => text()();
   TextColumn get title => text()();

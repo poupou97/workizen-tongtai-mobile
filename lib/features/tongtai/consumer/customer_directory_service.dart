@@ -11,11 +11,11 @@ enum CustomerSort {
   recency; // last purchase date
 
   String get labelEn => switch (this) {
-        CustomerSort.name => 'Name',
-        CustomerSort.spent => 'Spent',
-        CustomerSort.frequency => 'Frequency',
-        CustomerSort.recency => 'Recent',
-      };
+    CustomerSort.name => 'Name',
+    CustomerSort.spent => 'Spent',
+    CustomerSort.frequency => 'Frequency',
+    CustomerSort.recency => 'Recent',
+  };
 }
 
 /// Minimum / maximum customers shown per page (WTM-75 AC: 20–50 per page). The
@@ -106,8 +106,7 @@ class CustomerPage {
   final int totalCount;
 
   /// Total number of pages (always at least 1, even when empty).
-  int get pageCount =>
-      totalCount == 0 ? 1 : ((totalCount - 1) ~/ pageSize) + 1;
+  int get pageCount => totalCount == 0 ? 1 : ((totalCount - 1) ~/ pageSize) + 1;
 
   /// Whether there is a page before this one.
   bool get hasPrevious => pageIndex > 0;
@@ -133,7 +132,7 @@ class CustomerPage {
 /// can later replace the data source without touching callers.
 class CustomerDirectoryService {
   CustomerDirectoryService(List<Customer> customers)
-      : _customers = List.unmodifiable(customers);
+    : _customers = List.unmodifiable(customers);
 
   /// Convenience constructor seeded with the built-in sample directory.
   factory CustomerDirectoryService.sample() =>
@@ -169,8 +168,10 @@ class CustomerDirectoryService {
   /// an out-of-range slice).
   CustomerPage page(CustomerQuery query) {
     final matches = filter(query);
-    final size =
-        query.pageSize.clamp(kMinCustomerPageSize, kMaxCustomerPageSize);
+    final size = query.pageSize.clamp(
+      kMinCustomerPageSize,
+      kMaxCustomerPageSize,
+    );
     final pageCount = matches.isEmpty ? 1 : ((matches.length - 1) ~/ size) + 1;
     final index = query.pageIndex.clamp(0, pageCount - 1);
     final start = index * size;
@@ -194,12 +195,14 @@ class CustomerDirectoryService {
   void _sort(List<Customer> list, CustomerSort sort, bool ascending) {
     int compare(Customer a, Customer b) {
       final int c = switch (sort) {
-        CustomerSort.name =>
-          a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        CustomerSort.name => a.name.toLowerCase().compareTo(
+          b.name.toLowerCase(),
+        ),
         CustomerSort.spent => a.totalSpent.compareTo(b.totalSpent),
         CustomerSort.frequency => a.orderCount.compareTo(b.orderCount),
-        CustomerSort.recency =>
-          a.lastPurchaseDate.compareTo(b.lastPurchaseDate),
+        CustomerSort.recency => a.lastPurchaseDate.compareTo(
+          b.lastPurchaseDate,
+        ),
       };
       if (c != 0) return ascending ? c : -c;
       // Deterministic tiebreak by id, always ascending, so equal keys keep a

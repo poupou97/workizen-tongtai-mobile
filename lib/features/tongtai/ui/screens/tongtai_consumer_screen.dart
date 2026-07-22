@@ -116,9 +116,7 @@ class TongtaiConsumerScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text('No recent interactions'),
-              ),
+              child: const Center(child: Text('No recent interactions')),
             ),
             const SizedBox(height: 24),
             // Customer lifecycle
@@ -195,10 +193,7 @@ class _CustomerStat extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF6B7280),
-          ),
+          style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
         ),
       ],
     );
@@ -221,10 +216,7 @@ class _LifecycleStage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          stage,
-          style: const TextStyle(fontSize: 14),
-        ),
+        Text(stage, style: const TextStyle(fontSize: 14)),
         Text(
           count,
           style: TextStyle(

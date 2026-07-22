@@ -13,27 +13,25 @@ enum CustomerTier {
   bronze;
 
   String get labelEn => switch (this) {
-        CustomerTier.vip => 'VIP',
-        CustomerTier.gold => 'Gold',
-        CustomerTier.silver => 'Silver',
-        CustomerTier.bronze => 'Bronze',
-      };
+    CustomerTier.vip => 'VIP',
+    CustomerTier.gold => 'Gold',
+    CustomerTier.silver => 'Silver',
+    CustomerTier.bronze => 'Bronze',
+  };
 
   String get labelVi => switch (this) {
-        CustomerTier.vip => 'VIP',
-        CustomerTier.gold => 'Vàng',
-        CustomerTier.silver => 'Bạc',
-        CustomerTier.bronze => 'Đồng',
-      };
+    CustomerTier.vip => 'VIP',
+    CustomerTier.gold => 'Vàng',
+    CustomerTier.silver => 'Bạc',
+    CustomerTier.bronze => 'Đồng',
+  };
 
   /// Label for a language code ('vi' -> Vietnamese, otherwise English).
-  String label(String languageCode) =>
-      languageCode == 'vi' ? labelVi : labelEn;
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 
   /// Whether this tier is treated as high-value and gets a prominent indicator
   /// (WTM-75 AC: visual indicators for VIP / high-value customers).
-  bool get isHighValue =>
-      this == CustomerTier.vip || this == CustomerTier.gold;
+  bool get isHighValue => this == CustomerTier.vip || this == CustomerTier.gold;
 }
 
 /// Lifetime-spend thresholds (in đồng) for the customer value tiers. A customer

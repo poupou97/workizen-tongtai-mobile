@@ -173,10 +173,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Collide Alpha's SKU with Bravo's.
-    await tester.enterText(
-      find.byKey(const Key('product-sku-field')),
-      'SKU-B',
-    );
+    await tester.enterText(find.byKey(const Key('product-sku-field')), 'SKU-B');
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Save Changes'));
