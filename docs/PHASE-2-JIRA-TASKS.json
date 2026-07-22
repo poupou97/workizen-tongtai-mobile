@@ -1,0 +1,298 @@
+{
+  "audit_date": "2026-07-14",
+  "total_recommended_tasks": 7,
+  "priority_breakdown": {
+    "P1_blocking": 3,
+    "P2_nice_to_have": 3,
+    "P3_phase2_plus": 1
+  },
+  "tasks": [
+    {
+      "id": "WTM-001-ADD-JOURNEYSTEP-REF",
+      "type": "Documentation",
+      "priority": "P1",
+      "status": "READY FOR JIRA",
+      "title": "Add explicit JourneyStep entity references to Business Journey screen spec",
+      "description": "Update SCREEN-BUSINESS-JOURNEY.md to explicitly reference the JourneyStep entity from DOMAIN-DATA-MODEL.md. Currently, the step-by-step plan is displayed visually but the underlying data entity is not mentioned by name.",
+      "acceptance_criteria": [
+        "SCREEN-BUSINESS-JOURNEY.md mentions 'JourneyStep entity' in Data Model section",
+        "Each step's structure documented: title, status, milestone, forecast_days, guidance",
+        "Cross-reference to DOMAIN-DATA-MODEL.md Section 10 (JourneyStep Entity)",
+        "Bilingual (EN+VI)"
+      ],
+      "epic": "WTM-1",
+      "epic_name": "Phase 1 Documentation",
+      "story_points": 1,
+      "owner": "Developer Agent",
+      "due_date": "2026-07-18",
+      "blocking_phase2": true,
+      "effort_minutes": 5,
+      "file_to_update": "/Users/alexnguyen/projects/workizen-ai-personal-wallet/docs/tongtai/SCREEN-BUSINESS-JOURNEY.md"
+    },
+    {
+      "id": "WTM-002-ADD-AICHAT-REF",
+      "type": "Documentation",
+      "priority": "P1",
+      "status": "READY FOR JIRA",
+      "title": "Add explicit AIChat entity references to AI Copilot screen spec",
+      "description": "Update SCREEN-AI-COPILOT.md to explicitly reference the AIChat entity from DOMAIN-DATA-MODEL.md. Currently, the chat interface is documented but the underlying data entity is not mentioned by name.",
+      "acceptance_criteria": [
+        "SCREEN-AI-COPILOT.md mentions 'AIChat entity' in Data Model section",
+        "Conversation structure documented: messages, context, summary, tokens_used",
+        "Cross-reference to DOMAIN-DATA-MODEL.md Section 14 (AIChat Entity)",
+        "Bilingual (EN+VI)"
+      ],
+      "epic": "WTM-1",
+      "epic_name": "Phase 1 Documentation",
+      "story_points": 1,
+      "owner": "Developer Agent",
+      "due_date": "2026-07-18",
+      "blocking_phase2": true,
+      "effort_minutes": 5,
+      "file_to_update": "/Users/alexnguyen/projects/workizen-ai-personal-wallet/docs/tongtai/SCREEN-AI-COPILOT.md"
+    },
+    {
+      "id": "WTM-003-FOUNDER-GATE-D1",
+      "type": "Product Decision",
+      "priority": "P1",
+      "status": "PENDING FOUNDER",
+      "title": "Decide app separation strategy for Tổng Tài (Phase 2 Planning Gate - D-1)",
+      "description": "Phase 2 kickoff is gated on three Founder business decisions. This is Decision #1: Should Tổng Tài be built as single app with flavors (RECOMMENDED), multi-package monorepo, or separate repository?",
+      "options": [
+        {
+          "option": "A",
+          "name": "Single app with flavors",
+          "recommended": true,
+          "pros": [
+            "Faster Phase 2 startup (2-3 days)",
+            "Proven pattern from Hub",
+            "Simple git management",
+            "Revisit to multi-repo at 100K users if needed"
+          ],
+          "cons": [
+            "Tight code coupling"
+          ],
+          "timeline": "2-3 days to first dev build"
+        },
+        {
+          "option": "B",
+          "name": "Multi-package monorepo",
+          "recommended": false,
+          "pros": [
+            "Better component reuse with Hub",
+            "Clear package boundaries"
+          ],
+          "cons": [
+            "More complex setup (1-2 weeks)",
+            "Gradle/Xcode multi-module overhead"
+          ],
+          "timeline": "1-2 weeks to first dev build"
+        },
+        {
+          "option": "C",
+          "name": "Separate repository",
+          "recommended": false,
+          "pros": [
+            "Cleaner git history"
+          ],
+          "cons": [
+            "More CI/CD infrastructure",
+            "Component reuse requires npm/pub packages"
+          ],
+          "timeline": "2-3 weeks to first dev build"
+        }
+      ],
+      "acceptance_criteria": [
+        "Founder decision documented in DECISIONS.md with rationale",
+        "Tech lead confirms implementation path",
+        "Phase 2 sprint planning updated with correct project structure"
+      ],
+      "epic": "WTM-105",
+      "epic_name": "Phase 2 Preparation",
+      "story_points": 0,
+      "owner": "Founder",
+      "due_date": "2026-07-20",
+      "blocking_phase2": true,
+      "parallel_with": ["WTM-004-FOUNDER-GATE-D2", "WTM-005-FOUNDER-GATE-D3"],
+      "dependencies": []
+    },
+    {
+      "id": "WTM-004-FOUNDER-GATE-D2",
+      "type": "Product Decision",
+      "priority": "P1",
+      "status": "PENDING FOUNDER",
+      "title": "Decide package identity for Tổng Tài app (Phase 2 Planning Gate - D-2)",
+      "description": "Phase 2 kickoff is gated on three Founder business decisions. This is Decision #2: What should the app's package name (Android) and bundle ID (iOS) be?",
+      "options": [
+        {
+          "option": "A",
+          "name": "com.workizen.tongtai",
+          "recommended": true,
+          "reasoning": "Semantic (lowercase module name), follows Java/Kotlin conventions, Google Play allows multiple Workizen apps, clear product identity"
+        },
+        {
+          "option": "B",
+          "name": "ai.workizen.business",
+          "recommended": false,
+          "reasoning": "Too generic (conflicts with WorkforceOS Enterprise brand), doesn't distinguish from Hub"
+        },
+        {
+          "option": "C",
+          "name": "com.workizen.business",
+          "recommended": false,
+          "reasoning": "Ambiguous (which business app?), conflicts with Portfolio positioning"
+        }
+      ],
+      "acceptance_criteria": [
+        "Founder decision documented in DECISIONS.md",
+        "Selected package name registered in app signing configuration",
+        "Firebase project created under selected package ID"
+      ],
+      "epic": "WTM-105",
+      "epic_name": "Phase 2 Preparation",
+      "story_points": 0,
+      "owner": "Founder",
+      "due_date": "2026-07-20",
+      "blocking_phase2": true,
+      "parallel_with": ["WTM-003-FOUNDER-GATE-D1", "WTM-005-FOUNDER-GATE-D3"],
+      "dependencies": []
+    },
+    {
+      "id": "WTM-005-FOUNDER-GATE-D3",
+      "type": "Technical Decision",
+      "priority": "P1",
+      "status": "PENDING FOUNDER",
+      "title": "Approve tech stack for Tổng Tài Phase 2 (Phase 2 Planning Gate - D-3)",
+      "description": "Phase 2 kickoff is gated on three Founder business decisions. This is Decision #3: Approve the recommended technology stack for Phase 2 development.",
+      "recommended_stack": {
+        "frontend": "Flutter stable channel",
+        "storage": "SQLite + Drift ORM",
+        "state_management": "Riverpod",
+        "navigation": "GoRouter + bottom-tab pattern",
+        "ai_primary": "xAI Grok-2 ($0.01-0.05 per call, production-ready)",
+        "ai_fallback": "OpenRouter (multi-model, $0.0001-0.001 per call)",
+        "ai_offline": "Ollama (optional, local LLM)",
+        "byok_security": "flutter_secure_storage (proven, 10K+ users in Hub)",
+        "reuse_from_hub": "80% UI components, storage layer, AI routing logic"
+      },
+      "evidence": [
+        "Proven in production: Hub v1.1.0+62 running on S24, Nokia 6.1, iPad",
+        "Tested at scale: SQLite + FTS5 handles 1M rows <50ms",
+        "Cost analysis: xAI at $1-5 per user/month depending on usage"
+      ],
+      "acceptance_criteria": [
+        "Founder approves tech stack documented in TECH-EVAL-BUILD-READINESS.md",
+        "Tech lead confirms Flutter version (stable, not beta)",
+        "xAI + OpenRouter credentials ready for dev environment"
+      ],
+      "epic": "WTM-105",
+      "epic_name": "Phase 2 Preparation",
+      "story_points": 0,
+      "owner": "Founder",
+      "due_date": "2026-07-20",
+      "blocking_phase2": true,
+      "parallel_with": ["WTM-003-FOUNDER-GATE-D1", "WTM-004-FOUNDER-GATE-D2"],
+      "dependencies": [],
+      "related_doc": "TECH-EVAL-BUILD-READINESS.md"
+    },
+    {
+      "id": "WTM-006-BACKWARD-NAV-LINKS",
+      "type": "Documentation",
+      "priority": "P2",
+      "status": "READY FOR JIRA",
+      "title": "Add parent screen references to detail screen specs",
+      "description": "Add 'Related: SCREEN-CONSUMER.md' and 'Back Path' sections to detail screen specs for improved navigation clarity and cross-reference completeness.",
+      "screens_to_update": [
+        "SCREEN-PRODUCER-DETAIL.md",
+        "SCREEN-CONSUMER-DETAIL.md",
+        "SCREEN-INVENTORY-DETAIL.md"
+      ],
+      "acceptance_criteria": [
+        "Each detail screen links back to parent module screen",
+        "Back navigation path documented (e.g., 'Home → Consumer Tab → Consumer List → Customer Detail')",
+        "Cross-references bidirectional",
+        "Bilingual (EN+VI)"
+      ],
+      "epic": "WTM-1",
+      "epic_name": "Phase 1 Documentation",
+      "story_points": 2,
+      "owner": "Developer Agent",
+      "due_date": "2026-07-25",
+      "blocking_phase2": false,
+      "effort_minutes": 15
+    },
+    {
+      "id": "WTM-007-CONSOLIDATE-COLORS",
+      "type": "Documentation",
+      "priority": "P2",
+      "status": "READY FOR JIRA",
+      "title": "Consolidate duplicate domain color tables in Design System",
+      "description": "DESIGN-SYSTEM-DRAFT.md has domain color mapping documented in two places (sections 1.2 and 2.1). Consolidate into single authoritative table for maintainability.",
+      "acceptance_criteria": [
+        "Single canonical domain color table created",
+        "All cross-references point to single table",
+        "Duplicate sections removed or merged",
+        "Version updated in DESIGN-SYSTEM-DRAFT.md header"
+      ],
+      "epic": "WTM-1",
+      "epic_name": "Phase 1 Documentation",
+      "story_points": 1,
+      "owner": "Developer Agent",
+      "due_date": "2026-07-25",
+      "blocking_phase2": false,
+      "effort_minutes": 5,
+      "file_to_update": "/Users/alexnguyen/projects/workizen-ai-personal-wallet/docs/tongtai/DESIGN-SYSTEM-DRAFT.md"
+    },
+    {
+      "id": "WTM-008-ADR-ARCHITECTURE-DECISIONS",
+      "type": "Documentation",
+      "priority": "P3",
+      "status": "READY FOR PHASE 2",
+      "title": "Document top 10 architectural decisions as formal ADRs",
+      "description": "Create formal Architecture Decision Records (ADR-TON-001 through ADR-TON-010) for major architectural choices made in Phase 1.",
+      "decisions_to_document": [
+        "Local-first, BYOK architecture (vs. backend-heavy)",
+        "SQLite + Drift ORM (vs. Firestore/Realm)",
+        "Single app with flavors (vs. multi-repo)",
+        "8-capability model (vs. monolithic feature list)",
+        "Bottom-tab navigation (vs. drawer/hamburger)",
+        "Card-first UI (vs. table-first)",
+        "AI integration layer (xAI + OpenRouter routing)",
+        "Omnichannel sync strategy (eventual consistency)",
+        "Privacy-by-default (no tracking SDKs)",
+        "Multi-user support deferred to Phase 3"
+      ],
+      "acceptance_criteria": [
+        "10 ADRs created in docs/tongtai/ADR-TON-001 through ADR-TON-010.md",
+        "Each ADR follows standard format: Context, Decision, Rationale, Consequences",
+        "All ADRs linked from central index",
+        "Bilingual (EN+VI) for top 5 decisions"
+      ],
+      "epic": "WTM-105",
+      "epic_name": "Phase 2 Preparation",
+      "story_points": 5,
+      "owner": "Developer Agent",
+      "due_date": "2026-07-27",
+      "blocking_phase2": false,
+      "timing": "Start of Phase 2 (informational, not blocking)"
+    }
+  ],
+  "phase2_readiness": {
+    "overall_score": 95,
+    "business_ready": 95,
+    "architecture_ready": 95,
+    "design_ready": 95,
+    "specification_ready": 100,
+    "no_blockers": true,
+    "go_decision": "CONDITIONAL GO",
+    "go_conditions": [
+      "Two 5-minute entity reference fixes (P1 tasks WTM-001, WTM-002)",
+      "Three Founder gate decisions (WTM-003, WTM-004, WTM-005) can be parallel"
+    ]
+  },
+  "timeline": {
+    "p1_fixes": "5 minutes (can be done before Phase 2 sprint kickoff)",
+    "founder_gates": "2 hours decision time (can be parallel, no dependencies)",
+    "phase2_ready": "Immediately upon gate closure"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "product": "Tổng Tài Mobile",
+  "cloudId": "workizen.atlassian.net",
+  "jiraProject": "WTM",
+  "confluenceSpace": "workizento",
+  "workforceDocs": "docs/pm/workforce",
+  "note": "AI Workforce config (ADR-059: one repo per product). Runtime env: WORKFORCE_REPO=<this repo>, WORKFORCE_FLUTTER_DIR=."
+}

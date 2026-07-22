@@ -1,0 +1,43 @@
+import 'package:drift/drift.dart';
+
+import 'businesses.dart';
+import 'producers.dart';
+
+/// Product entity: Product catalog and inventory management.
+@TableIndex(name: 'products_business_id', columns: {#businessId})
+@TableIndex(name: 'products_sku', columns: {#sku})
+@TableIndex(name: 'products_category', columns: {#category})
+@TableIndex(name: 'products_supplier_id', columns: {#supplierId})
+class ProductsTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get businessId => text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get sku => text()();
+  TextColumn get name => text()();
+  // WTM-72: free-text product description, indexed by the products FTS5 table
+  // (name + description + category). Nullable/additive so it is backward
+  // compatible; added to existing installs via the schema-v3 upgrade step.
+  TextColumn get description => text().nullable()();
+  TextColumn get category => text().nullable()();
+  RealColumn get costPerUnit => real().nullable()();
+  RealColumn get listPrice => real()();
+  RealColumn get currentPrice => real().nullable()();
+  RealColumn get profitPerUnit => real().nullable()();
+  RealColumn get totalStock => real().withDefault(const Constant(0))();
+  TextColumn get stockByWarehouse => text().nullable()(); // JSON
+  RealColumn get stockAlertLevel => real().nullable()();
+  // WTM-53: ON DELETE CASCADE so deleting a Producer removes the Products it
+  // supplies (no orphaned supplier_id references). Nullable rows (no supplier)
+  // are unaffected. See DOMAIN-DATA-MODEL.md §Producer↔Product.
+  TextColumn get supplierId => text()
+      .nullable()
+      .references(ProducersTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get salesChannels => text().nullable()(); // JSON
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt =>
+      dateTime().withDefault(Constant(DateTime.now()))();
+  DateTimeColumn get updatedAt =>
+      dateTime().withDefault(Constant(DateTime.now()))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
