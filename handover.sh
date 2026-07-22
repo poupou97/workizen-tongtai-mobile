@@ -32,7 +32,11 @@ command -v flutter>/dev/null||die "flutter missing (evidence gate runs analyze+t
 log "=== sync ==="
 ( cd "$RUNTIME_DIR" && git fetch -q origin && git checkout -q "$RT_BRANCH" && git pull -q --ff-only ) || die "runtime sync failed"
 ( cd "$TARGET_DIR" && git fetch -q origin && git checkout -q "$HUB_BRANCH" && git pull -q --ff-only ) || die "hub sync failed"
-b="$(cd "$TARGET_DIR" && git branch --show-current)"; { [ "$b" = main ]||[ "$b" = master ]; } && die "REFUSE: hub on $b"
+# HUB_BRANCH is only the BASE to branch from (post-split: main). Pre-split this
+# script required a checked-out integration branch and refused main here, which
+# made it die unconditionally once the split removed that branch (WTM-106).
+# Dispatch now happens on a per-story branch created by story_branch() below;
+# push_safe keeps refusing main pushes as the second line of defense.
 ( cd "$RUNTIME_DIR" && npm ci --silent 2>/dev/null || npm install --silent ) || die "npm install failed"
 
 NOSLEEP=(); case "$(uname -s)" in
@@ -47,13 +51,25 @@ run_rt(){ ( cd "$RUNTIME_DIR" && "${NOSLEEP[@]}" npx tsx src/index.ts "$@" ); }
 push_safe(){ local b; b="$(cd "$TARGET_DIR" && git branch --show-current)"
   { [ "$b" = main ]||[ "$b" = master ]; } && { log "REFUSE push $b"; return; }
   ( cd "$TARGET_DIR" && git push -q origin HEAD ) && log "pushed $b" || log "push skipped"; }
+# Agents commit on the CURRENT branch, so give each dispatch its own feature
+# branch off the freshly-synced base and never dispatch from main/master
+# (WORKING-RULES gate; WTM-106).
+story_branch(){ local name="$1"
+  ( cd "$TARGET_DIR" && git checkout -q -B "$name" "origin/$HUB_BRANCH" ) || return 1
+  local b; b="$(cd "$TARGET_DIR" && git branch --show-current)"
+  if [ "$b" = main ] || [ "$b" = master ]; then return 1; fi
+  log "working branch: $b (base origin/$HUB_BRANCH)"; }
 
 [ $# -eq 0 ] && { log "usage: $0 WTM-69 WTM-76 ... | $0 --autonomous 20"; exit 2; }
 if [ "$1" = --autonomous ]; then
-  log "=== AUTONOMOUS max=${2:-25} ==="; run_rt --autonomous "${2:-25}" 2>&1 | tee -a "$MASTER"; push_safe
+  batch="feat/auto-$(date +%Y%m%d-%H%M%S)"
+  story_branch "$batch" || die "cannot create batch branch $batch"
+  log "=== AUTONOMOUS max=${2:-25} on $batch ==="; run_rt --autonomous "${2:-25}" 2>&1 | tee -a "$MASTER"; push_safe
 else
   log "=== BACKLOG: $* ==="
   for key in "$@"; do
+    slug="$(printf '%s' "$key" | tr '[:upper:]' '[:lower:]')"
+    story_branch "feat/${slug}-auto" || { log "SKIP $key: cannot create feat/${slug}-auto"; continue; }
     log "START $key"; run_rt --run-task "$key" "$key" > "$LOG_DIR/$key.log" 2>&1
     v="$(grep -oE 'verdict: (PASS|FAIL|PARTIAL|MANUAL_REVIEW)' "$LOG_DIR/$key.log"|head -1|awk '{print $2}')"
     push_safe; log "DONE $key verdict=${v:-?}"
