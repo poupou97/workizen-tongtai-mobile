@@ -27,14 +27,16 @@ void main() {
     expect(await store.read(), id);
   });
 
-  test('returns the same id across calls (idempotent, no regeneration)',
-      () async {
-    final first = await service.getOrCreateUserId();
-    final second = await service.getOrCreateUserId();
-    final third = await service.getOrCreateUserId();
-    expect(second, first);
-    expect(third, first);
-  });
+  test(
+    'returns the same id across calls (idempotent, no regeneration)',
+    () async {
+      final first = await service.getOrCreateUserId();
+      final second = await service.getOrCreateUserId();
+      final third = await service.getOrCreateUserId();
+      expect(second, first);
+      expect(third, first);
+    },
+  );
 
   test('reuses an id already present in the store', () async {
     const existing = '11111111-1111-4111-8111-111111111111';

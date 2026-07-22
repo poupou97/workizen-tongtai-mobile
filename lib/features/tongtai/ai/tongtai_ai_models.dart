@@ -23,7 +23,7 @@ class TongtaiAiMessage {
 
   /// Convenience constructor for an assistant turn.
   const TongtaiAiMessage.assistant(this.content)
-      : role = TongtaiAiRole.assistant;
+    : role = TongtaiAiRole.assistant;
 
   /// Convenience constructor for a system turn.
   const TongtaiAiMessage.system(this.content) : role = TongtaiAiRole.system;

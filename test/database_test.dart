@@ -12,7 +12,9 @@ void main() {
   late AppDatabase db;
 
   // A User must exist before a Business (Business.ownerId -> User.id).
-  Future<void> seedOwner(String userId) => db.into(db.usersTable).insert(
+  Future<void> seedOwner(String userId) => db
+      .into(db.usersTable)
+      .insert(
         UsersTableCompanion.insert(
           id: userId,
           email: '$userId@example.com',
@@ -56,14 +58,18 @@ void main() {
 
   test('insert + read round-trips a Business and a Product', () async {
     await seedOwner('user-1');
-    await db.into(db.businessesTable).insert(
+    await db
+        .into(db.businessesTable)
+        .insert(
           BusinessesTableCompanion.insert(
             id: 'biz-1',
             ownerId: 'user-1',
             name: 'Shop Tổng Tài',
           ),
         );
-    await db.into(db.productsTable).insert(
+    await db
+        .into(db.productsTable)
+        .insert(
           ProductsTableCompanion.insert(
             id: 'prod-1',
             businessId: 'biz-1',
@@ -80,33 +86,41 @@ void main() {
     expect(products.single.listPrice, 120000);
   });
 
-  test('foreign key is enforced: product with unknown business is rejected',
-      () async {
-    // PRAGMA foreign_keys = ON is set in AppDatabase.migration.beforeOpen.
-    expect(
-      () => db.into(db.productsTable).insert(
-            ProductsTableCompanion.insert(
-              id: 'prod-x',
-              businessId: 'does-not-exist',
-              sku: 'SKU-X',
-              name: 'Orphan',
-              listPrice: 1,
+  test(
+    'foreign key is enforced: product with unknown business is rejected',
+    () async {
+      // PRAGMA foreign_keys = ON is set in AppDatabase.migration.beforeOpen.
+      expect(
+        () => db
+            .into(db.productsTable)
+            .insert(
+              ProductsTableCompanion.insert(
+                id: 'prod-x',
+                businessId: 'does-not-exist',
+                sku: 'SKU-X',
+                name: 'Orphan',
+                listPrice: 1,
+              ),
             ),
-          ),
-      throwsA(isA<SqliteException>()),
-    );
-  });
+        throwsA(isA<SqliteException>()),
+      );
+    },
+  );
 
   test('cascade delete: deleting a Business removes its Products', () async {
     await seedOwner('user-2');
-    await db.into(db.businessesTable).insert(
+    await db
+        .into(db.businessesTable)
+        .insert(
           BusinessesTableCompanion.insert(
             id: 'biz-2',
             ownerId: 'user-2',
             name: 'B2',
           ),
         );
-    await db.into(db.productsTable).insert(
+    await db
+        .into(db.productsTable)
+        .insert(
           ProductsTableCompanion.insert(
             id: 'prod-2',
             businessId: 'biz-2',
@@ -117,8 +131,9 @@ void main() {
         );
     expect(await db.select(db.productsTable).get(), hasLength(1));
 
-    await (db.delete(db.businessesTable)..where((b) => b.id.equals('biz-2')))
-        .go();
+    await (db.delete(
+      db.businessesTable,
+    )..where((b) => b.id.equals('biz-2'))).go();
 
     // Product should be gone via ON DELETE CASCADE.
     expect(await db.select(db.productsTable).get(), isEmpty);
@@ -126,14 +141,18 @@ void main() {
 
   test('cascade delete: deleting a Journey removes its JourneySteps', () async {
     await seedOwner('user-3');
-    await db.into(db.businessesTable).insert(
+    await db
+        .into(db.businessesTable)
+        .insert(
           BusinessesTableCompanion.insert(
             id: 'biz-3',
             ownerId: 'user-3',
             name: 'B3',
           ),
         );
-    await db.into(db.journeysTable).insert(
+    await db
+        .into(db.journeysTable)
+        .insert(
           JourneysTableCompanion.insert(
             id: 'jny-1',
             businessId: 'biz-3',
@@ -141,7 +160,9 @@ void main() {
             status: 'in_progress',
           ),
         );
-    await db.into(db.journeyStepsTable).insert(
+    await db
+        .into(db.journeyStepsTable)
+        .insert(
           JourneyStepsTableCompanion.insert(
             id: 'step-1',
             journeyId: 'jny-1',
@@ -152,8 +173,9 @@ void main() {
         );
     expect(await db.select(db.journeyStepsTable).get(), hasLength(1));
 
-    await (db.delete(db.journeysTable)..where((j) => j.id.equals('jny-1')))
-        .go();
+    await (db.delete(
+      db.journeysTable,
+    )..where((j) => j.id.equals('jny-1'))).go();
 
     expect(await db.select(db.journeyStepsTable).get(), isEmpty);
   });

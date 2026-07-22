@@ -8,10 +8,7 @@ import 'package:flutter/foundation.dart';
 /// value object — it holds no controllers and is safe to persist as JSON.
 @immutable
 class TongtaiTabState {
-  const TongtaiTabState({
-    this.scrollOffset = 0.0,
-    this.formValues = const {},
-  });
+  const TongtaiTabState({this.scrollOffset = 0.0, this.formValues = const {}});
 
   /// Saved vertical scroll position, in logical pixels.
   final double scrollOffset;
@@ -35,9 +32,7 @@ class TongtaiTabState {
 
   /// Returns a copy with [fieldKey] set to [value].
   TongtaiTabState withFormValue(String fieldKey, String value) {
-    return copyWith(
-      formValues: {...formValues, fieldKey: value},
-    );
+    return copyWith(formValues: {...formValues, fieldKey: value});
   }
 
   /// Returns a copy with [fieldKey] removed (no-op if absent).
@@ -48,9 +43,9 @@ class TongtaiTabState {
   }
 
   Map<String, dynamic> toJson() => {
-        'scrollOffset': scrollOffset,
-        'formValues': formValues,
-      };
+    'scrollOffset': scrollOffset,
+    'formValues': formValues,
+  };
 
   factory TongtaiTabState.fromJson(Map<String, dynamic> json) {
     final rawOffset = json['scrollOffset'];
@@ -71,9 +66,12 @@ class TongtaiTabState {
   }
 
   @override
-  int get hashCode => Object.hash(scrollOffset, Object.hashAllUnordered(
-        formValues.entries.map((e) => Object.hash(e.key, e.value)),
-      ));
+  int get hashCode => Object.hash(
+    scrollOffset,
+    Object.hashAllUnordered(
+      formValues.entries.map((e) => Object.hash(e.key, e.value)),
+    ),
+  );
 
   @override
   String toString() =>

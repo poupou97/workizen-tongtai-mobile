@@ -15,16 +15,18 @@ import 'package:tongtai/features/tongtai/ai/tongtai_ai_service.dart';
 /// presence, delete, and the live test/chat paths (with an injected HTTP mock so
 /// no real network is touched).
 http.Response _okCompletion(String text) => http.Response.bytes(
-      utf8.encode(jsonEncode({
-        'model': 'grok-3',
-        'choices': [
-          {
-            'message': {'role': 'assistant', 'content': text},
-          },
-        ],
-      })),
-      200,
-    );
+  utf8.encode(
+    jsonEncode({
+      'model': 'grok-3',
+      'choices': [
+        {
+          'message': {'role': 'assistant', 'content': text},
+        },
+      ],
+    }),
+  ),
+  200,
+);
 
 void main() {
   final validKey = 'xai-${'k1L2m3N4' * 10}';
@@ -77,17 +79,24 @@ void main() {
       final service = serviceWith(MockClient((_) async => _okCompletion('OK')));
       expect(
         () => service.testConnection(),
-        throwsA(isA<TongtaiAiException>().having(
-            (e) => e.kind, 'kind', TongtaiAiErrorKind.missingKey)),
+        throwsA(
+          isA<TongtaiAiException>().having(
+            (e) => e.kind,
+            'kind',
+            TongtaiAiErrorKind.missingKey,
+          ),
+        ),
       );
     });
 
     test('uses the stored key and returns the response', () async {
       late String sentAuth;
-      final service = serviceWith(MockClient((req) async {
-        sentAuth = req.headers['Authorization'] ?? '';
-        return _okCompletion('OK');
-      }));
+      final service = serviceWith(
+        MockClient((req) async {
+          sentAuth = req.headers['Authorization'] ?? '';
+          return _okCompletion('OK');
+        }),
+      );
       await service.saveKey(validKey);
 
       final res = await service.testConnection();
@@ -97,13 +106,19 @@ void main() {
     });
 
     test('surfaces a friendly error from the provider', () async {
-      final service =
-          serviceWith(MockClient((_) async => http.Response('', 429)));
+      final service = serviceWith(
+        MockClient((_) async => http.Response('', 429)),
+      );
       await service.saveKey(validKey);
       expect(
         () => service.testConnection(),
-        throwsA(isA<TongtaiAiException>().having(
-            (e) => e.kind, 'kind', TongtaiAiErrorKind.rateLimit)),
+        throwsA(
+          isA<TongtaiAiException>().having(
+            (e) => e.kind,
+            'kind',
+            TongtaiAiErrorKind.rateLimit,
+          ),
+        ),
       );
     });
   });
@@ -113,39 +128,49 @@ void main() {
       final service = serviceWith(MockClient((_) async => _okCompletion('hi')));
       expect(
         () => service.chat(messages: const [TongtaiAiMessage.user('hi')]),
-        throwsA(isA<TongtaiAiException>().having(
-            (e) => e.kind, 'kind', TongtaiAiErrorKind.missingKey)),
+        throwsA(
+          isA<TongtaiAiException>().having(
+            (e) => e.kind,
+            'kind',
+            TongtaiAiErrorKind.missingKey,
+          ),
+        ),
       );
     });
 
     test('sends the conversation and returns the reply', () async {
-      final service = serviceWith(MockClient((_) async => _okCompletion('Chào')));
+      final service = serviceWith(
+        MockClient((_) async => _okCompletion('Chào')),
+      );
       await service.saveKey(validKey);
-      final res =
-          await service.chat(messages: const [TongtaiAiMessage.user('Hi')]);
+      final res = await service.chat(
+        messages: const [TongtaiAiMessage.user('Hi')],
+      );
       expect(res.text, 'Chào');
     });
   });
 
   group('clientFactory injection', () {
-    test('service routes through the custom client factory when provided',
-        () async {
-      var factoryCalls = 0;
-      final service = TongtaiAiService(
-        store,
-        clientFactory: (provider, apiKey) {
-          factoryCalls++;
-          return TongtaiAiClient(
-            provider: provider,
-            apiKey: apiKey,
-            client: MockClient((_) async => _okCompletion('via-factory')),
-          );
-        },
-      );
-      await service.saveKey(validKey);
-      final res = await service.testConnection();
-      expect(factoryCalls, 1);
-      expect(res.text, 'via-factory');
-    });
+    test(
+      'service routes through the custom client factory when provided',
+      () async {
+        var factoryCalls = 0;
+        final service = TongtaiAiService(
+          store,
+          clientFactory: (provider, apiKey) {
+            factoryCalls++;
+            return TongtaiAiClient(
+              provider: provider,
+              apiKey: apiKey,
+              client: MockClient((_) async => _okCompletion('via-factory')),
+            );
+          },
+        );
+        await service.saveKey(validKey);
+        final res = await service.testConnection();
+        expect(factoryCalls, 1);
+        expect(res.text, 'via-factory');
+      },
+    );
   });
 }

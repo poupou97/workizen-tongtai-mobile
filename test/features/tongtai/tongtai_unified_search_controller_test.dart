@@ -50,18 +50,14 @@ void main() {
     await controller.submit('ca phe');
 
     expect(controller.hasSearched, isTrue);
-    expect(
-      controller.results.suppliers.map((s) => s.id),
-      contains('sup-cafe'),
-    );
-    expect(
-      controller.results.products.map((p) => p.id),
-      contains('p-robusta'),
-    );
+    expect(controller.results.suppliers.map((s) => s.id), contains('sup-cafe'));
+    expect(controller.results.products.map((p) => p.id), contains('p-robusta'));
     // Collections spans both entity types.
     final r = controller.results;
-    expect(r.countFor(TongtaiSearchTab.collections),
-        r.supplierCount + r.productCount);
+    expect(
+      r.countFor(TongtaiSearchTab.collections),
+      r.supplierCount + r.productCount,
+    );
   });
 
   test('submit records the query in history (quick-repeat source)', () async {
@@ -113,15 +109,20 @@ void main() {
     expect(controller.suggestions, isNot(contains('tech')));
   });
 
-  test('debounced live search (setQuery) runs without recording history',
-      () async {
-    controller.setQuery('tech');
-    await _settle(() => controller.results.isNotEmpty);
+  test(
+    'debounced live search (setQuery) runs without recording history',
+    () async {
+      controller.setQuery('tech');
+      await _settle(() => controller.results.isNotEmpty);
 
-    expect(controller.results.suppliers.map((s) => s.id), contains('sup-tech'));
-    // Typing does not write history — only an explicit submit does.
-    expect(controller.recent, isEmpty);
-  });
+      expect(
+        controller.results.suppliers.map((s) => s.id),
+        contains('sup-tech'),
+      );
+      // Typing does not write history — only an explicit submit does.
+      expect(controller.recent, isEmpty);
+    },
+  );
 
   test('clearQuery empties the query and results', () async {
     await controller.submit('tech');
@@ -160,14 +161,18 @@ const String _ownerId = 'owner-search';
 const String _businessId = 'biz-search';
 
 Future<void> _seed(AppDatabase db) async {
-  await db.into(db.usersTable).insert(
+  await db
+      .into(db.usersTable)
+      .insert(
         UsersTableCompanion.insert(
           id: _ownerId,
           email: 'owner@search.test',
           name: 'Chủ tiệm',
         ),
       );
-  await db.into(db.businessesTable).insert(
+  await db
+      .into(db.businessesTable)
+      .insert(
         BusinessesTableCompanion.insert(
           id: _businessId,
           ownerId: _ownerId,
@@ -176,9 +181,16 @@ Future<void> _seed(AppDatabase db) async {
         ),
       );
 
-  Future<void> supplier(String id, String name, String category,
-      String country, double rating) {
-    return db.into(db.producersTable).insert(
+  Future<void> supplier(
+    String id,
+    String name,
+    String category,
+    String country,
+    double rating,
+  ) {
+    return db
+        .into(db.producersTable)
+        .insert(
           ProducersTableCompanion.insert(
             id: id,
             businessId: _businessId,
@@ -191,7 +203,9 @@ Future<void> _seed(AppDatabase db) async {
   }
 
   Future<void> product(String id, String name, String category, String desc) {
-    return db.into(db.productsTable).insert(
+    return db
+        .into(db.productsTable)
+        .insert(
           ProductsTableCompanion.insert(
             id: id,
             businessId: _businessId,
@@ -207,6 +221,11 @@ Future<void> _seed(AppDatabase db) async {
   await supplier('sup-cafe', 'Cà Phê Đắk Lắk', 'Nông sản', 'Vietnam', 4.8);
   await supplier('sup-tech', 'TechPro Wholesale', 'Điện tử', 'China', 4.2);
   await supplier('sup-textile', 'Saigon Textile', 'Dệt may', 'Vietnam', 4.5);
-  await product('p-robusta', 'Cà phê Robusta', 'Nông sản', 'Cà phê nguyên chất');
+  await product(
+    'p-robusta',
+    'Cà phê Robusta',
+    'Nông sản',
+    'Cà phê nguyên chất',
+  );
   await product('p-fan', 'Quạt mini cầm tay', 'Điện tử', 'Quạt sạc USB');
 }

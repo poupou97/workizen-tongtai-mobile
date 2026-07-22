@@ -13,27 +13,27 @@ enum TongtaiAiKeyIssue {
 
   /// Friendly, actionable English message for this issue ([none] → empty string).
   String get messageEn => switch (this) {
-        TongtaiAiKeyIssue.none => '',
-        TongtaiAiKeyIssue.empty => 'Please paste your API key.',
-        TongtaiAiKeyIssue.containsWhitespace =>
-          'The key should not contain spaces or line breaks.',
-        TongtaiAiKeyIssue.tooShort =>
-          'That key looks too short to be valid. Please check and paste the full key.',
-        TongtaiAiKeyIssue.wrongPrefix =>
-          'This does not look like a valid key for the selected provider.',
-      };
+    TongtaiAiKeyIssue.none => '',
+    TongtaiAiKeyIssue.empty => 'Please paste your API key.',
+    TongtaiAiKeyIssue.containsWhitespace =>
+      'The key should not contain spaces or line breaks.',
+    TongtaiAiKeyIssue.tooShort =>
+      'That key looks too short to be valid. Please check and paste the full key.',
+    TongtaiAiKeyIssue.wrongPrefix =>
+      'This does not look like a valid key for the selected provider.',
+  };
 
   /// Friendly Vietnamese message ([none] → empty string).
   String get messageVi => switch (this) {
-        TongtaiAiKeyIssue.none => '',
-        TongtaiAiKeyIssue.empty => 'Vui lòng dán khóa API của bạn.',
-        TongtaiAiKeyIssue.containsWhitespace =>
-          'Khóa không được chứa khoảng trắng hoặc xuống dòng.',
-        TongtaiAiKeyIssue.tooShort =>
-          'Khóa này có vẻ quá ngắn. Vui lòng kiểm tra và dán đầy đủ khóa.',
-        TongtaiAiKeyIssue.wrongPrefix =>
-          'Đây không giống khóa hợp lệ cho nhà cung cấp đã chọn.',
-      };
+    TongtaiAiKeyIssue.none => '',
+    TongtaiAiKeyIssue.empty => 'Vui lòng dán khóa API của bạn.',
+    TongtaiAiKeyIssue.containsWhitespace =>
+      'Khóa không được chứa khoảng trắng hoặc xuống dòng.',
+    TongtaiAiKeyIssue.tooShort =>
+      'Khóa này có vẻ quá ngắn. Vui lòng kiểm tra và dán đầy đủ khóa.',
+    TongtaiAiKeyIssue.wrongPrefix =>
+      'Đây không giống khóa hợp lệ cho nhà cung cấp đã chọn.',
+  };
 
   /// Message for a language code ('vi' → Vietnamese, otherwise English).
   String message(String languageCode) =>
@@ -89,14 +89,19 @@ abstract final class TongtaiAiKeyValidator {
     // user typed two tokens — reject rather than silently send a broken key.
     if (RegExp(r'\s').hasMatch(trimmed)) {
       return const TongtaiAiKeyValidation._(
-          TongtaiAiKeyIssue.containsWhitespace, null);
+        TongtaiAiKeyIssue.containsWhitespace,
+        null,
+      );
     }
     if (trimmed.length < minKeyLength) {
       return const TongtaiAiKeyValidation._(TongtaiAiKeyIssue.tooShort, null);
     }
     final prefix = provider.keyPrefix;
     if (prefix.isNotEmpty && !trimmed.startsWith(prefix)) {
-      return const TongtaiAiKeyValidation._(TongtaiAiKeyIssue.wrongPrefix, null);
+      return const TongtaiAiKeyValidation._(
+        TongtaiAiKeyIssue.wrongPrefix,
+        null,
+      );
     }
     return TongtaiAiKeyValidation._(TongtaiAiKeyIssue.none, trimmed);
   }

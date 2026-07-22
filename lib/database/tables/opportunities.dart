@@ -6,7 +6,8 @@ import 'businesses.dart';
 @TableIndex(name: 'opportunities_business_id', columns: {#businessId})
 class OpportunitiesTable extends Table {
   TextColumn get id => text()();
-  TextColumn get businessId => text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get businessId =>
+      text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
   TextColumn get type => text()();
   TextColumn get title => text()();
   TextColumn get description => text().nullable()();

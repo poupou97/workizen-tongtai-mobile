@@ -45,27 +45,29 @@ void main() {
     );
   }
 
-  test('a favourited supplier is promoted under the personalized variant',
-      () async {
-    final favorites = InMemorySupplierFavoritesStore([
-      SupplierFavorite(supplierId: 'sup-b', addedAt: DateTime(2026, 1, 1)),
-    ]);
-    final controller = build(
-      ranker: const TongtaiSearchRanker(
-        weights: TongtaiRankingWeights.personalized,
-      ),
-      favoritesStore: favorites,
-    );
-    await controller.init();
-    await controller.submit('coffee');
+  test(
+    'a favourited supplier is promoted under the personalized variant',
+    () async {
+      final favorites = InMemorySupplierFavoritesStore([
+        SupplierFavorite(supplierId: 'sup-b', addedAt: DateTime(2026, 1, 1)),
+      ]);
+      final controller = build(
+        ranker: const TongtaiSearchRanker(
+          weights: TongtaiRankingWeights.personalized,
+        ),
+        favoritesStore: favorites,
+      );
+      await controller.init();
+      await controller.submit('coffee');
 
-    final ids = controller.results.suppliers.map((s) => s.id).toList();
-    expect(ids, containsAll(<String>['sup-a', 'sup-b']));
-    // Both suppliers match 'coffee' equally well; the favourite is lifted first.
-    expect(ids.first, 'sup-b');
+      final ids = controller.results.suppliers.map((s) => s.id).toList();
+      expect(ids, containsAll(<String>['sup-a', 'sup-b']));
+      // Both suppliers match 'coffee' equally well; the favourite is lifted first.
+      expect(ids.first, 'sup-b');
 
-    controller.dispose();
-  });
+      controller.dispose();
+    },
+  );
 
   test('favouriting the other supplier flips the top result', () async {
     // Everything else is equal, so the favourite alone decides the winner —
@@ -77,7 +79,10 @@ void main() {
           weights: TongtaiRankingWeights.personalized,
         ),
         favoritesStore: InMemorySupplierFavoritesStore([
-          SupplierFavorite(supplierId: favouriteId, addedAt: DateTime(2026, 1, 1)),
+          SupplierFavorite(
+            supplierId: favouriteId,
+            addedAt: DateTime(2026, 1, 1),
+          ),
         ]),
       );
       await controller.init();
@@ -91,48 +96,56 @@ void main() {
     expect(await topFor('sup-b'), 'sup-b');
   });
 
-  test('the A/B experiment assigns a sticky variant and applies its weights',
-      () async {
-    const experiment = TongtaiRankingExperiment.defaultExperiment;
-    final expected = experiment.assign('unit-xyz');
+  test(
+    'the A/B experiment assigns a sticky variant and applies its weights',
+    () async {
+      const experiment = TongtaiRankingExperiment.defaultExperiment;
+      final expected = experiment.assign('unit-xyz');
 
-    final controller = build(
-      experiment: experiment,
-      unitIdLoader: () async => 'unit-xyz',
-    );
-    await controller.init();
+      final controller = build(
+        experiment: experiment,
+        unitIdLoader: () async => 'unit-xyz',
+      );
+      await controller.init();
 
-    expect(controller.activeVariant, isNotNull);
-    expect(controller.activeVariant!.id, expected.id);
+      expect(controller.activeVariant, isNotNull);
+      expect(controller.activeVariant!.id, expected.id);
 
-    // The assigned variant must actually drive ranking: forcing the personalized
-    // arm + a favourite reorders results.
-    controller.dispose();
-  });
+      // The assigned variant must actually drive ranking: forcing the personalized
+      // arm + a favourite reorders results.
+      controller.dispose();
+    },
+  );
 
-  test('no experiment configured leaves activeVariant null (default ranker)',
-      () async {
-    final controller = build();
-    await controller.init();
-    expect(controller.activeVariant, isNull);
-    await controller.submit('coffee');
-    expect(controller.results.suppliers, isNotEmpty);
-    controller.dispose();
-  });
+  test(
+    'no experiment configured leaves activeVariant null (default ranker)',
+    () async {
+      final controller = build();
+      await controller.init();
+      expect(controller.activeVariant, isNull);
+      await controller.submit('coffee');
+      expect(controller.results.suppliers, isNotEmpty);
+      controller.dispose();
+    },
+  );
 }
 
 const String _ownerId = 'owner-rank';
 const String _businessId = 'biz-rank';
 
 Future<void> _seed(AppDatabase db) async {
-  await db.into(db.usersTable).insert(
+  await db
+      .into(db.usersTable)
+      .insert(
         UsersTableCompanion.insert(
           id: _ownerId,
           email: 'owner@rank.test',
           name: 'Chủ tiệm',
         ),
       );
-  await db.into(db.businessesTable).insert(
+  await db
+      .into(db.businessesTable)
+      .insert(
         BusinessesTableCompanion.insert(
           id: _businessId,
           ownerId: _ownerId,
@@ -142,7 +155,9 @@ Future<void> _seed(AppDatabase db) async {
       );
 
   Future<void> supplier(String id, String name) {
-    return db.into(db.producersTable).insert(
+    return db
+        .into(db.producersTable)
+        .insert(
           ProducersTableCompanion.insert(
             id: id,
             businessId: _businessId,

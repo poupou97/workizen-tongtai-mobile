@@ -43,31 +43,31 @@ enum TongtaiRouteKind {
   /// only *land* on one of these tabs (detail screens live inside a tab), so
   /// this is what the navigator selects.
   int get tabIndex => switch (this) {
-        TongtaiRouteKind.home => TongtaiTabs.home,
-        TongtaiRouteKind.journey => TongtaiTabs.home,
-        TongtaiRouteKind.search => TongtaiTabs.home,
-        TongtaiRouteKind.producer => TongtaiTabs.producer,
-        TongtaiRouteKind.supplierList => TongtaiTabs.producer,
-        TongtaiRouteKind.supplierDetail => TongtaiTabs.producer,
-        TongtaiRouteKind.opportunityDetail => TongtaiTabs.producer,
-        TongtaiRouteKind.inventoryProducts => TongtaiTabs.inventory,
-        TongtaiRouteKind.productDetail => TongtaiTabs.inventory,
-        TongtaiRouteKind.customerList => TongtaiTabs.consumer,
-        TongtaiRouteKind.customerDetail => TongtaiTabs.consumer,
-        TongtaiRouteKind.reports => TongtaiTabs.more,
-        TongtaiRouteKind.financeAccounts => TongtaiTabs.more,
-        TongtaiRouteKind.chat => TongtaiTabs.more,
-      };
+    TongtaiRouteKind.home => TongtaiTabs.home,
+    TongtaiRouteKind.journey => TongtaiTabs.home,
+    TongtaiRouteKind.search => TongtaiTabs.home,
+    TongtaiRouteKind.producer => TongtaiTabs.producer,
+    TongtaiRouteKind.supplierList => TongtaiTabs.producer,
+    TongtaiRouteKind.supplierDetail => TongtaiTabs.producer,
+    TongtaiRouteKind.opportunityDetail => TongtaiTabs.producer,
+    TongtaiRouteKind.inventoryProducts => TongtaiTabs.inventory,
+    TongtaiRouteKind.productDetail => TongtaiTabs.inventory,
+    TongtaiRouteKind.customerList => TongtaiTabs.consumer,
+    TongtaiRouteKind.customerDetail => TongtaiTabs.consumer,
+    TongtaiRouteKind.reports => TongtaiTabs.more,
+    TongtaiRouteKind.financeAccounts => TongtaiTabs.more,
+    TongtaiRouteKind.chat => TongtaiTabs.more,
+  };
 
   /// Whether this destination is a specific record that needs an id
   /// (e.g. a single supplier), as opposed to a list or dashboard.
   bool get requiresId => switch (this) {
-        TongtaiRouteKind.supplierDetail => true,
-        TongtaiRouteKind.productDetail => true,
-        TongtaiRouteKind.customerDetail => true,
-        TongtaiRouteKind.opportunityDetail => true,
-        _ => false,
-      };
+    TongtaiRouteKind.supplierDetail => true,
+    TongtaiRouteKind.productDetail => true,
+    TongtaiRouteKind.customerDetail => true,
+    TongtaiRouteKind.opportunityDetail => true,
+    _ => false,
+  };
 }
 
 /// A fully resolved, validated deep-link destination.
@@ -77,11 +77,7 @@ enum TongtaiRouteKind {
 /// trust [entityId] and [queryParams] without re-checking them.
 @immutable
 class TongtaiRoute {
-  const TongtaiRoute(
-    this.kind, {
-    this.entityId,
-    this.queryParams = const {},
-  });
+  const TongtaiRoute(this.kind, {this.entityId, this.queryParams = const {}});
 
   /// The destination screen.
   final TongtaiRouteKind kind;
@@ -109,7 +105,8 @@ class TongtaiRoute {
       TongtaiRouteKind.productDetail => 'inventory/product/$entityId',
       TongtaiRouteKind.customerList => 'consumer/customers',
       TongtaiRouteKind.customerDetail => 'consumer/customer/$entityId',
-      TongtaiRouteKind.journey => entityId == null ? 'journey/active' : 'journey/$entityId',
+      TongtaiRouteKind.journey =>
+        entityId == null ? 'journey/active' : 'journey/$entityId',
       TongtaiRouteKind.opportunityDetail => 'opportunity/$entityId',
       TongtaiRouteKind.reports => 'reports',
       TongtaiRouteKind.financeAccounts => 'finance/accounts',
@@ -131,12 +128,12 @@ class TongtaiRoute {
 
   @override
   int get hashCode => Object.hash(
-        kind,
-        entityId,
-        Object.hashAllUnordered(
-          queryParams.entries.map((e) => Object.hash(e.key, e.value)),
-        ),
-      );
+    kind,
+    entityId,
+    Object.hashAllUnordered(
+      queryParams.entries.map((e) => Object.hash(e.key, e.value)),
+    ),
+  );
 
   @override
   String toString() =>
@@ -174,8 +171,9 @@ sealed class TongtaiDeepLinkResult {
 
   /// The resolved route, or `null` on failure. Convenience for callers that
   /// don't want to pattern-match.
-  TongtaiRoute? get routeOrNull =>
-      this is TongtaiDeepLinkSuccess ? (this as TongtaiDeepLinkSuccess).route : null;
+  TongtaiRoute? get routeOrNull => this is TongtaiDeepLinkSuccess
+      ? (this as TongtaiDeepLinkSuccess).route
+      : null;
 
   bool get isSuccess => this is TongtaiDeepLinkSuccess;
   bool get isFailure => this is TongtaiDeepLinkFailure;
@@ -210,30 +208,31 @@ final class TongtaiDeepLinkFailure extends TongtaiDeepLinkResult {
   final String? rawLink;
 
   String get _messageEn => switch (error) {
-        TongtaiDeepLinkError.empty => 'No link to open.',
-        TongtaiDeepLinkError.malformed => "This link isn't valid and can't be opened.",
-        TongtaiDeepLinkError.unsupportedScheme =>
-          "This link isn't a Tổng Tài link, so it can't be opened here.",
-        TongtaiDeepLinkError.unknownRoute =>
-          "We couldn't find the screen this link points to.",
-        TongtaiDeepLinkError.missingParameter =>
-          'This link is missing the item it should open.',
-        TongtaiDeepLinkError.invalidParameter =>
-          "This link points to something that doesn't look right, so it wasn't opened.",
-      };
+    TongtaiDeepLinkError.empty => 'No link to open.',
+    TongtaiDeepLinkError.malformed =>
+      "This link isn't valid and can't be opened.",
+    TongtaiDeepLinkError.unsupportedScheme =>
+      "This link isn't a Tổng Tài link, so it can't be opened here.",
+    TongtaiDeepLinkError.unknownRoute =>
+      "We couldn't find the screen this link points to.",
+    TongtaiDeepLinkError.missingParameter =>
+      'This link is missing the item it should open.',
+    TongtaiDeepLinkError.invalidParameter =>
+      "This link points to something that doesn't look right, so it wasn't opened.",
+  };
 
   String get _messageVi => switch (error) {
-        TongtaiDeepLinkError.empty => 'Không có liên kết để mở.',
-        TongtaiDeepLinkError.malformed => 'Liên kết này không hợp lệ nên không thể mở.',
-        TongtaiDeepLinkError.unsupportedScheme =>
-          'Đây không phải liên kết Tổng Tài nên không thể mở ở đây.',
-        TongtaiDeepLinkError.unknownRoute =>
-          'Không tìm thấy màn hình mà liên kết này trỏ tới.',
-        TongtaiDeepLinkError.missingParameter =>
-          'Liên kết này thiếu mục cần mở.',
-        TongtaiDeepLinkError.invalidParameter =>
-          'Liên kết này trỏ tới nội dung không hợp lệ nên đã không được mở.',
-      };
+    TongtaiDeepLinkError.empty => 'Không có liên kết để mở.',
+    TongtaiDeepLinkError.malformed =>
+      'Liên kết này không hợp lệ nên không thể mở.',
+    TongtaiDeepLinkError.unsupportedScheme =>
+      'Đây không phải liên kết Tổng Tài nên không thể mở ở đây.',
+    TongtaiDeepLinkError.unknownRoute =>
+      'Không tìm thấy màn hình mà liên kết này trỏ tới.',
+    TongtaiDeepLinkError.missingParameter => 'Liên kết này thiếu mục cần mở.',
+    TongtaiDeepLinkError.invalidParameter =>
+      'Liên kết này trỏ tới nội dung không hợp lệ nên đã không được mở.',
+  };
 
   /// A friendly message for the given language code (`'vi'` → Vietnamese,
   /// anything else → English).

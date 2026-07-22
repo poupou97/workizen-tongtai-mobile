@@ -5,7 +5,8 @@ import 'businesses.dart';
 /// Document entity: Document storage (contracts, certificates, receipts, OCR).
 class DocumentsTable extends Table {
   TextColumn get id => text()();
-  TextColumn get businessId => text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get businessId =>
+      text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
   TextColumn get type => text()();
   TextColumn get name => text()();
   TextColumn get fileName => text().nullable()();
@@ -16,8 +17,7 @@ class DocumentsTable extends Table {
   TextColumn get extractedData => text().nullable()(); // JSON
   TextColumn get relatedEntityType => text().nullable()();
   TextColumn get relatedEntityId => text().nullable()();
-  BoolColumn get isSynced =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt =>
       dateTime().withDefault(Constant(DateTime.now()))();
   DateTimeColumn get updatedAt =>

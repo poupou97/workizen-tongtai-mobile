@@ -92,16 +92,20 @@ void main() {
     });
 
     test('matches supplier name case-insensitively', () {
-      final results =
-          service.search(const SupplierSearchFilter(query: 'techpro'));
+      final results = service.search(
+        const SupplierSearchFilter(query: 'techpro'),
+      );
       expect(results, isNotEmpty);
-      expect(results.every((s) => s.name.toLowerCase().contains('techpro')),
-          isTrue);
+      expect(
+        results.every((s) => s.name.toLowerCase().contains('techpro')),
+        isTrue,
+      );
     });
 
     test('matches on location text', () {
-      final results =
-          service.search(const SupplierSearchFilter(query: 'vietnam'));
+      final results = service.search(
+        const SupplierSearchFilter(query: 'vietnam'),
+      );
       expect(results, isNotEmpty);
       expect(
         results.every((s) => s.location.toLowerCase().contains('vietnam')),
@@ -110,12 +114,14 @@ void main() {
     });
 
     test('matches on category text', () {
-      final results =
-          service.search(const SupplierSearchFilter(query: 'coconut'));
+      final results = service.search(
+        const SupplierSearchFilter(query: 'coconut'),
+      );
       expect(results, isNotEmpty);
       expect(
-        results.every((s) => s.categories
-            .any((c) => c.toLowerCase().contains('coconut'))),
+        results.every(
+          (s) => s.categories.any((c) => c.toLowerCase().contains('coconut')),
+        ),
         isTrue,
       );
     });
@@ -134,19 +140,24 @@ void main() {
         const SupplierSearchFilter(category: 'Electronics'),
       );
       expect(results, isNotEmpty);
-      expect(results.every((s) => s.categories.contains('Electronics')), isTrue);
+      expect(
+        results.every((s) => s.categories.contains('Electronics')),
+        isTrue,
+      );
     });
 
     test('rating filter keeps only suppliers at or above the threshold', () {
-      final results =
-          service.search(const SupplierSearchFilter(minRating: 4.8));
+      final results = service.search(
+        const SupplierSearchFilter(minRating: 4.8),
+      );
       expect(results, isNotEmpty);
       expect(results.every((s) => s.rating >= 4.8), isTrue);
     });
 
     test('location filter keeps only suppliers in that country', () {
-      final results =
-          service.search(const SupplierSearchFilter(location: 'Vietnam'));
+      final results = service.search(
+        const SupplierSearchFilter(location: 'Vietnam'),
+      );
       expect(results, isNotEmpty);
       expect(results.every((s) => s.country == 'Vietnam'), isTrue);
     });
@@ -163,7 +174,8 @@ void main() {
       for (final s in results) {
         expect(s.country, 'Vietnam');
         expect(s.rating, greaterThanOrEqualTo(4.8));
-        final matchesQuery = s.name.toLowerCase().contains('textile') ||
+        final matchesQuery =
+            s.name.toLowerCase().contains('textile') ||
             s.location.toLowerCase().contains('textile') ||
             s.categories.any((c) => c.toLowerCase().contains('textile'));
         expect(matchesQuery, isTrue);

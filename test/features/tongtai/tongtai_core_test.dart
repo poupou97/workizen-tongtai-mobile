@@ -32,32 +32,40 @@ void main() {
     test('buckets recent times', () {
       expect(
         TongtaiFormatters.relativeDate(
-            now.subtract(const Duration(seconds: 30)),
-            now: now),
+          now.subtract(const Duration(seconds: 30)),
+          now: now,
+        ),
         'just now',
       );
       expect(
         TongtaiFormatters.relativeDate(
-            now.subtract(const Duration(minutes: 5)),
-            now: now),
+          now.subtract(const Duration(minutes: 5)),
+          now: now,
+        ),
         '5m ago',
       );
       expect(
-        TongtaiFormatters.relativeDate(now.subtract(const Duration(hours: 3)),
-            now: now),
+        TongtaiFormatters.relativeDate(
+          now.subtract(const Duration(hours: 3)),
+          now: now,
+        ),
         '3h ago',
       );
       expect(
-        TongtaiFormatters.relativeDate(now.subtract(const Duration(days: 2)),
-            now: now),
+        TongtaiFormatters.relativeDate(
+          now.subtract(const Duration(days: 2)),
+          now: now,
+        ),
         '2d ago',
       );
     });
 
     test('falls back to absolute date beyond a week', () {
       expect(
-        TongtaiFormatters.relativeDate(now.subtract(const Duration(days: 30)),
-            now: now),
+        TongtaiFormatters.relativeDate(
+          now.subtract(const Duration(days: 30)),
+          now: now,
+        ),
         '2026-06-14',
       );
     });
@@ -76,16 +84,14 @@ void main() {
     });
 
     test('JourneyStatus round-trips and localizes', () {
-      expect(JourneyStatus.fromStorage('inProgress'),
-          JourneyStatus.inProgress);
+      expect(JourneyStatus.fromStorage('inProgress'), JourneyStatus.inProgress);
       expect(JourneyStatus.blocked.labelVi, 'Bị chặn');
     });
 
     test('OpportunityType localizes', () {
       expect(OpportunityType.crossBorder.labelEn, 'Cross-border');
       expect(OpportunityType.crossBorder.labelVi, 'Xuyên biên giới');
-      expect(OpportunityType.fromStorage('seasonal'),
-          OpportunityType.seasonal);
+      expect(OpportunityType.fromStorage('seasonal'), OpportunityType.seasonal);
     });
   });
 }

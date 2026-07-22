@@ -27,12 +27,11 @@ class TongtaiAiClient {
   factory TongtaiAiClient.xai({
     required Future<String?> Function() apiKey,
     http.Client? client,
-  }) =>
-      TongtaiAiClient(
-        provider: TongtaiAiProviderKind.xai,
-        apiKey: apiKey,
-        client: client,
-      );
+  }) => TongtaiAiClient(
+    provider: TongtaiAiProviderKind.xai,
+    apiKey: apiKey,
+    client: client,
+  );
 
   /// Which provider this client talks to (fixes base URL + default model).
   final TongtaiAiProviderKind provider;
@@ -123,12 +122,12 @@ class TongtaiAiClient {
   /// tokens so a valid key answers cheaply; any failure surfaces as a friendly
   /// [TongtaiAiException] the settings screen can display.
   Future<TongtaiAiResponse> testConnection() => chat(
-        messages: const [TongtaiAiMessage.user('ping')],
-        systemPrompt:
-            'You are a connectivity probe. Reply with the single word: OK.',
-        temperature: 0,
-        maxTokens: 5,
-      );
+    messages: const [TongtaiAiMessage.user('ping')],
+    systemPrompt:
+        'You are a connectivity probe. Reply with the single word: OK.',
+    temperature: 0,
+    maxTokens: 5,
+  );
 
   Future<String> _requireKey() async {
     final key = await apiKey();

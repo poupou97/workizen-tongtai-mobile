@@ -6,13 +6,13 @@ import 'businesses.dart';
 @TableIndex(name: 'journeys_business_id', columns: {#businessId})
 class JourneysTable extends Table {
   TextColumn get id => text()();
-  TextColumn get businessId => text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get businessId =>
+      text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
   TextColumn get goal => text()();
   TextColumn get status => text()();
   IntColumn get progressPercent => integer().nullable()();
   IntColumn get totalSteps => integer().nullable()();
-  IntColumn get completedSteps =>
-      integer().withDefault(const Constant(0))();
+  IntColumn get completedSteps => integer().withDefault(const Constant(0))();
   RealColumn get budget => real().nullable()();
   RealColumn get spent => real().withDefault(const Constant(0))();
   IntColumn get timelineDays => integer().nullable()();

@@ -7,8 +7,8 @@ import '../navigation/tongtai_design_tokens.dart';
 /// Persists the selection across app sessions.
 final tongtaiSelectedTabProvider =
     NotifierProvider<TongtaiSelectedTabNotifier, int>(
-  TongtaiSelectedTabNotifier.new,
-);
+      TongtaiSelectedTabNotifier.new,
+    );
 
 class TongtaiSelectedTabNotifier extends Notifier<int> {
   static const String _prefsKey = 'tongtai_selected_tab';

@@ -21,8 +21,8 @@ final tongtaiTabStateStoreProvider = Provider<TongtaiTabStateStore>((ref) {
 /// survive both tab switches (in memory) and app restarts (persisted).
 final tongtaiTabStateProvider =
     NotifierProvider<TongtaiTabStateController, Map<int, TongtaiTabState>>(
-  TongtaiTabStateController.new,
-);
+      TongtaiTabStateController.new,
+    );
 
 class TongtaiTabStateController extends Notifier<Map<int, TongtaiTabState>> {
   TongtaiTabStateStore get _store => ref.read(tongtaiTabStateStoreProvider);
@@ -56,7 +56,10 @@ class TongtaiTabStateController extends Notifier<Map<int, TongtaiTabState>> {
   /// Records the scroll offset for [tabIndex] (AC: scroll memory).
   Future<void> saveScrollOffset(int tabIndex, double offset) {
     final clamped = offset < 0 ? 0.0 : offset;
-    return _commit(tabIndex, stateFor(tabIndex).copyWith(scrollOffset: clamped));
+    return _commit(
+      tabIndex,
+      stateFor(tabIndex).copyWith(scrollOffset: clamped),
+    );
   }
 
   /// Records a form field value for [tabIndex] (AC: form preservation).

@@ -28,9 +28,9 @@ class TongtaiUnifiedSearchController extends ChangeNotifier {
     this._experiment,
     this._unitIdLoader,
     DateTime Function()? clock,
-  })  : _debounceDuration = debounce,
-        _limit = resultLimit,
-        _clock = clock ?? DateTime.now;
+  }) : _debounceDuration = debounce,
+       _limit = resultLimit,
+       _clock = clock ?? DateTime.now;
 
   final TongtaiSearchService _searchService;
   final TongtaiSearchHistoryStore _historyStore;
@@ -96,18 +96,17 @@ class TongtaiUnifiedSearchController extends ChangeNotifier {
   TongtaiSearchResults get rawResults => _rawResults;
 
   /// Category facet options for the advanced-filter panel.
-  List<String> get availableCategories =>
-      tongtaiResultCategories(_rawResults);
+  List<String> get availableCategories => tongtaiResultCategories(_rawResults);
 
   /// Supplier-country facet options for the advanced-filter panel.
   List<String> get availableCountries => tongtaiResultCountries(_rawResults);
 
   /// Autocomplete suggestions for the current query (WTM-73 AC1).
   List<String> get suggestions => buildTongtaiSearchSuggestions(
-        query: _query,
-        history: _recent,
-        results: results,
-      );
+    query: _query,
+    history: _recent,
+    results: results,
+  );
 
   /// The A/B ranking variant this session was assigned, once [init] resolves it
   /// (WTM-74 AC5). Null until assigned / when no experiment is configured.
@@ -154,8 +153,7 @@ class TongtaiUnifiedSearchController extends ChangeNotifier {
     if (_debounceDuration == Duration.zero) {
       unawaited(_runSearch());
     } else {
-      _debounceTimer =
-          Timer(_debounceDuration, () => unawaited(_runSearch()));
+      _debounceTimer = Timer(_debounceDuration, () => unawaited(_runSearch()));
     }
   }
 

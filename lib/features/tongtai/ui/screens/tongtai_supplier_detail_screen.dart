@@ -10,8 +10,7 @@ import '../../producer/supplier_profile.dart';
 /// Pulled out as a pure function so the responsive behaviour is directly
 /// unit-testable: phones use the full width, while wide tablets/landscape cap
 /// the reading column so the profile does not stretch edge-to-edge.
-double supplierDetailContentWidth(double width) =>
-    width > 720 ? 680 : width;
+double supplierDetailContentWidth(double width) => width > 720 ? 680 : width;
 
 /// Supplier Detail View (WTM-64) — Producer/Sourcing Hub.
 ///
@@ -25,7 +24,7 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
 
   /// Convenience: build the screen straight from a base [Supplier].
   TongtaiSupplierDetailScreen.forSupplier(Supplier supplier, {Key? key})
-      : this(key: key, profile: buildSupplierProfile(supplier));
+    : this(key: key, profile: buildSupplierProfile(supplier));
 
   final SupplierProfile profile;
 
@@ -79,9 +78,7 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
                         const SizedBox(height: TongtaiDesignTokens.spacing4),
                         _CatalogSection(profile: profile),
                         const SizedBox(height: TongtaiDesignTokens.spacing4),
-                        _TransactionsSection(
-                          summary: profile.transactions,
-                        ),
+                        _TransactionsSection(summary: profile.transactions),
                         const SizedBox(height: TongtaiDesignTokens.spacing4),
                         _ContactSection(
                           profile: profile,
@@ -401,7 +398,8 @@ class _TransactionsSection extends StatelessWidget {
           _MetricTile(
             icon: Icons.inventory_2_outlined,
             label: 'Total volume',
-            value: '${TongtaiFormatters.compact(summary.totalVolumeUnits)} units',
+            value:
+                '${TongtaiFormatters.compact(summary.totalVolumeUnits)} units',
           ),
           _MetricTile(
             icon: Icons.repeat,
@@ -556,7 +554,9 @@ class _DetailSection extends StatelessWidget {
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
       decoration: BoxDecoration(
         color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
         border: Border.all(color: TongtaiDesignTokens.lightBorder),
         boxShadow: TongtaiDesignTokens.elevation1,
       ),
@@ -649,8 +649,9 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
                   TongtaiDesignTokens.buttonHeight,
                 ),
               ),
-              onPressed:
-                  _canSend ? () => Navigator.of(context).pop(true) : null,
+              onPressed: _canSend
+                  ? () => Navigator.of(context).pop(true)
+                  : null,
               icon: const Icon(Icons.send, size: 18),
               label: const Text('Send'),
             ),

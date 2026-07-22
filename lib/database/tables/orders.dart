@@ -10,7 +10,8 @@ import 'channels.dart';
 @TableIndex(name: 'orders_order_date', columns: {#orderDate})
 class OrdersTable extends Table {
   TextColumn get id => text()();
-  TextColumn get businessId => text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
+  TextColumn get businessId =>
+      text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
   TextColumn get customerId => text().references(CustomersTable, #id)();
   TextColumn get channelId =>
       text().nullable().references(ChannelsTable, #id)();

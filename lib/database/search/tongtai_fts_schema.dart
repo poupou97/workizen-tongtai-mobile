@@ -61,57 +61,57 @@ String _foldDe(String col) => "replace(replace($col, 'đ', 'd'), 'Đ', 'D')";
 /// Every statement is `IF NOT EXISTS`, so [createTongtaiFtsSchema] is safe to
 /// call on an already-provisioned database (e.g. a re-run migration).
 List<String> tongtaiFtsDdl() => <String>[
-      // ── suppliers_fts ──────────────────────────────────────────────────────
-      'CREATE VIRTUAL TABLE IF NOT EXISTS $kSuppliersFtsTable USING fts5('
-          'supplier_id UNINDEXED, '
-          'name, '
-          'category, '
-          'country, '
-          "tokenize = '$_tokenizer'"
-          ')',
-      "CREATE TRIGGER IF NOT EXISTS ${kSuppliersFtsTable}_ai "
-          'AFTER INSERT ON $_producersTable BEGIN '
-          'INSERT INTO $kSuppliersFtsTable(rowid, supplier_id, name, category, country) '
-          'VALUES (new.rowid, new.id, ${_foldDe('new.name')}, '
-          '${_foldDe('new.category')}, ${_foldDe('new.country')}); '
-          'END',
-      "CREATE TRIGGER IF NOT EXISTS ${kSuppliersFtsTable}_ad "
-          'AFTER DELETE ON $_producersTable BEGIN '
-          'DELETE FROM $kSuppliersFtsTable WHERE rowid = old.rowid; '
-          'END',
-      "CREATE TRIGGER IF NOT EXISTS ${kSuppliersFtsTable}_au "
-          'AFTER UPDATE ON $_producersTable BEGIN '
-          'DELETE FROM $kSuppliersFtsTable WHERE rowid = old.rowid; '
-          'INSERT INTO $kSuppliersFtsTable(rowid, supplier_id, name, category, country) '
-          'VALUES (new.rowid, new.id, ${_foldDe('new.name')}, '
-          '${_foldDe('new.category')}, ${_foldDe('new.country')}); '
-          'END',
-      // ── products_fts ───────────────────────────────────────────────────────
-      'CREATE VIRTUAL TABLE IF NOT EXISTS $kProductsFtsTable USING fts5('
-          'product_id UNINDEXED, '
-          'name, '
-          'description, '
-          'category, '
-          "tokenize = '$_tokenizer'"
-          ')',
-      "CREATE TRIGGER IF NOT EXISTS ${kProductsFtsTable}_ai "
-          'AFTER INSERT ON $_productsTable BEGIN '
-          'INSERT INTO $kProductsFtsTable(rowid, product_id, name, description, category) '
-          'VALUES (new.rowid, new.id, ${_foldDe('new.name')}, '
-          '${_foldDe('new.description')}, ${_foldDe('new.category')}); '
-          'END',
-      "CREATE TRIGGER IF NOT EXISTS ${kProductsFtsTable}_ad "
-          'AFTER DELETE ON $_productsTable BEGIN '
-          'DELETE FROM $kProductsFtsTable WHERE rowid = old.rowid; '
-          'END',
-      "CREATE TRIGGER IF NOT EXISTS ${kProductsFtsTable}_au "
-          'AFTER UPDATE ON $_productsTable BEGIN '
-          'DELETE FROM $kProductsFtsTable WHERE rowid = old.rowid; '
-          'INSERT INTO $kProductsFtsTable(rowid, product_id, name, description, category) '
-          'VALUES (new.rowid, new.id, ${_foldDe('new.name')}, '
-          '${_foldDe('new.description')}, ${_foldDe('new.category')}); '
-          'END',
-    ];
+  // ── suppliers_fts ──────────────────────────────────────────────────────
+  'CREATE VIRTUAL TABLE IF NOT EXISTS $kSuppliersFtsTable USING fts5('
+      'supplier_id UNINDEXED, '
+      'name, '
+      'category, '
+      'country, '
+      "tokenize = '$_tokenizer'"
+      ')',
+  "CREATE TRIGGER IF NOT EXISTS ${kSuppliersFtsTable}_ai "
+      'AFTER INSERT ON $_producersTable BEGIN '
+      'INSERT INTO $kSuppliersFtsTable(rowid, supplier_id, name, category, country) '
+      'VALUES (new.rowid, new.id, ${_foldDe('new.name')}, '
+      '${_foldDe('new.category')}, ${_foldDe('new.country')}); '
+      'END',
+  "CREATE TRIGGER IF NOT EXISTS ${kSuppliersFtsTable}_ad "
+      'AFTER DELETE ON $_producersTable BEGIN '
+      'DELETE FROM $kSuppliersFtsTable WHERE rowid = old.rowid; '
+      'END',
+  "CREATE TRIGGER IF NOT EXISTS ${kSuppliersFtsTable}_au "
+      'AFTER UPDATE ON $_producersTable BEGIN '
+      'DELETE FROM $kSuppliersFtsTable WHERE rowid = old.rowid; '
+      'INSERT INTO $kSuppliersFtsTable(rowid, supplier_id, name, category, country) '
+      'VALUES (new.rowid, new.id, ${_foldDe('new.name')}, '
+      '${_foldDe('new.category')}, ${_foldDe('new.country')}); '
+      'END',
+  // ── products_fts ───────────────────────────────────────────────────────
+  'CREATE VIRTUAL TABLE IF NOT EXISTS $kProductsFtsTable USING fts5('
+      'product_id UNINDEXED, '
+      'name, '
+      'description, '
+      'category, '
+      "tokenize = '$_tokenizer'"
+      ')',
+  "CREATE TRIGGER IF NOT EXISTS ${kProductsFtsTable}_ai "
+      'AFTER INSERT ON $_productsTable BEGIN '
+      'INSERT INTO $kProductsFtsTable(rowid, product_id, name, description, category) '
+      'VALUES (new.rowid, new.id, ${_foldDe('new.name')}, '
+      '${_foldDe('new.description')}, ${_foldDe('new.category')}); '
+      'END',
+  "CREATE TRIGGER IF NOT EXISTS ${kProductsFtsTable}_ad "
+      'AFTER DELETE ON $_productsTable BEGIN '
+      'DELETE FROM $kProductsFtsTable WHERE rowid = old.rowid; '
+      'END',
+  "CREATE TRIGGER IF NOT EXISTS ${kProductsFtsTable}_au "
+      'AFTER UPDATE ON $_productsTable BEGIN '
+      'DELETE FROM $kProductsFtsTable WHERE rowid = old.rowid; '
+      'INSERT INTO $kProductsFtsTable(rowid, product_id, name, description, category) '
+      'VALUES (new.rowid, new.id, ${_foldDe('new.name')}, '
+      '${_foldDe('new.description')}, ${_foldDe('new.category')}); '
+      'END',
+];
 
 /// Creates the FTS5 virtual tables and their sync triggers on [db].
 ///

@@ -18,13 +18,12 @@ abstract interface class TongtaiIdentityStore {
 /// Production store backed by [FlutterSecureStorage] (Keychain / Keystore).
 class SecureTongtaiIdentityStore implements TongtaiIdentityStore {
   SecureTongtaiIdentityStore([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
   @override
-  Future<String?> read() =>
-      _storage.read(key: TongtaiIdentityStore.storageKey);
+  Future<String?> read() => _storage.read(key: TongtaiIdentityStore.storageKey);
 
   @override
   Future<void> write(String userId) =>

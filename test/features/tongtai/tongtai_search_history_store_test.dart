@@ -10,24 +10,23 @@ void main() {
 
   group('foldSearchHistory (pure)', () {
     test('a new query goes to the front, most-recent-first', () {
-      expect(
-        foldSearchHistory(['pho', 'coffee'], 'tea'),
-        ['tea', 'pho', 'coffee'],
-      );
+      expect(foldSearchHistory(['pho', 'coffee'], 'tea'), [
+        'tea',
+        'pho',
+        'coffee',
+      ]);
     });
 
     test('a repeat is moved to the front, not duplicated', () {
-      expect(
-        foldSearchHistory(['pho', 'coffee', 'tea'], 'coffee'),
-        ['coffee', 'pho', 'tea'],
-      );
+      expect(foldSearchHistory(['pho', 'coffee', 'tea'], 'coffee'), [
+        'coffee',
+        'pho',
+        'tea',
+      ]);
     });
 
     test('the repeat match is case-insensitive', () {
-      expect(
-        foldSearchHistory(['Coffee'], 'coffee'),
-        ['coffee'],
-      );
+      expect(foldSearchHistory(['Coffee'], 'coffee'), ['coffee']);
     });
 
     test('a blank query leaves history unchanged', () {
@@ -40,10 +39,7 @@ void main() {
 
     test('history is capped at the limit', () {
       final current = ['a', 'b', 'c'];
-      expect(
-        foldSearchHistory(current, 'new', limit: 3),
-        ['new', 'a', 'b'],
-      );
+      expect(foldSearchHistory(current, 'new', limit: 3), ['new', 'a', 'b']);
     });
   });
 

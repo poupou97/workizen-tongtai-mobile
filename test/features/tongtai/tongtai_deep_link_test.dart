@@ -69,20 +69,34 @@ void main() {
     test('list + dashboard routes resolve to the right tab', () {
       final cases = <String, ({TongtaiRouteKind kind, int tab})>{
         'tongtai://home': (kind: TongtaiRouteKind.home, tab: TongtaiTabs.home),
-        'tongtai://producer':
-            (kind: TongtaiRouteKind.producer, tab: TongtaiTabs.producer),
-        'tongtai://producer/suppliers':
-            (kind: TongtaiRouteKind.supplierList, tab: TongtaiTabs.producer),
-        'tongtai://suppliers':
-            (kind: TongtaiRouteKind.supplierList, tab: TongtaiTabs.producer),
-        'tongtai://inventory/products':
-            (kind: TongtaiRouteKind.inventoryProducts, tab: TongtaiTabs.inventory),
-        'tongtai://consumer/customers':
-            (kind: TongtaiRouteKind.customerList, tab: TongtaiTabs.consumer),
-        'tongtai://reports':
-            (kind: TongtaiRouteKind.reports, tab: TongtaiTabs.more),
-        'tongtai://finance/accounts':
-            (kind: TongtaiRouteKind.financeAccounts, tab: TongtaiTabs.more),
+        'tongtai://producer': (
+          kind: TongtaiRouteKind.producer,
+          tab: TongtaiTabs.producer,
+        ),
+        'tongtai://producer/suppliers': (
+          kind: TongtaiRouteKind.supplierList,
+          tab: TongtaiTabs.producer,
+        ),
+        'tongtai://suppliers': (
+          kind: TongtaiRouteKind.supplierList,
+          tab: TongtaiTabs.producer,
+        ),
+        'tongtai://inventory/products': (
+          kind: TongtaiRouteKind.inventoryProducts,
+          tab: TongtaiTabs.inventory,
+        ),
+        'tongtai://consumer/customers': (
+          kind: TongtaiRouteKind.customerList,
+          tab: TongtaiTabs.consumer,
+        ),
+        'tongtai://reports': (
+          kind: TongtaiRouteKind.reports,
+          tab: TongtaiTabs.more,
+        ),
+        'tongtai://finance/accounts': (
+          kind: TongtaiRouteKind.financeAccounts,
+          tab: TongtaiTabs.more,
+        ),
         'tongtai://chat': (kind: TongtaiRouteKind.chat, tab: TongtaiTabs.more),
       };
       cases.forEach((link, expected) {
@@ -137,8 +151,10 @@ void main() {
 
       final bad = parser.parse('tongtai://suppliers/$tooLong');
       expect(bad, isA<TongtaiDeepLinkFailure>());
-      expect((bad as TongtaiDeepLinkFailure).error,
-          TongtaiDeepLinkError.invalidParameter);
+      expect(
+        (bad as TongtaiDeepLinkFailure).error,
+        TongtaiDeepLinkError.invalidParameter,
+      );
     });
 
     test('path-traversal ids are rejected', () {
@@ -149,9 +165,11 @@ void main() {
       for (final id in ['a..b', '..b', 'a%2Fb', 'a%2e%2eb']) {
         final r = parser.parse('tongtai://suppliers/$id');
         expect(r, isA<TongtaiDeepLinkFailure>(), reason: id);
-        expect((r as TongtaiDeepLinkFailure).error,
-            TongtaiDeepLinkError.invalidParameter,
-            reason: id);
+        expect(
+          (r as TongtaiDeepLinkFailure).error,
+          TongtaiDeepLinkError.invalidParameter,
+          reason: id,
+        );
       }
     });
 
@@ -167,22 +185,28 @@ void main() {
       for (final id in ['a%20b', 'a%2Fb', r'a$b', 'a~b', 'a.b']) {
         final r = parser.parse('tongtai://suppliers/$id');
         expect(r, isA<TongtaiDeepLinkFailure>(), reason: id);
-        expect((r as TongtaiDeepLinkFailure).error,
-            TongtaiDeepLinkError.invalidParameter,
-            reason: id);
+        expect(
+          (r as TongtaiDeepLinkFailure).error,
+          TongtaiDeepLinkError.invalidParameter,
+          reason: id,
+        );
       }
     });
 
     test('search query is trimmed, control-stripped and length-capped', () {
       // Leading/trailing space + an embedded control char, all cleaned up.
-      final r = parser.parse('tongtai://search?q=%20rice%09price%20').routeOrNull;
+      final r = parser
+          .parse('tongtai://search?q=%20rice%09price%20')
+          .routeOrNull;
       expect(r, isNotNull);
       expect(r!.kind, TongtaiRouteKind.search);
       expect(r.queryParams['q'], 'riceprice');
 
       final long = 'x' * 500;
-      final capped =
-          parser.parse('tongtai://search?q=$long').routeOrNull!.queryParams['q']!;
+      final capped = parser
+          .parse('tongtai://search?q=$long')
+          .routeOrNull!
+          .queryParams['q']!;
       expect(capped.length, 200);
     });
 
@@ -206,16 +230,20 @@ void main() {
 
     test('a non-tongtai scheme is rejected as unsupported', () {
       final r = parser.parse('https://example.com/suppliers/42');
-      expect((r as TongtaiDeepLinkFailure).error,
-          TongtaiDeepLinkError.unsupportedScheme);
+      expect(
+        (r as TongtaiDeepLinkFailure).error,
+        TongtaiDeepLinkError.unsupportedScheme,
+      );
     });
 
     test('a malformed URI is caught, not thrown', () {
       // Non-numeric port makes Uri.parse throw FormatException internally.
       final r = parser.parse('tongtai://suppliers:notaport/42');
       expect(r, isA<TongtaiDeepLinkFailure>());
-      expect((r as TongtaiDeepLinkFailure).error,
-          TongtaiDeepLinkError.malformed);
+      expect(
+        (r as TongtaiDeepLinkFailure).error,
+        TongtaiDeepLinkError.malformed,
+      );
     });
 
     test('an unknown route reports unknownRoute', () {
@@ -227,9 +255,11 @@ void main() {
       ]) {
         final r = parser.parse(link);
         expect(r, isA<TongtaiDeepLinkFailure>(), reason: link);
-        expect((r as TongtaiDeepLinkFailure).error,
-            TongtaiDeepLinkError.unknownRoute,
-            reason: link);
+        expect(
+          (r as TongtaiDeepLinkFailure).error,
+          TongtaiDeepLinkError.unknownRoute,
+          reason: link,
+        );
       }
     });
 
@@ -268,8 +298,11 @@ void main() {
 
     test('every kind maps to a valid bottom-nav tab index', () {
       for (final kind in TongtaiRouteKind.values) {
-        expect(kind.tabIndex, inInclusiveRange(TongtaiTabs.home, TongtaiTabs.more),
-            reason: kind.name);
+        expect(
+          kind.tabIndex,
+          inInclusiveRange(TongtaiTabs.home, TongtaiTabs.more),
+          reason: kind.name,
+        );
       }
     });
   });
@@ -315,8 +348,10 @@ void main() {
 
       ctrl.handle('tongtai://journey/active');
       expect(c.read(tongtaiSelectedTabProvider), TongtaiTabs.home);
-      expect(c.read(tongtaiDeepLinkControllerProvider).activeRoute?.kind,
-          TongtaiRouteKind.journey);
+      expect(
+        c.read(tongtaiDeepLinkControllerProvider).activeRoute?.kind,
+        TongtaiRouteKind.journey,
+      );
     });
 
     test('AC4: a bad link records a failure and does NOT navigate', () {
@@ -356,8 +391,10 @@ void main() {
       expect(result, isNotNull);
       expect(result!.isSuccess, isTrue);
       expect(c.read(tongtaiSelectedTabProvider), TongtaiTabs.producer);
-      expect(c.read(tongtaiDeepLinkControllerProvider).activeRoute?.entityId,
-          '999');
+      expect(
+        c.read(tongtaiDeepLinkControllerProvider).activeRoute?.entityId,
+        '999',
+      );
     });
 
     test('AC5: a normal launch (no link) leaves state untouched', () {
@@ -407,8 +444,9 @@ void main() {
       return c;
     }
 
-    testWidgets('a bad link shows a friendly SnackBar and does not navigate',
-        (tester) async {
+    testWidgets('a bad link shows a friendly SnackBar and does not navigate', (
+      tester,
+    ) async {
       final c = makeContainer();
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -421,7 +459,9 @@ void main() {
           .read(tongtaiDeepLinkControllerProvider.notifier)
           .handle('tongtai://totally/unknown');
       await tester.pump(); // run the ref.listen callback
-      await tester.pump(const Duration(milliseconds: 400)); // animate SnackBar in
+      await tester.pump(
+        const Duration(milliseconds: 400),
+      ); // animate SnackBar in
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(
@@ -432,8 +472,9 @@ void main() {
       expect(c.read(tongtaiSelectedTabProvider), TongtaiTabs.home);
     });
 
-    testWidgets('a valid link navigates and shows no error SnackBar',
-        (tester) async {
+    testWidgets('a valid link navigates and shows no error SnackBar', (
+      tester,
+    ) async {
       final c = makeContainer();
       await tester.pumpWidget(
         UncontrolledProviderScope(

@@ -12,20 +12,15 @@ void main() {
     double? rating,
     int? reviewCount,
     DateTime? updatedAt,
-  }) =>
-      TongtaiSupplierResult(
-        id: id,
-        name: name,
-        rating: rating,
-        reviewCount: reviewCount,
-        updatedAt: updatedAt,
-      );
+  }) => TongtaiSupplierResult(
+    id: id,
+    name: name,
+    rating: rating,
+    reviewCount: reviewCount,
+    updatedAt: updatedAt,
+  );
 
-  TongtaiProductResult product(
-    String id,
-    String name, {
-    DateTime? updatedAt,
-  }) =>
+  TongtaiProductResult product(String id, String name, {DateTime? updatedAt}) =>
       TongtaiProductResult(
         id: id,
         name: name,
@@ -35,51 +30,59 @@ void main() {
       );
 
   group('foldTongtaiRankText', () {
-    test('lower-cases, folds Vietnamese diacritics incl. đ, collapses spaces',
-        () {
-      expect(foldTongtaiRankText('  Cà  Phê Đắk Lắk '), 'ca phe dak lak');
-      expect(foldTongtaiRankText('ĐƠN Hàng'), 'don hang');
-      expect(foldTongtaiRankText('Nước Mắm'), 'nuoc mam');
-    });
+    test(
+      'lower-cases, folds Vietnamese diacritics incl. đ, collapses spaces',
+      () {
+        expect(foldTongtaiRankText('  Cà  Phê Đắk Lắk '), 'ca phe dak lak');
+        expect(foldTongtaiRankText('ĐƠN Hàng'), 'don hang');
+        expect(foldTongtaiRankText('Nước Mắm'), 'nuoc mam');
+      },
+    );
 
     test('folds the query and target to the same form (FTS parity)', () {
-      expect(
-        foldTongtaiRankText('ca phe'),
-        foldTongtaiRankText('Cà phê'),
-      );
+      expect(foldTongtaiRankText('ca phe'), foldTongtaiRankText('Cà phê'));
     });
   });
 
   group('classifyTongtaiMatch (AC1: exact/prefix/fuzzy)', () {
     test('exact (diacritic-insensitive)', () {
-      expect(classifyTongtaiMatch('ca phe', 'Cà Phê'),
-          TongtaiMatchQuality.exact);
+      expect(
+        classifyTongtaiMatch('ca phe', 'Cà Phê'),
+        TongtaiMatchQuality.exact,
+      );
     });
 
     test('prefix — text starts with the query', () {
-      expect(classifyTongtaiMatch('ca phe', 'Cà phê Đắk Lắk'),
-          TongtaiMatchQuality.prefix);
+      expect(
+        classifyTongtaiMatch('ca phe', 'Cà phê Đắk Lắk'),
+        TongtaiMatchQuality.prefix,
+      );
     });
 
     test('wordPrefix — an inner word starts with the query', () {
-      expect(classifyTongtaiMatch('dak', 'Cà phê Đắk Lắk'),
-          TongtaiMatchQuality.wordPrefix);
+      expect(
+        classifyTongtaiMatch('dak', 'Cà phê Đắk Lắk'),
+        TongtaiMatchQuality.wordPrefix,
+      );
     });
 
     test('contains — query sits mid-word', () {
-      expect(classifyTongtaiMatch('hun', 'Robusta thunder'),
-          TongtaiMatchQuality.contains);
+      expect(
+        classifyTongtaiMatch('hun', 'Robusta thunder'),
+        TongtaiMatchQuality.contains,
+      );
     });
 
     test('fuzzy — all tokens are word-prefixes, any order', () {
-      expect(classifyTongtaiMatch('phe ca', 'Cà phê rang xay'),
-          TongtaiMatchQuality.fuzzy);
+      expect(
+        classifyTongtaiMatch('phe ca', 'Cà phê rang xay'),
+        TongtaiMatchQuality.fuzzy,
+      );
     });
 
     test('fuzzy — subsequence of letters', () {
       // c-p-h appear in order across "cà phê".
-      expect(classifyTongtaiMatch('cph', 'Cà phê'),
-          TongtaiMatchQuality.fuzzy);
+      expect(classifyTongtaiMatch('cph', 'Cà phê'), TongtaiMatchQuality.fuzzy);
     });
 
     test('none — unrelated, and blank query/text', () {
@@ -99,8 +102,11 @@ void main() {
         TongtaiMatchQuality.none,
       ].map((q) => q.score).toList();
       for (var i = 0; i < scores.length - 1; i++) {
-        expect(scores[i], greaterThan(scores[i + 1]),
-            reason: 'index $i should outrank ${i + 1}');
+        expect(
+          scores[i],
+          greaterThan(scores[i + 1]),
+          reason: 'index $i should outrank ${i + 1}',
+        );
       }
     });
   });
@@ -139,15 +145,19 @@ void main() {
 
     test('one half-life old sits at ~0.5', () {
       final oneHalfLifeAgo = now.subtract(const Duration(days: 30));
-      expect(tongtaiRecencyScore(oneHalfLifeAgo, now, halfLifeDays: 30),
-          closeTo(0.5, 1e-6));
+      expect(
+        tongtaiRecencyScore(oneHalfLifeAgo, now, halfLifeDays: 30),
+        closeTo(0.5, 1e-6),
+      );
     });
 
     test('newer beats older; null is neutral', () {
       final newer = now.subtract(const Duration(days: 2));
       final older = now.subtract(const Duration(days: 120));
-      expect(tongtaiRecencyScore(newer, now),
-          greaterThan(tongtaiRecencyScore(older, now)));
+      expect(
+        tongtaiRecencyScore(newer, now),
+        greaterThan(tongtaiRecencyScore(older, now)),
+      );
       expect(tongtaiRecencyScore(null, now), kTongtaiNeutralScore);
     });
   });
@@ -225,15 +235,17 @@ void main() {
       expect(a.id, b.id); // same user → same variant, always
     });
 
-    test('different users can land on different variants (both arms reachable)',
-        () {
-      final assigned = <String>{};
-      for (var i = 0; i < 200; i++) {
-        assigned.add(experiment.assign('user-$i').id);
-      }
-      // With a 50/50 split over 200 users, both arms must appear.
-      expect(assigned, containsAll(<String>{'control', 'balanced'}));
-    });
+    test(
+      'different users can land on different variants (both arms reachable)',
+      () {
+        final assigned = <String>{};
+        for (var i = 0; i < 200; i++) {
+          assigned.add(experiment.assign('user-$i').id);
+        }
+        // With a 50/50 split over 200 users, both arms must appear.
+        expect(assigned, containsAll(<String>{'control', 'balanced'}));
+      },
+    );
 
     test('allocation skews the split toward the heavier arm', () {
       const skewed = TongtaiRankingExperiment(
@@ -255,17 +267,24 @@ void main() {
       expect(control, greaterThan(280));
     });
 
-    test('resolve() honours a QA override, else falls back to sticky assign',
-        () {
-      expect(experiment.resolve('user-1', overrideId: 'control').id, 'control');
-      expect(
-          experiment.resolve('user-1', overrideId: 'balanced').id, 'balanced');
-      // Unknown override → normal assignment.
-      expect(
-        experiment.resolve('user-1', overrideId: 'nope').id,
-        experiment.assign('user-1').id,
-      );
-    });
+    test(
+      'resolve() honours a QA override, else falls back to sticky assign',
+      () {
+        expect(
+          experiment.resolve('user-1', overrideId: 'control').id,
+          'control',
+        );
+        expect(
+          experiment.resolve('user-1', overrideId: 'balanced').id,
+          'balanced',
+        );
+        // Unknown override → normal assignment.
+        expect(
+          experiment.resolve('user-1', overrideId: 'nope').id,
+          experiment.assign('user-1').id,
+        );
+      },
+    );
 
     test('single-variant experiment always returns that variant', () {
       const solo = TongtaiRankingExperiment(
@@ -292,23 +311,25 @@ void main() {
       expect(ranked.products.map((p) => p.id).toSet(), {'p1'});
     });
 
-    test('text-match quality dominates the score at equal FTS position (AC1)',
-        () {
-      // Same position (base signal equal) isolates the text-match signal: an
-      // exact hit must score above a prefix hit, a prefix above a contains.
-      const ranker = TongtaiSearchRanker();
-      double score(String name) => ranker.scoreItem(
-            id: 'x',
-            text: name,
-            isSupplier: true,
-            position: 0,
-            total: 3,
-            query: 'ca phe',
-            now: now,
-          );
-      expect(score('Cà phê'), greaterThan(score('Cà phê Đắk Lắk')));
-      expect(score('Cà phê Đắk Lắk'), greaterThan(score('Đặc sản cà phê')));
-    });
+    test(
+      'text-match quality dominates the score at equal FTS position (AC1)',
+      () {
+        // Same position (base signal equal) isolates the text-match signal: an
+        // exact hit must score above a prefix hit, a prefix above a contains.
+        const ranker = TongtaiSearchRanker();
+        double score(String name) => ranker.scoreItem(
+          id: 'x',
+          text: name,
+          isSupplier: true,
+          position: 0,
+          total: 3,
+          query: 'ca phe',
+          now: now,
+        );
+        expect(score('Cà phê'), greaterThan(score('Cà phê Đắk Lắk')));
+        expect(score('Cà phê Đắk Lắk'), greaterThan(score('Đặc sản cà phê')));
+      },
+    );
 
     test('a text-weighted algorithm promotes the exact hit over FTS order '
         '(AC1)', () {
@@ -333,33 +354,41 @@ void main() {
       expect(ranked.suppliers.first.id, 'exact');
     });
 
-    test('a rating-weighted algorithm surfaces the higher-rated supplier (AC2)',
-        () {
-      final results = TongtaiSearchResults(
-        suppliers: [
-          supplier('low', 'Vietnam Coffee', rating: 3.0),
-          supplier('high', 'Vietnam Coffee', rating: 5.0),
-        ],
-      );
-      const ratingHeavy = TongtaiSearchRanker(
-        weights: TongtaiRankingWeights(
-          textMatch: 0.2,
-          baseRelevance: 0.05,
-          rating: 0.6,
-          recency: 0.05,
-          personalization: 0.1,
-        ),
-      );
-      final ranked =
-          ratingHeavy.rank(results, query: 'vietnam coffee', now: now);
-      expect(ranked.suppliers.first.id, 'high');
-    });
+    test(
+      'a rating-weighted algorithm surfaces the higher-rated supplier (AC2)',
+      () {
+        final results = TongtaiSearchResults(
+          suppliers: [
+            supplier('low', 'Vietnam Coffee', rating: 3.0),
+            supplier('high', 'Vietnam Coffee', rating: 5.0),
+          ],
+        );
+        const ratingHeavy = TongtaiSearchRanker(
+          weights: TongtaiRankingWeights(
+            textMatch: 0.2,
+            baseRelevance: 0.05,
+            rating: 0.6,
+            recency: 0.05,
+            personalization: 0.1,
+          ),
+        );
+        final ranked = ratingHeavy.rank(
+          results,
+          query: 'vietnam coffee',
+          now: now,
+        );
+        expect(ranked.suppliers.first.id, 'high');
+      },
+    );
 
     test('recency breaks ties among otherwise-equal items (AC3)', () {
       final results = TongtaiSearchResults(
         products: [
-          product('old', 'Gao ST25',
-              updatedAt: now.subtract(const Duration(days: 200))),
+          product(
+            'old',
+            'Gao ST25',
+            updatedAt: now.subtract(const Duration(days: 200)),
+          ),
           product('new', 'Gao ST25', updatedAt: now),
         ],
       );
@@ -379,12 +408,7 @@ void main() {
       );
       final ranked = const TongtaiSearchRanker(
         weights: TongtaiRankingWeights.personalized,
-      ).rank(
-        results,
-        query: 'saigon',
-        now: now,
-        favoriteSupplierIds: {'fav'},
-      );
+      ).rank(results, query: 'saigon', now: now, favoriteSupplierIds: {'fav'});
       // The favourite outranks the (slightly) higher-rated non-favourite.
       expect(ranked.suppliers.first.id, 'fav');
     });
@@ -410,8 +434,12 @@ void main() {
     test('control variant preserves FTS order (baseline arm)', () {
       final results = TongtaiSearchResults(
         suppliers: [
-          supplier('a', 'Coffee A', rating: 3.0,
-              updatedAt: now.subtract(const Duration(days: 300))),
+          supplier(
+            'a',
+            'Coffee A',
+            rating: 3.0,
+            updatedAt: now.subtract(const Duration(days: 300)),
+          ),
           supplier('b', 'Coffee B', rating: 5.0, updatedAt: now),
         ],
       );

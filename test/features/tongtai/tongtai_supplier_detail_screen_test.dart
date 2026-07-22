@@ -55,8 +55,7 @@ void main() {
     expect(find.textContaining('7-14 days'), findsOneWidget);
   });
 
-  testWidgets('renders ratings and certification badges (AC3)',
-      (tester) async {
+  testWidgets('renders ratings and certification badges (AC3)', (tester) async {
     await pumpScreen(tester);
 
     expect(find.text('Ratings & Certifications'), findsOneWidget);
@@ -96,24 +95,27 @@ void main() {
     expect(find.text('${profile.transactions.totalOrders}'), findsOneWidget);
   });
 
-  testWidgets('renders contact details and the message button (AC4)',
-      (tester) async {
+  testWidgets('renders contact details and the message button (AC4)', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
     expect(find.text('Contact'), findsOneWidget);
     expect(find.text(profile.contactEmail!), findsOneWidget);
     expect(find.text(profile.contactPhone!), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Message supplier'),
-        findsOneWidget);
+    expect(
+      find.widgetWithText(FilledButton, 'Message supplier'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('messaging: compose and send shows a confirmation (AC4)',
-      (tester) async {
+  testWidgets('messaging: compose and send shows a confirmation (AC4)', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
     // Open the composer (the button sits below the fold, so reveal it first).
-    final messageButton =
-        find.widgetWithText(FilledButton, 'Message supplier');
+    final messageButton = find.widgetWithText(FilledButton, 'Message supplier');
     await tester.ensureVisible(messageButton);
     await tester.pumpAndSettle();
     await tester.tap(messageButton);
@@ -140,9 +142,7 @@ void main() {
 
   testWidgets('forSupplier constructor builds the profile', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: TongtaiSupplierDetailScreen.forSupplier(supplier),
-      ),
+      MaterialApp(home: TongtaiSupplierDetailScreen.forSupplier(supplier)),
     );
     await tester.pumpAndSettle();
 

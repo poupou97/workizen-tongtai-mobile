@@ -49,8 +49,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('typing a query shows grouped results across the three tabs',
-      (tester) async {
+  testWidgets('typing a query shows grouped results across the three tabs', (
+    tester,
+  ) async {
     useTallViewport(tester);
     final service = await buildSeededService(tester);
     await pumpScreen(tester, service: service);
@@ -148,14 +149,18 @@ const String _ownerId = 'owner-screen';
 const String _businessId = 'biz-screen';
 
 Future<void> _seed(AppDatabase db) async {
-  await db.into(db.usersTable).insert(
+  await db
+      .into(db.usersTable)
+      .insert(
         UsersTableCompanion.insert(
           id: _ownerId,
           email: 'owner@screen.test',
           name: 'Chủ tiệm',
         ),
       );
-  await db.into(db.businessesTable).insert(
+  await db
+      .into(db.businessesTable)
+      .insert(
         BusinessesTableCompanion.insert(
           id: _businessId,
           ownerId: _ownerId,
@@ -165,8 +170,14 @@ Future<void> _seed(AppDatabase db) async {
       );
 
   Future<void> supplier(
-      String id, String name, String category, String country) {
-    return db.into(db.producersTable).insert(
+    String id,
+    String name,
+    String category,
+    String country,
+  ) {
+    return db
+        .into(db.producersTable)
+        .insert(
           ProducersTableCompanion.insert(
             id: id,
             businessId: _businessId,
@@ -179,7 +190,9 @@ Future<void> _seed(AppDatabase db) async {
   }
 
   Future<void> product(String id, String name, String category) {
-    return db.into(db.productsTable).insert(
+    return db
+        .into(db.productsTable)
+        .insert(
           ProductsTableCompanion.insert(
             id: id,
             businessId: _businessId,

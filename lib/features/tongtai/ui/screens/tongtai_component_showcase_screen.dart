@@ -92,8 +92,7 @@ class _Swatch extends StatelessWidget {
           height: 56,
           decoration: BoxDecoration(
             color: color,
-            borderRadius:
-                BorderRadius.circular(TongtaiDesignTokens.radiusMd),
+            borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusMd),
           ),
         ),
         const SizedBox(height: TongtaiDesignTokens.spacing1),
@@ -153,10 +152,7 @@ class _ButtonsShowcase extends StatelessWidget {
       children: [
         SizedBox(
           height: TongtaiDesignTokens.buttonHeight,
-          child: FilledButton(
-            onPressed: () {},
-            child: const Text('Primary'),
-          ),
+          child: FilledButton(onPressed: () {}, child: const Text('Primary')),
         ),
         SizedBox(
           height: TongtaiDesignTokens.buttonHeight,
@@ -167,10 +163,7 @@ class _ButtonsShowcase extends StatelessWidget {
         ),
         SizedBox(
           height: TongtaiDesignTokens.buttonHeight,
-          child: TextButton(
-            onPressed: () {},
-            child: const Text('Ghost'),
-          ),
+          child: TextButton(onPressed: () {}, child: const Text('Ghost')),
         ),
       ],
     );
@@ -233,7 +226,9 @@ class _CardsShowcase extends StatelessWidget {
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
       decoration: BoxDecoration(
         color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
         boxShadow: shadow,
         border: Border.all(color: TongtaiDesignTokens.lightBorder),
       ),

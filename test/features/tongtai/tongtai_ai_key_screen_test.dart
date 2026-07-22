@@ -16,16 +16,18 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_ai_key_screen.dart';
 /// "key set" state with Test/Remove enabled; Test connection surfaces success
 /// and friendly failure banners; Remove clears the key.
 http.Response _okCompletion(String text) => http.Response.bytes(
-      utf8.encode(jsonEncode({
-        'model': 'grok-3',
-        'choices': [
-          {
-            'message': {'role': 'assistant', 'content': text},
-          },
-        ],
-      })),
-      200,
-    );
+  utf8.encode(
+    jsonEncode({
+      'model': 'grok-3',
+      'choices': [
+        {
+          'message': {'role': 'assistant', 'content': text},
+        },
+      ],
+    }),
+  ),
+  200,
+);
 
 void main() {
   final validKey = 'xai-${'A1b2C3d4' * 10}';
@@ -50,7 +52,10 @@ void main() {
   }
 
   testWidgets('renders the key field and Save button', (tester) async {
-    await pumpScreen(tester, httpClient: MockClient((_) async => http.Response('', 404)));
+    await pumpScreen(
+      tester,
+      httpClient: MockClient((_) async => http.Response('', 404)),
+    );
     expect(find.byKey(const Key('tongtai-ai-key-field')), findsOneWidget);
     expect(find.byKey(const Key('tongtai-ai-save')), findsOneWidget);
     expect(find.text('AI Assistant'), findsOneWidget);
@@ -64,7 +69,9 @@ void main() {
       httpClient: MockClient((_) async => http.Response('', 404)),
     );
     await tester.enterText(
-        find.byKey(const Key('tongtai-ai-key-field')), 'too-short');
+      find.byKey(const Key('tongtai-ai-key-field')),
+      'too-short',
+    );
     await tester.tap(find.byKey(const Key('tongtai-ai-save')));
     await tester.pumpAndSettle();
 
@@ -80,7 +87,9 @@ void main() {
       httpClient: MockClient((_) async => http.Response('', 404)),
     );
     await tester.enterText(
-        find.byKey(const Key('tongtai-ai-key-field')), validKey);
+      find.byKey(const Key('tongtai-ai-key-field')),
+      validKey,
+    );
     await tester.tap(find.byKey(const Key('tongtai-ai-save')));
     await tester.pumpAndSettle();
 
@@ -92,7 +101,8 @@ void main() {
 
     // Test connection is enabled now that a key is stored.
     final testBtn = tester.widget<OutlinedButton>(
-        find.byKey(const Key('tongtai-ai-test')));
+      find.byKey(const Key('tongtai-ai-test')),
+    );
     expect(testBtn.onPressed, isNotNull);
   });
 

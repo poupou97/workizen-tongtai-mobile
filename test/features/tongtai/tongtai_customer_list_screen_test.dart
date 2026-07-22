@@ -27,8 +27,9 @@ void main() {
     tester.view.physicalSize = const Size(420, 3600);
   }
 
-  testWidgets('renders header, search, filters and the results count',
-      (tester) async {
+  testWidgets('renders header, search, filters and the results count', (
+    tester,
+  ) async {
     useTallViewport(tester);
     await pumpScreen(tester);
 
@@ -42,8 +43,9 @@ void main() {
     expect(find.text('Page 1 of 2'), findsOneWidget);
   });
 
-  testWidgets('a customer row shows name, phone, purchases and last purchase',
-      (tester) async {
+  testWidgets('a customer row shows name, phone, purchases and last purchase', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
     // Isolate a single customer by their full phone so the assertion doesn't
@@ -105,8 +107,9 @@ void main() {
     expect(find.text('Page 1 of 1'), findsOneWidget);
   });
 
-  testWidgets('shows a VIP tier badge for a high-value customer',
-      (tester) async {
+  testWidgets('shows a VIP tier badge for a high-value customer', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
     // "Phương Nguyễn" is the only match and is a VIP (45.6M ₫ lifetime spend).
@@ -125,7 +128,9 @@ void main() {
 
     // Default sort is Name, ascending.
     expect(
-      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Name')).selected,
+      tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Name'))
+          .selected,
       isTrue,
     );
     expect(find.byIcon(Icons.arrow_upward), findsOneWidget);
@@ -134,11 +139,15 @@ void main() {
     await tester.tap(find.widgetWithText(ChoiceChip, 'Spent'));
     await tester.pumpAndSettle();
     expect(
-      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Spent')).selected,
+      tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Spent'))
+          .selected,
       isTrue,
     );
     expect(
-      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Name')).selected,
+      tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Name'))
+          .selected,
       isFalse,
     );
 

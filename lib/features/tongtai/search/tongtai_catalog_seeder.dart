@@ -47,7 +47,9 @@ class TongtaiCatalogSeeder {
 
   Future<void> _seed(AppDatabase db) async {
     await db.transaction(() async {
-      await db.into(db.usersTable).insertOnConflictUpdate(
+      await db
+          .into(db.usersTable)
+          .insertOnConflictUpdate(
             UsersTableCompanion.insert(
               id: demoOwnerId,
               email: 'demo@tongtai.local',
@@ -55,7 +57,9 @@ class TongtaiCatalogSeeder {
               language: const Value('vi'),
             ),
           );
-      await db.into(db.businessesTable).insertOnConflictUpdate(
+      await db
+          .into(db.businessesTable)
+          .insertOnConflictUpdate(
             BusinessesTableCompanion.insert(
               id: demoBusinessId,
               ownerId: demoOwnerId,
@@ -76,35 +80,98 @@ class TongtaiCatalogSeeder {
   /// filters (category / country) have something to bite on, and với dấu tiếng
   /// Việt (incl. đ) to exercise the diacritic-folding FTS tokenizer.
   static final List<ProducersTableCompanion> _suppliers = [
-    _producer('sup-caphe', 'Cà Phê Đắk Lắk Trading', 'Nông sản', 'Vietnam', 4.8),
+    _producer(
+      'sup-caphe',
+      'Cà Phê Đắk Lắk Trading',
+      'Nông sản',
+      'Vietnam',
+      4.8,
+    ),
     _producer('sup-saigon', 'Saigon Textile Works', 'Dệt may', 'Vietnam', 4.5),
     _producer('sup-techpro', 'TechPro Wholesale', 'Điện tử', 'China', 4.2),
     _producer(
-        'sup-danang', 'Đà Nẵng Seafood Export', 'Hải sản', 'Vietnam', 4.6),
+      'sup-danang',
+      'Đà Nẵng Seafood Export',
+      'Hải sản',
+      'Vietnam',
+      4.6,
+    ),
     _producer('sup-hanoi', 'Hanoi Handicraft Co.', 'Thủ công', 'Vietnam', 4.3),
     _producer(
-        'sup-guangzhou', 'Guangzhou Fashion Hub', 'Thời trang', 'China', 3.9),
+      'sup-guangzhou',
+      'Guangzhou Fashion Hub',
+      'Thời trang',
+      'China',
+      3.9,
+    ),
   ];
 
   /// Demo products across the same categories.
   static final List<ProductsTableCompanion> _products = [
-    _product('prod-robusta', 'Cà phê Robusta rang xay', 'Nông sản',
-        'Cà phê Robusta nguyên chất từ Đắk Lắk, rang mộc.', 120000, 320),
-    _product('prod-aothun', 'Áo thun cotton', 'Thời trang',
-        'Áo thun cotton 100%, form rộng, nhiều màu.', 85000, 540),
-    _product('prod-quat', 'Quạt mini cầm tay', 'Điện tử',
-        'Quạt mini sạc USB, pin 2000mAh, gió mạnh.', 150000, 210),
-    _product('prod-nuocmam', 'Nước mắm Phú Quốc', 'Nông sản',
-        'Nước mắm cốt nhĩ 40 độ đạm, đóng chai thủy tinh.', 95000, 180),
-    _product('prod-khanlua', 'Khăn lụa Hà Đông', 'Thủ công',
-        'Khăn lụa tơ tằm dệt thủ công, hoa văn truyền thống.', 320000, 60),
-    _product('prod-denled', 'Đèn LED năng lượng mặt trời', 'Điện tử',
-        'Đèn LED sân vườn, sạc pin mặt trời, chống nước IP65.', 240000, 95),
-    _product('prod-gao', 'Gạo ST25', 'Nông sản',
-        'Gạo ST25 thơm dẻo, túi 5kg, đạt giải gạo ngon nhất thế giới.', 165000,
-        400),
-    _product('prod-balo', 'Balo du lịch chống nước', 'Thời trang',
-        'Balo 30L vải Oxford chống thấm, ngăn laptop 15 inch.', 350000, 130),
+    _product(
+      'prod-robusta',
+      'Cà phê Robusta rang xay',
+      'Nông sản',
+      'Cà phê Robusta nguyên chất từ Đắk Lắk, rang mộc.',
+      120000,
+      320,
+    ),
+    _product(
+      'prod-aothun',
+      'Áo thun cotton',
+      'Thời trang',
+      'Áo thun cotton 100%, form rộng, nhiều màu.',
+      85000,
+      540,
+    ),
+    _product(
+      'prod-quat',
+      'Quạt mini cầm tay',
+      'Điện tử',
+      'Quạt mini sạc USB, pin 2000mAh, gió mạnh.',
+      150000,
+      210,
+    ),
+    _product(
+      'prod-nuocmam',
+      'Nước mắm Phú Quốc',
+      'Nông sản',
+      'Nước mắm cốt nhĩ 40 độ đạm, đóng chai thủy tinh.',
+      95000,
+      180,
+    ),
+    _product(
+      'prod-khanlua',
+      'Khăn lụa Hà Đông',
+      'Thủ công',
+      'Khăn lụa tơ tằm dệt thủ công, hoa văn truyền thống.',
+      320000,
+      60,
+    ),
+    _product(
+      'prod-denled',
+      'Đèn LED năng lượng mặt trời',
+      'Điện tử',
+      'Đèn LED sân vườn, sạc pin mặt trời, chống nước IP65.',
+      240000,
+      95,
+    ),
+    _product(
+      'prod-gao',
+      'Gạo ST25',
+      'Nông sản',
+      'Gạo ST25 thơm dẻo, túi 5kg, đạt giải gạo ngon nhất thế giới.',
+      165000,
+      400,
+    ),
+    _product(
+      'prod-balo',
+      'Balo du lịch chống nước',
+      'Thời trang',
+      'Balo 30L vải Oxford chống thấm, ngăn laptop 15 inch.',
+      350000,
+      130,
+    ),
   ];
 
   static ProducersTableCompanion _producer(

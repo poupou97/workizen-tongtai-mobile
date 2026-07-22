@@ -195,7 +195,9 @@ List<SupplierCategoryCount> supplierCatalog(Supplier supplier) {
     for (var i = 0; i < supplier.categories.length; i++)
       SupplierCategoryCount(
         supplier.categories[i],
-        4 + ((supplier.reviewCount + supplier.categories[i].length + i * 7) % 24),
+        4 +
+            ((supplier.reviewCount + supplier.categories[i].length + i * 7) %
+                24),
       ),
   ];
 }

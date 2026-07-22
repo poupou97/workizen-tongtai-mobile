@@ -18,8 +18,9 @@ void main() {
       SupplierFavoritesController(InMemorySupplierFavoritesStore(favorites));
 
   group('Favorites list screen', () {
-    testWidgets('shows an empty state when there are no favorites',
-        (tester) async {
+    testWidgets('shows an empty state when there are no favorites', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: TongtaiSupplierFavoritesScreen(
@@ -33,8 +34,9 @@ void main() {
       expect(find.byType(ListView), findsNothing);
     });
 
-    testWidgets('lists favorites most-recently-added first (AC3)',
-        (tester) async {
+    testWidgets('lists favorites most-recently-added first (AC3)', (
+      tester,
+    ) async {
       final controller = seeded([
         SupplierFavorite(supplierId: 's2', addedAt: DateTime(2026, 7, 10)),
         SupplierFavorite(supplierId: 's5', addedAt: DateTime(2026, 7, 16)),
@@ -54,8 +56,9 @@ void main() {
       expect(middle, lessThan(oldest));
     });
 
-    testWidgets('tapping the filled heart removes the favorite (AC1/AC2)',
-        (tester) async {
+    testWidgets('tapping the filled heart removes the favorite (AC1/AC2)', (
+      tester,
+    ) async {
       final controller = seeded([
         SupplierFavorite(supplierId: 's1', addedAt: DateTime(2026, 7, 16)),
       ]);
@@ -80,8 +83,9 @@ void main() {
   });
 
   group('Search screen — favorites integration', () {
-    testWidgets('card heart toggles favorite state with one tap (AC1/AC2)',
-        (tester) async {
+    testWidgets('card heart toggles favorite state with one tap (AC1/AC2)', (
+      tester,
+    ) async {
       final controller = SupplierFavoritesController.inMemory();
       final service = SupplierSearchService([byId('s1')]); // single card
 
@@ -106,10 +110,7 @@ void main() {
       expect(controller.isFavorite('s1'), isTrue);
       expect(find.byTooltip('Remove from favorites'), findsOneWidget);
       expect(
-        find.descendant(
-          of: find.byType(Badge),
-          matching: find.text('1'),
-        ),
+        find.descendant(of: find.byType(Badge), matching: find.text('1')),
         findsOneWidget,
       );
 
@@ -120,8 +121,9 @@ void main() {
       expect(find.byTooltip('Add to favorites'), findsOneWidget);
     });
 
-    testWidgets('favorites-only filter narrows the results (AC4)',
-        (tester) async {
+    testWidgets('favorites-only filter narrows the results (AC4)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1200, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -130,7 +132,11 @@ void main() {
       final controller = seeded([
         SupplierFavorite(supplierId: 's2', addedAt: DateTime(2026, 7, 16)),
       ]);
-      final service = SupplierSearchService([byId('s1'), byId('s2'), byId('s4')]);
+      final service = SupplierSearchService([
+        byId('s1'),
+        byId('s2'),
+        byId('s4'),
+      ]);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -156,25 +162,27 @@ void main() {
       expect(find.text(byId('s4').name), findsNothing);
     });
 
-    testWidgets('favorites-only with no favorites shows a helpful empty state',
-        (tester) async {
-      final service = SupplierSearchService([byId('s1'), byId('s2')]);
+    testWidgets(
+      'favorites-only with no favorites shows a helpful empty state',
+      (tester) async {
+        final service = SupplierSearchService([byId('s1'), byId('s2')]);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiSupplierSearchScreen(
-            service: service,
-            favorites: SupplierFavoritesController.inMemory(),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: TongtaiSupplierSearchScreen(
+              service: service,
+              favorites: SupplierFavoritesController.inMemory(),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(FilterChip, 'Favorites'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(FilterChip, 'Favorites'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('No favorite suppliers match'), findsOneWidget);
-      expect(find.text(byId('s1').name), findsNothing);
-    });
+        expect(find.text('No favorite suppliers match'), findsOneWidget);
+        expect(find.text(byId('s1').name), findsNothing);
+      },
+    );
   });
 }

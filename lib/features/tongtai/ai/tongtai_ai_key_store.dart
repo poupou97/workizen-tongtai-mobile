@@ -25,7 +25,7 @@ abstract interface class TongtaiAiKeyStore {
 /// Production store backed by [FlutterSecureStorage].
 class SecureTongtaiAiKeyStore implements TongtaiAiKeyStore {
   SecureTongtaiAiKeyStore([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 

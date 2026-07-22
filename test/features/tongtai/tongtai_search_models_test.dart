@@ -11,14 +11,13 @@ void main() {
     String? category,
     String? country,
     double? rating,
-  }) =>
-      TongtaiSupplierResult(
-        id: id,
-        name: name,
-        category: category,
-        country: country,
-        rating: rating,
-      );
+  }) => TongtaiSupplierResult(
+    id: id,
+    name: name,
+    category: category,
+    country: country,
+    rating: rating,
+  );
 
   TongtaiProductResult product(
     String id,
@@ -26,14 +25,13 @@ void main() {
     String? category,
     double price = 1000,
     double stock = 10,
-  }) =>
-      TongtaiProductResult(
-        id: id,
-        name: name,
-        category: category,
-        price: price,
-        stock: stock,
-      );
+  }) => TongtaiProductResult(
+    id: id,
+    name: name,
+    category: category,
+    price: price,
+    stock: stock,
+  );
 
   group('TongtaiSearchTab', () {
     test('labels resolve per language', () {
@@ -61,8 +59,10 @@ void main() {
 
     test('empty results report empty', () {
       expect(TongtaiSearchResults.empty.isEmpty, isTrue);
-      expect(TongtaiSearchResults.empty.countFor(TongtaiSearchTab.collections),
-          0);
+      expect(
+        TongtaiSearchResults.empty.countFor(TongtaiSearchTab.collections),
+        0,
+      );
     });
   });
 
@@ -92,12 +92,27 @@ void main() {
   group('applyTongtaiSearchFilters', () {
     final results = TongtaiSearchResults(
       suppliers: [
-        supplier('s1', 'Alpha', category: 'Electronics', country: 'China',
-            rating: 4.8),
-        supplier('s2', 'Beta', category: 'Textiles', country: 'Vietnam',
-            rating: 4.1),
-        supplier('s3', 'Gamma', category: 'Electronics', country: 'Vietnam',
-            rating: 3.5),
+        supplier(
+          's1',
+          'Alpha',
+          category: 'Electronics',
+          country: 'China',
+          rating: 4.8,
+        ),
+        supplier(
+          's2',
+          'Beta',
+          category: 'Textiles',
+          country: 'Vietnam',
+          rating: 4.1,
+        ),
+        supplier(
+          's3',
+          'Gamma',
+          category: 'Electronics',
+          country: 'Vietnam',
+          rating: 3.5,
+        ),
       ],
       products: [
         product('p1', 'Widget', category: 'Electronics'),
@@ -173,8 +188,11 @@ void main() {
     );
 
     test('categories are the sorted union across suppliers + products', () {
-      expect(tongtaiResultCategories(results),
-          ['Electronics', 'Food', 'Textiles']);
+      expect(tongtaiResultCategories(results), [
+        'Electronics',
+        'Food',
+        'Textiles',
+      ]);
     });
 
     test('countries come from suppliers only, sorted', () {

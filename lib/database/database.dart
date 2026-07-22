@@ -53,25 +53,27 @@ part 'database.g.dart';
 ///     (WTM-54); drained by a future Phase-3 sync worker.
 /// 17. SupplierFavorite - The user's starred suppliers for quick access
 ///     (WTM-65); each add/remove is also queued for cloud sync.
-@DriftDatabase(tables: [
-  UsersTable,
-  BusinessesTable,
-  ProducersTable,
-  ProductsTable,
-  CustomersTable,
-  OrdersTable,
-  ChannelsTable,
-  OpportunitiesTable,
-  JourneysTable,
-  JourneyStepsTable,
-  TransactionsTable,
-  DocumentsTable,
-  AlertsTable,
-  AIChatTable,
-  IntegrationsTable,
-  SyncQueueItemsTable,
-  SupplierFavoritesTable,
-])
+@DriftDatabase(
+  tables: [
+    UsersTable,
+    BusinessesTable,
+    ProducersTable,
+    ProductsTable,
+    CustomersTable,
+    OrdersTable,
+    ChannelsTable,
+    OpportunitiesTable,
+    JourneysTable,
+    JourneyStepsTable,
+    TransactionsTable,
+    DocumentsTable,
+    AlertsTable,
+    AIChatTable,
+    IntegrationsTable,
+    SyncQueueItemsTable,
+    SupplierFavoritesTable,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   /// Create app database instance (production: file-backed on-device).
   AppDatabase() : super(_openConnection());

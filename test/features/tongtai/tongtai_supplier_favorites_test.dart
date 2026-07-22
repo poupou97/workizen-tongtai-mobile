@@ -90,15 +90,17 @@ void main() {
       expect(notifications, 2);
     });
 
-    test('favoriteSuppliers resolves ids most-recently-added first (AC3)',
-        () async {
-      await controller.toggle('s2', now: DateTime(2026, 7, 10));
-      await controller.toggle('s5', now: DateTime(2026, 7, 16));
-      await controller.toggle('s1', now: DateTime(2026, 7, 12));
+    test(
+      'favoriteSuppliers resolves ids most-recently-added first (AC3)',
+      () async {
+        await controller.toggle('s2', now: DateTime(2026, 7, 10));
+        await controller.toggle('s5', now: DateTime(2026, 7, 16));
+        await controller.toggle('s1', now: DateTime(2026, 7, 12));
 
-      final ordered = controller.favoriteSuppliers(kSampleSuppliers);
-      expect(ordered.map((s) => s.id).toList(), ['s5', 's1', 's2']);
-    });
+        final ordered = controller.favoriteSuppliers(kSampleSuppliers);
+        expect(ordered.map((s) => s.id).toList(), ['s5', 's1', 's2']);
+      },
+    );
 
     test('favoriteSuppliers drops ids not present in the directory', () async {
       await controller.toggle('does-not-exist', now: DateTime(2026, 7, 16));
@@ -107,18 +109,20 @@ void main() {
       expect(ordered.map((s) => s.id).toList(), ['s1']);
     });
 
-    test('onlyFavorites keeps favorites and preserves input order (AC4)',
-        () async {
-      await controller.toggle('s3');
-      await controller.toggle('s1');
+    test(
+      'onlyFavorites keeps favorites and preserves input order (AC4)',
+      () async {
+        await controller.toggle('s3');
+        await controller.toggle('s1');
 
-      final input = [
-        for (final id in ['s1', 's2', 's3', 's4'])
-          kSampleSuppliers.firstWhere((s) => s.id == id),
-      ];
-      final filtered = controller.onlyFavorites(input);
-      expect(filtered.map((s) => s.id).toList(), ['s1', 's3']);
-    });
+        final input = [
+          for (final id in ['s1', 's2', 's3', 's4'])
+            kSampleSuppliers.firstWhere((s) => s.id == id),
+        ];
+        final filtered = controller.onlyFavorites(input);
+        expect(filtered.map((s) => s.id).toList(), ['s1', 's3']);
+      },
+    );
 
     test('load hydrates from the backing store', () async {
       final store = InMemorySupplierFavoritesStore([
@@ -172,20 +176,22 @@ void main() {
       expect(all.map((f) => f.supplierId).toList(), ['s2', 's3', 's1']);
     });
 
-    test('add enqueues a CREATE sync op with a JSON payload (sync to backend)',
-        () async {
-      await store.add('s1', addedAt: DateTime(2026, 7, 16, 8));
+    test(
+      'add enqueues a CREATE sync op with a JSON payload (sync to backend)',
+      () async {
+        await store.add('s1', addedAt: DateTime(2026, 7, 16, 8));
 
-      final ops = await queue.pending();
-      expect(ops, hasLength(1));
-      expect(ops.first.type, SyncOperationType.create);
-      expect(ops.first.entityType, SupplierFavoritesStore.syncEntityType);
-      expect(ops.first.entityId, 's1');
-      expect(ops.first.payloadMap, {
-        'supplierId': 's1',
-        'addedAt': DateTime(2026, 7, 16, 8).toIso8601String(),
-      });
-    });
+        final ops = await queue.pending();
+        expect(ops, hasLength(1));
+        expect(ops.first.type, SyncOperationType.create);
+        expect(ops.first.entityType, SupplierFavoritesStore.syncEntityType);
+        expect(ops.first.entityId, 's1');
+        expect(ops.first.payloadMap, {
+          'supplierId': 's1',
+          'addedAt': DateTime(2026, 7, 16, 8).toIso8601String(),
+        });
+      },
+    );
 
     test('remove deletes the row and enqueues a DELETE sync op', () async {
       await store.add('s1', addedAt: DateTime(2026, 7, 16));
@@ -194,8 +200,10 @@ void main() {
       expect(await store.loadAll(), isEmpty);
 
       final ops = await queue.pending();
-      expect(ops.map((o) => o.type).toList(),
-          [SyncOperationType.create, SyncOperationType.delete]);
+      expect(ops.map((o) => o.type).toList(), [
+        SyncOperationType.create,
+        SyncOperationType.delete,
+      ]);
       final del = ops.last;
       expect(del.entityType, SupplierFavoritesStore.syncEntityType);
       expect(del.entityId, 's1');
@@ -217,17 +225,19 @@ void main() {
       expect(all.first.addedAt, DateTime(2026, 7, 16));
     });
 
-    test('controller backed by the Drift store persists across reloads',
-        () async {
-      final c1 = SupplierFavoritesController(store);
-      await c1.toggle('s1', now: DateTime(2026, 7, 16));
-      expect(c1.isFavorite('s1'), isTrue);
+    test(
+      'controller backed by the Drift store persists across reloads',
+      () async {
+        final c1 = SupplierFavoritesController(store);
+        await c1.toggle('s1', now: DateTime(2026, 7, 16));
+        expect(c1.isFavorite('s1'), isTrue);
 
-      // A fresh controller over the same SQLite store sees the persisted state.
-      final c2 = SupplierFavoritesController(store);
-      await c2.load();
-      expect(c2.isFavorite('s1'), isTrue);
-      expect(c2.count, 1);
-    });
+        // A fresh controller over the same SQLite store sees the persisted state.
+        final c2 = SupplierFavoritesController(store);
+        await c2.load();
+        expect(c2.isFavorite('s1'), isTrue);
+        expect(c2.count, 1);
+      },
+    );
   });
 }

@@ -38,7 +38,9 @@ class SyncQueueRepository {
     Map<String, dynamic>? payload,
     DateTime? timestamp,
   }) {
-    return _db.into(_table).insert(
+    return _db
+        .into(_table)
+        .insert(
           SyncQueueItemsTableCompanion.insert(
             operationType: operationType.storageValue,
             entityType: entityType,
@@ -46,8 +48,9 @@ class SyncQueueRepository {
             payload: payload == null
                 ? const Value.absent()
                 : Value(jsonEncode(payload)),
-            timestamp:
-                timestamp == null ? const Value.absent() : Value(timestamp),
+            timestamp: timestamp == null
+                ? const Value.absent()
+                : Value(timestamp),
           ),
         );
   }
@@ -76,17 +79,18 @@ class SyncQueueRepository {
   /// All queued operations in FIFO order (oldest first). Read-only inspection;
   /// does not modify the queue.
   Future<List<SyncOperation>> pending() async {
-    final rows = await (_db.select(_table)
-          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
-        .get();
+    final rows = await (_db.select(
+      _table,
+    )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
     return rows.map(_toOperation).toList();
   }
 
   /// Number of operations currently waiting in the queue.
   Future<int> count() async {
     final countExp = _table.id.count();
-    final row = await (_db.selectOnly(_table)..addColumns([countExp]))
-        .getSingle();
+    final row = await (_db.selectOnly(
+      _table,
+    )..addColumns([countExp])).getSingle();
     return row.read(countExp) ?? 0;
   }
 
@@ -99,7 +103,7 @@ class SyncQueueRepository {
 
   /// Oldest-first, single-row query used by [peek]/[dequeue].
   SimpleSelectStatement<$SyncQueueItemsTableTable, SyncQueueItemsTableData>
-      _oldestQuery() {
+  _oldestQuery() {
     return _db.select(_table)
       ..orderBy([(t) => OrderingTerm.asc(t.id)])
       ..limit(1);

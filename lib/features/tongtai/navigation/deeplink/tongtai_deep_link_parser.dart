@@ -71,11 +71,7 @@ class TongtaiDeepLinkParser {
     return _match(segments, uri, trimmed);
   }
 
-  TongtaiDeepLinkResult _match(
-    List<String> segments,
-    Uri uri,
-    String rawLink,
-  ) {
+  TongtaiDeepLinkResult _match(List<String> segments, Uri uri, String rawLink) {
     // An empty path (`tongtai://`) has nowhere to go.
     if (segments.isEmpty) {
       return TongtaiDeepLinkFailure(
@@ -120,7 +116,9 @@ class TongtaiDeepLinkParser {
         // inventory/products      → product list
         // inventory/product/{id}  → product detail
         if (rest.length == 1 && rest.first == 'products') {
-          return _success(const TongtaiRoute(TongtaiRouteKind.inventoryProducts));
+          return _success(
+            const TongtaiRoute(TongtaiRouteKind.inventoryProducts),
+          );
         }
         if (rest.length == 2 && rest.first == 'product') {
           return _detail(TongtaiRouteKind.productDetail, rest[1], rawLink);
@@ -130,7 +128,9 @@ class TongtaiDeepLinkParser {
       // Short alias: products[/ID].
       case 'products':
         if (rest.isEmpty) {
-          return _success(const TongtaiRoute(TongtaiRouteKind.inventoryProducts));
+          return _success(
+            const TongtaiRoute(TongtaiRouteKind.inventoryProducts),
+          );
         }
         if (rest.length == 1) {
           return _detail(TongtaiRouteKind.productDetail, rest.first, rawLink);
@@ -172,7 +172,11 @@ class TongtaiDeepLinkParser {
 
       case 'opportunity':
         if (rest.length == 1) {
-          return _detail(TongtaiRouteKind.opportunityDetail, rest.first, rawLink);
+          return _detail(
+            TongtaiRouteKind.opportunityDetail,
+            rest.first,
+            rawLink,
+          );
         }
         return _unknown(rawLink);
 
@@ -232,9 +236,9 @@ class TongtaiDeepLinkParser {
       TongtaiDeepLinkSuccess(route);
 
   TongtaiDeepLinkResult _unknown(String rawLink) => TongtaiDeepLinkFailure(
-        TongtaiDeepLinkError.unknownRoute,
-        rawLink: rawLink,
-      );
+    TongtaiDeepLinkError.unknownRoute,
+    rawLink: rawLink,
+  );
 
   /// Validate + sanitize a record id. Returns the cleaned id, or `null` if it
   /// fails validation (empty, illegal characters, path traversal, too long).

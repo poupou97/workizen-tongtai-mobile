@@ -39,20 +39,19 @@ enum SyncOperationType {
   }
 
   String get labelEn => switch (this) {
-        SyncOperationType.create => 'Create',
-        SyncOperationType.update => 'Update',
-        SyncOperationType.delete => 'Delete',
-      };
+    SyncOperationType.create => 'Create',
+    SyncOperationType.update => 'Update',
+    SyncOperationType.delete => 'Delete',
+  };
 
   String get labelVi => switch (this) {
-        SyncOperationType.create => 'Tạo mới',
-        SyncOperationType.update => 'Cập nhật',
-        SyncOperationType.delete => 'Xóa',
-      };
+    SyncOperationType.create => 'Tạo mới',
+    SyncOperationType.update => 'Cập nhật',
+    SyncOperationType.delete => 'Xóa',
+  };
 
   /// Label for a language code ('vi' -> Vietnamese, otherwise English).
-  String label(String languageCode) =>
-      languageCode == 'vi' ? labelVi : labelEn;
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
 /// Which side of a conflict a resolver chose.
@@ -86,10 +85,7 @@ class LastWriteWinsResolver {
   final ConflictWinner tieBreak;
 
   /// Decide which side wins purely from the two timestamps.
-  ConflictWinner resolve({
-    required DateTime local,
-    required DateTime remote,
-  }) {
+  ConflictWinner resolve({required DateTime local, required DateTime remote}) {
     if (local.isAfter(remote)) return ConflictWinner.local;
     if (remote.isAfter(local)) return ConflictWinner.remote;
     return tieBreak;

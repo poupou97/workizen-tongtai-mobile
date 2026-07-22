@@ -55,15 +55,16 @@ void main() {
 
     test('is de-duplicated across overlapping categories', () {
       // Electronics and Smart Home both imply CE + RoHS.
-      final certs =
-          supplierCertifications(const ['Electronics', 'Smart Home']);
+      final certs = supplierCertifications(const ['Electronics', 'Smart Home']);
       expect(certs.where((c) => c == 'CE').length, 1);
       expect(certs.where((c) => c == 'RoHS').length, 1);
     });
 
     test('is alphabetically sorted', () {
-      final certs =
-          supplierCertifications(const ['Agriculture', 'Electronics']);
+      final certs = supplierCertifications(const [
+        'Agriculture',
+        'Electronics',
+      ]);
       final sorted = [...certs]..sort();
       expect(certs, sorted);
     });
@@ -72,8 +73,10 @@ void main() {
   group('supplierCatalog (AC2)', () {
     test('has one row per category, in order', () {
       final catalog = supplierCatalog(techpro);
-      expect(catalog.map((r) => r.category).toList(),
-          ['Electronics', 'Accessories']);
+      expect(catalog.map((r) => r.category).toList(), [
+        'Electronics',
+        'Accessories',
+      ]);
     });
 
     test('every category carries at least a few products', () {
@@ -118,8 +121,10 @@ void main() {
 
   group('contact details (AC4)', () {
     test('email is a slug of the supplier name', () {
-      expect(supplierContactEmail('TechPro Wholesale'),
-          'sales@techprowholesale.example');
+      expect(
+        supplierContactEmail('TechPro Wholesale'),
+        'sales@techprowholesale.example',
+      );
     });
 
     test('phone uses the country dialling code', () {
@@ -160,8 +165,7 @@ void main() {
 
     test('productCount equals the sum of the catalog breakdown', () {
       final profile = buildSupplierProfile(techpro);
-      final expected =
-          profile.catalog.fold<int>(0, (sum, r) => sum + r.count);
+      final expected = profile.catalog.fold<int>(0, (sum, r) => sum + r.count);
       expect(profile.productCount, expected);
       expect(profile.productCount, greaterThan(0));
     });
