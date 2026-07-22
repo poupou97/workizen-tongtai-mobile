@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'tongtai_chat_screen.dart';
 import 'tongtai_unified_search_screen.dart';
 
 /// Home dashboard screen for Tổng Tài
@@ -11,6 +12,12 @@ class TongtaiHomeScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const TongtaiUnifiedSearchRoute()),
     );
+  }
+
+  void _openChat(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const TongtaiChatScreen()));
   }
 
   @override
@@ -27,6 +34,12 @@ class TongtaiHomeScreen extends StatelessWidget {
             tooltip: 'Search',
             icon: const Icon(Icons.search),
             onPressed: () => _openSearch(context),
+          ),
+          IconButton(
+            key: const Key('home-open-chat'),
+            tooltip: 'AI Copilot chat',
+            icon: const Icon(Icons.chat_bubble_outline),
+            onPressed: () => _openChat(context),
           ),
         ],
       ),

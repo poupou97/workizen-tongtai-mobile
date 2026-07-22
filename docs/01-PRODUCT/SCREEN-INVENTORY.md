@@ -19,7 +19,7 @@ responsive, a11y). Trạng thái build = code thật trong `lib/features/tongtai
 | Reports | screens/SCREEN-REPORTS.md | ❌ chưa |
 | Business Journey | screens/SCREEN-BUSINESS-JOURNEY.md | ❌ chưa |
 | Opportunity Hub | screens/SCREEN-OPPORTUNITY-HUB.md | ❌ chưa |
-| AI Copilot chat | screens/SCREEN-AI-COPILOT.md | ❌ chưa (client có) |
+| AI Copilot chat | screens/SCREEN-AI-COPILOT.md | ✅ chat UI local-first (80) — AI routing chờ WTM-82 |
 | Detail: producer/inventory/consumer | screens/SCREEN-*-DETAIL.md | ✅ supplier detail; ❌ inventory/consumer detail |
 
 Luồng điều hướng: [screens/SCREEN-FLOW.md](screens/SCREEN-FLOW.md) ·
