@@ -73,6 +73,11 @@ export 'consumer/customer_form.dart';
 export 'consumer/customer_directory_controller.dart';
 export 'ui/screens/tongtai_customer_form_screen.dart';
 
+// Consumer — purchase history (WTM-77)
+export 'consumer/customer_order.dart';
+export 'consumer/customer_order_history_service.dart';
+export 'ui/screens/tongtai_customer_history_screen.dart';
+
 // AI client — xAI Grok BYOK integration (WTM-61)
 export 'ai/tongtai_ai_provider_kind.dart';
 export 'ai/tongtai_ai_key_store.dart';
