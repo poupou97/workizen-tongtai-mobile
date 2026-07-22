@@ -9,7 +9,7 @@ responsive, a11y). Trạng thái build = code thật trong `lib/features/tongtai
 | Home (dashboard shell) | screens/SCREEN-HOME.md | ✅ shell (WTM-55) |
 | Producer (sourcing hub) | screens/SCREEN-PRODUCER.md | ✅ shell + search/detail/favorites (63/64/65) |
 | Inventory | screens/SCREEN-INVENTORY.md | ✅ list + form + stock alerts (68/69/70) |
-| Consumer (CRM) | screens/SCREEN-CONSUMER.md | ✅ customer list (75) |
+| Consumer (CRM) | screens/SCREEN-CONSUMER.md | ✅ customer list (75) + add/edit form (76) |
 | More / menu | screens/SCREEN-MORE.md | ✅ shell + replay tutorial (59) |
 | Unified Search | (WTM-73 spec trong Jira) | ✅ (73/74) |
 | AI key (BYOK) | (WTM-61) | ✅ |

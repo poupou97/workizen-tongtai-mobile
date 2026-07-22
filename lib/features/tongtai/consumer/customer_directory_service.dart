@@ -143,9 +143,14 @@ class CustomerDirectoryService {
   /// The full, unfiltered directory.
   List<Customer> get all => _customers;
 
-  /// Distinct locations across the directory, alphabetically sorted.
+  /// Distinct locations across the directory, alphabetically sorted. Customers
+  /// with no location yet (added via the WTM-76 form) don't produce a blank
+  /// facet chip.
   List<String> get locations {
-    final set = <String>{for (final c in _customers) c.location};
+    final set = <String>{
+      for (final c in _customers)
+        if (c.location.isNotEmpty) c.location,
+    };
     final list = set.toList()..sort();
     return list;
   }
@@ -200,8 +205,10 @@ class CustomerDirectoryService {
         ),
         CustomerSort.spent => a.totalSpent.compareTo(b.totalSpent),
         CustomerSort.frequency => a.orderCount.compareTo(b.orderCount),
-        CustomerSort.recency => a.lastPurchaseDate.compareTo(
-          b.lastPurchaseDate,
+        // Customers with no purchase yet (nullable date, WTM-76) sort as the
+        // least recent.
+        CustomerSort.recency => (a.lastPurchaseDate ?? DateTime(0)).compareTo(
+          b.lastPurchaseDate ?? DateTime(0),
         ),
       };
       if (c != 0) return ascending ? c : -c;

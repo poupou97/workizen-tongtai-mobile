@@ -18,15 +18,15 @@
 | Producer | WTM-63 supplier search · 64 supplier detail · 65 favorites |
 | Inventory | WTM-68 product list · 69 add/edit product · 70 stock alerts |
 | Search | WTM-72 FTS5 (đ-aware) · 73 unified search · 74 ranking + A/B |
-| Consumer | WTM-75 customer list |
+| Consumer | WTM-75 customer list · 76 add/edit customer (form, multi-address, audit trail, duplicate check) |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
 
 ## NOT built yet (honest gaps)
 
 - Finance, Reports, Business Journey, Opportunity Hub **screens** (DB tables
   exist; UI does not). AI Copilot **chat UI** (client foundation only).
-- Sprint-3+ backlog (WTM-76…102: consumer detail, chat, journey, reports…)
-  exists in Jira with full ACs — not yet run.
+- Sprint-3+ backlog (WTM-77…102: purchase history, chat, journey, reports…)
+  exists in Jira with full ACs — not yet run (WTM-76 done, first of Sprint 3).
 - App icon/splash = Flutter defaults (mascot "business fox" not finalized —
   open decision).
 - iOS build unverified in-session (signing/SPM); Android debug build is the

@@ -24,7 +24,8 @@ lib/
     onboarding/                 # 6-screen tutorial + first-launch gate
     producer/                   # supplier search service, profile, favorites (store+controller)
     inventory/                  # product model/service, form, history, image source, stock alerts
-    consumer/                   # customer model + directory service
+    consumer/                   # customer model, directory service/controller,
+                                # form + audit-trail history + duplicate check (WTM-76)
     search/                     # unified search controller, ranking (+A/B), history store
     ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
     ui/
@@ -33,6 +34,7 @@ lib/
       widgets/                  # persistent scroll/text-field
       screens/                  # home, producer, inventory, consumer, more, showcase,
                                 # supplier search/detail/favorites, product form,
+                                # customer form (add/edit, WTM-76),
                                 # stock alerts, unified search, customer list, AI key
 test/                           # 519 tests: DB integration (in-memory), widget, unit
 ```
