@@ -16,6 +16,8 @@
 - `mobile/app/lib/database/**` → `lib/database/**`
 - `mobile/app/test/features/tongtai/**` + `test/database_test.dart` → `test/`
 - `docs/tongtai/**` (60 docs) → `docs/**` (tái tổ chức ở commit `4e11f0b`)
+- `assets/tongtai-concept/**` (25 ảnh concept UI/UX + mascot fox, 31MB) →
+  `docs/01-PRODUCT/concepts/` (bổ sung sau split — Founder phát hiện thiếu)
 - `handover.sh` (chỉnh path cho repo này)
 - Import rewrite: `package:wallet/` → `package:tongtai/` (133 file, 0 sót)
 - Dây Hub duy nhất (`mascot_state.sharedPreferencesProvider`) → cắt, thay bằng
