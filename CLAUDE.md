@@ -31,9 +31,16 @@ domain model, AI matrix, ADRs.
 ## Non-negotiable principles (inherited from the Workizen ecosystem)
 
 1. **Local First** — all business data on-device (SQLite/Drift); works offline.
-2. **BYOK** — AI keys are the user's; they leave the device only in the
-   Authorization header of a direct provider call (xAI Grok primary).
-3. **Privacy by Default** — no account required, no telemetry SDKs.
+   Phase 2 has no backend and no sync (D-5, 2026-07-23).
+2. **Workizen AI** — users interact only with "Workizen AI"; an AI Router picks
+   the provider (Gemini/xAI/Claude/OpenRouter/Cerebras/Ollama — ADR-TON-006).
+   Phase 2 modes: BYOK (user keys leave the device only in the Authorization
+   header of a direct provider call) + Local (Ollama); Managed waits for
+   Phase 3.
+3. **Privacy by Default** — no account required (D-4); no ad SDKs, marketing
+   tracking, profiling, or personalized ads — ever. Operational telemetry
+   (Firebase Analytics + Crashlytics, closed-beta quality only) is allowed per
+   D-7/ADR-TON-005.
 4. **Practical over ambitious** — ship the boring, working thing.
 
 ## Architecture decisions in force
