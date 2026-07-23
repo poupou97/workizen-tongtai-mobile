@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
+import 'tongtai_goals_screen.dart';
 
 /// More/Settings screen for Tổng Tài
 /// Provides access to settings, help, and additional features.
@@ -67,6 +68,15 @@ class TongtaiMoreScreen extends ConsumerWidget {
             _SettingsSection(
               title: 'Business',
               items: [
+                _SettingsItem(
+                  icon: Icons.flag_outlined,
+                  label: 'Business Goals',
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiGoalsScreen(),
+                    ),
+                  ),
+                ),
                 _SettingsItem(
                   icon: Icons.business_outlined,
                   label: 'Business Info',
