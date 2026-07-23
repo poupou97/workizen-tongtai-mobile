@@ -4,7 +4,7 @@
 
 ```
 lib/
-  main.dart                     # entry → ProviderScope(+prefs override) → TongtaaiApp → TongtaiAppShell
+  main.dart                     # entry → ProviderScope(+prefs override) → TongtaiApp → TongtaiRootGate
   core/
     prefs.dart                  # sharedPreferencesProvider (platform seam, tách từ Hub khi split)
   database/                     # Drift/SQLite — LOCAL-FIRST heart
@@ -24,18 +24,29 @@ lib/
     onboarding/                 # 6-screen tutorial + first-launch gate
     producer/                   # supplier search service, profile, favorites (store+controller)
     inventory/                  # product model/service, form, history, image source, stock alerts
-    consumer/                   # customer model + directory service
+    consumer/                   # customer model, directory service/controller,
+                                # form + audit-trail history + duplicate check (WTM-76),
+                                # order model + purchase-history service (WTM-77)
     search/                     # unified search controller, ranking (+A/B), history store
+    journey/                    # business goals (WTM-87): model, templates, form,
+                                # progress/pace, controller — AI plan chờ WTM-88
+    opportunity/                # opportunity feed (WTM-91): model, reactions,
+                                # filter/sort controller — AI scoring chờ WTM-93
     chat/                       # AI Copilot chat: message model + controller (WTM-80;
                                 # responder thật nối ở WTM-82)
     ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
     ui/
+      tongtai_root_gate.dart    # gate onboarding lần đầu (WTM-59; nối vào main: WTM-105)
       tongtai_app_shell.dart    # IndexedStack + bottom nav (5 tab)
       tongtai_bottom_nav.dart
       widgets/                  # persistent scroll/text-field
       screens/                  # home, producer, inventory, consumer, more, showcase,
                                 # supplier search/detail/favorites, product form,
+                                # customer form (add/edit, WTM-76),
+                                # customer purchase history (WTM-77),
                                 # stock alerts, unified search, customer list, AI key,
+                                # business goals list + multi-step goal form (WTM-87),
+                                # opportunity feed (WTM-91),
                                 # AI Copilot chat (WTM-80)
 test/                           # 519 tests: DB integration (in-memory), widget, unit
 ```
@@ -50,7 +61,8 @@ test/                           # 519 tests: DB integration (in-memory), widget,
 
 ## Dòng chảy chính
 
-1. `main()` → nạp SharedPreferences → override provider → `TongtaiAppShell`.
+1. `main()` → nạp SharedPreferences → override provider → `TongtaiRootGate`
+   (tutorial lần đầu, WTM-59 — nối lại sau bug split WTM-105) → `TongtaiAppShell`.
 2. Shell = IndexedStack 5 tab; tab state persist (WTM-56); deep link `tongtai://`
    parse → route (WTM-57); onboarding gate lần đầu (WTM-59).
 3. Data: screens → services/controllers → Drift (`AppDatabase`) hoặc stores

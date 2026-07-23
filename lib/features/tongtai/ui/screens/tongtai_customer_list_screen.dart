@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../consumer/customer.dart';
+import '../../consumer/customer_directory_controller.dart';
 import '../../consumer/customer_directory_service.dart';
+import '../../consumer/customer_order_history_service.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import 'tongtai_customer_form_screen.dart';
+import 'tongtai_customer_history_screen.dart';
 
 /// Color for a [CustomerTier] badge (WTM-75 AC: visual indicators for VIP /
 /// high-value customers). Pulled out as a pure function so the mapping is
@@ -19,13 +23,29 @@ Color tongtaiCustomerTierColor(CustomerTier tier) => switch (tier) {
 ///
 /// Local-first customer directory: a searchable, location-filterable, sortable
 /// customer list with VIP/high-value tier badges and 20-per-page pagination.
-/// All data comes from the in-memory [CustomerDirectoryService], so filtering,
-/// sorting and paging happen synchronously.
+/// Tapping a row opens the customer in the Add/Edit form; the FAB adds a new
+/// one (WTM-76). All data lives in the in-memory
+/// [CustomerDirectoryController], so filtering, sorting and paging happen
+/// synchronously.
 class TongtaiCustomerListScreen extends StatefulWidget {
-  const TongtaiCustomerListScreen({super.key, this.service});
+  const TongtaiCustomerListScreen({
+    super.key,
+    this.service,
+    this.directory,
+    this.orderHistory,
+  });
 
-  /// Injectable for tests; defaults to the built-in sample directory.
+  /// Injectable read-only seed for tests; defaults to the built-in sample
+  /// directory. Ignored when [directory] is provided.
   final CustomerDirectoryService? service;
+
+  /// Injectable mutable directory (WTM-76). When provided it takes precedence
+  /// over [service] and is *not* disposed here (its owner disposes it).
+  final CustomerDirectoryController? directory;
+
+  /// Injectable purchase-history source (WTM-77); defaults to the built-in
+  /// sample orders.
+  final CustomerOrderHistoryService? orderHistory;
 
   @override
   State<TongtaiCustomerListScreen> createState() =>
@@ -33,7 +53,8 @@ class TongtaiCustomerListScreen extends StatefulWidget {
 }
 
 class _TongtaiCustomerListScreenState extends State<TongtaiCustomerListScreen> {
-  late final CustomerDirectoryService _service;
+  late final CustomerDirectoryController _directory;
+  late final bool _ownsDirectory;
   final TextEditingController _searchController = TextEditingController();
 
   CustomerQuery _query = const CustomerQuery();
@@ -41,13 +62,55 @@ class _TongtaiCustomerListScreenState extends State<TongtaiCustomerListScreen> {
   @override
   void initState() {
     super.initState();
-    _service = widget.service ?? CustomerDirectoryService.sample();
+    if (widget.directory != null) {
+      _directory = widget.directory!;
+      _ownsDirectory = false;
+    } else {
+      _directory = CustomerDirectoryController(
+        widget.service?.all ?? kSampleCustomers,
+      );
+      _ownsDirectory = true;
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    if (_ownsDirectory) _directory.dispose();
     super.dispose();
+  }
+
+  /// Open the Add/Edit form (WTM-76). [customer] null = add; non-null = edit.
+  /// On save the returned customer is upserted and the list snaps to page 1.
+  Future<void> _openForm(BuildContext context, {Customer? customer}) async {
+    final result = await Navigator.of(context).push<Customer>(
+      MaterialPageRoute(
+        builder: (_) => TongtaiCustomerFormScreen(
+          customer: customer,
+          locations: _directory.service.locations,
+          findDuplicates: (name, phone) => _directory.findDuplicates(
+            name: name,
+            phone: phone,
+            exceptId: customer?.id,
+          ),
+        ),
+      ),
+    );
+    if (!context.mounted || result == null) return;
+    _directory.upsert(result);
+    setState(() => _query = _query.copyWith(pageIndex: 0));
+  }
+
+  /// Open the customer's purchase history (WTM-77).
+  void _openHistory(BuildContext context, Customer customer) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => TongtaiCustomerHistoryScreen(
+          customer: customer,
+          service: widget.orderHistory,
+        ),
+      ),
+    );
   }
 
   // Any change to the search text, location or sort resets to the first page so
@@ -86,63 +149,90 @@ class _TongtaiCustomerListScreenState extends State<TongtaiCustomerListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final page = _service.page(_query);
+    return ListenableBuilder(
+      listenable: _directory,
+      builder: (context, _) {
+        final service = _directory.service;
+        final page = service.page(_query);
 
-    return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
-      appBar: AppBar(
-        title: const Text('Customers'),
-        elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
-      ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TongtaiDesignTokens.spacing4,
-                TongtaiDesignTokens.spacing3,
-                TongtaiDesignTokens.spacing4,
-                TongtaiDesignTokens.spacing2,
-              ),
-              child: _SearchField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                onClear: _query.text.isEmpty ? null : _clearSearch,
-              ),
+        return Scaffold(
+          backgroundColor: TongtaiDesignTokens.lightBackground,
+          appBar: AppBar(
+            title: const Text('Customers'),
+            elevation: 0,
+            backgroundColor: TongtaiDesignTokens.lightBackground,
+            foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => _openForm(context),
+            backgroundColor: TongtaiDesignTokens.consumerBlue,
+            foregroundColor: Colors.white,
+            icon: const Icon(Icons.add),
+            label: const Text('Add customer'),
+          ),
+          // The pagination controls sit in the bottom bar so the (endFloat)
+          // FAB is lifted clear above them instead of obscuring the Next-page
+          // button — same layout fix as the Inventory screen (WTM-69).
+          bottomNavigationBar: page.totalCount > 0
+              ? SafeArea(
+                  top: false,
+                  child: _PaginationBar(
+                    page: page,
+                    onPrevious: page.hasPrevious
+                        ? () => _goToPage(page.pageIndex - 1)
+                        : null,
+                    onNext: page.hasNext
+                        ? () => _goToPage(page.pageIndex + 1)
+                        : null,
+                  ),
+                )
+              : null,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TongtaiDesignTokens.spacing4,
+                    TongtaiDesignTokens.spacing3,
+                    TongtaiDesignTokens.spacing4,
+                    TongtaiDesignTokens.spacing2,
+                  ),
+                  child: _SearchField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    onClear: _query.text.isEmpty ? null : _clearSearch,
+                  ),
+                ),
+                _LocationFilter(
+                  locations: service.locations,
+                  selected: _query.location,
+                  onSelected: _selectLocation,
+                ),
+                _SortBar(
+                  sort: _query.sort,
+                  ascending: _query.ascending,
+                  onSort: _selectSort,
+                  onToggleDirection: _toggleDirection,
+                ),
+                _ResultsHeader(count: page.totalCount),
+                Expanded(
+                  child: page.isEmpty
+                      ? const _EmptyState()
+                      : _CustomerList(
+                          customers: page.items,
+                          onEdit: (customer) =>
+                              _openForm(context, customer: customer),
+                          onHistory: (customer) =>
+                              _openHistory(context, customer),
+                        ),
+                ),
+              ],
             ),
-            _LocationFilter(
-              locations: _service.locations,
-              selected: _query.location,
-              onSelected: _selectLocation,
-            ),
-            _SortBar(
-              sort: _query.sort,
-              ascending: _query.ascending,
-              onSort: _selectSort,
-              onToggleDirection: _toggleDirection,
-            ),
-            _ResultsHeader(count: page.totalCount),
-            Expanded(
-              child: page.isEmpty
-                  ? const _EmptyState()
-                  : _CustomerList(customers: page.items),
-            ),
-            if (page.totalCount > 0)
-              _PaginationBar(
-                page: page,
-                onPrevious: page.hasPrevious
-                    ? () => _goToPage(page.pageIndex - 1)
-                    : null,
-                onNext: page.hasNext
-                    ? () => _goToPage(page.pageIndex + 1)
-                    : null,
-              ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -332,9 +422,15 @@ class _ResultsHeader extends StatelessWidget {
 }
 
 class _CustomerList extends StatelessWidget {
-  const _CustomerList({required this.customers});
+  const _CustomerList({
+    required this.customers,
+    required this.onEdit,
+    required this.onHistory,
+  });
 
   final List<Customer> customers;
+  final ValueChanged<Customer> onEdit;
+  final ValueChanged<Customer> onHistory;
 
   @override
   Widget build(BuildContext context) {
@@ -348,95 +444,124 @@ class _CustomerList extends StatelessWidget {
       itemCount: customers.length,
       separatorBuilder: (context, _) =>
           const SizedBox(height: TongtaiDesignTokens.spacing3),
-      itemBuilder: (context, index) => _CustomerRow(customer: customers[index]),
+      itemBuilder: (context, index) => _CustomerRow(
+        customer: customers[index],
+        onTap: () => onEdit(customers[index]),
+        onHistory: () => onHistory(customers[index]),
+      ),
     );
   }
 }
 
 class _CustomerRow extends StatelessWidget {
-  const _CustomerRow({required this.customer});
+  const _CustomerRow({
+    required this.customer,
+    required this.onTap,
+    required this.onHistory,
+  });
 
   final Customer customer;
+  final VoidCallback onTap;
+  final VoidCallback onHistory;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
-      decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
+      child: Container(
+        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+        decoration: BoxDecoration(
+          color: TongtaiDesignTokens.lightBackground,
+          borderRadius: BorderRadius.circular(
+            TongtaiDesignTokens.cardBorderRadius,
+          ),
+          border: Border.all(color: TongtaiDesignTokens.lightBorder),
+          boxShadow: TongtaiDesignTokens.elevation1,
         ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        boxShadow: TongtaiDesignTokens.elevation1,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        customer.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TongtaiDesignTokens.bodyStyle.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: TongtaiDesignTokens.lightTextPrimary,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          customer.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TongtaiDesignTokens.bodyStyle.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: TongtaiDesignTokens.lightTextPrimary,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: TongtaiDesignTokens.spacing2),
+                      _TierChip(tier: customer.tier),
+                    ],
+                  ),
+                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  Text(
+                    customer.location.isEmpty
+                        ? customer.maskedPhone
+                        : '${customer.maskedPhone} • ${customer.location}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                      color: TongtaiDesignTokens.lightTextSecondary,
                     ),
-                    const SizedBox(width: TongtaiDesignTokens.spacing2),
-                    _TierChip(tier: customer.tier),
-                  ],
-                ),
-                const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  ),
+                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  Text(
+                    customer.lastPurchaseDate == null
+                        ? 'No purchases yet'
+                        : 'Last purchase '
+                              '${TongtaiFormatters.isoDate(customer.lastPurchaseDate!)}',
+                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                      color: TongtaiDesignTokens.lightTextSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
                 Text(
-                  '${customer.maskedPhone} • ${customer.location}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
+                  TongtaiFormatters.vnd(customer.totalSpent),
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: TongtaiDesignTokens.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: TongtaiDesignTokens.spacing1),
                 Text(
-                  'Last purchase '
-                  '${TongtaiFormatters.isoDate(customer.lastPurchaseDate)}',
+                  customer.orderCount == 1
+                      ? '1 order'
+                      : '${customer.orderCount} orders',
                   style: TongtaiDesignTokens.captionStyle.copyWith(
                     color: TongtaiDesignTokens.lightTextSecondary,
                   ),
+                ),
+                IconButton(
+                  key: Key('customer-history-${customer.id}'),
+                  tooltip: 'Purchase history',
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(
+                    Icons.receipt_long_outlined,
+                    size: 20,
+                    color: TongtaiDesignTokens.consumerBlue,
+                  ),
+                  onPressed: onHistory,
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: TongtaiDesignTokens.spacing3),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                TongtaiFormatters.vnd(customer.totalSpent),
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(height: TongtaiDesignTokens.spacing1),
-              Text(
-                customer.orderCount == 1
-                    ? '1 order'
-                    : '${customer.orderCount} orders',
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
