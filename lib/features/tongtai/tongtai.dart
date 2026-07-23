@@ -67,6 +67,13 @@ export 'ui/screens/tongtai_stock_alerts_screen.dart';
 export 'consumer/customer.dart';
 export 'consumer/customer_directory_service.dart';
 
+// Journey — business goals (WTM-87)
+export 'journey/business_goal.dart';
+export 'journey/business_goal_form.dart';
+export 'journey/business_goal_controller.dart';
+export 'ui/screens/tongtai_goal_form_screen.dart';
+export 'ui/screens/tongtai_goals_screen.dart';
+
 // AI client — xAI Grok BYOK integration (WTM-61)
 export 'ai/tongtai_ai_provider_kind.dart';
 export 'ai/tongtai_ai_key_store.dart';

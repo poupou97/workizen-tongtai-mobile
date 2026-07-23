@@ -23,12 +23,14 @@
 | Search | WTM-72 FTS5 (đ-aware) · 73 unified search · 74 ranking + A/B |
 | Consumer | WTM-75 customer list |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
+| Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
 
-- Finance, Reports, Business Journey, Opportunity Hub **screens** (DB tables
-  exist; UI does not). AI Copilot **chat UI** (client foundation only).
+- Finance, Reports, Opportunity Hub **screens** (DB tables exist; UI does
+  not). Business Journey: goals UI có (WTM-87), step-plan/AI chờ WTM-88/89.
+  AI Copilot **chat UI** (client foundation only — xem các PR chat).
 - Sprint-3+ backlog (WTM-76…102: consumer detail, chat, journey, reports…)
   exists in Jira with full ACs — not yet run.
 - App icon/splash = Flutter defaults (mascot "business fox" not finalized —
