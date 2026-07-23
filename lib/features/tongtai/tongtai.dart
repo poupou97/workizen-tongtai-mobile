@@ -103,6 +103,12 @@ export 'ui/screens/tongtai_opportunity_feed_screen.dart';
 export 'ai/workizen_ai_context.dart';
 export 'ai/workizen_ai_router.dart';
 
+// Export — CSV data export (WTM-99, D-10 Phase 2)
+export 'export/csv_exporter.dart';
+export 'export/csv_delivery.dart';
+export 'export/export_history_store.dart';
+export 'ui/screens/tongtai_export_screen.dart';
+
 // AI client — xAI Grok BYOK integration (WTM-61)
 export 'ai/tongtai_ai_provider_kind.dart';
 export 'ai/tongtai_ai_key_store.dart';

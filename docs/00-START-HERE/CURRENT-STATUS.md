@@ -26,6 +26,7 @@
 | Chat | WTM-80 chat UI · 81 persistence SQLite v4 (local-only ADR-TON-004) · 82 Workizen AI Router (đa provider, context injection, fallback offline — ADR-TON-006) |
 | Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
 | Opportunity | WTM-91 feed: type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo (AI scoring chờ WTM-93) |
+| Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
@@ -34,8 +35,8 @@
   goals UI có (87), step-plan/AI chờ 88/89. Opportunity: feed có (91),
   detail/scoring chờ 92/93. Chat: đủ UI + persistence + Workizen AI Router
   (80/81/82); Claude adapter + per-provider key UX = follow-up (WTM-83).
-- Backlog còn lại (WTM-78/79, 84–86, 88–90, 92–98, 99 Ready, 102, 108) trong
-  Jira với AC đầy đủ.
+- Backlog còn lại (WTM-78/79, 84–86, 88–90, 92–98, 102, 108) trong Jira với
+  AC đầy đủ.
 - App icon/splash = Flutter defaults (mascot "business fox" not finalized —
   open decision).
 - iOS build unverified in-session (signing/SPM); Android debug build is the
