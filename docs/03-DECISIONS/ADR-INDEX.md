@@ -2,8 +2,9 @@
 
 | ADR | Quyết định | Trạng thái | Ngày |
 |---|---|---|---|
-| [ADR-TON-001](ADR-TON-001-app-separation-single-app-flavors.md) | App separation: single-app (nay = repo riêng này); tách rõ Platform/Product layer; không phụ thuộc code feature Hub; module phải extractable | ✅ ACCEPTED (Founder) | 2026-07-16, thực thi split 2026-07-22 |
+| [ADR-TON-001](ADR-TON-001-app-separation-single-app-flavors.md) | App separation: tách rõ Platform/Product layer; không phụ thuộc code feature Hub; module phải extractable. Phần "single-app + flavors" bị **supersede bởi ADR-TON-003**; ba yêu cầu kiến trúc giữ nguyên hiệu lực | ✅ ACCEPTED (Founder) | 2026-07-16 |
 | [ADR-TON-002](ADR-TON-002-di-riverpod.md) | DI/state = **Riverpod duy nhất** (GetIt trong AC cũ = lỗi spec) | ✅ ACCEPTED (Founder) | 2026-07-16 |
+| [ADR-TON-003](ADR-TON-003-repo-split.md) | Repo độc lập `workizen-tongtai-mobile` (supersede phần flavors của ADR-TON-001); Hub = upstream fetch-only, không thêm build flavor | ✅ ACCEPTED (Founder) | 2026-07-22 |
 
 ## Quyết định Founder khác (chưa thành ADR riêng)
 
