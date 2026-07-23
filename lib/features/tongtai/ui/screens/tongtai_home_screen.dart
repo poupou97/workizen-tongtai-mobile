@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'tongtai_opportunity_feed_screen.dart';
 import 'tongtai_unified_search_screen.dart';
 
 /// Home dashboard screen for Tổng Tài
@@ -81,10 +82,25 @@ class TongtaiHomeScreen extends StatelessWidget {
               child: const Center(child: Text('No missions yet')),
             ),
             const SizedBox(height: 24),
-            // Placeholder for opportunities section
-            Text(
-              'Top Opportunities',
-              style: Theme.of(context).textTheme.titleLarge,
+            // Opportunities section — the feed lives in its own screen (WTM-91).
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Top Opportunities',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                TextButton(
+                  key: const Key('home-open-opportunities'),
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiOpportunityFeedScreen(),
+                    ),
+                  ),
+                  child: const Text('View all'),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Container(

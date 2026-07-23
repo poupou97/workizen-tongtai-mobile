@@ -26,6 +26,8 @@ lib/
     inventory/                  # product model/service, form, history, image source, stock alerts
     consumer/                   # customer model + directory service
     search/                     # unified search controller, ranking (+A/B), history store
+    opportunity/                # opportunity feed (WTM-91): model, reactions,
+                                # filter/sort controller — AI scoring chờ WTM-93
     ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
     ui/
       tongtai_app_shell.dart    # IndexedStack + bottom nav (5 tab)
@@ -33,7 +35,8 @@ lib/
       widgets/                  # persistent scroll/text-field
       screens/                  # home, producer, inventory, consumer, more, showcase,
                                 # supplier search/detail/favorites, product form,
-                                # stock alerts, unified search, customer list, AI key
+                                # stock alerts, unified search, customer list, AI key,
+                                # opportunity feed (WTM-91)
 test/                           # 519 tests: DB integration (in-memory), widget, unit
 ```
 

@@ -18,7 +18,7 @@ responsive, a11y). Trạng thái build = code thật trong `lib/features/tongtai
 | Finance | screens/SCREEN-FINANCE.md | ❌ chưa |
 | Reports | screens/SCREEN-REPORTS.md | ❌ chưa |
 | Business Journey | screens/SCREEN-BUSINESS-JOURNEY.md | ❌ chưa |
-| Opportunity Hub | screens/SCREEN-OPPORTUNITY-HUB.md | ❌ chưa |
+| Opportunity Hub | screens/SCREEN-OPPORTUNITY-HUB.md | 🟡 feed: filter/sort/save/swipe (91); detail + AI scoring chờ WTM-92/93 |
 | AI Copilot chat | screens/SCREEN-AI-COPILOT.md | ❌ chưa (client có) |
 | Detail: producer/inventory/consumer | screens/SCREEN-*-DETAIL.md | ✅ supplier detail; ❌ inventory/consumer detail |
 
