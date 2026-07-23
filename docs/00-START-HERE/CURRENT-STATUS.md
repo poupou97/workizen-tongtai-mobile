@@ -20,13 +20,13 @@
 | Search | WTM-72 FTS5 (đ-aware) · 73 unified search · 74 ranking + A/B |
 | Consumer | WTM-75 customer list |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
-| Chat | WTM-80 AI Copilot chat UI (bubbles/ticks/attachments/typing — local-first; AI routing chờ WTM-82) |
+| Chat | WTM-80 AI Copilot chat UI (bubbles/ticks/attachments/typing) · 81 persistence SQLite v4 (hydrate/search, local-only ADR-TON-004; AI routing chờ WTM-82) |
 
 ## NOT built yet (honest gaps)
 
 - Finance, Reports, Business Journey, Opportunity Hub **screens** (DB tables
-  exist; UI does not). AI Copilot chat: UI có (WTM-80) nhưng **AI routing**
-  (WTM-82) và **persistence** (WTM-81) chưa nối — reply hiện là echo cục bộ.
+  exist; UI does not). AI Copilot chat: UI (WTM-80) + persistence (WTM-81)
+  có; **AI routing** (WTM-82) chưa nối — reply hiện là echo cục bộ.
 - Sprint-3+ backlog (WTM-76…102: consumer detail, chat, journey, reports…)
   exists in Jira with full ACs — not yet run.
 - App icon/splash = Flutter defaults (mascot "business fox" not finalized —

@@ -72,6 +72,9 @@ export 'chat/chat_message.dart';
 export 'chat/chat_controller.dart';
 export 'ui/screens/tongtai_chat_screen.dart';
 
+// Chat — message persistence, local-only per ADR-TON-004 (WTM-81)
+export 'chat/chat_message_store.dart';
+
 // AI client — xAI Grok BYOK integration (WTM-61)
 export 'ai/tongtai_ai_provider_kind.dart';
 export 'ai/tongtai_ai_key_store.dart';

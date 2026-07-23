@@ -12972,6 +12972,545 @@ class SupplierFavoritesTableCompanion
   }
 }
 
+class $ChatMessagesTableTable extends ChatMessagesTable
+    with TableInfo<$ChatMessagesTableTable, ChatMessagesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChatMessagesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _conversationIdMeta = const VerificationMeta(
+    'conversationId',
+  );
+  @override
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+    'conversation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('default'),
+  );
+  static const VerificationMeta _senderMeta = const VerificationMeta('sender');
+  @override
+  late final GeneratedColumn<String> sender = GeneratedColumn<String>(
+    'sender',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sentAtMeta = const VerificationMeta('sentAt');
+  @override
+  late final GeneratedColumn<DateTime> sentAt = GeneratedColumn<DateTime>(
+    'sent_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _attachmentPathMeta = const VerificationMeta(
+    'attachmentPath',
+  );
+  @override
+  late final GeneratedColumn<String> attachmentPath = GeneratedColumn<String>(
+    'attachment_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _attachmentNameMeta = const VerificationMeta(
+    'attachmentName',
+  );
+  @override
+  late final GeneratedColumn<String> attachmentName = GeneratedColumn<String>(
+    'attachment_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    conversationId,
+    sender,
+    body,
+    sentAt,
+    status,
+    attachmentPath,
+    attachmentName,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'chat_messages_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChatMessagesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+        _conversationIdMeta,
+        conversationId.isAcceptableOrUnknown(
+          data['conversation_id']!,
+          _conversationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sender')) {
+      context.handle(
+        _senderMeta,
+        sender.isAcceptableOrUnknown(data['sender']!, _senderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_senderMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('sent_at')) {
+      context.handle(
+        _sentAtMeta,
+        sentAt.isAcceptableOrUnknown(data['sent_at']!, _sentAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sentAtMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('attachment_path')) {
+      context.handle(
+        _attachmentPathMeta,
+        attachmentPath.isAcceptableOrUnknown(
+          data['attachment_path']!,
+          _attachmentPathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('attachment_name')) {
+      context.handle(
+        _attachmentNameMeta,
+        attachmentName.isAcceptableOrUnknown(
+          data['attachment_name']!,
+          _attachmentNameMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChatMessagesTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChatMessagesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      sender: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sender'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      sentAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}sent_at'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      attachmentPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}attachment_path'],
+      ),
+      attachmentName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}attachment_name'],
+      ),
+    );
+  }
+
+  @override
+  $ChatMessagesTableTable createAlias(String alias) {
+    return $ChatMessagesTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChatMessagesTableData extends DataClass
+    implements Insertable<ChatMessagesTableData> {
+  final String id;
+
+  /// Conversation the message belongs to. The MVP has a single Copilot
+  /// conversation ('default'); threads (WTM-84) can partition on this later.
+  final String conversationId;
+
+  /// 'seller' or 'assistant' — `ChatSender.name`.
+  final String sender;
+
+  /// Message text (may be empty for attachment-only messages).
+  final String body;
+
+  /// When the message was composed.
+  final DateTime sentAt;
+
+  /// Local delivery state — `ChatMessageStatus.name` (AC2: read status).
+  final String status;
+
+  /// Local file path/name of an attachment, when present. Paths never leave
+  /// the device (ADR-TON-004).
+  final String? attachmentPath;
+  final String? attachmentName;
+  const ChatMessagesTableData({
+    required this.id,
+    required this.conversationId,
+    required this.sender,
+    required this.body,
+    required this.sentAt,
+    required this.status,
+    this.attachmentPath,
+    this.attachmentName,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['sender'] = Variable<String>(sender);
+    map['body'] = Variable<String>(body);
+    map['sent_at'] = Variable<DateTime>(sentAt);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || attachmentPath != null) {
+      map['attachment_path'] = Variable<String>(attachmentPath);
+    }
+    if (!nullToAbsent || attachmentName != null) {
+      map['attachment_name'] = Variable<String>(attachmentName);
+    }
+    return map;
+  }
+
+  ChatMessagesTableCompanion toCompanion(bool nullToAbsent) {
+    return ChatMessagesTableCompanion(
+      id: Value(id),
+      conversationId: Value(conversationId),
+      sender: Value(sender),
+      body: Value(body),
+      sentAt: Value(sentAt),
+      status: Value(status),
+      attachmentPath: attachmentPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attachmentPath),
+      attachmentName: attachmentName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attachmentName),
+    );
+  }
+
+  factory ChatMessagesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChatMessagesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      conversationId: serializer.fromJson<String>(json['conversationId']),
+      sender: serializer.fromJson<String>(json['sender']),
+      body: serializer.fromJson<String>(json['body']),
+      sentAt: serializer.fromJson<DateTime>(json['sentAt']),
+      status: serializer.fromJson<String>(json['status']),
+      attachmentPath: serializer.fromJson<String?>(json['attachmentPath']),
+      attachmentName: serializer.fromJson<String?>(json['attachmentName']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'conversationId': serializer.toJson<String>(conversationId),
+      'sender': serializer.toJson<String>(sender),
+      'body': serializer.toJson<String>(body),
+      'sentAt': serializer.toJson<DateTime>(sentAt),
+      'status': serializer.toJson<String>(status),
+      'attachmentPath': serializer.toJson<String?>(attachmentPath),
+      'attachmentName': serializer.toJson<String?>(attachmentName),
+    };
+  }
+
+  ChatMessagesTableData copyWith({
+    String? id,
+    String? conversationId,
+    String? sender,
+    String? body,
+    DateTime? sentAt,
+    String? status,
+    Value<String?> attachmentPath = const Value.absent(),
+    Value<String?> attachmentName = const Value.absent(),
+  }) => ChatMessagesTableData(
+    id: id ?? this.id,
+    conversationId: conversationId ?? this.conversationId,
+    sender: sender ?? this.sender,
+    body: body ?? this.body,
+    sentAt: sentAt ?? this.sentAt,
+    status: status ?? this.status,
+    attachmentPath: attachmentPath.present
+        ? attachmentPath.value
+        : this.attachmentPath,
+    attachmentName: attachmentName.present
+        ? attachmentName.value
+        : this.attachmentName,
+  );
+  ChatMessagesTableData copyWithCompanion(ChatMessagesTableCompanion data) {
+    return ChatMessagesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      sender: data.sender.present ? data.sender.value : this.sender,
+      body: data.body.present ? data.body.value : this.body,
+      sentAt: data.sentAt.present ? data.sentAt.value : this.sentAt,
+      status: data.status.present ? data.status.value : this.status,
+      attachmentPath: data.attachmentPath.present
+          ? data.attachmentPath.value
+          : this.attachmentPath,
+      attachmentName: data.attachmentName.present
+          ? data.attachmentName.value
+          : this.attachmentName,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChatMessagesTableData(')
+          ..write('id: $id, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('sender: $sender, ')
+          ..write('body: $body, ')
+          ..write('sentAt: $sentAt, ')
+          ..write('status: $status, ')
+          ..write('attachmentPath: $attachmentPath, ')
+          ..write('attachmentName: $attachmentName')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    conversationId,
+    sender,
+    body,
+    sentAt,
+    status,
+    attachmentPath,
+    attachmentName,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChatMessagesTableData &&
+          other.id == this.id &&
+          other.conversationId == this.conversationId &&
+          other.sender == this.sender &&
+          other.body == this.body &&
+          other.sentAt == this.sentAt &&
+          other.status == this.status &&
+          other.attachmentPath == this.attachmentPath &&
+          other.attachmentName == this.attachmentName);
+}
+
+class ChatMessagesTableCompanion
+    extends UpdateCompanion<ChatMessagesTableData> {
+  final Value<String> id;
+  final Value<String> conversationId;
+  final Value<String> sender;
+  final Value<String> body;
+  final Value<DateTime> sentAt;
+  final Value<String> status;
+  final Value<String?> attachmentPath;
+  final Value<String?> attachmentName;
+  final Value<int> rowid;
+  const ChatMessagesTableCompanion({
+    this.id = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.sender = const Value.absent(),
+    this.body = const Value.absent(),
+    this.sentAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.attachmentPath = const Value.absent(),
+    this.attachmentName = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChatMessagesTableCompanion.insert({
+    required String id,
+    this.conversationId = const Value.absent(),
+    required String sender,
+    required String body,
+    required DateTime sentAt,
+    required String status,
+    this.attachmentPath = const Value.absent(),
+    this.attachmentName = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       sender = Value(sender),
+       body = Value(body),
+       sentAt = Value(sentAt),
+       status = Value(status);
+  static Insertable<ChatMessagesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? conversationId,
+    Expression<String>? sender,
+    Expression<String>? body,
+    Expression<DateTime>? sentAt,
+    Expression<String>? status,
+    Expression<String>? attachmentPath,
+    Expression<String>? attachmentName,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (sender != null) 'sender': sender,
+      if (body != null) 'body': body,
+      if (sentAt != null) 'sent_at': sentAt,
+      if (status != null) 'status': status,
+      if (attachmentPath != null) 'attachment_path': attachmentPath,
+      if (attachmentName != null) 'attachment_name': attachmentName,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChatMessagesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? conversationId,
+    Value<String>? sender,
+    Value<String>? body,
+    Value<DateTime>? sentAt,
+    Value<String>? status,
+    Value<String?>? attachmentPath,
+    Value<String?>? attachmentName,
+    Value<int>? rowid,
+  }) {
+    return ChatMessagesTableCompanion(
+      id: id ?? this.id,
+      conversationId: conversationId ?? this.conversationId,
+      sender: sender ?? this.sender,
+      body: body ?? this.body,
+      sentAt: sentAt ?? this.sentAt,
+      status: status ?? this.status,
+      attachmentPath: attachmentPath ?? this.attachmentPath,
+      attachmentName: attachmentName ?? this.attachmentName,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (sender.present) {
+      map['sender'] = Variable<String>(sender.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (sentAt.present) {
+      map['sent_at'] = Variable<DateTime>(sentAt.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (attachmentPath.present) {
+      map['attachment_path'] = Variable<String>(attachmentPath.value);
+    }
+    if (attachmentName.present) {
+      map['attachment_name'] = Variable<String>(attachmentName.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChatMessagesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('sender: $sender, ')
+          ..write('body: $body, ')
+          ..write('sentAt: $sentAt, ')
+          ..write('status: $status, ')
+          ..write('attachmentPath: $attachmentPath, ')
+          ..write('attachmentName: $attachmentName, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -13000,6 +13539,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
       $SupplierFavoritesTableTable(this);
+  late final $ChatMessagesTableTable chatMessagesTable =
+      $ChatMessagesTableTable(this);
   late final Index producersBusinessId = Index(
     'producers_business_id',
     'CREATE INDEX producers_business_id ON producers_table (business_id)',
@@ -13052,6 +13593,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'transactions_date',
     'CREATE INDEX transactions_date ON transactions_table (date)',
   );
+  late final Index chatMessagesConversation = Index(
+    'chat_messages_conversation',
+    'CREATE INDEX chat_messages_conversation ON chat_messages_table (conversation_id)',
+  );
+  late final Index chatMessagesSentAt = Index(
+    'chat_messages_sent_at',
+    'CREATE INDEX chat_messages_sent_at ON chat_messages_table (sent_at)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -13074,6 +13623,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     integrationsTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
+    chatMessagesTable,
     producersBusinessId,
     productsBusinessId,
     productsSku,
@@ -13087,6 +13637,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     journeysBusinessId,
     transactionsBusinessId,
     transactionsDate,
+    chatMessagesConversation,
+    chatMessagesSentAt,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -23501,6 +24053,282 @@ typedef $$SupplierFavoritesTableTableProcessedTableManager =
       SupplierFavoritesTableData,
       PrefetchHooks Function()
     >;
+typedef $$ChatMessagesTableTableCreateCompanionBuilder =
+    ChatMessagesTableCompanion Function({
+      required String id,
+      Value<String> conversationId,
+      required String sender,
+      required String body,
+      required DateTime sentAt,
+      required String status,
+      Value<String?> attachmentPath,
+      Value<String?> attachmentName,
+      Value<int> rowid,
+    });
+typedef $$ChatMessagesTableTableUpdateCompanionBuilder =
+    ChatMessagesTableCompanion Function({
+      Value<String> id,
+      Value<String> conversationId,
+      Value<String> sender,
+      Value<String> body,
+      Value<DateTime> sentAt,
+      Value<String> status,
+      Value<String?> attachmentPath,
+      Value<String?> attachmentName,
+      Value<int> rowid,
+    });
+
+class $$ChatMessagesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChatMessagesTableTable> {
+  $$ChatMessagesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sender => $composableBuilder(
+    column: $table.sender,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get sentAt => $composableBuilder(
+    column: $table.sentAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get attachmentPath => $composableBuilder(
+    column: $table.attachmentPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get attachmentName => $composableBuilder(
+    column: $table.attachmentName,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ChatMessagesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChatMessagesTableTable> {
+  $$ChatMessagesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sender => $composableBuilder(
+    column: $table.sender,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get sentAt => $composableBuilder(
+    column: $table.sentAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get attachmentPath => $composableBuilder(
+    column: $table.attachmentPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get attachmentName => $composableBuilder(
+    column: $table.attachmentName,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ChatMessagesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChatMessagesTableTable> {
+  $$ChatMessagesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sender =>
+      $composableBuilder(column: $table.sender, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get sentAt =>
+      $composableBuilder(column: $table.sentAt, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get attachmentPath => $composableBuilder(
+    column: $table.attachmentPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get attachmentName => $composableBuilder(
+    column: $table.attachmentName,
+    builder: (column) => column,
+  );
+}
+
+class $$ChatMessagesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ChatMessagesTableTable,
+          ChatMessagesTableData,
+          $$ChatMessagesTableTableFilterComposer,
+          $$ChatMessagesTableTableOrderingComposer,
+          $$ChatMessagesTableTableAnnotationComposer,
+          $$ChatMessagesTableTableCreateCompanionBuilder,
+          $$ChatMessagesTableTableUpdateCompanionBuilder,
+          (
+            ChatMessagesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ChatMessagesTableTable,
+              ChatMessagesTableData
+            >,
+          ),
+          ChatMessagesTableData,
+          PrefetchHooks Function()
+        > {
+  $$ChatMessagesTableTableTableManager(
+    _$AppDatabase db,
+    $ChatMessagesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChatMessagesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChatMessagesTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChatMessagesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> conversationId = const Value.absent(),
+                Value<String> sender = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<DateTime> sentAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> attachmentPath = const Value.absent(),
+                Value<String?> attachmentName = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChatMessagesTableCompanion(
+                id: id,
+                conversationId: conversationId,
+                sender: sender,
+                body: body,
+                sentAt: sentAt,
+                status: status,
+                attachmentPath: attachmentPath,
+                attachmentName: attachmentName,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> conversationId = const Value.absent(),
+                required String sender,
+                required String body,
+                required DateTime sentAt,
+                required String status,
+                Value<String?> attachmentPath = const Value.absent(),
+                Value<String?> attachmentName = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChatMessagesTableCompanion.insert(
+                id: id,
+                conversationId: conversationId,
+                sender: sender,
+                body: body,
+                sentAt: sentAt,
+                status: status,
+                attachmentPath: attachmentPath,
+                attachmentName: attachmentName,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ChatMessagesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ChatMessagesTableTable,
+      ChatMessagesTableData,
+      $$ChatMessagesTableTableFilterComposer,
+      $$ChatMessagesTableTableOrderingComposer,
+      $$ChatMessagesTableTableAnnotationComposer,
+      $$ChatMessagesTableTableCreateCompanionBuilder,
+      $$ChatMessagesTableTableUpdateCompanionBuilder,
+      (
+        ChatMessagesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ChatMessagesTableTable,
+          ChatMessagesTableData
+        >,
+      ),
+      ChatMessagesTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -23542,4 +24370,6 @@ class $AppDatabaseManager {
         _db,
         _db.supplierFavoritesTable,
       );
+  $$ChatMessagesTableTableTableManager get chatMessagesTable =>
+      $$ChatMessagesTableTableTableManager(_db, _db.chatMessagesTable);
 }

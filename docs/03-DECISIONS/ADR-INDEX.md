@@ -4,6 +4,7 @@
 |---|---|---|---|
 | [ADR-TON-001](ADR-TON-001-app-separation-single-app-flavors.md) | App separation: single-app (nay = repo riêng này); tách rõ Platform/Product layer; không phụ thuộc code feature Hub; module phải extractable | ✅ ACCEPTED (Founder) | 2026-07-16, thực thi split 2026-07-22 |
 | [ADR-TON-002](ADR-TON-002-di-riverpod.md) | DI/state = **Riverpod duy nhất** (GetIt trong AC cũ = lỗi spec) | ✅ ACCEPTED (Founder) | 2026-07-16 |
+| [ADR-TON-004](ADR-TON-004-chat-persistence-local-only.md) | Chat persistence **local-only** (bảng v4, KHÔNG vào sync outbox — chờ D-5); mã hoá = chuẩn nền tảng, SQLCipher là option chờ Founder | 🟡 PROPOSED (agent) — chờ Founder duyệt | 2026-07-22 |
 
 ## Quyết định Founder khác (chưa thành ADR riêng)
 

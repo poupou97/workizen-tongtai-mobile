@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'chat_message.dart';
+import 'chat_message_store.dart';
 
 /// Produces the assistant's reply to a seller message (WTM-80).
 ///
@@ -26,19 +27,25 @@ class EchoChatResponder implements ChatResponder {
   }
 }
 
-/// In-memory conversation state behind the Chat screen (WTM-80).
+/// Conversation state behind the Chat screen (WTM-80), persisted through an
+/// optional [ChatMessageStore] (WTM-81).
 ///
-/// Local-first: messages live in memory (persistence to SQLite arrives with
-/// WTM-81). Sending walks the seller message through the local delivery
-/// states (sending → sent → delivered, then read once the responder consumed
-/// it — AC3), raises the typing indicator while the responder works (AC5),
-/// and appends the assistant's reply.
+/// Local-first: messages live in memory, mirrored write-through into the
+/// store (Drift/SQLite in production — local-only per ADR-TON-004). Sending
+/// walks the seller message through the local delivery states (sending →
+/// sent → delivered, then read once the responder consumed it — AC3), raises
+/// the typing indicator while the responder works (AC5), and appends the
+/// assistant's reply. Call [hydrate] once after construction to restore the
+/// persisted conversation.
 class TongtaiChatController extends ChangeNotifier {
   TongtaiChatController({
     ChatResponder? responder,
+    ChatMessageStore? store,
     DateTime Function()? clock,
     String Function()? idFactory,
   }) : _responder = responder ?? const EchoChatResponder(),
+       // ignore: prefer_initializing_formals — the field is nullable on purpose
+       _store = store,
        _clock = clock ?? DateTime.now,
        _idFactory = idFactory ?? _sequentialId;
 
@@ -46,14 +53,40 @@ class TongtaiChatController extends ChangeNotifier {
   static String _sequentialId() => 'msg-${++_sequence}';
 
   final ChatResponder _responder;
+  final ChatMessageStore? _store;
   final DateTime Function() _clock;
   final String Function() _idFactory;
 
   final List<ChatMessage> _messages = [];
   bool _assistantTyping = false;
+  bool _hydrated = false;
 
   /// Conversation, oldest first.
   List<ChatMessage> get messages => List.unmodifiable(_messages);
+
+  /// Whether [hydrate] has completed (or no store is attached, in which case
+  /// there is nothing to restore).
+  bool get isHydrated => _hydrated || _store == null;
+
+  /// Restore the persisted conversation (WTM-81 AC5: history survives
+  /// restarts and offline periods). Messages sent before hydration completes
+  /// are preserved: restored history is prepended, keeping timestamp order.
+  Future<void> hydrate() async {
+    final store = _store;
+    if (store == null || _hydrated) return;
+    final persisted = await store.loadAll();
+    _hydrated = true;
+    if (persisted.isEmpty) {
+      notifyListeners();
+      return;
+    }
+    final liveIds = {for (final m in _messages) m.id};
+    _messages.insertAll(0, [
+      for (final m in persisted)
+        if (!liveIds.contains(m.id)) m,
+    ]);
+    notifyListeners();
+  }
 
   /// Whether the assistant is composing a reply (AC5 — typing indicator).
   bool get isAssistantTyping => _assistantTyping;
@@ -77,37 +110,48 @@ class TongtaiChatController extends ChangeNotifier {
     );
     _messages.add(message);
     notifyListeners();
+    // Write-through BEFORE any status advance: even if the app dies mid-send
+    // (offline period, crash), the composed message is already on disk
+    // (WTM-81 AC5 — messages preserved until processed).
+    await _persist(message);
 
     // Local pipeline: the message is immediately persisted-and-picked-up, so
     // it advances straight to delivered (no network hop exists to fail).
-    message = _update(message.id, ChatMessageStatus.delivered);
+    message = await _update(message.id, ChatMessageStatus.delivered);
 
     _assistantTyping = true;
     notifyListeners();
     try {
       final replyText = await _responder.reply(messages, trimmed);
       // The responder has consumed the message — mark it read (AC3).
-      _update(message.id, ChatMessageStatus.read);
-      _messages.add(
-        ChatMessage(
-          id: _idFactory(),
-          sender: ChatSender.assistant,
-          text: replyText,
-          timestamp: _clock(),
-          status: ChatMessageStatus.read,
-        ),
+      await _update(message.id, ChatMessageStatus.read);
+      final reply = ChatMessage(
+        id: _idFactory(),
+        sender: ChatSender.assistant,
+        text: replyText,
+        timestamp: _clock(),
+        status: ChatMessageStatus.read,
       );
+      _messages.add(reply);
+      await _persist(reply);
     } finally {
       _assistantTyping = false;
       notifyListeners();
     }
   }
 
-  ChatMessage _update(String id, ChatMessageStatus status) {
+  Future<void> _persist(ChatMessage message) async {
+    final store = _store;
+    if (store == null) return;
+    await store.save(message);
+  }
+
+  Future<ChatMessage> _update(String id, ChatMessageStatus status) async {
     final index = _messages.indexWhere((m) => m.id == id);
     final updated = _messages[index].copyWith(status: status);
     _messages[index] = updated;
     notifyListeners();
+    await _store?.updateStatus(id, status);
     return updated;
   }
 }

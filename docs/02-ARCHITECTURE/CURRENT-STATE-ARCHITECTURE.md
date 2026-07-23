@@ -8,10 +8,11 @@ lib/
   core/
     prefs.dart                  # sharedPreferencesProvider (platform seam, tách từ Hub khi split)
   database/                     # Drift/SQLite — LOCAL-FIRST heart
-    database.dart               # AppDatabase, 17 bảng, schemaVersion=3, forExecutor() cho test
+    database.dart               # AppDatabase, 18 bảng, schemaVersion=4, forExecutor() cho test
     database.g.dart             # generated (build_runner — không sửa tay)
     tables/*.dart               # 15 business entities + SyncQueueItem + SupplierFavorite
-    migrations/                 # v1→v3 (v3: products.description + FTS5)
+                                # + ChatMessage (WTM-81, local-only per ADR-TON-004)
+    migrations/                 # v1→v4 (v3: products.description + FTS5; v4: chat_messages)
     search/                     # FTS5: suppliers_fts/products_fts, đ-aware tokenizer, search service
   features/tongtai/
     navigation/tongtai_design_tokens.dart   # màu domain, typography, spacing, elevation, TongtaiTabs
@@ -26,8 +27,9 @@ lib/
     inventory/                  # product model/service, form, history, image source, stock alerts
     consumer/                   # customer model + directory service
     search/                     # unified search controller, ranking (+A/B), history store
-    chat/                       # AI Copilot chat: message model + controller (WTM-80;
-                                # responder thật nối ở WTM-82)
+    chat/                       # AI Copilot chat: message model + controller (WTM-80),
+                                # Drift store + search + hydrate (WTM-81, local-only
+                                # ADR-TON-004; responder thật nối ở WTM-82)
     ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
     ui/
       tongtai_app_shell.dart    # IndexedStack + bottom nav (5 tab)
