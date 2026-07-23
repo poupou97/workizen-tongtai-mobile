@@ -51,7 +51,13 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
     super.initState();
     _controller =
         widget.controller ??
-        TongtaiChatController(store: ref.read(tongtaiChatStoreProvider));
+        TongtaiChatController(
+          store: ref.read(tongtaiChatStoreProvider),
+          // Workizen AI Router (WTM-82): classifies the query, injects local
+          // business context, picks the best enabled provider, falls back to
+          // the rule-based offline reply.
+          responder: ref.read(tongtaiChatResponderProvider),
+        );
     _ownsController = widget.controller == null;
     _pickAttachment =
         widget.attachmentPicker ??

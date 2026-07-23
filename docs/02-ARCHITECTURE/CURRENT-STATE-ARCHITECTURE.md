@@ -32,7 +32,10 @@ lib/
     chat/                       # AI Copilot chat: message model + controller (WTM-80),
                                 # Drift store + search + hydrate (WTM-81, local-only
                                 # ADR-TON-004; responder thật nối ở WTM-82)
-    ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
+    ai/                         # BYOK đa provider: key store/validator, models,
+                                # client OpenAI-compatible, service, errors +
+                                # WorkizenAiRouter + context builder (WTM-82,
+                                # ADR-TON-006; Claude adapter = follow-up)
     ui/
       tongtai_root_gate.dart    # gate onboarding lần đầu (WTM-59; nối vào main: WTM-105)
       tongtai_app_shell.dart    # IndexedStack + bottom nav (5 tab)
