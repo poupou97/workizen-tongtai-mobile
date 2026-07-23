@@ -26,6 +26,8 @@ lib/
     inventory/                  # product model/service, form, history, image source, stock alerts
     consumer/                   # customer model + directory service
     search/                     # unified search controller, ranking (+A/B), history store
+    journey/                    # business goals (WTM-87): model, templates, form,
+                                # progress/pace, controller — AI plan chờ WTM-88
     ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
     ui/
       tongtai_app_shell.dart    # IndexedStack + bottom nav (5 tab)
@@ -33,7 +35,8 @@ lib/
       widgets/                  # persistent scroll/text-field
       screens/                  # home, producer, inventory, consumer, more, showcase,
                                 # supplier search/detail/favorites, product form,
-                                # stock alerts, unified search, customer list, AI key
+                                # stock alerts, unified search, customer list, AI key,
+                                # business goals list + multi-step goal form (WTM-87)
 test/                           # 519 tests: DB integration (in-memory), widget, unit
 ```
 
