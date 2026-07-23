@@ -24,13 +24,15 @@
 | Consumer | WTM-75 customer list |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
 | Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
+| Opportunity | WTM-91 feed: type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo (AI scoring chờ WTM-93) |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
 
-- Finance, Reports, Opportunity Hub **screens** (DB tables exist; UI does
-  not). Business Journey: goals UI có (WTM-87), step-plan/AI chờ WTM-88/89.
-  AI Copilot **chat UI** (client foundation only — xem các PR chat).
+- Finance, Reports **screens** (DB tables exist; UI does not). Business
+  Journey: goals UI có (WTM-87), step-plan/AI chờ WTM-88/89. Opportunity:
+  feed có (WTM-91), detail/AI scoring chờ WTM-92/93. AI Copilot chat: xem PR
+  WTM-80/81 (client foundation trên main).
 - Sprint-3+ backlog (WTM-76…102: consumer detail, chat, journey, reports…)
   exists in Jira with full ACs — not yet run.
 - App icon/splash = Flutter defaults (mascot "business fox" not finalized —

@@ -28,6 +28,8 @@ lib/
     search/                     # unified search controller, ranking (+A/B), history store
     journey/                    # business goals (WTM-87): model, templates, form,
                                 # progress/pace, controller — AI plan chờ WTM-88
+    opportunity/                # opportunity feed (WTM-91): model, reactions,
+                                # filter/sort controller — AI scoring chờ WTM-93
     ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
     ui/
       tongtai_root_gate.dart    # gate onboarding lần đầu (WTM-59; nối vào main: WTM-105)
@@ -37,7 +39,8 @@ lib/
       screens/                  # home, producer, inventory, consumer, more, showcase,
                                 # supplier search/detail/favorites, product form,
                                 # stock alerts, unified search, customer list, AI key,
-                                # business goals list + multi-step goal form (WTM-87)
+                                # business goals list + multi-step goal form (WTM-87),
+                                # opportunity feed (WTM-91)
 test/                           # 519 tests: DB integration (in-memory), widget, unit
 ```
 
