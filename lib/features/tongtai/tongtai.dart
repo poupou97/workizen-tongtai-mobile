@@ -73,6 +73,11 @@ export 'consumer/customer_form.dart';
 export 'consumer/customer_directory_controller.dart';
 export 'ui/screens/tongtai_customer_form_screen.dart';
 
+// Consumer — purchase history (WTM-77)
+export 'consumer/customer_order.dart';
+export 'consumer/customer_order_history_service.dart';
+export 'ui/screens/tongtai_customer_history_screen.dart';
+
 // Journey — business goals (WTM-87)
 export 'journey/business_goal.dart';
 export 'journey/business_goal_form.dart';

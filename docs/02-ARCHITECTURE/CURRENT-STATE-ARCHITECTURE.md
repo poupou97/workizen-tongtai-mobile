@@ -25,7 +25,8 @@ lib/
     producer/                   # supplier search service, profile, favorites (store+controller)
     inventory/                  # product model/service, form, history, image source, stock alerts
     consumer/                   # customer model, directory service/controller,
-                                # form + audit-trail history + duplicate check (WTM-76)
+                                # form + audit-trail history + duplicate check (WTM-76),
+                                # order model + purchase-history service (WTM-77)
     search/                     # unified search controller, ranking (+A/B), history store
     journey/                    # business goals (WTM-87): model, templates, form,
                                 # progress/pace, controller — AI plan chờ WTM-88
@@ -40,6 +41,7 @@ lib/
       screens/                  # home, producer, inventory, consumer, more, showcase,
                                 # supplier search/detail/favorites, product form,
                                 # customer form (add/edit, WTM-76),
+                                # customer purchase history (WTM-77),
                                 # stock alerts, unified search, customer list, AI key,
                                 # business goals list + multi-step goal form (WTM-87),
                                 # opportunity feed (WTM-91)
