@@ -98,6 +98,11 @@ export 'opportunity/opportunity.dart';
 export 'opportunity/opportunity_feed_controller.dart';
 export 'ui/screens/tongtai_opportunity_feed_screen.dart';
 
+// Workizen AI Router — multi-provider routing + context injection (WTM-82,
+// ADR-TON-006)
+export 'ai/workizen_ai_context.dart';
+export 'ai/workizen_ai_router.dart';
+
 // AI client — xAI Grok BYOK integration (WTM-61)
 export 'ai/tongtai_ai_provider_kind.dart';
 export 'ai/tongtai_ai_key_store.dart';

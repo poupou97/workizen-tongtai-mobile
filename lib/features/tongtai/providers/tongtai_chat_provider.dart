@@ -1,7 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../database/database.dart';
+import '../ai/workizen_ai_context.dart';
+import '../ai/workizen_ai_router.dart';
+import '../chat/chat_controller.dart';
 import '../chat/chat_message_store.dart';
+import 'tongtai_ai_provider.dart';
 
 /// The app's Drift database (platform resource, WTM-81).
 ///
@@ -21,3 +25,20 @@ final tongtaiDatabaseProvider = Provider<AppDatabase>((ref) {
 final tongtaiChatStoreProvider = Provider<ChatMessageStore>(
   (ref) => DriftChatMessageStore(ref.watch(tongtaiDatabaseProvider)),
 );
+
+/// Local business context injected into every Workizen AI turn (WTM-82).
+final tongtaiAiContextBuilderProvider = Provider<WorkizenAiContextBuilder>(
+  (ref) => WorkizenAiContextBuilder(),
+);
+
+/// The reply pipeline behind the chat screen (WTM-82, ADR-TON-006): Workizen
+/// AI Router over the BYOK service, with the rule-based offline fallback.
+/// Tests override this with a fixed responder.
+final tongtaiChatResponderProvider = Provider<ChatResponder>((ref) {
+  final context = ref.watch(tongtaiAiContextBuilderProvider);
+  return WorkizenAiRouter(
+    service: ref.watch(tongtaiAiServiceProvider),
+    context: context,
+    fallback: RuleBasedChatResponder(context: context),
+  );
+});
