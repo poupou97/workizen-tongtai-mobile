@@ -1,12 +1,28 @@
 # Approval Rules — Founder gates
 
-## Founder-ONLY (agent tuyệt đối không tự làm)
+## ⭐ Standing Authorization (Founder, 2026-07-23)
 
-- Merge/push/force-push **main**; xoá branch; rewrite history.
+Founder uỷ quyền vận hành cho PM Agent: **nếu một việc thuộc category đã được
+phê duyệt bởi Founder Decision / ADR / Product Principle / Working Rule trước
+đó → coi như ĐÃ DUYỆT, tiếp tục ngay, không hỏi lại.** Ví dụ (nguyên văn):
+documentation sync · ADR status update · Jira workflow · Confluence mirror ·
+technical refactoring · CI improvements · dependency updates · code cleanup ·
+backlog prioritization · story claiming · branch management · **merge (khi
+branch policy cho phép — hiện tại: CI xanh + trong phạm vi quyết định đã
+duyệt)**.
+
+- Chỉ ngắt Founder khi cần **quyết định chiến lược MỚI**.
+- Nếu không chắc: viết ADR proposal và tiếp tục với phương án an toàn nhất
+  cho tới khi Founder quyết.
+
+## Founder-ONLY (vẫn tuyệt đối không tự làm — chưa từng được duyệt)
+
 - Tag release, deploy, submit store, đóng Epic.
-- Quyết định kiến trúc (ADR), package/bundle id, tiền (billing/pricing),
-  dữ liệu người dùng (bất kỳ thứ gì chạm privacy red line).
-- Thay đổi các nguyên tắc trong PRODUCT-PRINCIPLES.
+- Force-push/rewrite history trên main.
+- Quyết định chiến lược MỚI: kiến trúc chưa có ADR, package/bundle id, tiền
+  (billing/pricing), dữ liệu người dùng (bất kỳ thứ gì chạm privacy red line).
+- Thay đổi các nguyên tắc trong PRODUCT-PRINCIPLES (trừ khi chính Founder ra
+  quyết định, như D-7/D-9 ngày 2026-07-23).
 
 ## Agent tự quyết (trong feature branch)
 

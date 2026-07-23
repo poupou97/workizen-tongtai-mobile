@@ -24,6 +24,13 @@ PM Agent được phép: cập nhật file này, đánh dấu SUPERSEDED, sync A
 Confluence/Jira, xoá khuyến nghị lỗi thời — **không cần Founder duyệt thêm
 cho việc đồng bộ tài liệu.**
 
+**Standing Authorization (2026-07-23):** việc thuộc category đã duyệt trước
+đó (docs sync, ADR status, Jira, CI, refactor, dependency update, cleanup,
+backlog, claim story, branch, merge khi policy cho phép) → tự động APPROVED,
+tiếp tục ngay. Chỉ ngắt Founder khi cần quyết định chiến lược MỚI; không chắc
+→ ADR proposal + phương án an toàn nhất. Chi tiết:
+[../06-GOVERNANCE/APPROVAL-RULES.md](../06-GOVERNANCE/APPROVAL-RULES.md).
+
 ## Còn mở (chưa quyết)
 
 - Mascot "business fox" → app icon/splash (WTM-11 tracker).
