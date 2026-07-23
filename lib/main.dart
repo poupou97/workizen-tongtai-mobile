@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/prefs.dart';
 import 'features/tongtai/navigation/tongtai_design_tokens.dart';
-import 'features/tongtai/ui/tongtai_app_shell.dart';
+import 'features/tongtai/ui/tongtai_root_gate.dart';
 
 /// Tổng Tài — AI-First Business OS (Workizen).
 ///
@@ -36,7 +36,7 @@ class TongtaiApp extends StatelessWidget {
           seedColor: TongtaiDesignTokens.producerGreen,
         ),
       ),
-      home: const TongtaiAppShell(),
+      home: const TongtaiRootGate(),
     );
   }
 }

@@ -7,6 +7,9 @@
   developed autonomously by the Evidence-Driven Runtime (3 batches + pilot).
 - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
   app runs standalone; `flutter analyze` clean; **519/519 tests passing**.
+- **Post-split fixes:** WTM-105 — split regression: `main.dart` bypassed
+  `TongtaiRootGate` so the first-launch tutorial never showed; rewired + 5
+  app-level boot tests (suite: 524) + ADR-TON-003 (repo split) recorded.
 
 ## Shipped stories (all at Jira "Code Review", code on this repo's main)
 
@@ -21,6 +24,7 @@
 | Consumer | WTM-75 customer list |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
 | Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
+| Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
 

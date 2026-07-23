@@ -4,7 +4,7 @@
 
 ```
 lib/
-  main.dart                     # entry → ProviderScope(+prefs override) → TongtaaiApp → TongtaiAppShell
+  main.dart                     # entry → ProviderScope(+prefs override) → TongtaiApp → TongtaiRootGate
   core/
     prefs.dart                  # sharedPreferencesProvider (platform seam, tách từ Hub khi split)
   database/                     # Drift/SQLite — LOCAL-FIRST heart
@@ -30,6 +30,7 @@ lib/
                                 # progress/pace, controller — AI plan chờ WTM-88
     ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
     ui/
+      tongtai_root_gate.dart    # gate onboarding lần đầu (WTM-59; nối vào main: WTM-105)
       tongtai_app_shell.dart    # IndexedStack + bottom nav (5 tab)
       tongtai_bottom_nav.dart
       widgets/                  # persistent scroll/text-field
@@ -50,7 +51,8 @@ test/                           # 519 tests: DB integration (in-memory), widget,
 
 ## Dòng chảy chính
 
-1. `main()` → nạp SharedPreferences → override provider → `TongtaiAppShell`.
+1. `main()` → nạp SharedPreferences → override provider → `TongtaiRootGate`
+   (tutorial lần đầu, WTM-59 — nối lại sau bug split WTM-105) → `TongtaiAppShell`.
 2. Shell = IndexedStack 5 tab; tab state persist (WTM-56); deep link `tongtai://`
    parse → route (WTM-57); onboarding gate lần đầu (WTM-59).
 3. Data: screens → services/controllers → Drift (`AppDatabase`) hoặc stores

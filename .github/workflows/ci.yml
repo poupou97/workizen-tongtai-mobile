@@ -1,0 +1,60 @@
+# CI — evidence gate on every PR (WTM-107).
+#
+# Mirrors the local Evidence-Driven chain exactly: format check → analyze →
+# full test suite. Flutter is pinned to the same framework revision the repo
+# is developed and verified against (Dart SDK ^3.12.2 needs a main-channel
+# build; see docs/02-ARCHITECTURE/CURRENT-STATE-ARCHITECTURE.md), so CI
+# results are reproducible and match local evidence. No secrets, no telemetry.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main] # main is Founder-merge-only; PRs already gate it
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Framework revision matching the verified local toolchain (Flutter 3.47.0-0.1.pre).
+  FLUTTER_REVISION: f68aaca9b0
+
+jobs:
+  verify:
+    name: format + analyze + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache pinned Flutter SDK
+        id: flutter-cache
+        uses: actions/cache@v4
+        with:
+          path: flutter-sdk
+          key: flutter-sdk-${{ env.FLUTTER_REVISION }}-${{ runner.os }}
+
+      - name: Fetch pinned Flutter SDK
+        if: steps.flutter-cache.outputs.cache-hit != 'true'
+        run: |
+          git clone --filter=blob:none https://github.com/flutter/flutter.git flutter-sdk
+          git -C flutter-sdk checkout "$FLUTTER_REVISION"
+
+      - name: Add Flutter to PATH
+        run: echo "$GITHUB_WORKSPACE/flutter-sdk/bin" >> "$GITHUB_PATH"
+
+      - name: Toolchain versions
+        run: flutter --version
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Format check (no drift allowed)
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyze (must be clean)
+        run: flutter analyze
+
+      - name: Tests (full suite must pass)
+        run: flutter test
