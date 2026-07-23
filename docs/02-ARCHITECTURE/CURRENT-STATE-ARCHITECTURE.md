@@ -32,6 +32,8 @@ lib/
                                 # progress/pace, controller — AI plan chờ WTM-88
     opportunity/                # opportunity feed (WTM-91): model, reactions,
                                 # filter/sort controller — AI scoring chờ WTM-93
+    chat/                       # AI Copilot chat: message model + controller (WTM-80;
+                                # responder thật nối ở WTM-82)
     ai/                         # xAI Grok BYOK: key store/validator, models, client, service, errors
     ui/
       tongtai_root_gate.dart    # gate onboarding lần đầu (WTM-59; nối vào main: WTM-105)
@@ -44,7 +46,8 @@ lib/
                                 # customer purchase history (WTM-77),
                                 # stock alerts, unified search, customer list, AI key,
                                 # business goals list + multi-step goal form (WTM-87),
-                                # opportunity feed (WTM-91)
+                                # opportunity feed (WTM-91),
+                                # AI Copilot chat (WTM-80)
 test/                           # 519 tests: DB integration (in-memory), widget, unit
 ```
 

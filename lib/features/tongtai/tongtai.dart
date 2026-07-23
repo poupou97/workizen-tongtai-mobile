@@ -67,6 +67,11 @@ export 'ui/screens/tongtai_stock_alerts_screen.dart';
 export 'consumer/customer.dart';
 export 'consumer/customer_directory_service.dart';
 
+// Chat — AI Copilot chat UI (WTM-80)
+export 'chat/chat_message.dart';
+export 'chat/chat_controller.dart';
+export 'ui/screens/tongtai_chat_screen.dart';
+
 // Consumer — add/edit customer (WTM-76)
 export 'consumer/customer_history.dart';
 export 'consumer/customer_form.dart';
