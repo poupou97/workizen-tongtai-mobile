@@ -75,6 +75,29 @@ export 'ui/screens/tongtai_chat_screen.dart';
 // Chat — message persistence, local-only per ADR-TON-004 (WTM-81)
 export 'chat/chat_message_store.dart';
 
+// Consumer — add/edit customer (WTM-76)
+export 'consumer/customer_history.dart';
+export 'consumer/customer_form.dart';
+export 'consumer/customer_directory_controller.dart';
+export 'ui/screens/tongtai_customer_form_screen.dart';
+
+// Consumer — purchase history (WTM-77)
+export 'consumer/customer_order.dart';
+export 'consumer/customer_order_history_service.dart';
+export 'ui/screens/tongtai_customer_history_screen.dart';
+
+// Journey — business goals (WTM-87)
+export 'journey/business_goal.dart';
+export 'journey/business_goal_form.dart';
+export 'journey/business_goal_controller.dart';
+export 'ui/screens/tongtai_goal_form_screen.dart';
+export 'ui/screens/tongtai_goals_screen.dart';
+
+// Opportunity — feed (WTM-91)
+export 'opportunity/opportunity.dart';
+export 'opportunity/opportunity_feed_controller.dart';
+export 'ui/screens/tongtai_opportunity_feed_screen.dart';
+
 // AI client — xAI Grok BYOK integration (WTM-61)
 export 'ai/tongtai_ai_provider_kind.dart';
 export 'ai/tongtai_ai_key_store.dart';

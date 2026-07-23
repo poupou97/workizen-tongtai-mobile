@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'customer_history.dart';
+
 /// Value tier of a customer, derived from lifetime spend (WTM-75 AC: visual
 /// indicators for VIP / high-value customers). Mirrors the tiered CRM model in
 /// `docs/tongtai/SCREEN-CONSUMER.md`.
@@ -44,7 +46,7 @@ const double kCustomerTierVipMin = 30000000; // ≥ 30M ₫
 const double kCustomerTierGoldMin = 10000000; // ≥ 10M ₫
 const double kCustomerTierSilverMin = 3000000; // ≥ 3M ₫
 
-/// A customer in the CRM directory (WTM-75).
+/// A customer in the CRM directory (WTM-75, extended by WTM-76 Add/Edit).
 ///
 /// Pure, immutable domain model — no Flutter/UI or persistence concerns — so it
 /// is trivially unit-testable and reusable by the directory service, screens and
@@ -59,6 +61,12 @@ class Customer {
     required this.orderCount,
     required this.totalSpent,
     required this.lastPurchaseDate,
+    this.email = '',
+    this.addresses = const [],
+    this.segments = const [],
+    this.tags = const [],
+    this.notes = '',
+    this.history = const [],
   });
 
   /// Stable identifier.
@@ -81,8 +89,61 @@ class Customer {
   /// for the value [tier].
   final double totalSpent;
 
-  /// When the customer last purchased — their *recency*.
-  final DateTime lastPurchaseDate;
+  /// When the customer last purchased — their *recency*. `null` for a customer
+  /// who has not bought anything yet (e.g. just added via the WTM-76 form).
+  final DateTime? lastPurchaseDate;
+
+  /// Contact email; empty when unknown (WTM-76 AC1).
+  final String email;
+
+  /// Delivery/contact addresses — a customer can have several (WTM-76 AC2).
+  final List<String> addresses;
+
+  /// Audience segments this customer belongs to, e.g. "Loyal Customers"
+  /// (WTM-76 AC1; matches the JSON-array `segments` column in the Drift table).
+  final List<String> segments;
+
+  /// Seller-defined tags for quick annotation (WTM-76 AC3).
+  final List<String> tags;
+
+  /// Free-form seller notes (WTM-76 AC3).
+  final String notes;
+
+  /// Edit history, newest first (WTM-76 AC4 — full audit trail).
+  final List<CustomerRevision> history;
+
+  /// Copy with individual field overrides. [lastPurchaseDate] cannot be cleared
+  /// via copyWith (pass-through when omitted) — no current caller needs that.
+  Customer copyWith({
+    String? name,
+    String? phone,
+    String? location,
+    int? orderCount,
+    double? totalSpent,
+    DateTime? lastPurchaseDate,
+    String? email,
+    List<String>? addresses,
+    List<String>? segments,
+    List<String>? tags,
+    String? notes,
+    List<CustomerRevision>? history,
+  }) {
+    return Customer(
+      id: id,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      location: location ?? this.location,
+      orderCount: orderCount ?? this.orderCount,
+      totalSpent: totalSpent ?? this.totalSpent,
+      lastPurchaseDate: lastPurchaseDate ?? this.lastPurchaseDate,
+      email: email ?? this.email,
+      addresses: addresses ?? this.addresses,
+      segments: segments ?? this.segments,
+      tags: tags ?? this.tags,
+      notes: notes ?? this.notes,
+      history: history ?? this.history,
+    );
+  }
 
   /// Value tier derived from [totalSpent] against the tier thresholds: VIP is
   /// the highest, Bronze the lowest.

@@ -7,6 +7,9 @@
   developed autonomously by the Evidence-Driven Runtime (3 batches + pilot).
 - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
   app runs standalone; `flutter analyze` clean; **519/519 tests passing**.
+- **Post-split fixes:** WTM-105 — split regression: `main.dart` bypassed
+  `TongtaiRootGate` so the first-launch tutorial never showed; rewired + 5
+  app-level boot tests (suite: 524) + ADR-TON-003 (repo split) recorded.
 
 ## Shipped stories (all at Jira "Code Review", code on this repo's main)
 
@@ -18,9 +21,12 @@
 | Producer | WTM-63 supplier search · 64 supplier detail · 65 favorites |
 | Inventory | WTM-68 product list · 69 add/edit product · 70 stock alerts |
 | Search | WTM-72 FTS5 (đ-aware) · 73 unified search · 74 ranking + A/B |
-| Consumer | WTM-75 customer list |
+| Consumer | WTM-75 customer list · 76 add/edit customer (form, multi-address, audit trail, duplicate check) · 77 purchase history (orders, filters, AOV/repurchase) |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
 | Chat | WTM-80 AI Copilot chat UI (bubbles/ticks/attachments/typing) · 81 persistence SQLite v4 (hydrate/search, local-only ADR-TON-004; AI routing chờ WTM-82) |
+| Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
+| Opportunity | WTM-91 feed: type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo (AI scoring chờ WTM-93) |
+| Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
 
