@@ -1,7 +1,7 @@
 # ADR-TON-004: Chat Persistence — Local-Only in MVP
 
-**Status:** 🟡 PROPOSED (agent, 2026-07-22 — awaiting Founder ratification;
-implemented per the recommendation, per the self-planning mandate)
+**Status:** ✅ ACCEPTED (Founder, 2026-07-23 — "duyệt", ratifying Option A as
+proposed by the agent on 2026-07-22 and implemented in WTM-81/PR #8)
 **Decides:** how WTM-81's ACs "encryption" and "automatic syncing to cloud
 backend" are read against recorded doctrine
 **Relates to:** OPEN-DECISIONS D-5 (Backend & Sync) · D-7 (Analytics/Privacy) ·
