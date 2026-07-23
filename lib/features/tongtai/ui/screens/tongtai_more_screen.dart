@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
+import 'tongtai_export_screen.dart';
 import 'tongtai_goals_screen.dart';
 
 /// More/Settings screen for Tổng Tài
@@ -74,6 +75,15 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiGoalsScreen(),
+                    ),
+                  ),
+                ),
+                _SettingsItem(
+                  icon: Icons.ios_share,
+                  label: 'Export Data (CSV)',
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiExportScreen(),
                     ),
                   ),
                 ),

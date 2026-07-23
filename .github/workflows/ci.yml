@@ -8,9 +8,7 @@
 name: CI
 
 on:
-  pull_request:
-  push:
-    branches-ignore: [main] # main is Founder-merge-only; PRs already gate it
+  pull_request: # sole trigger — a push trigger too would run every PR twice
 
 concurrency:
   group: ci-${{ github.ref }}

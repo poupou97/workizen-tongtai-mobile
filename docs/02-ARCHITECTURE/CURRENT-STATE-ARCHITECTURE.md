@@ -36,6 +36,8 @@ lib/
                                 # client OpenAI-compatible, service, errors +
                                 # WorkizenAiRouter + context builder (WTM-82,
                                 # ADR-TON-006; Claude adapter = follow-up)
+    export/                     # CSV exporter (BOM/quoting/date-range) + delivery
+                                # seam (share sheet) + history store (WTM-99)
     ui/
       tongtai_root_gate.dart    # gate onboarding lần đầu (WTM-59; nối vào main: WTM-105)
       tongtai_app_shell.dart    # IndexedStack + bottom nav (5 tab)
@@ -48,7 +50,7 @@ lib/
                                 # stock alerts, unified search, customer list, AI key,
                                 # business goals list + multi-step goal form (WTM-87),
                                 # opportunity feed (WTM-91),
-                                # AI Copilot chat (WTM-80)
+                                # AI Copilot chat (WTM-80), data export (WTM-99)
 test/                           # 519 tests: DB integration (in-memory), widget, unit
 ```
 
