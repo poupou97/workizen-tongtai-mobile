@@ -32,7 +32,8 @@ void main() {
 
   test('schema opens and reports the current version', () async {
     // v3 (WTM-72): added products.description + the FTS5 search index.
-    expect(db.schemaVersion, 3);
+    // v4 (WTM-81): added the per-message chat_messages_table.
+    expect(db.schemaVersion, 4);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/chat/chat_controller.dart';
 import 'package:tongtai/features/tongtai/chat/chat_message.dart';
+import 'package:tongtai/features/tongtai/chat/chat_message_store.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_chat_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
 
@@ -72,6 +75,9 @@ void main() {
       final controller = makeController(responder);
 
       final pending = controller.send('hi');
+      // Let send() run its write-through persistence (WTM-81) and reach the
+      // responder; it is now suspended on the gated reply.
+      await Future<void>.delayed(Duration.zero);
       // Reply not yet produced: typing, message delivered but not read.
       expect(controller.isAssistantTyping, isTrue);
       expect(controller.messages.single.status, ChatMessageStatus.delivered);
@@ -123,11 +129,18 @@ void main() {
   });
 
   group('TongtaiChatScreen widget', () {
+    // The screen reads the chat-store provider only when it builds its own
+    // controller; these tests inject one, so an empty ProviderScope suffices.
     Widget host(
       TongtaiChatController controller, {
       Future<String?> Function()? picker,
-    }) => MaterialApp(
-      home: TongtaiChatScreen(controller: controller, attachmentPicker: picker),
+    }) => ProviderScope(
+      child: MaterialApp(
+        home: TongtaiChatScreen(
+          controller: controller,
+          attachmentPicker: picker,
+        ),
+      ),
     );
 
     testWidgets('AC2: typing (emoji included) and sending clears the input '
@@ -273,11 +286,47 @@ void main() {
     testWidgets('the chat action on Home opens the chat screen', (
       tester,
     ) async {
-      await tester.pumpWidget(const MaterialApp(home: TongtaiHomeScreen()));
+      // No controller injected here, so the screen builds its own over the
+      // chat-store provider — override it away from the real database.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            tongtaiChatStoreProvider.overrideWithValue(
+              InMemoryChatMessageStore(),
+            ),
+          ],
+          child: const MaterialApp(home: TongtaiHomeScreen()),
+        ),
+      );
       await tester.tap(find.byKey(const Key('home-open-chat')));
       await tester.pumpAndSettle();
       expect(find.byType(TongtaiChatScreen), findsOneWidget);
       expect(find.text('AI Copilot'), findsOneWidget);
+    });
+
+    testWidgets('WTM-81: a persisted conversation hydrates into the screen', (
+      tester,
+    ) async {
+      final store = InMemoryChatMessageStore();
+      await store.save(
+        ChatMessage(
+          id: 'old-1',
+          sender: ChatSender.seller,
+          text: 'tin nhắn từ phiên trước',
+          timestamp: DateTime(2026, 7, 21, 8),
+          status: ChatMessageStatus.read,
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [tongtaiChatStoreProvider.overrideWithValue(store)],
+          child: const MaterialApp(home: TongtaiChatScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('tin nhắn từ phiên trước'), findsOneWidget);
     });
   });
 }

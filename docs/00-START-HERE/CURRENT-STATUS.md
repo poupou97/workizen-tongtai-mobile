@@ -23,26 +23,16 @@
 | Search | WTM-72 FTS5 (đ-aware) · 73 unified search · 74 ranking + A/B |
 | Consumer | WTM-75 customer list · 76 add/edit customer (form, multi-address, audit trail, duplicate check) · 77 purchase history (orders, filters, AOV/repurchase) |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
+| Chat | WTM-80 AI Copilot chat UI (bubbles/ticks/attachments/typing) · 81 persistence SQLite v4 (hydrate/search, local-only ADR-TON-004; AI routing chờ WTM-82) |
 | Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
 | Opportunity | WTM-91 feed: type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo (AI scoring chờ WTM-93) |
-| Chat | WTM-80 AI Copilot chat UI (bubbles/ticks/attachments/typing — local-first; AI routing chờ WTM-82) |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
 
-- Finance, Reports **screens** (DB tables exist; UI does not). Business
-  Journey: goals UI có (WTM-87), step-plan/AI chờ WTM-88/89. Opportunity:
-  feed có (WTM-91), detail/AI scoring chờ WTM-92/93. AI Copilot chat: xem PR
-  WTM-80/81 (client foundation trên main).
-- Sprint-3+ backlog (WTM-78…102: AI segmentation, chat, reports…) exists in
-  Jira with full ACs — WTM-76/77 done (Sprint 3), 80/81 ở PR.
-| Chat | WTM-80 AI Copilot chat UI (bubbles/ticks/attachments/typing — local-first; AI routing chờ WTM-82) |
-
-## NOT built yet (honest gaps)
-
 - Finance, Reports, Business Journey, Opportunity Hub **screens** (DB tables
-  exist; UI does not). AI Copilot chat: UI có (WTM-80) nhưng **AI routing**
-  (WTM-82) và **persistence** (WTM-81) chưa nối — reply hiện là echo cục bộ.
+  exist; UI does not). AI Copilot chat: UI (WTM-80) + persistence (WTM-81)
+  có; **AI routing** (WTM-82) chưa nối — reply hiện là echo cục bộ.
 - Sprint-3+ backlog (WTM-76…102: consumer detail, chat, journey, reports…)
   exists in Jira with full ACs — not yet run.
 - App icon/splash = Flutter defaults (mascot "business fox" not finalized —

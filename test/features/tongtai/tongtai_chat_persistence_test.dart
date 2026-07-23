@@ -1,0 +1,300 @@
+import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/database/database.dart';
+import 'package:tongtai/database/migrations/schema_integrity.dart';
+import 'package:tongtai/database/migrations/tongtai_migrations.dart';
+import 'package:tongtai/features/tongtai/chat/chat_controller.dart';
+import 'package:tongtai/features/tongtai/chat/chat_message.dart';
+import 'package:tongtai/features/tongtai/chat/chat_message_store.dart';
+
+/// WTM-81 — Chat Message Persistence (local-only per ADR-TON-004).
+///
+///  - AC1 (local-first reading): messages persist in SQLite; nothing leaves
+///    the device (no sync-outbox rows — asserted).
+///  - AC2: sender / timestamp / read-status live as real indexed columns.
+///  - AC3: history searchable by keyword or date at the store layer.
+///  - AC5: messages survive a restart (fresh controller over the same DB),
+///    including messages written before a reply arrived.
+class _FixedResponder implements ChatResponder {
+  const _FixedResponder(this.replyText);
+  final String replyText;
+
+  @override
+  Future<String> reply(List<ChatMessage> history, String prompt) async =>
+      replyText;
+}
+
+void main() {
+  late AppDatabase db;
+  late DriftChatMessageStore store;
+
+  setUp(() {
+    db = AppDatabase.forExecutor(NativeDatabase.memory());
+    store = DriftChatMessageStore(db);
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  ChatMessage message(
+    String id, {
+    ChatSender sender = ChatSender.seller,
+    String text = 'hello',
+    DateTime? at,
+    ChatMessageStatus status = ChatMessageStatus.sending,
+    ChatAttachment? attachment,
+  }) => ChatMessage(
+    id: id,
+    sender: sender,
+    text: text,
+    timestamp: at ?? DateTime(2026, 7, 22, 9),
+    status: status,
+    attachment: attachment,
+  );
+
+  group('schema v4', () {
+    test('chat_messages_table exists with its metadata indices (AC2)', () async {
+      final integrity = await verifyTongtaiSchema(db);
+      expect(integrity.isValid, isTrue, reason: '$integrity');
+
+      final tables = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+            variables: [Variable(kChatMessagesTableName)],
+          )
+          .get();
+      expect(tables, hasLength(1));
+
+      final indices = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=?",
+            variables: [Variable(kChatMessagesTableName)],
+          )
+          .get();
+      final names = [for (final row in indices) row.data['name'] as String];
+      expect(names, contains('chat_messages_conversation'));
+      expect(names, contains('chat_messages_sent_at'));
+    });
+
+    test('a v3 database upgrades to v4 gaining only the chat table', () async {
+      // Simulate the upgrade step exactly as buildTongtaiMigrationStrategy
+      // runs it for `from < 4`: create the table on a database that lacks it.
+      await db.customStatement('DROP TABLE $kChatMessagesTableName');
+      final before = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+            variables: [Variable(kChatMessagesTableName)],
+          )
+          .get();
+      expect(before, isEmpty);
+
+      final migrator = db.createMigrator();
+      final chatTable = db.allTables.firstWhere(
+        (t) => t.actualTableName == kChatMessagesTableName,
+      );
+      await migrator.createTable(chatTable);
+
+      final integrity = await verifyTongtaiSchema(db);
+      expect(integrity.isValid, isTrue, reason: '$integrity');
+      // Round-trip works on the upgraded schema.
+      await store.save(message('up-1'));
+      expect(await store.loadAll(), hasLength(1));
+    });
+
+    test('schema version constant advanced to 4 in lock-step', () {
+      expect(kTongtaiSchemaVersion, 4);
+      expect(db.schemaVersion, 4);
+    });
+  });
+
+  group('DriftChatMessageStore', () {
+    test('save + loadAll round-trips every field, oldest first', () async {
+      await store.save(
+        message(
+          'm2',
+          sender: ChatSender.assistant,
+          text: 'chào bạn',
+          at: DateTime(2026, 7, 22, 9, 5),
+          status: ChatMessageStatus.read,
+        ),
+      );
+      await store.save(
+        message(
+          'm1',
+          text: 'xin chào',
+          at: DateTime(2026, 7, 22, 9, 0),
+          status: ChatMessageStatus.delivered,
+          attachment: const ChatAttachment(
+            path: '/data/user/0/app/hoa-don.jpg',
+            name: 'hoa-don.jpg',
+          ),
+        ),
+      );
+
+      final all = await store.loadAll();
+      expect(all.map((m) => m.id), ['m1', 'm2']); // sorted by sentAt
+      final first = all.first;
+      expect(first.sender, ChatSender.seller);
+      expect(first.text, 'xin chào');
+      expect(first.timestamp, DateTime(2026, 7, 22, 9, 0));
+      expect(first.status, ChatMessageStatus.delivered);
+      expect(first.attachment!.path, '/data/user/0/app/hoa-don.jpg');
+      expect(first.attachment!.name, 'hoa-don.jpg');
+      expect(all.last.attachment, isNull);
+    });
+
+    test('updateStatus persists the read receipt (AC2)', () async {
+      await store.save(message('m1', status: ChatMessageStatus.delivered));
+      await store.updateStatus('m1', ChatMessageStatus.read);
+      final all = await store.loadAll();
+      expect(all.single.status, ChatMessageStatus.read);
+    });
+
+    test('search is case-insensitive for Vietnamese keywords (AC3)', () async {
+      // The keyword match runs in Dart (not SQLite LIKE), so case folding
+      // covers Vietnamese letters too: "QUẠT" finds "quạt".
+      await store.save(message('m1', text: 'Nhập thêm quạt mini'));
+      await store.save(
+        message('m2', text: 'Doanh thu tháng 7', at: DateTime(2026, 7, 22, 10)),
+      );
+
+      final hits = await store.search(const ChatHistoryQuery(text: 'QUẠT'));
+      expect(hits.map((m) => m.id), ['m1']);
+    });
+
+    test('search by ASCII keyword ignores case (AC3)', () async {
+      await store.save(message('m1', text: 'Order DH-2026-0101 shipped'));
+      await store.save(
+        message('m2', text: 'khác', at: DateTime(2026, 7, 22, 10)),
+      );
+      final hits = await store.search(const ChatHistoryQuery(text: 'dh-2026'));
+      expect(hits.map((m) => m.id), ['m1']);
+    });
+
+    test('wildcard characters in user input match literally', () async {
+      await store.save(message('m1', text: 'discount 100%'));
+      await store.save(
+        message('m2', text: 'discount 100x', at: DateTime(2026, 7, 22, 10)),
+      );
+      final hits = await store.search(const ChatHistoryQuery(text: '100%'));
+      expect(hits.map((m) => m.id), ['m1']);
+    });
+
+    test('search by inclusive date range (AC3)', () async {
+      await store.save(message('m1', at: DateTime(2026, 7, 20)));
+      await store.save(message('m2', at: DateTime(2026, 7, 21)));
+      await store.save(message('m3', at: DateTime(2026, 7, 22)));
+
+      final hits = await store.search(
+        ChatHistoryQuery(
+          from: DateTime(2026, 7, 20),
+          to: DateTime(2026, 7, 21),
+        ),
+      );
+      expect(hits.map((m) => m.id), ['m1', 'm2']);
+    });
+
+    test('keyword and date filters combine', () async {
+      await store.save(message('m1', text: 'quạt', at: DateTime(2026, 7, 20)));
+      await store.save(message('m2', text: 'quạt', at: DateTime(2026, 7, 22)));
+      final hits = await store.search(
+        ChatHistoryQuery(text: 'quạt', from: DateTime(2026, 7, 21)),
+      );
+      expect(hits.map((m) => m.id), ['m2']);
+    });
+  });
+
+  group('controller persistence (AC5 — survives restart)', () {
+    TongtaiChatController makeController(
+      ChatMessageStore store, {
+      String prefix = 'a',
+    }) {
+      var id = 0;
+      return TongtaiChatController(
+        responder: const _FixedResponder('đã nhận'),
+        store: store,
+        clock: () => DateTime(2026, 7, 22, 9, id + 1),
+        idFactory: () => '$prefix${++id}',
+      );
+    }
+
+    test(
+      'send writes through; a fresh controller hydrates the history',
+      () async {
+        final first = makeController(store);
+        await first.send('xin chào');
+        expect(first.messages, hasLength(2));
+
+        // "Restart": new controller over the same database.
+        final second = makeController(store, prefix: 'b');
+        expect(second.isHydrated, isFalse);
+        await second.hydrate();
+        expect(second.isHydrated, isTrue);
+        expect(second.messages, hasLength(2));
+        expect(second.messages.first.text, 'xin chào');
+        expect(second.messages.first.status, ChatMessageStatus.read);
+        expect(second.messages.last.text, 'đã nhận');
+      },
+    );
+
+    test('a message keeps its delivered state on disk if no reply ever came '
+        '(offline shape)', () async {
+      // Responder that never completes within the test: simulate by writing
+      // through the store directly the way send() does before the reply.
+      await store.save(message('m1', status: ChatMessageStatus.sending));
+      await store.updateStatus('m1', ChatMessageStatus.delivered);
+
+      final revived = makeController(store);
+      await revived.hydrate();
+      expect(revived.messages.single.status, ChatMessageStatus.delivered);
+    });
+
+    test(
+      'hydrate is idempotent and does not duplicate live messages',
+      () async {
+        final controller = makeController(store);
+        await controller.send('one');
+        await controller.hydrate();
+        await controller.hydrate();
+        expect(controller.messages, hasLength(2)); // seller + reply, no dupes
+      },
+    );
+
+    test('ADR-TON-004: chat writes create NO sync-outbox rows', () async {
+      final controller = makeController(store);
+      await controller.send('bí mật kinh doanh');
+      final outbox = await db.select(db.syncQueueItemsTable).get();
+      expect(outbox, isEmpty);
+    });
+  });
+
+  group('InMemoryChatMessageStore parity', () {
+    test('round-trip + search behave like the Drift store', () async {
+      final mem = InMemoryChatMessageStore();
+      await mem.save(
+        message('m1', text: 'quạt mini', at: DateTime(2026, 7, 20)),
+      );
+      await mem.save(
+        message('m2', text: 'doanh thu', at: DateTime(2026, 7, 22)),
+      );
+      await mem.updateStatus('m1', ChatMessageStatus.read);
+
+      expect((await mem.loadAll()).map((m) => m.id), ['m1', 'm2']);
+      expect(
+        (await mem.search(
+          const ChatHistoryQuery(text: 'QUẠT MINI'),
+        )).map((m) => m.id),
+        ['m1'],
+      );
+      expect(
+        (await mem.search(
+          ChatHistoryQuery(from: DateTime(2026, 7, 21)),
+        )).map((m) => m.id),
+        ['m2'],
+      );
+      expect((await mem.loadAll()).first.status, ChatMessageStatus.read);
+    });
+  });
+}

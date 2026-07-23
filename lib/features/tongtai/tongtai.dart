@@ -72,6 +72,9 @@ export 'chat/chat_message.dart';
 export 'chat/chat_controller.dart';
 export 'ui/screens/tongtai_chat_screen.dart';
 
+// Chat — message persistence, local-only per ADR-TON-004 (WTM-81)
+export 'chat/chat_message_store.dart';
+
 // Consumer — add/edit customer (WTM-76)
 export 'consumer/customer_history.dart';
 export 'consumer/customer_form.dart';

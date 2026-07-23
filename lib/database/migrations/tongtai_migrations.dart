@@ -22,6 +22,10 @@
 /// [MigrationStrategy.onCreate]; an existing v2 install runs the `from < 3` step
 /// which adds the column, creates the FTS schema, and backfills + optimizes the
 /// index from the rows already on disk.
+///
+/// ## Schema v4 (WTM-81 — Chat Message Persistence)
+/// v4 adds the per-message `chat_messages_table` (+ conversation and sent-at
+/// indices) backing the AI Copilot chat. Local-only by ADR-TON-004.
 library;
 
 import 'package:drift/drift.dart';
@@ -34,7 +38,11 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 3;
+const int kTongtaiSchemaVersion = 4;
+
+/// Drift table name of the per-message chat table (WTM-81), added in schema
+/// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
+const String kChatMessagesTableName = 'chat_messages_table';
 
 /// Drift table name of the Supplier Favorites table (WTM-65), added in schema
 /// v2. Kept as a constant so the [MigrationStrategy.onUpgrade] step can locate
@@ -96,6 +104,15 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await createTongtaiFtsSchema(db);
         await backfillTongtaiFts(db);
         await optimizeTongtaiFts(db);
+      }
+      if (from < 4) {
+        // v4 (WTM-81 — per-message chat history). Fresh installs already got
+        // the table (and its indices) via `createAll`; upgrading installs gain
+        // it here. Index creation is part of createTable for @TableIndex.
+        final chatMessages = db.allTables.firstWhere(
+          (t) => t.actualTableName == kChatMessagesTableName,
+        );
+        await m.createTable(chatMessages);
       }
     },
     beforeOpen: (OpeningDetails details) async {

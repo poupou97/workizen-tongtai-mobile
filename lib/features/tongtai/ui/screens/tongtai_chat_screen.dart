@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../chat/chat_controller.dart';
 import '../../chat/chat_message.dart';
 import '../../inventory/product_image_source.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_chat_provider.dart';
 
 /// Chat screen (WTM-80) — the conversation surface for the AI Copilot.
 ///
@@ -18,12 +20,14 @@ import '../../navigation/tongtai_design_tokens.dart';
 /// - AC5: assistant typing indicator + local presence chip in the app bar.
 ///
 /// The reply pipeline is [TongtaiChatController]'s injectable [ChatResponder];
-/// WTM-82 swaps in the real AI routing over the BYOK client.
-class TongtaiChatScreen extends StatefulWidget {
+/// WTM-82 swaps in the real AI routing over the BYOK client. Conversation
+/// history persists through [tongtaiChatStoreProvider] (WTM-81, local-only
+/// per ADR-TON-004) when the screen builds its own controller.
+class TongtaiChatScreen extends ConsumerStatefulWidget {
   const TongtaiChatScreen({super.key, this.controller, this.attachmentPicker});
 
   /// Injectable conversation state; the screen creates (and owns) a default
-  /// one when omitted.
+  /// one over the Riverpod chat store when omitted.
   final TongtaiChatController? controller;
 
   /// Returns a local file path to attach, or null when cancelled. Defaults to
@@ -31,10 +35,10 @@ class TongtaiChatScreen extends StatefulWidget {
   final Future<String?> Function()? attachmentPicker;
 
   @override
-  State<TongtaiChatScreen> createState() => _TongtaiChatScreenState();
+  ConsumerState<TongtaiChatScreen> createState() => _TongtaiChatScreenState();
 }
 
-class _TongtaiChatScreenState extends State<TongtaiChatScreen> {
+class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
   late final TongtaiChatController _controller;
   late final bool _ownsController;
   late final Future<String?> Function() _pickAttachment;
@@ -45,11 +49,16 @@ class _TongtaiChatScreenState extends State<TongtaiChatScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? TongtaiChatController();
+    _controller =
+        widget.controller ??
+        TongtaiChatController(store: ref.read(tongtaiChatStoreProvider));
     _ownsController = widget.controller == null;
     _pickAttachment =
         widget.attachmentPicker ??
         () => ImagePickerProductImageSource().pickFromGallery();
+    // Restore the persisted conversation (WTM-81); the controller notifies
+    // when history lands.
+    _controller.hydrate();
   }
 
   @override

@@ -21,6 +21,7 @@ import 'tables/ai_chats.dart';
 import 'tables/integrations.dart';
 import 'tables/sync_queue_items.dart';
 import 'tables/supplier_favorites.dart';
+import 'tables/chat_messages.dart';
 
 import 'migrations/tongtai_migrations.dart';
 
@@ -53,6 +54,8 @@ part 'database.g.dart';
 ///     (WTM-54); drained by a future Phase-3 sync worker.
 /// 17. SupplierFavorite - The user's starred suppliers for quick access
 ///     (WTM-65); each add/remove is also queued for cloud sync.
+/// 18. ChatMessage - Per-message AI Copilot chat history (WTM-81); local-only
+///     by ADR-TON-004 (never enqueued to the sync outbox).
 @DriftDatabase(
   tables: [
     UsersTable,
@@ -72,6 +75,7 @@ part 'database.g.dart';
     IntegrationsTable,
     SyncQueueItemsTable,
     SupplierFavoritesTable,
+    ChatMessagesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
