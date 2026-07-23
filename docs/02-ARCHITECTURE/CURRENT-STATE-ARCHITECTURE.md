@@ -24,7 +24,8 @@ lib/
     onboarding/                 # 6-screen tutorial + first-launch gate
     producer/                   # supplier search service, profile, favorites (store+controller)
     inventory/                  # product model/service, form, history, image source, stock alerts
-    consumer/                   # customer model + directory service
+    consumer/                   # customer model, directory service/controller,
+                                # form + audit-trail history + duplicate check (WTM-76)
     search/                     # unified search controller, ranking (+A/B), history store
     journey/                    # business goals (WTM-87): model, templates, form,
                                 # progress/pace, controller — AI plan chờ WTM-88
@@ -38,6 +39,7 @@ lib/
       widgets/                  # persistent scroll/text-field
       screens/                  # home, producer, inventory, consumer, more, showcase,
                                 # supplier search/detail/favorites, product form,
+                                # customer form (add/edit, WTM-76),
                                 # stock alerts, unified search, customer list, AI key,
                                 # business goals list + multi-step goal form (WTM-87),
                                 # opportunity feed (WTM-91)

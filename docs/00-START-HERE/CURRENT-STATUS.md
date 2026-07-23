@@ -21,7 +21,7 @@
 | Producer | WTM-63 supplier search · 64 supplier detail · 65 favorites |
 | Inventory | WTM-68 product list · 69 add/edit product · 70 stock alerts |
 | Search | WTM-72 FTS5 (đ-aware) · 73 unified search · 74 ranking + A/B |
-| Consumer | WTM-75 customer list |
+| Consumer | WTM-75 customer list · 76 add/edit customer (form, multi-address, audit trail, duplicate check) |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
 | Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
 | Opportunity | WTM-91 feed: type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo (AI scoring chờ WTM-93) |
@@ -33,8 +33,8 @@
   Journey: goals UI có (WTM-87), step-plan/AI chờ WTM-88/89. Opportunity:
   feed có (WTM-91), detail/AI scoring chờ WTM-92/93. AI Copilot chat: xem PR
   WTM-80/81 (client foundation trên main).
-- Sprint-3+ backlog (WTM-76…102: consumer detail, chat, journey, reports…)
-  exists in Jira with full ACs — not yet run.
+- Sprint-3+ backlog (WTM-78…102: AI segmentation, chat, reports…) exists in
+  Jira with full ACs — WTM-76 done (first of Sprint 3), 77/80/81 ở PR.
 - App icon/splash = Flutter defaults (mascot "business fox" not finalized —
   open decision).
 - iOS build unverified in-session (signing/SPM); Android debug build is the

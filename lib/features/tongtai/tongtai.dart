@@ -67,6 +67,12 @@ export 'ui/screens/tongtai_stock_alerts_screen.dart';
 export 'consumer/customer.dart';
 export 'consumer/customer_directory_service.dart';
 
+// Consumer — add/edit customer (WTM-76)
+export 'consumer/customer_history.dart';
+export 'consumer/customer_form.dart';
+export 'consumer/customer_directory_controller.dart';
+export 'ui/screens/tongtai_customer_form_screen.dart';
+
 // Journey — business goals (WTM-87)
 export 'journey/business_goal.dart';
 export 'journey/business_goal_form.dart';

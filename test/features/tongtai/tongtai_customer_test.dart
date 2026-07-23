@@ -250,9 +250,11 @@ void main() {
       final asc = service.filter(
         const CustomerQuery(sort: CustomerSort.recency),
       );
+      // Sample customers all have a purchase date (nullable only for
+      // newly-added WTM-76 customers), hence the non-null asserts.
       for (var i = 0; i + 1 < asc.length; i++) {
         expect(
-          asc[i].lastPurchaseDate.isAfter(asc[i + 1].lastPurchaseDate),
+          asc[i].lastPurchaseDate!.isAfter(asc[i + 1].lastPurchaseDate!),
           isFalse,
         );
       }
