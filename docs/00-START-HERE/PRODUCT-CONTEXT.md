@@ -15,7 +15,7 @@ the whole business loop:
 | Reports (Báo Cáo) | KPIs & insights *(not built yet)* |
 | Business Journey | Goal orchestration — journey ≠ workflow *(DB only)* |
 | Opportunity Hub | AI deal discovery *(DB only)* |
-| AI Copilot | BYOK assistant (xAI Grok) *(client built, chat UI not)* |
+| AI Copilot | "Workizen AI" qua AI Router đa provider (ADR-TON-006); Phase 2: BYOK + Local |
 
 Core ideas: **Opportunity is the central unit** · **Business Journey is
 goal-driven orchestration, not a flow** · **Copilot ≠ chatbot** (Planner /
