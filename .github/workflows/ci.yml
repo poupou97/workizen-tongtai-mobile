@@ -28,21 +28,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The SDK must live OUTSIDE the workspace: `flutter analyze` scans the
+      # working directory, and an in-workspace SDK checkout drowned the run in
+      # the SDK's own analyzer issues (first real run of this workflow).
       - name: Cache pinned Flutter SDK
         id: flutter-cache
         uses: actions/cache@v4
         with:
-          path: flutter-sdk
+          path: ${{ runner.temp }}/flutter-sdk
           key: flutter-sdk-${{ env.FLUTTER_REVISION }}-${{ runner.os }}
 
       - name: Fetch pinned Flutter SDK
         if: steps.flutter-cache.outputs.cache-hit != 'true'
         run: |
-          git clone --filter=blob:none https://github.com/flutter/flutter.git flutter-sdk
-          git -C flutter-sdk checkout "$FLUTTER_REVISION"
+          git clone --filter=blob:none https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter-sdk"
+          git -C "$RUNNER_TEMP/flutter-sdk" checkout "$FLUTTER_REVISION"
 
       - name: Add Flutter to PATH
-        run: echo "$GITHUB_WORKSPACE/flutter-sdk/bin" >> "$GITHUB_PATH"
+        run: echo "$RUNNER_TEMP/flutter-sdk/bin" >> "$GITHUB_PATH"
+
+      # Drift's NativeDatabase opens the system libsqlite3 on Linux test
+      # hosts (sqlite3_flutter_libs is device-only) — install the dev lib so
+      # the 100+ DB integration tests run.
+      - name: SQLite for Drift tests
+        run: sudo apt-get update -q && sudo apt-get install -y -q libsqlite3-dev
 
       - name: Toolchain versions
         run: flutter --version
