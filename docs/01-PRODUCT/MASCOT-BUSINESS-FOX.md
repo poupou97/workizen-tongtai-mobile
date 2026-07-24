@@ -53,7 +53,23 @@ touchpoint it suits best.
 | 9 | Emblem Ring | front face in blue ring | AI Avatar · Loading spinner |
 | 10 | Wink Mascot | winking, cheeky tongue | Empty State · Loading |
 
-## Agent recommendation (Founder decides)
+## Founder preference (2026-07-24)
+
+Founder likes **Concept 08 — Origami Low-poly**. Rather than run it as one card,
+it's promoted to a candidate **lead visual language**: the faceted paper-fold
+treatment is strong enough to carry the whole system consistently. A developed
+Origami set is in [`concepts/mascot/`](concepts/mascot/):
+
+- `08a-origami-icon.svg` — Origami fox on navy → **app icon**
+- `08b-origami-splash.svg` — Origami fox on the domain gradient + halo → **splash**
+- `08c-origami-avatar.svg` — Origami fox in the blue emblem ring → **AI avatar / loading**
+
+**Open question for the Founder (WTM-109):** go **all-Origami** (one language
+across every touchpoint — most coherent), or **pair Origami** with 1–2 of the
+other concepts (e.g. Origami for icon/splash + Friendly Flat 02 for
+onboarding warmth)? Either way Origami leads.
+
+## Agent recommendation (superseded by Founder preference above; kept for reference)
 
 For a coherent system across every touchpoint, three concepts cover the whole
 map with one visual language:
