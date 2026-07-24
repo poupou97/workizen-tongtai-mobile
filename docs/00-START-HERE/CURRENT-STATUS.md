@@ -27,7 +27,7 @@
 | Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
 | Opportunity | WTM-91 feed: type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo (AI scoring chờ WTM-93) |
 | Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) |
-| Brand | WTM-109 Business Fox mascot (10 concept, Founder chọn Origami all) · 110 app icon + splash native từ 08a |
+| Brand | WTM-109 Business Fox mascot (Origami all) · 110 app icon + splash native · 111 mascot trong app (avatar chat, empty states) + đổi nhãn hiển thị "Workizen AI" |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)

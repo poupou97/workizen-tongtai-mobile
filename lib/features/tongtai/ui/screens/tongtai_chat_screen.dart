@@ -8,6 +8,7 @@ import '../../chat/chat_message.dart';
 import '../../inventory/product_image_source.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_chat_provider.dart';
+import '../widgets/tongtai_fox_mascot.dart';
 
 /// Chat screen (WTM-80) — the conversation surface for the AI Copilot.
 ///
@@ -111,29 +112,40 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
             elevation: 0,
             backgroundColor: TongtaiDesignTokens.lightBackground,
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('AI Copilot'),
-                Row(
+                const TongtaiFoxMascot.avatar(
+                  size: 34,
+                  semanticsLabel: 'Workizen AI',
+                ),
+                const SizedBox(width: TongtaiDesignTokens.spacing2),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _controller.assistantOnline
-                            ? TongtaiDesignTokens.success
-                            : TongtaiDesignTokens.neutral,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: TongtaiDesignTokens.spacing1),
-                    Text(
-                      _controller.assistantOnline ? 'Online' : 'Offline',
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
-                      ),
+                    const Text('Workizen AI'),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: _controller.assistantOnline
+                                ? TongtaiDesignTokens.success
+                                : TongtaiDesignTokens.neutral,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: TongtaiDesignTokens.spacing1),
+                        Text(
+                          _controller.assistantOnline ? 'Online' : 'Offline',
+                          style: TongtaiDesignTokens.captionStyle.copyWith(
+                            color: TongtaiDesignTokens.lightTextSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -359,7 +371,7 @@ class _TypingIndicator extends StatelessWidget {
         vertical: TongtaiDesignTokens.spacing1,
       ),
       child: Text(
-        'AI Copilot đang nhập… | typing…',
+        'Workizen AI đang nhập… | typing…',
         style: TongtaiDesignTokens.captionStyle.copyWith(
           color: TongtaiDesignTokens.lightTextSecondary,
           fontStyle: FontStyle.italic,
@@ -454,7 +466,7 @@ class _InputBar extends StatelessWidget {
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: (_) => onSend(),
               decoration: InputDecoration(
-                hintText: 'Nhắn cho AI Copilot… | Message the AI Copilot…',
+                hintText: 'Nhắn cho Workizen AI… | Message Workizen AI…',
                 filled: true,
                 fillColor: TongtaiDesignTokens.lightHover,
                 border: OutlineInputBorder(
@@ -498,14 +510,10 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.chat_bubble_outline,
-              size: 48,
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            const TongtaiFoxMascot.face(size: 72),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'Hỏi AI Copilot về việc kinh doanh của bạn',
+              'Hỏi Workizen AI về việc kinh doanh của bạn',
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -514,7 +522,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
-              'Ask the AI Copilot about your business.',
+              'Ask Workizen AI about your business.',
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

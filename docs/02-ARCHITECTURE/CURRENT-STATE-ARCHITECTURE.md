@@ -42,7 +42,7 @@ lib/
       tongtai_root_gate.dart    # gate onboarding lần đầu (WTM-59; nối vào main: WTM-105)
       tongtai_app_shell.dart    # IndexedStack + bottom nav (5 tab)
       tongtai_bottom_nav.dart
-      widgets/                  # persistent scroll/text-field
+      widgets/                  # persistent scroll/text-field, fox mascot (WTM-111)
       screens/                  # home, producer, inventory, consumer, more, showcase,
                                 # supplier search/detail/favorites, product form,
                                 # customer form (add/edit, WTM-76),

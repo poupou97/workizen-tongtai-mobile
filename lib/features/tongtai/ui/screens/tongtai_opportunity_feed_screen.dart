@@ -5,6 +5,7 @@ import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_feed_controller.dart';
+import '../widgets/tongtai_fox_mascot.dart';
 
 /// Color for an [OpportunityType] chip. Pure function — unit-testable
 /// without a widget (same convention as the other chip color maps).
@@ -406,11 +407,16 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              savedOnly ? Icons.bookmark_outline : Icons.explore_outlined,
-              size: 48,
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            // Saved-only keeps the bookmark cue; the main feed empty is branded
+            // with the Origami fox (WTM-111).
+            if (savedOnly)
+              const Icon(
+                Icons.bookmark_outline,
+                size: 48,
+                color: TongtaiDesignTokens.lightTextSecondary,
+              )
+            else
+              const TongtaiFoxMascot.face(size: 64),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
               savedOnly

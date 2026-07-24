@@ -272,13 +272,10 @@ void main() {
       final controller = makeController(_FixedResponder('x'));
       await tester.pumpWidget(host(controller));
       expect(
-        find.text('Hỏi AI Copilot về việc kinh doanh của bạn'),
+        find.text('Hỏi Workizen AI về việc kinh doanh của bạn'),
         findsOneWidget,
       );
-      expect(
-        find.text('Ask the AI Copilot about your business.'),
-        findsOneWidget,
-      );
+      expect(find.text('Ask Workizen AI about your business.'), findsOneWidget);
     });
   });
 
@@ -301,7 +298,7 @@ void main() {
       await tester.tap(find.byKey(const Key('home-open-chat')));
       await tester.pumpAndSettle();
       expect(find.byType(TongtaiChatScreen), findsOneWidget);
-      expect(find.text('AI Copilot'), findsOneWidget);
+      expect(find.text('Workizen AI'), findsOneWidget);
     });
 
     testWidgets('WTM-81: a persisted conversation hydrates into the screen', (

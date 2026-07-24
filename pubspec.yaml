@@ -36,6 +36,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   share_plus: ^13.2.1
 
+  # In-app mascot rendering — Origami Business Fox as runtime vector (WTM-111)
+  flutter_svg: ^2.0.17
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -52,6 +55,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/mascot/
 
 # App launcher icon (WTM-110). Source rendered from
 # assets/branding/app_icon.svg (08a Origami on navy). iOS strips alpha;

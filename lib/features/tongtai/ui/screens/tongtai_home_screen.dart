@@ -38,7 +38,7 @@ class TongtaiHomeScreen extends StatelessWidget {
           ),
           IconButton(
             key: const Key('home-open-chat'),
-            tooltip: 'AI Copilot chat',
+            tooltip: 'Workizen AI chat',
             icon: const Icon(Icons.chat_bubble_outline),
             onPressed: () => _openChat(context),
           ),

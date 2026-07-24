@@ -6,6 +6,7 @@ import '../../consumer/customer_directory_service.dart';
 import '../../consumer/customer_order_history_service.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_customer_form_screen.dart';
 import 'tongtai_customer_history_screen.dart';
 
@@ -682,11 +683,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.people_outline,
-              size: 48,
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            const TongtaiFoxMascot.face(size: 64),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
               'No customers match your search',

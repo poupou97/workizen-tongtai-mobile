@@ -22,6 +22,7 @@ export 'navigation/deeplink/tongtai_deep_link_provider.dart';
 // Persistent tab-state widgets (WTM-56)
 export 'ui/widgets/tongtai_persistent_scroll_view.dart';
 export 'ui/widgets/tongtai_persistent_text_field.dart';
+export 'ui/widgets/tongtai_fox_mascot.dart';
 
 // State models & store (WTM-56)
 export 'state/tongtai_tab_state.dart';
