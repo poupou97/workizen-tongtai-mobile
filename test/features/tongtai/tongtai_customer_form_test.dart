@@ -282,7 +282,9 @@ void main() {
     test('upsert replaces an existing customer by id', () async {
       final controller = CustomerDirectoryController.inMemory([sample()]);
       await controller.hydrate();
-      final replaced = await controller.upsert(sample(name: 'Phương (updated)'));
+      final replaced = await controller.upsert(
+        sample(name: 'Phương (updated)'),
+      );
       expect(replaced, isTrue);
       expect(controller.count, 1);
       expect(controller.customers.single.name, 'Phương (updated)');

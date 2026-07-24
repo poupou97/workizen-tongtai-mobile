@@ -142,7 +142,10 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         final customers = db.allTables.firstWhere(
           (t) => t.actualTableName == 'customers_table',
         );
-        await m.addColumn(customers, customers.columnsByName['domain_snapshot']!);
+        await m.addColumn(
+          customers,
+          customers.columnsByName['domain_snapshot']!,
+        );
       }
     },
     beforeOpen: (OpeningDetails details) async {

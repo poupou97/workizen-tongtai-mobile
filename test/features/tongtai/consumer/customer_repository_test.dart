@@ -133,156 +133,168 @@ void main() {
     expect(all.single.totalSpent, 9000000);
   });
 
-  test('backward compatibility: a legacy row with a NULL snapshot loads', () async {
-    // Simulates a row written before schema v6 — structured columns intact, no
-    // domain_snapshot. The extended fields default to empty; nothing throws.
-    await insertRawCustomer(
-      id: 'legacy',
-      name: 'Legacy Khách',
-      phone: '+84900000000',
-      city: 'Huế',
-      email: 'legacy@example.com',
-      segments: null,
-      orderCount: 2,
-      totalSpent: 500000,
-      lastOrderDate: DateTime(2026, 1, 1),
-      domainSnapshot: null,
-    );
+  test(
+    'backward compatibility: a legacy row with a NULL snapshot loads',
+    () async {
+      // Simulates a row written before schema v6 — structured columns intact, no
+      // domain_snapshot. The extended fields default to empty; nothing throws.
+      await insertRawCustomer(
+        id: 'legacy',
+        name: 'Legacy Khách',
+        phone: '+84900000000',
+        city: 'Huế',
+        email: 'legacy@example.com',
+        segments: null,
+        orderCount: 2,
+        totalSpent: 500000,
+        lastOrderDate: DateTime(2026, 1, 1),
+        domainSnapshot: null,
+      );
 
-    final c = (await DriftCustomerRepository(db).loadAll()).single;
-    expect(c.name, 'Legacy Khách');
-    expect(c.location, 'Huế');
-    expect(c.totalSpent, 500000);
-    // No snapshot / no segments → extended fields empty, not null-crashing.
-    expect(c.addresses, isEmpty);
-    expect(c.tags, isEmpty);
-    expect(c.notes, '');
-    expect(c.segments, isEmpty);
-  });
+      final c = (await DriftCustomerRepository(db).loadAll()).single;
+      expect(c.name, 'Legacy Khách');
+      expect(c.location, 'Huế');
+      expect(c.totalSpent, 500000);
+      // No snapshot / no segments → extended fields empty, not null-crashing.
+      expect(c.addresses, isEmpty);
+      expect(c.tags, isEmpty);
+      expect(c.notes, '');
+      expect(c.segments, isEmpty);
+    },
+  );
 
-  test('corrupt-JSON fallback: a garbage snapshot never breaks a load', () async {
-    await insertRawCustomer(
-      id: 'corrupt',
-      name: 'Hỏng JSON',
-      city: 'Cần Thơ',
-      totalSpent: 3000000,
-      segments: 'not-an-array{',
-      domainSnapshot: '}{ this is not json',
-    );
+  test(
+    'corrupt-JSON fallback: a garbage snapshot never breaks a load',
+    () async {
+      await insertRawCustomer(
+        id: 'corrupt',
+        name: 'Hỏng JSON',
+        city: 'Cần Thơ',
+        totalSpent: 3000000,
+        segments: 'not-an-array{',
+        domainSnapshot: '}{ this is not json',
+      );
 
-    final c = (await DriftCustomerRepository(db).loadAll()).single;
-    // Structured columns still read; corrupt blobs degrade to empty.
-    expect(c.name, 'Hỏng JSON');
-    expect(c.location, 'Cần Thơ');
-    expect(c.totalSpent, 3000000);
-    expect(c.addresses, isEmpty);
-    expect(c.tags, isEmpty);
-    expect(c.notes, '');
-    expect(c.segments, isEmpty);
-  });
+      final c = (await DriftCustomerRepository(db).loadAll()).single;
+      // Structured columns still read; corrupt blobs degrade to empty.
+      expect(c.name, 'Hỏng JSON');
+      expect(c.location, 'Cần Thơ');
+      expect(c.totalSpent, 3000000);
+      expect(c.addresses, isEmpty);
+      expect(c.tags, isEmpty);
+      expect(c.notes, '');
+      expect(c.segments, isEmpty);
+    },
+  );
 
-  test('version tolerance: an unknown snapshot version still reads its fields', () async {
-    // A future writer bumps the version; today's reader must not choke on it.
-    await insertRawCustomer(
-      id: 'future',
-      name: 'Tương Lai',
-      domainSnapshot: encodeDomainSnapshot({
-        'tags': ['early-adopter'],
-        'addresses': ['99 Nguyễn Huệ'],
-        'notes': 'from v99',
-      }, version: 99),
-    );
-    // A legacy snapshot missing the version key (v:0) also reads.
-    await insertRawCustomer(
-      id: 'noversion',
-      name: 'Không Version',
-      domainSnapshot: '{"tags":["legacy-tag"]}',
-    );
+  test(
+    'version tolerance: an unknown snapshot version still reads its fields',
+    () async {
+      // A future writer bumps the version; today's reader must not choke on it.
+      await insertRawCustomer(
+        id: 'future',
+        name: 'Tương Lai',
+        domainSnapshot: encodeDomainSnapshot({
+          'tags': ['early-adopter'],
+          'addresses': ['99 Nguyễn Huệ'],
+          'notes': 'from v99',
+        }, version: 99),
+      );
+      // A legacy snapshot missing the version key (v:0) also reads.
+      await insertRawCustomer(
+        id: 'noversion',
+        name: 'Không Version',
+        domainSnapshot: '{"tags":["legacy-tag"]}',
+      );
 
-    final all = await DriftCustomerRepository(db).loadAll();
-    final future = all.firstWhere((c) => c.id == 'future');
-    final noVersion = all.firstWhere((c) => c.id == 'noversion');
-    expect(future.tags, ['early-adopter']);
-    expect(future.addresses, ['99 Nguyễn Huệ']);
-    expect(future.notes, 'from v99');
-    expect(noVersion.tags, ['legacy-tag']);
-  });
+      final all = await DriftCustomerRepository(db).loadAll();
+      final future = all.firstWhere((c) => c.id == 'future');
+      final noVersion = all.firstWhere((c) => c.id == 'noversion');
+      expect(future.tags, ['early-adopter']);
+      expect(future.addresses, ['99 Nguyễn Huệ']);
+      expect(future.notes, 'from v99');
+      expect(noVersion.tags, ['legacy-tag']);
+    },
+  );
 
-  test('structured precedence: the column wins over a stale snapshot copy', () async {
-    // The snapshot carries a stale copy of promoted fields; the reader must take
-    // the structured columns as the source of truth and ignore the snapshot's
-    // copies (ADR-TON-009).
-    await insertRawCustomer(
-      id: 'stale',
-      name: 'Tên Cột', // ← structured truth
-      city: 'Hà Nội', // ← structured truth
-      totalSpent: 30000000, // ← structured truth (VIP)
-      segments: encodeJsonStringList(['Loyal']),
-      domainSnapshot: encodeDomainSnapshot({
-        'name': 'Tên Cũ Trong Snapshot', // stale — must be ignored
-        'city': 'Sài Gòn cũ', // stale — must be ignored
-        'totalSpent': 1, // stale — must be ignored
-        'segments': ['stale-seg'], // stale — must be ignored
-        'tags': ['real-tag'], // extended — must be used
-      }, version: 1),
-    );
+  test(
+    'structured precedence: the column wins over a stale snapshot copy',
+    () async {
+      // The snapshot carries a stale copy of promoted fields; the reader must take
+      // the structured columns as the source of truth and ignore the snapshot's
+      // copies (ADR-TON-009).
+      await insertRawCustomer(
+        id: 'stale',
+        name: 'Tên Cột', // ← structured truth
+        city: 'Hà Nội', // ← structured truth
+        totalSpent: 30000000, // ← structured truth (VIP)
+        segments: encodeJsonStringList(['Loyal']),
+        domainSnapshot: encodeDomainSnapshot({
+          'name': 'Tên Cũ Trong Snapshot', // stale — must be ignored
+          'city': 'Sài Gòn cũ', // stale — must be ignored
+          'totalSpent': 1, // stale — must be ignored
+          'segments': ['stale-seg'], // stale — must be ignored
+          'tags': ['real-tag'], // extended — must be used
+        }, version: 1),
+      );
 
-    final c = (await DriftCustomerRepository(db).loadAll()).single;
-    expect(c.name, 'Tên Cột');
-    expect(c.location, 'Hà Nội');
-    expect(c.totalSpent, 30000000);
-    expect(c.tier, CustomerTier.vip);
-    expect(c.segments, ['Loyal']); // structured column, not the snapshot copy
-    expect(c.tags, ['real-tag']); // genuinely extended field
-  });
+      final c = (await DriftCustomerRepository(db).loadAll()).single;
+      expect(c.name, 'Tên Cột');
+      expect(c.location, 'Hà Nội');
+      expect(c.totalSpent, 30000000);
+      expect(c.tier, CustomerTier.vip);
+      expect(c.segments, ['Loyal']); // structured column, not the snapshot copy
+      expect(c.tags, ['real-tag']); // genuinely extended field
+    },
+  );
 
-  test('business isolation: loadAll only returns the local business rows', () async {
-    // Bootstrap the local business, then plant a customer under a DIFFERENT
-    // business (its own user + business rows) and confirm it is invisible.
-    final localBusiness = await const LocalWorkspace().ensureBusinessId(db);
-    await db
-        .into(db.usersTable)
-        .insert(
-          UsersTableCompanion.insert(
-            id: 'other-owner',
-            email: 'other@x.app',
-            name: 'Khác',
-          ),
-        );
-    await db
-        .into(db.businessesTable)
-        .insert(
-          BusinessesTableCompanion.insert(
-            id: 'other-business',
-            ownerId: 'other-owner',
-            name: 'Doanh nghiệp khác',
-          ),
-        );
+  test(
+    'business isolation: loadAll only returns the local business rows',
+    () async {
+      // Bootstrap the local business, then plant a customer under a DIFFERENT
+      // business (its own user + business rows) and confirm it is invisible.
+      final localBusiness = await const LocalWorkspace().ensureBusinessId(db);
+      await db
+          .into(db.usersTable)
+          .insert(
+            UsersTableCompanion.insert(
+              id: 'other-owner',
+              email: 'other@x.app',
+              name: 'Khác',
+            ),
+          );
+      await db
+          .into(db.businessesTable)
+          .insert(
+            BusinessesTableCompanion.insert(
+              id: 'other-business',
+              ownerId: 'other-owner',
+              name: 'Doanh nghiệp khác',
+            ),
+          );
 
-    await insertRawCustomer(
-      id: 'mine',
-      name: 'Của tôi',
-      businessId: localBusiness,
-    );
-    await insertRawCustomer(
-      id: 'theirs',
-      name: 'Của họ',
-      businessId: 'other-business',
-    );
+      await insertRawCustomer(
+        id: 'mine',
+        name: 'Của tôi',
+        businessId: localBusiness,
+      );
+      await insertRawCustomer(
+        id: 'theirs',
+        name: 'Của họ',
+        businessId: 'other-business',
+      );
 
-    final mine = await DriftCustomerRepository(db).loadAll();
-    expect(mine.map((c) => c.id), ['mine']);
-  });
+      final mine = await DriftCustomerRepository(db).loadAll();
+      expect(mine.map((c) => c.id), ['mine']);
+    },
+  );
 
   test('rows are ordered by name ascending', () async {
     final repo = DriftCustomerRepository(db);
     await repo.upsert(customer('c1', name: 'Zét'));
     await repo.upsert(customer('c2', name: 'An'));
     await repo.upsert(customer('c3', name: 'Minh'));
-    expect(
-      (await repo.loadAll()).map((c) => c.name),
-      ['An', 'Minh', 'Zét'],
-    );
+    expect((await repo.loadAll()).map((c) => c.name), ['An', 'Minh', 'Zét']);
   });
 
   group('SampleCustomerRepository (demo, read-only)', () {
