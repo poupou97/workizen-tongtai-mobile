@@ -26,6 +26,7 @@
 | Chat | WTM-80 chat UI · 81 persistence SQLite v4 (local-only ADR-TON-004) · 82 Workizen AI Router (đa provider, context injection, fallback offline — ADR-TON-006) |
 | Journey | WTM-87 business goals: templates + multi-step form + progress/pace + khuyến nghị rule-based (AI plan chờ WTM-88) |
 | Opportunity | WTM-91 feed: type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo (AI scoring chờ WTM-93) |
+| Home | WTM-14 dashboard front-door đọc data thật: đếm module (Producer/Inventory/Consumer/Journey), KPI doanh thu năm/đơn/AOV (từ `ReportsService`), Top 3 cơ hội theo điểm AI, mission = mục tiêu + tiến độ (thay placeholder "0"/"No … yet") |
 | Reports | WTM-95/96 dashboard: KPI doanh thu MTD/YTD + số đơn + AOV, biểu đồ doanh thu 6 tháng (CustomPaint, không thêm lib), top categories; nguồn `ReportsService` (sample orders, local-first), mở từ More → Business |
 | Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) |
 | Brand | WTM-109 Business Fox mascot (Origami all) · 110 app icon + splash native · 111 mascot trong app (avatar chat, empty states) + đổi nhãn hiển thị "Workizen AI" |
