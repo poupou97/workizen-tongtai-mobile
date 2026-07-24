@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../../core/tongtai_enums.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_feed_controller.dart';
+import '../../opportunity/opportunity_theme.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import 'tongtai_opportunity_detail_screen.dart';
 
-/// Color for an [OpportunityType] chip. Pure function — unit-testable
-/// without a widget (same convention as the other chip color maps).
-Color tongtaiOpportunityTypeColor(OpportunityType type) => switch (type) {
-  OpportunityType.arbitrage => TongtaiDesignTokens.inventoryOrange,
-  OpportunityType.seasonal => TongtaiDesignTokens.producerGreen,
-  OpportunityType.crossBorder => TongtaiDesignTokens.consumerBlue,
-  OpportunityType.trend => TongtaiDesignTokens.financePurple,
-};
+// The type→color helper now lives in opportunity_theme.dart (shared with the
+// detail screen); re-exported so existing importers keep resolving it here.
+export '../../opportunity/opportunity_theme.dart'
+    show tongtaiOpportunityTypeColor;
 
 /// Opportunity Feed screen (WTM-91) — "Opportunity is the central unit".
 ///
@@ -81,6 +78,21 @@ class _TongtaiOpportunityFeedScreenState
       ..showSnackBar(
         SnackBar(content: Text('Đã đánh dấu quan tâm "${opportunity.title}"')),
       );
+  }
+
+  /// Opens the detail screen (WTM-92); its reaction buttons write back through
+  /// the same controller so the feed stays in sync when it returns.
+  void _openDetail(Opportunity opportunity) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => TongtaiOpportunityDetailScreen(
+          opportunity: opportunity,
+          onToggleSaved: () => _controller.toggleSaved(opportunity.id),
+          onInterested: () => _controller.markInterested(opportunity.id),
+          onDismiss: () => _controller.dismiss(opportunity.id),
+        ),
+      ),
+    );
   }
 
   @override
@@ -228,6 +240,7 @@ class _TongtaiOpportunityFeedScreenState
                                   : _onDismissed(opportunity),
                               child: _OpportunityCard(
                                 opportunity: opportunity,
+                                onOpen: () => _openDetail(opportunity),
                                 onToggleSaved: () =>
                                     _controller.toggleSaved(opportunity.id),
                               ),
@@ -248,102 +261,112 @@ class _OpportunityCard extends StatelessWidget {
   const _OpportunityCard({
     required this.opportunity,
     required this.onToggleSaved,
+    required this.onOpen,
   });
 
   final Opportunity opportunity;
   final VoidCallback onToggleSaved;
 
+  /// Tapping the card body opens the detail screen (WTM-92).
+  final VoidCallback onOpen;
+
   @override
   Widget build(BuildContext context) {
     final color = tongtaiOpportunityTypeColor(opportunity.type);
-    return Container(
-      key: Key('opportunity-card-${opportunity.id}'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
-      decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
+    return GestureDetector(
+      onTap: onOpen,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        key: Key('opportunity-card-${opportunity.id}'),
+        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+        decoration: BoxDecoration(
+          color: TongtaiDesignTokens.lightBackground,
+          borderRadius: BorderRadius.circular(
+            TongtaiDesignTokens.cardBorderRadius,
+          ),
+          border: Border.all(color: TongtaiDesignTokens.lightBorder),
+          boxShadow: TongtaiDesignTokens.elevation1,
         ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        boxShadow: TongtaiDesignTokens.elevation1,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: TongtaiDesignTokens.spacing2,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(
-                    TongtaiDesignTokens.radiusFull,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: TongtaiDesignTokens.spacing2,
+                    vertical: 2,
                   ),
-                  border: Border.all(color: color),
-                ),
-                child: Text(
-                  opportunity.type.labelVi,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(
+                      TongtaiDesignTokens.radiusFull,
+                    ),
+                    border: Border.all(color: color),
+                  ),
+                  child: Text(
+                    opportunity.type.labelVi,
+                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-              if (opportunity.reaction != OpportunityReaction.none) ...[
-                const SizedBox(width: TongtaiDesignTokens.spacing2),
-                Text(
-                  opportunity.reaction.labelVi,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                    fontStyle: FontStyle.italic,
+                if (opportunity.reaction != OpportunityReaction.none) ...[
+                  const SizedBox(width: TongtaiDesignTokens.spacing2),
+                  Text(
+                    opportunity.reaction.labelVi,
+                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                      color: TongtaiDesignTokens.lightTextSecondary,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
+                ],
+                const Spacer(),
+                IconButton(
+                  key: Key('opportunity-save-${opportunity.id}'),
+                  tooltip: opportunity.isSaved ? 'Bỏ lưu' : 'Lưu lại',
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(
+                    opportunity.isSaved
+                        ? Icons.bookmark
+                        : Icons.bookmark_outline,
+                    size: 20,
+                    color: opportunity.isSaved
+                        ? TongtaiDesignTokens.inventoryOrange
+                        : TongtaiDesignTokens.lightTextSecondary,
+                  ),
+                  onPressed: onToggleSaved,
                 ),
               ],
-              const Spacer(),
-              IconButton(
-                key: Key('opportunity-save-${opportunity.id}'),
-                tooltip: opportunity.isSaved ? 'Bỏ lưu' : 'Lưu lại',
-                visualDensity: VisualDensity.compact,
-                icon: Icon(
-                  opportunity.isSaved ? Icons.bookmark : Icons.bookmark_outline,
-                  size: 20,
-                  color: opportunity.isSaved
-                      ? TongtaiDesignTokens.inventoryOrange
-                      : TongtaiDesignTokens.lightTextSecondary,
-                ),
-                onPressed: onToggleSaved,
+            ),
+            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            Text(
+              opportunity.title,
+              style: TongtaiDesignTokens.bodyStyle.copyWith(
+                fontWeight: FontWeight.w600,
+                color: TongtaiDesignTokens.lightTextPrimary,
               ),
-            ],
-          ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
-          Text(
-            opportunity.title,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
-              fontWeight: FontWeight.w600,
-              color: TongtaiDesignTokens.lightTextPrimary,
             ),
-          ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
-          Text(
-            opportunity.description,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
+            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            Text(
+              opportunity.description,
+              style: TongtaiDesignTokens.smallStyle.copyWith(
+                color: TongtaiDesignTokens.lightTextSecondary,
+              ),
             ),
-          ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
-          Text(
-            'Ước tính +${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
-            ' • ROI ${(opportunity.estimatedRoi * 100).round()}%'
-            ' • Điểm ${opportunity.aiScore.round()}',
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-              fontWeight: FontWeight.w600,
+            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            Text(
+              'Ước tính +${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
+              ' • ROI ${(opportunity.estimatedRoi * 100).round()}%'
+              ' • Điểm ${opportunity.aiScore.round()}',
+              style: TongtaiDesignTokens.captionStyle.copyWith(
+                color: TongtaiDesignTokens.lightTextPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

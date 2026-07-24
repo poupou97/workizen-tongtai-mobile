@@ -96,6 +96,11 @@ export 'finance/finance_transaction.dart';
 export 'finance/finance_summary.dart';
 export 'ui/screens/tongtai_finance_screen.dart';
 
+// Opportunity — detail & action plan (WTM-92)
+export 'opportunity/opportunity_action_plan.dart';
+export 'opportunity/opportunity_theme.dart';
+export 'ui/screens/tongtai_opportunity_detail_screen.dart';
+
 // Journey — business goals (WTM-87)
 export 'journey/business_goal.dart';
 export 'journey/business_goal_form.dart';
