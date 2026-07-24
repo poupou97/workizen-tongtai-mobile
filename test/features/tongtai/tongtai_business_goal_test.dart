@@ -222,12 +222,13 @@ void main() {
   });
 
   group('BusinessGoalController', () {
-    test('upsert appends new goals and replaces edits, notifying', () {
-      final controller = BusinessGoalController([goal()]);
+    test('upsert appends new goals and replaces edits, notifying', () async {
+      final controller = BusinessGoalController.inMemory([goal()]);
+      await controller.hydrate();
       var notified = 0;
       controller.addListener(() => notified++);
 
-      final added = controller.upsert(
+      final added = await controller.upsert(
         goal().copyWith(name: 'Khác', updatedAt: DateTime(2026, 7, 23)),
       );
       // Same id 'g1' → replace.
@@ -237,7 +238,7 @@ void main() {
       expect(controller.goals.single.name, 'Khác');
     });
 
-    test('goals sort newest-updated first', () {
+    test('goals sort newest-updated first', () async {
       final a = BusinessGoal(
         id: 'a',
         name: 'A',
@@ -264,7 +265,8 @@ void main() {
         createdAt: DateTime(2026, 7, 1),
         updatedAt: DateTime(2026, 7, 20),
       );
-      final controller = BusinessGoalController([a, b]);
+      final controller = BusinessGoalController.inMemory([a, b]);
+      await controller.hydrate();
       expect(controller.goals.map((g) => g.id), ['b', 'a']);
     });
 

@@ -36,6 +36,25 @@ List<String> snapshotStringList(Map<String, dynamic> snapshot, String key) =>
 String snapshotString(Map<String, dynamic> snapshot, String key) =>
     snapshot[key] is String ? snapshot[key] as String : '';
 
+/// An `int` from [key], tolerant of doubles and missing/invalid values.
+int snapshotInt(Map<String, dynamic> snapshot, String key, {int fallback = 0}) {
+  final v = snapshot[key];
+  if (v is int) return v;
+  if (v is double) return v.round();
+  return fallback;
+}
+
+/// A `double` from [key], tolerant of ints and missing/invalid values.
+double snapshotDouble(
+  Map<String, dynamic> snapshot,
+  String key, {
+  double fallback = 0,
+}) {
+  final v = snapshot[key];
+  if (v is num) return v.toDouble();
+  return fallback;
+}
+
 /// Encodes a `List<String>` for a *structured* JSON-array column (e.g.
 /// `customers_table.segments`). Kept beside the snapshot codec so every
 /// repository encodes list columns the same, tolerant way.

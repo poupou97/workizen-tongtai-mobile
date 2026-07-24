@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_controller.dart';
+import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_goal_form_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_goals_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
@@ -34,17 +36,30 @@ void main() {
     updatedAt: DateTime(2026, 7, 20),
   );
 
+  // The goals screen is a ConsumerStatefulWidget (WTM-124) and does not hydrate
+  // an injected controller, so the test hydrates it before pumping and wraps the
+  // app in a ProviderScope.
+  Future<void> pumpGoals(
+    WidgetTester tester,
+    BusinessGoalController controller,
+  ) async {
+    await controller.hydrate();
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiGoalsScreen(controller: controller, clock: () => now),
+        ),
+      ),
+    );
+  }
+
   group('goals list (AC4/AC5)', () {
     testWidgets('renders progress, pace badge and recommendation', (
       tester,
     ) async {
       useTallViewport(tester);
-      final controller = BusinessGoalController([existing()]);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiGoalsScreen(controller: controller, clock: () => now),
-        ),
-      );
+      final controller = BusinessGoalController.inMemory([existing()]);
+      await pumpGoals(tester, controller);
       await tester.pumpAndSettle();
 
       expect(find.text('Đạt 100 triệu ₫ trong quý 3'), findsOneWidget);
@@ -59,12 +74,8 @@ void main() {
 
     testWidgets('empty state invites creating the first goal', (tester) async {
       useTallViewport(tester);
-      final controller = BusinessGoalController(const []);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiGoalsScreen(controller: controller, clock: () => now),
-        ),
-      );
+      final controller = BusinessGoalController.inMemory(const []);
+      await pumpGoals(tester, controller);
       expect(
         find.text('Đặt mục tiêu kinh doanh đầu tiên của bạn'),
         findsOneWidget,
@@ -91,12 +102,8 @@ void main() {
       'template → details → review → create lands the goal in the list',
       (tester) async {
         useTallViewport(tester);
-        final controller = BusinessGoalController(const []);
-        await tester.pumpWidget(
-          MaterialApp(
-            home: TongtaiGoalsScreen(controller: controller, clock: () => now),
-          ),
-        );
+        final controller = BusinessGoalController.inMemory(const []);
+        await pumpGoals(tester, controller);
 
         await tester.tap(find.widgetWithText(FloatingActionButton, 'New goal'));
         await tester.pumpAndSettle();
@@ -133,12 +140,8 @@ void main() {
 
     testWidgets('custom (blank) goal validates before review', (tester) async {
       useTallViewport(tester);
-      final controller = BusinessGoalController(const []);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiGoalsScreen(controller: controller, clock: () => now),
-        ),
-      );
+      final controller = BusinessGoalController.inMemory(const []);
+      await pumpGoals(tester, controller);
       await tester.tap(find.widgetWithText(FloatingActionButton, 'New goal'));
       await tester.pumpAndSettle();
 
@@ -187,12 +190,8 @@ void main() {
       tester,
     ) async {
       useTallViewport(tester);
-      final controller = BusinessGoalController([existing()]);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiGoalsScreen(controller: controller, clock: () => now),
-        ),
-      );
+      final controller = BusinessGoalController.inMemory([existing()]);
+      await pumpGoals(tester, controller);
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('goal-card-g1')));
@@ -225,7 +224,7 @@ void main() {
   group('More screen entry point', () {
     testWidgets('"Business Goals" opens the goals screen', (tester) async {
       useTallViewport(tester);
-      await tester.pumpWidget(const MaterialApp(home: _MoreHost()));
+      await tester.pumpWidget(const _MoreHost());
       await tester.ensureVisible(find.text('Business Goals'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Business Goals'));
@@ -271,13 +270,21 @@ void main() {
   });
 }
 
-/// Hosts the More screen inside the Riverpod scope it needs (it is a
-/// ConsumerWidget; the onboarding provider is only read on tap, so no
-/// overrides are required here).
+/// Hosts the More screen inside the Riverpod scope it needs. The ProviderScope
+/// wraps the MaterialApp (above the Navigator) so the route pushed on tap — the
+/// real (no-controller) goals screen, which hydrates from
+/// [businessGoalRepositoryProvider] — inherits the in-memory override and the
+/// smoke test stays off the real Drift database (WTM-124).
 class _MoreHost extends StatelessWidget {
   const _MoreHost();
 
   @override
-  Widget build(BuildContext context) =>
-      const ProviderScope(child: TongtaiMoreScreen());
+  Widget build(BuildContext context) => ProviderScope(
+    overrides: [
+      businessGoalRepositoryProvider.overrideWithValue(
+        InMemoryBusinessGoalRepository(),
+      ),
+    ],
+    child: const MaterialApp(home: TongtaiMoreScreen()),
+  );
 }

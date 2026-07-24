@@ -104,8 +104,8 @@ void main() {
     });
 
     test('schema version constant advanced in lock-step', () {
-      expect(kTongtaiSchemaVersion, 6);
-      expect(db.schemaVersion, 6);
+      expect(kTongtaiSchemaVersion, 7);
+      expect(db.schemaVersion, 7);
     });
   });
 

@@ -35,7 +35,8 @@ void main() {
     // v4 (WTM-81): added the per-message chat_messages_table.
     // v5 (WTM-121): added products.domain_snapshot (ADR-TON-009).
     // v6 (WTM-123): added customers.domain_snapshot (ADR-TON-009).
-    expect(db.schemaVersion, 6);
+    // v7 (WTM-124): added journeys.domain_snapshot (ADR-TON-009).
+    expect(db.schemaVersion, 7);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });
