@@ -28,18 +28,18 @@
 | Opportunity | WTM-91 feed: type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo (AI scoring chờ WTM-93) |
 | Home | WTM-14 dashboard front-door đọc data thật: đếm module (Producer/Inventory/Consumer/Journey), KPI doanh thu năm/đơn/AOV (từ `ReportsService`), Top 3 cơ hội theo điểm AI, mission = mục tiêu + tiến độ (thay placeholder "0"/"No … yet") |
 | Reports | WTM-95/96 dashboard: KPI doanh thu MTD/YTD + số đơn + AOV, biểu đồ doanh thu 6 tháng (CustomPaint, không thêm lib), top categories; nguồn `ReportsService` (sample orders, local-first), mở từ More → Business |
+| Finance | WTM-27 dashboard: KPI thu/chi/lợi nhuận/biên LN (YTD), biểu đồ dòng tiền thu-vs-chi 6 tháng (CustomPaint), chi phí theo nhóm, feed giao dịch gần đây; `FinanceService` trên `TransactionsTable` shape (sample tx, local-first), mở từ More → Business |
 | Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) |
 | Brand | WTM-109 Business Fox mascot (Origami all) · 110 app icon + splash native · 111 mascot trong app (avatar chat, empty states) + đổi nhãn hiển thị "Workizen AI" |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
 
-- Finance **screen** (DB `transactions` table exists; UI does not). Reports
-  dashboard built on order data (WTM-95/96); a Finance-specific view + the
-  transactions ledger UI are still open. Journey: goals UI có (87),
-  step-plan/AI chờ 88/89. Opportunity: feed có (91), detail/scoring chờ 92/93.
-  Chat: đủ UI + persistence + Workizen AI Router (80/81/82); Claude adapter +
-  per-provider key UX = follow-up (WTM-83).
+- Finance dashboard built (WTM-27, read-only over the sample ledger); a
+  **transaction entry form** + Drift-backed ledger are still open. Journey:
+  goals UI có (87), step-plan/AI chờ 88/89. Opportunity: feed có (91),
+  detail/scoring chờ 92/93. Chat: đủ UI + persistence + Workizen AI Router
+  (80/81/82); Claude adapter + per-provider key UX = follow-up (WTM-83).
 - Backlog còn lại (WTM-78/79, 84–86, 88–90, 92–94, 97–98, 102, 108) trong Jira
   với AC đầy đủ.
 - App icon/splash = Origami Business Fox trên nền navy (WTM-110, native qua
