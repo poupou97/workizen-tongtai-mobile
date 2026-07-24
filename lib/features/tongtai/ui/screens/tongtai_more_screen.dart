@@ -5,6 +5,7 @@ import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
 import 'tongtai_export_screen.dart';
 import 'tongtai_goals_screen.dart';
+import 'tongtai_reports_screen.dart';
 
 /// More/Settings screen for Tổng Tài
 /// Provides access to settings, help, and additional features.
@@ -69,6 +70,15 @@ class TongtaiMoreScreen extends ConsumerWidget {
             _SettingsSection(
               title: 'Business',
               items: [
+                _SettingsItem(
+                  icon: Icons.bar_chart_outlined,
+                  label: 'Reports & Analytics · Báo cáo',
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiReportsScreen(),
+                    ),
+                  ),
+                ),
                 _SettingsItem(
                   icon: Icons.flag_outlined,
                   label: 'Business Goals',
