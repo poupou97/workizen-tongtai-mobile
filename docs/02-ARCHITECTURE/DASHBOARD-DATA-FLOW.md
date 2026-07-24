@@ -1,5 +1,9 @@
 # Dashboard Data-Flow Review (WTM-117)
 
+> Per-capability map + AI consumption boundary:
+> [DATA-FLOW-BY-CAPABILITY.md](DATA-FLOW-BY-CAPABILITY.md).
+
+
 **Status:** Reviewed 2026-07-24 · **Priority:** P1 (technical debt / architecture)
 · **Related:** WTM-114 (event-driven Timeline), ADR-TON-001 (extractable
 modules), ADR-TON-002 (Riverpod).
