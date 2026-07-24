@@ -2,8 +2,8 @@
 
 **Status:** ✅ ACCEPTED (Founder-directed, 2026-07-24 — option B, P0.4)
 **Builds on:** ADR-TON-008 (Repository seam, User Data First)
-**Related:** WTM-121 (first pattern — Inventory), WTM-122 (normalization TODO),
-`docs/02-ARCHITECTURE/DATA-FLOW-BY-CAPABILITY.md`.
+**Related:** WTM-121 (first pattern — Inventory), WTM-123 (second — Consumer),
+WTM-122 (normalization TODO), `docs/02-ARCHITECTURE/DATA-FLOW-BY-CAPABILITY.md`.
 
 ## Context / Bối cảnh
 
@@ -26,7 +26,14 @@ extended/nested/not-yet-queried fields.
   domain object / aggregate only (ADR-TON-008, DATA-FLOW-BY-CAPABILITY).
 - Lossless, additive migration (one nullable column), no domain/UI/test breakage.
 
-First pattern at **Inventory (Product)** — verified by test, then reused.
+First pattern at **Inventory (Product)** — verified by test, then reused at
+**Consumer (Customer)** (WTM-123): structured columns for
+name/phone/city/email/orderCount/totalSpent/lastOrderDate + a structured
+`segments` JSON-array column, with `addresses/tags/notes` in the snapshot. A
+shared, corrupt-tolerant codec (`lib/features/tongtai/core/domain_snapshot.dart`)
+is reused by every repository, and the Consumer test set covers round-trip,
+backward compatibility, corrupt-JSON fallback, version tolerance, structured
+precedence and business isolation.
 
 ## This is transitional, NOT the permanent model
 

@@ -33,6 +33,10 @@
 /// to structured columns. Additive + nullable, so upgrading installs keep their
 /// rows. First application of the "structured columns + versioned snapshot"
 /// convention (option B).
+///
+/// ## Schema v6 (WTM-123 — Consumer persistence snapshot, ADR-TON-009)
+/// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
+/// addresses, notes). Same additive-nullable convention as v5.
 library;
 
 import 'package:drift/drift.dart';
@@ -45,7 +49,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 5;
+const int kTongtaiSchemaVersion = 6;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -130,6 +134,18 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
           (t) => t.actualTableName == 'products_table',
         );
         await m.addColumn(products, products.columnsByName['domain_snapshot']!);
+      }
+      if (from < 6) {
+        // v6 (WTM-123 — Consumer persistence snapshot, ADR-TON-009). Add the
+        // nullable customers.domain_snapshot column (tags, addresses, notes).
+        // Same additive-nullable convention as v5.
+        final customers = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'customers_table',
+        );
+        await m.addColumn(
+          customers,
+          customers.columnsByName['domain_snapshot']!,
+        );
       }
     },
     beforeOpen: (OpeningDetails details) async {

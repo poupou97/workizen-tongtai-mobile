@@ -3,25 +3,35 @@ import 'package:flutter/foundation.dart';
 import 'customer.dart';
 import 'customer_directory_service.dart';
 import 'customer_form.dart';
+import 'customer_repository.dart';
 
-/// Mutable, in-memory directory of customers backing the Customer list screen
-/// (WTM-75) and its Add/Edit form (WTM-76).
+/// Directory of customers backing the Customer list screen (WTM-75) and its
+/// Add/Edit form (WTM-76), reads/writes through a [CustomerRepository]
+/// (WTM-123) — Drift (real, persistent), Sample (demo) or in-memory (tests).
 ///
 /// Holds the working set of customers and exposes a fresh
-/// [CustomerDirectoryService] view for read-only querying/paging. Adds and
-/// edits go through [upsert], which notifies listeners so the list rebuilds.
-/// Local-first, no backend; a Drift-backed store can replace the in-memory list
-/// later without touching callers — same pattern as `ProductCatalogController`
-/// (WTM-69).
+/// [CustomerDirectoryService] view for read-only querying/paging. Adds and edits
+/// go through [upsert], which persists then notifies so the list rebuilds. The
+/// UI never knows the source — same pattern as `ProductCatalogController`
+/// (WTM-121).
 class CustomerDirectoryController extends ChangeNotifier {
-  CustomerDirectoryController(Iterable<Customer> initial)
-    : _customers = [...initial];
+  CustomerDirectoryController(this._repository);
 
-  /// Convenience: a directory seeded with the built-in sample customers.
+  /// Demo/preview directory (read-only sample data). Not persisted.
   factory CustomerDirectoryController.sample() =>
-      CustomerDirectoryController(kSampleCustomers);
+      CustomerDirectoryController(const SampleCustomerRepository());
 
-  final List<Customer> _customers;
+  /// In-memory directory for tests, optionally pre-filled.
+  factory CustomerDirectoryController.inMemory([
+    Iterable<Customer> initial = const [],
+  ]) => CustomerDirectoryController(InMemoryCustomerRepository(initial));
+
+  final CustomerRepository _repository;
+  final List<Customer> _customers = [];
+  bool _hydrated = false;
+
+  /// True once [hydrate] has loaded from the repository.
+  bool get isHydrated => _hydrated;
 
   /// Current customers as an unmodifiable snapshot.
   List<Customer> get customers => List.unmodifiable(_customers);
@@ -46,10 +56,21 @@ class CustomerDirectoryController extends ChangeNotifier {
     exceptId: exceptId,
   );
 
-  /// Insert [customer] (new id) or replace the existing customer with the same
+  /// Loads the directory from the repository (call once when the screen mounts).
+  Future<void> hydrate() async {
+    final loaded = await _repository.loadAll();
+    _customers
+      ..clear()
+      ..addAll(loaded);
+    _hydrated = true;
+    notifyListeners();
+  }
+
+  /// Persist [customer] (new id) or replace the existing customer with the same
   /// id, then notify listeners. Returns `true` when it replaced an existing
   /// customer (edit), `false` when it was appended (add).
-  bool upsert(Customer customer) {
+  Future<bool> upsert(Customer customer) async {
+    await _repository.upsert(customer);
     final index = _customers.indexWhere((c) => c.id == customer.id);
     final replaced = index >= 0;
     if (replaced) {

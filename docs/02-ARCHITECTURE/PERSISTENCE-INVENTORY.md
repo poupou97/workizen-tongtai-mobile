@@ -31,11 +31,27 @@ Source: Drift (real, empty for new users) · Sample (demo). Promotion candidates
 `imagePaths` → a child `product_images` table **if** we need per-image metadata,
 CDN sync, or ordering beyond a list (no trigger yet).
 
+## Consumer (WTM-123 · schema v6 table `customers_table`)
+
+| Field | Where | Status |
+|---|---|---|
+| id, name, phone, city(=location), email, orderCount, totalSpent, lastOrderDate(=lastPurchaseDate) | structured columns | Promoted |
+| segments[] | structured `segments` JSON-array column | Promoted |
+| addresses[], tags[], notes | `domain_snapshot` JSON (`{v:1, addresses:[…], tags:[…], notes}`) | Keep in JSON |
+| history (edit audit) | not persisted (regenerable session state) | — |
+| tier | derived from `totalSpent` (never stored) | — |
+
+Source: Drift (real, empty for new users) · Sample (demo). Structured columns are
+the **source of truth** for promoted fields — a stale copy in the snapshot is
+ignored on read (verified by the *structured precedence* test). Promotion
+candidates: `addresses[]` → a child `customer_addresses` table **if** we need
+per-address labels/geocoding or an addresses join (no trigger yet); `tags[]` →
+its own table only if tag-based filtering/reporting arrives.
+
 ## Not yet persisted (still Sample/in-memory — migrate on the same seam)
 
 | Module | Domain | Table (target) | Notes / snapshot candidates |
 |---|---|---|---|
-| Consumer | `Customer` | `customers_table` | `notes`, `tags`, `addresses[]` → snapshot; segments→column; history not persisted |
 | Orders | `CustomerOrder` | `orders_table` | `items[]` already JSON in the table; no order-entry form yet |
 | Journey | `BusinessGoal` | `journeys_table` | schema shape differs (budget/steps vs target/growth) — snapshot the domain, promote target/achieved later |
 | Opportunity | `Opportunity` | `opportunities_table` | AI-generated; persist once scoring (WTM-93) lands |
@@ -48,5 +64,6 @@ underlying module is persisted — no UI change (DATA-FLOW-BY-CAPABILITY.md).
 ## Schema versions
 
 v1 initial · v2 supplier_favorites · v3 products.description + FTS5 · v4
-chat_messages · **v5 products.domain_snapshot** (WTM-121). Bump by exactly one +
-an additive `onUpgrade` step per change (`tongtai_migrations.dart`).
+chat_messages · v5 products.domain_snapshot (WTM-121) · **v6
+customers.domain_snapshot** (WTM-123). Bump by exactly one + an additive
+`onUpgrade` step per change (`tongtai_migrations.dart`).
