@@ -33,7 +33,8 @@ tiếp tục ngay. Chỉ ngắt Founder khi cần quyết định chiến lượ
 
 ## Còn mở (chưa quyết)
 
-- Mascot "business fox" → app icon/splash (WTM-11 tracker).
+- **Mascot species: ✅ Business Fox (Founder 2026-07-24)** — đóng mục 7 WTM-11.
+  Còn: chọn 3/10 concept (WTM-109, chờ Founder xem gallery) → làm icon/splash…
 - Scope còn lại của WTM-83 (QR input + key rotation) — chờ Founder.
 - WTM-101 nghi trùng WTM-59 — chờ Founder đóng/làm rõ.
 - SQLCipher (nâng mã hoá at-rest toàn DB) — option ghi trong ADR-TON-004.

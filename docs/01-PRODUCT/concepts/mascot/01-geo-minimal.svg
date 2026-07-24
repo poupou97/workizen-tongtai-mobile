@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 1 — Geometric Minimal">
+  <title>Concept 1 — Geometric Minimal</title>
+  <rect x="8" y="8" width="224" height="224" rx="52" fill="#111827"/>
+  <!-- ears + head -->
+  <path d="M58,40 L92,72 L120,84 L148,72 L182,40 L170,92 L156,150 L120,192 L84,150 L70,92 Z" fill="#F59E0B"/>
+  <!-- inner ears -->
+  <path d="M66,52 L92,74 L80,90 Z" fill="#C2410C"/>
+  <path d="M174,52 L148,74 L160,90 Z" fill="#C2410C"/>
+  <!-- muzzle -->
+  <path d="M120,116 L100,142 L120,192 L140,142 Z" fill="#FFF7ED"/>
+  <!-- eyes -->
+  <ellipse cx="101" cy="122" rx="6.5" ry="9" fill="#111827"/>
+  <ellipse cx="139" cy="122" rx="6.5" ry="9" fill="#111827"/>
+  <!-- nose -->
+  <path d="M112,164 L128,164 L120,176 Z" fill="#111827"/>
+</svg>

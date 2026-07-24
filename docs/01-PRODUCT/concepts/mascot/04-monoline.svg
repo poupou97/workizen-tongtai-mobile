@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 4 — Monoline">
+  <title>Concept 4 — Monoline</title>
+  <rect x="8" y="8" width="224" height="224" rx="52" fill="#FFF7ED"/>
+  <g fill="none" stroke="#EA580C" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M58,44 L92,74 L120,86 L148,74 L182,44 L170,94 L156,150 L120,190 L84,150 L70,94 Z"/>
+    <path d="M72,58 L92,76 L82,90"/>
+    <path d="M168,58 L148,76 L158,90"/>
+    <path d="M120,120 L102,144 L120,190 L138,144 Z"/>
+  </g>
+  <circle cx="101" cy="123" r="4.5" fill="#EA580C"/>
+  <circle cx="139" cy="123" r="4.5" fill="#EA580C"/>
+  <path d="M113,166 L127,166 L120,177 Z" fill="#EA580C"/>
+</svg>

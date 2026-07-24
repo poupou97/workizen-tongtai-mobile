@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 7 — The Boss (Tổng Tài)">
+  <title>Concept 7 — The Boss</title>
+  <rect x="8" y="8" width="224" height="224" rx="52" fill="#FFF7ED"/>
+  <!-- tail -->
+  <path d="M150,150 C206,138 206,216 150,200 C172,188 172,166 150,150 Z" fill="#F59E0B"/>
+  <ellipse cx="196" cy="184" rx="13" ry="15" fill="#FFFFFF"/>
+  <!-- body -->
+  <path d="M92,152 Q120,140 148,152 L154,202 Q120,222 86,202 Z" fill="#F59E0B"/>
+  <path d="M108,160 Q120,154 132,160 L136,202 Q120,212 104,202 Z" fill="#FFFFFF"/>
+  <!-- paws -->
+  <rect x="98" y="196" width="18" height="18" rx="9" fill="#FFFFFF"/>
+  <rect x="124" y="196" width="18" height="18" rx="9" fill="#FFFFFF"/>
+  <!-- bowtie -->
+  <path d="M120,150 L104,142 L104,158 Z" fill="#3B82F6"/>
+  <path d="M120,150 L136,142 L136,158 Z" fill="#3B82F6"/>
+  <rect x="115" y="145" width="10" height="10" rx="2" fill="#1D4ED8"/>
+  <!-- head -->
+  <g transform="translate(43.2,18) scale(0.64)">
+    <path d="M58,40 L92,72 L120,84 L148,72 L182,40 L170,92 L156,150 L120,192 L84,150 L70,92 Z" fill="#F59E0B"/>
+    <path d="M66,52 L92,74 L80,90 Z" fill="#C2410C"/>
+    <path d="M174,52 L148,74 L160,90 Z" fill="#C2410C"/>
+    <path d="M120,116 L100,144 L120,192 L140,144 Z" fill="#FFFFFF"/>
+    <path d="M112,164 L128,164 L120,176 Z" fill="#111827"/>
+    <!-- glasses -->
+    <g fill="none" stroke="#111827" stroke-width="4">
+      <circle cx="101" cy="122" r="15"/>
+      <circle cx="139" cy="122" r="15"/>
+      <path d="M116,122 H124"/>
+    </g>
+    <circle cx="101" cy="122" r="4.5" fill="#111827"/>
+    <circle cx="139" cy="122" r="4.5" fill="#111827"/>
+  </g>
+</svg>

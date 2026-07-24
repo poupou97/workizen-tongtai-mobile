@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 3 — Bold Badge">
+  <title>Concept 3 — Bold Badge</title>
+  <circle cx="120" cy="120" r="112" fill="#10B981"/>
+  <circle cx="120" cy="120" r="92" fill="#FFF7ED"/>
+  <path d="M58,44 L92,74 L120,86 L148,74 L182,44 L170,94 L156,150 L120,190 L84,150 L70,94 Z" fill="#F59E0B"/>
+  <path d="M66,55 L92,76 L80,91 Z" fill="#C2410C"/>
+  <path d="M174,55 L148,76 L160,91 Z" fill="#C2410C"/>
+  <path d="M120,118 L100,144 L120,190 L140,144 Z" fill="#FFF7ED"/>
+  <ellipse cx="101" cy="123" rx="7" ry="9.5" fill="#111827"/>
+  <ellipse cx="139" cy="123" rx="7" ry="9.5" fill="#111827"/>
+  <path d="M112,165 L128,165 L120,177 Z" fill="#111827"/>
+</svg>

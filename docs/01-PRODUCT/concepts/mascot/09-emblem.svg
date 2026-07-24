@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 9 — Emblem Ring">
+  <title>Concept 9 — Emblem Ring</title>
+  <circle cx="120" cy="120" r="114" fill="#FFFFFF"/>
+  <circle cx="120" cy="120" r="114" fill="none" stroke="#3B82F6" stroke-width="10"/>
+  <circle cx="120" cy="120" r="96" fill="none" stroke="#3B82F6" stroke-width="3"/>
+  <g transform="translate(40.8,34) scale(0.66)">
+    <path d="M58,40 L92,72 L120,84 L148,72 L182,40 L170,92 L156,150 L120,192 L84,150 L70,92 Z" fill="#F59E0B"/>
+    <path d="M66,52 L92,74 L80,90 Z" fill="#C2410C"/>
+    <path d="M174,52 L148,74 L160,90 Z" fill="#C2410C"/>
+    <path d="M120,116 L100,144 L120,192 L140,144 Z" fill="#FFFFFF"/>
+    <ellipse cx="101" cy="122" rx="7" ry="9.5" fill="#111827"/>
+    <ellipse cx="139" cy="122" rx="7" ry="9.5" fill="#111827"/>
+    <path d="M112,164 L128,164 L120,176 Z" fill="#111827"/>
+  </g>
+</svg>
