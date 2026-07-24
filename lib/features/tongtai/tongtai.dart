@@ -101,12 +101,15 @@ export 'opportunity/opportunity_action_plan.dart';
 export 'opportunity/opportunity_theme.dart';
 export 'ui/screens/tongtai_opportunity_detail_screen.dart';
 
-// Journey — business goals (WTM-87)
+// Journey — business goals (WTM-87) + goal detail & action plan (WTM-88)
 export 'journey/business_goal.dart';
 export 'journey/business_goal_form.dart';
 export 'journey/business_goal_controller.dart';
+export 'journey/goal_action_plan.dart';
+export 'journey/goal_theme.dart';
 export 'ui/screens/tongtai_goal_form_screen.dart';
 export 'ui/screens/tongtai_goals_screen.dart';
+export 'ui/screens/tongtai_goal_detail_screen.dart';
 
 // Opportunity — feed (WTM-91)
 export 'opportunity/opportunity.dart';

@@ -198,6 +198,10 @@ void main() {
       await tester.tap(find.byKey(const Key('goal-card-g1')));
       await tester.pumpAndSettle();
 
+      // The card now opens the detail (WTM-88); its pencil opens the edit form.
+      await tester.tap(find.byKey(const Key('goal-detail-edit')));
+      await tester.pumpAndSettle();
+
       // Edit mode: no template step, achieved fields visible.
       expect(find.text('Edit Goal'), findsOneWidget);
       await tester.enterText(
