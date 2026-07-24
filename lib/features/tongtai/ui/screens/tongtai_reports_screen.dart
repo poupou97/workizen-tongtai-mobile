@@ -2,18 +2,26 @@ import 'package:flutter/material.dart';
 
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../opportunity/opportunity.dart';
+import '../../opportunity/opportunity_pipeline.dart';
 import '../../reports/business_report.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import 'tongtai_opportunity_feed_screen.dart';
 
 /// Reports & Analytics dashboard (WTM-95 layout/widgets, WTM-96 revenue KPI).
 ///
 /// Local-first: the numbers come from the in-memory [ReportsService] (sample
 /// orders in Phase 2). Four headline KPIs, a six-month revenue trend drawn with
-/// a lightweight [CustomPainter] (no chart package), and a top-categories
-/// breakdown. Both `service` and `clock` are injectable so every figure is
-/// deterministic under test.
+/// a lightweight [CustomPainter] (no chart package), a top-categories/products/
+/// customers breakdown (WTM-97) and the open opportunity pipeline (WTM-98). All
+/// data sources are injectable so every figure is deterministic under test.
 class TongtaiReportsScreen extends StatelessWidget {
-  const TongtaiReportsScreen({super.key, this.service, this.clock});
+  const TongtaiReportsScreen({
+    super.key,
+    this.service,
+    this.clock,
+    this.opportunities,
+  });
 
   /// Injectable for tests; defaults to the built-in sample orders.
   final ReportsService? service;
@@ -21,11 +29,16 @@ class TongtaiReportsScreen extends StatelessWidget {
   /// Injectable clock (defaults to [DateTime.now]) — fixes "today" for MTD/YTD.
   final DateTime Function()? clock;
 
+  /// Injectable opportunity list for the pipeline card (WTM-98); defaults to
+  /// the built-in sample opportunities.
+  final List<Opportunity>? opportunities;
+
   @override
   Widget build(BuildContext context) {
     final reports = service ?? ReportsService.sample();
     final now = (clock ?? DateTime.now)();
     final report = reports.reportAsOf(now);
+    final pipeline = opportunityPipeline(opportunities ?? kSampleOpportunities);
 
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
@@ -36,16 +49,17 @@ class TongtaiReportsScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: report.hasSales
-          ? _ReportBody(report: report)
+          ? _ReportBody(report: report, pipeline: pipeline)
           : const _ReportsEmptyState(),
     );
   }
 }
 
 class _ReportBody extends StatelessWidget {
-  const _ReportBody({required this.report});
+  const _ReportBody({required this.report, required this.pipeline});
 
   final BusinessReport report;
+  final OpportunityPipeline pipeline;
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +145,164 @@ class _ReportBody extends StatelessWidget {
         _SectionTitle('Khách hàng hàng đầu · Top customers'),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _TopCustomersCard(customers: report.topCustomers),
+
+        const SizedBox(height: TongtaiDesignTokens.spacing6),
+
+        // ── Opportunity pipeline (WTM-98) ───────────────────────────────
+        _SectionHeader(
+          title: 'Cơ hội đang mở · Pipeline',
+          actionKey: const Key('reports-open-opportunities'),
+          onAction: () => Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (_) => const TongtaiOpportunityFeedScreen(),
+            ),
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        _PipelineCard(pipeline: pipeline),
+      ],
+    );
+  }
+}
+
+/// A section title with a trailing "Xem tất cả" action.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    required this.actionKey,
+    required this.onAction,
+  });
+
+  final String title;
+  final Key actionKey;
+  final VoidCallback onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: _SectionTitle(title)),
+        TextButton(
+          key: actionKey,
+          onPressed: onAction,
+          child: const Text('Xem tất cả'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Open-pipeline summary: active count + combined expected impact + the
+/// strongest opportunity.
+class _PipelineCard extends StatelessWidget {
+  const _PipelineCard({required this.pipeline});
+
+  final OpportunityPipeline pipeline;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!pipeline.hasActive) {
+      return Container(
+        key: const Key('reports-pipeline'),
+        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        decoration: _cardDecoration,
+        child: Text(
+          'Không có cơ hội đang mở',
+          style: TongtaiDesignTokens.smallStyle.copyWith(
+            color: TongtaiDesignTokens.lightTextSecondary,
+          ),
+        ),
+      );
+    }
+    final top = pipeline.top!;
+    return Container(
+      key: const Key('reports-pipeline'),
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      decoration: _cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _PipelineStat(
+                  label: 'Đang mở',
+                  value: '${pipeline.activeCount}',
+                ),
+              ),
+              Expanded(
+                child: _PipelineStat(
+                  label: 'Giá trị pipeline',
+                  value: TongtaiFormatters.vndShort(pipeline.pipelineValue),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: TongtaiDesignTokens.spacing6),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: TongtaiDesignTokens.copilotViolet.withValues(
+                    alpha: 0.12,
+                  ),
+                  borderRadius: BorderRadius.circular(
+                    TongtaiDesignTokens.radiusFull,
+                  ),
+                ),
+                child: Text(
+                  '${top.aiScore.round()}',
+                  style: TongtaiDesignTokens.captionStyle.copyWith(
+                    color: TongtaiDesignTokens.financePurple,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              Expanded(
+                child: Text(
+                  top.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PipelineStat extends StatelessWidget {
+  const _PipelineStat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: TongtaiDesignTokens.heading3Style.copyWith(
+            color: TongtaiDesignTokens.copilotViolet,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          label,
+          style: TongtaiDesignTokens.captionStyle.copyWith(
+            color: TongtaiDesignTokens.lightTextSecondary,
+          ),
+        ),
       ],
     );
   }

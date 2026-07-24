@@ -99,8 +99,9 @@ export 'finance/transaction_form.dart';
 export 'ui/screens/tongtai_finance_screen.dart';
 export 'ui/screens/tongtai_transaction_form_screen.dart';
 
-// Opportunity — detail & action plan (WTM-92)
+// Opportunity — detail & action plan (WTM-92) + pipeline summary (WTM-98)
 export 'opportunity/opportunity_action_plan.dart';
+export 'opportunity/opportunity_pipeline.dart';
 export 'opportunity/opportunity_theme.dart';
 export 'ui/screens/tongtai_opportunity_detail_screen.dart';
 
