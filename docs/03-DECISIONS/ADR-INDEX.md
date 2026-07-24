@@ -9,6 +9,7 @@
 | [ADR-TON-005](ADR-TON-005-analytics-firebase-operational.md) | Analytics (D-7 Updated): Phase 2 cho phép **Firebase Analytics + Crashlytics** (operational-only, giám sát closed beta); CẤM ad/marketing/profiling — red line giữ nguyên | ✅ ACCEPTED (Founder) | 2026-07-23 |
 | [ADR-TON-006](ADR-TON-006-workizen-ai-router.md) | AI Provider (D-9 Updated): **Workizen AI Router** đa provider (Gemini/xAI/Claude/OpenRouter/Cerebras/Ollama), 3 chế độ Managed/BYOK/Local — supersede xAI-first; Phase 2 = BYOK + Local | ✅ ACCEPTED (Founder) | 2026-07-23 |
 | [ADR-TON-007](ADR-TON-007-localization-appstrings.md) | Localization = **custom `AppStrings` + `LanguageNotifier`** (mirror Hub, KHÔNG ARB/gen-l10n/gói ngoài); `context.l10n`, đổi ngôn ngữ runtime EN+VI; migrate dần Boy-Scout (WTM-119) | ✅ ACCEPTED (Founder-directed) | 2026-07-24 |
+| [ADR-TON-008](ADR-TON-008-drift-persistence-user-data-first.md) | Drift persistence: **UI→Controller→Repository→Store→Drift**, Repository quyết định nguồn; **User Data First** (DB thật KHÔNG seed sample, user mới rỗng; sample chỉ Demo Mode); **Local Business** root aggregate (mở rộng multi-business/cloud/login sau). Finance-first (WTM-120) | ✅ ACCEPTED (Founder-directed) | 2026-07-24 |
 
 ## Quyết định Founder khác (chưa thành ADR riêng)
 

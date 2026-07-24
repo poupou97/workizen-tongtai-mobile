@@ -3,29 +3,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_controller.dart';
+import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
 import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_finance_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_finance_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart';
 import 'package:tongtai/features/tongtai/ui/widgets/tongtai_fox_mascot.dart';
 
-/// WTM-27 — the Finance dashboard renders income/expense/profit/margin KPIs, a
-/// cashflow chart, the expense breakdown and a recent-activity feed from the
-/// injected ledger at a fixed clock.
+/// WTM-27/113/120 — the Finance dashboard renders KPIs/chart/breakdown/feed from
+/// its controller (hydrated from the repository) and persists new entries.
 void main() {
   DateTime fixedNow() => DateTime(2026, 7, 24);
 
-  Widget host({FinanceController? controller}) => MaterialApp(
-    home: TongtaiFinanceScreen(
-      controller: controller ?? FinanceController.sample(),
-      clock: fixedNow,
-    ),
-  );
+  /// Pumps the screen and lets the async hydrate() complete.
+  Future<void> pump(
+    WidgetTester tester, {
+    FinanceController? controller,
+  }) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiFinanceScreen(
+            controller: controller ?? FinanceController.sample(),
+            clock: fixedNow,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('shows the four KPI cards with the right figures', (
     tester,
   ) async {
-    await tester.pumpWidget(host());
+    await pump(tester);
 
     expect(find.byKey(const Key('finance-kpi-income')), findsOneWidget);
     expect(find.byKey(const Key('finance-kpi-expense')), findsOneWidget);
@@ -40,18 +52,17 @@ void main() {
   });
 
   testWidgets('renders the cashflow chart with month ticks', (tester) async {
-    await tester.pumpWidget(host());
+    await pump(tester);
 
     expect(find.byKey(const Key('finance-cashflow-chart')), findsOneWidget);
     expect(find.text('Th7'), findsOneWidget);
     expect(find.text('Th2'), findsOneWidget);
-    // Legend labels.
     expect(find.text('Thu'), findsOneWidget);
     expect(find.text('Chi'), findsOneWidget);
   });
 
   testWidgets('lists the expense categories, largest first', (tester) async {
-    await tester.pumpWidget(host());
+    await pump(tester);
 
     await tester.scrollUntilVisible(
       find.text('Nhập hàng'),
@@ -59,14 +70,13 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Nhập hàng'), findsOneWidget);
-    // Nhập hàng leads at 12.900.000 ₫ · 72% of 18.020.000.
     expect(find.textContaining('12.900.000 ₫'), findsOneWidget);
   });
 
   testWidgets('empty ledger shows the fox empty state, no KPIs', (
     tester,
   ) async {
-    await tester.pumpWidget(host(controller: FinanceController([])));
+    await pump(tester, controller: FinanceController.inMemory());
 
     expect(find.byType(TongtaiFoxMascot), findsOneWidget);
     expect(find.text('Chưa có giao dịch tài chính'), findsOneWidget);
@@ -75,7 +85,15 @@ void main() {
 
   testWidgets('the More menu opens the Finance dashboard', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: TongtaiMoreScreen())),
+      ProviderScope(
+        // Keep the dashboard off the real Drift database in the nav test.
+        overrides: [
+          financeRepositoryProvider.overrideWithValue(
+            InMemoryFinanceRepository(),
+          ),
+        ],
+        child: const MaterialApp(home: TongtaiMoreScreen()),
+      ),
     );
 
     final entry = find.text('Finance · Tài chính');
@@ -91,7 +109,7 @@ void main() {
   });
 
   testWidgets('the FAB opens the transaction form (WTM-113)', (tester) async {
-    await tester.pumpWidget(host());
+    await pump(tester);
 
     await tester.tap(find.byKey(const Key('finance-add')));
     await tester.pumpAndSettle();
@@ -102,14 +120,14 @@ void main() {
   testWidgets('adding a transaction updates the dashboard live (WTM-113)', (
     tester,
   ) async {
-    final controller = FinanceController([]);
+    final controller = FinanceController.inMemory();
     addTearDown(controller.dispose);
-    await tester.pumpWidget(host(controller: controller));
+    await pump(tester, controller: controller);
 
     // Empty ledger → empty state, no KPIs.
     expect(find.text('Chưa có giao dịch tài chính'), findsOneWidget);
 
-    controller.add(
+    await controller.add(
       FinanceTransaction(
         id: 'x1',
         type: TransactionType.income,
@@ -121,8 +139,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('Chưa có giao dịch tài chính'), findsNothing);
-    // The income KPI card now shows the added amount (profit shows it too, so
-    // scope the match to the income card).
     expect(
       find.descendant(
         of: find.byKey(const Key('finance-kpi-income')),

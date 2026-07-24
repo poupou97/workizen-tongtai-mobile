@@ -1,21 +1,32 @@
 import 'package:flutter/foundation.dart';
 
+import 'finance_repository.dart';
 import 'finance_summary.dart';
 import 'finance_transaction.dart';
 
 /// Holds the seller's transaction ledger and notifies the Finance dashboard
-/// when it changes (WTM-113). Aggregation is delegated to a [FinanceService]
-/// rebuilt from the current list, so every figure stays consistent with the
-/// unit-tested service. Local-first and in-memory in Phase 2 (Drift persistence
-/// arrives later); the list is the seam a Drift-backed store will replace.
+/// when it changes (WTM-113/120). Reads and writes through a [FinanceRepository]
+/// — Drift (real, persistent), Sample (demo) or in-memory (tests) — so the
+/// dashboard never knows the source. Aggregation is delegated to a
+/// [FinanceService] over the current list.
 class FinanceController extends ChangeNotifier {
-  FinanceController(Iterable<FinanceTransaction> initial)
-    : _txns = [...initial];
+  FinanceController(this._repository);
 
-  /// Seeded with the built-in sample transactions.
-  factory FinanceController.sample() => FinanceController(kSampleTransactions);
+  /// Demo/preview ledger (read-only sample data). Not persisted.
+  factory FinanceController.sample() =>
+      FinanceController(const SampleFinanceRepository());
 
-  final List<FinanceTransaction> _txns;
+  /// In-memory ledger for tests, optionally pre-filled.
+  factory FinanceController.inMemory([
+    Iterable<FinanceTransaction> initial = const [],
+  ]) => FinanceController(InMemoryFinanceRepository(initial));
+
+  final FinanceRepository _repository;
+  final List<FinanceTransaction> _txns = [];
+  bool _hydrated = false;
+
+  /// True once [hydrate] has loaded from the repository.
+  bool get isHydrated => _hydrated;
 
   /// Every transaction, unsorted snapshot.
   List<FinanceTransaction> get transactions => List.unmodifiable(_txns);
@@ -29,8 +40,19 @@ class FinanceController extends ChangeNotifier {
   List<FinanceTransaction> recent({int limit = 6}) =>
       _service.recent(limit: limit);
 
-  /// Records a new transaction and refreshes the dashboard.
-  void add(FinanceTransaction transaction) {
+  /// Loads the ledger from the repository (call once when the screen mounts).
+  Future<void> hydrate() async {
+    final loaded = await _repository.loadAll();
+    _txns
+      ..clear()
+      ..addAll(loaded);
+    _hydrated = true;
+    notifyListeners();
+  }
+
+  /// Persists a new transaction and refreshes the dashboard.
+  Future<void> add(FinanceTransaction transaction) async {
+    await _repository.add(transaction);
     _txns.add(transaction);
     notifyListeners();
   }
