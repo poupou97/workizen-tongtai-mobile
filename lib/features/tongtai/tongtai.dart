@@ -76,6 +76,9 @@ export 'ui/screens/tongtai_chat_screen.dart';
 // Chat — message persistence, local-only per ADR-TON-004 (WTM-81)
 export 'chat/chat_message_store.dart';
 
+// Chat — search & history (WTM-84)
+export 'ui/screens/tongtai_chat_search_screen.dart';
+
 // Consumer — add/edit customer (WTM-76)
 export 'consumer/customer_history.dart';
 export 'consumer/customer_form.dart';

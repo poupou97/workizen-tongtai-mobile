@@ -9,6 +9,7 @@ import 'package:tongtai/features/tongtai/chat/chat_message_store.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_chat_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_chat_search_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
 
 /// Tests for the WTM-80 Chat Screen UI: controller unit tests (delivery
@@ -324,6 +325,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('tin nhắn từ phiên trước'), findsOneWidget);
+    });
+
+    testWidgets('the search action opens chat search (WTM-84)', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            tongtaiChatStoreProvider.overrideWithValue(
+              InMemoryChatMessageStore(),
+            ),
+          ],
+          child: const MaterialApp(home: TongtaiChatScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('chat-open-search')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TongtaiChatSearchScreen), findsOneWidget);
     });
   });
 }
