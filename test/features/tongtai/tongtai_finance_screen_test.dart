@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tongtai/features/tongtai/finance/finance_summary.dart';
+import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/finance/finance_controller.dart';
+import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_finance_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart';
 import 'package:tongtai/features/tongtai/ui/widgets/tongtai_fox_mascot.dart';
 
 /// WTM-27 — the Finance dashboard renders income/expense/profit/margin KPIs, a
 /// cashflow chart, the expense breakdown and a recent-activity feed from the
-/// injected service at a fixed clock.
+/// injected ledger at a fixed clock.
 void main() {
   DateTime fixedNow() => DateTime(2026, 7, 24);
 
-  Widget host({FinanceService? service}) => MaterialApp(
+  Widget host({FinanceController? controller}) => MaterialApp(
     home: TongtaiFinanceScreen(
-      service: service ?? FinanceService.sample(),
+      controller: controller ?? FinanceController.sample(),
       clock: fixedNow,
     ),
   );
@@ -63,7 +66,7 @@ void main() {
   testWidgets('empty ledger shows the fox empty state, no KPIs', (
     tester,
   ) async {
-    await tester.pumpWidget(host(service: FinanceService([])));
+    await tester.pumpWidget(host(controller: FinanceController([])));
 
     expect(find.byType(TongtaiFoxMascot), findsOneWidget);
     expect(find.text('Chưa có giao dịch tài chính'), findsOneWidget);
@@ -85,5 +88,47 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(TongtaiFinanceScreen), findsOneWidget);
+  });
+
+  testWidgets('the FAB opens the transaction form (WTM-113)', (tester) async {
+    await tester.pumpWidget(host());
+
+    await tester.tap(find.byKey(const Key('finance-add')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TongtaiTransactionFormScreen), findsOneWidget);
+  });
+
+  testWidgets('adding a transaction updates the dashboard live (WTM-113)', (
+    tester,
+  ) async {
+    final controller = FinanceController([]);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(host(controller: controller));
+
+    // Empty ledger → empty state, no KPIs.
+    expect(find.text('Chưa có giao dịch tài chính'), findsOneWidget);
+
+    controller.add(
+      FinanceTransaction(
+        id: 'x1',
+        type: TransactionType.income,
+        category: 'Bán hàng',
+        amount: 3000000,
+        date: DateTime(2026, 7, 10),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Chưa có giao dịch tài chính'), findsNothing);
+    // The income KPI card now shows the added amount (profit shows it too, so
+    // scope the match to the income card).
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('finance-kpi-income')),
+        matching: find.text('3.000.000 ₫'),
+      ),
+      findsOneWidget,
+    );
   });
 }

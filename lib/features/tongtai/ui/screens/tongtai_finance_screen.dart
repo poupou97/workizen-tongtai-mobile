@@ -1,44 +1,95 @@
 import 'package:flutter/material.dart';
 
 import '../../core/tongtai_formatters.dart';
+import '../../finance/finance_controller.dart';
 import '../../finance/finance_summary.dart';
 import '../../finance/finance_transaction.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import 'tongtai_transaction_form_screen.dart';
 
-/// Finance dashboard (WTM-27) — income, expenses, profit and margin over the
-/// local transaction ledger, an income-vs-expense cashflow chart, the expense
-/// breakdown by category, and a recent-activity feed.
+/// Finance dashboard (WTM-27, WTM-113) — income, expenses, profit and margin
+/// over the local transaction ledger, an income-vs-expense cashflow chart, the
+/// expense breakdown by category, and a recent-activity feed. The FAB adds a
+/// transaction that flows straight into the figures.
 ///
-/// Local-first: figures come from the in-memory [FinanceService] (sample
-/// transactions in Phase 2). Both `service` and `clock` are injectable so every
-/// figure is deterministic under test.
-class TongtaiFinanceScreen extends StatelessWidget {
-  const TongtaiFinanceScreen({super.key, this.service, this.clock});
+/// Local-first: figures come from the in-memory [FinanceController] (sample
+/// transactions in Phase 2). Both `controller` and `clock` are injectable so
+/// every figure is deterministic under test.
+class TongtaiFinanceScreen extends StatefulWidget {
+  const TongtaiFinanceScreen({super.key, this.controller, this.clock});
 
-  final FinanceService? service;
+  /// Injectable ledger. When provided it is *not* disposed here.
+  final FinanceController? controller;
   final DateTime Function()? clock;
 
   static const Color _income = TongtaiDesignTokens.producerGreen;
   static const Color _expense = TongtaiDesignTokens.error;
 
   @override
-  Widget build(BuildContext context) {
-    final finance = service ?? FinanceService.sample();
-    final now = (clock ?? DateTime.now)();
-    final summary = finance.summaryAsOf(now);
+  State<TongtaiFinanceScreen> createState() => _TongtaiFinanceScreenState();
+}
 
-    return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
-      appBar: AppBar(
-        title: const Text('Finance · Tài chính'),
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
-        elevation: 0,
+class _TongtaiFinanceScreenState extends State<TongtaiFinanceScreen> {
+  late final FinanceController _controller;
+  late final bool _ownsController;
+  late final DateTime Function() _clock;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller != null) {
+      _controller = widget.controller!;
+      _ownsController = false;
+    } else {
+      _controller = FinanceController.sample();
+      _ownsController = true;
+    }
+    _clock = widget.clock ?? DateTime.now;
+  }
+
+  @override
+  void dispose() {
+    if (_ownsController) _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addTransaction() async {
+    final result = await Navigator.of(context).push<FinanceTransaction>(
+      MaterialPageRoute(
+        builder: (_) => TongtaiTransactionFormScreen(clock: widget.clock),
       ),
-      body: summary.hasActivity
-          ? _FinanceBody(summary: summary, recent: finance.recent())
-          : const _FinanceEmptyState(),
+    );
+    if (result != null) _controller.add(result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        final summary = _controller.summaryAsOf(_clock());
+        return Scaffold(
+          backgroundColor: TongtaiDesignTokens.lightBackground,
+          appBar: AppBar(
+            title: const Text('Finance · Tài chính'),
+            backgroundColor: TongtaiDesignTokens.lightBackground,
+            foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+            elevation: 0,
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            key: const Key('finance-add'),
+            onPressed: _addTransaction,
+            backgroundColor: TongtaiDesignTokens.financePurple,
+            foregroundColor: Colors.white,
+            icon: const Icon(Icons.add),
+            label: const Text('Ghi giao dịch'),
+          ),
+          body: summary.hasActivity
+              ? _FinanceBody(summary: summary, recent: _controller.recent())
+              : const _FinanceEmptyState(),
+        );
+      },
     );
   }
 }
