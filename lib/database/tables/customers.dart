@@ -23,6 +23,12 @@ class CustomersTable extends Table {
   RealColumn get avgOrderValue => real().nullable()();
   DateTimeColumn get lastOrderDate => dateTime().nullable()();
   RealColumn get churnRisk => real().nullable()(); // 0-100
+
+  /// Versioned full-domain snapshot (JSON) — WTM-123, ADR-TON-009 (option B).
+  /// Structured columns stay the source of truth for promoted fields; this
+  /// carries extended fields not yet promoted (tags, addresses, notes).
+  TextColumn get domainSnapshot => text().nullable()();
+
   DateTimeColumn get createdAt =>
       dateTime().withDefault(Constant(DateTime.now()))();
   DateTimeColumn get updatedAt =>

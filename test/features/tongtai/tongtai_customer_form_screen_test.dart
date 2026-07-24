@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_directory_controller.dart';
@@ -253,7 +254,8 @@ void main() {
       tester,
     ) async {
       useTallViewport(tester);
-      final directory = CustomerDirectoryController([existing()]);
+      final directory = CustomerDirectoryController.inMemory([existing()]);
+      await directory.hydrate();
       await tester.pumpWidget(
         host(
           findDuplicates: (name, phone) =>
@@ -376,9 +378,14 @@ void main() {
   group('list screen wiring (WTM-76 on WTM-75)', () {
     testWidgets('the FAB opens the Add Customer form', (tester) async {
       useTallViewport(tester);
-      final directory = CustomerDirectoryController([existing()]);
+      final directory = CustomerDirectoryController.inMemory([existing()]);
+      await directory.hydrate();
       await tester.pumpWidget(
-        MaterialApp(home: TongtaiCustomerListScreen(directory: directory)),
+        ProviderScope(
+          child: MaterialApp(
+            home: TongtaiCustomerListScreen(directory: directory),
+          ),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -395,9 +402,14 @@ void main() {
       tester,
     ) async {
       useTallViewport(tester);
-      final directory = CustomerDirectoryController([existing()]);
+      final directory = CustomerDirectoryController.inMemory([existing()]);
+      await directory.hydrate();
       await tester.pumpWidget(
-        MaterialApp(home: TongtaiCustomerListScreen(directory: directory)),
+        ProviderScope(
+          child: MaterialApp(
+            home: TongtaiCustomerListScreen(directory: directory),
+          ),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -427,9 +439,14 @@ void main() {
       tester,
     ) async {
       useTallViewport(tester);
-      final directory = CustomerDirectoryController([existing()]);
+      final directory = CustomerDirectoryController.inMemory([existing()]);
+      await directory.hydrate();
       await tester.pumpWidget(
-        MaterialApp(home: TongtaiCustomerListScreen(directory: directory)),
+        ProviderScope(
+          child: MaterialApp(
+            home: TongtaiCustomerListScreen(directory: directory),
+          ),
+        ),
       );
       await tester.pumpAndSettle();
 

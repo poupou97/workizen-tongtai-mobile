@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
@@ -15,8 +16,16 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_list_screen
 /// (not lazily culled) so those counts are exact.
 void main() {
   Future<void> pumpScreen(WidgetTester tester) async {
+    // The real screen starts empty (User Data First, WTM-123); inject the sample
+    // directory so the list-UI tests (sort/filter/paging) have data to exercise.
     await tester.pumpWidget(
-      const MaterialApp(home: TongtaiCustomerListScreen()),
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiCustomerListScreen(
+            service: CustomerDirectoryService(kSampleCustomers),
+          ),
+        ),
+      ),
     );
     await tester.pumpAndSettle();
   }
@@ -219,7 +228,9 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      MaterialApp(home: TongtaiCustomerListScreen(service: service)),
+      ProviderScope(
+        child: MaterialApp(home: TongtaiCustomerListScreen(service: service)),
+      ),
     );
     await tester.pumpAndSettle();
 

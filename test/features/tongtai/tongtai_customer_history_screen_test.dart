@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_directory_controller.dart';
@@ -238,12 +239,15 @@ void main() {
     'list screen: the row history button opens this customer\'s history',
     (tester) async {
       useTallViewport(tester);
-      final directory = CustomerDirectoryController([customer]);
+      final directory = CustomerDirectoryController.inMemory([customer]);
+      await directory.hydrate();
       await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiCustomerListScreen(
-            directory: directory,
-            orderHistory: service,
+        ProviderScope(
+          child: MaterialApp(
+            home: TongtaiCustomerListScreen(
+              directory: directory,
+              orderHistory: service,
+            ),
           ),
         ),
       );

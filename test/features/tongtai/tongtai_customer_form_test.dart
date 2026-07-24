@@ -265,12 +265,13 @@ void main() {
   });
 
   group('CustomerDirectoryController', () {
-    test('upsert appends a new customer and notifies', () {
-      final controller = CustomerDirectoryController([sample()]);
+    test('upsert appends a new customer and notifies', () async {
+      final controller = CustomerDirectoryController.inMemory([sample()]);
+      await controller.hydrate();
       var notified = 0;
       controller.addListener(() => notified++);
 
-      final replaced = controller.upsert(sample(id: 'c2', name: 'Mai'));
+      final replaced = await controller.upsert(sample(id: 'c2', name: 'Mai'));
 
       expect(replaced, isFalse);
       expect(controller.count, 2);
@@ -278,16 +279,18 @@ void main() {
       expect(controller.service.all.map((c) => c.id), ['c1', 'c2']);
     });
 
-    test('upsert replaces an existing customer by id', () {
-      final controller = CustomerDirectoryController([sample()]);
-      final replaced = controller.upsert(sample(name: 'Phương (updated)'));
+    test('upsert replaces an existing customer by id', () async {
+      final controller = CustomerDirectoryController.inMemory([sample()]);
+      await controller.hydrate();
+      final replaced = await controller.upsert(sample(name: 'Phương (updated)'));
       expect(replaced, isTrue);
       expect(controller.count, 1);
       expect(controller.customers.single.name, 'Phương (updated)');
     });
 
-    test('findDuplicates delegates with exceptId', () {
-      final controller = CustomerDirectoryController([sample()]);
+    test('findDuplicates delegates with exceptId', () async {
+      final controller = CustomerDirectoryController.inMemory([sample()]);
+      await controller.hydrate();
       expect(
         controller.findDuplicates(name: '', phone: '0912345678'),
         hasLength(1),

@@ -3483,6 +3483,17 @@ class $CustomersTableTable extends CustomersTable
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _domainSnapshotMeta = const VerificationMeta(
+    'domainSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> domainSnapshot = GeneratedColumn<String>(
+    'domain_snapshot',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3526,6 +3537,7 @@ class $CustomersTableTable extends CustomersTable
     avgOrderValue,
     lastOrderDate,
     churnRisk,
+    domainSnapshot,
     createdAt,
     updatedAt,
   ];
@@ -3658,6 +3670,15 @@ class $CustomersTableTable extends CustomersTable
         churnRisk.isAcceptableOrUnknown(data['churn_risk']!, _churnRiskMeta),
       );
     }
+    if (data.containsKey('domain_snapshot')) {
+      context.handle(
+        _domainSnapshotMeta,
+        domainSnapshot.isAcceptableOrUnknown(
+          data['domain_snapshot']!,
+          _domainSnapshotMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3747,6 +3768,10 @@ class $CustomersTableTable extends CustomersTable
         DriftSqlType.double,
         data['${effectivePrefix}churn_risk'],
       ),
+      domainSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}domain_snapshot'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3783,6 +3808,11 @@ class CustomersTableData extends DataClass
   final double? avgOrderValue;
   final DateTime? lastOrderDate;
   final double? churnRisk;
+
+  /// Versioned full-domain snapshot (JSON) — WTM-123, ADR-TON-009 (option B).
+  /// Structured columns stay the source of truth for promoted fields; this
+  /// carries extended fields not yet promoted (tags, addresses, notes).
+  final String? domainSnapshot;
   final DateTime createdAt;
   final DateTime updatedAt;
   const CustomersTableData({
@@ -3803,6 +3833,7 @@ class CustomersTableData extends DataClass
     this.avgOrderValue,
     this.lastOrderDate,
     this.churnRisk,
+    this.domainSnapshot,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -3854,6 +3885,9 @@ class CustomersTableData extends DataClass
     if (!nullToAbsent || churnRisk != null) {
       map['churn_risk'] = Variable<double>(churnRisk);
     }
+    if (!nullToAbsent || domainSnapshot != null) {
+      map['domain_snapshot'] = Variable<String>(domainSnapshot);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -3904,6 +3938,9 @@ class CustomersTableData extends DataClass
       churnRisk: churnRisk == null && nullToAbsent
           ? const Value.absent()
           : Value(churnRisk),
+      domainSnapshot: domainSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(domainSnapshot),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -3932,6 +3969,7 @@ class CustomersTableData extends DataClass
       avgOrderValue: serializer.fromJson<double?>(json['avgOrderValue']),
       lastOrderDate: serializer.fromJson<DateTime?>(json['lastOrderDate']),
       churnRisk: serializer.fromJson<double?>(json['churnRisk']),
+      domainSnapshot: serializer.fromJson<String?>(json['domainSnapshot']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -3957,6 +3995,7 @@ class CustomersTableData extends DataClass
       'avgOrderValue': serializer.toJson<double?>(avgOrderValue),
       'lastOrderDate': serializer.toJson<DateTime?>(lastOrderDate),
       'churnRisk': serializer.toJson<double?>(churnRisk),
+      'domainSnapshot': serializer.toJson<String?>(domainSnapshot),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -3980,6 +4019,7 @@ class CustomersTableData extends DataClass
     Value<double?> avgOrderValue = const Value.absent(),
     Value<DateTime?> lastOrderDate = const Value.absent(),
     Value<double?> churnRisk = const Value.absent(),
+    Value<String?> domainSnapshot = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => CustomersTableData(
@@ -4008,6 +4048,9 @@ class CustomersTableData extends DataClass
         ? lastOrderDate.value
         : this.lastOrderDate,
     churnRisk: churnRisk.present ? churnRisk.value : this.churnRisk,
+    domainSnapshot: domainSnapshot.present
+        ? domainSnapshot.value
+        : this.domainSnapshot,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -4046,6 +4089,9 @@ class CustomersTableData extends DataClass
           ? data.lastOrderDate.value
           : this.lastOrderDate,
       churnRisk: data.churnRisk.present ? data.churnRisk.value : this.churnRisk,
+      domainSnapshot: data.domainSnapshot.present
+          ? data.domainSnapshot.value
+          : this.domainSnapshot,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -4071,6 +4117,7 @@ class CustomersTableData extends DataClass
           ..write('avgOrderValue: $avgOrderValue, ')
           ..write('lastOrderDate: $lastOrderDate, ')
           ..write('churnRisk: $churnRisk, ')
+          ..write('domainSnapshot: $domainSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4096,6 +4143,7 @@ class CustomersTableData extends DataClass
     avgOrderValue,
     lastOrderDate,
     churnRisk,
+    domainSnapshot,
     createdAt,
     updatedAt,
   );
@@ -4120,6 +4168,7 @@ class CustomersTableData extends DataClass
           other.avgOrderValue == this.avgOrderValue &&
           other.lastOrderDate == this.lastOrderDate &&
           other.churnRisk == this.churnRisk &&
+          other.domainSnapshot == this.domainSnapshot &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -4142,6 +4191,7 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
   final Value<double?> avgOrderValue;
   final Value<DateTime?> lastOrderDate;
   final Value<double?> churnRisk;
+  final Value<String?> domainSnapshot;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -4163,6 +4213,7 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     this.avgOrderValue = const Value.absent(),
     this.lastOrderDate = const Value.absent(),
     this.churnRisk = const Value.absent(),
+    this.domainSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -4185,6 +4236,7 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     this.avgOrderValue = const Value.absent(),
     this.lastOrderDate = const Value.absent(),
     this.churnRisk = const Value.absent(),
+    this.domainSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -4209,6 +4261,7 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     Expression<double>? avgOrderValue,
     Expression<DateTime>? lastOrderDate,
     Expression<double>? churnRisk,
+    Expression<String>? domainSnapshot,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -4231,6 +4284,7 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
       if (avgOrderValue != null) 'avg_order_value': avgOrderValue,
       if (lastOrderDate != null) 'last_order_date': lastOrderDate,
       if (churnRisk != null) 'churn_risk': churnRisk,
+      if (domainSnapshot != null) 'domain_snapshot': domainSnapshot,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -4255,6 +4309,7 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     Value<double?>? avgOrderValue,
     Value<DateTime?>? lastOrderDate,
     Value<double?>? churnRisk,
+    Value<String?>? domainSnapshot,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -4277,6 +4332,7 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
       avgOrderValue: avgOrderValue ?? this.avgOrderValue,
       lastOrderDate: lastOrderDate ?? this.lastOrderDate,
       churnRisk: churnRisk ?? this.churnRisk,
+      domainSnapshot: domainSnapshot ?? this.domainSnapshot,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -4337,6 +4393,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     if (churnRisk.present) {
       map['churn_risk'] = Variable<double>(churnRisk.value);
     }
+    if (domainSnapshot.present) {
+      map['domain_snapshot'] = Variable<String>(domainSnapshot.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4369,6 +4428,7 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
           ..write('avgOrderValue: $avgOrderValue, ')
           ..write('lastOrderDate: $lastOrderDate, ')
           ..write('churnRisk: $churnRisk, ')
+          ..write('domainSnapshot: $domainSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -17447,6 +17507,7 @@ typedef $$CustomersTableTableCreateCompanionBuilder =
       Value<double?> avgOrderValue,
       Value<DateTime?> lastOrderDate,
       Value<double?> churnRisk,
+      Value<String?> domainSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -17470,6 +17531,7 @@ typedef $$CustomersTableTableUpdateCompanionBuilder =
       Value<double?> avgOrderValue,
       Value<DateTime?> lastOrderDate,
       Value<double?> churnRisk,
+      Value<String?> domainSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -17611,6 +17673,11 @@ class $$CustomersTableTableFilterComposer
 
   ColumnFilters<double> get churnRisk => $composableBuilder(
     column: $table.churnRisk,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -17762,6 +17829,11 @@ class $$CustomersTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -17867,6 +17939,11 @@ class $$CustomersTableTableAnnotationComposer
   GeneratedColumn<double> get churnRisk =>
       $composableBuilder(column: $table.churnRisk, builder: (column) => column);
 
+  GeneratedColumn<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -17969,6 +18046,7 @@ class $$CustomersTableTableTableManager
                 Value<double?> avgOrderValue = const Value.absent(),
                 Value<DateTime?> lastOrderDate = const Value.absent(),
                 Value<double?> churnRisk = const Value.absent(),
+                Value<String?> domainSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -17990,6 +18068,7 @@ class $$CustomersTableTableTableManager
                 avgOrderValue: avgOrderValue,
                 lastOrderDate: lastOrderDate,
                 churnRisk: churnRisk,
+                domainSnapshot: domainSnapshot,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -18013,6 +18092,7 @@ class $$CustomersTableTableTableManager
                 Value<double?> avgOrderValue = const Value.absent(),
                 Value<DateTime?> lastOrderDate = const Value.absent(),
                 Value<double?> churnRisk = const Value.absent(),
+                Value<String?> domainSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -18034,6 +18114,7 @@ class $$CustomersTableTableTableManager
                 avgOrderValue: avgOrderValue,
                 lastOrderDate: lastOrderDate,
                 churnRisk: churnRisk,
+                domainSnapshot: domainSnapshot,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

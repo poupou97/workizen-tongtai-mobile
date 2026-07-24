@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart';
 
 import '../../../database/database.dart';
+import '../core/domain_snapshot.dart';
 import '../core/local_workspace.dart';
 import 'product.dart';
 import 'product_inventory_service.dart' show kSampleProducts;
@@ -61,7 +60,9 @@ class DriftProductRepository implements ProductRepository {
             totalStock: Value(p.quantity.toDouble()),
             stockAlertLevel: Value(p.reorderLevel.toDouble()),
             domainSnapshot: Value(
-              jsonEncode({'v': _snapshotVersion, 'imagePaths': p.imagePaths}),
+              encodeDomainSnapshot({
+                'imagePaths': p.imagePaths,
+              }, version: _snapshotVersion),
             ),
             updatedAt: Value(p.updatedAt),
           ),
@@ -78,16 +79,11 @@ class DriftProductRepository implements ProductRepository {
     reorderLevel: (row.stockAlertLevel ?? 0).round(),
     updatedAt: row.updatedAt,
     description: row.description ?? '',
-    imagePaths: _extendedFrom(row.domainSnapshot),
+    imagePaths: snapshotStringList(
+      decodeDomainSnapshot(row.domainSnapshot),
+      'imagePaths',
+    ),
   );
-
-  /// Reads the extended fields from the versioned snapshot; tolerant of a null
-  /// or older-version blob (structured columns still carry the promoted fields).
-  List<String> _extendedFrom(String? snapshot) {
-    if (snapshot == null || snapshot.isEmpty) return const [];
-    final map = jsonDecode(snapshot) as Map<String, dynamic>;
-    return (map['imagePaths'] as List?)?.cast<String>() ?? const [];
-  }
 }
 
 /// Demo / Preview source (WTM-121): the built-in sample catalogue, **read-only**

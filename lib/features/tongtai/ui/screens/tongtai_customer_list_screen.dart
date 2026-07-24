@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../consumer/customer.dart';
 import '../../consumer/customer_directory_controller.dart';
@@ -6,6 +7,7 @@ import '../../consumer/customer_directory_service.dart';
 import '../../consumer/customer_order_history_service.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_consumer_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_customer_form_screen.dart';
 import 'tongtai_customer_history_screen.dart';
@@ -25,10 +27,10 @@ Color tongtaiCustomerTierColor(CustomerTier tier) => switch (tier) {
 /// Local-first customer directory: a searchable, location-filterable, sortable
 /// customer list with VIP/high-value tier badges and 20-per-page pagination.
 /// Tapping a row opens the customer in the Add/Edit form; the FAB adds a new
-/// one (WTM-76). All data lives in the in-memory
-/// [CustomerDirectoryController], so filtering, sorting and paging happen
-/// synchronously.
-class TongtaiCustomerListScreen extends StatefulWidget {
+/// one (WTM-76). Data is loaded through the [CustomerDirectoryController] from a
+/// [CustomerRepository] (WTM-123 — Drift-backed for the real app, empty for a
+/// new user); once hydrated, filtering, sorting and paging happen synchronously.
+class TongtaiCustomerListScreen extends ConsumerStatefulWidget {
   const TongtaiCustomerListScreen({
     super.key,
     this.service,
@@ -36,8 +38,8 @@ class TongtaiCustomerListScreen extends StatefulWidget {
     this.orderHistory,
   });
 
-  /// Injectable read-only seed for tests; defaults to the built-in sample
-  /// directory. Ignored when [directory] is provided.
+  /// Injectable read-only seed for tests; when [directory] is omitted an
+  /// in-memory controller is created from this (empty when both are null).
   final CustomerDirectoryService? service;
 
   /// Injectable mutable directory (WTM-76). When provided it takes precedence
@@ -49,11 +51,12 @@ class TongtaiCustomerListScreen extends StatefulWidget {
   final CustomerOrderHistoryService? orderHistory;
 
   @override
-  State<TongtaiCustomerListScreen> createState() =>
+  ConsumerState<TongtaiCustomerListScreen> createState() =>
       _TongtaiCustomerListScreenState();
 }
 
-class _TongtaiCustomerListScreenState extends State<TongtaiCustomerListScreen> {
+class _TongtaiCustomerListScreenState
+    extends ConsumerState<TongtaiCustomerListScreen> {
   late final CustomerDirectoryController _directory;
   late final bool _ownsDirectory;
   final TextEditingController _searchController = TextEditingController();
@@ -66,12 +69,18 @@ class _TongtaiCustomerListScreenState extends State<TongtaiCustomerListScreen> {
     if (widget.directory != null) {
       _directory = widget.directory!;
       _ownsDirectory = false;
+    } else if (widget.service != null) {
+      // Test seed: an in-memory directory over the supplied customers.
+      _directory = CustomerDirectoryController.inMemory(widget.service!.all);
+      _ownsDirectory = true;
     } else {
+      // Real app: persistent Drift directory (WTM-123), empty for new users.
       _directory = CustomerDirectoryController(
-        widget.service?.all ?? kSampleCustomers,
+        ref.read(customerRepositoryProvider),
       );
       _ownsDirectory = true;
     }
+    if (_ownsDirectory) _directory.hydrate();
   }
 
   @override
@@ -98,7 +107,8 @@ class _TongtaiCustomerListScreenState extends State<TongtaiCustomerListScreen> {
       ),
     );
     if (!context.mounted || result == null) return;
-    _directory.upsert(result);
+    await _directory.upsert(result);
+    if (!context.mounted) return;
     setState(() => _query = _query.copyWith(pageIndex: 0));
   }
 
