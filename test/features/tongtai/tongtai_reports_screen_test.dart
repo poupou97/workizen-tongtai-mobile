@@ -63,6 +63,28 @@ void main() {
     expect(find.textContaining('1.970.000 ₫'), findsOneWidget);
   });
 
+  testWidgets('top products + customers rank widgets render (WTM-97)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(host());
+    final scrollable = find.byType(Scrollable).first;
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('reports-top-products')),
+      300,
+      scrollable: scrollable,
+    );
+    expect(find.text('Nồi chiên không dầu'), findsOneWidget); // #1 product
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('reports-top-customers')),
+      300,
+      scrollable: scrollable,
+    );
+    expect(find.text('Thu Hà'), findsOneWidget); // #1 customer
+    expect(find.text('4 đơn'), findsOneWidget);
+  });
+
   testWidgets('empty order book shows the fox empty state, no KPIs', (
     tester,
   ) async {
