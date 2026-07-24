@@ -2374,6 +2374,17 @@ class $ProductsTableTable extends ProductsTable
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _domainSnapshotMeta = const VerificationMeta(
+    'domainSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> domainSnapshot = GeneratedColumn<String>(
+    'domain_snapshot',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2416,6 +2427,7 @@ class $ProductsTableTable extends ProductsTable
     supplierId,
     salesChannels,
     isActive,
+    domainSnapshot,
     createdAt,
     updatedAt,
   ];
@@ -2555,6 +2567,15 @@ class $ProductsTableTable extends ProductsTable
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
       );
     }
+    if (data.containsKey('domain_snapshot')) {
+      context.handle(
+        _domainSnapshotMeta,
+        domainSnapshot.isAcceptableOrUnknown(
+          data['domain_snapshot']!,
+          _domainSnapshotMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -2640,6 +2661,10 @@ class $ProductsTableTable extends ProductsTable
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      domainSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}domain_snapshot'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -2675,6 +2700,12 @@ class ProductsTableData extends DataClass
   final String? supplierId;
   final String? salesChannels;
   final bool isActive;
+
+  /// Versioned full-domain snapshot (JSON) — WTM-121, ADR-TON-009 (option B).
+  /// Structured columns above stay the source of truth for promoted fields; this
+  /// carries the extended domain (e.g. imagePaths) not yet promoted to columns.
+  /// Fields graduate out of here to structured columns/child tables on demand.
+  final String? domainSnapshot;
   final DateTime createdAt;
   final DateTime updatedAt;
   const ProductsTableData({
@@ -2694,6 +2725,7 @@ class ProductsTableData extends DataClass
     this.supplierId,
     this.salesChannels,
     required this.isActive,
+    this.domainSnapshot,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -2734,6 +2766,9 @@ class ProductsTableData extends DataClass
       map['sales_channels'] = Variable<String>(salesChannels);
     }
     map['is_active'] = Variable<bool>(isActive);
+    if (!nullToAbsent || domainSnapshot != null) {
+      map['domain_snapshot'] = Variable<String>(domainSnapshot);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -2775,6 +2810,9 @@ class ProductsTableData extends DataClass
           ? const Value.absent()
           : Value(salesChannels),
       isActive: Value(isActive),
+      domainSnapshot: domainSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(domainSnapshot),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -2802,6 +2840,7 @@ class ProductsTableData extends DataClass
       supplierId: serializer.fromJson<String?>(json['supplierId']),
       salesChannels: serializer.fromJson<String?>(json['salesChannels']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      domainSnapshot: serializer.fromJson<String?>(json['domainSnapshot']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -2826,6 +2865,7 @@ class ProductsTableData extends DataClass
       'supplierId': serializer.toJson<String?>(supplierId),
       'salesChannels': serializer.toJson<String?>(salesChannels),
       'isActive': serializer.toJson<bool>(isActive),
+      'domainSnapshot': serializer.toJson<String?>(domainSnapshot),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -2848,6 +2888,7 @@ class ProductsTableData extends DataClass
     Value<String?> supplierId = const Value.absent(),
     Value<String?> salesChannels = const Value.absent(),
     bool? isActive,
+    Value<String?> domainSnapshot = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => ProductsTableData(
@@ -2875,6 +2916,9 @@ class ProductsTableData extends DataClass
         ? salesChannels.value
         : this.salesChannels,
     isActive: isActive ?? this.isActive,
+    domainSnapshot: domainSnapshot.present
+        ? domainSnapshot.value
+        : this.domainSnapshot,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -2916,6 +2960,9 @@ class ProductsTableData extends DataClass
           ? data.salesChannels.value
           : this.salesChannels,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      domainSnapshot: data.domainSnapshot.present
+          ? data.domainSnapshot.value
+          : this.domainSnapshot,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2940,6 +2987,7 @@ class ProductsTableData extends DataClass
           ..write('supplierId: $supplierId, ')
           ..write('salesChannels: $salesChannels, ')
           ..write('isActive: $isActive, ')
+          ..write('domainSnapshot: $domainSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2964,6 +3012,7 @@ class ProductsTableData extends DataClass
     supplierId,
     salesChannels,
     isActive,
+    domainSnapshot,
     createdAt,
     updatedAt,
   );
@@ -2987,6 +3036,7 @@ class ProductsTableData extends DataClass
           other.supplierId == this.supplierId &&
           other.salesChannels == this.salesChannels &&
           other.isActive == this.isActive &&
+          other.domainSnapshot == this.domainSnapshot &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -3008,6 +3058,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
   final Value<String?> supplierId;
   final Value<String?> salesChannels;
   final Value<bool> isActive;
+  final Value<String?> domainSnapshot;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -3028,6 +3079,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     this.supplierId = const Value.absent(),
     this.salesChannels = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.domainSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3049,6 +3101,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     this.supplierId = const Value.absent(),
     this.salesChannels = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.domainSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3074,6 +3127,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     Expression<String>? supplierId,
     Expression<String>? salesChannels,
     Expression<bool>? isActive,
+    Expression<String>? domainSnapshot,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -3095,6 +3149,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
       if (supplierId != null) 'supplier_id': supplierId,
       if (salesChannels != null) 'sales_channels': salesChannels,
       if (isActive != null) 'is_active': isActive,
+      if (domainSnapshot != null) 'domain_snapshot': domainSnapshot,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -3118,6 +3173,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     Value<String?>? supplierId,
     Value<String?>? salesChannels,
     Value<bool>? isActive,
+    Value<String?>? domainSnapshot,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -3139,6 +3195,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
       supplierId: supplierId ?? this.supplierId,
       salesChannels: salesChannels ?? this.salesChannels,
       isActive: isActive ?? this.isActive,
+      domainSnapshot: domainSnapshot ?? this.domainSnapshot,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -3196,6 +3253,9 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
+    if (domainSnapshot.present) {
+      map['domain_snapshot'] = Variable<String>(domainSnapshot.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3227,6 +3287,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
           ..write('supplierId: $supplierId, ')
           ..write('salesChannels: $salesChannels, ')
           ..write('isActive: $isActive, ')
+          ..write('domainSnapshot: $domainSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -16691,6 +16752,7 @@ typedef $$ProductsTableTableCreateCompanionBuilder =
       Value<String?> supplierId,
       Value<String?> salesChannels,
       Value<bool> isActive,
+      Value<String?> domainSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -16713,6 +16775,7 @@ typedef $$ProductsTableTableUpdateCompanionBuilder =
       Value<String?> supplierId,
       Value<String?> salesChannels,
       Value<bool> isActive,
+      Value<String?> domainSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -16840,6 +16903,11 @@ class $$ProductsTableTableFilterComposer
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16979,6 +17047,11 @@ class $$ProductsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -17103,6 +17176,11 @@ class $$ProductsTableTableAnnotationComposer
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
 
+  GeneratedColumn<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -17200,6 +17278,7 @@ class $$ProductsTableTableTableManager
                 Value<String?> supplierId = const Value.absent(),
                 Value<String?> salesChannels = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<String?> domainSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -17220,6 +17299,7 @@ class $$ProductsTableTableTableManager
                 supplierId: supplierId,
                 salesChannels: salesChannels,
                 isActive: isActive,
+                domainSnapshot: domainSnapshot,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -17242,6 +17322,7 @@ class $$ProductsTableTableTableManager
                 Value<String?> supplierId = const Value.absent(),
                 Value<String?> salesChannels = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<String?> domainSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -17262,6 +17343,7 @@ class $$ProductsTableTableTableManager
                 supplierId: supplierId,
                 salesChannels: salesChannels,
                 isActive: isActive,
+                domainSnapshot: domainSnapshot,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

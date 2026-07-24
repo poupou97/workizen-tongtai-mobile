@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/tongtai.dart';
 
@@ -73,10 +74,20 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: TongtaiProducerScreen()));
       expect(find.text('Producer Hub'), findsOneWidget);
 
-      // Test Inventory Screen (WTM-68: product list; AppBar title "Inventory")
+      // Test Inventory Screen (WTM-68: product list; AppBar title "Inventory").
+      // Override the repository so the ConsumerStatefulWidget's hydrate() stays
+      // off the real Drift database in this nav smoke test (WTM-121).
       await tester.pumpWidget(
-        const MaterialApp(home: TongtaiInventoryScreen()),
+        ProviderScope(
+          overrides: [
+            productRepositoryProvider.overrideWithValue(
+              InMemoryProductRepository(),
+            ),
+          ],
+          child: const MaterialApp(home: TongtaiInventoryScreen()),
+        ),
       );
+      await tester.pumpAndSettle();
       expect(find.text('Inventory'), findsOneWidget);
 
       // Test Consumer Screen

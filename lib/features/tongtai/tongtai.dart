@@ -57,6 +57,8 @@ export 'inventory/product_history.dart';
 export 'inventory/product_form.dart';
 export 'inventory/product_image_source.dart';
 export 'inventory/product_catalog_controller.dart';
+export 'inventory/product_repository.dart';
+export 'providers/tongtai_inventory_provider.dart';
 export 'ui/screens/tongtai_product_form_screen.dart';
 
 // Inventory — stock level alerts (WTM-70)

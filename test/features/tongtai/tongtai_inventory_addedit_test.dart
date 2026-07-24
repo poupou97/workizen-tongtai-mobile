@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_catalog_controller.dart';
@@ -34,10 +35,12 @@ void main() {
     updatedAt: DateTime(2026, 1, 1),
   );
 
-  Widget host(ProductCatalogController catalog) => MaterialApp(
-    home: TongtaiInventoryScreen(
-      catalog: catalog,
-      imageSource: _NoopImageSource(),
+  Widget host(ProductCatalogController catalog) => ProviderScope(
+    child: MaterialApp(
+      home: TongtaiInventoryScreen(
+        catalog: catalog,
+        imageSource: _NoopImageSource(),
+      ),
     ),
   );
 
@@ -50,7 +53,9 @@ void main() {
 
   testWidgets('the + button opens the Add Product form', (tester) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([product('a', 'Alpha', 'SKU-A')]);
+    final catalog = ProductCatalogController.inMemory([
+      product('a', 'Alpha', 'SKU-A'),
+    ]);
     await tester.pumpWidget(host(catalog));
     await tester.pumpAndSettle();
 
@@ -65,7 +70,9 @@ void main() {
     tester,
   ) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([product('a', 'Alpha', 'SKU-A')]);
+    final catalog = ProductCatalogController.inMemory([
+      product('a', 'Alpha', 'SKU-A'),
+    ]);
     await tester.pumpWidget(host(catalog));
     await tester.pumpAndSettle();
 
@@ -103,7 +110,9 @@ void main() {
 
   testWidgets('tapping a product row opens it in Edit mode', (tester) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([product('a', 'Alpha', 'SKU-A')]);
+    final catalog = ProductCatalogController.inMemory([
+      product('a', 'Alpha', 'SKU-A'),
+    ]);
     await tester.pumpWidget(host(catalog));
     await tester.pumpAndSettle();
 
@@ -128,7 +137,7 @@ void main() {
     tester,
   ) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product('a', 'Alpha', 'SKU-A'),
       product('b', 'Bravo', 'SKU-B'),
     ]);
@@ -162,7 +171,7 @@ void main() {
     tester,
   ) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product('a', 'Alpha', 'SKU-A'),
       product('b', 'Bravo', 'SKU-B'),
     ]);

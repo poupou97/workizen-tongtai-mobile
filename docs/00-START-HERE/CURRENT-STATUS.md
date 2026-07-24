@@ -19,7 +19,7 @@
 | Shell/Nav | WTM-55 bottom nav · 56 tab persistence · 57 deep links · 59 onboarding (6 màn) |
 | Identity/Core | WTM-58 UUID identity · 60 core utils (formatters/enums) · 62 design tokens+showcase |
 | Producer | WTM-63 supplier search · 64 supplier detail · 65 favorites |
-| Inventory | WTM-68 product list · 69 add/edit product · 70 stock alerts |
+| Inventory | WTM-68 product list · 69 add/edit product · 70 stock alerts · WTM-121 **Drift persistence (ADR-TON-009)**: `ProductCatalogController → ProductRepository → Drift` (schema v5 + `products.domain_snapshot`); app thật bắt đầu RỖNG, sản phẩm user persist (imagePaths trong versioned snapshot); sample = Demo Mode |
 | Search | WTM-72 FTS5 (đ-aware) · 73 unified search · 74 ranking + A/B |
 | Consumer | WTM-75 customer list · 76 add/edit customer (form, multi-address, audit trail, duplicate check) · 77 purchase history (orders, filters, AOV/repurchase) |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
