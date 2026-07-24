@@ -117,7 +117,158 @@ class _ReportBody extends StatelessWidget {
           categories: report.topCategories,
           total: report.revenueYtd,
         ),
+
+        const SizedBox(height: TongtaiDesignTokens.spacing6),
+
+        // ── Top products (WTM-97) ───────────────────────────────────────
+        _SectionTitle('Sản phẩm bán chạy · Top products'),
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        _TopProductsCard(products: report.topProducts),
+
+        const SizedBox(height: TongtaiDesignTokens.spacing6),
+
+        // ── Top customers (WTM-97) ──────────────────────────────────────
+        _SectionTitle('Khách hàng hàng đầu · Top customers'),
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        _TopCustomersCard(customers: report.topCustomers),
       ],
+    );
+  }
+}
+
+/// Top products as a ranked list with revenue + units sold.
+class _TopProductsCard extends StatelessWidget {
+  const _TopProductsCard({required this.products});
+
+  final List<ProductRevenue> products;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('reports-top-products'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: TongtaiDesignTokens.spacing4,
+      ),
+      decoration: _cardDecoration,
+      child: Column(
+        children: [
+          for (var i = 0; i < products.length; i++)
+            _RankRow(
+              rank: i + 1,
+              accent: TongtaiDesignTokens.inventoryOrange,
+              title: products[i].name,
+              subtitle: 'Đã bán ${products[i].quantity}',
+              value: TongtaiFormatters.vndShort(products[i].revenue),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Top customers as a ranked list with spend + order count.
+class _TopCustomersCard extends StatelessWidget {
+  const _TopCustomersCard({required this.customers});
+
+  final List<CustomerSpend> customers;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('reports-top-customers'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: TongtaiDesignTokens.spacing4,
+      ),
+      decoration: _cardDecoration,
+      child: Column(
+        children: [
+          for (var i = 0; i < customers.length; i++)
+            _RankRow(
+              rank: i + 1,
+              accent: TongtaiDesignTokens.consumerBlue,
+              title: customers[i].name,
+              subtitle: '${customers[i].orders} đơn',
+              value: TongtaiFormatters.vndShort(customers[i].spend),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A ranked list row: rank chip · title/subtitle · trailing value.
+class _RankRow extends StatelessWidget {
+  const _RankRow({
+    required this.rank,
+    required this.accent,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+  });
+
+  final int rank;
+  final Color accent;
+  final String title;
+  final String subtitle;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: TongtaiDesignTokens.spacing3,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '$rank',
+              style: TongtaiDesignTokens.captionStyle.copyWith(
+                color: accent,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: TongtaiDesignTokens.spacing3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TongtaiDesignTokens.captionStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          Text(
+            value,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

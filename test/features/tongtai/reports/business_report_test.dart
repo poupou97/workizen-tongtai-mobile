@@ -88,6 +88,43 @@ void main() {
       expect(cats.map((c) => c.revenue), [1970000, 1240000, 848000]);
       expect(cats.fold<double>(0, (s, c) => s + c.revenue), report.revenueYtd);
     });
+
+    test('top products are ordered by YTD revenue, capped at 5 (WTM-97)', () {
+      final products = report.topProducts;
+      expect(products, hasLength(5));
+      expect(products.map((p) => p.name), [
+        'Nồi chiên không dầu',
+        'Váy linen',
+        'Tai nghe bluetooth',
+        'Bộ dao nhà bếp',
+        'Áo thun cotton',
+      ]);
+      expect(products.map((p) => p.revenue), [
+        1250000,
+        700000,
+        420000,
+        390000,
+        360000,
+      ]);
+      // Units sold aggregate per product (Váy linen: 2, Áo thun: 3).
+      expect(products.firstWhere((p) => p.name == 'Váy linen').quantity, 2);
+      expect(
+        products.firstWhere((p) => p.name == 'Áo thun cotton').quantity,
+        3,
+      );
+    });
+
+    test('top customers are ordered by YTD spend with names (WTM-97)', () {
+      final customers = report.topCustomers;
+      // Three customers have billable orders this year.
+      expect(customers.map((c) => c.name), [
+        'Thu Hà', // c10
+        'Phương Nguyễn', // c01
+        'Bảo Lê', // c07
+      ]);
+      expect(customers.map((c) => c.spend), [2940000, 788000, 330000]);
+      expect(customers.first.orders, 4); // Thu Hà's billable orders
+    });
   });
 
   group('ReportsService edge cases', () {

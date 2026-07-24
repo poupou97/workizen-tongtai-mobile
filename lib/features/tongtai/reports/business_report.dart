@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../consumer/customer.dart';
+import '../consumer/customer_directory_service.dart';
 import '../consumer/customer_order.dart';
 import '../core/tongtai_enums.dart';
 
@@ -78,6 +80,67 @@ class CategoryRevenue {
   String toString() => 'CategoryRevenue($category, $revenue)';
 }
 
+/// Revenue + units for one product — a row in the top-products widget (WTM-97).
+@immutable
+class ProductRevenue {
+  const ProductRevenue({
+    required this.name,
+    required this.revenue,
+    required this.quantity,
+  });
+
+  final String name;
+  final double revenue;
+  final int quantity;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProductRevenue &&
+          other.name == name &&
+          other.revenue == revenue &&
+          other.quantity == quantity);
+
+  @override
+  int get hashCode => Object.hash(name, revenue, quantity);
+
+  @override
+  String toString() => 'ProductRevenue($name, $revenue, x$quantity)';
+}
+
+/// Spend + order count for one customer — a row in the top-customers widget
+/// (WTM-97). [name] is resolved from the customer directory; falls back to the
+/// id when unknown.
+@immutable
+class CustomerSpend {
+  const CustomerSpend({
+    required this.customerId,
+    required this.name,
+    required this.spend,
+    required this.orders,
+  });
+
+  final String customerId;
+  final String name;
+  final double spend;
+  final int orders;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CustomerSpend &&
+          other.customerId == customerId &&
+          other.name == name &&
+          other.spend == spend &&
+          other.orders == orders);
+
+  @override
+  int get hashCode => Object.hash(customerId, name, spend, orders);
+
+  @override
+  String toString() => 'CustomerSpend($name, $spend, $orders orders)';
+}
+
 /// A snapshot of the business's sales performance for the Reports & Analytics
 /// dashboard (WTM-95 layout/widgets, WTM-96 revenue KPI).
 ///
@@ -93,6 +156,8 @@ class BusinessReport {
     required this.averageOrderValue,
     required this.monthlyRevenue,
     required this.topCategories,
+    this.topProducts = const [],
+    this.topCustomers = const [],
   });
 
   /// Revenue booked in the current calendar month (WTM-96 — MTD).
@@ -115,6 +180,12 @@ class BusinessReport {
 
   /// Categories by YTD revenue, highest first (WTM-95 top-categories widget).
   final List<CategoryRevenue> topCategories;
+
+  /// Products by YTD revenue, highest first (WTM-97 top-products widget).
+  final List<ProductRevenue> topProducts;
+
+  /// Customers by YTD spend, highest first (WTM-97 top-customers widget).
+  final List<CustomerSpend> topCustomers;
 
   /// The largest single month in [monthlyRevenue] — the chart's y-axis top.
   /// 0 when the window is empty or every month is zero.
@@ -145,17 +216,27 @@ class BusinessReport {
 /// Swap the order source for a Drift-backed one later without touching the
 /// dashboard.
 class ReportsService {
-  ReportsService(List<CustomerOrder> orders, {this.monthsBack = 6})
-    : assert(monthsBack > 0, 'monthsBack must be positive'),
-      _orders = List.unmodifiable(orders);
+  ReportsService(
+    List<CustomerOrder> orders, {
+    this.monthsBack = 6,
+    List<Customer> customers = const [],
+  }) : assert(monthsBack > 0, 'monthsBack must be positive'),
+       _orders = List.unmodifiable(orders),
+       _customerNames = {for (final c in customers) c.id: c.name};
 
-  /// Seeded with the built-in sample orders — the same fixtures the customer
-  /// history uses, so the dashboard shows coherent numbers in demos and the
-  /// closed beta.
-  factory ReportsService.sample({int monthsBack = 6}) =>
-      ReportsService(kSampleCustomerOrders, monthsBack: monthsBack);
+  /// Seeded with the built-in sample orders + customers — the same fixtures the
+  /// customer history uses, so the dashboard shows coherent numbers in demos and
+  /// the closed beta.
+  factory ReportsService.sample({int monthsBack = 6}) => ReportsService(
+    kSampleCustomerOrders,
+    monthsBack: monthsBack,
+    customers: kSampleCustomers,
+  );
 
   final List<CustomerOrder> _orders;
+
+  /// customerId → display name, for the top-customers widget (WTM-97).
+  final Map<String, String> _customerNames;
 
   /// How many trailing months the revenue trend spans (inclusive of `now`).
   final int monthsBack;
@@ -186,11 +267,72 @@ class ReportsService {
       averageOrderValue: ytd.isEmpty ? 0 : revenueYtd / ytd.length,
       monthlyRevenue: _monthlySeries(billable, now),
       topCategories: _categorySeries(ytd),
+      topProducts: _productSeries(ytd),
+      topCustomers: _customerSeries(ytd),
     );
   }
 
   double _sum(Iterable<CustomerOrder> orders) =>
       orders.fold(0, (total, o) => total + o.totalAmount);
+
+  /// Products by YTD revenue (from order line items), highest first, top 5.
+  List<ProductRevenue> _productSeries(List<CustomerOrder> ytd) {
+    final revenue = <String, double>{};
+    final quantity = <String, int>{};
+    for (final order in ytd) {
+      for (final item in order.items) {
+        revenue.update(
+          item.productName,
+          (r) => r + item.lineTotal,
+          ifAbsent: () => item.lineTotal,
+        );
+        quantity.update(
+          item.productName,
+          (q) => q + item.quantity,
+          ifAbsent: () => item.quantity,
+        );
+      }
+    }
+    final products =
+        revenue.entries
+            .map(
+              (e) => ProductRevenue(
+                name: e.key,
+                revenue: e.value,
+                quantity: quantity[e.key]!,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => b.revenue.compareTo(a.revenue));
+    return products.take(5).toList();
+  }
+
+  /// Customers by YTD spend, highest first, top 5.
+  List<CustomerSpend> _customerSeries(List<CustomerOrder> ytd) {
+    final spend = <String, double>{};
+    final orders = <String, int>{};
+    for (final order in ytd) {
+      spend.update(
+        order.customerId,
+        (s) => s + order.totalAmount,
+        ifAbsent: () => order.totalAmount,
+      );
+      orders.update(order.customerId, (n) => n + 1, ifAbsent: () => 1);
+    }
+    final customers =
+        spend.entries
+            .map(
+              (e) => CustomerSpend(
+                customerId: e.key,
+                name: _customerNames[e.key] ?? e.key,
+                spend: e.value,
+                orders: orders[e.key]!,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => b.spend.compareTo(a.spend));
+    return customers.take(5).toList();
+  }
 
   /// [monthsBack] consecutive months ending with `now`'s month, oldest first.
   /// `DateTime` normalises month underflow, so December of the prior year is
