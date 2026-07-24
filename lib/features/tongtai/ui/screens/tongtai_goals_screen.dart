@@ -3,18 +3,14 @@ import 'package:flutter/material.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
 import '../../journey/business_goal_controller.dart';
+import '../../journey/goal_theme.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import 'tongtai_goal_detail_screen.dart';
 import 'tongtai_goal_form_screen.dart';
 
-/// Color for a [GoalPace] badge. Pure function — unit-testable without a
-/// widget (same convention as `tongtaiCustomerTierColor`).
-Color tongtaiGoalPaceColor(GoalPace pace) => switch (pace) {
-  GoalPace.ahead => TongtaiDesignTokens.success,
-  GoalPace.onTrack => TongtaiDesignTokens.info,
-  GoalPace.behind => TongtaiDesignTokens.error,
-  GoalPace.completed => TongtaiDesignTokens.success,
-  GoalPace.notStarted => TongtaiDesignTokens.neutral,
-};
+// The pace→color helper now lives in goal_theme.dart (shared with the detail
+// screen); re-exported so existing importers keep resolving it here.
+export '../../journey/goal_theme.dart' show tongtaiGoalPaceColor;
 
 /// Business Goals screen (WTM-87) — the entry surface of the Journey epic.
 ///
@@ -70,6 +66,23 @@ class _TongtaiGoalsScreenState extends State<TongtaiGoalsScreen> {
     _controller.upsert(result);
   }
 
+  /// Opens the goal detail (WTM-88) — progress, pace, action plan and tips —
+  /// with an Edit action that closes it and opens the form.
+  void _openDetail(BuildContext context, BusinessGoal goal) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => TongtaiGoalDetailScreen(
+          goal: goal,
+          clock: widget.clock,
+          onEdit: () {
+            Navigator.of(context).pop();
+            _openForm(context, goal: goal);
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final now = _clock();
@@ -103,7 +116,7 @@ class _TongtaiGoalsScreenState extends State<TongtaiGoalsScreen> {
                     itemBuilder: (context, index) => _GoalCard(
                       goal: goals[index],
                       now: now,
-                      onTap: () => _openForm(context, goal: goals[index]),
+                      onTap: () => _openDetail(context, goals[index]),
                     ),
                   ),
           ),
