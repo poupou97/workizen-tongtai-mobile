@@ -43,5 +43,36 @@ dev_dependencies:
   drift_dev: ^2.34.0
   build_runner: ^2.15.0
 
+  # Brand assets — generate native launcher icon + splash from the Origami
+  # Business Fox (WTM-110, ADR mascot = Business Fox / Origami). Dev-only:
+  # run `dart run flutter_launcher_icons` and
+  # `dart run flutter_native_splash:create` to regenerate.
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
+
 flutter:
   uses-material-design: true
+
+# App launcher icon (WTM-110). Source rendered from
+# assets/branding/app_icon.svg (08a Origami on navy). iOS strips alpha;
+# Android uses an adaptive icon (navy background + padded fox foreground).
+flutter_launcher_icons:
+  image_path: "assets/branding/app_icon.png"
+  remove_alpha_ios: true
+  android: true
+  ios: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#111827"
+  adaptive_icon_foreground: "assets/branding/app_icon_foreground.png"
+
+# Native splash (WTM-110): navy ground with the fox, matched in dark mode.
+flutter_native_splash:
+  color: "#111827"
+  color_dark: "#111827"
+  image: "assets/branding/app_icon_foreground.png"
+  image_dark: "assets/branding/app_icon_foreground.png"
+  android_12:
+    color: "#111827"
+    color_dark: "#111827"
+    image: "assets/branding/app_icon_foreground.png"
+    image_dark: "assets/branding/app_icon_foreground.png"
