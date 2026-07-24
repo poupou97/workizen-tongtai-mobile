@@ -56,6 +56,10 @@ Run remaining Phase-2 backlog (Sprint 3+) via the Evidence-Driven Runtime —
 same gates. Founder reviews/merges PRs into `main` of THIS repo now (the old
 "merge feat/tongtai into Hub main" plan is obsolete — replaced by this split).
 
+Pre-Beta gate: [RELEASE-READINESS-CHECKLIST.md](RELEASE-READINESS-CHECKLIST.md)
+(WTM-118) — top gaps: accessibility, localization (WTM-119), privacy policy +
+telemetry disclosure (WTM-37), iOS build + release signing (Founder).
+
 ## History
 
 Batch reports: [../04-DELIVERY/reports/](../04-DELIVERY/reports/) —
