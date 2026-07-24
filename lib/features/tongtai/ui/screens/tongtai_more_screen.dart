@@ -7,6 +7,7 @@ import 'tongtai_export_screen.dart';
 import 'tongtai_finance_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
+import 'tongtai_timeline_screen.dart';
 
 /// More/Settings screen for Tổng Tài
 /// Provides access to settings, help, and additional features.
@@ -71,6 +72,15 @@ class TongtaiMoreScreen extends ConsumerWidget {
             _SettingsSection(
               title: 'Business',
               items: [
+                _SettingsItem(
+                  icon: Icons.timeline_outlined,
+                  label: 'Timeline · Dòng thời gian',
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiTimelineScreen(),
+                    ),
+                  ),
+                ),
                 _SettingsItem(
                   icon: Icons.account_balance_wallet_outlined,
                   label: 'Finance · Tài chính',
