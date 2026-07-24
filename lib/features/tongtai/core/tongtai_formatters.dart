@@ -18,6 +18,30 @@ abstract final class TongtaiFormatters {
     return '${negative ? '-' : ''}$buffer ₫';
   }
 
+  /// Compact đồng in Vietnamese money units — nghìn → "K", triệu → "tr",
+  /// tỷ → "tỷ" (e.g. 579714 → "580K ₫", 4058000 → "4,06tr ₫", 1.25e9 →
+  /// "1,25tỷ ₫"). Decimal comma per VN convention. For tight chips (KPI tiles);
+  /// use [vnd] where the full figure fits.
+  static String vndShort(num amount) {
+    final rounded = amount.round();
+    final sign = rounded < 0 ? '-' : '';
+    final v = rounded.abs();
+    if (v >= 1000000000) return '$sign${_vnDecimals(v / 1000000000)}tỷ ₫';
+    if (v >= 1000000) return '$sign${_vnDecimals(v / 1000000)}tr ₫';
+    if (v >= 1000) return '$sign${(v / 1000).round()}K ₫';
+    return '$sign$v ₫';
+  }
+
+  /// Up to two decimals, trailing zeros trimmed, comma as the separator
+  /// (4.058 → "4,06", 12 → "12", 1.5 → "1,5").
+  static String _vnDecimals(double value) {
+    var s = value.toStringAsFixed(2);
+    if (s.contains('.')) {
+      s = s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return s.replaceAll('.', ',');
+  }
+
   /// Compact number, e.g. 1500 -> "1.5K", 2300000 -> "2.3M", 4_000_000_000 ->
   /// "4B". Values below 1000 are returned as-is.
   static String compact(num value) {

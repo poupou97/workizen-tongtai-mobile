@@ -37,8 +37,8 @@ void main() {
     await tester.pumpWidget(host());
 
     expect(find.byKey(const Key('home-kpi-revenue')), findsOneWidget);
-    // YTD revenue over the sample orders.
-    expect(find.text('4.058.000 ₫'), findsOneWidget);
+    // YTD revenue over the sample orders, in VN-compact form (4.058.000 đ).
+    expect(find.text('4,06tr ₫'), findsOneWidget);
     expect(find.text('Doanh thu năm'), findsOneWidget);
     expect(find.text('Đơn hàng'), findsOneWidget);
   });

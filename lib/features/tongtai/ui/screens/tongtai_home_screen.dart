@@ -305,7 +305,7 @@ class _KpiRow extends StatelessWidget {
           child: _KpiTile(
             tileKey: const Key('home-kpi-revenue'),
             label: 'Doanh thu năm',
-            value: TongtaiFormatters.vnd(report.revenueYtd),
+            value: TongtaiFormatters.vndShort(report.revenueYtd),
             color: TongtaiDesignTokens.financePurple,
           ),
         ),
@@ -321,7 +321,7 @@ class _KpiRow extends StatelessWidget {
         Expanded(
           child: _KpiTile(
             label: 'Đơn TB',
-            value: TongtaiFormatters.vnd(report.averageOrderValue),
+            value: TongtaiFormatters.vndShort(report.averageOrderValue),
             color: TongtaiDesignTokens.producerGreen,
           ),
         ),
