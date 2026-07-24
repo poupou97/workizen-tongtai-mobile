@@ -9,6 +9,7 @@ import '../../inventory/product_image_source.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_chat_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import 'tongtai_chat_search_screen.dart';
 
 /// Chat screen (WTM-80) — the conversation surface for the AI Copilot.
 ///
@@ -100,6 +101,16 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
     _controller.send(text, attachment: attachment);
   }
 
+  /// Opens Chat Search (WTM-84) over the persisted store (ADR-TON-004, on-device).
+  void _openSearch() {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) =>
+            TongtaiChatSearchScreen(store: ref.read(tongtaiChatStoreProvider)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -151,6 +162,14 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
                 ),
               ],
             ),
+            actions: [
+              IconButton(
+                key: const Key('chat-open-search'),
+                tooltip: 'Tìm kiếm',
+                icon: const Icon(Icons.search),
+                onPressed: _openSearch,
+              ),
+            ],
           ),
           body: SafeArea(
             child: Column(
