@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
 import 'tongtai_export_screen.dart';
+import 'tongtai_finance_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
 
@@ -70,6 +71,15 @@ class TongtaiMoreScreen extends ConsumerWidget {
             _SettingsSection(
               title: 'Business',
               items: [
+                _SettingsItem(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: 'Finance · Tài chính',
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiFinanceScreen(),
+                    ),
+                  ),
+                ),
                 _SettingsItem(
                   icon: Icons.bar_chart_outlined,
                   label: 'Reports & Analytics · Báo cáo',

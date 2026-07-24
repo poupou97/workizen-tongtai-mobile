@@ -101,3 +101,31 @@ enum OpportunityType {
 
   String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
+
+/// Financial transaction direction (WTM-27) — money in vs. money out. Stored as
+/// a plain string in the `transactions` table `type` column.
+enum TransactionType {
+  income,
+  expense;
+
+  /// Parse a stored string; unknown/absent values map to [expense] (the
+  /// conservative default — an unclassified outflow rather than phantom income).
+  static TransactionType fromStorage(String? value) {
+    return TransactionType.values.firstWhere(
+      (t) => t.name == value,
+      orElse: () => TransactionType.expense,
+    );
+  }
+
+  String get labelEn => switch (this) {
+    TransactionType.income => 'Income',
+    TransactionType.expense => 'Expense',
+  };
+
+  String get labelVi => switch (this) {
+    TransactionType.income => 'Thu',
+    TransactionType.expense => 'Chi',
+  };
+
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
+}

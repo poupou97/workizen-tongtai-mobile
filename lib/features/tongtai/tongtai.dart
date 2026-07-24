@@ -91,6 +91,11 @@ export 'ui/screens/tongtai_customer_history_screen.dart';
 export 'reports/business_report.dart';
 export 'ui/screens/tongtai_reports_screen.dart';
 
+// Finance — income/expense dashboard (WTM-27)
+export 'finance/finance_transaction.dart';
+export 'finance/finance_summary.dart';
+export 'ui/screens/tongtai_finance_screen.dart';
+
 // Journey — business goals (WTM-87)
 export 'journey/business_goal.dart';
 export 'journey/business_goal_form.dart';
