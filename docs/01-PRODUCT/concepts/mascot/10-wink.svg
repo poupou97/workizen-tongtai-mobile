@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 10 — Wink Mascot">
+  <title>Concept 10 — Wink Mascot</title>
+  <rect x="8" y="8" width="224" height="224" rx="52" fill="#FFEDD5"/>
+  <path d="M58,40 L92,72 L120,84 L148,72 L182,40 L170,92 L156,150 L120,192 L84,150 L70,92 Z" fill="#F59E0B"/>
+  <path d="M66,52 L92,74 L80,90 Z" fill="#C2410C"/>
+  <path d="M174,52 L148,74 L160,90 Z" fill="#C2410C"/>
+  <path d="M120,116 L98,144 L120,192 L142,144 Z" fill="#FFFFFF"/>
+  <circle cx="86" cy="140" r="11" fill="#FB7185" opacity="0.5"/>
+  <circle cx="154" cy="140" r="11" fill="#FB7185" opacity="0.5"/>
+  <!-- winking (left) eye -->
+  <path d="M91,122 Q101,113 111,122" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
+  <!-- open (right) eye -->
+  <ellipse cx="139" cy="121" rx="7.5" ry="10" fill="#111827"/>
+  <circle cx="142" cy="117" r="2.6" fill="#FFFFFF"/>
+  <path d="M112,164 L128,164 L120,176 Z" fill="#111827"/>
+  <!-- cheeky smile + tongue -->
+  <path d="M108,180 Q120,192 132,180" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+  <path d="M118,184 Q120,194 126,187 Z" fill="#FB7185"/>
+</svg>

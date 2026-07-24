@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 6 — Tech Fox (AI)">
+  <title>Concept 6 — Tech Fox (AI)</title>
+  <rect x="8" y="8" width="224" height="224" rx="52" fill="#0B1020"/>
+  <g stroke="#A78BFA" stroke-width="2" opacity="0.45" fill="none">
+    <path d="M24,60 H60 M24,180 H70 M216,72 H176 M216,168 H172"/>
+  </g>
+  <g fill="#A78BFA" opacity="0.6">
+    <circle cx="60" cy="60" r="3.5"/><circle cx="70" cy="180" r="3.5"/>
+    <circle cx="176" cy="72" r="3.5"/><circle cx="172" cy="168" r="3.5"/>
+  </g>
+  <path d="M58,40 L92,72 L120,84 L148,72 L182,40 L170,92 L156,150 L120,192 L84,150 L70,92 Z" fill="#F59E0B"/>
+  <path d="M66,52 L92,74 L80,90 Z" fill="#7C2D12"/>
+  <path d="M174,52 L148,74 L160,90 Z" fill="#7C2D12"/>
+  <path d="M120,116 L100,144 L120,192 L140,144 Z" fill="#FDE68A"/>
+  <g stroke="#7C2D12" stroke-width="1.6" opacity="0.5" fill="none">
+    <path d="M92,104 H118 M148,104 H122 M104,132 V150"/>
+  </g>
+  <ellipse cx="101" cy="122" rx="6.5" ry="9" fill="#C4B5FD"/>
+  <ellipse cx="139" cy="122" rx="6.5" ry="9" fill="#C4B5FD"/>
+  <path d="M112,164 L128,164 L120,176 Z" fill="#111827"/>
+</svg>

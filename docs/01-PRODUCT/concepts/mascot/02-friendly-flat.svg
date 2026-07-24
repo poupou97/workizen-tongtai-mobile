@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 2 — Friendly Flat">
+  <title>Concept 2 — Friendly Flat</title>
+  <rect x="8" y="8" width="224" height="224" rx="52" fill="#FFF7ED"/>
+  <path d="M58,40 L92,72 L120,84 L148,72 L182,40 L170,92 L156,150 L120,192 L84,150 L70,92 Z" fill="#F59E0B"/>
+  <path d="M66,52 L92,74 L80,90 Z" fill="#C2410C"/>
+  <path d="M174,52 L148,74 L160,90 Z" fill="#C2410C"/>
+  <path d="M120,116 L98,144 L120,192 L142,144 Z" fill="#FFFFFF"/>
+  <circle cx="88" cy="140" r="12" fill="#FCA5A5" opacity="0.55"/>
+  <circle cx="152" cy="140" r="12" fill="#FCA5A5" opacity="0.55"/>
+  <ellipse cx="100" cy="120" rx="8" ry="10" fill="#111827"/>
+  <ellipse cx="140" cy="120" rx="8" ry="10" fill="#111827"/>
+  <circle cx="103" cy="116" r="2.6" fill="#FFFFFF"/>
+  <circle cx="143" cy="116" r="2.6" fill="#FFFFFF"/>
+  <path d="M112,164 L128,164 L120,176 Z" fill="#111827"/>
+  <path d="M108,180 Q120,190 132,180" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Business Fox concept 8 — Origami Low-poly">
+  <title>Concept 8 — Origami Low-poly</title>
+  <rect x="8" y="8" width="224" height="224" rx="52" fill="#FFF7ED"/>
+  <!-- left ear -->
+  <path d="M58,40 L92,72 L70,92 Z" fill="#EA580C"/>
+  <path d="M92,72 L70,92 L86,96 Z" fill="#FDBA74"/>
+  <!-- right ear -->
+  <path d="M182,40 L148,72 L170,92 Z" fill="#EA580C"/>
+  <path d="M148,72 L170,92 L154,96 Z" fill="#FDBA74"/>
+  <!-- face facets -->
+  <path d="M92,72 L120,84 L120,116 L86,96 Z" fill="#F59E0B"/>
+  <path d="M148,72 L120,84 L120,116 L154,96 Z" fill="#FB923C"/>
+  <path d="M86,96 L120,116 L100,144 L84,150 Z" fill="#FDBA74"/>
+  <path d="M154,96 L120,116 L140,144 L156,150 Z" fill="#F59E0B"/>
+  <path d="M84,150 L100,144 L120,192 Z" fill="#EA580C"/>
+  <path d="M156,150 L140,144 L120,192 Z" fill="#C2410C"/>
+  <!-- muzzle -->
+  <path d="M120,116 L100,144 L120,164 Z" fill="#FFFFFF"/>
+  <path d="M120,116 L140,144 L120,164 Z" fill="#FFF7ED"/>
+  <path d="M100,144 L120,164 L120,192 L140,144 Z" fill="#F3F4F6"/>
+  <!-- eyes + nose -->
+  <path d="M95,116 L107,120 L99,128 Z" fill="#111827"/>
+  <path d="M145,116 L133,120 L141,128 Z" fill="#111827"/>
+  <path d="M112,158 L128,158 L120,170 Z" fill="#111827"/>
+</svg>
