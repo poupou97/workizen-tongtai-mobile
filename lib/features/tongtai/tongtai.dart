@@ -95,10 +95,14 @@ export 'reports/business_report.dart';
 export 'ui/screens/tongtai_reports_screen.dart';
 
 // Finance — income/expense dashboard (WTM-27) + transaction entry (WTM-113)
+//        + Drift persistence, User Data First (WTM-120)
+export 'core/local_workspace.dart';
 export 'finance/finance_transaction.dart';
 export 'finance/finance_summary.dart';
+export 'finance/finance_repository.dart';
 export 'finance/finance_controller.dart';
 export 'finance/transaction_form.dart';
+export 'providers/tongtai_finance_provider.dart';
 export 'ui/screens/tongtai_finance_screen.dart';
 export 'ui/screens/tongtai_transaction_form_screen.dart';
 

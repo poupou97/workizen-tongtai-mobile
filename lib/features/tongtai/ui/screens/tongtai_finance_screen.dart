@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
 import '../../finance/finance_controller.dart';
 import '../../finance/finance_summary.dart';
 import '../../finance/finance_transaction.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_finance_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_transaction_form_screen.dart';
 
-/// Finance dashboard (WTM-27, WTM-113) — income, expenses, profit and margin
-/// over the local transaction ledger, an income-vs-expense cashflow chart, the
+/// Finance dashboard (WTM-27, WTM-113, WTM-120) — income, expenses, profit and
+/// margin over the transaction ledger, an income-vs-expense cashflow chart, the
 /// expense breakdown by category, and a recent-activity feed. The FAB adds a
 /// transaction that flows straight into the figures.
 ///
-/// Local-first: figures come from the in-memory [FinanceController] (sample
-/// transactions in Phase 2). Both `controller` and `clock` are injectable so
-/// every figure is deterministic under test.
-class TongtaiFinanceScreen extends StatefulWidget {
+/// Reads/writes through a [FinanceController] over a [FinanceRepository]
+/// (WTM-120): the real app persists to Drift (User Data First — starts empty);
+/// tests inject an in-memory controller. Both `controller` and `clock` are
+/// injectable so every figure is deterministic under test.
+class TongtaiFinanceScreen extends ConsumerStatefulWidget {
   const TongtaiFinanceScreen({super.key, this.controller, this.clock});
 
   /// Injectable ledger. When provided it is *not* disposed here.
@@ -27,10 +30,11 @@ class TongtaiFinanceScreen extends StatefulWidget {
   static const Color _expense = TongtaiDesignTokens.error;
 
   @override
-  State<TongtaiFinanceScreen> createState() => _TongtaiFinanceScreenState();
+  ConsumerState<TongtaiFinanceScreen> createState() =>
+      _TongtaiFinanceScreenState();
 }
 
-class _TongtaiFinanceScreenState extends State<TongtaiFinanceScreen> {
+class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
   late final FinanceController _controller;
   late final bool _ownsController;
   late final DateTime Function() _clock;
@@ -42,10 +46,13 @@ class _TongtaiFinanceScreenState extends State<TongtaiFinanceScreen> {
       _controller = widget.controller!;
       _ownsController = false;
     } else {
-      _controller = FinanceController.sample();
+      // Real app: persistent Drift ledger (WTM-120), starts empty for new users.
+      _controller = FinanceController(ref.read(financeRepositoryProvider));
       _ownsController = true;
     }
     _clock = widget.clock ?? DateTime.now;
+    // Load the ledger from its source (Drift / sample / in-memory).
+    _controller.hydrate();
   }
 
   @override
@@ -60,7 +67,7 @@ class _TongtaiFinanceScreenState extends State<TongtaiFinanceScreen> {
         builder: (_) => TongtaiTransactionFormScreen(clock: widget.clock),
       ),
     );
-    if (result != null) _controller.add(result);
+    if (result != null) await _controller.add(result);
   }
 
   @override
