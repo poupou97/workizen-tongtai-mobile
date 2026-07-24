@@ -30,3 +30,9 @@
 Ghi local trước, `sync/` outbox (SyncQueueItem, FIFO, last-write-wins đã
 document trong [SYNC-QUEUE-CONFLICT-RESOLUTION.md](SYNC-QUEUE-CONFLICT-RESOLUTION.md))
 chờ Phase-3 sync worker. Không thêm network dependency vào luồng dữ liệu.
+
+## Dashboard data-flow (seam per module)
+
+Mọi dashboard đọc qua domain service/controller, không đụng DB trực tiếp — chi
+tiết audit + seam map + điểm cần bọc repository khi lên Drift ở
+[DASHBOARD-DATA-FLOW.md](DASHBOARD-DATA-FLOW.md) (WTM-117).
