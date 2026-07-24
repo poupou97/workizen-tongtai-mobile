@@ -85,6 +85,23 @@ void main() {
     expect(find.text('4 đơn'), findsOneWidget);
   });
 
+  testWidgets('opportunity pipeline card renders count + value (WTM-98)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(host());
+
+    final card = find.byKey(const Key('reports-pipeline'));
+    await tester.scrollUntilVisible(
+      card,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // Active count "5" — scoped to the card (rank chips elsewhere also show 5).
+    expect(find.descendant(of: card, matching: find.text('5')), findsOneWidget);
+    expect(find.text('160tr ₫'), findsOneWidget); // combined pipeline value
+    expect(find.text('Quạt tích điện sắp vào mùa nóng'), findsOneWidget); // top
+  });
+
   testWidgets('empty order book shows the fox empty state, no KPIs', (
     tester,
   ) async {
