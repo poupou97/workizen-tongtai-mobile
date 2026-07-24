@@ -32,6 +32,7 @@
 | Finance | WTM-27 dashboard: KPI thu/chi/lợi nhuận/biên LN (YTD), biểu đồ dòng tiền thu-vs-chi 6 tháng (CustomPaint), chi phí theo nhóm, feed giao dịch gần đây · WTM-113 **nhập giao dịch**: FAB → form (Thu/Chi, số tiền, nhóm chips, ngày, ghi chú) qua `FinanceController` (ChangeNotifier) → dashboard cập nhật live; `FinanceService` trên `TransactionsTable` shape (local-first), mở từ More → Business |
 | Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) |
 | Brand | WTM-109 Business Fox mascot (Origami all) · 110 app icon + splash native · 111 mascot trong app (avatar chat, empty states) + đổi nhãn hiển thị "Workizen AI" |
+| i18n | WTM-119 **localization foundation** (ADR-TON-007, mirror Hub — KHÔNG ARB): `AppStrings` (VI/EN) + `LanguageNotifier` (persist 'wz.locale') + `context.l10n`; `MaterialApp` wired locale + delegates; picker ở More → Ngôn ngữ đổi ngôn ngữ runtime. Migrate chuỗi UI dần Boy-Scout |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
