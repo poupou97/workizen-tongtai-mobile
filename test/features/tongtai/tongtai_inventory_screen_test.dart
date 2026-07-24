@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart';
@@ -14,7 +15,17 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dar
 /// culled) so those counts are exact.
 void main() {
   Future<void> pumpScreen(WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: TongtaiInventoryScreen()));
+    // The real screen starts empty (User Data First, WTM-121); inject the sample
+    // catalogue so the list-UI tests (sort/filter/paging) have data to exercise.
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiInventoryScreen(
+            service: ProductInventoryService(kSampleProducts),
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -197,7 +208,9 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      MaterialApp(home: TongtaiInventoryScreen(service: service)),
+      ProviderScope(
+        child: MaterialApp(home: TongtaiInventoryScreen(service: service)),
+      ),
     );
     await tester.pumpAndSettle();
 

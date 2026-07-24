@@ -2,24 +2,31 @@ import 'package:flutter/foundation.dart';
 
 import 'product.dart';
 import 'product_inventory_service.dart';
+import 'product_repository.dart';
 
-/// Mutable, in-memory catalog of products backing the Inventory screen (WTM-68)
-/// and its Add/Edit form (WTM-69).
-///
-/// Holds the working set of products and exposes a fresh [ProductInventoryService]
-/// view for read-only querying/paging. Adds and edits go through [upsert], which
-/// notifies listeners so the list rebuilds. Local-first, no backend (ADR-002);
-/// a Drift/remote-backed store can replace the in-memory list later without
-/// touching callers.
+/// Catalog of products backing the Inventory screen (WTM-68) and its Add/Edit
+/// form (WTM-69), reads/writes through a [ProductRepository] (WTM-121) — Drift
+/// (real, persistent), Sample (demo) or in-memory (tests). Exposes a fresh
+/// [ProductInventoryService] view for read-only querying/paging; adds/edits go
+/// through [upsert], which persists then notifies. The UI never knows the source.
 class ProductCatalogController extends ChangeNotifier {
-  ProductCatalogController(Iterable<Product> initial)
-    : _products = [...initial];
+  ProductCatalogController(this._repository);
 
-  /// Convenience: a catalog seeded with the built-in sample products.
+  /// Demo/preview catalogue (read-only sample data). Not persisted.
   factory ProductCatalogController.sample() =>
-      ProductCatalogController(kSampleProducts);
+      ProductCatalogController(const SampleProductRepository());
 
-  final List<Product> _products;
+  /// In-memory catalogue for tests, optionally pre-filled.
+  factory ProductCatalogController.inMemory([
+    Iterable<Product> initial = const [],
+  ]) => ProductCatalogController(InMemoryProductRepository(initial));
+
+  final ProductRepository _repository;
+  final List<Product> _products = [];
+  bool _hydrated = false;
+
+  /// True once [hydrate] has loaded from the repository.
+  bool get isHydrated => _hydrated;
 
   /// Current products as an unmodifiable snapshot.
   List<Product> get products => List.unmodifiable(_products);
@@ -32,9 +39,7 @@ class ProductCatalogController extends ChangeNotifier {
   ProductInventoryService get service => ProductInventoryService(_products);
 
   /// Whether [sku] is already used by a product other than [exceptId]
-  /// (case-insensitive, trimmed). Drives the form's SKU-uniqueness validation;
-  /// pass the edited product's id as [exceptId] so a product never collides with
-  /// itself. A blank SKU is never "taken".
+  /// (case-insensitive, trimmed). A blank SKU is never "taken".
   bool isSkuTaken(String sku, {String? exceptId}) {
     final needle = sku.trim().toLowerCase();
     if (needle.isEmpty) return false;
@@ -43,10 +48,21 @@ class ProductCatalogController extends ChangeNotifier {
     );
   }
 
-  /// Insert [product] (new id) or replace the existing product with the same id,
-  /// then notify listeners. Returns `true` when it replaced an existing product
+  /// Loads the catalog from the repository (call once when the screen mounts).
+  Future<void> hydrate() async {
+    final loaded = await _repository.loadAll();
+    _products
+      ..clear()
+      ..addAll(loaded);
+    _hydrated = true;
+    notifyListeners();
+  }
+
+  /// Persist [product] (new id) or replace the existing product with the same
+  /// id, then notify. Returns `true` when it replaced an existing product
   /// (edit), `false` when it was appended (add).
-  bool upsert(Product product) {
+  Future<bool> upsert(Product product) async {
+    await _repository.upsert(product);
     final index = _products.indexWhere((p) => p.id == product.id);
     final replaced = index >= 0;
     if (replaced) {

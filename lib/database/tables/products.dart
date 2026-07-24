@@ -36,6 +36,13 @@ class ProductsTable extends Table {
   )();
   TextColumn get salesChannels => text().nullable()(); // JSON
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+
+  /// Versioned full-domain snapshot (JSON) — WTM-121, ADR-TON-009 (option B).
+  /// Structured columns above stay the source of truth for promoted fields; this
+  /// carries the extended domain (e.g. imagePaths) not yet promoted to columns.
+  /// Fields graduate out of here to structured columns/child tables on demand.
+  TextColumn get domainSnapshot => text().nullable()();
+
   DateTimeColumn get createdAt =>
       dateTime().withDefault(Constant(DateTime.now()))();
   DateTimeColumn get updatedAt =>

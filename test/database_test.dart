@@ -33,7 +33,8 @@ void main() {
   test('schema opens and reports the current version', () async {
     // v3 (WTM-72): added products.description + the FTS5 search index.
     // v4 (WTM-81): added the per-message chat_messages_table.
-    expect(db.schemaVersion, 4);
+    // v5 (WTM-121): added products.domain_snapshot (ADR-TON-009).
+    expect(db.schemaVersion, 5);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

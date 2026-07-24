@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
@@ -7,6 +8,7 @@ import '../../inventory/product_image_source.dart';
 import '../../inventory/product_inventory_service.dart';
 import '../../inventory/stock_alert_service.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_inventory_provider.dart';
 import 'tongtai_product_form_screen.dart';
 import 'tongtai_stock_alerts_screen.dart';
 
@@ -26,7 +28,7 @@ Color tongtaiStockStatusColor(StockStatus status) => switch (status) {
 /// button opens the Add Product form and tapping a row opens it in Edit mode
 /// (WTM-69); saved products are upserted into the [ProductCatalogController] so
 /// the list updates live. Filtering, sorting and paging happen synchronously.
-class TongtaiInventoryScreen extends StatefulWidget {
+class TongtaiInventoryScreen extends ConsumerStatefulWidget {
   const TongtaiInventoryScreen({
     super.key,
     this.service,
@@ -51,10 +53,12 @@ class TongtaiInventoryScreen extends StatefulWidget {
   final int minimumThreshold;
 
   @override
-  State<TongtaiInventoryScreen> createState() => _TongtaiInventoryScreenState();
+  ConsumerState<TongtaiInventoryScreen> createState() =>
+      _TongtaiInventoryScreenState();
 }
 
-class _TongtaiInventoryScreenState extends State<TongtaiInventoryScreen> {
+class _TongtaiInventoryScreenState
+    extends ConsumerState<TongtaiInventoryScreen> {
   late final ProductCatalogController _catalog;
   late final bool _ownsCatalog;
   final TextEditingController _searchController = TextEditingController();
@@ -67,12 +71,16 @@ class _TongtaiInventoryScreenState extends State<TongtaiInventoryScreen> {
     if (widget.catalog != null) {
       _catalog = widget.catalog!;
       _ownsCatalog = false;
+    } else if (widget.service != null) {
+      // Test seed: an in-memory catalogue over the supplied products.
+      _catalog = ProductCatalogController.inMemory(widget.service!.all);
+      _ownsCatalog = true;
     } else {
-      _catalog = ProductCatalogController(
-        widget.service?.all ?? kSampleProducts,
-      );
+      // Real app: persistent Drift catalogue (WTM-121), empty for new users.
+      _catalog = ProductCatalogController(ref.read(productRepositoryProvider));
       _ownsCatalog = true;
     }
+    _catalog.hydrate();
   }
 
   @override
@@ -226,7 +234,8 @@ class _TongtaiInventoryScreenState extends State<TongtaiInventoryScreen> {
       ),
     );
     if (!context.mounted || result == null) return;
-    _catalog.upsert(result);
+    await _catalog.upsert(result);
+    if (!context.mounted) return;
     setState(() => _query = _query.copyWith(pageIndex: 0));
   }
 

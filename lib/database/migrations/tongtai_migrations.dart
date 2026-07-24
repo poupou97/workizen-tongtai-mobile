@@ -26,6 +26,13 @@
 /// ## Schema v4 (WTM-81 — Chat Message Persistence)
 /// v4 adds the per-message `chat_messages_table` (+ conversation and sent-at
 /// indices) backing the AI Copilot chat. Local-only by ADR-TON-004.
+///
+/// ## Schema v5 (WTM-121 — Persistence snapshot, ADR-TON-009)
+/// v5 adds the nullable `products_table.domain_snapshot` column: a versioned
+/// full-domain JSON blob for extended fields (e.g. imagePaths) not yet promoted
+/// to structured columns. Additive + nullable, so upgrading installs keep their
+/// rows. First application of the "structured columns + versioned snapshot"
+/// convention (option B).
 library;
 
 import 'package:drift/drift.dart';
@@ -38,7 +45,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 4;
+const int kTongtaiSchemaVersion = 5;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -113,6 +120,16 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
           (t) => t.actualTableName == kChatMessagesTableName,
         );
         await m.createTable(chatMessages);
+      }
+      if (from < 5) {
+        // v5 (WTM-121 — persistence snapshot, ADR-TON-009). Add the nullable
+        // products.domain_snapshot column. Fresh installs already got it via
+        // createAll; upgrading installs gain it here. Nullable, so existing rows
+        // keep NULL until next written.
+        final products = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'products_table',
+        );
+        await m.addColumn(products, products.columnsByName['domain_snapshot']!);
       }
     },
     beforeOpen: (OpeningDetails details) async {

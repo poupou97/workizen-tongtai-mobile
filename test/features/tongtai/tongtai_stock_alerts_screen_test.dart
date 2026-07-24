@@ -54,11 +54,12 @@ void main() {
 
   testWidgets('lists alerting products with summary counts', (tester) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product(id: 'ok', name: 'Healthy Item', quantity: 100),
       product(id: 'low', name: 'Low Item', quantity: 3, reorderLevel: 10),
       product(id: 'out', name: 'Out Item', quantity: 0, reorderLevel: 10),
     ]);
+    await catalog.hydrate();
     await tester.pumpWidget(alertsHost(catalog));
     await tester.pumpAndSettle();
 
@@ -75,9 +76,10 @@ void main() {
 
   testWidgets('shows the healthy state when nothing is low', (tester) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product(id: 'a', name: 'Plenty', quantity: 500),
     ]);
+    await catalog.hydrate();
     await tester.pumpWidget(alertsHost(catalog));
     await tester.pumpAndSettle();
 
@@ -89,9 +91,10 @@ void main() {
     tester,
   ) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product(id: 'low', name: 'Low Item', quantity: 3, reorderLevel: 10),
     ]);
+    await catalog.hydrate();
     await tester.pumpWidget(alertsHost(catalog));
     await tester.pumpAndSettle();
 
@@ -111,9 +114,10 @@ void main() {
 
   testWidgets('restocking a product drops its alert live', (tester) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product(id: 'low', name: 'Low Item', quantity: 3, reorderLevel: 10),
     ]);
+    await catalog.hydrate();
     await tester.pumpWidget(alertsHost(catalog));
     await tester.pumpAndSettle();
     expect(find.text('Low Item'), findsOneWidget);
@@ -131,9 +135,10 @@ void main() {
 
   testWidgets('minimumThreshold floor surfaces extra products', (tester) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product(id: 'a', name: 'Border Item', quantity: 8, reorderLevel: 5),
     ]);
+    await catalog.hydrate();
     await tester.pumpWidget(
       MaterialApp(
         home: TongtaiStockAlertsScreen(
@@ -154,11 +159,12 @@ void main() {
     tester,
   ) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product(id: 'ok', name: 'Healthy Item', quantity: 100),
       product(id: 'low', name: 'Low Item', quantity: 3, reorderLevel: 10),
       product(id: 'out', name: 'Out Item', quantity: 0, reorderLevel: 10),
     ]);
+    await catalog.hydrate();
     await tester.pumpWidget(
       MaterialApp(
         home: TongtaiInventoryScreen(
@@ -180,9 +186,10 @@ void main() {
 
   testWidgets('no banner when the catalog has no alerts', (tester) async {
     useTallViewport(tester);
-    final catalog = ProductCatalogController([
+    final catalog = ProductCatalogController.inMemory([
       product(id: 'ok', name: 'Healthy Item', quantity: 500),
     ]);
+    await catalog.hydrate();
     await tester.pumpWidget(
       MaterialApp(
         home: TongtaiInventoryScreen(

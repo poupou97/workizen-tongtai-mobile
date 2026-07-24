@@ -103,9 +103,9 @@ void main() {
       expect(await store.loadAll(), hasLength(1));
     });
 
-    test('schema version constant advanced to 4 in lock-step', () {
-      expect(kTongtaiSchemaVersion, 4);
-      expect(db.schemaVersion, 4);
+    test('schema version constant advanced in lock-step', () {
+      expect(kTongtaiSchemaVersion, 5);
+      expect(db.schemaVersion, 5);
     });
   });
 
