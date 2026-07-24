@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_controller.dart';
@@ -80,12 +81,15 @@ void main() {
   testWidgets('tapping a goal card on the goals screen opens the detail', (
     tester,
   ) async {
-    final controller = BusinessGoalController([buildGoal()]);
+    final controller = BusinessGoalController.inMemory([buildGoal()]);
     addTearDown(controller.dispose);
+    await controller.hydrate();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: TongtaiGoalsScreen(controller: controller, clock: clock),
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiGoalsScreen(controller: controller, clock: clock),
+        ),
       ),
     );
 

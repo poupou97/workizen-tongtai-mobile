@@ -3,7 +3,9 @@
 **Status:** ✅ ACCEPTED (Founder-directed, 2026-07-24 — option B, P0.4)
 **Builds on:** ADR-TON-008 (Repository seam, User Data First)
 **Related:** WTM-121 (first pattern — Inventory), WTM-123 (second — Consumer),
-WTM-122 (normalization TODO), `docs/02-ARCHITECTURE/DATA-FLOW-BY-CAPABILITY.md`.
+WTM-124 (third — Journey, divergent-schema case), WTM-122 (normalization TODO),
+`docs/02-ARCHITECTURE/DATA-FLOW-BY-CAPABILITY.md`,
+`docs/02-ARCHITECTURE/PERSISTENCE-INVENTORY.md` (Capability Persistence Matrix).
 
 ## Context / Bối cảnh
 
@@ -34,6 +36,16 @@ shared, corrupt-tolerant codec (`lib/features/tongtai/core/domain_snapshot.dart`
 is reused by every repository, and the Consumer test set covers round-trip,
 backward compatibility, corrupt-JSON fallback, version tolerance, structured
 precedence and business isolation.
+
+The third application — **Journey (BusinessGoal)** (WTM-124) — is the canonical
+**divergent-schema** case: `journeys_table` (goal/status/budget/steps/timeline)
+does not line up with the `BusinessGoal` domain (type/target/achieved/growth/
+dates/notes). The Repository promotes what maps cleanly and is queryable
+(`goal`←name, `revenueImpact`←targetAmount, `startedAt`←startDate; `status`/
+`progressPercent`/`timelineDays` derived for query only) and snapshots the
+lossless remainder (type, achievedAmount, growth, endDate, notes). Same shared
+codec, same six-part test set. This proves the pattern absorbs a table whose
+shape predates the current domain **without** a breaking migration.
 
 ## This is transitional, NOT the permanent model
 

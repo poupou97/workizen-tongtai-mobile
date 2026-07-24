@@ -7312,6 +7312,17 @@ class $JourneysTableTable extends JourneysTable
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _domainSnapshotMeta = const VerificationMeta(
+    'domainSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> domainSnapshot = GeneratedColumn<String>(
+    'domain_snapshot',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -7360,6 +7371,7 @@ class $JourneysTableTable extends JourneysTable
     spent,
     timelineDays,
     revenueImpact,
+    domainSnapshot,
     createdAt,
     startedAt,
     updatedAt,
@@ -7459,6 +7471,15 @@ class $JourneysTableTable extends JourneysTable
         ),
       );
     }
+    if (data.containsKey('domain_snapshot')) {
+      context.handle(
+        _domainSnapshotMeta,
+        domainSnapshot.isAcceptableOrUnknown(
+          data['domain_snapshot']!,
+          _domainSnapshotMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -7530,6 +7551,10 @@ class $JourneysTableTable extends JourneysTable
         DriftSqlType.double,
         data['${effectivePrefix}revenue_impact'],
       ),
+      domainSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}domain_snapshot'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -7564,6 +7589,12 @@ class JourneysTableData extends DataClass
   final double spent;
   final int? timelineDays;
   final double? revenueImpact;
+
+  /// Versioned full-domain snapshot (JSON) — WTM-124, ADR-TON-009 (option B).
+  /// The `journeys_table` shape (goal/status/budget/steps) diverges from the
+  /// `BusinessGoal` domain (type/achieved/growth/endDate/notes); structured
+  /// columns stay SoT for promoted fields, this carries the rest losslessly.
+  final String? domainSnapshot;
   final DateTime createdAt;
   final DateTime? startedAt;
   final DateTime updatedAt;
@@ -7579,6 +7610,7 @@ class JourneysTableData extends DataClass
     required this.spent,
     this.timelineDays,
     this.revenueImpact,
+    this.domainSnapshot,
     required this.createdAt,
     this.startedAt,
     required this.updatedAt,
@@ -7606,6 +7638,9 @@ class JourneysTableData extends DataClass
     }
     if (!nullToAbsent || revenueImpact != null) {
       map['revenue_impact'] = Variable<double>(revenueImpact);
+    }
+    if (!nullToAbsent || domainSnapshot != null) {
+      map['domain_snapshot'] = Variable<String>(domainSnapshot);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || startedAt != null) {
@@ -7638,6 +7673,9 @@ class JourneysTableData extends DataClass
       revenueImpact: revenueImpact == null && nullToAbsent
           ? const Value.absent()
           : Value(revenueImpact),
+      domainSnapshot: domainSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(domainSnapshot),
       createdAt: Value(createdAt),
       startedAt: startedAt == null && nullToAbsent
           ? const Value.absent()
@@ -7663,6 +7701,7 @@ class JourneysTableData extends DataClass
       spent: serializer.fromJson<double>(json['spent']),
       timelineDays: serializer.fromJson<int?>(json['timelineDays']),
       revenueImpact: serializer.fromJson<double?>(json['revenueImpact']),
+      domainSnapshot: serializer.fromJson<String?>(json['domainSnapshot']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       startedAt: serializer.fromJson<DateTime?>(json['startedAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -7683,6 +7722,7 @@ class JourneysTableData extends DataClass
       'spent': serializer.toJson<double>(spent),
       'timelineDays': serializer.toJson<int?>(timelineDays),
       'revenueImpact': serializer.toJson<double?>(revenueImpact),
+      'domainSnapshot': serializer.toJson<String?>(domainSnapshot),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'startedAt': serializer.toJson<DateTime?>(startedAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -7701,6 +7741,7 @@ class JourneysTableData extends DataClass
     double? spent,
     Value<int?> timelineDays = const Value.absent(),
     Value<double?> revenueImpact = const Value.absent(),
+    Value<String?> domainSnapshot = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> startedAt = const Value.absent(),
     DateTime? updatedAt,
@@ -7720,6 +7761,9 @@ class JourneysTableData extends DataClass
     revenueImpact: revenueImpact.present
         ? revenueImpact.value
         : this.revenueImpact,
+    domainSnapshot: domainSnapshot.present
+        ? domainSnapshot.value
+        : this.domainSnapshot,
     createdAt: createdAt ?? this.createdAt,
     startedAt: startedAt.present ? startedAt.value : this.startedAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -7749,6 +7793,9 @@ class JourneysTableData extends DataClass
       revenueImpact: data.revenueImpact.present
           ? data.revenueImpact.value
           : this.revenueImpact,
+      domainSnapshot: data.domainSnapshot.present
+          ? data.domainSnapshot.value
+          : this.domainSnapshot,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -7769,6 +7816,7 @@ class JourneysTableData extends DataClass
           ..write('spent: $spent, ')
           ..write('timelineDays: $timelineDays, ')
           ..write('revenueImpact: $revenueImpact, ')
+          ..write('domainSnapshot: $domainSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('startedAt: $startedAt, ')
           ..write('updatedAt: $updatedAt')
@@ -7789,6 +7837,7 @@ class JourneysTableData extends DataClass
     spent,
     timelineDays,
     revenueImpact,
+    domainSnapshot,
     createdAt,
     startedAt,
     updatedAt,
@@ -7808,6 +7857,7 @@ class JourneysTableData extends DataClass
           other.spent == this.spent &&
           other.timelineDays == this.timelineDays &&
           other.revenueImpact == this.revenueImpact &&
+          other.domainSnapshot == this.domainSnapshot &&
           other.createdAt == this.createdAt &&
           other.startedAt == this.startedAt &&
           other.updatedAt == this.updatedAt);
@@ -7825,6 +7875,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
   final Value<double> spent;
   final Value<int?> timelineDays;
   final Value<double?> revenueImpact;
+  final Value<String?> domainSnapshot;
   final Value<DateTime> createdAt;
   final Value<DateTime?> startedAt;
   final Value<DateTime> updatedAt;
@@ -7841,6 +7892,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     this.spent = const Value.absent(),
     this.timelineDays = const Value.absent(),
     this.revenueImpact = const Value.absent(),
+    this.domainSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.startedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -7858,6 +7910,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     this.spent = const Value.absent(),
     this.timelineDays = const Value.absent(),
     this.revenueImpact = const Value.absent(),
+    this.domainSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.startedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -7878,6 +7931,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     Expression<double>? spent,
     Expression<int>? timelineDays,
     Expression<double>? revenueImpact,
+    Expression<String>? domainSnapshot,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? startedAt,
     Expression<DateTime>? updatedAt,
@@ -7895,6 +7949,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
       if (spent != null) 'spent': spent,
       if (timelineDays != null) 'timeline_days': timelineDays,
       if (revenueImpact != null) 'revenue_impact': revenueImpact,
+      if (domainSnapshot != null) 'domain_snapshot': domainSnapshot,
       if (createdAt != null) 'created_at': createdAt,
       if (startedAt != null) 'started_at': startedAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -7914,6 +7969,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     Value<double>? spent,
     Value<int?>? timelineDays,
     Value<double?>? revenueImpact,
+    Value<String?>? domainSnapshot,
     Value<DateTime>? createdAt,
     Value<DateTime?>? startedAt,
     Value<DateTime>? updatedAt,
@@ -7931,6 +7987,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
       spent: spent ?? this.spent,
       timelineDays: timelineDays ?? this.timelineDays,
       revenueImpact: revenueImpact ?? this.revenueImpact,
+      domainSnapshot: domainSnapshot ?? this.domainSnapshot,
       createdAt: createdAt ?? this.createdAt,
       startedAt: startedAt ?? this.startedAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -7974,6 +8031,9 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     if (revenueImpact.present) {
       map['revenue_impact'] = Variable<double>(revenueImpact.value);
     }
+    if (domainSnapshot.present) {
+      map['domain_snapshot'] = Variable<String>(domainSnapshot.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -8003,6 +8063,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
           ..write('spent: $spent, ')
           ..write('timelineDays: $timelineDays, ')
           ..write('revenueImpact: $revenueImpact, ')
+          ..write('domainSnapshot: $domainSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('startedAt: $startedAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -20233,6 +20294,7 @@ typedef $$JourneysTableTableCreateCompanionBuilder =
       Value<double> spent,
       Value<int?> timelineDays,
       Value<double?> revenueImpact,
+      Value<String?> domainSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime?> startedAt,
       Value<DateTime> updatedAt,
@@ -20251,6 +20313,7 @@ typedef $$JourneysTableTableUpdateCompanionBuilder =
       Value<double> spent,
       Value<int?> timelineDays,
       Value<double?> revenueImpact,
+      Value<String?> domainSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime?> startedAt,
       Value<DateTime> updatedAt,
@@ -20365,6 +20428,11 @@ class $$JourneysTableTableFilterComposer
 
   ColumnFilters<double> get revenueImpact => $composableBuilder(
     column: $table.revenueImpact,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -20491,6 +20559,11 @@ class $$JourneysTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -20576,6 +20649,11 @@ class $$JourneysTableTableAnnotationComposer
 
   GeneratedColumn<double> get revenueImpact => $composableBuilder(
     column: $table.revenueImpact,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get domainSnapshot => $composableBuilder(
+    column: $table.domainSnapshot,
     builder: (column) => column,
   );
 
@@ -20677,6 +20755,7 @@ class $$JourneysTableTableTableManager
                 Value<double> spent = const Value.absent(),
                 Value<int?> timelineDays = const Value.absent(),
                 Value<double?> revenueImpact = const Value.absent(),
+                Value<String?> domainSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> startedAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -20693,6 +20772,7 @@ class $$JourneysTableTableTableManager
                 spent: spent,
                 timelineDays: timelineDays,
                 revenueImpact: revenueImpact,
+                domainSnapshot: domainSnapshot,
                 createdAt: createdAt,
                 startedAt: startedAt,
                 updatedAt: updatedAt,
@@ -20711,6 +20791,7 @@ class $$JourneysTableTableTableManager
                 Value<double> spent = const Value.absent(),
                 Value<int?> timelineDays = const Value.absent(),
                 Value<double?> revenueImpact = const Value.absent(),
+                Value<String?> domainSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> startedAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -20727,6 +20808,7 @@ class $$JourneysTableTableTableManager
                 spent: spent,
                 timelineDays: timelineDays,
                 revenueImpact: revenueImpact,
+                domainSnapshot: domainSnapshot,
                 createdAt: createdAt,
                 startedAt: startedAt,
                 updatedAt: updatedAt,

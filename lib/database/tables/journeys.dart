@@ -17,6 +17,13 @@ class JourneysTable extends Table {
   RealColumn get spent => real().withDefault(const Constant(0))();
   IntColumn get timelineDays => integer().nullable()();
   RealColumn get revenueImpact => real().nullable()();
+
+  /// Versioned full-domain snapshot (JSON) — WTM-124, ADR-TON-009 (option B).
+  /// The `journeys_table` shape (goal/status/budget/steps) diverges from the
+  /// `BusinessGoal` domain (type/achieved/growth/endDate/notes); structured
+  /// columns stay SoT for promoted fields, this carries the rest losslessly.
+  TextColumn get domainSnapshot => text().nullable()();
+
   DateTimeColumn get createdAt =>
       dateTime().withDefault(Constant(DateTime.now()))();
   DateTimeColumn get startedAt => dateTime().nullable()();

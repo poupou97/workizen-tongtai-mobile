@@ -284,3 +284,39 @@ class BusinessGoal {
   @override
   String toString() => 'BusinessGoal($id, $name, ${type.name})';
 }
+
+/// Deterministic sample goals so Demo/Preview surfaces have real data to
+/// exercise — same convention as `kSampleCustomers`. Lives in the domain file
+/// (not the controller) so the Drift repository can read it without importing
+/// the controller (which would form a cycle). Not `const` because the dates are
+/// runtime [DateTime]s.
+final List<BusinessGoal> kSampleBusinessGoals = [
+  BusinessGoal(
+    id: 'g01',
+    name: 'Đạt 100 triệu ₫ trong quý 3',
+    type: GoalType.revenue,
+    targetAmount: 100000000,
+    achievedAmount: 62000000,
+    growthTarget: 200,
+    growthAchieved: 118,
+    startDate: DateTime(2026, 7, 1),
+    endDate: DateTime(2026, 9, 30),
+    notes: 'Tập trung đơn Shopee + khách sỉ Hà Nội.',
+    createdAt: DateTime(2026, 7, 1),
+    updatedAt: DateTime(2026, 7, 20),
+  ),
+  BusinessGoal(
+    id: 'g02',
+    name: 'Mở kênh TikTok Shop',
+    type: GoalType.newChannel,
+    targetAmount: 30000000,
+    achievedAmount: 4500000,
+    growthTarget: 50,
+    growthAchieved: 6,
+    startDate: DateTime(2026, 7, 15),
+    endDate: DateTime(2026, 9, 15),
+    notes: '',
+    createdAt: DateTime(2026, 7, 15),
+    updatedAt: DateTime(2026, 7, 18),
+  ),
+];

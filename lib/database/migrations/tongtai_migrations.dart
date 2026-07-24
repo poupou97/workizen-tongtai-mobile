@@ -37,6 +37,12 @@
 /// ## Schema v6 (WTM-123 — Consumer persistence snapshot, ADR-TON-009)
 /// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
 /// addresses, notes). Same additive-nullable convention as v5.
+///
+/// ## Schema v7 (WTM-124 — Journey persistence snapshot, ADR-TON-009)
+/// v7 adds the nullable `journeys_table.domain_snapshot` column: the divergent
+/// `BusinessGoal` domain fields (type, achievedAmount, growth, endDate, notes)
+/// not carried by the goal/status/budget/steps structured columns. Same
+/// additive-nullable convention as v5/v6.
 library;
 
 import 'package:drift/drift.dart';
@@ -49,7 +55,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 6;
+const int kTongtaiSchemaVersion = 7;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -146,6 +152,15 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
           customers,
           customers.columnsByName['domain_snapshot']!,
         );
+      }
+      if (from < 7) {
+        // v7 (WTM-124 — Journey persistence snapshot, ADR-TON-009). Add the
+        // nullable journeys.domain_snapshot column. Same additive-nullable
+        // convention as v5/v6.
+        final journeys = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'journeys_table',
+        );
+        await m.addColumn(journeys, journeys.columnsByName['domain_snapshot']!);
       }
     },
     beforeOpen: (OpeningDetails details) async {

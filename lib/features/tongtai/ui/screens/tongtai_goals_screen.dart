@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
 import '../../journey/business_goal_controller.dart';
 import '../../journey/goal_theme.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_journey_provider.dart';
 import 'tongtai_goal_detail_screen.dart';
 import 'tongtai_goal_form_screen.dart';
 
@@ -16,9 +18,11 @@ export '../../journey/goal_theme.dart' show tongtaiGoalPaceColor;
 ///
 /// Lists the seller's goals newest-updated first with progress, pace and a
 /// rule-based recommendation (AC4/AC5); the FAB starts the multi-step goal
-/// form (AC1/AC2) and tapping a card edits it (AC3). Local-first over the
-/// in-memory [BusinessGoalController]; the AI step-plan arrives with WTM-88.
-class TongtaiGoalsScreen extends StatefulWidget {
+/// form (AC1/AC2) and tapping a card edits it (AC3). Local-first over a
+/// [BusinessGoalController] backed by a [BusinessGoalRepository] (WTM-124 —
+/// Drift-backed for the real app, empty for a new user); the AI step-plan
+/// arrives with WTM-88.
+class TongtaiGoalsScreen extends ConsumerStatefulWidget {
   const TongtaiGoalsScreen({super.key, this.controller, this.clock});
 
   /// Injectable goal set. When provided it is *not* disposed here.
@@ -29,10 +33,10 @@ class TongtaiGoalsScreen extends StatefulWidget {
   final DateTime Function()? clock;
 
   @override
-  State<TongtaiGoalsScreen> createState() => _TongtaiGoalsScreenState();
+  ConsumerState<TongtaiGoalsScreen> createState() => _TongtaiGoalsScreenState();
 }
 
-class _TongtaiGoalsScreenState extends State<TongtaiGoalsScreen> {
+class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
   late final BusinessGoalController _controller;
   late final bool _ownsController;
   late final DateTime Function() _clock;
@@ -44,10 +48,14 @@ class _TongtaiGoalsScreenState extends State<TongtaiGoalsScreen> {
       _controller = widget.controller!;
       _ownsController = false;
     } else {
-      _controller = BusinessGoalController.sample();
+      // Real app: persistent Drift goals (WTM-124), empty for new users.
+      _controller = BusinessGoalController(
+        ref.read(businessGoalRepositoryProvider),
+      );
       _ownsController = true;
     }
     _clock = widget.clock ?? DateTime.now;
+    if (_ownsController) _controller.hydrate();
   }
 
   @override
@@ -63,7 +71,7 @@ class _TongtaiGoalsScreenState extends State<TongtaiGoalsScreen> {
       ),
     );
     if (!context.mounted || result == null) return;
-    _controller.upsert(result);
+    await _controller.upsert(result);
   }
 
   /// Opens the goal detail (WTM-88) — progress, pace, action plan and tips —

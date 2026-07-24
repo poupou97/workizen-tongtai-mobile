@@ -4,7 +4,6 @@ import '../../consumer/customer_directory_service.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product_inventory_service.dart';
 import '../../journey/business_goal.dart';
-import '../../journey/business_goal_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../producer/supplier_search_service.dart';
