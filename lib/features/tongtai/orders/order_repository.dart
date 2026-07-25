@@ -143,32 +143,40 @@ class InMemoryOrderRepository implements OrderRepository {
   }
 }
 
-/// Encodes order lines into the `orders_table.items` JSON array.
+/// Encodes order lines into the `orders_table.items` JSON array — the immutable
+/// business snapshot (productId/name/sku/unit/quantity/soldPrice) per line.
 String encodeOrderItems(List<OrderItem> items) => jsonEncode([
   for (final i in items)
     {
+      'productId': i.productId,
       'productName': i.productName,
+      'sku': i.sku,
       'category': i.category,
+      'unit': i.unit,
       'quantity': i.quantity,
       'unitPrice': i.unitPrice,
     },
 ]);
 
 /// Decodes the `items` JSON array, tolerant of null/empty/corrupt/non-array
-/// blobs and wrong element types — a bad blob yields `[]`, never a throw.
+/// blobs and wrong element types — a bad blob yields `[]`, never a throw. New
+/// snapshot fields (productId/sku/unit) default to empty for legacy pre-WTM-126
+/// blobs, so old orders still load.
 List<OrderItem> decodeOrderItems(String? json) {
   if (json == null || json.isEmpty) return const [];
   try {
     final decoded = jsonDecode(json);
     if (decoded is! List) return const [];
+    String str(Map e, String k) => e[k] is String ? e[k] as String : '';
     return [
       for (final e in decoded)
         if (e is Map)
           OrderItem(
-            productName: e['productName'] is String
-                ? e['productName'] as String
-                : '',
-            category: e['category'] is String ? e['category'] as String : '',
+            productId: str(e, 'productId'),
+            productName: str(e, 'productName'),
+            sku: str(e, 'sku'),
+            category: str(e, 'category'),
+            unit: str(e, 'unit'),
             quantity: e['quantity'] is num ? (e['quantity'] as num).toInt() : 0,
             unitPrice: e['unitPrice'] is num
                 ? (e['unitPrice'] as num).toDouble()

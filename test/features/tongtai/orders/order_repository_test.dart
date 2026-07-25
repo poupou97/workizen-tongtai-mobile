@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/core/local_workspace.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 
@@ -293,18 +294,97 @@ void main() {
     });
   });
 
+  test(
+    'line snapshot (productId/sku/unit + sold price) round-trips via Drift',
+    () async {
+      await seedCustomer('c1');
+      final repo = DriftOrderRepository(db);
+      await repo.upsert(
+        order(
+          'o1',
+          items: const [
+            OrderItem(
+              productId: 'p1',
+              productName: 'Quạt mini',
+              sku: 'SKU-EL-001',
+              category: 'Electronics',
+              unit: 'cái',
+              quantity: 2,
+              unitPrice: 79000, // sold price, below the inventory default
+            ),
+          ],
+        ),
+      );
+
+      final line = (await DriftOrderRepository(
+        db,
+      ).loadAll()).single.items.single;
+      expect(line.productId, 'p1');
+      expect(line.sku, 'SKU-EL-001');
+      expect(line.unit, 'cái');
+      expect(line.unitPrice, 79000); // immutable sold-price snapshot
+    },
+  );
+
+  test('legacy items blob without snapshot fields still loads', () async {
+    await seedCustomer('c1');
+    // A pre-WTM-126 line: no productId/sku/unit keys.
+    await insertRawOrder(
+      id: 'legacy',
+      customerId: 'c1',
+      items:
+          '[{"productName":"Old","category":"Home","quantity":1,"unitPrice":5000}]',
+    );
+    final line = (await DriftOrderRepository(db).loadAll()).single.items.single;
+    expect(line.productName, 'Old');
+    expect(line.unitPrice, 5000);
+    // New snapshot fields default to empty — no crash.
+    expect(line.productId, '');
+    expect(line.sku, '');
+    expect(line.unit, '');
+  });
+
   group('order items JSON codec', () {
-    test('round-trips through encode/decode', () {
+    test('round-trips the full snapshot through encode/decode', () {
       const items = [
         OrderItem(
+          productId: 'p9',
           productName: 'A',
+          sku: 'SKU-A',
           category: 'Home',
+          unit: 'hộp',
           quantity: 2,
           unitPrice: 1500,
         ),
       ];
       final decoded = decodeOrderItems(encodeOrderItems(items));
       expect(decoded, items);
+    });
+
+    test('OrderItem.fromProduct snapshots the product + sold price', () {
+      final product = Product(
+        id: 'p1',
+        sku: 'SKU-EL-001',
+        name: 'Quạt mini',
+        category: 'Electronics',
+        quantity: 10,
+        pricePerUnit: 89000,
+        reorderLevel: 2,
+        updatedAt: DateTime(2026, 7, 1),
+      );
+      final line = OrderItem.fromProduct(
+        product,
+        quantity: 3,
+        soldPrice: 80000,
+      );
+      expect(line.productId, 'p1');
+      expect(line.productName, 'Quạt mini');
+      expect(line.sku, 'SKU-EL-001');
+      expect(line.category, 'Electronics');
+      expect(line.quantity, 3);
+      expect(line.unitPrice, 80000); // sold price overrides the default
+      // Default sold price falls back to the inventory price.
+      expect(OrderItem.fromProduct(product, quantity: 1).unitPrice, 89000);
     });
 
     test('decode is tolerant of null', () {

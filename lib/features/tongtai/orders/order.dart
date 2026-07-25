@@ -1,9 +1,14 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/tongtai_enums.dart';
+import '../inventory/product.dart';
 
-/// One line of a customer's order: a product, how many, and at what price
-/// (WTM-77 AC3 — items purchased in each order with quantities).
+/// One line of a customer's order — an **immutable business snapshot** of an
+/// inventory product at sale time (Founder WTM-126). A line always references an
+/// inventory product ([productId]) and records the product identity + the
+/// **actual sold price** ([unitPrice]) as they were when the order was placed, so
+/// historical orders and reports never change when inventory prices/names change
+/// later.
 @immutable
 class OrderItem {
   const OrderItem({
@@ -11,39 +16,92 @@ class OrderItem {
     required this.category,
     required this.quantity,
     required this.unitPrice,
+    this.productId = '',
+    this.sku = '',
+    this.unit = '',
   });
 
-  /// Product display name, e.g. "Quạt mini cầm tay".
+  /// Builds a line from an inventory [product] (Founder WTM-126: order lines must
+  /// reference an inventory product, never free text). Snapshots the product's
+  /// identity and takes [soldPrice] — the *actual* sold price, which may override
+  /// the inventory default [Product.pricePerUnit].
+  factory OrderItem.fromProduct(
+    Product product, {
+    required int quantity,
+    double? soldPrice,
+    String unit = '',
+  }) => OrderItem(
+    productId: product.id,
+    productName: product.name,
+    sku: product.sku,
+    category: product.category,
+    unit: unit,
+    quantity: quantity,
+    unitPrice: soldPrice ?? product.pricePerUnit,
+  );
+
+  /// The inventory product this line references. Empty only for a legacy line
+  /// written before WTM-126.
+  final String productId;
+
+  /// Product display name at sale time, e.g. "Quạt mini cầm tay".
   final String productName;
+
+  /// Stock-keeping unit at sale time, e.g. "SKU-EL-001" (empty if unknown).
+  final String sku;
 
   /// Product category, e.g. "Electronics" — the AC4 category filter facet.
   final String category;
 
+  /// Unit of sale (e.g. "cái", "hộp") at sale time; empty until Inventory
+  /// carries an explicit unit field.
+  final String unit;
+
   /// Units purchased.
   final int quantity;
 
-  /// Price per unit in Vietnamese đồng at purchase time.
+  /// The **actual sold price** per unit in Vietnamese đồng at sale time — an
+  /// immutable snapshot that never follows later inventory-price changes.
   final double unitPrice;
 
-  /// This line's total (quantity × unit price).
+  /// This line's total (quantity × sold price).
   double get lineTotal => quantity * unitPrice;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is OrderItem &&
+          other.productId == productId &&
           other.productName == productName &&
+          other.sku == sku &&
           other.category == category &&
+          other.unit == unit &&
           other.quantity == quantity &&
           other.unitPrice == unitPrice);
 
   @override
-  int get hashCode => Object.hash(productName, category, quantity, unitPrice);
+  int get hashCode => Object.hash(
+    productId,
+    productName,
+    sku,
+    category,
+    unit,
+    quantity,
+    unitPrice,
+  );
 }
 
-/// A customer's past order (WTM-77) — pure domain model mirroring the Drift
-/// `OrdersTable` shape (id, date, status, JSON items) so an in-memory service
-/// can later be swapped for a Drift-backed one without touching callers.
+/// A sales order (WTM-77, persisted WTM-125) — pure domain model over the Orders
+/// capability's `orders_table`. Holds the customer, a human order number, the
+/// date, lifecycle [status], and the immutable line-item snapshots.
+///
+/// **Future compatibility (Founder WTM-126):** the model is deliberately kept
+/// open so later capabilities attach **without breaking existing orders** —
+/// Payment/paymentStatus and Shipment/shippingCost already have `orders_table`
+/// columns; Invoice, Return and Warranty can arrive as additive columns or a
+/// versioned `domain_snapshot` (ADR-TON-009) plus their own child tables, read by
+/// the Repository. No downstream consumer decodes the order itself, so adding a
+/// field never ripples callers.
 @immutable
 class CustomerOrder {
   const CustomerOrder({

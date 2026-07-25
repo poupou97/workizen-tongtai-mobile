@@ -6,8 +6,12 @@ import '../../consumer/customer_directory_controller.dart';
 import '../../consumer/customer_directory_service.dart';
 import '../../consumer/customer_order_history_service.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../inventory/product.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../orders/order_controller.dart';
 import '../../providers/tongtai_consumer_provider.dart';
+import '../../providers/tongtai_inventory_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_customer_form_screen.dart';
 import 'tongtai_customer_history_screen.dart';
@@ -61,6 +65,12 @@ class _TongtaiCustomerListScreenState
   late final bool _ownsDirectory;
   final TextEditingController _searchController = TextEditingController();
 
+  /// Real order source + inventory for the Create Order flow (WTM-126), wired
+  /// only in the real-app path so purchase history can create + show real
+  /// orders. Null in test/injected modes (history stays read-only there).
+  OrderController? _orders;
+  List<Product> _products = const [];
+
   CustomerQuery _query = const CustomerQuery();
 
   @override
@@ -79,13 +89,23 @@ class _TongtaiCustomerListScreenState
         ref.read(customerRepositoryProvider),
       );
       _ownsDirectory = true;
+      // Real order source + inventory catalogue for Create Order (WTM-126).
+      _orders = OrderController(ref.read(orderRepositoryProvider))..hydrate();
+      _loadProducts();
     }
     if (_ownsDirectory) _directory.hydrate();
+  }
+
+  Future<void> _loadProducts() async {
+    final products = await ref.read(productRepositoryProvider).loadAll();
+    if (!mounted) return;
+    setState(() => _products = products);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _orders?.dispose();
     if (_ownsDirectory) _directory.dispose();
     super.dispose();
   }
@@ -112,13 +132,16 @@ class _TongtaiCustomerListScreenState
     setState(() => _query = _query.copyWith(pageIndex: 0));
   }
 
-  /// Open the customer's purchase history (WTM-77).
+  /// Open the customer's purchase history (WTM-77) — with the real order source
+  /// + inventory wired in the real app so the seller can create orders (WTM-126).
   void _openHistory(BuildContext context, Customer customer) {
     Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => TongtaiCustomerHistoryScreen(
           customer: customer,
           service: widget.orderHistory,
+          orderController: _orders,
+          products: _products,
         ),
       ),
     );
