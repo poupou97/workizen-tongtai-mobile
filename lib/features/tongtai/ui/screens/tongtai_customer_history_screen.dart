@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../consumer/customer.dart';
-import '../../consumer/customer_order.dart';
 import '../../consumer/customer_order_history_service.dart';
 import '../../core/tongtai_enums.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../inventory/product.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../orders/order.dart';
+import '../../orders/order_controller.dart';
+import 'tongtai_create_order_screen.dart';
 
 /// Color for an [OrderStatus] chip. Pure function so the mapping is directly
 /// unit-testable without pumping a widget (same convention as
@@ -51,16 +54,28 @@ class TongtaiCustomerHistoryScreen extends StatefulWidget {
     required this.customer,
     this.service,
     this.clock,
+    this.orderController,
+    this.products = const [],
   });
 
   /// Whose history to show.
   final Customer customer;
 
-  /// Injectable for tests; defaults to the built-in sample orders.
+  /// Injectable sample source for tests; used only when [orderController] is
+  /// null. Defaults to the built-in sample orders.
   final CustomerOrderHistoryService? service;
 
   /// Injectable clock for the date-range presets (defaults to [DateTime.now]).
   final DateTime Function()? clock;
+
+  /// The real order source (WTM-125/126). When provided, this screen reads the
+  /// customer's persisted orders through it and shows a "Create Order" action;
+  /// when null the screen stays read-only over [service] (User Data First: the
+  /// real app always passes a controller).
+  final OrderController? orderController;
+
+  /// The inventory the Create Order flow picks lines from (WTM-126).
+  final List<Product> products;
 
   @override
   State<TongtaiCustomerHistoryScreen> createState() =>
@@ -69,7 +84,6 @@ class TongtaiCustomerHistoryScreen extends StatefulWidget {
 
 class _TongtaiCustomerHistoryScreenState
     extends State<TongtaiCustomerHistoryScreen> {
-  late final CustomerOrderHistoryService _service;
   late final DateTime Function() _clock;
 
   OrderHistoryRange _range = OrderHistoryRange.all;
@@ -78,19 +92,42 @@ class _TongtaiCustomerHistoryScreenState
   @override
   void initState() {
     super.initState();
-    _service = widget.service ?? CustomerOrderHistoryService.sample();
     _clock = widget.clock ?? DateTime.now;
   }
 
   OrderHistoryQuery get _query =>
       OrderHistoryQuery(from: _range.fromFor(_clock()), category: _category);
 
+  /// The order source: the real controller's orders when wired, else the sample
+  /// service. A fresh service is built each frame so it reflects new orders.
+  CustomerOrderHistoryService get _service => widget.orderController != null
+      ? CustomerOrderHistoryService(widget.orderController!.orders)
+      : (widget.service ?? CustomerOrderHistoryService.sample());
+
+  Future<void> _createOrder() async {
+    final controller = widget.orderController!;
+    final order = await Navigator.of(context).push<CustomerOrder>(
+      MaterialPageRoute(
+        builder: (_) => TongtaiCreateOrderScreen(
+          customer: widget.customer,
+          products: widget.products,
+          clock: widget.clock,
+        ),
+      ),
+    );
+    if (!mounted || order == null) return;
+    await controller.upsert(order);
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final customerId = widget.customer.id;
-    final orders = _service.ordersFor(customerId, _query);
-    final metrics = _service.metricsFor(customerId);
-    final categories = _service.categoriesFor(customerId);
+    final service = _service;
+    final orders = service.ordersFor(customerId, _query);
+    final metrics = service.metricsFor(customerId);
+    final categories = service.categoriesFor(customerId);
 
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
@@ -100,6 +137,16 @@ class _TongtaiCustomerHistoryScreenState
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
       ),
+      floatingActionButton: widget.orderController == null
+          ? null
+          : FloatingActionButton.extended(
+              key: const Key('history-create-order'),
+              onPressed: _createOrder,
+              backgroundColor: TongtaiDesignTokens.consumerBlue,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.add),
+              label: const Text('Create Order'),
+            ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

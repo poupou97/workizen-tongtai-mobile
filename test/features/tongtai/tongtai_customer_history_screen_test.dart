@@ -6,9 +6,13 @@ import 'package:tongtai/features/tongtai/consumer/customer_directory_controller.
 import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order_history_service.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
+import 'package:tongtai/features/tongtai/orders/order_controller.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_create_order_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_history_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_list_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart';
 
 /// Widget tests for the WTM-77 Purchase History screen + its entry point on
 /// the customer list.
@@ -261,4 +265,81 @@ void main() {
       expect(find.textContaining('DH-2026-0101'), findsOneWidget);
     },
   );
+
+  group('Create Order from history (WTM-126)', () {
+    final products = [
+      Product(
+        id: 'p1',
+        sku: 'SKU-EL-001',
+        name: 'Quạt tích điện',
+        category: 'Electronics',
+        quantity: 20,
+        pricePerUnit: 350000,
+        reorderLevel: 5,
+        updatedAt: DateTime(2026, 7, 1),
+      ),
+    ];
+
+    testWidgets('no Create Order action in read-only (sample) mode', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TongtaiCustomerHistoryScreen(
+            customer: customer,
+            service: service,
+            clock: () => now,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('history-create-order')), findsNothing);
+    });
+
+    testWidgets('creates an inventory-referenced order and shows it', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      final orders = OrderController.inMemory();
+      await orders.hydrate();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TongtaiCustomerHistoryScreen(
+            customer: customer,
+            orderController: orders,
+            products: products,
+            clock: () => now,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Starts empty (User Data First) with the Create Order action available.
+      expect(find.text('No orders in this period'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('history-create-order')));
+      await tester.pumpAndSettle();
+
+      // Create Order form → add a line via the inventory picker.
+      expect(find.byType(TongtaiCreateOrderScreen), findsOneWidget);
+      await tester.tap(find.byKey(const Key('create-order-add-item')));
+      await tester.pumpAndSettle();
+      expect(find.byType(TongtaiInventoryPickerScreen), findsOneWidget);
+      await tester.tap(find.byKey(const Key('picker-product-p1')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('order-item-quantity')), '2');
+      await tester.tap(find.byKey(const Key('order-item-add')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('create-order-save')));
+      await tester.pumpAndSettle();
+
+      // Back on history — the new order is persisted to the controller + shown.
+      expect(orders.count, 1);
+      expect(orders.orders.single.items.single.productId, 'p1');
+      expect(find.byType(TongtaiCustomerHistoryScreen), findsOneWidget);
+      expect(find.textContaining('Quạt tích điện'), findsOneWidget);
+      expect(find.text('1 order'), findsOneWidget);
+    });
+  });
 }
