@@ -28,9 +28,13 @@ Map<String, dynamic> decodeDomainSnapshot(String? json) {
 int snapshotVersion(Map<String, dynamic> snapshot) =>
     snapshot['v'] is int ? snapshot['v'] as int : 0;
 
-/// A `List<String>` from [key], tolerant of missing keys / wrong element types.
-List<String> snapshotStringList(Map<String, dynamic> snapshot, String key) =>
-    (snapshot[key] as List?)?.whereType<String>().toList() ?? const [];
+/// A `List<String>` from [key], tolerant of missing keys, a wrong *value* type
+/// (e.g. a scalar left by an older/corrupt blob → `[]` instead of throwing), and
+/// wrong element types (non-strings are dropped).
+List<String> snapshotStringList(Map<String, dynamic> snapshot, String key) {
+  final value = snapshot[key];
+  return value is List ? value.whereType<String>().toList() : const [];
+}
 
 /// A `String` from [key], defaulting to `''` when missing or non-string.
 String snapshotString(Map<String, dynamic> snapshot, String key) =>

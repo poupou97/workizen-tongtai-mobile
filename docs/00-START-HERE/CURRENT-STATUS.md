@@ -1,15 +1,23 @@
-# Current Status — 2026-07-22 (repo split day)
+# Current Status — 2026-07-25
 
 ## Where we are
 
 - **Phase 1 (Product Design Bible):** ✅ DONE + Founder-approved. 60 docs.
-- **Phase 2 (build):** 🔄 IN PROGRESS — **22 stories verified & shipped**,
-  developed autonomously by the Evidence-Driven Runtime (3 batches + pilot).
+- **Phase 2 (build):** 🔄 IN PROGRESS — developed autonomously by the
+  Evidence-Driven Runtime. `flutter analyze` clean; **828/828 tests passing**.
 - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
-  app runs standalone; `flutter analyze` clean; **519/519 tests passing**.
-- **Post-split fixes:** WTM-105 — split regression: `main.dart` bypassed
-  `TongtaiRootGate` so the first-launch tutorial never showed; rewired + 5
-  app-level boot tests (suite: 524) + ADR-TON-003 (repo split) recorded.
+  app runs standalone.
+- **Data Foundation — persistence arc COMPLETE for user-authored capabilities**
+  (Founder Post-P0 "Data Foundation before AI"): Finance (WTM-120), Inventory
+  (WTM-121), Consumer (WTM-123) and Journey (WTM-124) all persist to Drift via
+  the approved **Repository + structured-columns + versioned domain-snapshot**
+  pattern (ADR-TON-008/009), **User Data First** (real DB starts empty; sample =
+  Demo only). Readiness dashboard: `docs/02-ARCHITECTURE/PERSISTENCE-INVENTORY.md`
+  (Capability Persistence Matrix). The shared corrupt-tolerant codec
+  `lib/features/tongtai/core/domain_snapshot.dart` backs all four.
+- **Founder-gates blocking the next tier** (see OPEN-DECISIONS "Còn mở"): Orders
+  entry UX · Home demo-vs-User-Data-First · Workizen AI activation (BYOK/router,
+  privacy red-line). No non-gated persistence migration remains.
 
 ## Shipped stories (all at Jira "Code Review", code on this repo's main)
 
@@ -21,10 +29,10 @@
 | Producer | WTM-63 supplier search · 64 supplier detail · 65 favorites |
 | Inventory | WTM-68 product list · 69 add/edit product · 70 stock alerts · WTM-121 **Drift persistence (ADR-TON-009)**: `ProductCatalogController → ProductRepository → Drift` (schema v5 + `products.domain_snapshot`); app thật bắt đầu RỖNG, sản phẩm user persist (imagePaths trong versioned snapshot); sample = Demo Mode |
 | Search | WTM-72 FTS5 (đ-aware) · 73 unified search · 74 ranking + A/B |
-| Consumer | WTM-75 customer list · 76 add/edit customer (form, multi-address, audit trail, duplicate check) · 77 purchase history (orders, filters, AOV/repurchase) |
+| Consumer | WTM-75 customer list · 76 add/edit customer (form, multi-address, audit trail, duplicate check) · 77 purchase history (orders, filters, AOV/repurchase) · WTM-123 **Drift persistence (ADR-TON-009)**: `CustomerDirectoryController → CustomerRepository → Drift` (schema v6 + `customers.domain_snapshot`); structured cols for name/phone/city/email/orders/spend + `segments` JSON col; addresses/tags/notes in snapshot; app thật RỖNG, sample = Demo |
 | AI | WTM-61 xAI Grok BYOK client + key screen |
 | Chat | WTM-80 chat UI · 81 persistence SQLite v4 (local-only ADR-TON-004) · 82 Workizen AI Router (đa provider, context injection, fallback offline — ADR-TON-006) · WTM-84 **search & history**: nút search → tìm theo nội dung (đ-aware, dùng `ChatMessageStore.search` sẵn có) + lọc kỳ (Tất cả/Hôm nay/7 ngày), kết quả nhóm theo ngày + highlight từ khóa |
-| Journey | WTM-87 business goals (templates + multi-step form + progress/pace + khuyến nghị) · WTM-88 goal detail: bấm goal mở chi tiết — tiến độ/pace/còn lại, **kế hoạch hành động** rule-based theo loại + pace, gợi ý (guidance), nút Sửa → form (AI plan thật kế thừa seam này sau) |
+| Journey | WTM-87 business goals (templates + multi-step form + progress/pace + khuyến nghị) · WTM-88 goal detail: bấm goal mở chi tiết — tiến độ/pace/còn lại, **kế hoạch hành động** rule-based theo loại + pace, gợi ý (guidance), nút Sửa → form (AI plan thật kế thừa seam này sau) · WTM-124 **Drift persistence (ADR-TON-009, divergent-schema)**: `BusinessGoalController → BusinessGoalRepository → Drift` (schema v7 + `journeys.domain_snapshot`); promoted cols goal/revenueImpact/startedAt + derived status/progress/timeline; type/achieved/growth/endDate/notes trong snapshot; app thật RỖNG, sample = Demo |
 | Opportunity | WTM-91 feed (type filter, sort relevance/recency/ROI, bookmark + saved view, swipe interested/dismiss + undo) · WTM-92 detail: bấm card mở chi tiết — điểm AI, ROI/tác động, lý do, **kế hoạch hành động** rule-based theo loại, nút quan tâm/bỏ qua/lưu đồng bộ về feed (AI scoring chờ WTM-93) |
 | Timeline | WTM-114 Business Timeline (event-driven): `BusinessEvent` + `BusinessEventSource` (finance/order/opportunity/journey adapters) → `TimelineService` merge+sort desc, group-by-day; screen lọc theo loại, icon/màu theo domain, empty-state; modules EMIT events (timeline không query module) — mở từ More → Business |
 | Home | WTM-14 dashboard front-door đọc data thật: đếm module (Producer/Inventory/Consumer/Journey), KPI doanh thu năm/đơn/AOV (từ `ReportsService`), Top 3 cơ hội theo điểm AI, mission = mục tiêu + tiến độ (thay placeholder "0"/"No … yet") |
