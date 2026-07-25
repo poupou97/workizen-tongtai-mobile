@@ -11,9 +11,8 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../orders/order.dart' show kSampleCustomerOrders;
 import '../../producer/supplier_search_service.dart';
-import '../../providers/tongtai_inventory_provider.dart';
+import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_journey_provider.dart';
-import '../../providers/tongtai_metrics_provider.dart';
 import '../../providers/tongtai_search_provider.dart';
 import 'tongtai_chat_screen.dart';
 import 'tongtai_customer_list_screen.dart';
@@ -114,22 +113,23 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
   }
 
   Future<void> _load() async {
-    // Resolve every provider before the first await so no `ref` is touched after
-    // an async gap (the widget may be disposed mid-load).
-    final metricsService = ref.read(businessMetricsServiceProvider);
-    final productRepo = ref.read(productRepositoryProvider);
+    // Home consumes the BusinessContext Aggregate Root (WTM-129) for its KPIs +
+    // capability counts + health — the same seam AI reads. Journey (goals) and
+    // Producer (favourites) are not in the Phase-1 context yet, so they load
+    // alongside. Resolve every provider before the first await (the widget may be
+    // disposed mid-load).
+    final contextService = ref.read(businessContextServiceProvider);
     final goalRepo = ref.read(businessGoalRepositoryProvider);
     final favoritesStore = ref.read(tongtaiSearchFavoritesStoreProvider);
-    final metrics = await metricsService.load();
-    final products = await productRepo.loadAll();
+    final context = await contextService.load();
     final goals = await goalRepo.loadAll();
     final favorites = await favoritesStore.loadAll();
     if (!mounted) return;
     setState(() {
-      _metrics = metrics;
-      _health = widget.health ?? BusinessHealth.from(metrics);
-      _inventory = products.length;
-      _consumer = metrics.customersCount;
+      _metrics = context.metrics;
+      _health = widget.health ?? BusinessHealth.fromContext(context);
+      _inventory = context.inventory.productCount;
+      _consumer = context.customers.total;
       _goals = goals;
       _journey = goals.length;
       _producers = favorites.length;
