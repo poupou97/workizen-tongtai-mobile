@@ -19,7 +19,7 @@ on demand) · ADR-TON-008 (Repository seam, User Data First) · WTM-122
 | Inventory | `ProductRepository` | id, sku, name, category, description, price, quantity, reorder, updatedAt | `imagePaths` | ✅ | ✅ | ⛔ | v5 | Promoted + JSON |
 | Consumer | `CustomerRepository` | id, name, phone, city(=location), email, orderCount, totalSpent, lastOrderDate, `segments[]` | `addresses[]`, `tags[]`, `notes` | ✅ | ✅ | ⛔ | v6 | Promoted + JSON |
 | Journey | `BusinessGoalRepository` | id, goal(=name), status*, revenueImpact(=targetAmount), startedAt(=startDate), progressPercent*, timelineDays* | `type`, `achievedAmount`, `growthTarget`, `growthAchieved`, `endDate`, `notes` | ✅ | ✅ | ⛔ | v7 | Promoted + JSON (divergent-schema) |
-| Orders | `CustomerOrder` → `orders_table` | — | — | ⛔ | ✅ | ⛔ | — | Not started (no order-entry form yet) |
+| Orders | `OrderRepository` | id, customerId, orderNumber, orderDate, totalQuantity, subtotal, totalAmount, status | `items[]` (JSON array) | ✅ | ✅ | ⛔ | orders_table | Repo+Persistence ✅ (WTM-125); Create-Order UI + Reports/Home rewire pending (layered DoD) |
 | Opportunity | `Opportunity` → `opportunities_table` | — | — | ⛔ | ✅ | ⛔ | — | Blocked on scoring (WTM-93) |
 | Producer | `Supplier` → `producers_table` | favorites only (Drift) | — | 🟡 | ✅ | ⛔ | v2 | Favorites Drift; catalogue = sample |
 | Timeline | derived (no table) | — | — | n/a | ✅ | ⛔ | — | Inherits from its sources |
