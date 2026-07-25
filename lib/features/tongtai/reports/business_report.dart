@@ -235,6 +235,10 @@ class ReportsService {
 
   final List<CustomerOrder> _orders;
 
+  /// The orders this service reports over (WTM-127) — read-only, so callers can
+  /// derive [BusinessMetrics] from the same data without a second load.
+  List<CustomerOrder> get all => List.unmodifiable(_orders);
+
   /// customerId → display name, for the top-customers widget (WTM-97).
   final Map<String, String> _customerNames;
 

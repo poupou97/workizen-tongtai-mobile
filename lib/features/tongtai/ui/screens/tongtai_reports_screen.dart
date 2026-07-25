@@ -1,44 +1,102 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
+import '../../metrics/business_metrics.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_pipeline.dart';
+import '../../providers/tongtai_metrics_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
 import '../../reports/business_report.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_opportunity_feed_screen.dart';
 
-/// Reports & Analytics dashboard (WTM-95 layout/widgets, WTM-96 revenue KPI).
+/// Reports & Analytics dashboard (WTM-95 layout/widgets, WTM-96 revenue KPI,
+/// WTM-127 real data).
 ///
-/// Local-first: the numbers come from the in-memory [ReportsService] (sample
-/// orders in Phase 2). Four headline KPIs, a six-month revenue trend drawn with
-/// a lightweight [CustomPainter] (no chart package), a top-categories/products/
-/// customers breakdown (WTM-97) and the open opportunity pipeline (WTM-98). All
-/// data sources are injectable so every figure is deterministic under test.
-class TongtaiReportsScreen extends StatelessWidget {
+/// **User Data First:** the numbers come from the persisted Orders + Consumer
+/// repositories — a new user with no sales sees the empty state. The four
+/// headline KPIs (revenue, orders, customers, AOV) are read from
+/// [BusinessMetricsService] (the KPI single source of truth, Founder), never
+/// recomputed here; the trend + breakdowns come from [ReportsService] over the
+/// same real orders. All sources are injectable so every figure is deterministic
+/// under test.
+class TongtaiReportsScreen extends ConsumerStatefulWidget {
   const TongtaiReportsScreen({
     super.key,
     this.service,
+    this.metrics,
     this.clock,
     this.opportunities,
   });
 
-  /// Injectable for tests; defaults to the built-in sample orders.
+  /// Injectable breakdown source for tests; when null the screen loads real
+  /// persisted orders (via [orderRepositoryProvider]).
   final ReportsService? service;
 
-  /// Injectable clock (defaults to [DateTime.now]) — fixes "today" for MTD/YTD.
+  /// Injectable headline KPIs for tests; when null they are loaded from the
+  /// [businessMetricsServiceProvider] (the KPI source of truth).
+  final BusinessMetrics? metrics;
+
+  /// Injectable clock (defaults to [DateTime.now]) — fixes "today" for the trend.
   final DateTime Function()? clock;
 
   /// Injectable opportunity list for the pipeline card (WTM-98); defaults to
-  /// the built-in sample opportunities.
+  /// the built-in sample opportunities (AI-generated — real source lands with
+  /// the Opportunity capability, later in the Founder sequence).
   final List<Opportunity>? opportunities;
 
   @override
+  ConsumerState<TongtaiReportsScreen> createState() =>
+      _TongtaiReportsScreenState();
+}
+
+class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
+  ReportsService? _reports;
+  BusinessMetrics? _metrics;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.service != null || widget.metrics != null) {
+      // Test / injected mode — no async load.
+      _reports = widget.service ?? ReportsService.sample();
+      _metrics =
+          widget.metrics ??
+          BusinessMetrics.from(
+            orders: _reports!.all,
+            customersCount: _reports!.all
+                .map((o) => o.customerId)
+                .toSet()
+                .length,
+          );
+      _loading = false;
+    } else {
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final orders = await ref.read(orderRepositoryProvider).loadAll();
+    final metrics = await ref.read(businessMetricsServiceProvider).load();
+    if (!mounted) return;
+    setState(() {
+      _reports = ReportsService(orders);
+      _metrics = metrics;
+      _loading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final reports = service ?? ReportsService.sample();
-    final now = (clock ?? DateTime.now)();
-    final report = reports.reportAsOf(now);
-    final pipeline = opportunityPipeline(opportunities ?? kSampleOpportunities);
+    final now = (widget.clock ?? DateTime.now)();
+    final report = _reports?.reportAsOf(now);
+    final metrics = _metrics ?? BusinessMetrics.empty;
+    final pipeline = opportunityPipeline(
+      widget.opportunities ?? kSampleOpportunities,
+    );
 
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
@@ -48,17 +106,28 @@ class TongtaiReportsScreen extends StatelessWidget {
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
         elevation: 0,
       ),
-      body: report.hasSales
-          ? _ReportBody(report: report, pipeline: pipeline)
-          : const _ReportsEmptyState(),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : (metrics.hasSales && report != null
+                ? _ReportBody(
+                    report: report,
+                    metrics: metrics,
+                    pipeline: pipeline,
+                  )
+                : const _ReportsEmptyState()),
     );
   }
 }
 
 class _ReportBody extends StatelessWidget {
-  const _ReportBody({required this.report, required this.pipeline});
+  const _ReportBody({
+    required this.report,
+    required this.metrics,
+    required this.pipeline,
+  });
 
   final BusinessReport report;
+  final BusinessMetrics metrics;
   final OpportunityPipeline pipeline;
 
   @override
@@ -66,26 +135,27 @@ class _ReportBody extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
       children: [
-        // ── Headline KPIs (WTM-96) ──────────────────────────────────────
+        // ── Headline KPIs — the four canonical metrics from the KPI source of
+        //    truth (WTM-127, BusinessMetricsService). Never recomputed here. ──
         Row(
           children: [
             Expanded(
               child: _KpiCard(
-                key: const Key('reports-kpi-revenue-mtd'),
-                label: 'Doanh thu tháng · MTD',
-                value: TongtaiFormatters.vnd(report.revenueMtd),
+                key: const Key('reports-kpi-revenue'),
+                label: 'Doanh thu · Revenue',
+                value: TongtaiFormatters.vnd(metrics.revenue),
                 accent: TongtaiDesignTokens.financePurple,
-                icon: Icons.calendar_month_outlined,
+                icon: Icons.trending_up,
               ),
             ),
             const SizedBox(width: TongtaiDesignTokens.spacing3),
             Expanded(
               child: _KpiCard(
-                key: const Key('reports-kpi-revenue-ytd'),
-                label: 'Doanh thu năm · YTD',
-                value: TongtaiFormatters.vnd(report.revenueYtd),
-                accent: TongtaiDesignTokens.financePurple,
-                icon: Icons.trending_up,
+                key: const Key('reports-kpi-orders'),
+                label: 'Đơn hàng · Orders',
+                value: '${metrics.ordersCount}',
+                accent: TongtaiDesignTokens.consumerBlue,
+                icon: Icons.receipt_long_outlined,
               ),
             ),
           ],
@@ -95,11 +165,11 @@ class _ReportBody extends StatelessWidget {
           children: [
             Expanded(
               child: _KpiCard(
-                key: const Key('reports-kpi-orders'),
-                label: 'Đơn hàng (năm) · Orders',
-                value: '${report.ordersYtd}',
-                accent: TongtaiDesignTokens.consumerBlue,
-                icon: Icons.receipt_long_outlined,
+                key: const Key('reports-kpi-customers'),
+                label: 'Khách hàng · Customers',
+                value: '${metrics.customersCount}',
+                accent: TongtaiDesignTokens.inventoryOrange,
+                icon: Icons.people_outline,
               ),
             ),
             const SizedBox(width: TongtaiDesignTokens.spacing3),
@@ -107,7 +177,7 @@ class _ReportBody extends StatelessWidget {
               child: _KpiCard(
                 key: const Key('reports-kpi-aov'),
                 label: 'Giá trị đơn TB · AOV',
-                value: TongtaiFormatters.vnd(report.averageOrderValue),
+                value: TongtaiFormatters.vnd(metrics.averageOrderValue),
                 accent: TongtaiDesignTokens.producerGreen,
                 icon: Icons.shopping_bag_outlined,
               ),
