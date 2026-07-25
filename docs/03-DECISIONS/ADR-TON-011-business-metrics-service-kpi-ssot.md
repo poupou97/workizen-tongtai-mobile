@@ -42,7 +42,12 @@ Repositories → BusinessMetricsService → Reports → Home → BusinessContext
 - One place owns KPI semantics; Reports/Home/AI stay consistent by construction.
 - **User Data First:** a new business loads `BusinessMetrics.empty` → surfaces
   show real (zero) state, never sample.
-- First application: Reports (WTM-127). Next: Home (WTM-128, G-1). Then
-  BusinessContext assembles `BusinessMetrics` + other capability aggregates for AI.
+- First application: Reports (WTM-127). Home (WTM-128, G-1) consumes
+  `BusinessMetrics` for its KPIs **and** a companion `BusinessHealth` read
+  (`Healthy` | `Not enough data`) — Home renders the value, so the assessor
+  behind it can later become AI-powered **without changing the Home UI**. KPI
+  values always come from `BusinessMetrics` (zero is valid, never "No Data").
+  Then BusinessContext assembles `BusinessMetrics` + other capability aggregates
+  for AI.
 - A capability is not "layered-DoD DONE" until its KPIs flow through
   `BusinessMetricsService` (not a private calculation).

@@ -25,7 +25,7 @@ on demand) · ADR-TON-008 (Repository seam, User Data First) · WTM-122
 | Producer | `Supplier` → `producers_table` | favorites only (Drift) | — | 🟡 | ✅ | ⛔ | v2 | Favorites Drift; catalogue = sample |
 | Timeline | derived (no table) | — | — | n/a | ✅ | ⛔ | — | Inherits from its sources |
 | Reports | via BusinessMetricsService (KPIs) + ReportsService (breakdowns) | — | — | ✅ | ✅ | ⛔ | — | Real data ✅ (WTM-127); breakdowns over real orders; opportunities still sample (AI-gated) |
-| Home | BusinessMetricsService (KPIs) — pending | — | — | ⛔ | ✅ | ⛔ | — | Rewire to BusinessMetrics + zero-state pending (WTM-128, G-1) |
+| Home | BusinessMetricsService (KPIs) + BusinessHealth | — | — | ✅ | ✅ | ⛔ | — | User Data First ✅ (WTM-128, G-1): real KPIs (zero valid), real counts, BusinessHealth badge, onboarding CTAs; Demo Mode = explicit action, never preloaded |
 
 Legend: ✅ done · 🟡 partial · ⛔ not yet · n/a not applicable. `*` = derived
 column written for query/report only (the domain recomputes it; not read back).

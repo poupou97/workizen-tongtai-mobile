@@ -1,8 +1,12 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/core/prefs.dart' show sharedPreferencesProvider;
+import 'package:tongtai/database/database.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
+    show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/tongtai.dart';
 import 'package:tongtai/main.dart' show TongtaiApp;
 
@@ -25,10 +29,17 @@ void main() {
     return SharedPreferences.getInstance();
   }
 
-  // Mirrors main(): the only override the real app installs is the prefs one,
-  // so everything downstream (store, controller, gate) is the production path.
+  // Mirrors main(): prefs is overridden as in production. The Drift database is
+  // also overridden with an in-memory one so the Home dashboard's real
+  // repository load (WTM-128) stays off the file-system (path_provider is
+  // unavailable under `flutter test`); everything else is the production path.
   Widget app(SharedPreferences prefs) => ProviderScope(
-    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      tongtaiDatabaseProvider.overrideWithValue(
+        AppDatabase.forExecutor(NativeDatabase.memory()),
+      ),
+    ],
     child: const TongtaiApp(),
   );
 

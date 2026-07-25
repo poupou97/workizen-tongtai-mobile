@@ -1,9 +1,14 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_feed_controller.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
+    show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
 
@@ -268,7 +273,19 @@ void main() {
 
     testWidgets('Home "View all" opens the feed', (tester) async {
       useTallViewport(tester);
-      await tester.pumpWidget(const MaterialApp(home: TongtaiHomeScreen()));
+      // Home loads its KPIs/counts from the repositories (WTM-128); keep it off
+      // the real Drift database with an in-memory override.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            tongtaiDatabaseProvider.overrideWithValue(
+              AppDatabase.forExecutor(NativeDatabase.memory()),
+            ),
+          ],
+          child: const MaterialApp(home: TongtaiHomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('home-open-opportunities')));
       await tester.pumpAndSettle();
 
