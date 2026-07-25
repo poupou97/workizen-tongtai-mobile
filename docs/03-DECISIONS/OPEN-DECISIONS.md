@@ -39,33 +39,26 @@ tiếp tục ngay. Chỉ ngắt Founder khi cần quyết định chiến lượ
 - WTM-101 nghi trùng WTM-59 — chờ Founder đóng/làm rõ.
 - SQLCipher (nâng mã hoá at-rest toàn DB) — option ghi trong ADR-TON-004.
 
-### ⛔ Gates mở khoá "tier kế tiếp" sau khi Data Foundation xong (Autonomous V2, 2026-07-25)
+### ✅ Gates tier kế tiếp — ĐÃ QUYẾT (Founder 2026-07-25 → **ADR-TON-010**)
 
 > Arc persistence cho 4 capability người-dùng-tự-nhập (Finance/Inventory/Consumer/
-> Journey) đã HOÀN TẤT. Mọi bước giá trị cao kế tiếp đều chạm 1 trong 3 gate dưới
-> — Runtime **không tự quyết**, chờ Founder. Mỗi mục kèm **phương án an toàn nhất**
-> (đề xuất, chưa thực thi) theo quy tắc "không chắc → safest option".
+> Journey) đã HOÀN TẤT. Founder đã quyết 3 gate mở khoá tier kế tiếp:
 
-- **G-1 · Home dashboard: Demo-preview vs User-Data-First.** WTM-14 cố ý coi
-  *sample = "real business data"* để dashboard đẹp khi demo; nhưng D-5/ADR-TON-008
-  **User Data First** nói user thật thấy dữ liệu thật (RỖNG khi chưa nhập). Hai
-  cái mâu thuẫn ở màn Home (đang hiển thị 28 sp / 26 khách / doanh thu sample cho
-  user mới). *Safest option đề xuất:* Home đọc repo thật (0 cho user mới) + empty-state
-  có CTA "Thêm…"; giữ Demo Mode riêng cho screenshot/beta. **Cần Founder chọn** vì
-  đổi hành vi hiển thị + thiết kế empty-state (nhiều hướng UX hợp lệ).
-- **G-2 · Orders (sales) entry — khoá Reports/Home KPI thật.** `orders_table` +
-  domain `CustomerOrder` đã có, NHƯNG **chưa có form nhập đơn** và **chưa có điểm
-  vào UX** (nhập từ đâu: Consumer detail? màn Sales mới?). Reports & KPI doanh thu
-  dựng trên orders → thật hoá được là nhờ Orders persist. Side-effects (trừ tồn kho,
-  auto tạo giao dịch Finance, line-items vs tổng đơn) là **quyết định sản phẩm**.
-  *Safest option đề xuất:* form đơn tối thiểu (khách + ngày + tổng + trạng thái +
-  PTTT, KHÔNG side-effect) theo đúng pattern form hiện có, đặt ở Consumer detail;
-  Repository over `orders_table` (items JSON có sẵn). **Cần Founder chốt** điểm vào +
-  phạm vi side-effect.
-- **G-3 · Workizen AI activation (BYOK/Router) — privacy red-line.** Data Foundation
-  xong ⇒ biên giới kế tiếp là AI thật (ADR-TON-006: Router + Gemini/xAI/Claude/…,
-  chế độ BYOK + Local). Chạm **red-line privacy/security** (xử lý BYOK key rời thiết
-  bị chỉ trong Authorization header; không telemetry nội dung) ⇒ **executive gate**.
-  *Safest option đề xuất:* bắt đầu ở **Local (Ollama)** + BYOK 1 provider với key
-  chỉ nằm trong secure storage, có ADR proposal chi tiết luồng key trước khi code.
-  **Runtime KHÔNG tự khởi động epic này.**
+- **G-1 · Home = User Data First — ✅ APPROVED.** Home **luôn** hiển thị dữ liệu
+  kinh doanh THẬT; user mới thấy **zero-state + CTA onboarding**, KHÔNG sample.
+  Demo data chỉ tồn tại trong **Demo Mode**; không trộn demo + production.
+- **G-2 · Orders = capability độc lập — ✅ APPROVED (điều chỉnh).** Orders **sở
+  hữu** lifecycle · revenue · order items · payment · (sau) invoice · shipment ·
+  returns. **KHÔNG nhúng logic order vào Consumer**; Consumer Detail chỉ được
+  *launch* "Create Order". **Reports + Home KPI consume Orders Repository.**
+  → module `orders/` + `OrderRepository`/`OrderController` (WTM-125).
+- **G-3 · AI — ⏸️ DEFERRED.** Chưa làm AI. Xong Data Foundation trước, theo thứ tự:
+  **Consumer → Orders → Reports → Home KPI → Opportunity → Journey → Timeline →
+  BusinessContext → AI Summary → AI Recommendation → AI Planner.**
+
+### 📏 Product Rule mới — Layered Definition of Done (Founder 2026-07-25)
+
+Capability chỉ **DONE** khi đủ tầng: **UI → Repository → Persistence →
+Report/Dashboard → BusinessContext → AI-Ready** — và **không downstream nào còn
+xài Sample**. Không đánh Done nếu Reports/Home… vẫn đọc dữ liệu mẫu. (Chi tiết:
+ADR-TON-010.)
