@@ -1,28 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../consumer/customer_directory_service.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product_inventory_service.dart';
 import '../../journey/business_goal.dart';
+import '../../metrics/business_health.dart';
+import '../../metrics/business_metrics.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
+import '../../orders/order.dart' show kSampleCustomerOrders;
 import '../../producer/supplier_search_service.dart';
-import '../../reports/business_report.dart';
+import '../../providers/tongtai_inventory_provider.dart';
+import '../../providers/tongtai_journey_provider.dart';
+import '../../providers/tongtai_metrics_provider.dart';
+import '../../providers/tongtai_search_provider.dart';
 import 'tongtai_chat_screen.dart';
+import 'tongtai_customer_list_screen.dart';
+import 'tongtai_goals_screen.dart';
+import 'tongtai_inventory_screen.dart';
 import 'tongtai_opportunity_feed_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_unified_search_screen.dart';
 
 /// Home dashboard for Tổng Tài — the app's front door.
 ///
-/// Reads the same local sample data every other screen uses (products,
-/// customers, suppliers, goals, opportunities) plus the [ReportsService] revenue
-/// figures, so the dashboard reflects the real state of the business instead of
-/// placeholder zeros. All data sources are injectable for deterministic tests.
-class TongtaiHomeScreen extends StatelessWidget {
+/// **User Data First (WTM-128, Founder G-1):** every figure is the user's real
+/// business data — module counts + the KPIs from [BusinessMetricsService] (the
+/// KPI source of truth) and a [BusinessHealth] read. Zero is valid business data
+/// (never "No Data"). A brand-new business sees onboarding CTAs; sample data
+/// only ever appears behind the explicit "Explore Demo Mode" action, never
+/// preloaded. All sources are injectable for deterministic tests.
+class TongtaiHomeScreen extends ConsumerStatefulWidget {
   const TongtaiHomeScreen({
     super.key,
-    this.reportsService,
+    this.metrics,
+    this.health,
     this.clock,
     this.supplierCount,
     this.inventoryCount,
@@ -31,13 +44,104 @@ class TongtaiHomeScreen extends StatelessWidget {
     this.opportunities,
   });
 
-  final ReportsService? reportsService;
+  /// A demo dashboard populated with sample data — the explicit "Explore Demo
+  /// Mode" action. Nothing here is written to the real database.
+  factory TongtaiHomeScreen.demo({Key? key, DateTime Function()? clock}) {
+    return TongtaiHomeScreen(
+      key: key,
+      clock: clock,
+      metrics: BusinessMetrics.from(
+        orders: kSampleCustomerOrders,
+        customersCount: kSampleCustomers.length,
+      ),
+      health: BusinessHealth.healthy,
+      supplierCount: kSampleSuppliers.length,
+      inventoryCount: kSampleProducts.length,
+      customerCount: kSampleCustomers.length,
+      goals: kSampleBusinessGoals,
+      opportunities: kSampleOpportunities,
+    );
+  }
+
+  /// Injectable KPIs (source of truth); when null they load from the
+  /// [businessMetricsServiceProvider].
+  final BusinessMetrics? metrics;
+
+  /// Injectable health read; when null it is derived from [metrics].
+  final BusinessHealth? health;
+
   final DateTime Function()? clock;
   final int? supplierCount;
   final int? inventoryCount;
   final int? customerCount;
   final List<BusinessGoal>? goals;
+
+  /// AI-generated opportunities for the preview row; real source lands with the
+  /// Opportunity capability. A real user starts with none.
   final List<Opportunity>? opportunities;
+
+  @override
+  ConsumerState<TongtaiHomeScreen> createState() => _TongtaiHomeScreenState();
+}
+
+class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+  BusinessMetrics _metrics = BusinessMetrics.empty;
+  BusinessHealth _health = BusinessHealth.notEnoughData;
+  List<BusinessGoal> _goals = const [];
+  int _producers = 0;
+  int _inventory = 0;
+  int _consumer = 0;
+  int _journey = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.metrics != null) {
+      // Injected / demo mode — data is available synchronously.
+      _metrics = widget.metrics!;
+      _health = widget.health ?? BusinessHealth.from(_metrics);
+      _producers = widget.supplierCount ?? 0;
+      _inventory = widget.inventoryCount ?? 0;
+      _consumer = widget.customerCount ?? _metrics.customersCount;
+      _goals = widget.goals ?? const [];
+      _journey = _goals.length;
+    } else {
+      // Real app: render the dashboard progressively (starts at the empty/zero
+      // state, fills in when the repositories resolve). No blocking spinner, so
+      // there is no perpetual animation to stall widget tests.
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    // Resolve every provider before the first await so no `ref` is touched after
+    // an async gap (the widget may be disposed mid-load).
+    final metricsService = ref.read(businessMetricsServiceProvider);
+    final productRepo = ref.read(productRepositoryProvider);
+    final goalRepo = ref.read(businessGoalRepositoryProvider);
+    final favoritesStore = ref.read(tongtaiSearchFavoritesStoreProvider);
+    final metrics = await metricsService.load();
+    final products = await productRepo.loadAll();
+    final goals = await goalRepo.loadAll();
+    final favorites = await favoritesStore.loadAll();
+    if (!mounted) return;
+    setState(() {
+      _metrics = metrics;
+      _health = widget.health ?? BusinessHealth.from(metrics);
+      _inventory = products.length;
+      _consumer = metrics.customersCount;
+      _goals = goals;
+      _journey = goals.length;
+      _producers = favorites.length;
+    });
+  }
+
+  /// A brand-new business — nothing created in any capability yet.
+  bool get _isEmptyBusiness =>
+      _consumer == 0 &&
+      _inventory == 0 &&
+      _journey == 0 &&
+      _metrics.ordersCount == 0;
 
   void _openSearch(BuildContext context) {
     Navigator.of(context).push(
@@ -51,13 +155,15 @@ class TongtaiHomeScreen extends StatelessWidget {
     ).push(MaterialPageRoute(builder: (_) => const TongtaiChatScreen()));
   }
 
+  void _push(BuildContext context, Widget screen) {
+    Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => screen));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final now = (clock ?? DateTime.now)();
-    final report = (reportsService ?? ReportsService.sample()).reportAsOf(now);
-    final goalList = goals ?? kSampleBusinessGoals;
-    final topOpportunities = (opportunities ?? kSampleOpportunities).toList()
-      ..sort((a, b) => b.aiScore.compareTo(a.aiScore));
+    final topOpportunities =
+        (widget.opportunities ?? const <Opportunity>[]).toList()
+          ..sort((a, b) => b.aiScore.compareTo(a.aiScore));
 
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
@@ -85,7 +191,7 @@ class TongtaiHomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Welcome + module counts ──────────────────────────────────
+            // ── Welcome + health + module counts ──────────────────────
             Card(
               elevation: 1,
               shape: RoundedRectangleBorder(
@@ -96,12 +202,19 @@ class TongtaiHomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Welcome to Tổng Tài',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Welcome to Tổng Tài',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        _HealthBadge(health: _health),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -111,10 +224,10 @@ class TongtaiHomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     _ModuleSummaryGrid(
-                      producers: supplierCount ?? kSampleSuppliers.length,
-                      inventory: inventoryCount ?? kSampleProducts.length,
-                      consumers: customerCount ?? kSampleCustomers.length,
-                      journeys: goalList.length,
+                      producers: _producers,
+                      inventory: _inventory,
+                      consumers: _consumer,
+                      journeys: _journey,
                     ),
                   ],
                 ),
@@ -122,29 +235,39 @@ class TongtaiHomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // ── Business KPIs (WTM-96 revenue into the front door) ────────
+            // ── Get started (new business) ────────────────────────────
+            if (_isEmptyBusiness) ...[
+              _GetStartedCard(
+                onCustomer: () =>
+                    _push(context, const TongtaiCustomerListScreen()),
+                onProduct: () => _push(context, const TongtaiInventoryScreen()),
+                onOrder: () =>
+                    _push(context, const TongtaiCustomerListScreen()),
+                onGoal: () => _push(context, const TongtaiGoalsScreen()),
+                onDemo: () =>
+                    _push(context, TongtaiHomeScreen.demo(clock: widget.clock)),
+              ),
+              const SizedBox(height: 24),
+            ],
+
+            // ── Business KPIs — real values, zero is valid (WTM-128) ──
             _SectionHeader(
               title: 'Business KPIs',
               actionKey: const Key('home-open-reports'),
               actionLabel: 'Xem báo cáo',
-              onAction: () => Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const TongtaiReportsScreen()),
-              ),
+              onAction: () => _push(context, const TongtaiReportsScreen()),
             ),
             const SizedBox(height: 12),
-            _KpiRow(report: report),
+            _KpiRow(metrics: _metrics),
             const SizedBox(height: 24),
 
-            // ── Top opportunities ─────────────────────────────────────────
+            // ── Top opportunities (AI-generated; empty for new users) ─
             _SectionHeader(
               title: 'Top Opportunities',
               actionKey: const Key('home-open-opportunities'),
               actionLabel: 'View all',
-              onAction: () => Navigator.of(context).push<void>(
-                MaterialPageRoute(
-                  builder: (_) => const TongtaiOpportunityFeedScreen(),
-                ),
-              ),
+              onAction: () =>
+                  _push(context, const TongtaiOpportunityFeedScreen()),
             ),
             const SizedBox(height: 12),
             if (topOpportunities.isEmpty)
@@ -155,19 +278,164 @@ class TongtaiHomeScreen extends StatelessWidget {
                   .map((o) => _OpportunityTile(opportunity: o)),
             const SizedBox(height: 24),
 
-            // ── Today's missions = active goals ───────────────────────────
+            // ── Today's missions = active goals ───────────────────────
             Text(
               "Today's Missions",
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            if (goalList.isEmpty)
+            if (_goals.isEmpty)
               const _EmptyBox('No missions yet')
             else
-              ...goalList.take(3).map((g) => _MissionTile(goal: g)),
+              ..._goals.take(3).map((g) => _MissionTile(goal: g)),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Coarse business-health chip (WTM-128). Home renders the value; the assessor
+/// behind it can later become AI-powered without changing this UI.
+class _HealthBadge extends StatelessWidget {
+  const _HealthBadge({required this.health});
+
+  final BusinessHealth health;
+
+  @override
+  Widget build(BuildContext context) {
+    final healthy = health == BusinessHealth.healthy;
+    final color = healthy
+        ? TongtaiDesignTokens.success
+        : TongtaiDesignTokens.neutral;
+    return Container(
+      key: const Key('home-health-badge'),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        border: Border.all(color: color),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            healthy ? Icons.favorite : Icons.hourglass_empty,
+            size: 12,
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            health.labelEn,
+            style: TongtaiDesignTokens.captionStyle.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Onboarding CTAs for a brand-new business (WTM-128, Founder priority order).
+/// Demo Mode is always an explicit action — sample data is never preloaded.
+class _GetStartedCard extends StatelessWidget {
+  const _GetStartedCard({
+    required this.onCustomer,
+    required this.onProduct,
+    required this.onOrder,
+    required this.onGoal,
+    required this.onDemo,
+  });
+
+  final VoidCallback onCustomer;
+  final VoidCallback onProduct;
+  final VoidCallback onOrder;
+  final VoidCallback onGoal;
+  final VoidCallback onDemo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bắt đầu · Get started',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Nhập dữ liệu kinh doanh đầu tiên của bạn.',
+              style: TongtaiDesignTokens.smallStyle.copyWith(
+                color: TongtaiDesignTokens.lightTextSecondary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _CtaTile(
+              tileKey: const Key('home-cta-customer'),
+              icon: Icons.person_add_alt_1,
+              label: 'Create your first customer',
+              onTap: onCustomer,
+            ),
+            _CtaTile(
+              tileKey: const Key('home-cta-product'),
+              icon: Icons.add_box_outlined,
+              label: 'Add your first product',
+              onTap: onProduct,
+            ),
+            _CtaTile(
+              tileKey: const Key('home-cta-order'),
+              icon: Icons.receipt_long_outlined,
+              label: 'Create your first order',
+              onTap: onOrder,
+            ),
+            _CtaTile(
+              tileKey: const Key('home-cta-goal'),
+              icon: Icons.flag_outlined,
+              label: 'Set your first business goal',
+              onTap: onGoal,
+            ),
+            _CtaTile(
+              tileKey: const Key('home-cta-demo'),
+              icon: Icons.play_circle_outline,
+              label: 'Explore Demo Mode',
+              onTap: onDemo,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CtaTile extends StatelessWidget {
+  const _CtaTile({
+    required this.tileKey,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final Key tileKey;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      key: tileKey,
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: TongtaiDesignTokens.consumerBlue),
+      title: Text(label),
+      trailing: const Icon(Icons.chevron_right, size: 18),
+      onTap: onTap,
     );
   }
 }
@@ -288,39 +556,41 @@ class _ModuleCard extends StatelessWidget {
 }
 
 /// Revenue YTD + order count + AOV, pulled from the reports aggregator.
+/// The headline KPIs on Home — read straight from [BusinessMetrics] (the KPI
+/// source of truth, WTM-127). Real values are always shown; **zero is valid
+/// business data** and is never replaced with a "No Data" placeholder (WTM-128).
 class _KpiRow extends StatelessWidget {
-  const _KpiRow({required this.report});
+  const _KpiRow({required this.metrics});
 
-  final BusinessReport report;
+  final BusinessMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    if (!report.hasSales) {
-      return const _EmptyBox('KPI metrics will appear here');
-    }
     return Row(
       children: [
         Expanded(
           child: _KpiTile(
             tileKey: const Key('home-kpi-revenue'),
-            label: 'Doanh thu năm',
-            value: TongtaiFormatters.vndShort(report.revenueYtd),
+            label: 'Doanh thu',
+            value: TongtaiFormatters.vndShort(metrics.revenue),
             color: TongtaiDesignTokens.financePurple,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _KpiTile(
+            tileKey: const Key('home-kpi-orders'),
             label: 'Đơn hàng',
-            value: '${report.ordersYtd}',
+            value: '${metrics.ordersCount}',
             color: TongtaiDesignTokens.consumerBlue,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _KpiTile(
+            tileKey: const Key('home-kpi-aov'),
             label: 'Đơn TB',
-            value: TongtaiFormatters.vndShort(report.averageOrderValue),
+            value: TongtaiFormatters.vndShort(metrics.averageOrderValue),
             color: TongtaiDesignTokens.producerGreen,
           ),
         ),

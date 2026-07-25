@@ -1,6 +1,10 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/database/database.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
+    show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/tongtai.dart';
 
 void main() {
@@ -66,8 +70,20 @@ void main() {
     testWidgets('All 5 screens render without errors', (
       WidgetTester tester,
     ) async {
-      // Test Home Screen
-      await tester.pumpWidget(const MaterialApp(home: TongtaiHomeScreen()));
+      // Test Home Screen — a ConsumerStatefulWidget that loads its KPIs +
+      // counts from the repositories (WTM-128); override the Drift database with
+      // an in-memory one so this smoke test stays off the file-system.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            tongtaiDatabaseProvider.overrideWithValue(
+              AppDatabase.forExecutor(NativeDatabase.memory()),
+            ),
+          ],
+          child: const MaterialApp(home: TongtaiHomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Home Dashboard'), findsOneWidget);
 
       // Test Producer Screen
