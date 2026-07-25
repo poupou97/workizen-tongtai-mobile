@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
+import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/reports/business_report.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
@@ -9,10 +14,20 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart'
 void main() {
   DateTime fixedNow() => DateTime(2026, 7, 24);
 
-  Widget host() => MaterialApp(
-    home: TongtaiHomeScreen(
-      reportsService: ReportsService.sample(),
-      clock: fixedNow,
+  // The KPI header opens the (real) Reports dashboard, a ConsumerStatefulWidget
+  // that loads from the repositories; override them empty so it stays off Drift.
+  Widget host() => ProviderScope(
+    overrides: [
+      orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
+      customerRepositoryProvider.overrideWithValue(
+        InMemoryCustomerRepository(),
+      ),
+    ],
+    child: MaterialApp(
+      home: TongtaiHomeScreen(
+        reportsService: ReportsService.sample(),
+        clock: fixedNow,
+      ),
     ),
   );
 

@@ -19,11 +19,13 @@ on demand) · ADR-TON-008 (Repository seam, User Data First) · WTM-122
 | Inventory | `ProductRepository` | id, sku, name, category, description, price, quantity, reorder, updatedAt | `imagePaths` | ✅ | ✅ | ⛔ | v5 | Promoted + JSON |
 | Consumer | `CustomerRepository` | id, name, phone, city(=location), email, orderCount, totalSpent, lastOrderDate, `segments[]` | `addresses[]`, `tags[]`, `notes` | ✅ | ✅ | ⛔ | v6 | Promoted + JSON |
 | Journey | `BusinessGoalRepository` | id, goal(=name), status*, revenueImpact(=targetAmount), startedAt(=startDate), progressPercent*, timelineDays* | `type`, `achievedAmount`, `growthTarget`, `growthAchieved`, `endDate`, `notes` | ✅ | ✅ | ⛔ | v7 | Promoted + JSON (divergent-schema) |
-| Orders | `OrderRepository` | id, customerId, orderNumber, orderDate, totalQuantity, subtotal, totalAmount, status | `items[]` (JSON array) | ✅ | ✅ | ⛔ | orders_table | Repo+Persistence ✅ (WTM-125); Create-Order UI + Reports/Home rewire pending (layered DoD) |
+| Orders | `OrderRepository` | id, customerId, orderNumber, orderDate, totalQuantity, subtotal, totalAmount, status | `items[]` snapshot (productId/name/sku/unit/qty/soldPrice) | ✅ | ✅ | ⛔ | orders_table | UI+Repo+Persistence ✅ (WTM-125/126); Reports ✅ via BusinessMetricsService (WTM-127); **Home rewire pending** (layered DoD) |
+| **BusinessMetricsService** (KPI SoT) | `BusinessMetricsService` over Orders+Consumer repos | KPIs: revenue · ordersCount · customersCount · AOV (billable) | — (read-only aggregate `BusinessMetrics`) | ✅ | ✅ | ⛔ | — | ADR-TON-011: Reports/Home reuse (no recompute); future KPIs extend it; future input to BusinessContext+AI |
 | Opportunity | `Opportunity` → `opportunities_table` | — | — | ⛔ | ✅ | ⛔ | — | Blocked on scoring (WTM-93) |
 | Producer | `Supplier` → `producers_table` | favorites only (Drift) | — | 🟡 | ✅ | ⛔ | v2 | Favorites Drift; catalogue = sample |
 | Timeline | derived (no table) | — | — | n/a | ✅ | ⛔ | — | Inherits from its sources |
-| Reports / Home | read-through Services | — | — | n/a | ✅ | ⛔ | — | Real data as sources persist |
+| Reports | via BusinessMetricsService (KPIs) + ReportsService (breakdowns) | — | — | ✅ | ✅ | ⛔ | — | Real data ✅ (WTM-127); breakdowns over real orders; opportunities still sample (AI-gated) |
+| Home | BusinessMetricsService (KPIs) — pending | — | — | ⛔ | ✅ | ⛔ | — | Rewire to BusinessMetrics + zero-state pending (WTM-128, G-1) |
 
 Legend: ✅ done · 🟡 partial · ⛔ not yet · n/a not applicable. `*` = derived
 column written for query/report only (the domain recomputes it; not read back).
