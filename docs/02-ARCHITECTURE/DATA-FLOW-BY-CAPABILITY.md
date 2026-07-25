@@ -35,10 +35,10 @@ flowchart TD
 | **Producer** (favorites) | Controller → **Store** | **Drift** ✅ (favorites) | `SupplierSearchService` (search = sample) |
 | **Reports** | **Service** (direct) | Sample ⏳ (`kSampleCustomerOrders`, `kSampleCustomers`) | `ReportsService` → `BusinessReport` |
 | **Orders / Consumer history** | Service | Sample ⏳ | `CustomerOrderHistoryService` → `OrderHistoryMetrics` |
-| **Consumer** (directory) | Controller | Sample ⏳ (`kSampleCustomers`) | `CustomerDirectoryService` |
-| **Inventory** | Controller | Sample ⏳ (`kSampleProducts`) | `ProductInventoryService`, `StockAlertService` |
-| **Opportunity** | Controller | Sample ⏳ (`kSampleOpportunities`) | `opportunityPipeline`, `opportunityActionPlan` (pure) |
-| **Journey** | Controller | Sample ⏳ (`kSampleBusinessGoals`) | `goalActionPlan` (pure) + `BusinessGoal` getters |
+| **Consumer** (directory) | Controller → **Repository** | **Drift** ✅ (WTM-123, real, empty) · Sample = demo | `CustomerDirectoryService` |
+| **Inventory** | Controller → **Repository** | **Drift** ✅ (WTM-121, real, empty) · Sample = demo | `ProductInventoryService`, `StockAlertService` |
+| **Opportunity** | Controller | Sample ⏳ (`kSampleOpportunities`) — AI-generated, chờ WTM-93 | `opportunityPipeline`, `opportunityActionPlan` (pure) |
+| **Journey** | Controller → **Repository** | **Drift** ✅ (WTM-124, real, empty) · Sample = demo | `goalActionPlan` (pure) + `BusinessGoal` getters |
 | **Timeline** | **Service** ← EventSources | Sample ⏳ (sources read `kSample*`) | `TimelineService` → `BusinessEvent` |
 
 ✅ = Drift-backed (persistent) · ⏳ = still Sample/in-memory; will move to Drift on
@@ -68,7 +68,11 @@ unchanged, so AI never needs edits and never learns the source.
 
 ## Migration order (P0.3 extension, same seam)
 
-Finance done (WTM-120). Next, same pattern: Orders → Consumer → Inventory →
-Opportunity → Journey; Timeline follows automatically once its event sources read
-persisted data. Reports/Home read through the Services above, so they inherit
-real data as each underlying module is persisted — no UI change.
+**Persistence arc for user-authored capabilities is COMPLETE:** Finance
+(WTM-120) · Inventory (WTM-121) · Consumer (WTM-123) · Journey (WTM-124) all on
+the same Repository seam (ADR-TON-009). The remaining ⏳ rows are **not** simple
+migrations: **Orders** has no entry form/UX (gate G-2), **Opportunity** is
+AI-generated (WTM-93), **Timeline** inherits automatically once Orders persist.
+**Reports/Home** read through the Services above, so they inherit real data as
+each underlying module persists — but their revenue/KPIs derive from **Orders**,
+so they stay Sample until Orders land (gate G-2). See OPEN-DECISIONS "Gates".
