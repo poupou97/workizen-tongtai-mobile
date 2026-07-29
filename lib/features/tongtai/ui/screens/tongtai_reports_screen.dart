@@ -57,6 +57,10 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
   BusinessMetrics? _metrics;
   bool _loading = true;
 
+  /// Which window the breakdown sections are scoped to (WTM-115). Defaults to
+  /// this-year, matching the classic YTD breakdown.
+  ReportPeriod _period = ReportPeriod.thisYear;
+
   @override
   void initState() {
     super.initState();
@@ -94,6 +98,8 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     final now = (widget.clock ?? DateTime.now)();
     final report = _reports?.reportAsOf(now);
     final metrics = _metrics ?? BusinessMetrics.empty;
+    final breakdown =
+        _reports?.breakdownFor(now, _period) ?? PeriodBreakdown.empty;
     final pipeline = opportunityPipeline(
       widget.opportunities ?? kSampleOpportunities,
     );
@@ -112,6 +118,9 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
                 ? _ReportBody(
                     report: report,
                     metrics: metrics,
+                    breakdown: breakdown,
+                    period: _period,
+                    onPeriodChanged: (p) => setState(() => _period = p),
                     pipeline: pipeline,
                   )
                 : const _ReportsEmptyState()),
@@ -123,11 +132,20 @@ class _ReportBody extends StatelessWidget {
   const _ReportBody({
     required this.report,
     required this.metrics,
+    required this.breakdown,
+    required this.period,
+    required this.onPeriodChanged,
     required this.pipeline,
   });
 
   final BusinessReport report;
   final BusinessMetrics metrics;
+
+  /// Period-scoped sales breakdown (WTM-115) — categories/products/customers.
+  final PeriodBreakdown breakdown;
+  final ReportPeriod period;
+  final ValueChanged<ReportPeriod> onPeriodChanged;
+
   final OpportunityPipeline pipeline;
 
   @override
@@ -194,27 +212,34 @@ class _ReportBody extends StatelessWidget {
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
-        // ── Top categories (WTM-95) ─────────────────────────────────────
+        // ── Period selector — scopes the breakdowns below (WTM-115) ─────
+        _SectionTitle('Chi tiết theo kỳ · Breakdown by period'),
+        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        _PeriodSelector(period: period, onChanged: onPeriodChanged),
+
+        const SizedBox(height: TongtaiDesignTokens.spacing5),
+
+        // ── Top categories (WTM-95, period-scoped WTM-115) ──────────────
         _SectionTitle('Nhóm bán chạy · Top categories'),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _TopCategoriesCard(
-          categories: report.topCategories,
-          total: report.revenueYtd,
+          categories: breakdown.topCategories,
+          total: breakdown.revenue,
         ),
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
-        // ── Top products (WTM-97) ───────────────────────────────────────
+        // ── Top products (WTM-97, period-scoped WTM-115) ────────────────
         _SectionTitle('Sản phẩm bán chạy · Top products'),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
-        _TopProductsCard(products: report.topProducts),
+        _TopProductsCard(products: breakdown.topProducts),
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
-        // ── Top customers (WTM-97) ──────────────────────────────────────
+        // ── Top customers (WTM-97, period-scoped WTM-115) ───────────────
         _SectionTitle('Khách hàng hàng đầu · Top customers'),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
-        _TopCustomersCard(customers: report.topCustomers),
+        _TopCustomersCard(customers: breakdown.topCustomers),
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
@@ -230,6 +255,43 @@ class _ReportBody extends StatelessWidget {
         ),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _PipelineCard(pipeline: pipeline),
+      ],
+    );
+  }
+}
+
+/// Period chips (WTM-115) scoping the breakdown sections below them. The
+/// headline KPIs are unaffected — they stay all-business (BusinessMetrics).
+class _PeriodSelector extends StatelessWidget {
+  const _PeriodSelector({required this.period, required this.onChanged});
+
+  final ReportPeriod period;
+  final ValueChanged<ReportPeriod> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      key: const Key('reports-period-selector'),
+      spacing: TongtaiDesignTokens.spacing2,
+      runSpacing: TongtaiDesignTokens.spacing1,
+      children: [
+        for (final p in ReportPeriod.values)
+          ChoiceChip(
+            key: Key('reports-period-${p.name}'),
+            label: Text(p.labelVi),
+            selected: p == period,
+            onSelected: (_) => onChanged(p),
+            visualDensity: VisualDensity.compact,
+            selectedColor: TongtaiDesignTokens.financePurple.withValues(
+              alpha: 0.15,
+            ),
+            labelStyle: TongtaiDesignTokens.smallStyle.copyWith(
+              color: p == period
+                  ? TongtaiDesignTokens.financePurple
+                  : TongtaiDesignTokens.lightTextSecondary,
+              fontWeight: p == period ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
       ],
     );
   }
