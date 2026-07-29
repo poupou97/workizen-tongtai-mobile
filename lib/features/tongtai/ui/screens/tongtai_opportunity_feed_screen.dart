@@ -4,8 +4,10 @@ import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_feed_controller.dart';
+import '../../opportunity/opportunity_signals.dart';
 import '../../opportunity/opportunity_theme.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import '../widgets/tongtai_opportunity_signal_badges.dart';
 import 'tongtai_opportunity_detail_screen.dart';
 
 // The type→color helper now lives in opportunity_theme.dart (shared with the
@@ -21,10 +23,14 @@ export '../../opportunity/opportunity_theme.dart'
 /// interested, left = dismiss with undo (AC5). Local-first over the
 /// in-memory [OpportunityFeedController]; AI scoring arrives with WTM-93.
 class TongtaiOpportunityFeedScreen extends StatefulWidget {
-  const TongtaiOpportunityFeedScreen({super.key, this.controller});
+  const TongtaiOpportunityFeedScreen({super.key, this.controller, this.clock});
 
   /// Injectable feed. When provided it is *not* disposed here.
   final OpportunityFeedController? controller;
+
+  /// Injectable clock for the rule-based signals (WTM-130); defaults to
+  /// [DateTime.now].
+  final DateTime Function()? clock;
 
   @override
   State<TongtaiOpportunityFeedScreen> createState() =>
@@ -35,12 +41,14 @@ class _TongtaiOpportunityFeedScreenState
     extends State<TongtaiOpportunityFeedScreen> {
   late final OpportunityFeedController _controller;
   late final bool _ownsController;
+  late final DateTime Function() _clock;
 
   OpportunityQuery _query = const OpportunityQuery();
 
   @override
   void initState() {
     super.initState();
+    _clock = widget.clock ?? DateTime.now;
     if (widget.controller != null) {
       _controller = widget.controller!;
       _ownsController = false;
@@ -240,6 +248,10 @@ class _TongtaiOpportunityFeedScreenState
                                   : _onDismissed(opportunity),
                               child: _OpportunityCard(
                                 opportunity: opportunity,
+                                signals: opportunitySignals(
+                                  opportunity,
+                                  now: _clock(),
+                                ),
                                 onOpen: () => _openDetail(opportunity),
                                 onToggleSaved: () =>
                                     _controller.toggleSaved(opportunity.id),
@@ -260,11 +272,16 @@ class _TongtaiOpportunityFeedScreenState
 class _OpportunityCard extends StatelessWidget {
   const _OpportunityCard({
     required this.opportunity,
+    required this.signals,
     required this.onToggleSaved,
     required this.onOpen,
   });
 
   final Opportunity opportunity;
+
+  /// Rule-based signals (WTM-130) shown as badges under the title.
+  final Set<OpportunitySignal> signals;
+
   final VoidCallback onToggleSaved;
 
   /// Tapping the card body opens the detail screen (WTM-92).
@@ -348,6 +365,10 @@ class _OpportunityCard extends StatelessWidget {
                 color: TongtaiDesignTokens.lightTextPrimary,
               ),
             ),
+            if (signals.isNotEmpty) ...[
+              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              TongtaiOpportunitySignalBadges(signals: signals),
+            ],
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
               opportunity.description,

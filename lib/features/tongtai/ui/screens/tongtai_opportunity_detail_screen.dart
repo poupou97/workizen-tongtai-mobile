@@ -4,7 +4,9 @@ import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_action_plan.dart';
+import '../../opportunity/opportunity_signals.dart';
 import '../../opportunity/opportunity_theme.dart';
+import '../widgets/tongtai_opportunity_signal_badges.dart';
 
 /// Opportunity Detail & Action Plan (WTM-92).
 ///
@@ -19,9 +21,15 @@ class TongtaiOpportunityDetailScreen extends StatefulWidget {
     this.onToggleSaved,
     this.onInterested,
     this.onDismiss,
+    this.clock,
   });
 
   final Opportunity opportunity;
+
+  /// Injectable clock for the rule-based signals (WTM-130); defaults to
+  /// [DateTime.now].
+  final DateTime Function()? clock;
+
   final VoidCallback? onToggleSaved;
   final VoidCallback? onInterested;
   final VoidCallback? onDismiss;
@@ -103,6 +111,21 @@ class _TongtaiOpportunityDetailScreenState
             style: TongtaiDesignTokens.heading2Style.copyWith(
               color: TongtaiDesignTokens.lightTextPrimary,
             ),
+          ),
+          Builder(
+            builder: (context) {
+              final signals = opportunitySignals(
+                _o,
+                now: (widget.clock ?? DateTime.now)(),
+              );
+              if (signals.isEmpty) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(
+                  top: TongtaiDesignTokens.spacing3,
+                ),
+                child: TongtaiOpportunitySignalBadges(signals: signals),
+              );
+            },
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing4),
 
