@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ai/business_plan.dart';
 import '../ai/business_recommendation.dart';
 import '../ai/business_summary.dart';
 import '../ai/tongtai_ai_key_store.dart';
@@ -45,3 +46,12 @@ final businessRecommendationServiceProvider =
         ref.watch(businessContextServiceProvider),
       ),
     );
+
+/// G-3C — AI Planner (WTM-136). Plan/tasks/roadmap text over the
+/// BusinessContext; never auto-executed (ADR-TON-013).
+final businessPlanServiceProvider = Provider<BusinessPlanService>(
+  (ref) => BusinessPlanService(
+    ref.watch(tongtaiAiServiceProvider),
+    ref.watch(businessContextServiceProvider),
+  ),
+);
