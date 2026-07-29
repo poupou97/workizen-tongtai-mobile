@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/ai/business_recommendation.dart';
 import 'package:tongtai/features/tongtai/ai/business_summary.dart';
 import 'package:tongtai/features/tongtai/ai/tongtai_ai_key_store.dart';
 import 'package:tongtai/features/tongtai/ai/tongtai_ai_service.dart';
@@ -267,6 +268,33 @@ void main() {
       expect(find.byKey(const Key('reports-ai-summary-text')), findsOneWidget);
       expect(find.text('Rule-based'), findsOneWidget);
       expect(find.textContaining('500.000 ₫'), findsWidgets);
+
+      // G-3B (WTM-135): the Recommend action shares the card — rule twin
+      // renders actionable suggestions with the same provenance chip.
+      final recommendationService = BusinessRecommendationService(
+        TongtaiAiService(InMemoryTongtaiAiKeyStore()), // no keys → rule path
+        contextService,
+        clock: clock,
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: TongtaiReportsScreen(
+              service: ReportsService.sample(),
+              clock: clock,
+              summaryService: summaryService,
+              recommendationService: recommendationService,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('reports-ai-recommend-run')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('reports-ai-summary-text')), findsOneWidget);
+      expect(find.text('Rule-based'), findsOneWidget);
+      expect(find.textContaining('Gợi ý hành động'), findsWidgets);
     },
   );
 
