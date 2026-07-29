@@ -21,8 +21,24 @@ BusinessContext is **not** blocked on completing every capability. It grows:
   same aggregate without changing what AI or Home consume.
 
 Phase-1 shape: `BusinessContext { metrics, customers: CustomerSummary,
-orders: OrderSummary, inventory: InventorySummary }`, assembled by
-`BusinessContextService` over the Order/Customer/Product repositories.
+orders: OrderSummary, inventory: InventorySummary, opportunity:
+OpportunitySummary }`.
+
+### One Context Provider per capability (WTM-131)
+Do **not** build many independent summary services. **Each capability owns a
+single Context Provider** (implementing `CapabilityContextProvider<T>` in
+`core/`) that turns its repository into its read-only summary slice —
+`CustomerContextProvider`, `OrderContextProvider`, `InventoryContextProvider`,
+`OpportunityContextProvider`, … `BusinessContextService` just **composes** the
+providers + `BusinessMetricsService`. Adding a capability (Journey, Timeline,
+Goals, Finance) is one more provider wired in — no other change to Home or AI.
+
+The `OpportunityContextProvider` counts the **rule-based** signals (WTM-130), so
+the opportunity slice works with **AI off/offline**. Its summary is keyed by
+`OpportunitySignal`, so the backlog signals (New / Won Recently / Lost Recently /
+Follow-up Today / No Activity / Near Deadline) extend it without a breaking
+change. **Rule Engine owns the basic signals; AI only adds analysis, prediction
+and recommendation.**
 
 ### AI boundary (absolute)
 **Workizen AI reads ONLY the BusinessContext** — never a Repository, Store, or

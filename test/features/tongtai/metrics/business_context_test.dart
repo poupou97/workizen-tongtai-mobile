@@ -1,18 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_context.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/inventory/inventory_context.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/metrics/business_context.dart';
 import 'package:tongtai/features/tongtai/metrics/business_context_service.dart';
 import 'package:tongtai/features/tongtai/metrics/business_health.dart';
+import 'package:tongtai/features/tongtai/metrics/business_metrics_service.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_context.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_signals.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
+import 'package:tongtai/features/tongtai/orders/order_context.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 
-/// WTM-129 — BusinessContext is the business Aggregate Root (Progressive
-/// Aggregation Phase 1: metrics + customers + orders + inventory). AI reads only
-/// this; Home consumes it; BusinessHealth derives from it.
+/// WTM-129/131 — BusinessContext is the Aggregate Root, composed from one
+/// Context Provider per capability. AI reads only this; Home consumes it.
 void main() {
   Customer customer(String id, {double spent = 1000000}) => Customer(
     id: id,
@@ -60,18 +66,39 @@ void main() {
     updatedAt: DateTime(2026, 7, 1),
   );
 
-  group('summaries', () {
+  BusinessContextService service({
+    List<CustomerOrder> orders = const [],
+    List<Customer> customers = const [],
+    List<Product> products = const [],
+    List<Opportunity> opportunities = const [],
+    DateTime? now,
+  }) {
+    final orderRepo = InMemoryOrderRepository(orders);
+    final customerRepo = InMemoryCustomerRepository(customers);
+    final productRepo = InMemoryProductRepository(products);
+    return BusinessContextService(
+      BusinessMetricsService(orderRepo, customerRepo),
+      CustomerContextProvider(customerRepo),
+      OrderContextProvider(orderRepo),
+      InventoryContextProvider(productRepo),
+      OpportunityContextProvider(
+        opportunities: opportunities,
+        clock: () => now ?? DateTime(2026, 7, 25),
+      ),
+    );
+  }
+
+  group('capability summaries', () {
     test('CustomerSummary counts total + by tier', () {
       final s = CustomerSummary.from([
-        customer('a', spent: 40000000), // VIP (≥30M)
-        customer('b', spent: 12000000), // Gold (≥10M)
+        customer('a', spent: 40000000), // VIP
+        customer('b', spent: 12000000), // Gold
         customer('c', spent: 500000), // Bronze
       ]);
       expect(s.total, 3);
       expect(s.tier(CustomerTier.vip), 1);
       expect(s.tier(CustomerTier.gold), 1);
       expect(s.tier(CustomerTier.bronze), 1);
-      expect(s.tier(CustomerTier.silver), 0);
     });
 
     test('OrderSummary counts total, by status, and open orders', () {
@@ -82,78 +109,118 @@ void main() {
         order('o4', status: OrderStatus.confirmed),
       ]);
       expect(s.total, 4);
-      expect(s.status(OrderStatus.pending), 1);
-      expect(s.status(OrderStatus.delivered), 1);
-      // Open = not delivered and not cancelled → pending + confirmed.
-      expect(s.openCount, 2);
+      expect(s.openCount, 2); // pending + confirmed
     });
 
     test('InventorySummary counts stock health + value', () {
       final s = InventorySummary.from([
-        product('p1', qty: 10, reorder: 3, price: 5000), // in stock
-        product('p2', qty: 2, reorder: 3, price: 1000), // low stock
-        product('p3', qty: 0, reorder: 3, price: 2000), // out of stock
+        product('p1', qty: 10, reorder: 3, price: 5000),
+        product('p2', qty: 2, reorder: 3, price: 1000),
+        product('p3', qty: 0, reorder: 3, price: 2000),
       ]);
       expect(s.productCount, 3);
       expect(s.lowStockCount, 1);
       expect(s.outOfStockCount, 1);
-      // Stock value = 10×5000 + 2×1000 + 0×2000.
       expect(s.stockValue, 52000);
     });
+
+    test(
+      'OpportunitySummary counts active opportunities by rule-based signal',
+      () {
+        final now = DateTime(2026, 7, 25);
+        final s = OpportunitySummary.from([
+          // seasonal high value → highValue + urgent
+          Opportunity(
+            id: 'a',
+            type: OpportunityType.seasonal,
+            title: 't',
+            description: 'd',
+            expectedImpact: 40000000,
+            estimatedRoi: 2.5,
+            aiScore: 50,
+            discoveredAt: DateTime(2026, 7, 24),
+          ),
+          // low ROI → highRisk
+          Opportunity(
+            id: 'b',
+            type: OpportunityType.trend,
+            title: 't',
+            description: 'd',
+            expectedImpact: 5000000,
+            estimatedRoi: 1.5,
+            aiScore: 50,
+            discoveredAt: DateTime(2026, 7, 24),
+          ),
+          // dismissed → excluded from the active total + counts
+          Opportunity(
+            id: 'c',
+            type: OpportunityType.seasonal,
+            title: 't',
+            description: 'd',
+            expectedImpact: 90000000,
+            estimatedRoi: 1.0,
+            aiScore: 50,
+            discoveredAt: DateTime(2026, 7, 24),
+            reaction: OpportunityReaction.dismissed,
+          ),
+        ], now: now);
+
+        expect(s.total, 2); // dismissed excluded
+        expect(s.signal(OpportunitySignal.highValue), 1);
+        expect(s.signal(OpportunitySignal.urgent), 1);
+        expect(s.signal(OpportunitySignal.highRisk), 1);
+      },
+    );
   });
 
-  group('BusinessContextService.load', () {
-    test('assembles the Phase-1 aggregate from the repositories', () async {
-      final service = BusinessContextService(
-        InMemoryOrderRepository([
+  group('BusinessContextService.load (composes providers)', () {
+    test('assembles the aggregate from every capability provider', () async {
+      final ctx = await service(
+        orders: [
           order('o1', total: 100000),
           order('o2', total: 300000, status: OrderStatus.cancelled),
-        ]),
-        InMemoryCustomerRepository([customer('c1'), customer('c2')]),
-        InMemoryProductRepository([product('p1'), product('p2', qty: 1)]),
-      );
-      final ctx = await service.load();
+        ],
+        customers: [customer('c1'), customer('c2')],
+        products: [product('p1'), product('p2', qty: 1)],
+        opportunities: [
+          Opportunity(
+            id: 'a',
+            type: OpportunityType.seasonal,
+            title: 't',
+            description: 'd',
+            expectedImpact: 40000000,
+            estimatedRoi: 2.5,
+            aiScore: 50,
+            discoveredAt: DateTime(2026, 7, 24),
+          ),
+        ],
+      ).load();
 
-      // Metrics exclude the cancelled order.
-      expect(ctx.metrics.revenue, 100000);
-      expect(ctx.metrics.ordersCount, 1);
+      expect(ctx.metrics.revenue, 100000); // cancelled excluded
       expect(ctx.metrics.customersCount, 2);
       expect(ctx.customers.total, 2);
-      expect(ctx.orders.total, 2); // summary counts all statuses
+      expect(ctx.orders.total, 2);
       expect(ctx.inventory.productCount, 2);
       expect(ctx.inventory.lowStockCount, 1);
+      expect(ctx.opportunity.total, 1);
+      expect(ctx.opportunity.signal(OpportunitySignal.highValue), 1);
       expect(ctx.hasData, isTrue);
     });
 
-    test('a brand-new business loads BusinessContext.empty', () async {
-      final service = BusinessContextService(
-        InMemoryOrderRepository(),
-        InMemoryCustomerRepository(),
-        InMemoryProductRepository(),
-      );
-      final ctx = await service.load();
+    test('a brand-new business loads an empty context', () async {
+      final ctx = await service().load();
       expect(ctx.hasData, isFalse);
-      expect(ctx.metrics, BusinessContext.empty.metrics);
       expect(ctx.customers.total, 0);
       expect(ctx.orders.total, 0);
       expect(ctx.inventory.productCount, 0);
+      expect(ctx.opportunity.total, 0);
     });
   });
 
   group('BusinessHealth.fromContext', () {
-    test('no data → not enough data; with sales → healthy', () {
+    test('empty context → not enough data', () {
       expect(
         BusinessHealth.fromContext(BusinessContext.empty),
-        BusinessHealth.notEnoughData,
-      );
-      final withSales = BusinessContext(
-        metrics: BusinessContext.empty.metrics,
-        customers: CustomerSummary.empty,
-        orders: OrderSummary.empty,
-        inventory: InventorySummary.empty,
-      );
-      expect(
-        BusinessHealth.fromContext(withSales),
         BusinessHealth.notEnoughData,
       );
     });

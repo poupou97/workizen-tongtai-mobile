@@ -1,39 +1,42 @@
-import '../consumer/customer_repository.dart';
-import '../inventory/product_repository.dart';
-import '../orders/order_repository.dart';
+import '../consumer/customer_context.dart';
+import '../inventory/inventory_context.dart';
+import '../opportunity/opportunity_context.dart';
+import '../orders/order_context.dart';
 import 'business_context.dart';
-import 'business_metrics.dart';
+import 'business_metrics_service.dart';
 
-/// Builds the [BusinessContext] Aggregate Root (WTM-129, Founder) by
-/// **Progressive Aggregation** over the persisted capabilities. Phase 1 reads
-/// Orders + Customers + Inventory through their repositories and assembles the
-/// KPIs ([BusinessMetrics]) + per-capability summaries.
+/// Composes the [BusinessContext] Aggregate Root (WTM-129/131) from **one
+/// Context Provider per capability** plus the KPI source of truth
+/// ([BusinessMetricsService]). Adding a capability to the business snapshot is
+/// just wiring one more provider here — no other change to what Home or AI
+/// consume.
 ///
 /// This is the seam **Workizen AI** consumes — AI reads the returned
-/// [BusinessContext], never the repositories. New capabilities (Opportunity,
-/// Journey, Timeline, Goals, Finance) are folded in here without changing what
-/// AI or Home consume.
+/// [BusinessContext], never a provider or repository.
 class BusinessContextService {
-  const BusinessContextService(this._orders, this._customers, this._products);
+  const BusinessContextService(
+    this._metrics,
+    this._customers,
+    this._orders,
+    this._inventory,
+    this._opportunity,
+  );
 
-  final OrderRepository _orders;
-  final CustomerRepository _customers;
-  final ProductRepository _products;
+  final BusinessMetricsService _metrics;
+  final CustomerContextProvider _customers;
+  final OrderContextProvider _orders;
+  final InventoryContextProvider _inventory;
+  final OpportunityContextProvider _opportunity;
 
-  /// Loads the current business snapshot. A brand-new business (no data) yields
-  /// [BusinessContext.empty].
+  /// Loads the current business snapshot by composing every capability provider.
+  /// A brand-new business (no data) yields [BusinessContext.empty]'s shape.
   Future<BusinessContext> load() async {
-    final orders = await _orders.loadAll();
-    final customers = await _customers.loadAll();
-    final products = await _products.loadAll();
     return BusinessContext(
-      metrics: BusinessMetrics.from(
-        orders: orders,
-        customersCount: customers.length,
-      ),
-      customers: CustomerSummary.from(customers),
-      orders: OrderSummary.from(orders),
-      inventory: InventorySummary.from(products),
+      metrics: await _metrics.load(),
+      customers: await _customers.load(),
+      orders: await _orders.load(),
+      inventory: await _inventory.load(),
+      opportunity: await _opportunity.load(),
     );
   }
 }
