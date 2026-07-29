@@ -16,13 +16,23 @@ Repositories → BusinessMetricsService → BusinessContext → BusinessHealth �
 
 ### Progressive Aggregation
 BusinessContext is **not** blocked on completing every capability. It grows:
-- **Phase 1 (now, WTM-129):** `BusinessMetrics` + Customers + Orders + Inventory.
-- **Later:** Opportunity · Journey · Timeline · Goals · Finance — folded into the
-  same aggregate without changing what AI or Home consume.
+- **Phase 1 (WTM-129/130/131):** `BusinessMetrics` + Customers + Orders +
+  Inventory + Opportunity (rule-based slice).
+- **Phase 2 (WTM-133):** **Journey** (goals, keyed by `GoalPace`) + **Finance**
+  (reuses the capability's own `FinanceSummary`). Both are Drift-backed and start
+  empty (User Data First); the provider owns its own clock for the time-relative
+  reads. Folded in as two more providers — no change to what AI or Home consume.
+- **Later:** Timeline — a *derived projection* over the other capabilities'
+  events, so it becomes its own provider once real (non-sample) event sources are
+  wired; it is deliberately not folded in yet to avoid double-counting.
+- Business Journey **is** the goal-orchestration capability, so the single
+  `JourneySummary` slice covers the snapshot's Journey/Goals concern (one Context
+  Provider per capability).
 
-Phase-1 shape: `BusinessContext { metrics, customers: CustomerSummary,
-orders: OrderSummary, inventory: InventorySummary, opportunity:
-OpportunitySummary }`.
+Current shape (through Phase 2): `BusinessContext { version, generatedAt,
+metrics, customers: CustomerSummary, orders: OrderSummary, inventory:
+InventorySummary, opportunity: OpportunitySummary, journey: JourneySummary,
+finance: FinanceSummary, health: BusinessHealth }`.
 
 ### One Context Provider per capability (WTM-131)
 Do **not** build many independent summary services. **Each capability owns a
@@ -79,5 +89,6 @@ classification can proceed; only the AI scoring waits).
   consistent and the AI boundary is enforceable by construction.
 - **User Data First:** a new business yields `BusinessContext.empty`.
 - Adding a capability to the context is additive — no change to AI/Home contracts.
-- Next: extend the context (Opportunity Phase-1, Journey, Timeline, Goals,
-  Finance) as those capabilities mature; AI activation itself remains G-3.
+- Next: Timeline projection slice as its real sources land; then AI Phase-2
+  (Opportunity Win Probability / Recommendation / Summary, BusinessHealth AI
+  assessor). AI activation itself remains **G-3** (deferred).
