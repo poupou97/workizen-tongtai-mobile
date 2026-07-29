@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ai/opportunity_ai.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_action_plan.dart';
 import '../../opportunity/opportunity_signals.dart';
 import '../../opportunity/opportunity_theme.dart';
+import '../../providers/tongtai_ai_provider.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 
 /// Opportunity Detail & Action Plan (WTM-92).
@@ -14,7 +17,7 @@ import '../widgets/tongtai_opportunity_signal_badges.dart';
 /// relevance score, ROI and expected impact, the reasoning, and a rule-based
 /// [opportunityActionPlan] to pursue it. The reaction callbacks are wired to the
 /// feed's controller so save / interested / dismiss stay in sync.
-class TongtaiOpportunityDetailScreen extends StatefulWidget {
+class TongtaiOpportunityDetailScreen extends ConsumerStatefulWidget {
   const TongtaiOpportunityDetailScreen({
     super.key,
     required this.opportunity,
@@ -22,6 +25,7 @@ class TongtaiOpportunityDetailScreen extends StatefulWidget {
     this.onInterested,
     this.onDismiss,
     this.clock,
+    this.aiService,
   });
 
   final Opportunity opportunity;
@@ -34,14 +38,35 @@ class TongtaiOpportunityDetailScreen extends StatefulWidget {
   final VoidCallback? onInterested;
   final VoidCallback? onDismiss;
 
+  /// Injectable AI layer for tests (WTM-141); when null the screen uses
+  /// [opportunityAiServiceProvider].
+  final OpportunityAiService? aiService;
+
   @override
-  State<TongtaiOpportunityDetailScreen> createState() =>
+  ConsumerState<TongtaiOpportunityDetailScreen> createState() =>
       _TongtaiOpportunityDetailScreenState();
 }
 
 class _TongtaiOpportunityDetailScreenState
-    extends State<TongtaiOpportunityDetailScreen> {
+    extends ConsumerState<TongtaiOpportunityDetailScreen> {
   late bool _saved = widget.opportunity.isSaved;
+
+  /// WTM-141: the on-demand AI insight. Null until requested.
+  OpportunityAiInsight? _insight;
+  bool _explaining = false;
+
+  Future<void> _runExplain() async {
+    if (_explaining) return;
+    setState(() => _explaining = true);
+    final OpportunityAiService service =
+        widget.aiService ?? ref.read(opportunityAiServiceProvider);
+    final insight = await service.explain(_o);
+    if (!mounted) return;
+    setState(() {
+      _insight = insight;
+      _explaining = false;
+    });
+  }
 
   Opportunity get _o => widget.opportunity;
 
@@ -172,6 +197,76 @@ class _TongtaiOpportunityDetailScreenState
             _o.description,
             style: TongtaiDesignTokens.bodyStyle.copyWith(
               color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing5),
+
+          // ── Workizen AI insight (WTM-141) — annotation only; the rule
+          //    score stays authoritative. ─────────────────────────────────
+          Container(
+            key: const Key('opportunity-ai-section'),
+            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+            decoration: BoxDecoration(
+              color: TongtaiDesignTokens.copilotViolet.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(
+                TongtaiDesignTokens.componentBorderRadius,
+              ),
+              border: Border.all(
+                color: TongtaiDesignTokens.copilotViolet.withValues(
+                  alpha: 0.25,
+                ),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome,
+                      size: 16,
+                      color: TongtaiDesignTokens.copilotViolet,
+                    ),
+                    const SizedBox(width: TongtaiDesignTokens.spacing2),
+                    Expanded(
+                      child: Text(
+                        _insight == null
+                            ? 'Workizen AI'
+                            : 'Workizen AI — '
+                                  '${_insight!.isAi ? (_insight!.provider?.displayName ?? 'AI') : 'Rule-based'}'
+                                  '${_insight!.aiScore != null ? ' · điểm AI ${_insight!.aiScore!.round()}' : ''}',
+                        style: TongtaiDesignTokens.captionStyle.copyWith(
+                          color: TongtaiDesignTokens.lightTextSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: TongtaiDesignTokens.spacing2),
+                if (_explaining)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else if (_insight == null)
+                  OutlinedButton.icon(
+                    key: const Key('opportunity-ai-explain'),
+                    onPressed: _runExplain,
+                    icon: const Icon(Icons.auto_awesome, size: 16),
+                    label: const Text('Đánh giá AI · AI insight'),
+                  )
+                else
+                  Text(
+                    _insight!.text,
+                    key: const Key('opportunity-ai-insight-text'),
+                    style: TongtaiDesignTokens.smallStyle.copyWith(
+                      color: TongtaiDesignTokens.lightTextPrimary,
+                      height: 1.5,
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing5),
