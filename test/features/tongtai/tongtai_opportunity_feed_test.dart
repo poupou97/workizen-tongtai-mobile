@@ -6,7 +6,17 @@ import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
+import 'package:tongtai/features/tongtai/inventory/product.dart';
+import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_feed_controller.dart';
+import 'package:tongtai/features/tongtai/orders/order.dart';
+import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
@@ -350,5 +360,90 @@ void main() {
       expect(find.byType(TongtaiOpportunityFeedScreen), findsOneWidget);
       expect(find.text('Opportunities'), findsOneWidget);
     });
+
+    testWidgets(
+      'real mode shows rule-generated opportunities (WTM-140) — and the empty '
+      'state for a brand-new business',
+      (tester) async {
+        useTallViewport(tester);
+        // An out-of-stock product WITH sales → the rule engine generates a
+        // restock opportunity that must appear in the real-mode feed.
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              orderRepositoryProvider.overrideWithValue(
+                InMemoryOrderRepository([
+                  CustomerOrder(
+                    id: 'o1',
+                    customerId: 'c1',
+                    orderNumber: 'DH-o1',
+                    date: DateTime(2026, 7, 20),
+                    status: OrderStatus.delivered,
+                    items: const [
+                      OrderItem(
+                        productName: 'Quạt mini',
+                        category: 'Home',
+                        quantity: 1,
+                        unitPrice: 800000,
+                      ),
+                    ],
+                  ),
+                ]),
+              ),
+              customerRepositoryProvider.overrideWithValue(
+                InMemoryCustomerRepository(),
+              ),
+              productRepositoryProvider.overrideWithValue(
+                InMemoryProductRepository([
+                  Product(
+                    id: 'p1',
+                    sku: 'SKU-p1',
+                    name: 'Quạt mini',
+                    category: 'Home',
+                    quantity: 0,
+                    pricePerUnit: 100000,
+                    reorderLevel: 3,
+                    updatedAt: DateTime(2026, 7, 1),
+                  ),
+                ]),
+              ),
+              businessGoalRepositoryProvider.overrideWithValue(
+                InMemoryBusinessGoalRepository(),
+              ),
+            ],
+            child: const MaterialApp(home: TongtaiOpportunityFeedScreen()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Nhập lại Quạt mini'), findsOneWidget);
+
+        // A brand-new business (empty repositories) → empty state.
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              orderRepositoryProvider.overrideWithValue(
+                InMemoryOrderRepository(),
+              ),
+              customerRepositoryProvider.overrideWithValue(
+                InMemoryCustomerRepository(),
+              ),
+              productRepositoryProvider.overrideWithValue(
+                InMemoryProductRepository([]),
+              ),
+              businessGoalRepositoryProvider.overrideWithValue(
+                InMemoryBusinessGoalRepository(),
+              ),
+            ],
+            child: const MaterialApp(
+              // A distinct key forces a fresh State (initState re-runs).
+              home: TongtaiOpportunityFeedScreen(key: Key('fresh-empty')),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('No opportunities here yet.'), findsOneWidget);
+      },
+    );
   });
 }

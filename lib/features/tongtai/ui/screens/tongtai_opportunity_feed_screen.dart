@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
@@ -6,6 +7,7 @@ import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_feed_controller.dart';
 import '../../opportunity/opportunity_signals.dart';
 import '../../opportunity/opportunity_theme.dart';
+import '../../providers/tongtai_context_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 import 'tongtai_opportunity_detail_screen.dart';
@@ -21,8 +23,11 @@ export '../../opportunity/opportunity_theme.dart'
 /// impact per card (AC1), type filter chips (AC2), relevance/recency/ROI
 /// sorting (AC3), bookmark + saved view (AC4), and swipe gestures — right =
 /// interested, left = dismiss with undo (AC5). Local-first over the
-/// in-memory [OpportunityFeedController]; AI scoring arrives with WTM-93.
-class TongtaiOpportunityFeedScreen extends StatefulWidget {
+/// in-memory [OpportunityFeedController]. **Real mode (WTM-140):** the feed
+/// loads the Rule Engine's generated opportunities (WTM-139) — a brand-new
+/// business sees the empty state (User Data First); tests/demo inject a
+/// controller.
+class TongtaiOpportunityFeedScreen extends ConsumerStatefulWidget {
   const TongtaiOpportunityFeedScreen({super.key, this.controller, this.clock});
 
   /// Injectable feed. When provided it is *not* disposed here.
@@ -33,13 +38,13 @@ class TongtaiOpportunityFeedScreen extends StatefulWidget {
   final DateTime Function()? clock;
 
   @override
-  State<TongtaiOpportunityFeedScreen> createState() =>
+  ConsumerState<TongtaiOpportunityFeedScreen> createState() =>
       _TongtaiOpportunityFeedScreenState();
 }
 
 class _TongtaiOpportunityFeedScreenState
-    extends State<TongtaiOpportunityFeedScreen> {
-  late final OpportunityFeedController _controller;
+    extends ConsumerState<TongtaiOpportunityFeedScreen> {
+  late OpportunityFeedController _controller;
   late final bool _ownsController;
   late final DateTime Function() _clock;
 
@@ -53,9 +58,24 @@ class _TongtaiOpportunityFeedScreenState
       _controller = widget.controller!;
       _ownsController = false;
     } else {
-      _controller = OpportunityFeedController.sample();
+      // Real mode: start empty, then hydrate with the rule-generated
+      // opportunities (WTM-139) — progressive, no blocking spinner.
+      _controller = OpportunityFeedController(const []);
       _ownsController = true;
+      _loadGenerated();
     }
+  }
+
+  Future<void> _loadGenerated() async {
+    final List<Opportunity> generated = await ref.read(
+      generatedOpportunitiesProvider.future,
+    );
+    if (!mounted) return;
+    setState(() {
+      final old = _controller;
+      _controller = OpportunityFeedController(generated);
+      old.dispose();
+    });
   }
 
   @override
