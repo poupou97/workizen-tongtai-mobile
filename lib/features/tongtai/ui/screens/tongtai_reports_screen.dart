@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ai/business_recommendation.dart';
 import '../../ai/business_summary.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../metrics/business_metrics.dart';
@@ -32,6 +33,7 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
     this.clock,
     this.opportunities,
     this.summaryService,
+    this.recommendationService,
   });
 
   /// Injectable breakdown source for tests; when null the screen loads real
@@ -54,6 +56,10 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
   /// uses [businessSummaryServiceProvider].
   final BusinessSummaryService? summaryService;
 
+  /// Injectable recommendation source for tests (WTM-135/G-3B); when null the
+  /// screen uses [businessRecommendationServiceProvider].
+  final BusinessRecommendationService? recommendationService;
+
   @override
   ConsumerState<TongtaiReportsScreen> createState() =>
       _TongtaiReportsScreenState();
@@ -68,20 +74,47 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
   /// this-year, matching the classic YTD breakdown.
   ReportPeriod _period = ReportPeriod.thisYear;
 
-  /// G-3A (WTM-116): the on-demand AI summary. Null until requested.
-  BusinessSummary? _summary;
-  bool _summarizing = false;
+  /// G-3A/G-3B (WTM-116/135): the on-demand Workizen AI answer (summary or
+  /// recommendations). Null until requested.
+  AiCardResult? _aiResult;
+  bool _aiRunning = false;
 
   Future<void> _runSummary() async {
-    if (_summarizing) return;
-    setState(() => _summarizing = true);
+    if (_aiRunning) return;
+    setState(() => _aiRunning = true);
     final BusinessSummaryService service =
         widget.summaryService ?? ref.read(businessSummaryServiceProvider);
     final summary = await service.summarize();
     if (!mounted) return;
     setState(() {
-      _summary = summary;
-      _summarizing = false;
+      _aiResult = AiCardResult(
+        title: 'Tóm tắt · Summary',
+        text: summary.text,
+        sourceLabel: summary.isAi
+            ? (summary.provider?.displayName ?? 'AI')
+            : 'Rule-based',
+      );
+      _aiRunning = false;
+    });
+  }
+
+  Future<void> _runRecommendation() async {
+    if (_aiRunning) return;
+    setState(() => _aiRunning = true);
+    final BusinessRecommendationService service =
+        widget.recommendationService ??
+        ref.read(businessRecommendationServiceProvider);
+    final recommendation = await service.recommend();
+    if (!mounted) return;
+    setState(() {
+      _aiResult = AiCardResult(
+        title: 'Gợi ý hành động · Recommendations',
+        text: recommendation.text,
+        sourceLabel: recommendation.isAi
+            ? (recommendation.provider?.displayName ?? 'AI')
+            : 'Rule-based',
+      );
+      _aiRunning = false;
     });
   }
 
@@ -146,9 +179,10 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
                     period: _period,
                     onPeriodChanged: (p) => setState(() => _period = p),
                     pipeline: pipeline,
-                    summary: _summary,
-                    summarizing: _summarizing,
+                    aiResult: _aiResult,
+                    aiRunning: _aiRunning,
                     onSummarize: _runSummary,
+                    onRecommend: _runRecommendation,
                   )
                 : const _ReportsEmptyState()),
     );
@@ -163,9 +197,10 @@ class _ReportBody extends StatelessWidget {
     required this.period,
     required this.onPeriodChanged,
     required this.pipeline,
-    required this.summary,
-    required this.summarizing,
+    required this.aiResult,
+    required this.aiRunning,
     required this.onSummarize,
+    required this.onRecommend,
   });
 
   final BusinessReport report;
@@ -178,10 +213,11 @@ class _ReportBody extends StatelessWidget {
 
   final OpportunityPipeline pipeline;
 
-  /// G-3A (WTM-116): the on-demand Workizen AI summary of the snapshot.
-  final BusinessSummary? summary;
-  final bool summarizing;
+  /// G-3A/G-3B: the on-demand Workizen AI answer (summary or recommendations).
+  final AiCardResult? aiResult;
+  final bool aiRunning;
   final VoidCallback onSummarize;
+  final VoidCallback onRecommend;
 
   @override
   Widget build(BuildContext context) {
@@ -240,11 +276,12 @@ class _ReportBody extends StatelessWidget {
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
-        // ── Workizen AI summary (WTM-116 / G-3A) ────────────────────────
+        // ── Workizen AI (WTM-116 G-3A summary · WTM-135 G-3B recommend) ─
         _AiSummaryCard(
-          summary: summary,
-          summarizing: summarizing,
+          result: aiResult,
+          running: aiRunning,
           onSummarize: onSummarize,
+          onRecommend: onRecommend,
         ),
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
@@ -304,19 +341,38 @@ class _ReportBody extends StatelessWidget {
   }
 }
 
-/// Workizen AI business summary (WTM-116 / G-3A). On demand — the seller taps
-/// to generate; the answer renders with a provenance chip (AI provider vs
-/// rule-based). Read-only: the summary is text over the BusinessContext.
-class _AiSummaryCard extends StatelessWidget {
-  const _AiSummaryCard({
-    required this.summary,
-    required this.summarizing,
-    required this.onSummarize,
+/// One rendered Workizen AI answer for the Reports AI card — pre-flattened by
+/// the screen so the card never touches AI types directly.
+class AiCardResult {
+  const AiCardResult({
+    required this.title,
+    required this.text,
+    required this.sourceLabel,
   });
 
-  final BusinessSummary? summary;
-  final bool summarizing;
+  final String title;
+  final String text;
+
+  /// Provenance chip label — the provider's display name, or "Rule-based".
+  final String sourceLabel;
+}
+
+/// Workizen AI card (WTM-116 G-3A summary · WTM-135 G-3B recommendations). On
+/// demand — the seller picks an action; the answer renders with a provenance
+/// chip. Read-only: both actions are text over the BusinessContext; nothing is
+/// executed.
+class _AiSummaryCard extends StatelessWidget {
+  const _AiSummaryCard({
+    required this.result,
+    required this.running,
+    required this.onSummarize,
+    required this.onRecommend,
+  });
+
+  final AiCardResult? result;
+  final bool running;
   final VoidCallback onSummarize;
+  final VoidCallback onRecommend;
 
   @override
   Widget build(BuildContext context) {
@@ -340,14 +396,16 @@ class _AiSummaryCard extends StatelessWidget {
               const SizedBox(width: TongtaiDesignTokens.spacing2),
               Expanded(
                 child: Text(
-                  'Workizen AI — Tóm tắt kinh doanh',
+                  result == null
+                      ? 'Workizen AI'
+                      : 'Workizen AI — ${result!.title}',
                   style: TongtaiDesignTokens.smallStyle.copyWith(
                     color: TongtaiDesignTokens.lightTextPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              if (summary != null)
+              if (result != null)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: TongtaiDesignTokens.spacing2,
@@ -360,9 +418,7 @@ class _AiSummaryCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    summary!.isAi
-                        ? (summary!.provider?.displayName ?? 'AI')
-                        : 'Rule-based',
+                    result!.sourceLabel,
                     key: const Key('reports-ai-summary-source'),
                     style: TongtaiDesignTokens.captionStyle.copyWith(
                       color: accent,
@@ -373,14 +429,7 @@ class _AiSummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing3),
-          if (summary == null && !summarizing)
-            OutlinedButton.icon(
-              key: const Key('reports-ai-summary-run'),
-              onPressed: onSummarize,
-              icon: const Icon(Icons.auto_awesome, size: 16),
-              label: const Text('Tạo tóm tắt · Summarize'),
-            )
-          else if (summarizing)
+          if (running)
             Row(
               children: [
                 const SizedBox(
@@ -390,22 +439,44 @@ class _AiSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(width: TongtaiDesignTokens.spacing2),
                 Text(
-                  'Đang tóm tắt…',
+                  'Workizen AI đang phân tích…',
                   style: TongtaiDesignTokens.smallStyle.copyWith(
                     color: TongtaiDesignTokens.lightTextSecondary,
                   ),
                 ),
               ],
             )
-          else
-            Text(
-              summary!.text,
-              key: const Key('reports-ai-summary-text'),
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-                height: 1.5,
+          else ...[
+            if (result != null) ...[
+              Text(
+                result!.text,
+                key: const Key('reports-ai-summary-text'),
+                style: TongtaiDesignTokens.smallStyle.copyWith(
+                  color: TongtaiDesignTokens.lightTextPrimary,
+                  height: 1.5,
+                ),
               ),
+              const SizedBox(height: TongtaiDesignTokens.spacing3),
+            ],
+            Wrap(
+              spacing: TongtaiDesignTokens.spacing2,
+              runSpacing: TongtaiDesignTokens.spacing1,
+              children: [
+                OutlinedButton.icon(
+                  key: const Key('reports-ai-summary-run'),
+                  onPressed: onSummarize,
+                  icon: const Icon(Icons.auto_awesome, size: 16),
+                  label: const Text('Tóm tắt · Summarize'),
+                ),
+                OutlinedButton.icon(
+                  key: const Key('reports-ai-recommend-run'),
+                  onPressed: onRecommend,
+                  icon: const Icon(Icons.tips_and_updates_outlined, size: 16),
+                  label: const Text('Gợi ý hành động · Recommend'),
+                ),
+              ],
             ),
+          ],
         ],
       ),
     );

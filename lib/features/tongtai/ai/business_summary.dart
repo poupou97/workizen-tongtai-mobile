@@ -1,12 +1,9 @@
 import '../core/tongtai_formatters.dart';
 import '../metrics/business_context.dart';
 import '../metrics/business_context_service.dart';
-import 'tongtai_ai_errors.dart';
-import 'tongtai_ai_models.dart';
+import 'business_ai_engine.dart';
 import 'tongtai_ai_provider_kind.dart';
 import 'tongtai_ai_service.dart';
-import 'workizen_ai_router.dart'
-    show kWorkizenRoutingPreference, WorkizenQueryClass;
 
 /// G-3A — AI Business Summary (WTM-116, Founder pre-approved 2026-07-29).
 ///
@@ -118,75 +115,43 @@ String ruleBasedBusinessSummary(BusinessContext ctx) {
 }
 
 /// G-3A service: builds one [BusinessSummary] per call from the current
-/// [BusinessContext]. Tries the enabled providers in the complex-query
-/// preference order (ADR-TON-006 router policy), falling back to the rule.
+/// [BusinessContext] via the shared [BusinessAiEngine] (ADR-TON-013 runner —
+/// context-only boundary, provider chain, rule fallback, zero-spend on empty).
 class BusinessSummaryService {
-  const BusinessSummaryService(
-    this._ai,
-    this._context, {
-    this.preference = const [],
-    this.clock,
-  });
+  BusinessSummaryService(
+    TongtaiAiService ai,
+    BusinessContextService context, {
+    List<TongtaiAiProviderKind> preference = const [],
+    DateTime Function()? clock,
+  }) : _engine = BusinessAiEngine(
+         ai,
+         context,
+         preference: preference,
+         clock: clock,
+       );
 
-  final TongtaiAiService _ai;
-  final BusinessContextService _context;
+  final BusinessAiEngine _engine;
 
-  /// Provider order to try; empty means the router's complex-query default.
-  final List<TongtaiAiProviderKind> preference;
-
-  /// Injectable clock for deterministic tests; defaults to [DateTime.now].
-  final DateTime Function()? clock;
-
-  List<TongtaiAiProviderKind> get _chain => preference.isNotEmpty
-      ? preference
-      : kWorkizenRoutingPreference[WorkizenQueryClass.complex]!;
+  static const String _instruction =
+      'Bạn là Workizen AI. Tóm tắt tình hình kinh doanh dưới đây cho chủ '
+      'shop SME Việt Nam: 3–5 gạch đầu dòng ngắn, tiếng Việt, thực tế, '
+      'nêu điểm cần chú ý nhất trước. CHỈ dùng số liệu được cung cấp; '
+      'không bịa. Không đề xuất hành động cụ thể ngoài dữ liệu.';
 
   /// Produces the summary for the business's current snapshot. Read-only: the
   /// context is loaded once, serialized, and only that text reaches the AI.
   Future<BusinessSummary> summarize() async {
-    final ctx = await _context.load();
-    final now = (clock ?? DateTime.now)();
-
-    // A brand-new business gets the deterministic empty-state text — calling a
-    // paid provider to say "no data" would waste the seller's tokens.
-    if (!ctx.hasData) {
-      return BusinessSummary(
-        text: ruleBasedBusinessSummary(ctx),
-        source: BusinessSummarySource.rule,
-        generatedAt: now,
-      );
-    }
-
-    final data = businessContextPromptText(ctx);
-    const instruction =
-        'Bạn là Workizen AI. Tóm tắt tình hình kinh doanh dưới đây cho chủ '
-        'shop SME Việt Nam: 3–5 gạch đầu dòng ngắn, tiếng Việt, thực tế, '
-        'nêu điểm cần chú ý nhất trước. CHỈ dùng số liệu được cung cấp; '
-        'không bịa. Không đề xuất hành động cụ thể ngoài dữ liệu.';
-
-    for (final provider in _chain) {
-      if (!await _ai.hasKey(provider: provider)) continue;
-      try {
-        final response = await _ai.chat(
-          messages: [TongtaiAiMessage.user(data)],
-          systemPrompt: instruction,
-          provider: provider,
-        );
-        return BusinessSummary(
-          text: response.text,
-          source: BusinessSummarySource.ai,
-          generatedAt: now,
-          provider: provider,
-        );
-      } on TongtaiAiException {
-        continue; // Next provider in the chain.
-      }
-    }
-
+    final outcome = await _engine.run(
+      instruction: _instruction,
+      ruleFallback: ruleBasedBusinessSummary,
+    );
     return BusinessSummary(
-      text: ruleBasedBusinessSummary(ctx),
-      source: BusinessSummarySource.rule,
-      generatedAt: now,
+      text: outcome.text,
+      source: outcome.isAi
+          ? BusinessSummarySource.ai
+          : BusinessSummarySource.rule,
+      generatedAt: outcome.generatedAt,
+      provider: outcome.provider,
     );
   }
 }

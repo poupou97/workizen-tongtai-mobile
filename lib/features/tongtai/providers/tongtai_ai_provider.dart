@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ai/business_recommendation.dart';
 import '../ai/business_summary.dart';
 import '../ai/tongtai_ai_key_store.dart';
 import '../ai/tongtai_ai_provider_kind.dart';
@@ -34,3 +35,13 @@ final businessSummaryServiceProvider = Provider<BusinessSummaryService>(
     ref.watch(businessContextServiceProvider),
   ),
 );
+
+/// G-3B — AI Recommendation (WTM-135). Suggestions only over the
+/// BusinessContext; nothing is mutated or executed (ADR-TON-013).
+final businessRecommendationServiceProvider =
+    Provider<BusinessRecommendationService>(
+      (ref) => BusinessRecommendationService(
+        ref.watch(tongtaiAiServiceProvider),
+        ref.watch(businessContextServiceProvider),
+      ),
+    );
