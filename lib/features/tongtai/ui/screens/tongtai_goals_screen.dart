@@ -105,21 +105,28 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
 
   /// Opens the goal detail (WTM-88) — progress, pace, action plan and tips —
   /// with an Edit action that closes it and opens the form.
-  void _openDetail(BuildContext context, BusinessGoal goal) {
+  ///
+  /// [display] is the auto-derived view (WTM-138); [original] is the persisted
+  /// goal the edit form must receive (manual fields intact).
+  void _openDetail(
+    BuildContext context, {
+    required BusinessGoal display,
+    required BusinessGoal original,
+  }) {
     // Data-first insight (WTM-89): sales booked in the goal window from real
     // orders — only meaningful for revenue-denominated goals.
-    final realized = goal.targetAmount > 0
-        ? _progress.realizedRevenue(goal, _orders, _clock())
+    final realized = display.targetAmount > 0
+        ? _progress.realizedRevenue(display, _orders, _clock())
         : null;
     Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => TongtaiGoalDetailScreen(
-          goal: goal,
+          goal: display,
           clock: widget.clock,
           realizedRevenue: realized,
           onEdit: () {
             Navigator.of(context).pop();
-            _openForm(context, goal: goal);
+            _openForm(context, goal: original);
           },
         ),
       ),
@@ -133,6 +140,9 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
       listenable: _controller,
       builder: (context, _) {
         final goals = _controller.goals;
+        // Auto-derive (WTM-138, Founder default): revenue-goal progress comes
+        // from real booked orders; the persisted goals stay untouched.
+        final display = deriveGoalsProgress(goals, _orders, now);
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
           appBar: AppBar(
@@ -153,13 +163,17 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
                 ? const _EmptyState()
                 : ListView.separated(
                     padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
-                    itemCount: goals.length,
+                    itemCount: display.length,
                     separatorBuilder: (context, _) =>
                         const SizedBox(height: TongtaiDesignTokens.spacing3),
                     itemBuilder: (context, index) => _GoalCard(
-                      goal: goals[index],
+                      goal: display[index],
                       now: now,
-                      onTap: () => _openDetail(context, goals[index]),
+                      onTap: () => _openDetail(
+                        context,
+                        display: display[index],
+                        original: goals[index],
+                      ),
                     ),
                   ),
           ),

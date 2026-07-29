@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_controller.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_goal_form_screen.dart';
@@ -54,23 +56,69 @@ void main() {
   }
 
   group('goals list (AC4/AC5)', () {
-    testWidgets('renders progress, pace badge and recommendation', (
-      tester,
-    ) async {
-      useTallViewport(tester);
-      final controller = BusinessGoalController.inMemory([existing()]);
-      await pumpGoals(tester, controller);
-      await tester.pumpAndSettle();
+    testWidgets(
+      'renders progress (auto-derived from orders, WTM-138), pace badge and '
+      'recommendation',
+      (tester) async {
+        useTallViewport(tester);
+        final controller = BusinessGoalController.inMemory([existing()]);
+        await controller.hydrate();
+        // Auto-derive (Founder default): revenue-goal progress comes from the
+        // orders actually booked in the goal window — 62M ₫ on Jul 15.
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: TongtaiGoalsScreen(
+                controller: controller,
+                clock: () => now,
+                orders: [
+                  CustomerOrder(
+                    id: 'o1',
+                    customerId: 'c1',
+                    orderNumber: 'DH-o1',
+                    date: DateTime(2026, 7, 15),
+                    status: OrderStatus.delivered,
+                    items: const [
+                      OrderItem(
+                        productName: 'X',
+                        category: 'Home',
+                        quantity: 1,
+                        unitPrice: 62000000,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Đạt 100 triệu ₫ trong quý 3'), findsOneWidget);
-      expect(find.text('62%'), findsOneWidget); // progress
-      // 2026-07-22 is ~23% into Jul 1→Sep 30; 62% ≥ 23%+10 → ahead.
-      expect(find.text(GoalPace.ahead.labelVi), findsOneWidget);
-      expect(
-        find.textContaining('vượt tiến độ', findRichText: false),
-        findsOneWidget,
-      );
-    });
+        expect(find.text('Đạt 100 triệu ₫ trong quý 3'), findsOneWidget);
+        expect(find.text('62%'), findsOneWidget); // derived from the order
+        // 2026-07-22 is ~23% into Jul 1→Sep 30; 62% ≥ 23%+10 → ahead.
+        expect(find.text(GoalPace.ahead.labelVi), findsOneWidget);
+        expect(
+          find.textContaining('vượt tiến độ', findRichText: false),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'without booked orders a revenue goal derives 0% (manual value ignored)',
+      (tester) async {
+        useTallViewport(tester);
+        final controller = BusinessGoalController.inMemory([existing()]);
+        await pumpGoals(tester, controller);
+        await tester.pumpAndSettle();
+
+        // The persisted manual 62M no longer drives progress — no orders were
+        // booked, so the data-first read is 0%.
+        expect(find.text('0%'), findsOneWidget);
+        expect(find.text('62%'), findsNothing);
+      },
+    );
 
     testWidgets('empty state invites creating the first goal', (tester) async {
       useTallViewport(tester);
@@ -185,40 +233,48 @@ void main() {
     });
   });
 
-  group('edit flow (AC3)', () {
-    testWidgets('tapping a card opens edit; save updates progress fields', (
-      tester,
-    ) async {
-      useTallViewport(tester);
-      final controller = BusinessGoalController.inMemory([existing()]);
-      await pumpGoals(tester, controller);
-      await tester.pumpAndSettle();
+  group('edit flow (AC3, auto-derive WTM-138)', () {
+    testWidgets(
+      'revenue goal: achieved is auto-derived (no manual field); the growth '
+      'metric stays manually editable',
+      (tester) async {
+        useTallViewport(tester);
+        final controller = BusinessGoalController.inMemory([existing()]);
+        await pumpGoals(tester, controller);
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('goal-card-g1')));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('goal-card-g1')));
+        await tester.pumpAndSettle();
 
-      // The card now opens the detail (WTM-88); its pencil opens the edit form.
-      await tester.tap(find.byKey(const Key('goal-detail-edit')));
-      await tester.pumpAndSettle();
+        // The card opens the detail (WTM-88); its pencil opens the edit form.
+        await tester.tap(find.byKey(const Key('goal-detail-edit')));
+        await tester.pumpAndSettle();
 
-      // Edit mode: no template step, achieved fields visible.
-      expect(find.text('Edit Goal'), findsOneWidget);
-      await tester.enterText(
-        find.byKey(const Key('goal-achieved-field')),
-        '80000000',
-      );
-      await tester.tap(find.byKey(const Key('goal-next')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('goal-save')));
-      await tester.pumpAndSettle();
+        expect(find.text('Edit Goal'), findsOneWidget);
+        // Founder default: revenue achieved derives from orders — the manual
+        // field is replaced by the derived note…
+        expect(find.byKey(const Key('goal-achieved-field')), findsNothing);
+        expect(
+          find.byKey(const Key('goal-achieved-derived-note')),
+          findsOneWidget,
+        );
+        // …while the non-derivable growth metric stays manual.
+        await tester.enterText(
+          find.byKey(const Key('goal-growth-achieved-field')),
+          '150',
+        );
+        await tester.tap(find.byKey(const Key('goal-next')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('goal-save')));
+        await tester.pumpAndSettle();
 
-      expect(controller.count, 1);
-      final updated = controller.goals.single;
-      expect(updated.id, 'g1');
-      expect(updated.achievedAmount, 80000000);
-      expect(updated.createdAt, DateTime(2026, 7, 1)); // preserved
-      expect(find.text('80%'), findsOneWidget);
-    });
+        expect(controller.count, 1);
+        final updated = controller.goals.single;
+        expect(updated.id, 'g1');
+        expect(updated.growthAchieved, 150); // manual KPI persisted
+        expect(updated.createdAt, DateTime(2026, 7, 1)); // preserved
+      },
+    );
   });
 
   group('More screen entry point', () {

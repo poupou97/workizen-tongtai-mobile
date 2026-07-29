@@ -101,6 +101,48 @@ void main() {
     expect(r, 0);
   });
 
+  group('deriveGoalProgress (WTM-138, Founder auto-derive)', () {
+    test('revenue goal: achievedAmount becomes booked revenue in window', () {
+      final derived = deriveGoalProgress(goal(target: 100000000), [
+        order('a', date: DateTime(2026, 7, 5), amount: 30000000),
+      ], now);
+      expect(derived.achievedAmount, 30000000);
+      expect(derived.progress, 0.3);
+      expect(derived.id, 'g'); // same goal, view-derived
+    });
+
+    test('growth-metric goal (no revenue target) keeps manual values', () {
+      final manual = BusinessGoal(
+        id: 'growth',
+        name: 'growth',
+        type: GoalType.customerGrowth,
+        targetAmount: 0,
+        achievedAmount: 0,
+        growthTarget: 100,
+        growthAchieved: 40,
+        startDate: DateTime(2026, 7, 1),
+        endDate: DateTime(2026, 9, 30),
+        createdAt: DateTime(2026, 7, 1),
+        updatedAt: DateTime(2026, 7, 1),
+      );
+      final derived = deriveGoalProgress(manual, [
+        order('a', date: DateTime(2026, 7, 5), amount: 30000000),
+      ], now);
+      expect(identical(derived, manual), isTrue); // untouched
+      expect(derived.progress, 0.4); // still the manual growth metric
+    });
+
+    test('deriveGoalsProgress preserves order', () {
+      final derived = deriveGoalsProgress(
+        [goal(), goal(target: 0)],
+        [order('a', date: DateTime(2026, 7, 5))],
+        now,
+      );
+      expect(derived, hasLength(2));
+      expect(derived.first.achievedAmount, 1000000);
+    });
+  });
+
   test(
     'realizedShare = realized / target, clamped; 0 for non-revenue goals',
     () {

@@ -241,7 +241,37 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                 suffixText: '₫',
                 numeric: true,
               ),
-              if (_isEditing)
+              // Auto-derive (WTM-138, Founder default): for a revenue-
+              // denominated goal the achieved revenue is derived from real
+              // booked orders — manual entry stays only for KPIs that cannot
+              // be derived (the growth metric below).
+              if (_isEditing && widget.goal!.targetAmount > 0)
+                Padding(
+                  key: const Key('goal-achieved-derived-note'),
+                  padding: const EdgeInsets.only(
+                    bottom: TongtaiDesignTokens.spacing3,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.auto_mode,
+                        size: 16,
+                        color: TongtaiDesignTokens.lightTextSecondary,
+                      ),
+                      const SizedBox(width: TongtaiDesignTokens.spacing2),
+                      Expanded(
+                        child: Text(
+                          'Doanh thu đã đạt: tự tính từ đơn hàng đã ghi nhận '
+                          '(auto-derived from recorded orders).',
+                          style: TongtaiDesignTokens.captionStyle.copyWith(
+                            color: TongtaiDesignTokens.lightTextSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (_isEditing)
                 _field(
                   key: const Key('goal-achieved-field'),
                   controller: _achieved,
