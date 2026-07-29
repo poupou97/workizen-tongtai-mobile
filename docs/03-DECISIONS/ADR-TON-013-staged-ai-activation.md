@@ -43,8 +43,13 @@ blocker.
 
 ## Consequences
 
-- G-3A shipped as `BusinessSummaryService` (`lib/features/tongtai/ai/
-  business_summary.dart`) + on-demand summary card on Reports with a provenance
-  chip (provider vs Rule-based).
-- G-3B/C/D and the Opportunity AI chain + Journey auto-derive follow under the
-  same invariants without further gate approvals.
+- **All four stages shipped 2026-07-29** on the shared `BusinessAiEngine`
+  (`lib/features/tongtai/ai/`): G-3A `BusinessSummaryService` (WTM-116) ·
+  G-3B `BusinessRecommendationService` (WTM-135) · G-3C `BusinessPlanService`
+  (WTM-136) · G-3D `BusinessHealthAiService` (WTM-137 — `ruleHealth` attached
+  verbatim on both paths; a test proves a hostile AI answer cannot change the
+  status). Surface: the Workizen AI card on Reports (4 on-demand actions +
+  provenance chip).
+- The Opportunity AI chain (scoring/ranking/explanation over the Rule Engine)
+  and Journey auto-derive follow under the same invariants without further
+  gate approvals.
