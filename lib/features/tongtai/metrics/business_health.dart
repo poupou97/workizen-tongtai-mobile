@@ -1,39 +1,77 @@
-import 'business_context.dart';
+import 'package:flutter/foundation.dart';
+
 import 'business_metrics.dart';
 
-/// A coarse read on how the business is doing (WTM-128, Founder). Home consumes
-/// this as a value — **the Home UI never changes** when the assessment later
-/// becomes AI-powered; only the producer of this value changes.
-///
-/// Initially simple: a business with no billable sales yet has *not enough data*
-/// to assess; otherwise it reads as *healthy*. Future revisions (trend, margins,
-/// risk, AI) return richer states but keep the same enum contract Home renders.
-enum BusinessHealth {
+/// The coarse health status a business reads at (WTM-128). Kept as the stable
+/// enum Home renders; the surrounding [BusinessHealth] model carries the reason
+/// and confidence.
+enum BusinessHealthStatus {
   healthy,
   notEnoughData;
 
   String get labelEn => switch (this) {
-    BusinessHealth.healthy => 'Healthy',
-    BusinessHealth.notEnoughData => 'Not enough data',
+    BusinessHealthStatus.healthy => 'Healthy',
+    BusinessHealthStatus.notEnoughData => 'Not enough data',
   };
 
   String get labelVi => switch (this) {
-    BusinessHealth.healthy => 'Khỏe mạnh',
-    BusinessHealth.notEnoughData => 'Chưa đủ dữ liệu',
+    BusinessHealthStatus.healthy => 'Khỏe mạnh',
+    BusinessHealthStatus.notEnoughData => 'Chưa đủ dữ liệu',
   };
 
-  /// Label for a language code ('vi' -> Vietnamese, otherwise English).
   String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
+}
+
+/// A read on how the business is doing (WTM-128/132, Founder) — a **model**, not
+/// just an enum, so it can grow without changing Home's UI or the API:
+///
+/// * [status]     — Healthy | NotEnoughData (what Home renders).
+/// * [reason]     — a short human explanation.
+/// * [confidence] — 0..1; always 1.0 for the rule-based v1.
+///
+/// The v1 derivation is a pure rule over the KPIs. A later AI assessor replaces
+/// [from] (richer status/reason/confidence) **without touching Home**, which only
+/// reads this model.
+@immutable
+class BusinessHealth {
+  const BusinessHealth({
+    required this.status,
+    required this.reason,
+    this.confidence = 1.0,
+  });
+
+  static const BusinessHealth healthy = BusinessHealth(
+    status: BusinessHealthStatus.healthy,
+    reason: 'Doanh nghiệp đang ghi nhận doanh thu.',
+  );
+
+  static const BusinessHealth notEnoughData = BusinessHealth(
+    status: BusinessHealthStatus.notEnoughData,
+    reason: 'Chưa đủ dữ liệu để đánh giá sức khỏe.',
+  );
+
+  final BusinessHealthStatus status;
+  final String reason;
+  final double confidence;
+
+  bool get isHealthy => status == BusinessHealthStatus.healthy;
+
+  /// Localized status label ('vi' -> Vietnamese, otherwise English).
+  String label(String languageCode) => status.label(languageCode);
 
   /// The current (v1) rule over the KPIs: sales ⇒ healthy, otherwise not enough
-  /// data. Kept pure so a later AI assessor can replace it without touching Home.
-  static BusinessHealth from(BusinessMetrics metrics) =>
+  /// data. Pure so a later AI assessor can replace it without touching Home.
+  factory BusinessHealth.from(BusinessMetrics metrics) =>
       metrics.hasSales ? BusinessHealth.healthy : BusinessHealth.notEnoughData;
 
-  /// Derive health from the [BusinessContext] Aggregate Root (WTM-129) — the
-  /// step in the chain `BusinessContext → BusinessHealth`. Phase 1 keys off
-  /// sales; richer signals (open orders, low stock, trend, AI) fold in here
-  /// later without changing Home's UI contract.
-  static BusinessHealth fromContext(BusinessContext context) =>
-      from(context.metrics);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BusinessHealth &&
+          other.status == status &&
+          other.reason == reason &&
+          other.confidence == confidence);
+
+  @override
+  int get hashCode => Object.hash(status, reason, confidence);
 }

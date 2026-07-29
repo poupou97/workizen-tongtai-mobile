@@ -127,7 +127,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     if (!mounted) return;
     setState(() {
       _metrics = context.metrics;
-      _health = widget.health ?? BusinessHealth.fromContext(context);
+      _health = widget.health ?? context.health;
       _inventory = context.inventory.productCount;
       _consumer = context.customers.total;
       _goals = goals;
@@ -304,35 +304,38 @@ class _HealthBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final healthy = health == BusinessHealth.healthy;
+    final healthy = health.isHealthy;
     final color = healthy
         ? TongtaiDesignTokens.success
         : TongtaiDesignTokens.neutral;
-    return Container(
-      key: const Key('home-health-badge'),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
-        border: Border.all(color: color),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            healthy ? Icons.favorite : Icons.hourglass_empty,
-            size: 12,
-            color: color,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            health.labelEn,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
+    return Tooltip(
+      message: health.reason,
+      child: Container(
+        key: const Key('home-health-badge'),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+          border: Border.all(color: color),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              healthy ? Icons.favorite : Icons.hourglass_empty,
+              size: 12,
               color: color,
-              fontWeight: FontWeight.w600,
             ),
-          ),
-        ],
+            const SizedBox(width: 4),
+            Text(
+              health.label('en'),
+              style: TongtaiDesignTokens.captionStyle.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

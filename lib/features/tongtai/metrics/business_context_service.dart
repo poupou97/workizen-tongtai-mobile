@@ -3,6 +3,7 @@ import '../inventory/inventory_context.dart';
 import '../opportunity/opportunity_context.dart';
 import '../orders/order_context.dart';
 import 'business_context.dart';
+import 'business_health.dart';
 import 'business_metrics_service.dart';
 
 /// Composes the [BusinessContext] Aggregate Root (WTM-129/131) from **one
@@ -19,8 +20,9 @@ class BusinessContextService {
     this._customers,
     this._orders,
     this._inventory,
-    this._opportunity,
-  );
+    this._opportunity, {
+    this.clock,
+  });
 
   final BusinessMetricsService _metrics;
   final CustomerContextProvider _customers;
@@ -28,15 +30,22 @@ class BusinessContextService {
   final InventoryContextProvider _inventory;
   final OpportunityContextProvider _opportunity;
 
-  /// Loads the current business snapshot by composing every capability provider.
-  /// A brand-new business (no data) yields [BusinessContext.empty]'s shape.
+  /// Stamps [BusinessContext.generatedAt]; injectable for deterministic tests.
+  final DateTime Function()? clock;
+
+  /// Loads the current business snapshot by composing every capability provider,
+  /// then stamping the version + timestamp and embedding the health read. A
+  /// brand-new business (no data) yields the empty snapshot's shape.
   Future<BusinessContext> load() async {
+    final metrics = await _metrics.load();
     return BusinessContext(
-      metrics: await _metrics.load(),
+      generatedAt: (clock ?? DateTime.now)(),
+      metrics: metrics,
       customers: await _customers.load(),
       orders: await _orders.load(),
       inventory: await _inventory.load(),
       opportunity: await _opportunity.load(),
+      health: BusinessHealth.from(metrics),
     );
   }
 }

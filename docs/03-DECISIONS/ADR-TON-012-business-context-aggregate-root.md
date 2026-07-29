@@ -40,6 +40,20 @@ Follow-up Today / No Activity / Near Deadline) extend it without a breaking
 change. **Rule Engine owns the basic signals; AI only adds analysis, prediction
 and recommendation.**
 
+### BusinessContext is a versioned Business Snapshot (WTM-132)
+BusinessContext is a **Business Snapshot**, not just a DTO: it carries a
+`version` (`kBusinessContextVersion`) + `generatedAt`, embeds the capability
+slices, **and embeds the [BusinessHealth] read** — so AI reads one self-contained
+snapshot. Target structure (grows via Progressive Aggregation): `version ·
+generatedAt · BusinessMetrics · Customers · Orders · Inventory · Opportunity ·
+Journey · Timeline · Goals · Finance · BusinessHealth`.
+
+`BusinessHealth` is a **model** (not just an enum), kept simple but extensible:
+`status` (Healthy | NotEnoughData) · `reason` (short text) · `confidence` (1.0
+for the rule-based v1). A later AI assessor replaces the derivation with richer
+status/reason/confidence **without changing Home's UI or the API** — Home only
+reads the model.
+
 ### AI boundary (absolute)
 **Workizen AI reads ONLY the BusinessContext** — never a Repository, Store, or
 Drift, and never a screen's private state. BusinessContext is the one seam
