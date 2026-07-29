@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/ai/business_summary.dart';
+import 'package:tongtai/features/tongtai/ai/tongtai_ai_key_store.dart';
+import 'package:tongtai/features/tongtai/ai/tongtai_ai_service.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_context.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/finance/finance_context.dart';
+import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
+import 'package:tongtai/features/tongtai/inventory/inventory_context.dart';
+import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/journey/journey_context.dart';
+import 'package:tongtai/features/tongtai/metrics/business_context_service.dart';
+import 'package:tongtai/features/tongtai/metrics/business_metrics_service.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_context.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
+import 'package:tongtai/features/tongtai/orders/order_context.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/reports/business_report.dart';
+import 'package:tongtai/features/tongtai/timeline/timeline_context.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
 import 'package:tongtai/features/tongtai/ui/widgets/tongtai_fox_mascot.dart';
@@ -186,6 +201,74 @@ void main() {
     expect(find.text('JulyCat'), findsOneWidget);
     expect(find.text('JuneCat'), findsNothing);
   });
+
+  testWidgets(
+    'AI summary card: tap → deterministic rule-based summary when AI is off '
+    '(WTM-116 / G-3A)',
+    (tester) async {
+      // A real BusinessSummaryService with an in-memory context (1 order, 1
+      // customer) and NO provider keys → the deterministic rule-based path.
+      DateTime clock() => DateTime(2026, 7, 24);
+      final orderRepo = InMemoryOrderRepository([
+        CustomerOrder(
+          id: 'o1',
+          customerId: 'c1',
+          orderNumber: 'DH-o1',
+          date: DateTime(2026, 7, 10),
+          status: OrderStatus.delivered,
+          items: const [
+            OrderItem(
+              productName: 'X',
+              category: 'Home',
+              quantity: 1,
+              unitPrice: 500000,
+            ),
+          ],
+        ),
+      ]);
+      final customerRepo = InMemoryCustomerRepository([]);
+      final goalRepo = InMemoryBusinessGoalRepository();
+      final financeRepo = InMemoryFinanceRepository();
+      final contextService = BusinessContextService(
+        BusinessMetricsService(orderRepo, customerRepo),
+        CustomerContextProvider(customerRepo),
+        OrderContextProvider(orderRepo),
+        InventoryContextProvider(InMemoryProductRepository([])),
+        OpportunityContextProvider(clock: clock),
+        JourneyContextProvider(goalRepo, clock: clock),
+        FinanceContextProvider(financeRepo, clock: clock),
+        TimelineContextProvider(financeRepo, orderRepo, goalRepo, clock: clock),
+        clock: clock,
+      );
+      final summaryService = BusinessSummaryService(
+        TongtaiAiService(InMemoryTongtaiAiKeyStore()), // no keys → rule path
+        contextService,
+        clock: clock,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: TongtaiReportsScreen(
+              service: ReportsService.sample(),
+              clock: clock,
+              summaryService: summaryService,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('reports-ai-summary')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('reports-ai-summary-run')));
+      await tester.pumpAndSettle();
+
+      // Rule-based summary rendered with its provenance chip.
+      expect(find.byKey(const Key('reports-ai-summary-text')), findsOneWidget);
+      expect(find.text('Rule-based'), findsOneWidget);
+      expect(find.textContaining('500.000 ₫'), findsWidgets);
+    },
+  );
 
   testWidgets('empty order book shows the fox empty state, no KPIs', (
     tester,
