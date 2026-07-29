@@ -7,8 +7,10 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_action_plan.dart';
 import '../../opportunity/opportunity_signals.dart';
+import '../../journey/business_goal.dart';
 import '../../opportunity/opportunity_theme.dart';
 import '../../providers/tongtai_ai_provider.dart';
+import '../../providers/tongtai_journey_provider.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 
 /// Opportunity Detail & Action Plan (WTM-92).
@@ -69,6 +71,31 @@ class _TongtaiOpportunityDetailScreenState
   }
 
   Opportunity get _o => widget.opportunity;
+
+  /// WTM-94 — Opportunity Action: one tap turns this opportunity into a
+  /// Business Journey goal (idempotent id, so repeat taps never duplicate).
+  Future<void> _createGoal() async {
+    final now = (widget.clock ?? DateTime.now)();
+    final goal = BusinessGoal(
+      id: 'goal-from-${_o.id}',
+      name: _o.title,
+      type: GoalType.revenue,
+      targetAmount: _o.expectedImpact,
+      achievedAmount: 0,
+      growthTarget: 0,
+      growthAchieved: 0,
+      startDate: now,
+      endDate: now.add(const Duration(days: 45)),
+      notes: 'Tạo từ cơ hội: ${_o.description}',
+      createdAt: now,
+      updatedAt: now,
+    );
+    await ref.read(businessGoalRepositoryProvider).upsert(goal);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Đã tạo mục tiêu "${_o.title}" trong Journey')),
+    );
+  }
 
   void _toggleSaved() {
     setState(() => _saved = !_saved);
@@ -288,6 +315,15 @@ class _TongtaiOpportunityDetailScreenState
             ],
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing6),
+
+          // ── Opportunity Action (WTM-94): opportunity → Journey goal ──
+          OutlinedButton.icon(
+            key: const Key('opportunity-create-goal'),
+            onPressed: _createGoal,
+            icon: const Icon(Icons.flag_outlined),
+            label: const Text('Tạo mục tiêu từ cơ hội · Create goal'),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
 
           // ── Reactions ────────────────────────────────────────────────
           Row(
