@@ -3,9 +3,15 @@ import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_context.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/finance/finance_context.dart';
+import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
+import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
 import 'package:tongtai/features/tongtai/inventory/inventory_context.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+import 'package:tongtai/features/tongtai/journey/business_goal.dart';
+import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/journey/journey_context.dart';
 import 'package:tongtai/features/tongtai/metrics/business_context.dart';
 import 'package:tongtai/features/tongtai/metrics/business_context_service.dart';
 import 'package:tongtai/features/tongtai/metrics/business_health.dart';
@@ -66,16 +72,53 @@ void main() {
     updatedAt: DateTime(2026, 7, 1),
   );
 
+  BusinessGoal goal(
+    String id, {
+    double target = 100000000,
+    double achieved = 20000000,
+    DateTime? start,
+    DateTime? end,
+  }) => BusinessGoal(
+    id: id,
+    name: id,
+    type: GoalType.revenue,
+    targetAmount: target,
+    achievedAmount: achieved,
+    growthTarget: 0,
+    growthAchieved: 0,
+    startDate: start ?? DateTime(2026, 7, 1),
+    endDate: end ?? DateTime(2026, 9, 30),
+    createdAt: DateTime(2026, 7, 1),
+    updatedAt: DateTime(2026, 7, 1),
+  );
+
+  FinanceTransaction txn(
+    String id, {
+    TransactionType type = TransactionType.income,
+    double amount = 1000000,
+    DateTime? date,
+  }) => FinanceTransaction(
+    id: id,
+    type: type,
+    category: 'Sales',
+    amount: amount,
+    date: date ?? DateTime(2026, 7, 10),
+  );
+
   BusinessContextService service({
     List<CustomerOrder> orders = const [],
     List<Customer> customers = const [],
     List<Product> products = const [],
     List<Opportunity> opportunities = const [],
+    List<BusinessGoal> goals = const [],
+    List<FinanceTransaction> transactions = const [],
     DateTime? now,
   }) {
     final orderRepo = InMemoryOrderRepository(orders);
     final customerRepo = InMemoryCustomerRepository(customers);
     final productRepo = InMemoryProductRepository(products);
+    final goalRepo = InMemoryBusinessGoalRepository(goals);
+    final financeRepo = InMemoryFinanceRepository(transactions);
     DateTime clock() => now ?? DateTime(2026, 7, 25);
     return BusinessContextService(
       BusinessMetricsService(orderRepo, customerRepo),
@@ -83,6 +126,8 @@ void main() {
       OrderContextProvider(orderRepo),
       InventoryContextProvider(productRepo),
       OpportunityContextProvider(opportunities: opportunities, clock: clock),
+      JourneyContextProvider(goalRepo, clock: clock),
+      FinanceContextProvider(financeRepo, clock: clock),
       clock: clock,
     );
   }
@@ -170,6 +215,23 @@ void main() {
         expect(s.signal(OpportunitySignal.highRisk), 1);
       },
     );
+
+    test('JourneySummary counts goals by pace + active/completed/at-risk', () {
+      final now = DateTime(2026, 7, 25); // ~26% through a Jul 1–Sep 30 timeline
+      final s = JourneySummary.from([
+        goal('done', achieved: 100000000), // progress 1.0 -> completed
+        goal('ahead', achieved: 40000000), // 0.40 vs ~0.26 elapsed -> ahead
+        goal('behind', achieved: 2000000), // 0.02 -> behind
+        goal('soon', start: DateTime(2026, 8, 1)), // future -> not started
+      ], now: now);
+
+      expect(s.total, 4);
+      expect(s.completedCount, 1);
+      expect(s.activeCount, 3); // everything not completed
+      expect(s.atRiskCount, 1); // the behind one
+      expect(s.pace(GoalPace.ahead), 1);
+      expect(s.pace(GoalPace.notStarted), 1);
+    });
   });
 
   group('BusinessContextService.load (composes providers)', () {
@@ -193,6 +255,8 @@ void main() {
             discoveredAt: DateTime(2026, 7, 24),
           ),
         ],
+        goals: [goal('g1')],
+        transactions: [txn('t1', amount: 500000)],
       ).load();
 
       expect(ctx.metrics.revenue, 100000); // cancelled excluded
@@ -203,6 +267,9 @@ void main() {
       expect(ctx.inventory.lowStockCount, 1);
       expect(ctx.opportunity.total, 1);
       expect(ctx.opportunity.signal(OpportunitySignal.highValue), 1);
+      expect(ctx.journey.total, 1);
+      expect(ctx.finance.incomeYtd, 500000);
+      expect(ctx.finance.hasActivity, isTrue);
       expect(ctx.hasData, isTrue);
     });
 
@@ -213,7 +280,22 @@ void main() {
       expect(ctx.orders.total, 0);
       expect(ctx.inventory.productCount, 0);
       expect(ctx.opportunity.total, 0);
+      expect(ctx.journey.total, 0);
+      expect(ctx.finance.hasActivity, isFalse);
     });
+
+    test(
+      'journey/finance data alone marks the business as having data',
+      () async {
+        final journeyOnly = await service(goals: [goal('g1')]).load();
+        expect(journeyOnly.hasData, isTrue);
+        expect(journeyOnly.journey.activeCount, 1);
+
+        final financeOnly = await service(transactions: [txn('t1')]).load();
+        expect(financeOnly.hasData, isTrue);
+        expect(financeOnly.finance.hasActivity, isTrue);
+      },
+    );
   });
 
   group('Business Snapshot (WTM-132)', () {
