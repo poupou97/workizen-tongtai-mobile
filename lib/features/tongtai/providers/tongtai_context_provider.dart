@@ -7,6 +7,7 @@ import '../journey/journey_context.dart';
 import '../metrics/business_context_service.dart';
 import '../opportunity/opportunity_context.dart';
 import '../orders/order_context.dart';
+import '../timeline/timeline_context.dart';
 import 'tongtai_consumer_provider.dart';
 import 'tongtai_finance_provider.dart';
 import 'tongtai_inventory_provider.dart';
@@ -41,6 +42,18 @@ final financeContextProvider = Provider<FinanceContextProvider>(
   (ref) => FinanceContextProvider(ref.watch(financeRepositoryProvider)),
 );
 
+/// Timeline is a **derived projection** (WTM-134) — no repository of its own; it
+/// merges the real Finance/Order/Journey records into an activity stream. It
+/// reads empty for a brand-new business (User Data First). Opportunity has no
+/// persisted source yet, so it contributes no events in the real app.
+final timelineContextProvider = Provider<TimelineContextProvider>(
+  (ref) => TimelineContextProvider(
+    ref.watch(financeRepositoryProvider),
+    ref.watch(orderRepositoryProvider),
+    ref.watch(businessGoalRepositoryProvider),
+  ),
+);
+
 /// The business Aggregate Root builder (WTM-129/131) — composes every capability
 /// Context Provider + the KPI source of truth. Home and (later) Workizen AI
 /// consume the returned `BusinessContext`; **AI never reads a repository/provider
@@ -54,5 +67,6 @@ final businessContextServiceProvider = Provider<BusinessContextService>(
     ref.watch(opportunityContextProvider),
     ref.watch(journeyContextProvider),
     ref.watch(financeContextProvider),
+    ref.watch(timelineContextProvider),
   ),
 );

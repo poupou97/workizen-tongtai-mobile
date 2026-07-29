@@ -4,7 +4,7 @@
 
 - **Phase 1 (Product Design Bible):** ✅ DONE + Founder-approved. 60 docs.
 - **Phase 2 (build):** 🔄 IN PROGRESS — developed autonomously by the
-  Evidence-Driven Runtime. `flutter analyze` clean; **887/887 tests passing**.
+  Evidence-Driven Runtime. `flutter analyze` clean; **890/890 tests passing**.
 - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
   app runs standalone.
 - **Data Foundation — persistence arc COMPLETE for user-authored capabilities**
@@ -22,11 +22,12 @@
   **Aggregate Root** via **Progressive Aggregation** — Phase 1 metrics/Customers/
   Orders/Inventory/Opportunity (WTM-129/130/131), versioned Business Snapshot +
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
-  (WTM-133)**. AI reads **only** BusinessContext, never a repository.
-- **Founder-gates still blocking the next tier**: Workizen AI activation
-  (BYOK/router, privacy red-line — **G-3, deferred**; Founder sequenced the full
-  Business Data Foundation first). Timeline is the last non-AI slice to fold into
-  BusinessContext (a derived projection — its own provider once real sources land).
+  (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
+  Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **Founder-gate blocking the next tier**: Workizen AI activation (BYOK/router,
+  privacy red-line — **G-3, deferred**; Founder sequenced the full Business Data
+  Foundation first). AI Phase-2 (Opportunity Win Probability / Recommendation /
+  Summary, `BusinessHealth` AI assessor) all read the same BusinessContext.
 
 ## Shipped stories (all at Jira "Code Review", code on this repo's main)
 
@@ -47,7 +48,7 @@
 | Home | WTM-14 dashboard front-door đọc data thật: đếm module, KPI doanh thu năm/đơn/AOV, Top cơ hội, mission = mục tiêu + tiến độ · WTM-128 **Home = User Data First** (G-1): KPI từ `BusinessMetrics` (0 hợp lệ, không "No Data"), `BusinessHealth` badge, onboarding CTAs (customer→product→order→goal→Demo), Demo Mode = hành động chủ động (không preload sample); giờ consume `BusinessContext` (WTM-129/132) |
 | Reports | WTM-95/96 dashboard: KPI doanh thu MTD/YTD + số đơn + AOV, biểu đồ doanh thu 6 tháng (CustomPaint, không thêm lib), top categories · WTM-97 **Top sản phẩm** (doanh thu + số bán) + **Top khách hàng** (chi tiêu + số đơn, tên resolve từ customer directory) · WTM-98 **Pipeline cơ hội** (số đang mở + tổng giá trị kỳ vọng + cơ hội điểm cao nhất, `opportunityPipeline` thuần); headline KPI giờ đọc từ `BusinessMetricsService` (WTM-127); mở từ More → Business |
 | Orders | WTM-125 **capability độc lập** tách khỏi `consumer/` + `OrderRepository`/Controller + Drift (ADR-TON-010) · WTM-126 **Create Order**: line PHẢI reference Inventory Product (Inventory Picker); `OrderItem` = snapshot bất biến productId/name/sku/unit/qty/**soldPrice** (override được; order lịch sử KHÔNG đổi khi giá kho đổi); model chừa chỗ Invoice/Payment/Shipment/Return |
-| Metrics / BusinessContext | WTM-127 **`BusinessMetricsService` = KPI SoT** (revenue·orders·customers·AOV; Reports/Home reuse, không recompute — ADR-TON-011) · WTM-129/131 **`BusinessContext` = Aggregate Root** — one Context Provider per capability, `BusinessContextService` composes (ADR-TON-012) · WTM-130 Opportunity Phase-1 rule-based signals (AI-off/offline) · WTM-132 versioned Business Snapshot + `BusinessHealth` model · **WTM-133 Progressive Aggregation Phase 2: Journey + Finance slices**. **AI reads ONLY BusinessContext**, never repos |
+| Metrics / BusinessContext | WTM-127 **`BusinessMetricsService` = KPI SoT** (revenue·orders·customers·AOV; Reports/Home reuse, không recompute — ADR-TON-011) · WTM-129/131 **`BusinessContext` = Aggregate Root** — one Context Provider per capability, `BusinessContextService` composes (ADR-TON-012) · WTM-130 Opportunity Phase-1 rule-based signals (AI-off/offline) · WTM-132 versioned Business Snapshot + `BusinessHealth` model · WTM-133 Phase 2: Journey + Finance slices · **WTM-134 Phase 3: Timeline projection (activity-stream, live repos, loại khỏi `hasData`)** → **snapshot phi-AI HOÀN CHỈNH**. **AI reads ONLY BusinessContext**, never repos |
 | Finance | WTM-27 dashboard (KPI thu/chi/lợi nhuận/biên, biểu đồ dòng tiền, chi phí theo nhóm, feed) · WTM-113 nhập giao dịch (FAB → form) · WTM-120 **Drift persistence (ADR-TON-008, User Data First)**: `FinanceController → FinanceRepository → Drift`; app thật **bắt đầu RỖNG**, entry user persist qua `TransactionsTable` (scoped `LocalWorkspace` business); sample = Demo Mode (`SampleFinanceRepository`), không ghi vào DB thật. Mở từ More → Business |
 | Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) |
 | Brand | WTM-109 Business Fox mascot (Origami all) · 110 app icon + splash native · 111 mascot trong app (avatar chat, empty states) + đổi nhãn hiển thị "Workizen AI" |
