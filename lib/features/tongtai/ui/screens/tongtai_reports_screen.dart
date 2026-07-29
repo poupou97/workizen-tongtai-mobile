@@ -11,6 +11,7 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_pipeline.dart';
 import '../../providers/tongtai_ai_provider.dart';
+import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_metrics_provider.dart';
 import '../../providers/tongtai_orders_provider.dart';
 import '../../reports/business_report.dart';
@@ -191,13 +192,21 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     }
   }
 
+  /// Real generated opportunities (WTM-139) backing the pipeline card in real
+  /// mode; sample only when the test injects a list.
+  List<Opportunity> _generatedOpportunities = const [];
+
   Future<void> _load() async {
     final orders = await ref.read(orderRepositoryProvider).loadAll();
     final metrics = await ref.read(businessMetricsServiceProvider).load();
+    final List<Opportunity> generated = await ref.read(
+      generatedOpportunitiesProvider.future,
+    );
     if (!mounted) return;
     setState(() {
       _reports = ReportsService(orders);
       _metrics = metrics;
+      _generatedOpportunities = generated;
       _loading = false;
     });
   }
@@ -210,7 +219,13 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     final breakdown =
         _reports?.breakdownFor(now, _period) ?? PeriodBreakdown.empty;
     final pipeline = opportunityPipeline(
-      widget.opportunities ?? kSampleOpportunities,
+      // Real generated opportunities (WTM-139); tests may inject a list. In
+      // injected-service test mode with no explicit list, fall back to the
+      // samples so existing fixtures stay coherent.
+      widget.opportunities ??
+          (widget.service != null
+              ? kSampleOpportunities
+              : _generatedOpportunities),
     );
 
     return Scaffold(

@@ -43,21 +43,31 @@ class OpportunitySummary {
 
 /// The Opportunity capability's Context Provider (WTM-131). Produces the
 /// [OpportunitySummary] slice from the current opportunities using the rule-based
-/// classifier. **User Data First:** the real app supplies no opportunities yet
-/// (there is no persisted/generated source), so a real business reads an empty
-/// summary; demo/tests inject a list. Rule-based → no AI, no network.
+/// classifier. Since WTM-139 the real app wires [source] to the
+/// `OpportunityRuleEngine` over the live repositories — a real business reads a
+/// real generated summary (empty until its data produces signals, User Data
+/// First). Rule-based → no AI, no network.
 class OpportunityContextProvider
     implements CapabilityContextProvider<OpportunitySummary> {
-  const OpportunityContextProvider({this.opportunities = const [], this.clock});
+  const OpportunityContextProvider({
+    this.opportunities = const [],
+    this.source,
+    this.clock,
+  });
 
-  /// Current opportunities to summarise (empty in the real app until a real
-  /// source exists; injected in demo/tests).
+  /// Static opportunities to summarise (demo/tests).
   final List<Opportunity> opportunities;
+
+  /// Async source of the current opportunities (WTM-139: the rule engine over
+  /// live repositories). Takes precedence over [opportunities] when present.
+  final Future<List<Opportunity>> Function()? source;
 
   /// Injectable clock for the rule-based signals; defaults to [DateTime.now].
   final DateTime Function()? clock;
 
   @override
-  Future<OpportunitySummary> load() async =>
-      OpportunitySummary.from(opportunities, now: (clock ?? DateTime.now)());
+  Future<OpportunitySummary> load() async => OpportunitySummary.from(
+    source != null ? await source!() : opportunities,
+    now: (clock ?? DateTime.now)(),
+  );
 }
