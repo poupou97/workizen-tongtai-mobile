@@ -153,6 +153,64 @@ void main() {
       expect(find.text(OpportunityType.seasonal.labelVi), findsWidgets);
     });
 
+    testWidgets('WTM-130: rule-based signal badges render on a card', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      final controller = OpportunityFeedController([
+        // seasonal → Urgent; ROI 1.5 < 2.0 → High Risk; impact 10M → not high value.
+        make(
+          'a',
+          type: OpportunityType.seasonal,
+          roi: 1.5,
+          at: DateTime(2026, 7, 24),
+        ),
+      ]);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TongtaiOpportunityFeedScreen(
+            controller: controller,
+            clock: () => DateTime(2026, 7, 25),
+          ),
+        ),
+      );
+
+      expect(
+        find.byKey(const Key('opportunity-signal-urgent')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('opportunity-signal-highRisk')),
+        findsOneWidget,
+      );
+      expect(find.text('Khẩn'), findsOneWidget);
+      expect(find.text('Rủi ro cao'), findsOneWidget);
+      expect(
+        find.byKey(const Key('opportunity-signal-highValue')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('WTM-130: an old untouched opportunity shows the Stale badge', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      final controller = OpportunityFeedController([
+        make('old', roi: 2.5, at: DateTime(2026, 7, 1)), // 24 days old
+      ]);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TongtaiOpportunityFeedScreen(
+            controller: controller,
+            clock: () => DateTime(2026, 7, 25),
+          ),
+        ),
+      );
+
+      expect(find.byKey(const Key('opportunity-signal-stale')), findsOneWidget);
+      expect(find.text('Nguội'), findsOneWidget);
+    });
+
     testWidgets('AC2/AC3: type chips filter, sort chips re-order', (
       tester,
     ) async {
