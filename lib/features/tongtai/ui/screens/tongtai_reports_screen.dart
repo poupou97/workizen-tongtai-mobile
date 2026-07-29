@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ai/business_summary.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../metrics/business_metrics.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_pipeline.dart';
+import '../../providers/tongtai_ai_provider.dart';
 import '../../providers/tongtai_metrics_provider.dart';
 import '../../providers/tongtai_orders_provider.dart';
 import '../../reports/business_report.dart';
@@ -29,6 +31,7 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
     this.metrics,
     this.clock,
     this.opportunities,
+    this.summaryService,
   });
 
   /// Injectable breakdown source for tests; when null the screen loads real
@@ -47,6 +50,10 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
   /// the Opportunity capability, later in the Founder sequence).
   final List<Opportunity>? opportunities;
 
+  /// Injectable summary source for tests (WTM-116/G-3A); when null the screen
+  /// uses [businessSummaryServiceProvider].
+  final BusinessSummaryService? summaryService;
+
   @override
   ConsumerState<TongtaiReportsScreen> createState() =>
       _TongtaiReportsScreenState();
@@ -60,6 +67,23 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
   /// Which window the breakdown sections are scoped to (WTM-115). Defaults to
   /// this-year, matching the classic YTD breakdown.
   ReportPeriod _period = ReportPeriod.thisYear;
+
+  /// G-3A (WTM-116): the on-demand AI summary. Null until requested.
+  BusinessSummary? _summary;
+  bool _summarizing = false;
+
+  Future<void> _runSummary() async {
+    if (_summarizing) return;
+    setState(() => _summarizing = true);
+    final BusinessSummaryService service =
+        widget.summaryService ?? ref.read(businessSummaryServiceProvider);
+    final summary = await service.summarize();
+    if (!mounted) return;
+    setState(() {
+      _summary = summary;
+      _summarizing = false;
+    });
+  }
 
   @override
   void initState() {
@@ -122,6 +146,9 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
                     period: _period,
                     onPeriodChanged: (p) => setState(() => _period = p),
                     pipeline: pipeline,
+                    summary: _summary,
+                    summarizing: _summarizing,
+                    onSummarize: _runSummary,
                   )
                 : const _ReportsEmptyState()),
     );
@@ -136,6 +163,9 @@ class _ReportBody extends StatelessWidget {
     required this.period,
     required this.onPeriodChanged,
     required this.pipeline,
+    required this.summary,
+    required this.summarizing,
+    required this.onSummarize,
   });
 
   final BusinessReport report;
@@ -147,6 +177,11 @@ class _ReportBody extends StatelessWidget {
   final ValueChanged<ReportPeriod> onPeriodChanged;
 
   final OpportunityPipeline pipeline;
+
+  /// G-3A (WTM-116): the on-demand Workizen AI summary of the snapshot.
+  final BusinessSummary? summary;
+  final bool summarizing;
+  final VoidCallback onSummarize;
 
   @override
   Widget build(BuildContext context) {
@@ -205,6 +240,15 @@ class _ReportBody extends StatelessWidget {
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
+        // ── Workizen AI summary (WTM-116 / G-3A) ────────────────────────
+        _AiSummaryCard(
+          summary: summary,
+          summarizing: summarizing,
+          onSummarize: onSummarize,
+        ),
+
+        const SizedBox(height: TongtaiDesignTokens.spacing6),
+
         // ── Revenue trend (WTM-95) ──────────────────────────────────────
         _SectionTitle('Doanh thu theo tháng · Revenue trend'),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
@@ -256,6 +300,114 @@ class _ReportBody extends StatelessWidget {
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _PipelineCard(pipeline: pipeline),
       ],
+    );
+  }
+}
+
+/// Workizen AI business summary (WTM-116 / G-3A). On demand — the seller taps
+/// to generate; the answer renders with a provenance chip (AI provider vs
+/// rule-based). Read-only: the summary is text over the BusinessContext.
+class _AiSummaryCard extends StatelessWidget {
+  const _AiSummaryCard({
+    required this.summary,
+    required this.summarizing,
+    required this.onSummarize,
+  });
+
+  final BusinessSummary? summary;
+  final bool summarizing;
+  final VoidCallback onSummarize;
+
+  @override
+  Widget build(BuildContext context) {
+    const accent = TongtaiDesignTokens.copilotViolet;
+    return Container(
+      key: const Key('reports-ai-summary'),
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome, size: 18, color: accent),
+              const SizedBox(width: TongtaiDesignTokens.spacing2),
+              Expanded(
+                child: Text(
+                  'Workizen AI — Tóm tắt kinh doanh',
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (summary != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: TongtaiDesignTokens.spacing2,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(
+                      TongtaiDesignTokens.radiusFull,
+                    ),
+                  ),
+                  child: Text(
+                    summary!.isAi
+                        ? (summary!.provider?.displayName ?? 'AI')
+                        : 'Rule-based',
+                    key: const Key('reports-ai-summary-source'),
+                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                      color: accent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          if (summary == null && !summarizing)
+            OutlinedButton.icon(
+              key: const Key('reports-ai-summary-run'),
+              onPressed: onSummarize,
+              icon: const Icon(Icons.auto_awesome, size: 16),
+              label: const Text('Tạo tóm tắt · Summarize'),
+            )
+          else if (summarizing)
+            Row(
+              children: [
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: TongtaiDesignTokens.spacing2),
+                Text(
+                  'Đang tóm tắt…',
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextSecondary,
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(
+              summary!.text,
+              key: const Key('reports-ai-summary-text'),
+              style: TongtaiDesignTokens.smallStyle.copyWith(
+                color: TongtaiDesignTokens.lightTextPrimary,
+                height: 1.5,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

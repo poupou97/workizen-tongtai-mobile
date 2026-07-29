@@ -52,9 +52,13 @@ tiếp tục ngay. Chỉ ngắt Founder khi cần quyết định chiến lượ
   returns. **KHÔNG nhúng logic order vào Consumer**; Consumer Detail chỉ được
   *launch* "Create Order". **Reports + Home KPI consume Orders Repository.**
   → module `orders/` + `OrderRepository`/`OrderController` (WTM-125).
-- **G-3 · AI — ⏸️ DEFERRED.** Chưa làm AI. Xong Data Foundation trước, theo thứ tự:
-  **Consumer → Orders → Reports → Home KPI → Opportunity → Journey → Timeline →
-  BusinessContext → AI Summary → AI Recommendation → AI Planner.**
+- **G-3 · AI — ▶️ OPENED IN STAGES (Founder 2026-07-29 → ADR-TON-013).** Data
+  Foundation đã xong (BusinessContext snapshot phi-AI hoàn chỉnh WTM-134) →
+  Founder mở G-3 theo bậc pre-approved, auto-progress, tất cả **read-only**:
+  **G-3A** AI Summary (WTM-116, ✅ shipped) → **G-3B** AI Recommendation →
+  **G-3C** AI Planner → **G-3D** BusinessHealth AI (rule vẫn là fallback).
+  Kèm defaults: Opportunity giữ Rule Engine + AI chỉ scoring/ranking/explanation;
+  Journey progress auto-derived; **WTM-122 vẫn CLOSED** (không migration).
 
 ### 📏 Product Rule mới — Layered Definition of Done (Founder 2026-07-25)
 
