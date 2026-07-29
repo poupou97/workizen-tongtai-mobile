@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../ai/business_health_ai.dart';
 import '../ai/business_plan.dart';
 import '../ai/business_recommendation.dart';
 import '../ai/business_summary.dart';
@@ -51,6 +52,15 @@ final businessRecommendationServiceProvider =
 /// BusinessContext; never auto-executed (ADR-TON-013).
 final businessPlanServiceProvider = Provider<BusinessPlanService>(
   (ref) => BusinessPlanService(
+    ref.watch(tongtaiAiServiceProvider),
+    ref.watch(businessContextServiceProvider),
+  ),
+);
+
+/// G-3D — BusinessHealth AI (WTM-137). Assessment text only; the rule-based
+/// health remains the app's authoritative status (ADR-TON-013).
+final businessHealthAiServiceProvider = Provider<BusinessHealthAiService>(
+  (ref) => BusinessHealthAiService(
     ref.watch(tongtaiAiServiceProvider),
     ref.watch(businessContextServiceProvider),
   ),

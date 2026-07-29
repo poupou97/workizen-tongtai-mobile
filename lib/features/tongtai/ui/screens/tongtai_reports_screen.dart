@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ai/business_health_ai.dart';
 import '../../ai/business_plan.dart';
 import '../../ai/business_recommendation.dart';
 import '../../ai/business_summary.dart';
@@ -36,6 +37,7 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
     this.summaryService,
     this.recommendationService,
     this.planService,
+    this.healthAiService,
   });
 
   /// Injectable breakdown source for tests; when null the screen loads real
@@ -65,6 +67,10 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
   /// Injectable planner source for tests (WTM-136/G-3C); when null the screen
   /// uses [businessPlanServiceProvider].
   final BusinessPlanService? planService;
+
+  /// Injectable health-assessment source for tests (WTM-137/G-3D); when null
+  /// the screen uses [businessHealthAiServiceProvider].
+  final BusinessHealthAiService? healthAiService;
 
   @override
   ConsumerState<TongtaiReportsScreen> createState() =>
@@ -143,6 +149,27 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     });
   }
 
+  Future<void> _runHealth() async {
+    if (_aiRunning) return;
+    setState(() => _aiRunning = true);
+    final BusinessHealthAiService service =
+        widget.healthAiService ?? ref.read(businessHealthAiServiceProvider);
+    final assessment = await service.assess();
+    if (!mounted) return;
+    setState(() {
+      _aiResult = AiCardResult(
+        // The badge status stays rule-based (G-3D) — the title carries it so
+        // the AI text is always read against the authoritative status.
+        title: 'Sức khỏe: ${assessment.ruleHealth.label('vi')}',
+        text: assessment.text,
+        sourceLabel: assessment.isAi
+            ? (assessment.provider?.displayName ?? 'AI')
+            : 'Rule-based',
+      );
+      _aiRunning = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -209,6 +236,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
                     onSummarize: _runSummary,
                     onRecommend: _runRecommendation,
                     onPlan: _runPlan,
+                    onHealth: _runHealth,
                   )
                 : const _ReportsEmptyState()),
     );
@@ -228,6 +256,7 @@ class _ReportBody extends StatelessWidget {
     required this.onSummarize,
     required this.onRecommend,
     required this.onPlan,
+    required this.onHealth,
   });
 
   final BusinessReport report;
@@ -247,6 +276,7 @@ class _ReportBody extends StatelessWidget {
   final VoidCallback onSummarize;
   final VoidCallback onRecommend;
   final VoidCallback onPlan;
+  final VoidCallback onHealth;
 
   @override
   Widget build(BuildContext context) {
@@ -312,6 +342,7 @@ class _ReportBody extends StatelessWidget {
           onSummarize: onSummarize,
           onRecommend: onRecommend,
           onPlan: onPlan,
+          onHealth: onHealth,
         ),
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
@@ -398,6 +429,7 @@ class _AiSummaryCard extends StatelessWidget {
     required this.onSummarize,
     required this.onRecommend,
     required this.onPlan,
+    required this.onHealth,
   });
 
   final AiCardResult? result;
@@ -405,6 +437,7 @@ class _AiSummaryCard extends StatelessWidget {
   final VoidCallback onSummarize;
   final VoidCallback onRecommend;
   final VoidCallback onPlan;
+  final VoidCallback onHealth;
 
   @override
   Widget build(BuildContext context) {
@@ -511,6 +544,12 @@ class _AiSummaryCard extends StatelessWidget {
                   onPressed: onPlan,
                   icon: const Icon(Icons.checklist_outlined, size: 16),
                   label: const Text('Kế hoạch tuần · Plan'),
+                ),
+                OutlinedButton.icon(
+                  key: const Key('reports-ai-health-run'),
+                  onPressed: onHealth,
+                  icon: const Icon(Icons.favorite_outline, size: 16),
+                  label: const Text('Sức khỏe · Health'),
                 ),
               ],
             ),
