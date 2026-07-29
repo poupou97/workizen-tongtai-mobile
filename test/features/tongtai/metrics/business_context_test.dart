@@ -76,15 +76,14 @@ void main() {
     final orderRepo = InMemoryOrderRepository(orders);
     final customerRepo = InMemoryCustomerRepository(customers);
     final productRepo = InMemoryProductRepository(products);
+    DateTime clock() => now ?? DateTime(2026, 7, 25);
     return BusinessContextService(
       BusinessMetricsService(orderRepo, customerRepo),
       CustomerContextProvider(customerRepo),
       OrderContextProvider(orderRepo),
       InventoryContextProvider(productRepo),
-      OpportunityContextProvider(
-        opportunities: opportunities,
-        clock: () => now ?? DateTime(2026, 7, 25),
-      ),
+      OpportunityContextProvider(opportunities: opportunities, clock: clock),
+      clock: clock,
     );
   }
 
@@ -217,12 +216,27 @@ void main() {
     });
   });
 
-  group('BusinessHealth.fromContext', () {
-    test('empty context → not enough data', () {
-      expect(
-        BusinessHealth.fromContext(BusinessContext.empty),
-        BusinessHealth.notEnoughData,
-      );
+  group('Business Snapshot (WTM-132)', () {
+    test('carries version + generatedAt and embeds health', () async {
+      final ctx = await service(
+        customers: [customer('c1')],
+        now: DateTime(2026, 7, 25, 9),
+      ).load();
+      expect(ctx.version, kBusinessContextVersion);
+      expect(ctx.generatedAt, DateTime(2026, 7, 25, 9));
+      // No sales yet → not enough data, confidence 1.0 (rule-based v1).
+      expect(ctx.health.status, BusinessHealthStatus.notEnoughData);
+      expect(ctx.health.confidence, 1.0);
+      expect(ctx.health.reason, isNotEmpty);
+    });
+
+    test('a business with sales reports healthy in the snapshot', () async {
+      final ctx = await service(
+        orders: [order('o1', total: 100000)],
+        customers: [customer('c1')],
+      ).load();
+      expect(ctx.health.status, BusinessHealthStatus.healthy);
+      expect(ctx.health.isHealthy, isTrue);
     });
   });
 }
