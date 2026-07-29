@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
+import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
@@ -127,6 +129,62 @@ void main() {
     expect(find.descendant(of: card, matching: find.text('5')), findsOneWidget);
     expect(find.text('160tr ₫'), findsOneWidget);
     expect(find.text('Quạt tích điện sắp vào mùa nóng'), findsOneWidget);
+  });
+
+  testWidgets('the period selector scopes the breakdown sections (WTM-115)', (
+    tester,
+  ) async {
+    // One category sold in June, another in July; "today" is Jul 24.
+    CustomerOrder o(String id, DateTime date, String category, double price) =>
+        CustomerOrder(
+          id: id,
+          customerId: 'c1',
+          orderNumber: id,
+          date: date,
+          status: OrderStatus.delivered,
+          items: [
+            OrderItem(
+              productName: '$category-item',
+              category: category,
+              quantity: 1,
+              unitPrice: price,
+            ),
+          ],
+        );
+    final service = ReportsService([
+      o('jun', DateTime(2026, 6, 10), 'JuneCat', 400000),
+      o('jul', DateTime(2026, 7, 10), 'JulyCat', 600000),
+    ]);
+
+    await tester.pumpWidget(host(service: service));
+    await tester.pumpAndSettle();
+    final scrollable = find.byType(Scrollable).first;
+
+    // Default this-year → both categories present.
+    await tester.scrollUntilVisible(
+      find.text('JuneCat'),
+      300,
+      scrollable: scrollable,
+    );
+    expect(find.text('JuneCat'), findsOneWidget);
+    expect(find.text('JulyCat'), findsOneWidget);
+
+    // Scope to this month → only July's category remains.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('reports-period-thisMonth')),
+      -300,
+      scrollable: scrollable,
+    );
+    await tester.tap(find.byKey(const Key('reports-period-thisMonth')));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('JulyCat'),
+      300,
+      scrollable: scrollable,
+    );
+    expect(find.text('JulyCat'), findsOneWidget);
+    expect(find.text('JuneCat'), findsNothing);
   });
 
   testWidgets('empty order book shows the fox empty state, no KPIs', (

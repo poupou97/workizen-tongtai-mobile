@@ -141,6 +141,90 @@ class CustomerSpend {
   String toString() => 'CustomerSpend($name, $spend, $orders orders)';
 }
 
+/// The window a Reports **breakdown** is scoped to (WTM-115). The four headline
+/// KPIs stay canonical/all-business (BusinessMetrics, ADR-TON-011); only the
+/// breakdown sections (categories/products/customers) respond to this.
+enum ReportPeriod {
+  thisMonth,
+  thisQuarter,
+  thisYear,
+  allTime;
+
+  String get labelVi => switch (this) {
+    ReportPeriod.thisMonth => 'Tháng này',
+    ReportPeriod.thisQuarter => 'Quý này',
+    ReportPeriod.thisYear => 'Năm nay',
+    ReportPeriod.allTime => 'Tất cả',
+  };
+
+  String get labelEn => switch (this) {
+    ReportPeriod.thisMonth => 'This month',
+    ReportPeriod.thisQuarter => 'This quarter',
+    ReportPeriod.thisYear => 'This year',
+    ReportPeriod.allTime => 'All time',
+  };
+
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
+
+  /// The inclusive `[start, end]` calendar window as of [now]. `allTime` spans
+  /// everything. `thisYear` equals the classic year-to-date breakdown window.
+  (DateTime, DateTime) range(DateTime now) {
+    switch (this) {
+      case ReportPeriod.thisMonth:
+        return (
+          DateTime(now.year, now.month, 1),
+          DateTime(now.year, now.month + 1, 0, 23, 59, 59, 999),
+        );
+      case ReportPeriod.thisQuarter:
+        final startMonth = ((now.month - 1) ~/ 3) * 3 + 1;
+        return (
+          DateTime(now.year, startMonth, 1),
+          DateTime(now.year, startMonth + 3, 0, 23, 59, 59, 999),
+        );
+      case ReportPeriod.thisYear:
+        return (
+          DateTime(now.year, 1, 1),
+          DateTime(now.year, 12, 31, 23, 59, 59, 999),
+        );
+      case ReportPeriod.allTime:
+        return (DateTime.utc(1970), DateTime(9999, 12, 31, 23, 59, 59, 999));
+    }
+  }
+}
+
+/// The sales breakdown over a chosen [ReportPeriod] (WTM-115) — the period-scoped
+/// half of the dashboard, alongside the all-business headline KPIs.
+@immutable
+class PeriodBreakdown {
+  const PeriodBreakdown({
+    required this.revenue,
+    required this.orders,
+    required this.topCategories,
+    required this.topProducts,
+    required this.topCustomers,
+  });
+
+  static const PeriodBreakdown empty = PeriodBreakdown(
+    revenue: 0,
+    orders: 0,
+    topCategories: [],
+    topProducts: [],
+    topCustomers: [],
+  );
+
+  /// Billable revenue booked in the window.
+  final double revenue;
+
+  /// Billable order count in the window.
+  final int orders;
+
+  final List<CategoryRevenue> topCategories;
+  final List<ProductRevenue> topProducts;
+  final List<CustomerSpend> topCustomers;
+
+  bool get hasSales => orders > 0;
+}
+
 /// A snapshot of the business's sales performance for the Reports & Analytics
 /// dashboard (WTM-95 layout/widgets, WTM-96 revenue KPI).
 ///
@@ -273,6 +357,28 @@ class ReportsService {
       topCategories: _categorySeries(ytd),
       topProducts: _productSeries(ytd),
       topCustomers: _customerSeries(ytd),
+    );
+  }
+
+  /// The sales breakdown scoped to [period] as of [now] (WTM-115).
+  PeriodBreakdown breakdownFor(DateTime now, ReportPeriod period) {
+    final (start, end) = period.range(now);
+    return breakdownForRange(start, end);
+  }
+
+  /// The sales breakdown over an explicit inclusive `[start, end]` window
+  /// (WTM-115). Only the breakdown sections are period-scoped — the headline
+  /// KPIs remain all-business (BusinessMetrics).
+  PeriodBreakdown breakdownForRange(DateTime start, DateTime end) {
+    final inRange = _billable
+        .where((o) => !o.date.isBefore(start) && !o.date.isAfter(end))
+        .toList(growable: false);
+    return PeriodBreakdown(
+      revenue: _sum(inRange),
+      orders: inRange.length,
+      topCategories: _categorySeries(inRange),
+      topProducts: _productSeries(inRange),
+      topCustomers: _customerSeries(inRange),
     );
   }
 

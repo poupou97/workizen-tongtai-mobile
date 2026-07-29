@@ -180,4 +180,109 @@ void main() {
       expect(report.topCategories.single.revenue, 500000);
     });
   });
+
+  group('ReportPeriod.range (WTM-115)', () {
+    test('this month spans the whole calendar month', () {
+      final (start, end) = ReportPeriod.thisMonth.range(DateTime(2026, 7, 24));
+      expect(start, DateTime(2026, 7, 1));
+      expect(end.year, 2026);
+      expect(end.month, 7);
+      expect(end.day, 31);
+    });
+
+    test('December this-month does not overflow the year', () {
+      final (start, end) = ReportPeriod.thisMonth.range(DateTime(2026, 12, 10));
+      expect(start, DateTime(2026, 12, 1));
+      expect(end.month, 12);
+      expect(end.day, 31);
+    });
+
+    test('this quarter spans its three months', () {
+      final (start, end) = ReportPeriod.thisQuarter.range(
+        DateTime(2026, 7, 24),
+      );
+      expect(start, DateTime(2026, 7, 1)); // Q3 starts in July
+      expect(end.month, 9);
+      expect(end.day, 30);
+    });
+
+    test('quarter start snaps back for a mid-quarter month', () {
+      final (start, _) = ReportPeriod.thisQuarter.range(DateTime(2026, 2, 15));
+      expect(start, DateTime(2026, 1, 1)); // Q1
+    });
+
+    test('this year spans the calendar year', () {
+      final (start, end) = ReportPeriod.thisYear.range(DateTime(2026, 7, 24));
+      expect(start, DateTime(2026, 1, 1));
+      expect(end.month, 12);
+      expect(end.day, 31);
+    });
+  });
+
+  group('ReportsService.breakdownFor period scoping (WTM-115)', () {
+    final now = DateTime(2026, 7, 24);
+    final service = ReportsService([
+      order('lastyear', DateTime(2025, 11, 10), OrderStatus.delivered, [
+        item('Home', 1, 900000),
+      ]),
+      order('q2', DateTime(2026, 5, 10), OrderStatus.delivered, [
+        item('Home', 1, 300000),
+      ]),
+      order('jul1', DateTime(2026, 7, 5), OrderStatus.delivered, [
+        item('Fashion', 1, 500000),
+      ]),
+      order('jul2', DateTime(2026, 7, 20), OrderStatus.delivered, [
+        item('Electronics', 1, 200000),
+      ]),
+      order('void', DateTime(2026, 7, 6), OrderStatus.cancelled, [
+        item('Home', 1, 999000),
+      ]),
+    ]);
+
+    test('this month = July billable only (cancelled excluded)', () {
+      final b = service.breakdownFor(now, ReportPeriod.thisMonth);
+      expect(b.revenue, 700000);
+      expect(b.orders, 2);
+      expect(b.topCategories.map((c) => c.category), [
+        'Fashion',
+        'Electronics',
+      ]);
+      expect(b.hasSales, isTrue);
+    });
+
+    test('this quarter (Q3) matches July here — Q2 May order excluded', () {
+      final b = service.breakdownFor(now, ReportPeriod.thisQuarter);
+      expect(b.revenue, 700000);
+      expect(b.orders, 2);
+    });
+
+    test('this year adds the Q2 order, still no last-year order', () {
+      final b = service.breakdownFor(now, ReportPeriod.thisYear);
+      expect(b.revenue, 1000000); // 300k (Home) + 500k (Fashion) + 200k (Elec)
+      expect(b.orders, 3);
+      // Fashion (500k) leads this year; Home is only 300k here.
+      expect(b.topCategories.first.category, 'Fashion');
+      expect(b.topCategories.map((c) => c.category), [
+        'Fashion',
+        'Home',
+        'Electronics',
+      ]);
+    });
+
+    test('all time adds the 2025 order', () {
+      final b = service.breakdownFor(now, ReportPeriod.allTime);
+      expect(b.revenue, 1900000); // + 900k from Nov 2025
+      expect(b.orders, 4);
+      // Home now leads with 1.2M (300k + 900k).
+      expect(b.topCategories.first.category, 'Home');
+      expect(b.topCategories.first.revenue, 1200000);
+    });
+
+    test('empty book yields the empty breakdown', () {
+      final b = ReportsService([]).breakdownFor(now, ReportPeriod.thisYear);
+      expect(b.hasSales, isFalse);
+      expect(b.revenue, 0);
+      expect(b.topCategories, isEmpty);
+    });
+  });
 }
