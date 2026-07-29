@@ -4,7 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/metrics/business_metrics.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
@@ -22,6 +26,13 @@ void main() {
       orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
       customerRepositoryProvider.overrideWithValue(
         InMemoryCustomerRepository(),
+      ),
+      // The generated-opportunities source (WTM-139) also reads these.
+      productRepositoryProvider.overrideWithValue(
+        InMemoryProductRepository([]),
+      ),
+      businessGoalRepositoryProvider.overrideWithValue(
+        InMemoryBusinessGoalRepository(),
       ),
     ],
     child: MaterialApp(home: home),

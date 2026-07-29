@@ -5,7 +5,9 @@ import '../finance/finance_context.dart';
 import '../inventory/inventory_context.dart';
 import '../journey/journey_context.dart';
 import '../metrics/business_context_service.dart';
+import '../opportunity/opportunity.dart';
 import '../opportunity/opportunity_context.dart';
+import '../opportunity/opportunity_rule_engine.dart';
 import '../orders/order_context.dart';
 import '../timeline/timeline_context.dart';
 import 'tongtai_consumer_provider.dart';
@@ -27,10 +29,28 @@ final inventoryContextProvider = Provider<InventoryContextProvider>(
   (ref) => InventoryContextProvider(ref.watch(productRepositoryProvider)),
 );
 
-/// Opportunity has no persisted/generated source yet, so the real business reads
-/// an empty summary (User Data First); it fills in once a real source lands.
+/// The Opportunity Rule Engine's current generated opportunities (WTM-139,
+/// Founder default): real business data in → rule-based opportunities out.
+/// Deterministic per data snapshot; empty for a brand-new business.
+final generatedOpportunitiesProvider = FutureProvider<List<Opportunity>>((
+  ref,
+) async {
+  const engine = OpportunityRuleEngine();
+  return engine.generate(
+    products: await ref.watch(productRepositoryProvider).loadAll(),
+    customers: await ref.watch(customerRepositoryProvider).loadAll(),
+    orders: await ref.watch(orderRepositoryProvider).loadAll(),
+    goals: await ref.watch(businessGoalRepositoryProvider).loadAll(),
+    now: DateTime.now(),
+  );
+});
+
+/// Opportunity slice — real generated opportunities via the Rule Engine
+/// (WTM-139); AI later only layers scoring/ranking/explanation on top.
 final opportunityContextProvider = Provider<OpportunityContextProvider>(
-  (ref) => const OpportunityContextProvider(),
+  (ref) => OpportunityContextProvider(
+    source: () => ref.read(generatedOpportunitiesProvider.future),
+  ),
 );
 
 /// Business Journey (goals) + Finance slices (WTM-133) — Drift-backed, so a

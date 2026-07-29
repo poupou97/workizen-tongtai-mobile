@@ -21,6 +21,8 @@ import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_context.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/reports/business_report.dart';
 import 'package:tongtai/features/tongtai/timeline/timeline_context.dart';
@@ -327,6 +329,13 @@ void main() {
           orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
           customerRepositoryProvider.overrideWithValue(
             InMemoryCustomerRepository(),
+          ),
+          // The generated-opportunities source (WTM-139) also reads these.
+          productRepositoryProvider.overrideWithValue(
+            InMemoryProductRepository([]),
+          ),
+          businessGoalRepositoryProvider.overrideWithValue(
+            InMemoryBusinessGoalRepository(),
           ),
         ],
         child: const MaterialApp(home: TongtaiMoreScreen()),
