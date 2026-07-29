@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_feed_controller.dart';
@@ -56,6 +59,8 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(button);
+    await tester.pumpAndSettle();
     await tester.tap(button);
     await tester.pumpAndSettle();
 
@@ -100,4 +105,45 @@ void main() {
 
     expect(find.byType(TongtaiOpportunityDetailScreen), findsOneWidget);
   });
+
+  testWidgets(
+    'WTM-94: "Tạo mục tiêu" creates an idempotent Journey goal from the '
+    'opportunity',
+    (tester) async {
+      final repo = InMemoryBusinessGoalRepository();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [businessGoalRepositoryProvider.overrideWithValue(repo)],
+          child: MaterialApp(
+            home: TongtaiOpportunityDetailScreen(
+              opportunity: sample,
+              clock: () => DateTime(2026, 7, 29),
+            ),
+          ),
+        ),
+      );
+
+      final button = find.byKey(const Key('opportunity-create-goal'));
+      await tester.scrollUntilVisible(
+        button,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      final goals = await repo.loadAll();
+      final goal = goals.single;
+      expect(goal.id, 'goal-from-o1');
+      expect(goal.name, 'Quạt tích điện sắp vào mùa nóng');
+      expect(goal.targetAmount, 5200000); // expectedImpact
+      expect(goal.endDate, DateTime(2026, 7, 29).add(const Duration(days: 45)));
+      expect(find.textContaining('Đã tạo mục tiêu'), findsOneWidget);
+
+      // Idempotent: a second tap upserts the same id — no duplicates.
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(await repo.loadAll(), hasLength(1));
+    },
+  );
 }
