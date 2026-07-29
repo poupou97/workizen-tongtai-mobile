@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ai/business_plan.dart';
 import '../../ai/business_recommendation.dart';
 import '../../ai/business_summary.dart';
 import '../../core/tongtai_formatters.dart';
@@ -34,6 +35,7 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
     this.opportunities,
     this.summaryService,
     this.recommendationService,
+    this.planService,
   });
 
   /// Injectable breakdown source for tests; when null the screen loads real
@@ -59,6 +61,10 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
   /// Injectable recommendation source for tests (WTM-135/G-3B); when null the
   /// screen uses [businessRecommendationServiceProvider].
   final BusinessRecommendationService? recommendationService;
+
+  /// Injectable planner source for tests (WTM-136/G-3C); when null the screen
+  /// uses [businessPlanServiceProvider].
+  final BusinessPlanService? planService;
 
   @override
   ConsumerState<TongtaiReportsScreen> createState() =>
@@ -112,6 +118,25 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
         text: recommendation.text,
         sourceLabel: recommendation.isAi
             ? (recommendation.provider?.displayName ?? 'AI')
+            : 'Rule-based',
+      );
+      _aiRunning = false;
+    });
+  }
+
+  Future<void> _runPlan() async {
+    if (_aiRunning) return;
+    setState(() => _aiRunning = true);
+    final BusinessPlanService service =
+        widget.planService ?? ref.read(businessPlanServiceProvider);
+    final plan = await service.plan();
+    if (!mounted) return;
+    setState(() {
+      _aiResult = AiCardResult(
+        title: 'Kế hoạch tuần · Weekly plan',
+        text: plan.text,
+        sourceLabel: plan.isAi
+            ? (plan.provider?.displayName ?? 'AI')
             : 'Rule-based',
       );
       _aiRunning = false;
@@ -183,6 +208,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
                     aiRunning: _aiRunning,
                     onSummarize: _runSummary,
                     onRecommend: _runRecommendation,
+                    onPlan: _runPlan,
                   )
                 : const _ReportsEmptyState()),
     );
@@ -201,6 +227,7 @@ class _ReportBody extends StatelessWidget {
     required this.aiRunning,
     required this.onSummarize,
     required this.onRecommend,
+    required this.onPlan,
   });
 
   final BusinessReport report;
@@ -213,11 +240,13 @@ class _ReportBody extends StatelessWidget {
 
   final OpportunityPipeline pipeline;
 
-  /// G-3A/G-3B: the on-demand Workizen AI answer (summary or recommendations).
+  /// G-3A/B/C: the on-demand Workizen AI answer (summary / recommendations /
+  /// weekly plan).
   final AiCardResult? aiResult;
   final bool aiRunning;
   final VoidCallback onSummarize;
   final VoidCallback onRecommend;
+  final VoidCallback onPlan;
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +311,7 @@ class _ReportBody extends StatelessWidget {
           running: aiRunning,
           onSummarize: onSummarize,
           onRecommend: onRecommend,
+          onPlan: onPlan,
         ),
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
@@ -367,12 +397,14 @@ class _AiSummaryCard extends StatelessWidget {
     required this.running,
     required this.onSummarize,
     required this.onRecommend,
+    required this.onPlan,
   });
 
   final AiCardResult? result;
   final bool running;
   final VoidCallback onSummarize;
   final VoidCallback onRecommend;
+  final VoidCallback onPlan;
 
   @override
   Widget build(BuildContext context) {
@@ -473,6 +505,12 @@ class _AiSummaryCard extends StatelessWidget {
                   onPressed: onRecommend,
                   icon: const Icon(Icons.tips_and_updates_outlined, size: 16),
                   label: const Text('Gợi ý hành động · Recommend'),
+                ),
+                OutlinedButton.icon(
+                  key: const Key('reports-ai-plan-run'),
+                  onPressed: onPlan,
+                  icon: const Icon(Icons.checklist_outlined, size: 16),
+                  label: const Text('Kế hoạch tuần · Plan'),
                 ),
               ],
             ),

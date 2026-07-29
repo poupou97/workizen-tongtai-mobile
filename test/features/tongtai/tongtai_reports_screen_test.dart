@@ -86,6 +86,13 @@ void main() {
     await tester.pumpWidget(host());
     await tester.pumpAndSettle();
 
+    // The AI card (G-3A/B/C) sits above the chart — bring the chart into the
+    // lazy ListView's viewport first.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('reports-revenue-chart')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.byKey(const Key('reports-revenue-chart')), findsOneWidget);
     expect(find.text('Th7'), findsOneWidget);
     expect(find.text('Th2'), findsOneWidget);
