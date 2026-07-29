@@ -4,6 +4,7 @@ import '../inventory/inventory_context.dart';
 import '../journey/journey_context.dart';
 import '../opportunity/opportunity_context.dart';
 import '../orders/order_context.dart';
+import '../timeline/timeline_context.dart';
 import 'business_context.dart';
 import 'business_health.dart';
 import 'business_metrics_service.dart';
@@ -24,7 +25,8 @@ class BusinessContextService {
     this._inventory,
     this._opportunity,
     this._journey,
-    this._finance, {
+    this._finance,
+    this._timeline, {
     this.clock,
   });
 
@@ -35,6 +37,7 @@ class BusinessContextService {
   final OpportunityContextProvider _opportunity;
   final JourneyContextProvider _journey;
   final FinanceContextProvider _finance;
+  final TimelineContextProvider _timeline;
 
   /// Stamps [BusinessContext.generatedAt]; injectable for deterministic tests.
   final DateTime Function()? clock;
@@ -53,6 +56,7 @@ class BusinessContextService {
       opportunity: await _opportunity.load(),
       journey: await _journey.load(),
       finance: await _finance.load(),
+      timeline: await _timeline.load(),
       health: BusinessHealth.from(metrics),
     );
   }

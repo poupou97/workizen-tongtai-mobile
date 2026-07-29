@@ -15,6 +15,7 @@ import 'package:tongtai/features/tongtai/journey/journey_context.dart';
 import 'package:tongtai/features/tongtai/metrics/business_context.dart';
 import 'package:tongtai/features/tongtai/metrics/business_context_service.dart';
 import 'package:tongtai/features/tongtai/metrics/business_health.dart';
+import 'package:tongtai/features/tongtai/metrics/business_metrics.dart';
 import 'package:tongtai/features/tongtai/metrics/business_metrics_service.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_context.dart';
@@ -22,6 +23,8 @@ import 'package:tongtai/features/tongtai/opportunity/opportunity_signals.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_context.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/timeline/business_event.dart';
+import 'package:tongtai/features/tongtai/timeline/timeline_context.dart';
 
 /// WTM-129/131 — BusinessContext is the Aggregate Root, composed from one
 /// Context Provider per capability. AI reads only this; Home consumes it.
@@ -128,6 +131,13 @@ void main() {
       OpportunityContextProvider(opportunities: opportunities, clock: clock),
       JourneyContextProvider(goalRepo, clock: clock),
       FinanceContextProvider(financeRepo, clock: clock),
+      TimelineContextProvider(
+        financeRepo,
+        orderRepo,
+        goalRepo,
+        opportunities: opportunities,
+        clock: clock,
+      ),
       clock: clock,
     );
   }
@@ -232,6 +242,29 @@ void main() {
       expect(s.pace(GoalPace.ahead), 1);
       expect(s.pace(GoalPace.notStarted), 1);
     });
+
+    test('TimelineSummary counts events by type + recent window + latest', () {
+      final now = DateTime(2026, 7, 25); // recent window cutoff = Jul 18
+      BusinessEvent event(String id, BusinessEventType type, DateTime at) =>
+          BusinessEvent(id: id, type: type, title: id, timestamp: at);
+      final s = TimelineSummary.from([
+        event('e1', BusinessEventType.order, DateTime(2026, 7, 24)), // recent
+        event('e2', BusinessEventType.order, DateTime(2026, 7, 20)), // recent
+        event('e3', BusinessEventType.finance, DateTime(2026, 7, 10)), // old
+      ], now: now);
+
+      expect(s.totalEvents, 3);
+      expect(s.type(BusinessEventType.order), 2);
+      expect(s.type(BusinessEventType.finance), 1);
+      expect(s.recentCount, 2); // Jul 24 + Jul 20
+      expect(s.latestAt, DateTime(2026, 7, 24));
+      expect(s.hasActivity, isTrue);
+    });
+
+    test('TimelineSummary.empty has no activity', () {
+      expect(TimelineSummary.empty.hasActivity, isFalse);
+      expect(TimelineSummary.empty.latestAt, isNull);
+    });
   });
 
   group('BusinessContextService.load (composes providers)', () {
@@ -270,6 +303,12 @@ void main() {
       expect(ctx.journey.total, 1);
       expect(ctx.finance.incomeYtd, 500000);
       expect(ctx.finance.hasActivity, isTrue);
+      // Timeline projects the same records into an activity stream:
+      // 2 orders + 1 goal + 1 transaction + 1 opportunity = 5 events.
+      expect(ctx.timeline.totalEvents, 5);
+      expect(ctx.timeline.type(BusinessEventType.order), 2);
+      expect(ctx.timeline.type(BusinessEventType.opportunity), 1);
+      expect(ctx.timeline.hasActivity, isTrue);
       expect(ctx.hasData, isTrue);
     });
 
@@ -282,6 +321,8 @@ void main() {
       expect(ctx.opportunity.total, 0);
       expect(ctx.journey.total, 0);
       expect(ctx.finance.hasActivity, isFalse);
+      expect(ctx.timeline.hasActivity, isFalse);
+      expect(ctx.timeline.totalEvents, 0);
     });
 
     test(
@@ -319,6 +360,33 @@ void main() {
       ).load();
       expect(ctx.health.status, BusinessHealthStatus.healthy);
       expect(ctx.health.isHealthy, isTrue);
+    });
+
+    test('hasData ignores the timeline projection (no double-count)', () {
+      // Timeline re-derives from the other slices, so a snapshot whose only
+      // "activity" is timeline events (and every real slice empty) still has no
+      // data — timeline must not leak into hasData.
+      final ctx = BusinessContext(
+        generatedAt: DateTime(2026, 7, 25),
+        metrics: BusinessMetrics.empty,
+        customers: CustomerSummary.empty,
+        orders: OrderSummary.empty,
+        inventory: InventorySummary.empty,
+        opportunity: OpportunitySummary.empty,
+        journey: JourneySummary.empty,
+        finance: FinanceSummary.empty,
+        timeline: TimelineSummary.from([
+          BusinessEvent(
+            id: 'e',
+            type: BusinessEventType.order,
+            title: 'o',
+            timestamp: DateTime(2026, 7, 24),
+          ),
+        ], now: DateTime(2026, 7, 25)),
+        health: BusinessHealth.notEnoughData,
+      );
+      expect(ctx.timeline.hasActivity, isTrue);
+      expect(ctx.hasData, isFalse);
     });
   });
 }

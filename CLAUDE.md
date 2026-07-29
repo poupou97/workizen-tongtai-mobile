@@ -66,9 +66,19 @@ Fable 5 for hard tasks/retries.
 
 ## Gates
 
-- **`main` is Founder-only** — agents work on feature branches, open PRs,
-  never merge/push main, never tag/release/deploy.
-- Every PASS story parks at Jira **Code Review** until the Founder merges.
+- **Autonomous merge (Founder-authorized 2026-07-29):** Tổng Tài is an
+  independent repo and the AI has **full Git rights, including merging its own
+  PRs to `main`**, once **CI is green · no regression · no Founder Gate touched ·
+  no Accepted ADR violated**. Do **not** pause at routine Git/PR/merge steps —
+  self-merge and continue to the next backlog item. Then move the story to Jira
+  **Done**. (This repo-local grant deviates from the ecosystem "gates are
+  Founder-only" default in the root workspace `CLAUDE.md`; it applies to this
+  repo only, by the Founder's decision.)
+- **Founder Gates (the only reasons to stop)** — surface and wait for these,
+  nothing less: product vision/direction · ADR conflict · multiple genuinely
+  valid directions · security/privacy/legal (incl. the **G-3** Workizen-AI /
+  BYOK / privacy red-line) · genuinely blocked.
+- **Release / tag / deploy to production remain Founder-only.**
 
 ## Conventions
 

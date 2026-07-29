@@ -22,17 +22,21 @@ BusinessContext is **not** blocked on completing every capability. It grows:
   (reuses the capability's own `FinanceSummary`). Both are Drift-backed and start
   empty (User Data First); the provider owns its own clock for the time-relative
   reads. Folded in as two more providers — no change to what AI or Home consume.
-- **Later:** Timeline — a *derived projection* over the other capabilities'
-  events, so it becomes its own provider once real (non-sample) event sources are
-  wired; it is deliberately not folded in yet to avoid double-counting.
+- **Phase 3 (WTM-134):** **Timeline** — a *derived projection* (activity stream)
+  over the other capabilities' events. `TimelineContextProvider` builds a real,
+  non-sample `TimelineService` from the live Finance/Order/Journey repositories.
+  It is a read-only *view*, so it is **excluded from `hasData`** (its events
+  re-derive from finance/orders/journey, which already drive `hasData`) — no
+  double-counting. This completes the non-AI Business Snapshot.
 - Business Journey **is** the goal-orchestration capability, so the single
   `JourneySummary` slice covers the snapshot's Journey/Goals concern (one Context
   Provider per capability).
 
-Current shape (through Phase 2): `BusinessContext { version, generatedAt,
-metrics, customers: CustomerSummary, orders: OrderSummary, inventory:
-InventorySummary, opportunity: OpportunitySummary, journey: JourneySummary,
-finance: FinanceSummary, health: BusinessHealth }`.
+Current shape (through Phase 3 — the full non-AI snapshot): `BusinessContext {
+version, generatedAt, metrics, customers: CustomerSummary, orders: OrderSummary,
+inventory: InventorySummary, opportunity: OpportunitySummary, journey:
+JourneySummary, finance: FinanceSummary, timeline: TimelineSummary, health:
+BusinessHealth }`.
 
 ### One Context Provider per capability (WTM-131)
 Do **not** build many independent summary services. **Each capability owns a
@@ -89,6 +93,7 @@ classification can proceed; only the AI scoring waits).
   consistent and the AI boundary is enforceable by construction.
 - **User Data First:** a new business yields `BusinessContext.empty`.
 - Adding a capability to the context is additive — no change to AI/Home contracts.
-- Next: Timeline projection slice as its real sources land; then AI Phase-2
+- The non-AI Business Snapshot is **complete** (WTM-134). Next is AI Phase-2
   (Opportunity Win Probability / Recommendation / Summary, BusinessHealth AI
-  assessor). AI activation itself remains **G-3** (deferred).
+  assessor) — all reading the same BusinessContext. AI activation remains **G-3**
+  (deferred, Founder-only privacy red-line).
