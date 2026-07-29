@@ -1,0 +1,53 @@
+import '../consumer/customer_order.dart';
+import '../core/tongtai_enums.dart';
+import 'business_goal.dart';
+
+/// Reconciles a [BusinessGoal] against **real recorded sales** (WTM-89).
+///
+/// A goal is aspirational and its `achievedAmount` is the seller's own manual
+/// tracking. This service adds the **data-first** view: how much revenue the
+/// business actually booked *during the goal's active window* — the same
+/// billable rule the reports use (cancelled orders excluded). It is purely
+/// additive: it never mutates the goal or its manual progress, so the seller
+/// stays in control of the goal while also seeing the ground truth from orders.
+///
+/// Pure Dart over the order list — no database, no clock of its own (the caller
+/// passes `now`) — so every figure is deterministically unit-testable, mirroring
+/// [ReportsService].
+class JourneyProgressService {
+  const JourneyProgressService();
+
+  /// Revenue booked toward [goal] — billable orders whose date falls within the
+  /// goal's active window `[startDate, min(now, endDate)]` (inclusive). Returns 0
+  /// before the goal starts.
+  double realizedRevenue(
+    BusinessGoal goal,
+    Iterable<CustomerOrder> orders,
+    DateTime now,
+  ) {
+    // The window never runs past the goal's own end, nor into the future.
+    final windowEnd = now.isBefore(goal.endDate) ? now : goal.endDate;
+    if (windowEnd.isBefore(goal.startDate)) return 0;
+    return orders
+        .where((o) => o.status != OrderStatus.cancelled)
+        .where(
+          (o) => !o.date.isBefore(goal.startDate) && !o.date.isAfter(windowEnd),
+        )
+        .fold(0.0, (sum, o) => sum + o.totalAmount);
+  }
+
+  /// Realized revenue as a fraction of the goal's revenue target (0..1, clamped).
+  /// Returns 0 when the goal has no revenue target — see [BusinessGoal.progress]
+  /// for the goal's own (manual) progress in that case.
+  double realizedShare(
+    BusinessGoal goal,
+    Iterable<CustomerOrder> orders,
+    DateTime now,
+  ) {
+    if (goal.targetAmount <= 0) return 0;
+    return (realizedRevenue(goal, orders, now) / goal.targetAmount).clamp(
+      0.0,
+      1.0,
+    );
+  }
+}

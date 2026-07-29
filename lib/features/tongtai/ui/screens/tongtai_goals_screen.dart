@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../consumer/customer_order.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
 import '../../journey/business_goal_controller.dart';
 import '../../journey/goal_theme.dart';
+import '../../journey/journey_progress.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_journey_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
 import 'tongtai_goal_detail_screen.dart';
 import 'tongtai_goal_form_screen.dart';
 
@@ -23,7 +26,12 @@ export '../../journey/goal_theme.dart' show tongtaiGoalPaceColor;
 /// Drift-backed for the real app, empty for a new user); the AI step-plan
 /// arrives with WTM-88.
 class TongtaiGoalsScreen extends ConsumerStatefulWidget {
-  const TongtaiGoalsScreen({super.key, this.controller, this.clock});
+  const TongtaiGoalsScreen({
+    super.key,
+    this.controller,
+    this.clock,
+    this.orders,
+  });
 
   /// Injectable goal set. When provided it is *not* disposed here.
   final BusinessGoalController? controller;
@@ -32,14 +40,25 @@ class TongtaiGoalsScreen extends ConsumerStatefulWidget {
   /// [DateTime.now]).
   final DateTime Function()? clock;
 
+  /// Injectable orders for the real-sales insight on goal detail (WTM-89). When
+  /// null in real mode the screen loads them from the Orders repository; in test
+  /// mode (an injected [controller]) it defaults to none rather than touching a
+  /// provider.
+  final List<CustomerOrder>? orders;
+
   @override
   ConsumerState<TongtaiGoalsScreen> createState() => _TongtaiGoalsScreenState();
 }
 
 class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
+  static const _progress = JourneyProgressService();
+
   late final BusinessGoalController _controller;
   late final bool _ownsController;
   late final DateTime Function() _clock;
+
+  /// Real orders backing the goal-detail sales insight (WTM-89).
+  List<CustomerOrder> _orders = const [];
 
   @override
   void initState() {
@@ -47,15 +66,25 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
     if (widget.controller != null) {
       _controller = widget.controller!;
       _ownsController = false;
+      // Test mode: never reach for a provider — use whatever was injected.
+      _orders = widget.orders ?? const [];
     } else {
       // Real app: persistent Drift goals (WTM-124), empty for new users.
       _controller = BusinessGoalController(
         ref.read(businessGoalRepositoryProvider),
       );
       _ownsController = true;
+      _loadOrders();
     }
     _clock = widget.clock ?? DateTime.now;
     if (_ownsController) _controller.hydrate();
+  }
+
+  Future<void> _loadOrders() async {
+    final orders =
+        widget.orders ?? await ref.read(orderRepositoryProvider).loadAll();
+    if (!mounted) return;
+    setState(() => _orders = orders);
   }
 
   @override
@@ -77,11 +106,17 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
   /// Opens the goal detail (WTM-88) — progress, pace, action plan and tips —
   /// with an Edit action that closes it and opens the form.
   void _openDetail(BuildContext context, BusinessGoal goal) {
+    // Data-first insight (WTM-89): sales booked in the goal window from real
+    // orders — only meaningful for revenue-denominated goals.
+    final realized = goal.targetAmount > 0
+        ? _progress.realizedRevenue(goal, _orders, _clock())
+        : null;
     Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => TongtaiGoalDetailScreen(
           goal: goal,
           clock: widget.clock,
+          realizedRevenue: realized,
           onEdit: () {
             Navigator.of(context).pop();
             _openForm(context, goal: goal);

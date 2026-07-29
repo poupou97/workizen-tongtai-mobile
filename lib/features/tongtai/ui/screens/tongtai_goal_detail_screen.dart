@@ -8,21 +8,31 @@ import '../../navigation/tongtai_design_tokens.dart';
 
 /// Goal Detail & Action Plan (WTM-88) — the tap target from the goals list.
 ///
-/// Shows a goal's progress and pace (WTM-89), a rule-based [goalActionPlan] to
-/// reach it, and short guidance tips (WTM-90, inline). The pencil action calls
-/// [onEdit] to open the goal form. `clock` is injectable so pace and the plan
-/// are deterministic under test.
+/// Shows a goal's progress and pace, a rule-based [goalActionPlan] to reach it,
+/// and short guidance tips (WTM-90, inline). The pencil action calls [onEdit] to
+/// open the goal form. `clock` is injectable so pace and the plan are
+/// deterministic under test.
+///
+/// When [realizedRevenue] is supplied (WTM-89), the screen adds a data-first
+/// card showing the sales actually booked during the goal's window — real order
+/// data alongside the seller's own (manual) progress. It is purely additive and
+/// leaves the goal's manual progress/edit flow untouched.
 class TongtaiGoalDetailScreen extends StatelessWidget {
   const TongtaiGoalDetailScreen({
     super.key,
     required this.goal,
     this.clock,
     this.onEdit,
+    this.realizedRevenue,
   });
 
   final BusinessGoal goal;
   final DateTime Function()? clock;
   final VoidCallback? onEdit;
+
+  /// Sales booked during the goal window, from real orders (WTM-89). Null when
+  /// the caller has no order source; shown only for revenue-denominated goals.
+  final double? realizedRevenue;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +85,14 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
 
           // ── Progress ─────────────────────────────────────────────────
           _ProgressCard(goal: goal, now: now, paceColor: paceColor),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TongtaiDesignTokens.spacing4),
+
+          // ── Real sales booked in the goal window (WTM-89) ────────────
+          if (realizedRevenue != null && goal.targetAmount > 0) ...[
+            _RealizedSalesCard(goal: goal, realized: realizedRevenue!),
+            const SizedBox(height: TongtaiDesignTokens.spacing5),
+          ] else
+            const SizedBox(height: TongtaiDesignTokens.spacing1),
 
           // ── Recommendation ───────────────────────────────────────────
           Container(
@@ -214,6 +231,70 @@ class _ProgressCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Data-first companion to [_ProgressCard] (WTM-89): the revenue actually booked
+/// from real orders during the goal window, next to its share of the target.
+/// Purely informational — it never overrides the goal's own manual progress.
+class _RealizedSalesCard extends StatelessWidget {
+  const _RealizedSalesCard({required this.goal, required this.realized});
+
+  final BusinessGoal goal;
+  final double realized;
+
+  @override
+  Widget build(BuildContext context) {
+    final share = goal.targetAmount <= 0
+        ? 0
+        : (realized / goal.targetAmount * 100).round();
+    const accent = TongtaiDesignTokens.producerGreen;
+    return Container(
+      key: const Key('goal-detail-realized'),
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.componentBorderRadius,
+        ),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.point_of_sale_outlined, size: 20, color: accent),
+          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Doanh thu thực tế trong kỳ · Booked sales this period',
+                  style: TongtaiDesignTokens.captionStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${TongtaiFormatters.vndShort(realized)} · $share% mục tiêu',
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Từ đơn hàng đã ghi nhận · from recorded orders',
+                  style: TongtaiDesignTokens.captionStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

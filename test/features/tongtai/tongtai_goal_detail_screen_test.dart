@@ -78,6 +78,38 @@ void main() {
     expect(find.byKey(const Key('goal-detail-edit')), findsNothing);
   });
 
+  testWidgets(
+    'shows the real-sales card when realizedRevenue is provided (WTM-89)',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TongtaiGoalDetailScreen(
+            goal: buildGoal(), // revenue target 100M
+            clock: clock,
+            realizedRevenue: 30000000, // 30% of target from real orders
+          ),
+        ),
+      );
+
+      expect(find.byKey(const Key('goal-detail-realized')), findsOneWidget);
+      expect(find.textContaining('30% mục tiêu'), findsOneWidget);
+      // The manual progress (55%) is untouched — both are shown.
+      expect(find.text('55%'), findsOneWidget);
+    },
+  );
+
+  testWidgets('hides the real-sales card when realizedRevenue is null', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TongtaiGoalDetailScreen(goal: buildGoal(), clock: clock),
+      ),
+    );
+
+    expect(find.byKey(const Key('goal-detail-realized')), findsNothing);
+  });
+
   testWidgets('tapping a goal card on the goals screen opens the detail', (
     tester,
   ) async {
