@@ -34,9 +34,13 @@ final opportunityContextProvider = Provider<OpportunityContextProvider>(
 );
 
 /// Business Journey (goals) + Finance slices (WTM-133) — Drift-backed, so a
-/// brand-new business reads empty summaries (User Data First).
+/// brand-new business reads empty summaries (User Data First). Journey derives
+/// revenue-goal progress from real orders (WTM-138, Founder auto-derive).
 final journeyContextProvider = Provider<JourneyContextProvider>(
-  (ref) => JourneyContextProvider(ref.watch(businessGoalRepositoryProvider)),
+  (ref) => JourneyContextProvider(
+    ref.watch(businessGoalRepositoryProvider),
+    orders: () => ref.read(orderRepositoryProvider).loadAll(),
+  ),
 );
 final financeContextProvider = Provider<FinanceContextProvider>(
   (ref) => FinanceContextProvider(ref.watch(financeRepositoryProvider)),

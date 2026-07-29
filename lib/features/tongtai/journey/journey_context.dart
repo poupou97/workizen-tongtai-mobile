@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 
+import '../consumer/customer_order.dart';
 import '../core/capability_context_provider.dart';
 import 'business_goal.dart';
 import 'business_goal_repository.dart';
+import 'journey_progress.dart';
 
 /// Business-Journey slice of the business snapshot (WTM-133, Progressive
 /// Aggregation Phase 2). Business Journey *is* the goal-orchestration capability,
@@ -55,17 +57,26 @@ class JourneySummary {
 /// so a brand-new business reads an empty summary; demo/tests inject goals.
 class JourneyContextProvider
     implements CapabilityContextProvider<JourneySummary> {
-  const JourneyContextProvider(this._repository, {this.clock});
+  const JourneyContextProvider(this._repository, {this.orders, this.clock});
 
   final BusinessGoalRepository _repository;
+
+  /// Optional order source for **auto-derived progress** (WTM-138, Founder
+  /// default): when present, revenue-goal progress is derived from real booked
+  /// orders before the pace counts. Absent → the goals' own values are used.
+  final Future<List<CustomerOrder>> Function()? orders;
 
   /// Injectable clock for the time-relative pace counts; defaults to
   /// [DateTime.now].
   final DateTime Function()? clock;
 
   @override
-  Future<JourneySummary> load() async => JourneySummary.from(
-    await _repository.loadAll(),
-    now: (clock ?? DateTime.now)(),
-  );
+  Future<JourneySummary> load() async {
+    final now = (clock ?? DateTime.now)();
+    var goals = await _repository.loadAll();
+    if (orders != null) {
+      goals = deriveGoalsProgress(goals, await orders!(), now);
+    }
+    return JourneySummary.from(goals, now: now);
+  }
 }
