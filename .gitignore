@@ -46,3 +46,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# WTM-108 (ADR-TON-005 secret gate): real Firebase config files are provided
+# locally by the Founder and must never be committed.
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart

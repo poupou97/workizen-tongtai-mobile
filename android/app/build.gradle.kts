@@ -4,6 +4,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// WTM-108 (ADR-TON-005, D-7): Firebase operational telemetry is wired but the
+// Google Services plugin is applied ONLY when the Founder-provided config file
+// exists. Without android/app/google-services.json the app still builds and
+// telemetry silently no-ops (see lib/core/telemetry/).
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.workizen.tongtai"
     compileSdk = flutter.compileSdkVersion
