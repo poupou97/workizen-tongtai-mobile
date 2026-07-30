@@ -16,6 +16,20 @@ abstract class CustomerRepository {
   /// Insert a new customer or replace the one with the same id.
   Future<void> upsert(Customer customer);
 
+  /// [upsert] for a whole collection, as ONE write (WTM-149 device defect 2).
+  ///
+  /// Semantically identical to calling [upsert] in iteration order — same rows,
+  /// same ids, same conflict handling — but the Drift implementation issues a
+  /// single batched transaction instead of one statement (plus a workspace
+  /// bootstrap) per record. Seeding 12 months of history writes ~1,100 rows;
+  /// row-at-a-time that froze the UI for minutes on a real device and got the
+  /// app killed by Android's low-memory killer mid-seed.
+  ///
+  /// Callers that mix collections must still order the calls themselves — the
+  /// `orders_table.customer_id` foreign key means customers have to be written
+  /// (and committed) before their orders.
+  Future<void> upsertAll(Iterable<Customer> customers);
+
   /// Deletes every row whose id starts with [prefix] — the sample-data
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
@@ -68,29 +82,45 @@ class DriftCustomerRepository implements CustomerRepository {
     final businessId = await _workspace.ensureBusinessId(_db);
     await _db
         .into(_db.customersTable)
-        .insertOnConflictUpdate(
-          CustomersTableCompanion.insert(
-            id: c.id,
-            businessId: businessId,
-            name: c.name,
-            email: Value(c.email.isEmpty ? null : c.email),
-            phone: Value(c.phone.isEmpty ? null : c.phone),
-            city: Value(c.location.isEmpty ? null : c.location),
-            segments: Value(encodeJsonStringList(c.segments)),
-            orderCount: Value(c.orderCount),
-            totalSpent: Value(c.totalSpent),
-            lastOrderDate: Value(c.lastPurchaseDate),
-            domainSnapshot: Value(
-              encodeDomainSnapshot({
-                'tags': c.tags,
-                'addresses': c.addresses,
-                'notes': c.notes,
-              }, version: _snapshotVersion),
-            ),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
+        .insertOnConflictUpdate(_companion(c, businessId));
   }
+
+  @override
+  Future<void> upsertAll(Iterable<Customer> customers) async {
+    final rows = customers.toList(growable: false);
+    if (rows.isEmpty) return;
+    final businessId = await _workspace.ensureBusinessId(_db);
+    // One batch = one transaction = one fsync, instead of one per row.
+    await _db.batch(
+      (b) => b.insertAllOnConflictUpdate(_db.customersTable, [
+        for (final c in rows) _companion(c, businessId),
+      ]),
+    );
+  }
+
+  /// The single row mapping, shared by [upsert] and [upsertAll] so the bulk
+  /// path can never drift from the single-row path.
+  CustomersTableCompanion _companion(Customer c, String businessId) =>
+      CustomersTableCompanion.insert(
+        id: c.id,
+        businessId: businessId,
+        name: c.name,
+        email: Value(c.email.isEmpty ? null : c.email),
+        phone: Value(c.phone.isEmpty ? null : c.phone),
+        city: Value(c.location.isEmpty ? null : c.location),
+        segments: Value(encodeJsonStringList(c.segments)),
+        orderCount: Value(c.orderCount),
+        totalSpent: Value(c.totalSpent),
+        lastOrderDate: Value(c.lastPurchaseDate),
+        domainSnapshot: Value(
+          encodeDomainSnapshot({
+            'tags': c.tags,
+            'addresses': c.addresses,
+            'notes': c.notes,
+          }, version: _snapshotVersion),
+        ),
+        updatedAt: Value(DateTime.now()),
+      );
 
   Customer _toCustomer(CustomersTableData row) {
     // Structured columns are the source of truth for promoted fields; the
@@ -141,6 +171,12 @@ class SampleCustomerRepository implements CustomerRepository {
   Future<void> upsert(Customer customer) async {
     // Demo data is read-only — do not persist.
   }
+
+  @override
+  Future<void> upsertAll(Iterable<Customer> customers) async {
+    // Demo data is read-only — do not persist.
+  }
+
   @override
   Future<void> deleteByIdPrefix(
     String prefix, {
@@ -167,6 +203,13 @@ class InMemoryCustomerRepository implements CustomerRepository {
       _customers[index] = customer;
     } else {
       _customers.add(customer);
+    }
+  }
+
+  @override
+  Future<void> upsertAll(Iterable<Customer> customers) async {
+    for (final c in customers) {
+      await upsert(c);
     }
   }
 

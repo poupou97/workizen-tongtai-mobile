@@ -15,6 +15,10 @@ abstract class BusinessGoalRepository {
   /// Insert a new goal or replace the one with the same id.
   Future<void> upsert(BusinessGoal goal);
 
+  /// [upsert] for a whole collection, as ONE write (WTM-149 device defect 2) —
+  /// see `CustomerRepository.upsertAll` for why the seam exists.
+  Future<void> upsertAll(Iterable<BusinessGoal> goals);
+
   /// Deletes every row whose id starts with [prefix] — the sample-data
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
@@ -61,37 +65,52 @@ class DriftBusinessGoalRepository implements BusinessGoalRepository {
   @override
   Future<void> upsert(BusinessGoal g) async {
     final businessId = await _workspace.ensureBusinessId(_db);
-    final status = g.progress >= 1.0 ? 'completed' : 'active';
     await _db
         .into(_db.journeysTable)
-        .insertOnConflictUpdate(
-          JourneysTableCompanion.insert(
-            id: g.id,
-            businessId: businessId,
-            goal: g.name,
-            status: status,
-            // Promoted (SoT) — read back from these columns.
-            revenueImpact: Value(g.targetAmount),
-            startedAt: Value(g.startDate),
-            // Derived, query/report only — the domain recomputes these.
-            progressPercent: Value((g.progress * 100).round()),
-            timelineDays: Value(g.endDate.difference(g.startDate).inDays),
-            createdAt: Value(g.createdAt),
-            updatedAt: Value(g.updatedAt),
-            // Lossless remainder of the divergent domain.
-            domainSnapshot: Value(
-              encodeDomainSnapshot({
-                'type': g.type.name,
-                'achievedAmount': g.achievedAmount,
-                'growthTarget': g.growthTarget,
-                'growthAchieved': g.growthAchieved,
-                'endDate': g.endDate.millisecondsSinceEpoch,
-                'notes': g.notes,
-              }, version: _snapshotVersion),
-            ),
-          ),
-        );
+        .insertOnConflictUpdate(_companion(g, businessId));
   }
+
+  @override
+  Future<void> upsertAll(Iterable<BusinessGoal> goals) async {
+    final rows = goals.toList(growable: false);
+    if (rows.isEmpty) return;
+    final businessId = await _workspace.ensureBusinessId(_db);
+    // One batch = one transaction = one fsync, instead of one per row.
+    await _db.batch(
+      (b) => b.insertAllOnConflictUpdate(_db.journeysTable, [
+        for (final g in rows) _companion(g, businessId),
+      ]),
+    );
+  }
+
+  /// The single row mapping, shared by [upsert] and [upsertAll] so the bulk
+  /// path can never drift from the single-row path.
+  JourneysTableCompanion _companion(BusinessGoal g, String businessId) =>
+      JourneysTableCompanion.insert(
+        id: g.id,
+        businessId: businessId,
+        goal: g.name,
+        status: g.progress >= 1.0 ? 'completed' : 'active',
+        // Promoted (SoT) — read back from these columns.
+        revenueImpact: Value(g.targetAmount),
+        startedAt: Value(g.startDate),
+        // Derived, query/report only — the domain recomputes these.
+        progressPercent: Value((g.progress * 100).round()),
+        timelineDays: Value(g.endDate.difference(g.startDate).inDays),
+        createdAt: Value(g.createdAt),
+        updatedAt: Value(g.updatedAt),
+        // Lossless remainder of the divergent domain.
+        domainSnapshot: Value(
+          encodeDomainSnapshot({
+            'type': g.type.name,
+            'achievedAmount': g.achievedAmount,
+            'growthTarget': g.growthTarget,
+            'growthAchieved': g.growthAchieved,
+            'endDate': g.endDate.millisecondsSinceEpoch,
+            'notes': g.notes,
+          }, version: _snapshotVersion),
+        ),
+      );
 
   BusinessGoal _toGoal(JourneysTableData row) {
     final snapshot = decodeDomainSnapshot(row.domainSnapshot);
@@ -149,6 +168,12 @@ class SampleBusinessGoalRepository implements BusinessGoalRepository {
   Future<void> upsert(BusinessGoal goal) async {
     // Demo data is read-only — do not persist.
   }
+
+  @override
+  Future<void> upsertAll(Iterable<BusinessGoal> goals) async {
+    // Demo data is read-only — do not persist.
+  }
+
   @override
   Future<void> deleteByIdPrefix(String prefix) async {
     // Demo fixtures are read-only — nothing to delete.
@@ -172,6 +197,13 @@ class InMemoryBusinessGoalRepository implements BusinessGoalRepository {
       _goals[index] = goal;
     } else {
       _goals.add(goal);
+    }
+  }
+
+  @override
+  Future<void> upsertAll(Iterable<BusinessGoal> goals) async {
+    for (final g in goals) {
+      await upsert(g);
     }
   }
 

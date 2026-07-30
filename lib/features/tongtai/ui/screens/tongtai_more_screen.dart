@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/l10n/language_notifier.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 import '../../providers/tongtai_sample_provider.dart';
 import '../../sample/historical_data_generator.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
@@ -61,6 +62,11 @@ class TongtaiMoreScreen extends ConsumerWidget {
   /// WTM-144/ADR-TON-014: seeds the sample fixtures into the PRODUCTION
   /// repositories (idempotent) after an explicit confirmation — every screen
   /// then shows the same data; removable below.
+  ///
+  /// Like every handler below it ends with [invalidateBusinessDataProviders]:
+  /// the capability contexts and Rule Twins are cached `FutureProvider`s, so
+  /// without it the predictive screens keep serving the pre-seed answer until
+  /// the app restarts (WTM-149 device defect 1).
   Future<void> _seedSamples(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -82,6 +88,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
     );
     if (confirmed != true || !context.mounted) return;
     await ref.read(sampleDataSeederProvider).seed();
+    invalidateBusinessDataProviders(ref);
     if (!context.mounted) return;
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)
@@ -116,6 +123,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
     await ref
         .read(historicalDataSeederProvider)
         .seed(const HistoricalDataSpec());
+    invalidateBusinessDataProviders(ref);
     if (!context.mounted) return;
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)
@@ -145,6 +153,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
     );
     if (confirmed != true || !context.mounted) return;
     await ref.read(sampleDataSeederProvider).removeAll();
+    invalidateBusinessDataProviders(ref);
     if (!context.mounted) return;
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)

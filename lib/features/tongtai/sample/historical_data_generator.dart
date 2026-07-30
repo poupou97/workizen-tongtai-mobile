@@ -1532,25 +1532,24 @@ class HistoricalDataSeeder {
   /// Insert order is customers/products → orders → goals → finance: the SQLite
   /// `orders_table.customer_id` foreign key requires the customer to exist
   /// first.
+  ///
+  /// Each step is a **single bulk write** (WTM-149 device defect 2). Written
+  /// row-at-a-time, 12 months (~1,100 rows, each its own Drift statement plus a
+  /// workspace bootstrap and its own implicit transaction/fsync) took ~4–5
+  /// minutes on a Galaxy S24 Ultra with the UI frozen, and Android's low-memory
+  /// killer restarted the app mid-seed. The generated records are byte-for-byte
+  /// the same — only the number of transactions changed.
   Future<void> seed(HistoricalDataSpec spec) async {
     final data = generate(spec);
     await sampleSeeder.removeAll();
 
-    for (final c in data.customers) {
-      await sampleSeeder.customers.upsert(c);
-    }
-    for (final p in data.products) {
-      await sampleSeeder.products.upsert(p);
-    }
-    for (final o in data.orders) {
-      await sampleSeeder.orders.upsert(o);
-    }
-    for (final g in data.goals) {
-      await sampleSeeder.goals.upsert(g);
-    }
-    for (final t in data.transactions) {
-      await sampleSeeder.finance.add(t);
-    }
+    await sampleSeeder.customers.upsertAll(data.customers);
+    await sampleSeeder.products.upsertAll(data.products);
+    // Awaited separately, and after the customers: a batch is one transaction,
+    // so every referenced customer must already be committed (FK 787).
+    await sampleSeeder.orders.upsertAll(data.orders);
+    await sampleSeeder.goals.upsertAll(data.goals);
+    await sampleSeeder.finance.addAll(data.transactions);
   }
 
   /// Removes every sample row — hand-written fixtures and generated history

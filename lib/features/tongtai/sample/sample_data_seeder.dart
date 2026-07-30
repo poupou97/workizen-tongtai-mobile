@@ -45,18 +45,25 @@ class SampleDataSeeder {
   static String _sampleId(String originalId) => '$kSampleIdPrefix$originalId';
 
   /// Seeds all fixtures with `sample-` ids (idempotent — see class doc).
+  ///
+  /// Writes through the repositories' **bulk** API (WTM-149 device defect 2):
+  /// one batched transaction per repository instead of one statement per row.
+  /// The record order inside each call is unchanged, and the calls are still
+  /// sequenced customers/products → orders → goals → finance, because
+  /// `orders_table.customer_id` is a foreign key that needs its customer
+  /// committed first.
   Future<void> seed() async {
     await removeAll();
 
     final customerIds = <String>{for (final c in kSampleCustomers) c.id};
-    for (final Customer c in kSampleCustomers) {
-      await customers.upsert(c.withId(_sampleId(c.id)));
-    }
-    for (final p in kSampleProducts) {
-      await products.upsert(p.withId(_sampleId(p.id)));
-    }
-    for (final o in kSampleCustomerOrders) {
-      await orders.upsert(
+    await customers.upsertAll([
+      for (final Customer c in kSampleCustomers) c.withId(_sampleId(c.id)),
+    ]);
+    await products.upsertAll([
+      for (final p in kSampleProducts) p.withId(_sampleId(p.id)),
+    ]);
+    await orders.upsertAll([
+      for (final o in kSampleCustomerOrders)
         o.withIds(
           newId: _sampleId(o.id),
           // Rewire to the remapped sample customer when the order pointed at a
@@ -65,14 +72,13 @@ class SampleDataSeeder {
               ? _sampleId(o.customerId)
               : null,
         ),
-      );
-    }
-    for (final g in kSampleBusinessGoals) {
-      await goals.upsert(g.withId(_sampleId(g.id)));
-    }
-    for (final t in kSampleTransactions) {
-      await finance.add(t.withId(_sampleId(t.id)));
-    }
+    ]);
+    await goals.upsertAll([
+      for (final g in kSampleBusinessGoals) g.withId(_sampleId(g.id)),
+    ]);
+    await finance.addAll([
+      for (final t in kSampleTransactions) t.withId(_sampleId(t.id)),
+    ]);
   }
 
   /// Removes every sample record across all repositories. User data (UUID ids)
