@@ -67,6 +67,34 @@ class TongtaiAiService {
     return _clientFor(provider).testConnection();
   }
 
+  /// Safely rotates the stored key for [provider] to [raw] (WTM-83,
+  /// Founder-approved): validate the format → write the new key → live-test it
+  /// against the provider → **roll back to the previous key when the test
+  /// fails**, so a broken rotation never bricks a working setup.
+  Future<TongtaiAiRotation> rotateKey(
+    String raw, {
+    TongtaiAiProviderKind provider = TongtaiAiProviderKind.xai,
+  }) async {
+    final validation = TongtaiAiKeyValidator.validate(raw, provider: provider);
+    if (!validation.ok) {
+      return TongtaiAiRotation.invalid(validation);
+    }
+    final previous = await _store.read(provider);
+    await _store.write(provider, validation.normalizedKey!);
+    try {
+      final response = await _clientFor(provider).testConnection();
+      return TongtaiAiRotation.success(response.model);
+    } on TongtaiAiException catch (error) {
+      // The new key failed live verification — restore what worked before.
+      if (previous != null) {
+        await _store.write(provider, previous);
+      } else {
+        await _store.delete(provider);
+      }
+      return TongtaiAiRotation.failed(error, rolledBack: previous != null);
+    }
+  }
+
   /// Send a chat exchange using the stored key. Throws
   /// [TongtaiAiException.missingKey] when no key is set.
   Future<TongtaiAiResponse> chat({
@@ -98,4 +126,43 @@ class TongtaiAiService {
       client: _httpClient,
     );
   }
+}
+
+/// Outcome of a safe key rotation (WTM-83). Exactly one of the three shapes:
+/// invalid format (nothing written), verified success, or live-test failure
+/// (previous key restored when one existed).
+class TongtaiAiRotation {
+  const TongtaiAiRotation._({
+    required this.ok,
+    this.model,
+    this.validation,
+    this.error,
+    this.rolledBack = false,
+  });
+
+  factory TongtaiAiRotation.success(String model) =>
+      TongtaiAiRotation._(ok: true, model: model);
+
+  factory TongtaiAiRotation.invalid(TongtaiAiKeyValidation validation) =>
+      TongtaiAiRotation._(ok: false, validation: validation);
+
+  factory TongtaiAiRotation.failed(
+    TongtaiAiException error, {
+    required bool rolledBack,
+  }) => TongtaiAiRotation._(ok: false, error: error, rolledBack: rolledBack);
+
+  /// True when the new key was verified live and is now the stored key.
+  final bool ok;
+
+  /// The model that answered the verification call (success only).
+  final String? model;
+
+  /// The format-validation result (invalid-format only).
+  final TongtaiAiKeyValidation? validation;
+
+  /// The live-test failure (failed only).
+  final TongtaiAiException? error;
+
+  /// Whether the previous working key was restored after the failure.
+  final bool rolledBack;
 }

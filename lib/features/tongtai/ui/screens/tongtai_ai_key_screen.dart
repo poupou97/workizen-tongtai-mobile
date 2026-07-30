@@ -7,6 +7,7 @@ import '../../ai/tongtai_ai_provider_kind.dart';
 import '../../ai/tongtai_ai_service.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_ai_provider.dart';
+import 'tongtai_key_scan_screen.dart';
 
 /// Kind of the inline status banner shown after a save / test / delete.
 enum _AiStatusTone { success, error, info }
@@ -19,9 +20,14 @@ enum _AiStatusTone { success, error, info }
 /// endpoint so the user gets immediate confirmation the key works, with friendly
 /// error messages for invalid keys, network failures and rate limits.
 class TongtaiAiKeyScreen extends ConsumerStatefulWidget {
-  const TongtaiAiKeyScreen({super.key});
+  const TongtaiAiKeyScreen({super.key, this.scanLauncher});
 
   static const provider = TongtaiAiProviderKind.xai;
+
+  /// Launches the QR scan and returns the scanned key text (WTM-83); null when
+  /// dismissed. Injectable so tests never touch the camera. Defaults to pushing
+  /// [TongtaiKeyScanScreen].
+  final Future<String?> Function(BuildContext context)? scanLauncher;
 
   @override
   ConsumerState<TongtaiAiKeyScreen> createState() => _TongtaiAiKeyScreenState();
@@ -98,6 +104,67 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
     );
   }
 
+  /// Safe rotation (WTM-83): the new key from the field is validated, written
+  /// and live-verified; on failure the previous working key is restored by the
+  /// service — the seller can never brick a working setup.
+  Future<void> _rotate() async {
+    setState(() {
+      _busy = true;
+      _fieldError = null;
+      _statusMessage = null;
+    });
+    final rotation = await _service.rotateKey(
+      _controller.text,
+      provider: _providerKind,
+    );
+    ref.invalidate(tongtaiHasAiKeyProvider);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (rotation.ok) {
+      _controller.clear();
+      setState(() => _hasKey = true);
+      _setStatus(
+        _lang == 'vi'
+            ? 'Đã đổi khóa — ${rotation.model} phản hồi với khóa mới.'
+            : 'Key rotated — ${rotation.model} responded with the new key.',
+        _AiStatusTone.success,
+      );
+    } else if (rotation.validation != null) {
+      setState(() => _fieldError = rotation.validation!.issue.message(_lang));
+    } else {
+      _setStatus(
+        _lang == 'vi'
+            ? 'Khóa mới không hoạt động (${rotation.error!.message(_lang)}). '
+                  '${rotation.rolledBack ? 'Đã khôi phục khóa cũ.' : 'Chưa có khóa nào được lưu.'}'
+            : 'The new key failed (${rotation.error!.message(_lang)}). '
+                  '${rotation.rolledBack ? 'Previous key restored.' : 'No key stored.'}',
+        _AiStatusTone.error,
+      );
+    }
+  }
+
+  /// QR input (WTM-83): the scanned text only FILLS the field — it still goes
+  /// through the exact same validate→save/rotate path as a typed key.
+  Future<void> _scan() async {
+    final launcher =
+        widget.scanLauncher ??
+        (BuildContext context) => Navigator.of(context).push<String>(
+          MaterialPageRoute(builder: (_) => const TongtaiKeyScanScreen()),
+        );
+    final scanned = await launcher(context);
+    if (!mounted || scanned == null || scanned.trim().isEmpty) return;
+    setState(() {
+      _controller.text = scanned.trim();
+      _fieldError = null;
+    });
+    _setStatus(
+      _lang == 'vi'
+          ? 'Đã quét khóa từ QR — bấm Lưu (hoặc Đổi khóa) để xác nhận.'
+          : 'Key scanned — press Save (or Rotate) to confirm.',
+      _AiStatusTone.info,
+    );
+  }
+
   Future<void> _test() async {
     setState(() {
       _busy = true;
@@ -167,6 +234,15 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                 onToggleObscure: () => setState(() => _obscure = !_obscure),
               ),
               const SizedBox(height: TongtaiDesignTokens.spacing2),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: const Key('tongtai-ai-scan'),
+                  onPressed: _busy ? null : _scan,
+                  icon: const Icon(Icons.qr_code_scanner, size: 18),
+                  label: Text(vi ? 'Quét QR' : 'Scan QR'),
+                ),
+              ),
               Text(
                 vi
                     ? 'Lấy khóa tại ${_providerKind.keyConsoleUrl}. Khóa chỉ lưu trên máy bạn và chỉ gửi trực tiếp tới ${_providerKind.displayName}.'
@@ -202,6 +278,22 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                   child: Text(vi ? 'Kiểm tra kết nối' : 'Test connection'),
                 ),
               ),
+              if (_hasKey == true) ...[
+                const SizedBox(height: TongtaiDesignTokens.spacing3),
+                SizedBox(
+                  width: double.infinity,
+                  height: TongtaiDesignTokens.buttonHeight,
+                  child: OutlinedButton(
+                    key: const Key('tongtai-ai-rotate'),
+                    onPressed: _busy ? null : _rotate,
+                    child: Text(
+                      vi
+                          ? 'Đổi khóa (kiểm tra rồi mới thay)'
+                          : 'Rotate key (verified swap)',
+                    ),
+                  ),
+                ),
+              ],
               if (_hasKey == true) ...[
                 const SizedBox(height: TongtaiDesignTokens.spacing3),
                 SizedBox(

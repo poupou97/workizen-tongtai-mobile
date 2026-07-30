@@ -171,4 +171,82 @@ void main() {
     await tester.pumpAndSettle();
     expect(field().obscureText, isFalse);
   });
+
+  group('WTM-83 — rotate + QR scan', () {
+    final newKey = 'xai-${'Q9w8E7r6' * 10}';
+
+    testWidgets('rotate: verified new key replaces the old one', (
+      tester,
+    ) async {
+      final store = InMemoryTongtaiAiKeyStore();
+      await store.write(TongtaiAiProviderKind.xai, validKey);
+      await pumpScreen(
+        tester,
+        httpClient: MockClient((_) async => _okCompletion('grok-3')),
+        store: store,
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('tongtai-ai-key-field')),
+        newKey,
+      );
+      await tester.tap(find.byKey(const Key('tongtai-ai-rotate')));
+      await tester.pumpAndSettle();
+
+      expect(await store.read(TongtaiAiProviderKind.xai), newKey);
+      expect(find.textContaining('Key rotated'), findsOneWidget);
+    });
+
+    testWidgets('rotate: a dead new key rolls back to the working key', (
+      tester,
+    ) async {
+      final store = InMemoryTongtaiAiKeyStore();
+      await store.write(TongtaiAiProviderKind.xai, validKey);
+      await pumpScreen(
+        tester,
+        httpClient: MockClient((_) async => http.Response('unauthorized', 401)),
+        store: store,
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('tongtai-ai-key-field')),
+        newKey,
+      );
+      await tester.tap(find.byKey(const Key('tongtai-ai-rotate')));
+      await tester.pumpAndSettle();
+
+      // The broken key never sticks — the working key is restored.
+      expect(await store.read(TongtaiAiProviderKind.xai), validKey);
+      expect(find.textContaining('Previous key restored'), findsOneWidget);
+    });
+
+    testWidgets('QR scan fills the field through the launcher seam', (
+      tester,
+    ) async {
+      final service = TongtaiAiService(
+        InMemoryTongtaiAiKeyStore(),
+        httpClient: MockClient((_) async => http.Response('', 404)),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [tongtaiAiServiceProvider.overrideWithValue(service)],
+          child: MaterialApp(
+            home: TongtaiAiKeyScreen(
+              scanLauncher: (_) async => '  $newKey  ', // untrimmed on purpose
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('tongtai-ai-scan')));
+      await tester.pumpAndSettle();
+
+      final field = tester.widget<TextField>(
+        find.byKey(const Key('tongtai-ai-key-field')),
+      );
+      expect(field.controller!.text, newKey); // trimmed
+      expect(find.textContaining('scanned'), findsOneWidget);
+    });
+  });
 }
