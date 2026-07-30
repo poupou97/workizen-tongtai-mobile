@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../consumer/customer_directory_service.dart';
 import '../../core/tongtai_formatters.dart';
-import '../../inventory/product_inventory_service.dart';
 import '../../journey/business_goal.dart';
 import '../../metrics/business_health.dart';
 import '../../metrics/business_metrics.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
-import '../../orders/order.dart' show kSampleCustomerOrders;
-import '../../producer/supplier_search_service.dart';
 import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_journey_provider.dart';
+import '../../providers/tongtai_sample_provider.dart';
 import '../../providers/tongtai_search_provider.dart';
 import 'tongtai_chat_screen.dart';
 import 'tongtai_customer_list_screen.dart';
@@ -41,28 +38,7 @@ class TongtaiHomeScreen extends ConsumerStatefulWidget {
     this.customerCount,
     this.goals,
     this.opportunities,
-    this.isDemo = false,
   });
-
-  /// A demo dashboard populated with sample data — the explicit "Explore Demo
-  /// Mode" action. Nothing here is written to the real database.
-  factory TongtaiHomeScreen.demo({Key? key, DateTime Function()? clock}) {
-    return TongtaiHomeScreen(
-      key: key,
-      clock: clock,
-      isDemo: true,
-      metrics: BusinessMetrics.from(
-        orders: kSampleCustomerOrders,
-        customersCount: kSampleCustomers.length,
-      ),
-      health: BusinessHealth.healthy,
-      supplierCount: kSampleSuppliers.length,
-      inventoryCount: kSampleProducts.length,
-      customerCount: kSampleCustomers.length,
-      goals: kSampleBusinessGoals,
-      opportunities: kSampleOpportunities,
-    );
-  }
 
   /// Injectable KPIs (source of truth); when null they load from the
   /// [businessMetricsServiceProvider].
@@ -81,18 +57,15 @@ class TongtaiHomeScreen extends ConsumerStatefulWidget {
   /// Opportunity capability. A real user starts with none.
   final List<Opportunity>? opportunities;
 
-  /// True only behind the explicit "Explore Demo Mode" action (WTM-143): the
-  /// screen then labels itself unmistakably as sample data — the Founder
-  /// himself mistook the demo for a second real dashboard, so the demo must
-  /// introduce itself.
-  final bool isDemo;
-
   @override
   ConsumerState<TongtaiHomeScreen> createState() => _TongtaiHomeScreenState();
 }
 
 class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
   BusinessMetrics _metrics = BusinessMetrics.empty;
+  List<Opportunity> _loadedOpportunities = const [];
+  bool _hasSamples = false;
+  bool _seeding = false;
   BusinessHealth _health = BusinessHealth.notEnoughData;
   List<BusinessGoal> _goals = const [];
   int _producers = 0;
@@ -129,9 +102,13 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     final contextService = ref.read(businessContextServiceProvider);
     final goalRepo = ref.read(businessGoalRepositoryProvider);
     final favoritesStore = ref.read(tongtaiSearchFavoritesStoreProvider);
+    final seeder = ref.read(sampleDataSeederProvider);
+    final opportunitiesFuture = ref.read(generatedOpportunitiesProvider.future);
     final context = await contextService.load();
     final goals = await goalRepo.loadAll();
     final favorites = await favoritesStore.loadAll();
+    final List<Opportunity> generated = await opportunitiesFuture;
+    final hasSamples = await seeder.hasSamples();
     if (!mounted) return;
     setState(() {
       _metrics = context.metrics;
@@ -141,6 +118,8 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       _goals = goals;
       _journey = goals.length;
       _producers = favorites.length;
+      _loadedOpportunities = generated;
+      _hasSamples = hasSamples;
     });
   }
 
@@ -150,6 +129,28 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       _inventory == 0 &&
       _journey == 0 &&
       _metrics.ordersCount == 0;
+
+  /// "Xem thử Demo" (WTM-144/ADR-TON-014): seeds the sample fixtures into the
+  /// PRODUCTION repositories — no parallel demo screen — then reloads so this
+  /// same dashboard (and every other screen) shows them.
+  Future<void> _seedSamples() async {
+    setState(() => _seeding = true);
+    await ref.read(sampleDataSeederProvider).seed();
+    if (!mounted) return;
+    setState(() => _seeding = false);
+    await _load();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Đã nạp dữ liệu mẫu — tất cả màn hình đang dùng chung dữ liệu '
+            'này. Xóa trong More khi không cần nữa.',
+          ),
+        ),
+      );
+  }
 
   void _openSearch(BuildContext context) {
     Navigator.of(context).push(
@@ -169,14 +170,16 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Real mode: the Rule Engine's generated opportunities over persisted data
+    // (WTM-144 one-source); injected lists are for tests/previews only.
     final topOpportunities =
-        (widget.opportunities ?? const <Opportunity>[]).toList()
+        (widget.opportunities ?? _loadedOpportunities).toList()
           ..sort((a, b) => b.aiScore.compareTo(a.aiScore));
 
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: Text(widget.isDemo ? 'Demo — Dữ liệu mẫu' : 'Home Dashboard'),
+        title: const Text('Home Dashboard'),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -199,10 +202,12 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Demo banner (WTM-143): the demo must introduce itself ──
-            if (widget.isDemo) ...[
+            // ── Sample-data banner (WTM-144/ADR-TON-014): when sample rows
+            //    are present, every screen shows them as ordinary data — this
+            //    banner is the one reminder + pointer to the remover in More. ─
+            if (_hasSamples) ...[
               Container(
-                key: const Key('home-demo-banner'),
+                key: const Key('home-sample-banner'),
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -223,10 +228,9 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Bạn đang xem DEMO với dữ liệu mẫu — đây KHÔNG phải '
-                        'số liệu của bạn. Bấm ← để về màn hình thật.\n'
-                        'Demo with sample data — not your business. '
-                        'Tap ← to go back.',
+                        'Đang hiển thị kèm DỮ LIỆU MẪU (mọi màn hình dùng '
+                        'chung dữ liệu này). Bạn có thể sửa/xóa từng dòng, '
+                        'hoặc xóa toàn bộ mẫu trong More.',
                         style: TongtaiDesignTokens.captionStyle.copyWith(
                           color: TongtaiDesignTokens.lightTextPrimary,
                           height: 1.4,
@@ -291,8 +295,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                 onOrder: () =>
                     _push(context, const TongtaiCustomerListScreen()),
                 onGoal: () => _push(context, const TongtaiGoalsScreen()),
-                onDemo: () =>
-                    _push(context, TongtaiHomeScreen.demo(clock: widget.clock)),
+                onDemo: _seeding ? () {} : _seedSamples,
               ),
               const SizedBox(height: 24),
             ],

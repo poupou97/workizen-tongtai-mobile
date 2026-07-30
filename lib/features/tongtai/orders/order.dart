@@ -149,6 +149,19 @@ class CustomerOrder {
 
   @override
   String toString() => 'CustomerOrder($id, $orderNumber, ${status.name})';
+
+  /// The same record under different ids — the sample-seeding remap hook
+  /// (WTM-144/ADR-TON-014). [newCustomerId] rewires the order to the remapped
+  /// sample customer.
+  CustomerOrder withIds({required String newId, String? newCustomerId}) =>
+      CustomerOrder(
+        id: newId,
+        customerId: newCustomerId ?? customerId,
+        orderNumber: orderNumber,
+        date: date,
+        status: status,
+        items: items,
+      );
 }
 
 /// Deterministic sample orders for the sample customer directory, until a

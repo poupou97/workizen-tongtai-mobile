@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../timeline/business_event.dart';
+import '../../providers/tongtai_context_provider.dart';
+import '../../providers/tongtai_finance_provider.dart';
+import '../../providers/tongtai_journey_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
+import '../../timeline/business_event_sources.dart';
 import '../../timeline/timeline_service.dart';
 import '../../timeline/timeline_theme.dart';
 import '../widgets/tongtai_fox_mascot.dart';
@@ -11,29 +17,54 @@ import '../widgets/tongtai_fox_mascot.dart';
 /// happened in the business (orders, finance, opportunities, goals…), grouped
 /// by day with a type filter.
 ///
-/// Local-first: events come from the in-memory [TimelineService], which merges
-/// per-module sources. Both `service` and `clock` are injectable so the day
-/// grouping is deterministic under test.
-class TongtaiTimelineScreen extends StatefulWidget {
+/// Local-first: events come from [TimelineService], which merges per-module
+/// sources. **Real mode (WTM-144 P0 §1) builds the service from the PRODUCTION
+/// repositories** — the same rows every other screen shows; the old
+/// sample-default silently displayed fixture events. `service`/`clock` stay
+/// injectable for deterministic tests.
+class TongtaiTimelineScreen extends ConsumerStatefulWidget {
   const TongtaiTimelineScreen({super.key, this.service, this.clock});
 
   final TimelineService? service;
   final DateTime Function()? clock;
 
   @override
-  State<TongtaiTimelineScreen> createState() => _TongtaiTimelineScreenState();
+  ConsumerState<TongtaiTimelineScreen> createState() =>
+      _TongtaiTimelineScreenState();
 }
 
-class _TongtaiTimelineScreenState extends State<TongtaiTimelineScreen> {
-  late final TimelineService _service;
+class _TongtaiTimelineScreenState extends ConsumerState<TongtaiTimelineScreen> {
+  TimelineService _service = TimelineService(const []);
   late final DateTime Function() _clock;
   BusinessEventType? _filter;
 
   @override
   void initState() {
     super.initState();
-    _service = widget.service ?? TimelineService.sample();
     _clock = widget.clock ?? DateTime.now;
+    if (widget.service != null) {
+      _service = widget.service!;
+    } else {
+      _loadReal();
+    }
+  }
+
+  Future<void> _loadReal() async {
+    // One source (WTM-144): finance/orders/goals from the live repositories +
+    // the Rule Engine's generated opportunities — mirrors TimelineContext.
+    final finance = await ref.read(financeRepositoryProvider).loadAll();
+    final orders = await ref.read(orderRepositoryProvider).loadAll();
+    final goals = await ref.read(businessGoalRepositoryProvider).loadAll();
+    final opportunities = await ref.read(generatedOpportunitiesProvider.future);
+    if (!mounted) return;
+    setState(() {
+      _service = TimelineService([
+        FinanceEventSource(finance),
+        OrderEventSource(orders),
+        JourneyEventSource(goals),
+        OpportunityEventSource(opportunities),
+      ]);
+    });
   }
 
   @override

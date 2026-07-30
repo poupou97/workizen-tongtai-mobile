@@ -136,4 +136,20 @@ class Product {
 
   @override
   String toString() => 'Product($id, $sku, $name, qty=$quantity)';
+
+  /// The same record under a different id — the sample-seeding remap hook
+  /// (WTM-144/ADR-TON-014).
+  Product withId(String newId) => Product(
+    id: newId,
+    sku: sku,
+    name: name,
+    category: category,
+    quantity: quantity,
+    pricePerUnit: pricePerUnit,
+    reorderLevel: reorderLevel,
+    updatedAt: updatedAt,
+    description: description,
+    imagePaths: imagePaths,
+    history: history,
+  );
 }

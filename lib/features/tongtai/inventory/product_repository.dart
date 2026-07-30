@@ -13,6 +13,11 @@ abstract class ProductRepository {
 
   /// Insert a new product or replace the one with the same id.
   Future<void> upsert(Product product);
+
+  /// Deletes every row whose id starts with [prefix] — the sample-data
+  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
+  /// `sample-` id prefix so they can be removed without touching user data.
+  Future<void> deleteByIdPrefix(String prefix);
 }
 
 /// Real, persistent catalog for the local business (WTM-121).
@@ -84,6 +89,14 @@ class DriftProductRepository implements ProductRepository {
       'imagePaths',
     ),
   );
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(_db.productsTable)..where(
+          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
+        ))
+        .go();
+  }
 }
 
 /// Demo / Preview source (WTM-121): the built-in sample catalogue, **read-only**
@@ -97,6 +110,10 @@ class SampleProductRepository implements ProductRepository {
   @override
   Future<void> upsert(Product product) async {
     // Demo data is read-only — do not persist.
+  }
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    // Demo fixtures are read-only — nothing to delete.
   }
 }
 
@@ -119,4 +136,8 @@ class InMemoryProductRepository implements ProductRepository {
       _products.add(product);
     }
   }
+
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async =>
+      _products.removeWhere((x) => x.id.startsWith(prefix));
 }

@@ -14,6 +14,11 @@ abstract class BusinessGoalRepository {
 
   /// Insert a new goal or replace the one with the same id.
   Future<void> upsert(BusinessGoal goal);
+
+  /// Deletes every row whose id starts with [prefix] — the sample-data
+  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
+  /// `sample-` id prefix so they can be removed without touching user data.
+  Future<void> deleteByIdPrefix(String prefix);
 }
 
 /// Real, persistent business goals for the local business (WTM-124).
@@ -121,6 +126,15 @@ class DriftBusinessGoalRepository implements BusinessGoalRepository {
     }
     return GoalType.revenue;
   }
+
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(_db.journeysTable)..where(
+          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
+        ))
+        .go();
+  }
 }
 
 /// Demo / Preview source (WTM-124): the built-in sample goals, **read-only** —
@@ -134,6 +148,10 @@ class SampleBusinessGoalRepository implements BusinessGoalRepository {
   @override
   Future<void> upsert(BusinessGoal goal) async {
     // Demo data is read-only — do not persist.
+  }
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    // Demo fixtures are read-only — nothing to delete.
   }
 }
 
@@ -156,4 +174,8 @@ class InMemoryBusinessGoalRepository implements BusinessGoalRepository {
       _goals.add(goal);
     }
   }
+
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async =>
+      _goals.removeWhere((x) => x.id.startsWith(prefix));
 }

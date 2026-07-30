@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/l10n/language_notifier.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_sample_provider.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
 import 'tongtai_export_screen.dart';
 import 'tongtai_finance_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
-import 'tongtai_home_screen.dart';
 import 'tongtai_timeline_screen.dart';
 
 /// Opens the language picker (WTM-119) and persists the choice; the app
@@ -54,6 +54,77 @@ Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
 /// Provides access to settings, help, and additional features.
 class TongtaiMoreScreen extends ConsumerWidget {
   const TongtaiMoreScreen({super.key});
+
+  /// WTM-144/ADR-TON-014: seeds the sample fixtures into the PRODUCTION
+  /// repositories (idempotent) after an explicit confirmation — every screen
+  /// then shows the same data; removable below.
+  Future<void> _seedSamples(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Nạp dữ liệu mẫu?'),
+        content: const Text(
+          'Dữ liệu mẫu sẽ được thêm vào ứng dụng như dữ liệu bình thường — '
+          'mọi màn hình (Home, Kho, Khách hàng, Báo cáo, Cơ hội…) cùng hiển '
+          'thị. Bạn có thể sửa từng dòng hoặc xóa toàn bộ mẫu bất cứ lúc nào; '
+          'dữ liệu bạn tự nhập không bị ảnh hưởng.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            key: const Key('more-demo-confirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Nạp mẫu'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ref.read(sampleDataSeederProvider).seed();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('Đã nạp dữ liệu mẫu — xem ở mọi màn hình.'),
+        ),
+      );
+  }
+
+  /// Removes ONLY the `sample-` prefixed rows — user data stays (tested).
+  Future<void> _removeSamples(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Xóa toàn bộ dữ liệu mẫu?'),
+        content: const Text(
+          'Chỉ các bản ghi mẫu bị xóa. Dữ liệu bạn tự nhập được giữ nguyên.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            key: const Key('more-remove-sample-confirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Xóa mẫu'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ref.read(sampleDataSeederProvider).removeAll();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(content: Text('Đã xóa toàn bộ dữ liệu mẫu.')),
+      );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -116,10 +187,14 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 _SettingsItem(
                   key: const Key('more-demo-mode'),
                   icon: Icons.science_outlined,
-                  label: 'Xem thử Demo · Explore Demo',
-                  onTap: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(builder: (_) => TongtaiHomeScreen.demo()),
-                  ),
+                  label: 'Nạp dữ liệu mẫu · Load sample data',
+                  onTap: () => _seedSamples(context, ref),
+                ),
+                _SettingsItem(
+                  key: const Key('more-remove-sample'),
+                  icon: Icons.delete_sweep_outlined,
+                  label: 'Xóa dữ liệu mẫu · Remove sample data',
+                  onTap: () => _removeSamples(context, ref),
                 ),
                 _SettingsItem(
                   icon: Icons.timeline_outlined,
