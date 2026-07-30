@@ -46,6 +46,25 @@ void main() {
       wrap(TongtaiHomeScreen(metrics: BusinessMetrics.empty, clock: fixedNow));
 
   group('demo mode (sample data)', () {
+    testWidgets(
+      'the demo introduces itself: banner + title, never "Home Dashboard" '
+      '(WTM-143)',
+      (tester) async {
+        await tester.pumpWidget(demoHost());
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('home-demo-banner')), findsOneWidget);
+        expect(find.text('Demo — Dữ liệu mẫu'), findsOneWidget);
+        expect(find.text('Home Dashboard'), findsNothing);
+
+        // The REAL home never shows the demo label (guard both directions).
+        await tester.pumpWidget(emptyHost());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('home-demo-banner')), findsNothing);
+        expect(find.text('Home Dashboard'), findsOneWidget);
+      },
+    );
+
     testWidgets('module tiles show real counts', (tester) async {
       await tester.pumpWidget(demoHost());
       await tester.pumpAndSettle();
