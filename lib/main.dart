@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/l10n/language_notifier.dart';
 import 'core/prefs.dart';
+import 'core/telemetry/tongtai_telemetry.dart';
 import 'features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'features/tongtai/ui/tongtai_root_gate.dart';
 
@@ -16,9 +17,18 @@ import 'features/tongtai/ui/tongtai_root_gate.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
+  // WTM-108 (D-7/ADR-TON-005): operational telemetry — Firebase only when the
+  // Founder-provided config exists; the privacy-safe no-op otherwise.
+  final telemetry = await initTongtaiTelemetry();
+  // Operational catalogue only (docs/05-OPERATIONS/TELEMETRY-EVENTS.md) —
+  // events carry counts/flags, never business content.
+  await telemetry.logEvent('app_open');
   runApp(
     ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        tongtaiTelemetryProvider.overrideWithValue(telemetry),
+      ],
       child: const TongtaiApp(),
     ),
   );

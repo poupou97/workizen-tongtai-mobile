@@ -4,7 +4,7 @@
 
 - **Phase 1 (Product Design Bible):** ✅ DONE + Founder-approved. 60 docs.
 - **Phase 2 (build):** 🔄 IN PROGRESS — developed autonomously by the
-  Evidence-Driven Runtime. `flutter analyze` clean; **959/959 tests passing**.
+  Evidence-Driven Runtime. `flutter analyze` clean; **962/962 tests passing**.
 - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
   app runs standalone.
 - **Data Foundation — persistence arc COMPLETE for user-authored capabilities**
@@ -53,6 +53,7 @@
 | Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) · **WTM-100 mã hoá backup (Founder-approved 2026-07-29)**: `BackupCrypto` — AES-256-GCM + PBKDF2 (150k, iteration count nhúng trong container `TONGTAI-BACKUP-V1:` armored base64), toggle "Mã hoá bằng mật khẩu" + passphrase ≥6 ký tự trên Export screen → file `.ttbk` qua CÙNG delivery seam; passphrase không rời máy/không lưu; dep mới `cryptography` (pure Dart) |
 | Brand | WTM-109 Business Fox mascot (Origami all) · 110 app icon + splash native · 111 mascot trong app (avatar chat, empty states) + đổi nhãn hiển thị "Workizen AI" |
 | i18n | WTM-119 **localization foundation** (ADR-TON-007, mirror Hub — KHÔNG ARB): `AppStrings` (VI/EN) + `LanguageNotifier` (persist 'wz.locale') + `context.l10n`; `MaterialApp` wired locale + delegates; picker ở More → Ngôn ngữ đổi ngôn ngữ runtime. Migrate chuỗi UI dần Boy-Scout |
+| Telemetry | **WTM-108 (D-7/ADR-TON-005, Founder-approved)**: seam `TongtaiTelemetry` (Noop mặc định · Firebase Analytics+Crashlytics khi Founder cấp config) — gradle apply Google Services CHỈ khi có `google-services.json` (build không vỡ khi thiếu); `initTongtaiTelemetry()` không bao giờ throw; event catalogue v1 (`app_open`/`screen_view`/`flow_error`) tại `docs/05-OPERATIONS/TELEMETRY-EVENTS.md`; config thật bị chặn commit qua `.gitignore`; CẤM ad/marketing/profiling |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
 
 ## NOT built yet (honest gaps)
