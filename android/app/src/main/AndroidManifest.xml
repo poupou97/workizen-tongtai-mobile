@@ -1,8 +1,32 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- WTM-142 (release readiness): INTERNET is required in RELEASE builds for
+         BYOK AI provider calls (ADR-TON-006) and operational telemetry
+         (ADR-TON-005). The Flutter template only declares it in the debug
+         manifest — without this line a release build ships broken. CAMERA is
+         merged by mobile_scanner (WTM-83, QR key scan). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Privacy red-line (D-7/ADR-TON-005: no ads, no profiling): Firebase
+         Analytics merges the Advertising-ID permissions by default — strip
+         them so no advertising identifier can ever be collected. Paired with
+         the google_analytics_* meta-data below. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" tools:node="remove"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" tools:node="remove"/>
+    <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE" tools:node="remove"/>
     <application
-        android:label="tongtai"
+        android:label="Tổng Tài"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Operational analytics only — advertising ID + ad-personalization
+             signals disabled for good (D-7/ADR-TON-005). -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
