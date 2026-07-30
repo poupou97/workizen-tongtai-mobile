@@ -41,6 +41,7 @@ class TongtaiHomeScreen extends ConsumerStatefulWidget {
     this.customerCount,
     this.goals,
     this.opportunities,
+    this.isDemo = false,
   });
 
   /// A demo dashboard populated with sample data — the explicit "Explore Demo
@@ -49,6 +50,7 @@ class TongtaiHomeScreen extends ConsumerStatefulWidget {
     return TongtaiHomeScreen(
       key: key,
       clock: clock,
+      isDemo: true,
       metrics: BusinessMetrics.from(
         orders: kSampleCustomerOrders,
         customersCount: kSampleCustomers.length,
@@ -78,6 +80,12 @@ class TongtaiHomeScreen extends ConsumerStatefulWidget {
   /// AI-generated opportunities for the preview row; real source lands with the
   /// Opportunity capability. A real user starts with none.
   final List<Opportunity>? opportunities;
+
+  /// True only behind the explicit "Explore Demo Mode" action (WTM-143): the
+  /// screen then labels itself unmistakably as sample data — the Founder
+  /// himself mistook the demo for a second real dashboard, so the demo must
+  /// introduce itself.
+  final bool isDemo;
 
   @override
   ConsumerState<TongtaiHomeScreen> createState() => _TongtaiHomeScreenState();
@@ -168,7 +176,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Home Dashboard'),
+        title: Text(widget.isDemo ? 'Demo — Dữ liệu mẫu' : 'Home Dashboard'),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -191,6 +199,45 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Demo banner (WTM-143): the demo must introduce itself ──
+            if (widget.isDemo) ...[
+              Container(
+                key: const Key('home-demo-banner'),
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: TongtaiDesignTokens.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: TongtaiDesignTokens.warning.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.science_outlined,
+                      size: 20,
+                      color: TongtaiDesignTokens.warning,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Bạn đang xem DEMO với dữ liệu mẫu — đây KHÔNG phải '
+                        'số liệu của bạn. Bấm ← để về màn hình thật.\n'
+                        'Demo with sample data — not your business. '
+                        'Tap ← to go back.',
+                        style: TongtaiDesignTokens.captionStyle.copyWith(
+                          color: TongtaiDesignTokens.lightTextPrimary,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             // ── Welcome + health + module counts ──────────────────────
             Card(
               elevation: 1,
