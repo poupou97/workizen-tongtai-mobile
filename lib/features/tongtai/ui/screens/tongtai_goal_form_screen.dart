@@ -169,7 +169,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('Please fix the highlighted fields.')),
+          SnackBar(content: Text(context.l10n.formFixHighlighted)),
         );
     }
   }

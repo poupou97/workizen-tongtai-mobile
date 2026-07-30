@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/app_strings.dart';
 import '../navigation/tongtai_design_tokens.dart';
 
 /// Custom bottom navigation bar for Tổng Tài with 5 main tabs.
@@ -43,7 +44,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 selectedIndex: selectedIndex,
                 icon: Icons.home_outlined,
                 selectedIcon: Icons.home,
-                label: 'Home',
+                label: context.l10n.navHome,
                 onTap: onTabSelected,
               ),
               _NavTab(
@@ -51,7 +52,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 selectedIndex: selectedIndex,
                 icon: Icons.shopping_bag_outlined,
                 selectedIcon: Icons.shopping_bag,
-                label: 'Producer',
+                label: context.l10n.navProducer,
                 color: TongtaiDesignTokens.producerGreen,
                 onTap: onTabSelected,
               ),
@@ -60,7 +61,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 selectedIndex: selectedIndex,
                 icon: Icons.warehouse_outlined,
                 selectedIcon: Icons.warehouse,
-                label: 'Inventory',
+                label: context.l10n.navInventory,
                 color: TongtaiDesignTokens.inventoryOrange,
                 onTap: onTabSelected,
               ),
@@ -69,7 +70,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 selectedIndex: selectedIndex,
                 icon: Icons.people_outline,
                 selectedIcon: Icons.people,
-                label: 'Consumer',
+                label: context.l10n.navConsumer,
                 color: TongtaiDesignTokens.consumerBlue,
                 onTap: onTabSelected,
               ),
@@ -78,7 +79,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 selectedIndex: selectedIndex,
                 icon: Icons.menu_outlined,
                 selectedIcon: Icons.menu,
-                label: 'More',
+                label: context.l10n.navMore,
                 color: TongtaiDesignTokens.setupGray,
                 onTap: onTabSelected,
               ),

@@ -178,8 +178,10 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
   void initState() {
     super.initState();
     if (widget.service != null || widget.metrics != null) {
-      // Test / injected mode — no async load.
-      _reports = widget.service ?? ReportsService.sample();
+      // Test / injected mode — no async load. NEVER fall back to fixtures
+      // (P0 §3, WTM-146): a metrics-only injection gets an empty order book,
+      // not sample data.
+      _reports = widget.service ?? ReportsService(const []);
       _metrics =
           widget.metrics ??
           BusinessMetrics.from(

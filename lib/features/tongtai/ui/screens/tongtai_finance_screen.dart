@@ -270,9 +270,9 @@ class _CashflowLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _dot(TongtaiFinanceScreen._income, 'Thu'),
+        _dot(TongtaiFinanceScreen._income, context.l10n.txnIncome),
         const SizedBox(width: TongtaiDesignTokens.spacing4),
-        _dot(TongtaiFinanceScreen._expense, 'Chi'),
+        _dot(TongtaiFinanceScreen._expense, context.l10n.txnExpense),
       ],
     );
   }

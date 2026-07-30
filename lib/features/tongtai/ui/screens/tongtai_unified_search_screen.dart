@@ -302,7 +302,7 @@ class _SearchField extends StatelessWidget {
             ? null
             : IconButton(
                 icon: const Icon(Icons.clear),
-                tooltip: 'Clear',
+                tooltip: context.l10n.actionClear,
                 onPressed: onClear,
               ),
         filled: true,

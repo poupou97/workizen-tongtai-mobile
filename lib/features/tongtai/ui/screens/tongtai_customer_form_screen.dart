@@ -160,7 +160,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('Please fix the highlighted fields.')),
+          SnackBar(content: Text(context.l10n.formFixHighlighted)),
         );
       return;
     }
@@ -516,7 +516,7 @@ class _AddressesSection extends StatelessWidget {
                 if (onRemove != null)
                   IconButton(
                     key: Key('customer-address-remove-$i'),
-                    tooltip: 'Remove address',
+                    tooltip: context.l10n.custRemoveAddress,
                     icon: const Icon(Icons.remove_circle_outline),
                     color: TongtaiDesignTokens.error,
                     onPressed: () => onRemove!(i),
@@ -528,7 +528,7 @@ class _AddressesSection extends StatelessWidget {
           key: const Key('customer-add-address'),
           onPressed: onAdd,
           icon: const Icon(Icons.add),
-          label: const Text('Add address'),
+          label: Text(context.l10n.custAddAddress),
         ),
       ],
     );
@@ -562,7 +562,7 @@ class _SegmentsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Segments',
+          context.l10n.custSegments,
           style: TongtaiDesignTokens.smallStyle.copyWith(
             fontWeight: FontWeight.w600,
             color: TongtaiDesignTokens.lightTextPrimary,
@@ -590,7 +590,7 @@ class _SegmentsSection extends StatelessWidget {
                 controller: input,
                 onSubmitted: (_) => onAddCustom(),
                 decoration: InputDecoration(
-                  hintText: 'Custom segment…',
+                  hintText: context.l10n.custCustomSegmentHint,
                   isDense: true,
                   filled: true,
                   fillColor: TongtaiDesignTokens.lightHover,
@@ -607,7 +607,7 @@ class _SegmentsSection extends StatelessWidget {
             OutlinedButton(
               key: const Key('customer-segment-add'),
               onPressed: onAddCustom,
-              child: const Text('Add'),
+              child: Text(context.l10n.actionAdd),
             ),
           ],
         ),
@@ -681,7 +681,7 @@ class _ChangeHistory extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Change history',
+          context.l10n.changeHistory,
           style: TongtaiDesignTokens.smallStyle.copyWith(
             fontWeight: FontWeight.w700,
             color: TongtaiDesignTokens.lightTextPrimary,
@@ -737,7 +737,7 @@ class _SaveCancelBar extends StatelessWidget {
                     TongtaiDesignTokens.buttonHeight,
                   ),
                 ),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.actionCancel),
               ),
             ),
             const SizedBox(width: TongtaiDesignTokens.spacing3),

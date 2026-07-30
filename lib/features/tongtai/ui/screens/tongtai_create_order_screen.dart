@@ -94,14 +94,16 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
               key: const Key('order-item-quantity'),
               controller: qtyController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Quantity'),
+              decoration: InputDecoration(
+                labelText: context.l10n.labelQuantity,
+              ),
             ),
             TextField(
               key: const Key('order-item-price'),
               controller: priceController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Sold price (per unit)',
+              decoration: InputDecoration(
+                labelText: context.l10n.orderSoldPrice,
               ),
             ),
           ],
@@ -109,7 +111,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.actionCancel),
           ),
           FilledButton(
             key: const Key('order-item-add'),
@@ -124,7 +126,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
                 OrderItem.fromProduct(product, quantity: qty, soldPrice: price),
               );
             },
-            child: const Text('Add'),
+            child: Text(context.l10n.actionAdd),
           ),
         ],
       ),
@@ -137,7 +139,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
     if (_items.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Add at least one product')));
+      ).showSnackBar(SnackBar(content: Text(context.l10n.orderNeedProduct)));
       return;
     }
     final now = _clock();
@@ -166,7 +168,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Create Order'),
+        title: Text(context.l10n.titleCreateOrder),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -174,7 +176,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
           TextButton(
             key: const Key('create-order-save'),
             onPressed: _save,
-            child: const Text('Save'),
+            child: Text(context.l10n.actionSave),
           ),
         ],
       ),
@@ -184,7 +186,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
         backgroundColor: TongtaiDesignTokens.consumerBlue,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
-        label: const Text('Add item'),
+        label: Text(context.l10n.orderAddItem),
       ),
       body: SafeArea(
         child: Column(
@@ -219,7 +221,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
               child: _items.isEmpty
                   ? Center(
                       child: Text(
-                        'No products yet — tap "Add item"',
+                        context.l10n.orderEmptyItems,
                         style: TongtaiDesignTokens.bodyStyle.copyWith(
                           color: TongtaiDesignTokens.lightTextSecondary,
                         ),
@@ -264,7 +266,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total',
+                context.l10n.labelTotal,
                 style: TongtaiDesignTokens.captionStyle.copyWith(
                   color: TongtaiDesignTokens.lightTextSecondary,
                 ),
@@ -302,7 +304,7 @@ class _StatusRow extends StatelessWidget {
           SizedBox(
             width: 68,
             child: Text(
-              'Status',
+              context.l10n.labelStatus,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,
                 fontWeight: FontWeight.w600,

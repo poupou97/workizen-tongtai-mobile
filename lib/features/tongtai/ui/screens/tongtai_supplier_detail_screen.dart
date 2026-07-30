@@ -4,6 +4,7 @@ import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../producer/supplier.dart';
 import '../../producer/supplier_profile.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Content width to use for the detail view given the available [width].
 ///
@@ -52,7 +53,7 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Supplier'),
+        title: Text(context.l10n.labelSupplier),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -217,7 +218,7 @@ class _AboutSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _DetailSection(
-      title: 'About',
+      title: context.l10n.supAbout,
       child: Text(
         description,
         style: TongtaiDesignTokens.bodyStyle.copyWith(
@@ -238,7 +239,7 @@ class _RatingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _DetailSection(
-      title: 'Ratings & Certifications',
+      title: context.l10n.supRatingsCerts,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -330,7 +331,7 @@ class _CatalogSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoryCount = profile.catalog.length;
     return _DetailSection(
-      title: 'Product Catalog',
+      title: context.l10n.supProductCatalog,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -390,31 +391,31 @@ class _TransactionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final repeatPercent = (summary.repeatBuyerRate * 100).round();
     return _DetailSection(
-      title: 'Transaction History',
+      title: context.l10n.supTransactionHistory,
       child: Wrap(
         spacing: TongtaiDesignTokens.spacing3,
         runSpacing: TongtaiDesignTokens.spacing3,
         children: [
           _MetricTile(
             icon: Icons.inventory_2_outlined,
-            label: 'Total volume',
+            label: context.l10n.supTotalVolume,
             value:
                 '${TongtaiFormatters.compact(summary.totalVolumeUnits)} units',
           ),
           _MetricTile(
             icon: Icons.repeat,
-            label: 'Total orders',
+            label: context.l10n.supTotalOrders,
             value: '${summary.totalOrders}',
           ),
           _MetricTile(
             icon: Icons.local_shipping_outlined,
-            label: 'Avg order',
+            label: context.l10n.kpiAovShort,
             value:
                 '${TongtaiFormatters.compact(summary.averageOrderVolume.round())} units',
           ),
           _MetricTile(
             icon: Icons.people_alt_outlined,
-            label: 'Repeat buyers',
+            label: context.l10n.supRepeatBuyers,
             value: '$repeatPercent%',
           ),
         ],
@@ -478,7 +479,7 @@ class _ContactSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _DetailSection(
-      title: 'Contact',
+      title: context.l10n.supContact,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -506,7 +507,7 @@ class _ContactSection extends StatelessWidget {
               ),
               onPressed: onMessage,
               icon: const Icon(Icons.chat_bubble_outline, size: 18),
-              label: const Text('Message supplier'),
+              label: Text(context.l10n.supMessage),
             ),
           ),
         ],
@@ -628,7 +629,7 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
             maxLines: 5,
             autofocus: true,
             decoration: InputDecoration(
-              hintText: 'Ask about pricing, MOQ, lead time…',
+              hintText: context.l10n.supAskHint,
               filled: true,
               fillColor: TongtaiDesignTokens.lightHover,
               border: OutlineInputBorder(
@@ -653,7 +654,7 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
                   ? () => Navigator.of(context).pop(true)
                   : null,
               icon: const Icon(Icons.send, size: 18),
-              label: const Text('Send'),
+              label: Text(context.l10n.actionSend),
             ),
           ),
         ],

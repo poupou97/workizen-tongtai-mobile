@@ -62,8 +62,8 @@ class TongtaiCustomerHistoryScreen extends StatefulWidget {
   /// Whose history to show.
   final Customer customer;
 
-  /// Injectable sample source for tests; used only when [orderController] is
-  /// null. Defaults to the built-in sample orders.
+  /// Injectable order source for tests; used only when [orderController] is
+  /// null. When both are null the history is empty (never fixtures — P0 §3).
   final CustomerOrderHistoryService? service;
 
   /// Injectable clock for the date-range presets (defaults to [DateTime.now]).
@@ -99,11 +99,13 @@ class _TongtaiCustomerHistoryScreenState
   OrderHistoryQuery get _query =>
       OrderHistoryQuery(from: _range.fromFor(_clock()), category: _category);
 
-  /// The order source: the real controller's orders when wired, else the sample
-  /// service. A fresh service is built each frame so it reflects new orders.
+  /// The order source: the real controller's orders when wired, else the
+  /// injected service. A fresh service is built each frame so it reflects new
+  /// orders. NEVER falls back to fixtures (P0 §3, WTM-146): a bare-constructed
+  /// screen shows an empty history, not sample data.
   CustomerOrderHistoryService get _service => widget.orderController != null
       ? CustomerOrderHistoryService(widget.orderController!.orders)
-      : (widget.service ?? CustomerOrderHistoryService.sample());
+      : (widget.service ?? CustomerOrderHistoryService(const []));
 
   Future<void> _createOrder() async {
     final controller = widget.orderController!;
@@ -133,7 +135,9 @@ class _TongtaiCustomerHistoryScreenState
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: Text('Purchase History — ${widget.customer.name}'),
+        title: Text(
+          '${context.l10n.custPurchaseHistory} — ${widget.customer.name}',
+        ),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -146,7 +150,7 @@ class _TongtaiCustomerHistoryScreenState
               backgroundColor: TongtaiDesignTokens.consumerBlue,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add),
-              label: const Text('Create Order'),
+              label: Text(context.l10n.titleCreateOrder),
             ),
       body: SafeArea(
         child: Column(
@@ -154,7 +158,7 @@ class _TongtaiCustomerHistoryScreenState
           children: [
             _MetricsHeader(metrics: metrics),
             _FilterRow(
-              label: 'Period',
+              label: context.l10n.labelPeriod,
               children: [
                 for (final range in OrderHistoryRange.values)
                   Padding(
@@ -171,14 +175,14 @@ class _TongtaiCustomerHistoryScreenState
             ),
             if (categories.isNotEmpty)
               _FilterRow(
-                label: 'Category',
+                label: context.l10n.searchCategory,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(
                       right: TongtaiDesignTokens.spacing2,
                     ),
                     child: ChoiceChip(
-                      label: const Text('All'),
+                      label: Text(context.l10n.filterAll),
                       selected: _category == null,
                       onSelected: (_) => setState(() => _category = null),
                     ),
@@ -260,17 +264,17 @@ class _MetricsHeader extends StatelessWidget {
         children: [
           _Metric(
             key: const Key('history-metric-orders'),
-            label: 'Orders',
+            label: context.l10n.kpiOrders,
             value: '${metrics.orderCount}',
           ),
           _Metric(
             key: const Key('history-metric-aov'),
-            label: 'Avg order',
+            label: context.l10n.kpiAovShort,
             value: TongtaiFormatters.vnd(metrics.averageOrderValue),
           ),
           _Metric(
             key: const Key('history-metric-repurchase'),
-            label: 'Repurchase',
+            label: context.l10n.historyRepurchase,
             value: '${(metrics.repurchaseRate * 100).round()}%',
           ),
         ],
@@ -469,7 +473,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'No orders in this period',
+              context.l10n.historyEmptyOrders,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -478,7 +482,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
-              'Try a wider period or clear the category filter.',
+              context.l10n.historyEmptyHint,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

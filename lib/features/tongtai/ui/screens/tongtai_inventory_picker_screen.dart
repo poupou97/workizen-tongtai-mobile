@@ -50,7 +50,7 @@ class _TongtaiInventoryPickerScreenState
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Pick a product'),
+        title: Text(context.l10n.pickerTitle),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -65,7 +65,7 @@ class _TongtaiInventoryPickerScreenState
                 onChanged: (v) => setState(() => _query = v),
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: 'Search name, SKU or category',
+                  hintText: context.l10n.pickerSearchHint,
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
                   fillColor: TongtaiDesignTokens.lightHover,
@@ -82,7 +82,7 @@ class _TongtaiInventoryPickerScreenState
               child: products.isEmpty
                   ? Center(
                       child: Text(
-                        'No products match',
+                        context.l10n.pickerNoMatch,
                         style: TongtaiDesignTokens.bodyStyle.copyWith(
                           color: TongtaiDesignTokens.lightTextSecondary,
                         ),

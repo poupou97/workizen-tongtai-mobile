@@ -174,7 +174,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Home Dashboard'),
+        title: Text(context.l10n.titleHomeDashboard),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -186,7 +186,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           ),
           IconButton(
             key: const Key('home-open-chat'),
-            tooltip: 'Workizen AI chat',
+            tooltip: context.l10n.homeChatTooltip,
             icon: const Icon(Icons.chat_bubble_outline),
             onPressed: () => _openChat(context),
           ),
@@ -257,14 +257,25 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                             ),
                           ),
                         ),
-                        _HealthBadge(health: _health),
+                        // Scale down instead of overflowing on narrow
+                        // screens at accessibility text sizes (P0 §3).
+                        // Flexible bounds the width — a bare FittedBox in a
+                        // Row gets unbounded constraints and never shrinks.
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: _HealthBadge(health: _health),
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Your AI-powered business assistant for sourcing, '
-                      'inventory, customers, and more.',
-                      style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+                    Text(
+                      context.l10n.homeAiSubtitle,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF6B7280),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     _ModuleSummaryGrid(
@@ -335,7 +346,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
 
             // ── Business KPIs — real values, zero is valid (WTM-128) ──
             _SectionHeader(
-              title: 'Business KPIs',
+              title: context.l10n.sectionBusinessKpis,
               actionKey: const Key('home-open-reports'),
               actionLabel: context.l10n.homeViewReports,
               onAction: () => _push(context, const TongtaiReportsScreen()),
@@ -346,7 +357,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
 
             // ── Top opportunities (AI-generated; empty for new users) ─
             _SectionHeader(
-              title: 'Top Opportunities',
+              title: context.l10n.sectionTopOpportunities,
               actionKey: const Key('home-open-opportunities'),
               actionLabel: context.l10n.actionViewAll,
               onAction: () =>
@@ -466,31 +477,31 @@ class _GetStartedCard extends StatelessWidget {
             _CtaTile(
               tileKey: const Key('home-cta-customer'),
               icon: Icons.person_add_alt_1,
-              label: 'Create your first customer',
+              label: context.l10n.homeCtaCustomer,
               onTap: onCustomer,
             ),
             _CtaTile(
               tileKey: const Key('home-cta-product'),
               icon: Icons.add_box_outlined,
-              label: 'Add your first product',
+              label: context.l10n.homeCtaProduct,
               onTap: onProduct,
             ),
             _CtaTile(
               tileKey: const Key('home-cta-order'),
               icon: Icons.receipt_long_outlined,
-              label: 'Create your first order',
+              label: context.l10n.homeCtaOrder,
               onTap: onOrder,
             ),
             _CtaTile(
               tileKey: const Key('home-cta-goal'),
               icon: Icons.flag_outlined,
-              label: 'Set your first business goal',
+              label: context.l10n.homeCtaGoal,
               onTap: onGoal,
             ),
             _CtaTile(
               tileKey: const Key('home-cta-demo'),
               icon: Icons.play_circle_outline,
-              label: 'Explore Demo Mode',
+              label: context.l10n.homeCtaDemo,
               onTap: onDemo,
             ),
           ],
@@ -546,10 +557,17 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(title, style: Theme.of(context).textTheme.titleLarge),
         ),
-        TextButton(
-          key: actionKey,
-          onPressed: onAction,
-          child: Text(actionLabel),
+        // Flexible + FittedBox: at large text scales the action label must
+        // shrink rather than push the Row past its bounds (P0 §3).
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: TextButton(
+              key: actionKey,
+              onPressed: onAction,
+              child: Text(actionLabel),
+            ),
+          ),
         ),
       ],
     );
@@ -581,22 +599,22 @@ class _ModuleSummaryGrid extends StatelessWidget {
       childAspectRatio: 2.4,
       children: [
         _ModuleCard(
-          title: 'Producer',
+          title: context.l10n.navProducer,
           count: '$producers',
           color: TongtaiDesignTokens.producerGreen,
         ),
         _ModuleCard(
-          title: 'Inventory',
+          title: context.l10n.navInventory,
           count: '$inventory',
           color: TongtaiDesignTokens.inventoryOrange,
         ),
         _ModuleCard(
-          title: 'Consumer',
+          title: context.l10n.navConsumer,
           count: '$consumers',
           color: TongtaiDesignTokens.consumerBlue,
         ),
         _ModuleCard(
-          title: 'Journey',
+          title: context.l10n.tileJourney,
           count: '$journeys',
           color: const Color(0xFFFBBF24),
         ),
@@ -623,19 +641,32 @@ class _ModuleCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color, width: 2),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            title,
-            style: TextStyle(fontWeight: FontWeight.bold, color: color),
+      // FittedBox: the grid's fixed aspect ratio cannot grow with the text
+      // scale — shrink the content instead of overflowing (P0 §3).
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  count,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            count,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -657,7 +688,7 @@ class _KpiRow extends StatelessWidget {
         Expanded(
           child: _KpiTile(
             tileKey: const Key('home-kpi-revenue'),
-            label: 'Doanh thu',
+            label: context.l10n.kpiRevenue,
             value: TongtaiFormatters.vndShort(metrics.revenue),
             color: TongtaiDesignTokens.financePurple,
           ),

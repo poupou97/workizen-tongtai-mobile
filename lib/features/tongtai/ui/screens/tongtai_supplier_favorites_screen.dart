@@ -5,6 +5,7 @@ import '../../producer/supplier.dart';
 import '../../producer/supplier_favorites_controller.dart';
 import '../../producer/supplier_search_service.dart';
 import 'tongtai_supplier_detail_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Favorite Suppliers screen (WTM-65) — the user's starred sourcing shortlist.
 ///
@@ -50,7 +51,7 @@ class _TongtaiSupplierFavoritesScreenState
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Favorite Suppliers'),
+        title: Text(context.l10n.titleFavoriteSuppliers),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -178,7 +179,7 @@ class _FavoriteTile extends StatelessWidget {
               // Filled heart — one tap removes from favorites (AC1/AC2).
               IconButton(
                 onPressed: onRemove,
-                tooltip: 'Remove from favorites',
+                tooltip: context.l10n.favRemove,
                 icon: const Icon(
                   Icons.favorite,
                   color: TongtaiDesignTokens.error,
@@ -210,7 +211,7 @@ class _EmptyFavorites extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'No favorite suppliers yet',
+              context.l10n.favEmpty,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -219,7 +220,7 @@ class _EmptyFavorites extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
-              'Tap the heart on a supplier to add it here for quick access.',
+              context.l10n.favEmptyHint,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

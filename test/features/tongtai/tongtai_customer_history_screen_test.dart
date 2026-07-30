@@ -261,7 +261,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TongtaiCustomerHistoryScreen), findsOneWidget);
-      expect(find.text('Purchase History — Phương Nguyễn'), findsOneWidget);
+      expect(find.text('Purchase history — Phương Nguyễn'), findsOneWidget);
       expect(find.textContaining('DH-2026-0101'), findsOneWidget);
     },
   );

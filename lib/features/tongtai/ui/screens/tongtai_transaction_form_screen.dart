@@ -105,7 +105,7 @@ class _TongtaiTransactionFormScreenState
               Expanded(
                 child: _TypeButton(
                   buttonKey: const Key('transaction-type-income'),
-                  label: 'Thu',
+                  label: l10n.txnIncome,
                   icon: Icons.south_west,
                   color: _income,
                   selected: _data.type == TransactionType.income,
@@ -118,7 +118,7 @@ class _TongtaiTransactionFormScreenState
               Expanded(
                 child: _TypeButton(
                   buttonKey: const Key('transaction-type-expense'),
-                  label: 'Chi',
+                  label: l10n.txnExpense,
                   icon: Icons.north_east,
                   color: _expense,
                   selected: _data.type == TransactionType.expense,

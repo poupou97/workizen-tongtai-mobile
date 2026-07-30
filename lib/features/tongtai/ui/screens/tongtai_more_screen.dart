@@ -120,7 +120,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('More'),
+        title: Text(context.l10n.navMore),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -130,37 +130,39 @@ class TongtaiMoreScreen extends ConsumerWidget {
           children: [
             // App settings section
             _SettingsSection(
-              title: 'Settings',
+              title: context.l10n.moreSettings,
               items: [
                 _SettingsItem(
                   icon: Icons.person_outline,
-                  label: 'Profile',
+                  label: context.l10n.moreProfile,
                   onTap: () {},
                 ),
                 _SettingsItem(
                   icon: Icons.notifications_outlined,
-                  label: 'Notifications',
+                  label: context.l10n.moreNotifications,
                   onTap: () {},
                 ),
                 _SettingsItem(
+                  key: const Key('more-language'),
                   icon: Icons.language,
                   label: context.l10n.settingsLanguage,
                   onTap: () => _pickLanguage(context, ref),
                 ),
                 _SettingsItem(
                   icon: Icons.dark_mode_outlined,
-                  label: 'Theme',
+                  label: context.l10n.moreTheme,
                   onTap: () {},
                 ),
               ],
             ),
             // AI Assistant section (WTM-61) — BYOK Grok (xAI) key management.
             _SettingsSection(
-              title: 'AI Assistant',
+              title: context.l10n.titleAiAssistant,
               items: [
                 _SettingsItem(
+                  key: const Key('more-ai-key'),
                   icon: Icons.auto_awesome,
-                  label: 'Grok (xAI) API key',
+                  label: context.l10n.moreGrokKey,
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiAiKeyScreen(),
@@ -171,7 +173,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
             ),
             // Business settings section
             _SettingsSection(
-              title: 'Business',
+              title: context.l10n.moreBusinessSection,
               items: [
                 _SettingsItem(
                   key: const Key('more-demo-mode'),
@@ -186,6 +188,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () => _removeSamples(context, ref),
                 ),
                 _SettingsItem(
+                  key: const Key('more-timeline'),
                   icon: Icons.timeline_outlined,
                   label: context.l10n.titleTimeline,
                   onTap: () => Navigator.of(context).push<void>(
@@ -195,6 +198,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   ),
                 ),
                 _SettingsItem(
+                  key: const Key('more-finance'),
                   icon: Icons.account_balance_wallet_outlined,
                   label: context.l10n.titleFinance,
                   onTap: () => Navigator.of(context).push<void>(
@@ -204,6 +208,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   ),
                 ),
                 _SettingsItem(
+                  key: const Key('more-reports'),
                   icon: Icons.bar_chart_outlined,
                   label: context.l10n.titleReports,
                   onTap: () => Navigator.of(context).push<void>(
@@ -213,8 +218,9 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   ),
                 ),
                 _SettingsItem(
+                  key: const Key('more-goals'),
                   icon: Icons.flag_outlined,
-                  label: 'Business Goals',
+                  label: context.l10n.titleBusinessGoals,
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiGoalsScreen(),
@@ -222,8 +228,9 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   ),
                 ),
                 _SettingsItem(
+                  key: const Key('more-export'),
                   icon: Icons.ios_share,
-                  label: 'Export Data (CSV)',
+                  label: context.l10n.titleExport,
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiExportScreen(),
@@ -232,34 +239,34 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 ),
                 _SettingsItem(
                   icon: Icons.business_outlined,
-                  label: 'Business Info',
+                  label: context.l10n.moreBusinessInfo,
                   onTap: () {},
                 ),
                 _SettingsItem(
                   icon: Icons.people_outline,
-                  label: 'Team',
+                  label: context.l10n.moreTeam,
                   onTap: () {},
                 ),
                 _SettingsItem(
                   icon: Icons.security_outlined,
-                  label: 'Permissions',
+                  label: context.l10n.morePermissions,
                   onTap: () {},
                 ),
               ],
             ),
             // Support section
             _SettingsSection(
-              title: 'Support',
+              title: context.l10n.moreSupportSection,
               items: [
                 _SettingsItem(
                   icon: Icons.school_outlined,
-                  label: 'Replay Tutorial',
+                  label: context.l10n.moreReplayTutorial,
                   onTap: () =>
                       ref.read(tongtaiOnboardingProvider.notifier).reset(),
                 ),
                 _SettingsItem(
                   icon: Icons.help_outline,
-                  label: 'Help & Support',
+                  label: context.l10n.moreHelp,
                   onTap: () {},
                 ),
                 _SettingsItem(
@@ -269,23 +276,23 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 ),
                 _SettingsItem(
                   icon: Icons.feedback_outlined,
-                  label: 'Send Feedback',
+                  label: context.l10n.moreSendFeedback,
                   onTap: () {},
                 ),
               ],
             ),
             // Legal section
             _SettingsSection(
-              title: 'Legal',
+              title: context.l10n.moreLegalSection,
               items: [
                 _SettingsItem(
                   icon: Icons.description_outlined,
-                  label: 'Terms of Service',
+                  label: context.l10n.moreTerms,
                   onTap: () {},
                 ),
                 _SettingsItem(
                   icon: Icons.privacy_tip_outlined,
-                  label: 'Privacy Policy',
+                  label: context.l10n.morePrivacy,
                   onTap: () {},
                 ),
               ],
@@ -302,7 +309,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                     side: const BorderSide(color: Color(0xFFEF4444)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  child: const Text('Logout'),
+                  child: Text(context.l10n.moreLogout),
                 ),
               ),
             ),

@@ -136,7 +136,7 @@ class _TongtaiOpportunityFeedScreenState
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
           appBar: AppBar(
-            title: const Text('Opportunities'),
+            title: Text(context.l10n.titleOpportunities),
             elevation: 0,
             backgroundColor: TongtaiDesignTokens.lightBackground,
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -161,14 +161,14 @@ class _TongtaiOpportunityFeedScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _ChipsRow(
-                  label: 'Type',
+                  label: context.l10n.labelType,
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(
                         right: TongtaiDesignTokens.spacing2,
                       ),
                       child: ChoiceChip(
-                        label: const Text('All'),
+                        label: Text(context.l10n.filterAll),
                         selected: _query.type == null,
                         onSelected: (_) => setState(
                           () => _query = _query.copyWith(clearType: true),
@@ -194,7 +194,7 @@ class _TongtaiOpportunityFeedScreenState
                   ],
                 ),
                 _ChipsRow(
-                  label: 'Sort',
+                  label: context.l10n.labelSort,
                   children: [
                     for (final sort in OpportunitySort.values)
                       Padding(
