@@ -160,7 +160,7 @@ void main() {
       expect(find.text('Cơ hội a'), findsOneWidget);
       expect(find.text('Mô tả a'), findsOneWidget);
       expect(find.textContaining('+10.000.000 ₫'), findsOneWidget);
-      expect(find.text(OpportunityType.seasonal.labelVi), findsWidgets);
+      expect(find.text(OpportunityType.seasonal.labelEn), findsWidgets);
     });
 
     testWidgets('WTM-130: rule-based signal badges render on a card', (
@@ -193,8 +193,8 @@ void main() {
         find.byKey(const Key('opportunity-signal-highRisk')),
         findsOneWidget,
       );
-      expect(find.text('Khẩn'), findsOneWidget);
-      expect(find.text('Rủi ro cao'), findsOneWidget);
+      expect(find.text('Urgent'), findsOneWidget);
+      expect(find.text('High risk'), findsOneWidget);
       expect(
         find.byKey(const Key('opportunity-signal-highValue')),
         findsNothing,
@@ -218,7 +218,7 @@ void main() {
       );
 
       expect(find.byKey(const Key('opportunity-signal-stale')), findsOneWidget);
-      expect(find.text('Nguội'), findsOneWidget);
+      expect(find.text('Stale'), findsOneWidget);
     });
 
     testWidgets('AC2/AC3: type chips filter, sort chips re-order', (
@@ -287,10 +287,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Cơ hội a'), findsNothing);
-      expect(find.textContaining('Đã bỏ qua'), findsOneWidget);
+      expect(find.textContaining('Dismissed'), findsOneWidget);
 
       // Undo via the snackbar action.
-      await tester.tap(find.text('Hoàn tác'));
+      await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
       expect(find.text('Cơ hội a'), findsOneWidget);
     });
@@ -313,7 +313,7 @@ void main() {
         OpportunityReaction.interested,
       );
       // Re-rendered with the reaction label.
-      expect(find.text(OpportunityReaction.interested.labelVi), findsWidgets);
+      expect(find.text(OpportunityReaction.interested.labelEn), findsWidgets);
       // Flush the confirmation snackbar timer.
       await tester.pump(const Duration(seconds: 4));
     });

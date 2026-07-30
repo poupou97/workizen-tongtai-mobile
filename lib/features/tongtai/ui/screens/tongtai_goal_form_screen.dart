@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
 import '../../journey/business_goal_form.dart';
@@ -224,7 +225,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                 key: const Key('goal-name-field'),
                 controller: _name,
                 field: GoalField.name,
-                hint: 'e.g. Đạt 100 triệu ₫ trong quý',
+                hint: context.l10n.goalTitleHint,
                 required: true,
               ),
               _TypePicker(
@@ -261,8 +262,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                       const SizedBox(width: TongtaiDesignTokens.spacing2),
                       Expanded(
                         child: Text(
-                          'Doanh thu đã đạt: tự tính từ đơn hàng đã ghi nhận '
-                          '(auto-derived from recorded orders).',
+                          context.l10n.goalRealizedHelp,
                           style: TongtaiDesignTokens.captionStyle.copyWith(
                             color: TongtaiDesignTokens.lightTextSecondary,
                           ),
@@ -320,7 +320,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                 key: const Key('goal-notes-field'),
                 controller: _notes,
                 field: GoalField.notes,
-                hint: 'Bối cảnh, kênh bán, nguồn hàng…',
+                hint: context.l10n.goalNotesHint,
                 maxLines: 3,
               ),
               const SizedBox(height: TongtaiDesignTokens.spacing8),
@@ -358,7 +358,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                 ),
               ),
               const SizedBox(height: TongtaiDesignTokens.spacing3),
-              _reviewRow('Type', preview.type.labelVi),
+              _reviewRow('Type', preview.type.label(context.l10n.languageCode)),
               if (preview.targetAmount > 0)
                 _reviewRow(
                   'Revenue target',
@@ -462,7 +462,9 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
               ]
             : null,
         decoration: InputDecoration(
-          labelText: required ? '${field.labelEn} *' : field.labelEn,
+          labelText: required
+              ? '${field.label(context.l10n.languageCode)} *'
+              : field.label(context.l10n.languageCode),
           hintText: hint,
           suffixText: suffixText,
           errorText: _errors[field],
@@ -489,11 +491,12 @@ class _TemplateStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
       children: [
         Text(
-          'Bạn muốn đạt điều gì? | What do you want to achieve?',
+          l10n.goalWhatToAchieve,
           style: TongtaiDesignTokens.bodyStyle.copyWith(
             fontWeight: FontWeight.w700,
             color: TongtaiDesignTokens.lightTextPrimary,
@@ -534,7 +537,10 @@ class _TemplateStep extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${template.type.labelVi} • ${template.suggestedDays} ngày',
+                      l10n.goalTemplateDays(
+                        template.type.label(l10n.languageCode),
+                        template.suggestedDays,
+                      ),
                       style: TongtaiDesignTokens.captionStyle.copyWith(
                         color: TongtaiDesignTokens.lightTextSecondary,
                       ),
@@ -548,7 +554,7 @@ class _TemplateStep extends StatelessWidget {
           key: const Key('goal-template-blank'),
           onPressed: onBlank,
           icon: const Icon(Icons.edit_outlined),
-          label: const Text('Tự đặt mục tiêu | Custom goal'),
+          label: Text(l10n.goalCustom),
         ),
       ],
     );
@@ -571,7 +577,7 @@ class _TypePicker extends StatelessWidget {
         for (final type in GoalType.values)
           ChoiceChip(
             key: Key('goal-type-${type.name}'),
-            label: Text(type.labelVi),
+            label: Text(type.label(context.l10n.languageCode)),
             selected: selected == type,
             onSelected: (_) => onSelected(type),
           ),

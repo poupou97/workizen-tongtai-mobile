@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../consumer/customer.dart';
 import '../../consumer/customer_form.dart';
 import '../../consumer/customer_history.dart';
@@ -243,7 +244,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
               key: const Key('customer-name-field'),
               controller: _name,
               field: CustomerField.name,
-              hint: 'e.g. Phương Nguyễn',
+              hint: context.l10n.custNameHint,
               textCapitalization: TextCapitalization.words,
             ),
             _field(
@@ -267,7 +268,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
               key: const Key('customer-location-field'),
               controller: _location,
               field: CustomerField.location,
-              hint: 'e.g. Hà Nội',
+              hint: context.l10n.custLocationHint,
               optional: true,
             ),
             _LocationSuggestions(
@@ -296,7 +297,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
               key: const Key('customer-tags-field'),
               controller: _tags,
               field: CustomerField.tags,
-              hint: 'Comma-separated, e.g. tiktok, bán sỉ',
+              hint: context.l10n.custTagsHint,
               optional: true,
             ),
             _field(
@@ -343,10 +344,10 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
     TextInputType? keyboardType,
   }) {
     final label = optional
-        ? '${field.labelEn} (optional)'
+        ? '${field.label(context.l10n.languageCode)} ${context.l10n.labelOptionalSuffix}'
         : field.isRequired
-        ? '${field.labelEn} *'
-        : field.labelEn;
+        ? '${field.label(context.l10n.languageCode)} *'
+        : field.label(context.l10n.languageCode);
     return Padding(
       padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
       child: TextField(
@@ -500,7 +501,7 @@ class _AddressesSection extends StatelessWidget {
                     key: Key('customer-address-field-$i'),
                     controller: controllers[i],
                     decoration: InputDecoration(
-                      hintText: 'e.g. 12 Hàng Bài, Hoàn Kiếm',
+                      hintText: context.l10n.custAddressHint,
                       filled: true,
                       fillColor: TongtaiDesignTokens.lightHover,
                       border: OutlineInputBorder(
@@ -654,7 +655,7 @@ class _ChangeList extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 2),
               child: Text(
-                '${change.field.labelEn}: '
+                '${change.field.label(context.l10n.languageCode)}: '
                 '${change.before.isEmpty ? '—' : change.before} → '
                 '${change.after.isEmpty ? '—' : change.after}',
                 style: TongtaiDesignTokens.captionStyle.copyWith(

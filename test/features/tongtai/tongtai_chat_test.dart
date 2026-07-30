@@ -269,14 +269,17 @@ void main() {
       expect(find.byKey(const Key('chat-pending-attachment')), findsNothing);
     });
 
-    testWidgets('empty state greets bilingually', (tester) async {
+    testWidgets('empty state greets in ONE locale (P0 §2 WTM-145)', (
+      tester,
+    ) async {
       final controller = makeController(_FixedResponder('x'));
       await tester.pumpWidget(host(controller));
+      // Default test locale is EN; the VI variant must NOT be on screen.
+      expect(find.text('Ask Workizen AI about your business'), findsOneWidget);
       expect(
         find.text('Hỏi Workizen AI về việc kinh doanh của bạn'),
-        findsOneWidget,
+        findsNothing,
       );
-      expect(find.text('Ask Workizen AI about your business.'), findsOneWidget);
     });
   });
 

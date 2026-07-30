@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../onboarding/tongtai_onboarding_content.dart';
 
@@ -61,7 +62,6 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
   Widget build(BuildContext context) {
     final languageCode =
         Localizations.maybeLocaleOf(context)?.languageCode ?? 'en';
-    final isVi = languageCode == 'vi';
     final pages = widget.pages;
     final accent = pages[_index].accentColor;
 
@@ -84,7 +84,7 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
                   style: TextButton.styleFrom(
                     foregroundColor: TongtaiDesignTokens.lightTextSecondary,
                   ),
-                  child: Text(isVi ? 'Bỏ qua' : 'Skip'),
+                  child: Text(context.l10n.actionSkip),
                 ),
               ),
             ),
@@ -132,8 +132,8 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
                   ),
                   child: Text(
                     _isLast
-                        ? (isVi ? 'Bắt đầu' : 'Get Started')
-                        : (isVi ? 'Tiếp tục' : 'Next'),
+                        ? context.l10n.actionGetStarted
+                        : context.l10n.actionNext,
                     style: TongtaiDesignTokens.bodyStyle.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

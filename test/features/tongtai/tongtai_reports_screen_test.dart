@@ -137,7 +137,7 @@ void main() {
       scrollable: scrollable,
     );
     expect(find.text('Thu Hà'), findsOneWidget);
-    expect(find.text('4 đơn'), findsOneWidget);
+    expect(find.text('4 orders'), findsOneWidget);
   });
 
   testWidgets('opportunity pipeline card renders count + value (WTM-98)', (
@@ -327,7 +327,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(TongtaiFoxMascot), findsOneWidget);
-    expect(find.text('Chưa có doanh thu để báo cáo'), findsOneWidget);
+    expect(find.text('No revenue to report yet'), findsOneWidget);
     expect(find.byKey(const Key('reports-kpi-revenue')), findsNothing);
   });
 
@@ -366,6 +366,6 @@ void main() {
 
     expect(find.byType(TongtaiReportsScreen), findsOneWidget);
     // Empty repositories → User Data First empty state.
-    expect(find.text('Chưa có doanh thu để báo cáo'), findsOneWidget);
+    expect(find.text('No revenue to report yet'), findsOneWidget);
   });
 }

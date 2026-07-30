@@ -91,7 +91,7 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
             backgroundColor: TongtaiDesignTokens.financePurple,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
-            label: const Text('Ghi giao dịch'),
+            label: Text(context.l10n.titleTransactionForm),
           ),
           body: summary.hasActivity
               ? _FinanceBody(summary: summary, recent: _controller.recent())
@@ -576,7 +576,7 @@ class _FinanceEmptyState extends StatelessWidget {
             const TongtaiFoxMascot.face(size: 72),
             const SizedBox(height: TongtaiDesignTokens.spacing4),
             Text(
-              'Chưa có giao dịch tài chính',
+              context.l10n.financeEmptyTitle,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.heading3Style.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -584,8 +584,7 @@ class _FinanceEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing2),
             Text(
-              'Ghi khoản thu/chi đầu tiên và bảng tài chính sẽ hiện ở đây.\n'
-              'Your income & expenses appear here after the first entry.',
+              context.l10n.financeEmptyBody,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

@@ -16,6 +16,15 @@ enum CustomerSort {
     CustomerSort.frequency => 'Frequency',
     CustomerSort.recency => 'Recent',
   };
+
+  String get labelVi => switch (this) {
+    CustomerSort.name => 'Tên',
+    CustomerSort.spent => 'Chi tiêu',
+    CustomerSort.frequency => 'Tần suất',
+    CustomerSort.recency => 'Gần đây',
+  };
+
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
 /// Minimum / maximum customers shown per page (WTM-75 AC: 20–50 per page). The

@@ -8,7 +8,8 @@
 name: CI
 
 on:
-  pull_request: # sole trigger — a push trigger too would run every PR twice
+  pull_request: # primary trigger — a push trigger too would run every PR twice
+  workflow_dispatch: # manual fallback when pull_request event delivery stalls
 
 concurrency:
   group: ci-${{ github.ref }}

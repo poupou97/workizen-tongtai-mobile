@@ -54,7 +54,7 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
           if (onEdit != null)
             IconButton(
               key: const Key('goal-detail-edit'),
-              tooltip: 'Sửa mục tiêu',
+              tooltip: context.l10n.goalEdit,
               icon: const Icon(Icons.edit_outlined),
               onPressed: onEdit,
             ),
@@ -67,11 +67,14 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
           Row(
             children: [
               _Badge(
-                label: goal.type.labelVi,
+                label: goal.type.label(context.l10n.languageCode),
                 color: TongtaiDesignTokens.financePurple,
               ),
               const SizedBox(width: TongtaiDesignTokens.spacing2),
-              _Badge(label: pace.labelVi, color: paceColor),
+              _Badge(
+                label: pace.label(context.l10n.languageCode),
+                color: paceColor,
+              ),
             ],
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing3),
@@ -128,7 +131,7 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
           const SizedBox(height: TongtaiDesignTokens.spacing5),
 
           // ── Action plan ──────────────────────────────────────────────
-          _SectionTitle('Kế hoạch hành động'),
+          _SectionTitle(context.l10n.sectionActionPlan),
           const SizedBox(height: TongtaiDesignTokens.spacing3),
           Column(
             key: const Key('goal-detail-plan'),
@@ -140,7 +143,7 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
           const SizedBox(height: TongtaiDesignTokens.spacing5),
 
           // ── Guidance tips ────────────────────────────────────────────
-          _SectionTitle('Gợi ý'),
+          _SectionTitle(context.l10n.sectionSuggestions),
           const SizedBox(height: TongtaiDesignTokens.spacing2),
           for (final tip in tips) _Tip(text: tip),
         ],
@@ -221,13 +224,13 @@ class _ProgressCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _MiniStat(
-                  label: 'Còn lại',
-                  value: '${goal.daysRemaining(now)} ngày',
+                  label: context.l10n.goalDaysLeftLabel,
+                  value: context.l10n.daysCount(goal.daysRemaining(now)),
                 ),
               ),
               Expanded(
                 child: _MiniStat(
-                  label: 'Thời gian đã trôi',
+                  label: context.l10n.goalTimeElapsed,
                   value: '${(goal.timelineElapsed(now) * 100).round()}%',
                 ),
               ),
@@ -281,7 +284,8 @@ class _RealizedSalesCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${TongtaiFormatters.vndShort(realized)} · $share% mục tiêu',
+                  '${TongtaiFormatters.vndShort(realized)} · '
+                  '${context.l10n.percentOfGoal(share)}',
                   style: TongtaiDesignTokens.smallStyle.copyWith(
                     color: TongtaiDesignTokens.lightTextPrimary,
                     fontWeight: FontWeight.w700,

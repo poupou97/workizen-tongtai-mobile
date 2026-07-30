@@ -7,6 +7,7 @@ import '../../inventory/stock_alert.dart';
 import '../../inventory/stock_alert_service.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import 'tongtai_product_form_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Color for a [StockAlertLevel] badge (WTM-70): out of stock is the error red,
 /// low stock the warning amber. Pure function so the mapping is unit-testable
@@ -322,7 +323,7 @@ class _LevelChip extends StatelessWidget {
         border: Border.all(color: color),
       ),
       child: Text(
-        level.labelEn,
+        level.label(context.l10n.languageCode),
         style: TongtaiDesignTokens.captionStyle.copyWith(
           color: color,
           fontWeight: FontWeight.w600,

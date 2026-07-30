@@ -79,7 +79,7 @@ void main() {
     await pump(tester, controller: FinanceController.inMemory());
 
     expect(find.byType(TongtaiFoxMascot), findsOneWidget);
-    expect(find.text('Chưa có giao dịch tài chính'), findsOneWidget);
+    expect(find.text('No financial transactions yet'), findsOneWidget);
     expect(find.byKey(const Key('finance-kpi-income')), findsNothing);
   });
 
@@ -125,7 +125,7 @@ void main() {
     await pump(tester, controller: controller);
 
     // Empty ledger → empty state, no KPIs.
-    expect(find.text('Chưa có giao dịch tài chính'), findsOneWidget);
+    expect(find.text('No financial transactions yet'), findsOneWidget);
 
     await controller.add(
       FinanceTransaction(
@@ -138,7 +138,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Chưa có giao dịch tài chính'), findsNothing);
+    expect(find.text('No financial transactions yet'), findsNothing);
     expect(
       find.descendant(
         of: find.byKey(const Key('finance-kpi-income')),

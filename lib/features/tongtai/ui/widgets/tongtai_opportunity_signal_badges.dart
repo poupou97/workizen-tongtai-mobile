@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity_signals.dart';
 import '../../opportunity/opportunity_theme.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// A wrap of rule-based [OpportunitySignal] badges (WTM-130), in a stable
 /// severity order. Shared by the Opportunity feed and detail screens so they
@@ -50,7 +51,7 @@ class TongtaiOpportunitySignalBadges extends StatelessWidget {
                 ),
                 const SizedBox(width: 3),
                 Text(
-                  s.labelVi,
+                  s.label(context.l10n.languageCode),
                   style: TongtaiDesignTokens.captionStyle.copyWith(
                     color: tongtaiOpportunitySignalColor(s),
                     fontWeight: FontWeight.w600,

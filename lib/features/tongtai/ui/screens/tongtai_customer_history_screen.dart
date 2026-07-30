@@ -9,6 +9,7 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../orders/order.dart';
 import '../../orders/order_controller.dart';
 import 'tongtai_create_order_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Color for an [OrderStatus] chip. Pure function so the mapping is directly
 /// unit-testable without pumping a widget (same convention as
@@ -27,10 +28,10 @@ enum OrderHistoryRange {
   last30Days,
   last90Days;
 
-  String get labelEn => switch (this) {
-    OrderHistoryRange.all => 'All time',
-    OrderHistoryRange.last30Days => 'Last 30 days',
-    OrderHistoryRange.last90Days => 'Last 90 days',
+  String label(AppStrings l10n) => switch (this) {
+    OrderHistoryRange.all => l10n.historyRangeAll,
+    OrderHistoryRange.last30Days => l10n.historyRangeLast30,
+    OrderHistoryRange.last90Days => l10n.historyRangeLast90,
   };
 
   /// The `from` bound this preset represents; null = unbounded (all time).
@@ -161,7 +162,7 @@ class _TongtaiCustomerHistoryScreenState
                       right: TongtaiDesignTokens.spacing2,
                     ),
                     child: ChoiceChip(
-                      label: Text(range.labelEn),
+                      label: Text(range.label(context.l10n)),
                       selected: _range == range,
                       onSelected: (_) => setState(() => _range = range),
                     ),
@@ -440,7 +441,7 @@ class _StatusChip extends StatelessWidget {
         border: Border.all(color: color),
       ),
       child: Text(
-        status.labelEn,
+        status.label(context.l10n.languageCode),
         style: TongtaiDesignTokens.captionStyle.copyWith(
           color: color,
           fontWeight: FontWeight.w600,

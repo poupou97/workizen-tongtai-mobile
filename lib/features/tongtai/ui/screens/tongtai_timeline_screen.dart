@@ -138,7 +138,7 @@ class _FilterRow extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
             child: ChoiceChip(
-              label: const Text('Tất cả'),
+              label: Text(context.l10n.filterAll),
               selected: selected == null,
               onSelected: (_) => onSelected(null),
             ),
@@ -150,7 +150,7 @@ class _FilterRow extends StatelessWidget {
               ),
               child: ChoiceChip(
                 key: Key('timeline-filter-${t.name}'),
-                label: Text(t.labelVi),
+                label: Text(t.label(context.l10n.languageCode)),
                 selected: selected == t,
                 onSelected: (_) => onSelected(t),
               ),
@@ -167,11 +167,11 @@ class _DaySection extends StatelessWidget {
   final TimelineDay day;
   final DateTime now;
 
-  String get _label {
+  String _label(AppStrings l10n) {
     final today = DateTime(now.year, now.month, now.day);
     final diff = today.difference(day.date).inDays;
-    if (diff == 0) return 'Hôm nay';
-    if (diff == 1) return 'Hôm qua';
+    if (diff == 0) return l10n.dateToday;
+    if (diff == 1) return l10n.dateYesterday;
     return TongtaiFormatters.isoDate(day.date);
   }
 
@@ -188,7 +188,7 @@ class _DaySection extends StatelessWidget {
             TongtaiDesignTokens.spacing2,
           ),
           child: Text(
-            _label,
+            _label(context.l10n),
             style: TongtaiDesignTokens.smallStyle.copyWith(
               color: TongtaiDesignTokens.lightTextSecondary,
               fontWeight: FontWeight.w700,
@@ -305,7 +305,7 @@ class _TimelineEmptyState extends StatelessWidget {
             const TongtaiFoxMascot.face(size: 72),
             const SizedBox(height: TongtaiDesignTokens.spacing4),
             Text(
-              'Chưa có hoạt động nào',
+              context.l10n.timelineEmptyTitle,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.heading3Style.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -313,8 +313,7 @@ class _TimelineEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing2),
             Text(
-              'Đơn hàng, thu chi, cơ hội và mục tiêu sẽ xuất hiện ở đây theo '
-              'thời gian.',
+              context.l10n.timelineEmptyBody,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

@@ -58,13 +58,13 @@ void main() {
     await tester.pumpAndSettle();
 
     // Both "quạt" (m1) and "Quạt" (m2) match.
-    expect(find.text('2 kết quả'), findsOneWidget);
+    expect(find.text('2 results'), findsOneWidget);
     expect(find.byType(ListTile), findsNWidgets(2));
     // Day header inside the results (distinct from the "Hôm nay" range chip).
     expect(
       find.descendant(
         of: find.byKey(const Key('chat-search-results')),
-        matching: find.text('Hôm nay'),
+        matching: find.text('Today'),
       ),
       findsOneWidget,
     );

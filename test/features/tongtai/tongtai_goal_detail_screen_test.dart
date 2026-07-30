@@ -38,7 +38,7 @@ void main() {
     expect(find.byKey(const Key('goal-detail-title')), findsOneWidget);
     expect(find.text('Mục tiêu quý 3'), findsOneWidget);
     expect(find.text('55%'), findsOneWidget); // 55M / 100M progress
-    expect(find.text('Đúng tiến độ'), findsOneWidget); // on-track pace
+    expect(find.text('On track'), findsOneWidget); // on-track pace
     expect(find.byKey(const Key('goal-detail-plan')), findsOneWidget);
 
     // The revenue plan's first step (may sit just below the fold).
@@ -92,7 +92,7 @@ void main() {
       );
 
       expect(find.byKey(const Key('goal-detail-realized')), findsOneWidget);
-      expect(find.textContaining('30% mục tiêu'), findsOneWidget);
+      expect(find.textContaining('30% of goal'), findsOneWidget);
       // The manual progress (55%) is untouched — both are shown.
       expect(find.text('55%'), findsOneWidget);
     },

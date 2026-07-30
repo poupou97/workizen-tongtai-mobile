@@ -7,6 +7,7 @@ import '../../inventory/product.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../orders/order.dart';
 import 'tongtai_inventory_picker_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Create Order form (WTM-126) — the Orders capability's create flow, launched
 /// from a customer's screen with that [customer] pre-selected. Each line is added
@@ -319,7 +320,7 @@ class _StatusRow extends StatelessWidget {
                         right: TongtaiDesignTokens.spacing2,
                       ),
                       child: ChoiceChip(
-                        label: Text(s.labelEn),
+                        label: Text(s.label(context.l10n.languageCode)),
                         selected: status == s,
                         onSelected: (_) => onSelected(s),
                       ),

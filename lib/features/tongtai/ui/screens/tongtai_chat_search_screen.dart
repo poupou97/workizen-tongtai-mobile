@@ -5,6 +5,7 @@ import '../../chat/chat_message_store.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Date window for the chat search (WTM-84) — "by session/period".
 enum ChatSearchRange {
@@ -12,10 +13,10 @@ enum ChatSearchRange {
   today,
   last7Days;
 
-  String get labelVi => switch (this) {
-    ChatSearchRange.all => 'Tất cả',
-    ChatSearchRange.today => 'Hôm nay',
-    ChatSearchRange.last7Days => '7 ngày',
+  String label(AppStrings l10n) => switch (this) {
+    ChatSearchRange.all => l10n.filterAll,
+    ChatSearchRange.today => l10n.dateToday,
+    ChatSearchRange.last7Days => l10n.chatSearchRange7d,
   };
 
   /// The `from` bound this preset represents at [now]; null = unbounded.
@@ -102,8 +103,8 @@ class _TongtaiChatSearchScreenState extends State<TongtaiChatSearchScreen> {
           key: const Key('chat-search-field'),
           controller: _searchController,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Tìm trong trò chuyện…',
+          decoration: InputDecoration(
+            hintText: context.l10n.chatSearchHint,
             border: InputBorder.none,
           ),
           onChanged: _onKeyword,
@@ -153,7 +154,7 @@ class _RangeRow extends StatelessWidget {
               ),
               child: ChoiceChip(
                 key: Key('chat-search-range-${range.name}'),
-                label: Text(range.labelVi),
+                label: Text(range.label(context.l10n)),
                 selected: selected == range,
                 onSelected: (_) => onSelected(range),
               ),
@@ -175,21 +176,22 @@ class _ResultList extends StatelessWidget {
   final String keyword;
   final DateTime now;
 
-  String _dayLabel(DateTime ts) {
+  String _dayLabel(DateTime ts, AppStrings l10n) {
     final today = DateTime(now.year, now.month, now.day);
     final day = DateTime(ts.year, ts.month, ts.day);
     final diff = today.difference(day).inDays;
-    if (diff == 0) return 'Hôm nay';
-    if (diff == 1) return 'Hôm qua';
+    if (diff == 0) return l10n.dateToday;
+    if (diff == 1) return l10n.dateYesterday;
     return TongtaiFormatters.isoDate(day);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     // Group results (already newest-first) into day sections.
     final sections = <String, List<ChatMessage>>{};
     for (final m in results) {
-      (sections[_dayLabel(m.timestamp)] ??= []).add(m);
+      (sections[_dayLabel(m.timestamp, l10n)] ??= []).add(m);
     }
     return ListView(
       key: const Key('chat-search-results'),
@@ -202,7 +204,7 @@ class _ResultList extends StatelessWidget {
             0,
           ),
           child: Text(
-            results.length == 1 ? '1 kết quả' : '${results.length} kết quả',
+            l10n.searchResultCount(results.length),
             style: TongtaiDesignTokens.captionStyle.copyWith(
               color: TongtaiDesignTokens.lightTextSecondary,
             ),
@@ -242,7 +244,7 @@ class _ResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final who = _fromSeller ? 'Bạn' : 'Workizen AI';
+    final who = _fromSeller ? context.l10n.chatYou : 'Workizen AI';
     final time =
         '${message.timestamp.hour.toString().padLeft(2, '0')}:'
         '${message.timestamp.minute.toString().padLeft(2, '0')}';
@@ -317,7 +319,7 @@ class _Prompt extends StatelessWidget {
     return Center(
       key: const Key('chat-search-prompt'),
       child: Text(
-        'Nhập từ khóa để tìm trong lịch sử trò chuyện',
+        context.l10n.chatSearchPrompt,
         style: TongtaiDesignTokens.smallStyle.copyWith(
           color: TongtaiDesignTokens.lightTextSecondary,
         ),
@@ -341,7 +343,7 @@ class _NoResults extends StatelessWidget {
             const TongtaiFoxMascot.face(size: 64),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'Không tìm thấy tin nhắn nào',
+              context.l10n.chatSearchNoResults,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,
               ),

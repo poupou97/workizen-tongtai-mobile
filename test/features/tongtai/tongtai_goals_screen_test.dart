@@ -97,7 +97,7 @@ void main() {
         expect(find.text('Đạt 100 triệu ₫ trong quý 3'), findsOneWidget);
         expect(find.text('62%'), findsOneWidget); // derived from the order
         // 2026-07-22 is ~23% into Jul 1→Sep 30; 62% ≥ 23%+10 → ahead.
-        expect(find.text(GoalPace.ahead.labelVi), findsOneWidget);
+        expect(find.text(GoalPace.ahead.labelEn), findsOneWidget);
         expect(
           find.textContaining('vượt tiến độ', findRichText: false),
           findsOneWidget,
@@ -124,10 +124,7 @@ void main() {
       useTallViewport(tester);
       final controller = BusinessGoalController.inMemory(const []);
       await pumpGoals(tester, controller);
-      expect(
-        find.text('Đặt mục tiêu kinh doanh đầu tiên của bạn'),
-        findsOneWidget,
-      );
+      expect(find.text('Set your first business goal'), findsOneWidget);
     });
 
     testWidgets('pace colors map correctly (pure function)', (tester) async {

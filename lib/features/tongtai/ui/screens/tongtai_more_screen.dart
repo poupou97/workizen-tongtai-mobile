@@ -62,13 +62,8 @@ class TongtaiMoreScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Nạp dữ liệu mẫu?'),
-        content: const Text(
-          'Dữ liệu mẫu sẽ được thêm vào ứng dụng như dữ liệu bình thường — '
-          'mọi màn hình (Home, Kho, Khách hàng, Báo cáo, Cơ hội…) cùng hiển '
-          'thị. Bạn có thể sửa từng dòng hoặc xóa toàn bộ mẫu bất cứ lúc nào; '
-          'dữ liệu bạn tự nhập không bị ảnh hưởng.',
-        ),
+        title: Text(dialogContext.l10n.moreLoadSampleConfirmTitle),
+        content: Text(dialogContext.l10n.moreLoadSampleConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -77,7 +72,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
           FilledButton(
             key: const Key('more-demo-confirm'),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Nạp mẫu'),
+            child: Text(dialogContext.l10n.moreLoadSampleAction),
           ),
         ],
       ),
@@ -85,13 +80,10 @@ class TongtaiMoreScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
     await ref.read(sampleDataSeederProvider).seed();
     if (!context.mounted) return;
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Đã nạp dữ liệu mẫu — xem ở mọi màn hình.'),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(l10n.moreSampleLoadedSnack)));
   }
 
   /// Removes ONLY the `sample-` prefixed rows — user data stays (tested).
@@ -99,10 +91,8 @@ class TongtaiMoreScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Xóa toàn bộ dữ liệu mẫu?'),
-        content: const Text(
-          'Chỉ các bản ghi mẫu bị xóa. Dữ liệu bạn tự nhập được giữ nguyên.',
-        ),
+        title: Text(dialogContext.l10n.moreRemoveSampleConfirmTitle),
+        content: Text(dialogContext.l10n.moreRemoveSampleConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -111,7 +101,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
           FilledButton(
             key: const Key('more-remove-sample-confirm'),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Xóa mẫu'),
+            child: Text(dialogContext.l10n.moreRemoveSampleAction),
           ),
         ],
       ),
@@ -119,11 +109,10 @@ class TongtaiMoreScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
     await ref.read(sampleDataSeederProvider).removeAll();
     if (!context.mounted) return;
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('Đã xóa toàn bộ dữ liệu mẫu.')),
-      );
+      ..showSnackBar(SnackBar(content: Text(l10n.moreSampleRemovedSnack)));
   }
 
   @override
@@ -275,7 +264,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 ),
                 _SettingsItem(
                   icon: Icons.info_outlined,
-                  label: 'About Tổng Tài',
+                  label: context.l10n.moreAbout,
                   onTap: () {},
                 ),
                 _SettingsItem(

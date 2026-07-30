@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../ai/tongtai_ai_errors.dart';
 import '../../ai/tongtai_ai_key_validator.dart';
 import '../../ai/tongtai_ai_provider_kind.dart';
@@ -45,9 +46,6 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
   TongtaiAiService get _service => ref.read(tongtaiAiServiceProvider);
   TongtaiAiProviderKind get _providerKind => TongtaiAiKeyScreen.provider;
 
-  String get _lang =>
-      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-
   @override
   void initState() {
     super.initState();
@@ -74,6 +72,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     final validation = TongtaiAiKeyValidator.validate(
       _controller.text,
       provider: _providerKind,
@@ -81,7 +80,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
     if (!validation.ok) {
       // Reject up front so an invalid key is never stored (WTM-61 AC).
       setState(() {
-        _fieldError = validation.issue.message(_lang);
+        _fieldError = validation.issue.message(l10n.languageCode);
         _statusMessage = null;
       });
       return;
@@ -98,16 +97,14 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
       _busy = false;
       _hasKey = true;
     });
-    _setStatus(
-      _lang == 'vi' ? 'Đã lưu khóa API an toàn.' : 'API key saved securely.',
-      _AiStatusTone.success,
-    );
+    _setStatus(l10n.aiKeySavedSnack, _AiStatusTone.success);
   }
 
   /// Safe rotation (WTM-83): the new key from the field is validated, written
   /// and live-verified; on failure the previous working key is restored by the
   /// service — the seller can never brick a working setup.
   Future<void> _rotate() async {
+    final l10n = context.l10n;
     setState(() {
       _busy = true;
       _fieldError = null;
@@ -124,20 +121,20 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
       _controller.clear();
       setState(() => _hasKey = true);
       _setStatus(
-        _lang == 'vi'
-            ? 'Đã đổi khóa — ${rotation.model} phản hồi với khóa mới.'
-            : 'Key rotated — ${rotation.model} responded with the new key.',
+        l10n.aiKeyRotatedSnack(rotation.model!),
         _AiStatusTone.success,
       );
     } else if (rotation.validation != null) {
-      setState(() => _fieldError = rotation.validation!.issue.message(_lang));
+      setState(
+        () =>
+            _fieldError = rotation.validation!.issue.message(l10n.languageCode),
+      );
     } else {
       _setStatus(
-        _lang == 'vi'
-            ? 'Khóa mới không hoạt động (${rotation.error!.message(_lang)}). '
-                  '${rotation.rolledBack ? 'Đã khôi phục khóa cũ.' : 'Chưa có khóa nào được lưu.'}'
-            : 'The new key failed (${rotation.error!.message(_lang)}). '
-                  '${rotation.rolledBack ? 'Previous key restored.' : 'No key stored.'}',
+        l10n.aiKeyRotateFailedPrefix(
+              rotation.error!.message(l10n.languageCode),
+            ) +
+            (rotation.rolledBack ? l10n.aiKeyRolledBack : l10n.aiKeyNoneStored),
         _AiStatusTone.error,
       );
     }
@@ -146,6 +143,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
   /// QR input (WTM-83): the scanned text only FILLS the field — it still goes
   /// through the exact same validate→save/rotate path as a typed key.
   Future<void> _scan() async {
+    final l10n = context.l10n;
     final launcher =
         widget.scanLauncher ??
         (BuildContext context) => Navigator.of(context).push<String>(
@@ -157,15 +155,11 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
       _controller.text = scanned.trim();
       _fieldError = null;
     });
-    _setStatus(
-      _lang == 'vi'
-          ? 'Đã quét khóa từ QR — bấm Lưu (hoặc Đổi khóa) để xác nhận.'
-          : 'Key scanned — press Save (or Rotate) to confirm.',
-      _AiStatusTone.info,
-    );
+    _setStatus(l10n.aiKeyScannedSnack, _AiStatusTone.info);
   }
 
   Future<void> _test() async {
+    final l10n = context.l10n;
     setState(() {
       _busy = true;
       _statusMessage = null;
@@ -173,21 +167,17 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
     try {
       final res = await _service.testConnection(provider: _providerKind);
       if (!mounted) return;
-      _setStatus(
-        _lang == 'vi'
-            ? 'Kết nối thành công — ${res.model} đã phản hồi.'
-            : 'Connected — ${res.model} responded.',
-        _AiStatusTone.success,
-      );
+      _setStatus(l10n.aiKeyTestOkSnack(res.model), _AiStatusTone.success);
     } on TongtaiAiException catch (e) {
       if (!mounted) return;
-      _setStatus(e.message(_lang), _AiStatusTone.error);
+      _setStatus(e.message(l10n.languageCode), _AiStatusTone.error);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
   Future<void> _delete() async {
+    final l10n = context.l10n;
     setState(() => _busy = true);
     await _service.deleteKey(provider: _providerKind);
     ref.invalidate(tongtaiHasAiKeyProvider);
@@ -196,19 +186,16 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
       _busy = false;
       _hasKey = false;
     });
-    _setStatus(
-      _lang == 'vi' ? 'Đã xóa khóa API.' : 'API key removed.',
-      _AiStatusTone.info,
-    );
+    _setStatus(l10n.aiKeyRemovedSnack, _AiStatusTone.info);
   }
 
   @override
   Widget build(BuildContext context) {
-    final vi = _lang == 'vi';
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: Text(vi ? 'Trợ lý AI' : 'AI Assistant'),
+        title: Text(l10n.titleAiAssistant),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -219,9 +206,9 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Header(providerName: _providerKind.displayName, vi: vi),
+              _Header(providerName: _providerKind.displayName),
               const SizedBox(height: TongtaiDesignTokens.spacing4),
-              if (_hasKey == true) _KeySetBadge(vi: vi),
+              if (_hasKey == true) const _KeySetBadge(),
               if (_hasKey == true)
                 const SizedBox(height: TongtaiDesignTokens.spacing3),
               _KeyField(
@@ -230,7 +217,6 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                 enabled: !_busy,
                 errorText: _fieldError,
                 hasKey: _hasKey == true,
-                vi: vi,
                 onToggleObscure: () => setState(() => _obscure = !_obscure),
               ),
               const SizedBox(height: TongtaiDesignTokens.spacing2),
@@ -240,13 +226,14 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                   key: const Key('tongtai-ai-scan'),
                   onPressed: _busy ? null : _scan,
                   icon: const Icon(Icons.qr_code_scanner, size: 18),
-                  label: Text(vi ? 'Quét QR' : 'Scan QR'),
+                  label: Text(l10n.aiKeyScanQr),
                 ),
               ),
               Text(
-                vi
-                    ? 'Lấy khóa tại ${_providerKind.keyConsoleUrl}. Khóa chỉ lưu trên máy bạn và chỉ gửi trực tiếp tới ${_providerKind.displayName}.'
-                    : 'Get a key at ${_providerKind.keyConsoleUrl}. Your key stays on this device and is sent only to ${_providerKind.displayName}.',
+                l10n.aiKeyConsoleHint(
+                  _providerKind.keyConsoleUrl,
+                  _providerKind.displayName,
+                ),
                 style: TongtaiDesignTokens.captionStyle.copyWith(
                   color: TongtaiDesignTokens.lightTextSecondary,
                 ),
@@ -265,7 +252,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                   style: FilledButton.styleFrom(
                     backgroundColor: TongtaiDesignTokens.copilotViolet,
                   ),
-                  child: Text(vi ? 'Lưu khóa' : 'Save key'),
+                  child: Text(l10n.aiKeySave),
                 ),
               ),
               const SizedBox(height: TongtaiDesignTokens.spacing3),
@@ -275,7 +262,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                 child: OutlinedButton(
                   key: const Key('tongtai-ai-test'),
                   onPressed: (_busy || _hasKey != true) ? null : _test,
-                  child: Text(vi ? 'Kiểm tra kết nối' : 'Test connection'),
+                  child: Text(l10n.aiKeyTest),
                 ),
               ),
               if (_hasKey == true) ...[
@@ -286,11 +273,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                   child: OutlinedButton(
                     key: const Key('tongtai-ai-rotate'),
                     onPressed: _busy ? null : _rotate,
-                    child: Text(
-                      vi
-                          ? 'Đổi khóa (kiểm tra rồi mới thay)'
-                          : 'Rotate key (verified swap)',
-                    ),
+                    child: Text(l10n.aiKeyRotate),
                   ),
                 ),
               ],
@@ -306,7 +289,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                       foregroundColor: TongtaiDesignTokens.error,
                       side: const BorderSide(color: TongtaiDesignTokens.error),
                     ),
-                    child: Text(vi ? 'Xóa khóa' : 'Remove key'),
+                    child: Text(l10n.aiKeyRemove),
                   ),
                 ),
               ],
@@ -329,13 +312,13 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.providerName, required this.vi});
+  const _Header({required this.providerName});
 
   final String providerName;
-  final bool vi;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -348,7 +331,7 @@ class _Header extends StatelessWidget {
             const SizedBox(width: TongtaiDesignTokens.spacing2),
             Expanded(
               child: Text(
-                vi ? 'Khóa API $providerName' : '$providerName API key',
+                l10n.aiKeyCardTitle(providerName),
                 style: TongtaiDesignTokens.heading3Style.copyWith(
                   color: TongtaiDesignTokens.lightTextPrimary,
                 ),
@@ -358,9 +341,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: TongtaiDesignTokens.spacing2),
         Text(
-          vi
-              ? 'Dùng khóa của riêng bạn (BYOK) để bật trợ lý AI. Khóa được lưu an toàn trên thiết bị.'
-              : 'Bring your own key (BYOK) to enable the AI assistant. The key is stored securely on your device.',
+          l10n.aiKeyByokHint,
           style: TongtaiDesignTokens.smallStyle.copyWith(
             color: TongtaiDesignTokens.lightTextSecondary,
           ),
@@ -371,9 +352,7 @@ class _Header extends StatelessWidget {
 }
 
 class _KeySetBadge extends StatelessWidget {
-  const _KeySetBadge({required this.vi});
-
-  final bool vi;
+  const _KeySetBadge();
 
   @override
   Widget build(BuildContext context) {
@@ -398,9 +377,7 @@ class _KeySetBadge extends StatelessWidget {
           const SizedBox(width: TongtaiDesignTokens.spacing2),
           Expanded(
             child: Text(
-              vi
-                  ? 'Đã lưu khóa API. Bạn có thể kiểm tra, thay thế hoặc xóa khóa.'
-                  : 'An API key is saved. You can test, replace or remove it.',
+              context.l10n.aiKeyStoredHint,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
               ),
@@ -419,7 +396,6 @@ class _KeyField extends StatelessWidget {
     required this.enabled,
     required this.errorText,
     required this.hasKey,
-    required this.vi,
     required this.onToggleObscure,
   });
 
@@ -428,14 +404,12 @@ class _KeyField extends StatelessWidget {
   final bool enabled;
   final String? errorText;
   final bool hasKey;
-  final bool vi;
   final VoidCallback onToggleObscure;
 
   @override
   Widget build(BuildContext context) {
-    final hint = hasKey
-        ? (vi ? 'Dán khóa mới để thay thế' : 'Paste a new key to replace')
-        : (vi ? 'Dán khóa API của bạn' : 'Paste your API key');
+    final l10n = context.l10n;
+    final hint = hasKey ? l10n.aiKeyPasteReplace : l10n.aiKeyPaste;
     return TextField(
       key: const Key('tongtai-ai-key-field'),
       controller: controller,
@@ -454,9 +428,7 @@ class _KeyField extends StatelessWidget {
         suffixIcon: IconButton(
           key: const Key('tongtai-ai-key-visibility'),
           icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
-          tooltip: obscure
-              ? (vi ? 'Hiện khóa' : 'Show key')
-              : (vi ? 'Ẩn khóa' : 'Hide key'),
+          tooltip: obscure ? l10n.aiKeyShow : l10n.aiKeyHide,
           onPressed: onToggleObscure,
         ),
         border: OutlineInputBorder(
