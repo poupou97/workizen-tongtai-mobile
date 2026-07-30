@@ -188,10 +188,9 @@ void main() {
       );
     }
 
-    Finder skipButton() =>
-        find.byKey(const ValueKey('tongtai_onboarding_skip'));
+    Finder skipButton() => find.byKey(const ValueKey('onboarding-action-skip'));
     Finder primaryButton() =>
-        find.byKey(const ValueKey('tongtai_onboarding_next'));
+        find.byKey(const ValueKey('onboarding-action-next'));
 
     testWidgets('shows the first screen: illustration + headline + body', (
       tester,
@@ -327,8 +326,7 @@ void main() {
       );
     }
 
-    Finder onboarding() =>
-        find.byKey(const ValueKey('tongtai_onboarding_skip'));
+    Finder onboarding() => find.byKey(const ValueKey('onboarding-action-skip'));
     Finder appShell() => find.byType(TongtaiBottomNav);
 
     testWidgets('AC4: shows the tutorial on first launch (not completed)', (

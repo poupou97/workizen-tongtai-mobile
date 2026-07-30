@@ -145,6 +145,7 @@ class _TongtaiInventoryScreenState
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
           ),
           floatingActionButton: FloatingActionButton.extended(
+            key: const Key('inventory-action-add'),
             onPressed: () => _openForm(context),
             backgroundColor: TongtaiDesignTokens.inventoryOrange,
             foregroundColor: Colors.white,
@@ -289,6 +290,7 @@ class _AlertBanner extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
+          key: const Key('inventory-open-stock-alerts'),
           onTap: onTap,
           borderRadius: BorderRadius.circular(
             TongtaiDesignTokens.cardBorderRadius,
@@ -309,6 +311,7 @@ class _AlertBanner extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Stock alerts: ${parts.join(' • ')}',
+                    key: const Key('inventory-summary-alerts'),
                     style: TongtaiDesignTokens.smallStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextPrimary,
                       fontWeight: FontWeight.w600,
@@ -346,6 +349,7 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      key: const Key('inventory-search-field'),
       controller: controller,
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
@@ -508,6 +512,7 @@ class _ResultsHeader extends StatelessWidget {
       ),
       child: Text(
         count == 1 ? '1 product' : '$count products',
+        key: const Key('inventory-count-badge'),
         style: TongtaiDesignTokens.smallStyle.copyWith(
           color: TongtaiDesignTokens.lightTextSecondary,
         ),
@@ -551,6 +556,7 @@ class _ProductRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      key: Key('inventory-item-${product.id}'),
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -701,6 +707,7 @@ class _PaginationBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
+                key: const Key('inventory-action-prev-page'),
                 icon: const Icon(Icons.chevron_left),
                 tooltip: context.l10n.actionPrevPage,
                 onPressed: onPrevious,
@@ -713,6 +720,7 @@ class _PaginationBar extends StatelessWidget {
                 ),
               ),
               IconButton(
+                key: const Key('inventory-action-next-page'),
                 icon: const Icon(Icons.chevron_right),
                 tooltip: context.l10n.actionNextPage,
                 onPressed: onNext,
@@ -731,6 +739,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+      key: const Key('inventory-empty'),
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
         child: Column(

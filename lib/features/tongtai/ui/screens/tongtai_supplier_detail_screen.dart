@@ -109,6 +109,7 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      key: const Key('supplier-detail-header'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _LogoMonogram(initials: profile.initials),
@@ -239,6 +240,7 @@ class _RatingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _DetailSection(
+      sectionKey: const Key('supplier-detail-ratings'),
       title: context.l10n.supRatingsCerts,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,6 +333,7 @@ class _CatalogSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoryCount = profile.catalog.length;
     return _DetailSection(
+      sectionKey: const Key('supplier-detail-catalog'),
       title: context.l10n.supProductCatalog,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,6 +394,7 @@ class _TransactionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final repeatPercent = (summary.repeatBuyerRate * 100).round();
     return _DetailSection(
+      sectionKey: const Key('supplier-detail-transactions'),
       title: context.l10n.supTransactionHistory,
       child: Wrap(
         spacing: TongtaiDesignTokens.spacing3,
@@ -499,6 +503,7 @@ class _ContactSection extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
+              key: const Key('supplier-detail-action-message'),
               style: FilledButton.styleFrom(
                 backgroundColor: TongtaiDesignTokens.producerGreen,
                 minimumSize: const Size.fromHeight(
@@ -544,14 +549,23 @@ class _ContactRow extends StatelessWidget {
 // ── Reusable section wrapper ──────────────────────────────────────────────────
 
 class _DetailSection extends StatelessWidget {
-  const _DetailSection({required this.title, required this.child});
+  const _DetailSection({
+    required this.title,
+    required this.child,
+    this.sectionKey,
+  });
 
   final String title;
   final Widget child;
 
+  /// Stable test id (`supplier-detail-*`) supplied by the section that owns
+  /// this wrapper; the wrapper itself is shared by every detail section.
+  final Key? sectionKey;
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: sectionKey,
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
       decoration: BoxDecoration(
         color: TongtaiDesignTokens.lightBackground,

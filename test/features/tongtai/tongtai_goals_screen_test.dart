@@ -240,7 +240,7 @@ void main() {
         await pumpGoals(tester, controller);
         await tester.pumpAndSettle();
 
-        await tester.tap(find.byKey(const Key('goal-card-g1')));
+        await tester.tap(find.byKey(const Key('goals-item-g1')));
         await tester.pumpAndSettle();
 
         // The card opens the detail (WTM-88); its pencil opens the edit form.

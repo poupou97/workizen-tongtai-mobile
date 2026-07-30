@@ -134,6 +134,7 @@ class _AlertSummary extends StatelessWidget {
         children: [
           Expanded(
             child: _SummaryStat(
+              statKey: const Key('stock-summary-out-of-stock'),
               count: outOfStock,
               label: context.l10n.stockOut,
               color: TongtaiDesignTokens.error,
@@ -142,6 +143,7 @@ class _AlertSummary extends StatelessWidget {
           const SizedBox(width: TongtaiDesignTokens.spacing3),
           Expanded(
             child: _SummaryStat(
+              statKey: const Key('stock-summary-low-stock'),
               count: lowStock,
               label: context.l10n.stockLow,
               color: TongtaiDesignTokens.warning,
@@ -155,11 +157,14 @@ class _AlertSummary extends StatelessWidget {
 
 class _SummaryStat extends StatelessWidget {
   const _SummaryStat({
+    this.statKey,
     required this.count,
     required this.label,
     required this.color,
   });
 
+  /// Stable test id applied to the tile root (P0 §5).
+  final Key? statKey;
   final int count;
   final String label;
   final Color color;
@@ -167,6 +172,7 @@ class _SummaryStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: statKey,
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
@@ -211,6 +217,7 @@ class _AlertRow extends StatelessWidget {
     final color = tongtaiStockAlertColor(alert.level);
     final product = alert.product;
     return Material(
+      key: Key('stock-item-${product.id}'),
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -339,6 +346,7 @@ class _HealthyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+      key: const Key('stock-empty'),
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
         child: Column(

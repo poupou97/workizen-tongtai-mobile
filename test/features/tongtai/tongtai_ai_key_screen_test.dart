@@ -56,8 +56,8 @@ void main() {
       tester,
       httpClient: MockClient((_) async => http.Response('', 404)),
     );
-    expect(find.byKey(const Key('tongtai-ai-key-field')), findsOneWidget);
-    expect(find.byKey(const Key('tongtai-ai-save')), findsOneWidget);
+    expect(find.byKey(const Key('ai-key-field')), findsOneWidget);
+    expect(find.byKey(const Key('ai-key-action-save')), findsOneWidget);
     expect(find.text('AI Assistant'), findsOneWidget);
   });
 
@@ -68,11 +68,8 @@ void main() {
       tester,
       httpClient: MockClient((_) async => http.Response('', 404)),
     );
-    await tester.enterText(
-      find.byKey(const Key('tongtai-ai-key-field')),
-      'too-short',
-    );
-    await tester.tap(find.byKey(const Key('tongtai-ai-save')));
+    await tester.enterText(find.byKey(const Key('ai-key-field')), 'too-short');
+    await tester.tap(find.byKey(const Key('ai-key-action-save')));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('too short'), findsOneWidget);
@@ -86,22 +83,19 @@ void main() {
       tester,
       httpClient: MockClient((_) async => http.Response('', 404)),
     );
-    await tester.enterText(
-      find.byKey(const Key('tongtai-ai-key-field')),
-      validKey,
-    );
-    await tester.tap(find.byKey(const Key('tongtai-ai-save')));
+    await tester.enterText(find.byKey(const Key('ai-key-field')), validKey);
+    await tester.tap(find.byKey(const Key('ai-key-action-save')));
     await tester.pumpAndSettle();
 
     // Persisted, and the confirmation + set-state UI is shown.
     expect(await store.read(TongtaiAiProviderKind.xai), validKey);
     expect(find.text('API key saved securely.'), findsOneWidget);
     expect(find.textContaining('An API key is stored'), findsOneWidget);
-    expect(find.byKey(const Key('tongtai-ai-delete')), findsOneWidget);
+    expect(find.byKey(const Key('ai-key-action-delete')), findsOneWidget);
 
     // Test connection is enabled now that a key is stored.
     final testBtn = tester.widget<OutlinedButton>(
-      find.byKey(const Key('tongtai-ai-test')),
+      find.byKey(const Key('ai-key-action-test')),
     );
     expect(testBtn.onPressed, isNotNull);
   });
@@ -117,7 +111,7 @@ void main() {
       httpClient: MockClient((_) async => _okCompletion('OK')),
     );
 
-    await tester.tap(find.byKey(const Key('tongtai-ai-test')));
+    await tester.tap(find.byKey(const Key('ai-key-action-test')));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Connection OK'), findsOneWidget);
@@ -134,7 +128,7 @@ void main() {
       httpClient: MockClient((_) async => http.Response('', 401)),
     );
 
-    await tester.tap(find.byKey(const Key('tongtai-ai-test')));
+    await tester.tap(find.byKey(const Key('ai-key-action-test')));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('key seems invalid'), findsOneWidget);
@@ -149,14 +143,14 @@ void main() {
       httpClient: MockClient((_) async => http.Response('', 404)),
     );
 
-    expect(find.byKey(const Key('tongtai-ai-delete')), findsOneWidget);
-    await tester.tap(find.byKey(const Key('tongtai-ai-delete')));
+    expect(find.byKey(const Key('ai-key-action-delete')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('ai-key-action-delete')));
     await tester.pumpAndSettle();
 
     expect(await store.hasKey(TongtaiAiProviderKind.xai), isFalse);
     expect(find.text('API key removed.'), findsOneWidget);
     // Delete button is gone once there is no key.
-    expect(find.byKey(const Key('tongtai-ai-delete')), findsNothing);
+    expect(find.byKey(const Key('ai-key-action-delete')), findsNothing);
   });
 
   testWidgets('visibility toggle unmasks the field', (tester) async {
@@ -165,9 +159,9 @@ void main() {
       httpClient: MockClient((_) async => http.Response('', 404)),
     );
     TextField field() =>
-        tester.widget<TextField>(find.byKey(const Key('tongtai-ai-key-field')));
+        tester.widget<TextField>(find.byKey(const Key('ai-key-field')));
     expect(field().obscureText, isTrue);
-    await tester.tap(find.byKey(const Key('tongtai-ai-key-visibility')));
+    await tester.tap(find.byKey(const Key('ai-key-action-visibility')));
     await tester.pumpAndSettle();
     expect(field().obscureText, isFalse);
   });
@@ -186,11 +180,8 @@ void main() {
         store: store,
       );
 
-      await tester.enterText(
-        find.byKey(const Key('tongtai-ai-key-field')),
-        newKey,
-      );
-      await tester.tap(find.byKey(const Key('tongtai-ai-rotate')));
+      await tester.enterText(find.byKey(const Key('ai-key-field')), newKey);
+      await tester.tap(find.byKey(const Key('ai-key-action-rotate')));
       await tester.pumpAndSettle();
 
       expect(await store.read(TongtaiAiProviderKind.xai), newKey);
@@ -208,11 +199,8 @@ void main() {
         store: store,
       );
 
-      await tester.enterText(
-        find.byKey(const Key('tongtai-ai-key-field')),
-        newKey,
-      );
-      await tester.tap(find.byKey(const Key('tongtai-ai-rotate')));
+      await tester.enterText(find.byKey(const Key('ai-key-field')), newKey);
+      await tester.tap(find.byKey(const Key('ai-key-action-rotate')));
       await tester.pumpAndSettle();
 
       // The broken key never sticks — the working key is restored.
@@ -239,11 +227,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('tongtai-ai-scan')));
+      await tester.tap(find.byKey(const Key('ai-key-action-scan')));
       await tester.pumpAndSettle();
 
       final field = tester.widget<TextField>(
-        find.byKey(const Key('tongtai-ai-key-field')),
+        find.byKey(const Key('ai-key-field')),
       );
       expect(field.controller!.text, newKey); // trimmed
       expect(find.textContaining('scanned'), findsOneWidget);

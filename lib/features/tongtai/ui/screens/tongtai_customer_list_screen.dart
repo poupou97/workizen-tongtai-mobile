@@ -199,6 +199,7 @@ class _TongtaiCustomerListScreenState
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
           ),
           floatingActionButton: FloatingActionButton.extended(
+            key: const Key('customer-action-add'),
             onPressed: () => _openForm(context),
             backgroundColor: TongtaiDesignTokens.consumerBlue,
             foregroundColor: Colors.white,
@@ -286,6 +287,7 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      key: const Key('customer-search-field'),
       controller: controller,
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
@@ -329,6 +331,7 @@ class _LocationFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ChipsRow(
+      rowKey: const Key('customer-filter-location'),
       label: context.l10n.labelLocation,
       children: [
         Padding(
@@ -370,6 +373,7 @@ class _SortBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ChipsRow(
+      rowKey: const Key('customer-filter-sort'),
       label: context.l10n.labelSort,
       trailing: IconButton(
         icon: Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward),
@@ -394,15 +398,26 @@ class _SortBar extends StatelessWidget {
 /// A labelled, horizontally-scrolling row of chips with an optional trailing
 /// action — shared chrome for the location and sort rows.
 class _ChipsRow extends StatelessWidget {
-  const _ChipsRow({required this.label, required this.children, this.trailing});
+  const _ChipsRow({
+    required this.label,
+    required this.children,
+    this.trailing,
+    this.rowKey,
+  });
 
   final String label;
   final List<Widget> children;
   final Widget? trailing;
 
+  /// Stable test id supplied by the owning row (`customer-filter-*`); this
+  /// widget is shared by the location and sort rows so the key comes from the
+  /// caller rather than being hard-coded here.
+  final Key? rowKey;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
+      key: rowKey,
       padding: const EdgeInsets.symmetric(
         horizontal: TongtaiDesignTokens.spacing4,
         vertical: TongtaiDesignTokens.spacing1,
@@ -448,6 +463,7 @@ class _ResultsHeader extends StatelessWidget {
       ),
       child: Text(
         count == 1 ? '1 customer' : '$count customers',
+        key: const Key('customer-count-badge'),
         style: TongtaiDesignTokens.smallStyle.copyWith(
           color: TongtaiDesignTokens.lightTextSecondary,
         ),
@@ -502,6 +518,7 @@ class _CustomerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      key: Key('customer-item-${customer.id}'),
       onTap: onTap,
       borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
       child: Container(
@@ -682,6 +699,7 @@ class _PaginationBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
+                key: const Key('customer-action-prev-page'),
                 icon: const Icon(Icons.chevron_left),
                 tooltip: context.l10n.actionPrevPage,
                 onPressed: onPrevious,
@@ -694,6 +712,7 @@ class _PaginationBar extends StatelessWidget {
                 ),
               ),
               IconButton(
+                key: const Key('customer-action-next-page'),
                 icon: const Icon(Icons.chevron_right),
                 tooltip: context.l10n.actionNextPage,
                 onPressed: onNext,
@@ -712,6 +731,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+      key: const Key('customer-empty'),
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
         child: Column(

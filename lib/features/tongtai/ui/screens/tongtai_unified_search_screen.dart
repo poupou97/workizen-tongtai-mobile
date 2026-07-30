@@ -186,6 +186,7 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
           ListenableBuilder(
             listenable: _controller,
             builder: (context, _) => IconButton(
+              key: const Key('search-action-toggle-filters'),
               tooltip: context.l10n.searchAdvancedFilters,
               onPressed: () =>
                   setState(() => _filtersExpanded = !_filtersExpanded),
@@ -290,6 +291,7 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      key: const Key('search-field'),
       controller: controller,
       focusNode: focusNode,
       onChanged: onChanged,
@@ -547,6 +549,7 @@ class _IdleView extends StatelessWidget {
     final l10n = context.l10n;
     if (recent.isEmpty) {
       return _CenteredMessage(
+        messageKey: const Key('search-empty-idle'),
         icon: Icons.search,
         title: l10n.searchEverythingTitle,
         subtitle: l10n.searchEverythingBody,
@@ -574,6 +577,7 @@ class _IdleView extends StatelessWidget {
               ),
               const Spacer(),
               TextButton(
+                key: const Key('search-action-clear-history'),
                 onPressed: onClearHistory,
                 child: Text(l10n.actionClear),
               ),
@@ -663,6 +667,7 @@ class _ResultsTabView extends StatelessWidget {
     final l10n = context.l10n;
     if (results.countFor(tab) == 0) {
       return _CenteredMessage(
+        messageKey: const Key('search-empty-no-results'),
         icon: Icons.search_off,
         title: l10n.searchNoResults,
         subtitle: l10n.searchNoResultsBody,
@@ -759,6 +764,7 @@ class _SupplierResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ResultCard(
+      cardKey: Key('search-item-supplier-${supplier.id}'),
       icon: Icons.factory_outlined,
       iconColor: TongtaiDesignTokens.producerGreen,
       title: supplier.name,
@@ -796,6 +802,7 @@ class _ProductResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ResultCard(
+      cardKey: Key('search-item-product-${product.id}'),
       icon: Icons.inventory_2_outlined,
       iconColor: TongtaiDesignTokens.inventoryOrange,
       title: product.name,
@@ -817,6 +824,7 @@ class _ProductResultCard extends StatelessWidget {
 
 class _ResultCard extends StatelessWidget {
   const _ResultCard({
+    this.cardKey,
     required this.icon,
     required this.iconColor,
     required this.title,
@@ -824,6 +832,8 @@ class _ResultCard extends StatelessWidget {
     this.trailing,
   });
 
+  /// Stable test id applied to the card root (P0 §5).
+  final Key? cardKey;
   final IconData icon;
   final Color iconColor;
   final String title;
@@ -833,6 +843,7 @@ class _ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: cardKey,
       margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
       decoration: BoxDecoration(
@@ -896,11 +907,14 @@ class _ResultCard extends StatelessWidget {
 
 class _CenteredMessage extends StatelessWidget {
   const _CenteredMessage({
+    this.messageKey,
     required this.icon,
     required this.title,
     required this.subtitle,
   });
 
+  /// Stable test id applied to the empty-state root (P0 §5).
+  final Key? messageKey;
   final IconData icon;
   final String title;
   final String subtitle;
@@ -908,6 +922,7 @@ class _CenteredMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
+      key: messageKey,
       builder: (context, constraints) => SingleChildScrollView(
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
