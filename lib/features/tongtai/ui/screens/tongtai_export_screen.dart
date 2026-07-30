@@ -4,6 +4,7 @@ import '../../consumer/customer.dart';
 import '../../consumer/customer_directory_service.dart';
 import '../../consumer/customer_order.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../export/backup_crypto.dart';
 import '../../export/csv_delivery.dart';
 import '../../export/csv_exporter.dart';
 import '../../export/export_history_store.dart';
@@ -47,6 +48,7 @@ class TongtaiExportScreen extends StatefulWidget {
     this.products,
     this.orders,
     this.clock,
+    this.crypto,
   });
 
   /// Injectable delivery; defaults to the share sheet.
@@ -63,6 +65,10 @@ class TongtaiExportScreen extends StatefulWidget {
   /// Injectable clock for range presets + timestamps.
   final DateTime Function()? clock;
 
+  /// Injectable backup encryption (WTM-100); tests pass a low-iteration
+  /// instance so PBKDF2 stays fast. Defaults to the production parameters.
+  final BackupCrypto? crypto;
+
   @override
   State<TongtaiExportScreen> createState() => _TongtaiExportScreenState();
 }
@@ -78,6 +84,18 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
   ExportRange _range = ExportRange.all;
   List<TongtaiExportRecord> _records = const [];
   bool _busy = false;
+
+  /// WTM-100 (Founder-approved): optionally encrypt the export with a
+  /// passphrase before it leaves the app. The passphrase never leaves the
+  /// device and is never stored.
+  bool _encrypt = false;
+  final TextEditingController _passphrase = TextEditingController();
+
+  @override
+  void dispose() {
+    _passphrase.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -113,10 +131,32 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
     setState(() => _busy = true);
     try {
       final now = _clock();
-      final csv = _buildCsv();
+      var csv = _buildCsv();
       final stamp =
           '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-      final fileName = '${_type.fileStem}-$stamp.csv';
+      var fileName = '${_type.fileStem}-$stamp.csv';
+      if (_encrypt) {
+        final passphrase = _passphrase.text;
+        if (passphrase.length < 6) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('Mật khẩu mã hoá cần tối thiểu 6 ký tự.'),
+              ),
+            );
+          return;
+        }
+        // Armored container (WTM-100) — flows through the same delivery seam.
+        csv = TongtaiCsv(
+          content: await (widget.crypto ?? const BackupCrypto()).encryptArmored(
+            csv.content,
+            passphrase,
+          ),
+          rowCount: csv.rowCount,
+        );
+        fileName = '$fileName.ttbk';
+      }
       await _delivery.deliver(
         csv,
         fileName,
@@ -200,7 +240,41 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
                 ],
               ),
             ],
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            // ── Encryption (WTM-100) ─────────────────────────────────────
+            SwitchListTile(
+              key: const Key('export-encrypt-toggle'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                'Mã hoá bằng mật khẩu | Encrypt with passphrase',
+                style: TongtaiDesignTokens.smallStyle.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: TongtaiDesignTokens.lightTextPrimary,
+                ),
+              ),
+              subtitle: Text(
+                'File .ttbk chỉ mở được bằng mật khẩu này. Mật khẩu không '
+                'được lưu — quên là mất dữ liệu backup.',
+                style: TongtaiDesignTokens.captionStyle.copyWith(
+                  color: TongtaiDesignTokens.lightTextSecondary,
+                ),
+              ),
+              value: _encrypt,
+              onChanged: (v) => setState(() => _encrypt = v),
+            ),
+            if (_encrypt) ...[
+              TextField(
+                key: const Key('export-passphrase'),
+                controller: _passphrase,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Mật khẩu (≥ 6 ký tự) | Passphrase',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: TongtaiDesignTokens.spacing3),
+            ],
+            const SizedBox(height: TongtaiDesignTokens.spacing2),
             FilledButton.icon(
               key: const Key('export-run'),
               onPressed: _busy ? null : _export,

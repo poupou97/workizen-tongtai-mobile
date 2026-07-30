@@ -24,6 +24,9 @@ dependencies:
 
   # Security (BYOK keys live only in secure storage)
   flutter_secure_storage: ^10.3.1
+  # Passphrase-encrypted backups (WTM-100, Founder-approved dependency):
+  # pure-Dart AES-GCM + PBKDF2 — no platform channels.
+  cryptography: ^2.7.0
 
   # AI client (xAI Grok BYOK, WTM-61)
   http: ^1.6.0
