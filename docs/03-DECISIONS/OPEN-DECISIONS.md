@@ -31,13 +31,26 @@ tiếp tục ngay. Chỉ ngắt Founder khi cần quyết định chiến lượ
 → ADR proposal + phương án an toàn nhất. Chi tiết:
 [../06-GOVERNANCE/APPROVAL-RULES.md](../06-GOVERNANCE/APPROVAL-RULES.md).
 
+### ✅ Frontier gates — APPROVED (Founder 2026-07-29 tối, "tôi approve, để các agent tự động chạy")
+
+- **WTM-100 Backup encryption — ✅ APPROVED** (kèm duyệt thêm **crypto dependency**, L2).
+  Agent tự chạy: mã hoá backup/export bằng passphrase (AEAD), round-trip test, không đổi
+  flow export mặc định (mã hoá = tuỳ chọn).
+- **WTM-83 (phần còn lại) QR key input + key rotation — ✅ APPROVED** (kèm duyệt dependency
+  QR scanner nếu cần). Agent tự chạy.
+- **WTM-108 Firebase Analytics + Crashlytics — ✅ APPROVED** (chính sách đã có từ D-7/
+  ADR-TON-005). ⚠️ Vẫn cần Founder cấp **Firebase project + `google-services.json`** —
+  agent implement seam trước (build không được vỡ khi CHƯA có config; file config Founder
+  bổ sung sau là chạy).
+- Thứ tự agent tự chọn theo Backlog Selection (value/self-executable trước).
+
 ## Còn mở (chưa quyết)
 
 - **Mascot species: ✅ Business Fox (Founder 2026-07-24)** — đóng mục 7 WTM-11.
   Còn: chọn 3/10 concept (WTM-109, chờ Founder xem gallery) → làm icon/splash…
-- Scope còn lại của WTM-83 (QR input + key rotation) — chờ Founder.
 - WTM-101 nghi trùng WTM-59 — chờ Founder đóng/làm rõ.
-- SQLCipher (nâng mã hoá at-rest toàn DB) — option ghi trong ADR-TON-004.
+- SQLCipher (nâng mã hoá at-rest toàn DB) — option ghi trong ADR-TON-004 (KHÔNG nằm trong
+  approval WTM-100 ở trên; cần quyết riêng vì đụng migration DB).
 
 ### ✅ Gates tier kế tiếp — ĐÃ QUYẾT (Founder 2026-07-25 → **ADR-TON-010**)
 
