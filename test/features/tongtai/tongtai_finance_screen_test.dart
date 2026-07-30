@@ -96,7 +96,7 @@ void main() {
       ),
     );
 
-    final entry = find.text('Finance · Tài chính');
+    final entry = find.text('Finance');
     await tester.scrollUntilVisible(
       entry,
       200,

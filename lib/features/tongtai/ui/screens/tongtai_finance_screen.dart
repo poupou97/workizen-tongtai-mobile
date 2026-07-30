@@ -9,6 +9,7 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_finance_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_transaction_form_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Finance dashboard (WTM-27, WTM-113, WTM-120) — income, expenses, profit and
 /// margin over the transaction ledger, an income-vs-expense cashflow chart, the
@@ -79,7 +80,7 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
           appBar: AppBar(
-            title: const Text('Finance · Tài chính'),
+            title: Text(context.l10n.titleFinance),
             backgroundColor: TongtaiDesignTokens.lightBackground,
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
             elevation: 0,
@@ -118,7 +119,7 @@ class _FinanceBody extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 cardKey: const Key('finance-kpi-income'),
-                label: 'Doanh thu · Income',
+                label: context.l10n.kpiIncome,
                 value: TongtaiFormatters.vnd(summary.incomeYtd),
                 accent: TongtaiFinanceScreen._income,
                 icon: Icons.south_west,
@@ -128,7 +129,7 @@ class _FinanceBody extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 cardKey: const Key('finance-kpi-expense'),
-                label: 'Chi phí · Expense',
+                label: context.l10n.kpiExpense,
                 value: TongtaiFormatters.vnd(summary.expenseYtd),
                 accent: TongtaiFinanceScreen._expense,
                 icon: Icons.north_east,
@@ -142,7 +143,7 @@ class _FinanceBody extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 cardKey: const Key('finance-kpi-profit'),
-                label: 'Lợi nhuận · Profit',
+                label: context.l10n.kpiProfit,
                 value: TongtaiFormatters.vnd(summary.profitYtd),
                 accent: TongtaiDesignTokens.financePurple,
                 icon: Icons.savings_outlined,
@@ -152,7 +153,7 @@ class _FinanceBody extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 cardKey: const Key('finance-kpi-margin'),
-                label: 'Biên LN · Margin',
+                label: context.l10n.kpiMargin,
                 value: '${(summary.marginYtd * 100).round()}%',
                 accent: TongtaiDesignTokens.consumerBlue,
                 icon: Icons.percent,
@@ -164,7 +165,7 @@ class _FinanceBody extends StatelessWidget {
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
         // ── Cashflow: income vs expense per month ───────────────────────
-        const _SectionTitle('Dòng tiền · Thu vs Chi'),
+        _SectionTitle(context.l10n.sectionCashflow),
         const SizedBox(height: TongtaiDesignTokens.spacing2),
         const _CashflowLegend(),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
@@ -173,7 +174,7 @@ class _FinanceBody extends StatelessWidget {
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
         // ── Expense breakdown ───────────────────────────────────────────
-        const _SectionTitle('Chi phí theo nhóm · Expenses'),
+        _SectionTitle(context.l10n.sectionExpensesByCategory),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _ExpenseBreakdownCard(
           categories: summary.expenseByCategory,
@@ -183,7 +184,7 @@ class _FinanceBody extends StatelessWidget {
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
         // ── Recent activity ─────────────────────────────────────────────
-        const _SectionTitle('Gần đây · Recent'),
+        _SectionTitle(context.l10n.sectionRecent),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _RecentCard(transactions: recent),
       ],

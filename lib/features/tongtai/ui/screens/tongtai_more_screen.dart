@@ -72,7 +72,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Hủy'),
+            child: Text(dialogContext.l10n.actionCancel),
           ),
           FilledButton(
             key: const Key('more-demo-confirm'),
@@ -106,7 +106,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Hủy'),
+            child: Text(dialogContext.l10n.actionCancel),
           ),
           FilledButton(
             key: const Key('more-remove-sample-confirm'),
@@ -187,18 +187,18 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 _SettingsItem(
                   key: const Key('more-demo-mode'),
                   icon: Icons.science_outlined,
-                  label: 'Nạp dữ liệu mẫu · Load sample data',
+                  label: context.l10n.moreLoadSample,
                   onTap: () => _seedSamples(context, ref),
                 ),
                 _SettingsItem(
                   key: const Key('more-remove-sample'),
                   icon: Icons.delete_sweep_outlined,
-                  label: 'Xóa dữ liệu mẫu · Remove sample data',
+                  label: context.l10n.moreRemoveSample,
                   onTap: () => _removeSamples(context, ref),
                 ),
                 _SettingsItem(
                   icon: Icons.timeline_outlined,
-                  label: 'Timeline · Dòng thời gian',
+                  label: context.l10n.titleTimeline,
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiTimelineScreen(),
@@ -207,7 +207,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 ),
                 _SettingsItem(
                   icon: Icons.account_balance_wallet_outlined,
-                  label: 'Finance · Tài chính',
+                  label: context.l10n.titleFinance,
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiFinanceScreen(),
@@ -216,7 +216,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 ),
                 _SettingsItem(
                   icon: Icons.bar_chart_outlined,
-                  label: 'Reports & Analytics · Báo cáo',
+                  label: context.l10n.titleReports,
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiReportsScreen(),

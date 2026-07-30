@@ -316,7 +316,7 @@ void main() {
 
       expect(find.byKey(const Key('reports-ai-summary-text')), findsOneWidget);
       expect(find.text('Rule-based'), findsOneWidget);
-      expect(find.textContaining('Gợi ý hành động'), findsWidgets);
+      expect(find.textContaining('Recommendations'), findsWidgets);
     },
   );
 
@@ -355,7 +355,7 @@ void main() {
       ),
     );
 
-    final entry = find.text('Reports & Analytics · Báo cáo');
+    final entry = find.text('Reports & Analytics');
     await tester.scrollUntilVisible(
       entry,
       200,

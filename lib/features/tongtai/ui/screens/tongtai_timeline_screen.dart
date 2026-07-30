@@ -12,6 +12,7 @@ import '../../timeline/business_event_sources.dart';
 import '../../timeline/timeline_service.dart';
 import '../../timeline/timeline_theme.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Business Timeline (WTM-114) — a chronological feed of everything that
 /// happened in the business (orders, finance, opportunities, goals…), grouped
@@ -83,7 +84,7 @@ class _TongtaiTimelineScreenState extends ConsumerState<TongtaiTimelineScreen> {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Dòng thời gian · Timeline'),
+        title: Text(context.l10n.titleTimeline),
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
         elevation: 0,

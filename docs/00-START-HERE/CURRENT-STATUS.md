@@ -24,7 +24,7 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
-- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 localization single-locale + §3-6 đang tiếp.
+- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 XONG (WTM-145) — **CẤM label song ngữ**: quét toàn bộ nhãn " · " 2 ngôn ngữ → `context.l10n.<key>` (~37 key mới VI/EN); scan-test regex tự động chặn tái phạm + unused-key check + test switch-locale runtime & persist (`test/features/tongtai/p0/localization_test.dart`). Chuỗi đơn-ngữ còn lại migrate Boy-Scout theo ADR-TON-007. §3-6 đang tiếp.
 - **Founder-gate blocking the next tier**: Workizen AI activation (BYOK/router,
   privacy red-line — **G-3, deferred**; Founder sequenced the full Business Data
   Foundation first). AI Phase-2 (Opportunity Win Probability / Recommendation /
