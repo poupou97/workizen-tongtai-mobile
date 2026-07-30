@@ -10,6 +10,7 @@ import 'tongtai_export_screen.dart';
 import 'tongtai_finance_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
+import 'tongtai_home_screen.dart';
 import 'tongtai_timeline_screen.dart';
 
 /// Opens the language picker (WTM-119) and persists the choice; the app
@@ -112,6 +113,14 @@ class TongtaiMoreScreen extends ConsumerWidget {
             _SettingsSection(
               title: 'Business',
               items: [
+                _SettingsItem(
+                  key: const Key('more-demo-mode'),
+                  icon: Icons.science_outlined,
+                  label: 'Xem thử Demo · Explore Demo',
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(builder: (_) => TongtaiHomeScreen.demo()),
+                  ),
+                ),
                 _SettingsItem(
                   icon: Icons.timeline_outlined,
                   label: 'Timeline · Dòng thời gian',
@@ -274,6 +283,7 @@ class _SettingsItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const _SettingsItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,

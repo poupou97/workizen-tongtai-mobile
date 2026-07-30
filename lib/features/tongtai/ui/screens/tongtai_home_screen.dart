@@ -297,6 +297,46 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
               const SizedBox(height: 24),
             ],
 
+            // ── Quick actions (WTM-144): once the business has data the
+            //    Get-started card retires, but Home keeps one-tap shortcuts —
+            //    field feedback: the Founder thought the features were gone. ──
+            if (!_isEmptyBusiness) ...[
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ActionChip(
+                    key: const Key('home-quick-customer'),
+                    avatar: const Icon(Icons.person_add_alt, size: 18),
+                    label: const Text('+ Khách hàng'),
+                    onPressed: () =>
+                        _push(context, const TongtaiCustomerListScreen()),
+                  ),
+                  ActionChip(
+                    key: const Key('home-quick-product'),
+                    avatar: const Icon(Icons.add_box_outlined, size: 18),
+                    label: const Text('+ Sản phẩm'),
+                    onPressed: () =>
+                        _push(context, const TongtaiInventoryScreen()),
+                  ),
+                  ActionChip(
+                    key: const Key('home-quick-order'),
+                    avatar: const Icon(Icons.receipt_long_outlined, size: 18),
+                    label: const Text('+ Đơn hàng'),
+                    onPressed: () =>
+                        _push(context, const TongtaiCustomerListScreen()),
+                  ),
+                  ActionChip(
+                    key: const Key('home-quick-goal'),
+                    avatar: const Icon(Icons.flag_outlined, size: 18),
+                    label: const Text('+ Mục tiêu'),
+                    onPressed: () => _push(context, const TongtaiGoalsScreen()),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
+
             // ── Business KPIs — real values, zero is valid (WTM-128) ──
             _SectionHeader(
               title: 'Business KPIs',

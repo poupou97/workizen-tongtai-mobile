@@ -11,6 +11,7 @@ import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.da
 import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
 
 /// WTM-128 — the Home dashboard is User Data First: real module counts + KPIs
@@ -44,6 +45,62 @@ void main() {
   // A brand-new business — real zeros, onboarding CTAs.
   Widget emptyHost() =>
       wrap(TongtaiHomeScreen(metrics: BusinessMetrics.empty, clock: fixedNow));
+
+  group('quick actions (WTM-144)', () {
+    testWidgets(
+      'a business WITH data keeps one-tap shortcuts; the empty business shows '
+      'Get-started instead',
+      (tester) async {
+        // Demo host has data → quick actions visible, Get-started gone.
+        await tester.pumpWidget(
+          wrap(
+            TongtaiHomeScreen.demo(key: const Key('qa-demo'), clock: fixedNow),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('home-quick-customer')), findsOneWidget);
+        expect(find.byKey(const Key('home-quick-goal')), findsOneWidget);
+        expect(find.byKey(const Key('home-cta-customer')), findsNothing);
+
+        // Empty business → Get-started card, no duplicate quick actions.
+        // Distinct key forces a fresh State (initState re-runs).
+        await tester.pumpWidget(
+          wrap(
+            TongtaiHomeScreen(
+              key: const Key('qa-empty'),
+              metrics: BusinessMetrics.empty,
+              clock: fixedNow,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('home-cta-customer')), findsOneWidget);
+        expect(find.byKey(const Key('home-quick-customer')), findsNothing);
+      },
+    );
+  });
+
+  group('More → Demo entry (WTM-144)', () {
+    testWidgets('"Xem thử Demo" in More opens the labeled demo dashboard', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(const TongtaiMoreScreen()));
+      await tester.pumpAndSettle();
+
+      final entry = find.byKey(const Key('more-demo-mode'));
+      await tester.scrollUntilVisible(
+        entry,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(entry);
+      await tester.pumpAndSettle();
+
+      // Lands on the demo home, clearly labeled (WTM-143).
+      expect(find.byKey(const Key('home-demo-banner')), findsOneWidget);
+      expect(find.text('Demo — Dữ liệu mẫu'), findsOneWidget);
+    });
+  });
 
   group('demo mode (sample data)', () {
     testWidgets(
