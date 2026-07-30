@@ -1,0 +1,3589 @@
+commit 3c851d23ab7983ae871c1c92b0d234215ead9ade
+Author: poupou97 <nbp85hn@gmail.com>
+Date:   Thu Jul 30 15:40:18 2026 +0700
+
+    fix(WTM-146): P0 §3 — test governance: literal ratchet, fallback kill, real-DB restart, overflow + nav suites (#71)
+    
+    Production fixes (2 real bugs found by the new suites):
+    - SampleDataSeeder.removeAll deleted customers BEFORE orders → FOREIGN KEY
+      787 on the real SQLite database (PRAGMA foreign_keys=ON); in-memory test
+      doubles never enforced it — the exact §1 bug class. Orders now delete first
+      (ADR-TON-014 updated).
+    - Home overflowed at 320px/1.3x text scale (health badge, module tiles,
+      section-header action) — Flexible+FittedBox fixes.
+    
+    Hardening:
+    - Kill the two remaining silent .sample() fallbacks in UI (Reports
+      metrics-only branch, Customer history bare-construct) → empty, never
+      fixtures
+    - Bottom-nav labels + ~180 remaining EN-literal chrome strings (20 screens,
+      More entries incl. new stable Keys) → context.l10n keys; AppStrings now
+      ~290 keys VI/EN
+    - Stable Keys for More entries (more-language/ai-key/timeline/finance/
+      reports/goals/export)
+    
+    New P0 governance suites (test/features/tongtai/p0/):
+    - localization_test: final ratchet — NO string literal in ANY ui/ text
+      position (allowlist: product names; dev-only showcase excluded)
+    - sample_fallback_scan_test: .sample() banned in ui/ (allowlist: curated
+      supplier catalog, Phase-2 by design)
+    - l10n_placeholder_test: every parameterized string interpolates all args
+      in both locales
+    - nav_availability_test: 5 tabs render+switch, full More entry list and
+      create paths in EVERY data state (real app shell wiring)
+    - overflow_test: no RenderFlex overflow @320px/1.3x vi+en, empty+seeded;
+      2.0x long-content proxy
+    - drift_restart_test: full sample lifecycle across 3 AppDatabase sessions
+      on one real .db file
+    
+    Evidence: flutter analyze clean · 990/990 tests pass
+    
+    Co-authored-by: Claude Fable 5 <noreply@anthropic.com>
+
+diff --git a/docs/00-START-HERE/CURRENT-STATUS.md b/docs/00-START-HERE/CURRENT-STATUS.md
+index 2dd7c64..7be7699 100644
+--- a/docs/00-START-HERE/CURRENT-STATUS.md
++++ b/docs/00-START-HERE/CURRENT-STATUS.md
+@@ -24,7 +24,7 @@
+   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
+   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
+   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+-- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 XONG (WTM-145, 2 PR) — **một locale active, mọi UI string qua key**: quét sạch label song ngữ " · " và " | " + migrate TOÀN BỘ chuỗi user-facing trong `lib/features/tongtai/ui/` (19 màn, ~150 key VI/EN + method có tham số); UI cấm đọc `labelVi/labelEn` trực tiếp — luôn `label(context.l10n.languageCode)`; đổi ngôn ngữ runtime update toàn app + persist; 7 lock test trong `test/features/tongtai/p0/localization_test.dart` (scan " · "/" | "/chuỗi-VN-trong-ui/labelVi-labelEn + unused-key + vi≠en + switch-persist). Ranh giới: domain-generated content (rule summary, timeline event title, sample fixtures) là DATA — giữ tiếng Việt theo thiết kế. §3-6 đang tiếp.
++- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 XONG (WTM-145, 2 PR) — **một locale active, mọi UI string qua key**: quét sạch label song ngữ " · " và " | " + migrate TOÀN BỘ chuỗi user-facing trong `lib/features/tongtai/ui/` (19 màn, ~150 key VI/EN + method có tham số); UI cấm đọc `labelVi/labelEn` trực tiếp — luôn `label(context.l10n.languageCode)`; đổi ngôn ngữ runtime update toàn app + persist; 7 lock test trong `test/features/tongtai/p0/localization_test.dart` (scan " · "/" | "/chuỗi-VN-trong-ui/labelVi-labelEn + unused-key + vi≠en + switch-persist). Ranh giới: domain-generated content (rule summary, timeline event title, sample fixtures) là DATA — giữ tiếng Việt theo thiết kế. §3 XONG (WTM-146) — **test governance**: quét sạch nốt ~180 EN-literal chrome (20 màn + bottom-nav + More entries → key; tổng AppStrings ≈ 290 key VI/EN); diệt 2 fallback `.sample()` tiềm ẩn trong UI (Reports/Customer-history); suite mới `test/features/tongtai/p0/`: scan cấm literal trong MỌI vị trí text của ui/ + cấm `.sample()` (allowlist supplier catalog) · placeholder-consistency VI/EN · nav/action availability qua app-shell thật (5 tab + More entries + create paths mọi data state) · overflow 320px/1.3x vi+en empty+seeded + 2.0x proxy · restart/persistence trên FILE SQLite thật (3 session). **2 bug thật do suite §3 tìm ra & fix:** (1) `SampleDataSeeder.removeAll` xoá customers trước orders → FOREIGN KEY 787 trên DB thật (in-memory không enforce — đúng bug-class §1); (2) Home overflow ở 320px/1.3x (badge + module tiles + section header). §4-6 đang tiếp.
+ - **Founder-gate blocking the next tier**: Workizen AI activation (BYOK/router,
+   privacy red-line — **G-3, deferred**; Founder sequenced the full Business Data
+   Foundation first). AI Phase-2 (Opportunity Win Probability / Recommendation /
+diff --git a/docs/03-DECISIONS/ADR-TON-014-sample-data-seeding.md b/docs/03-DECISIONS/ADR-TON-014-sample-data-seeding.md
+index 418dbaa..feb8797 100644
+--- a/docs/03-DECISIONS/ADR-TON-014-sample-data-seeding.md
++++ b/docs/03-DECISIONS/ADR-TON-014-sample-data-seeding.md
+@@ -28,6 +28,12 @@ passed, because tests exercised the same mocked fallbacks.
+ 4. **Reversible.** More → "Xóa dữ liệu mẫu" calls `removeAll()` — deletes ONLY
+    the `sample-` prefix (user ids are UUIDs, collision-free by construction).
+    `Repository.deleteByIdPrefix(prefix)` is the seam on all five repositories.
++   **Deletion order: orders FIRST** — on the real SQLite database
++   `orders_table.customer_id` enforces a foreign key (PRAGMA foreign_keys=ON);
++   deleting customers while sample orders exist throws SqliteException 787.
++   Locked by `test/features/tongtai/p0/drift_restart_test.dart` (WTM-146 §3),
++   which runs the full lifecycle across three AppDatabase sessions on one
++   real .db file (the in-memory doubles never enforced the constraint).
+ 5. **Producer** counts persisted supplier favourites (no supplier table exists;
+    the catalog remains a search surface until the Phase-4 APIs) — Home and the
+    Producer screens read that same favourites store.
+diff --git a/lib/core/l10n/app_strings.dart b/lib/core/l10n/app_strings.dart
+index 391381b..c59f382 100644
+--- a/lib/core/l10n/app_strings.dart
++++ b/lib/core/l10n/app_strings.dart
+@@ -240,6 +240,184 @@ abstract class AppStrings {
+   String get historyRangeLast30;
+   String get historyRangeLast90;
+ 
++  // ── bottom navigation (WTM-55, keyed in WTM-146 §3) ─────────────────────
++  String get navHome;
++  String get navProducer;
++  String get navInventory;
++  String get navConsumer;
++  String get navMore;
++
++  // ── common actions/labels (WTM-146 §3 EN-literal sweep) ─────────────────
++  String get actionAdd;
++  String get actionSave;
++  String get actionSend;
++  String get actionClearFilters;
++  String get actionPrevPage;
++  String get actionNextPage;
++  String get labelSort;
++  String get labelStatus;
++  String get labelTotal;
++  String get labelType;
++  String get labelLocation;
++  String get labelPeriod;
++  String get labelQuantity;
++  String get labelDescription;
++  String get formFixHighlighted;
++  String get changeHistory;
++
++  // ── chat extras ─────────────────────────────────────────────────────────
++  String get chatRemoveAttachment;
++  String get chatAttachFile;
++
++  // ── Consumer overview (WTM-26) ──────────────────────────────────────────
++  String get titleConsumerIntelligence;
++  String get titleCustomers;
++  String get segActive;
++  String get segVip;
++  String get segNew;
++  String get sectionCustomerSegments;
++  String get emptyCustomerSegments;
++  String get sectionRecentInteractions;
++  String get emptyRecentInteractions;
++  String get sectionCustomerLifecycle;
++
++  // ── orders (WTM-126) ────────────────────────────────────────────────────
++  String get titleCreateOrder;
++  String get orderSoldPrice;
++  String get orderNeedProduct;
++  String get orderAddItem;
++  String get orderEmptyItems;
++
++  // ── customer form/list (WTM-75/76) ──────────────────────────────────────
++  String get custRemoveAddress;
++  String get custAddAddress;
++  String get custSegments;
++  String get custCustomSegmentHint;
++  String get custAdd;
++  String get custSearchHint;
++  String get custPurchaseHistory;
++  String get custEmptySearch;
++  String get custEmptySearchHint;
++
++  // ── purchase history extras (WTM-77) ────────────────────────────────────
++  String get historyRepurchase;
++  String get historyEmptyOrders;
++  String get historyEmptyHint;
++
++  // ── goals extras (WTM-87) ───────────────────────────────────────────────
++  String get titleBusinessGoals;
++  String get goalNew;
++
++  // ── Home extras (WTM-128) ───────────────────────────────────────────────
++  String get titleHomeDashboard;
++  String get homeChatTooltip;
++  String get homeAiSubtitle;
++  String get sectionBusinessKpis;
++  String get sectionTopOpportunities;
++  String get homeCtaCustomer;
++  String get homeCtaProduct;
++  String get homeCtaOrder;
++  String get homeCtaGoal;
++  String get homeCtaDemo;
++  String get tileJourney;
++
++  // ── inventory (WTM-68/70) ───────────────────────────────────────────────
++  String get pickerTitle;
++  String get pickerSearchHint;
++  String get pickerNoMatch;
++  String get invAdd;
++  String get invView;
++  String get invSearchHint;
++  String get invEmptySearch;
++  String get invEmptySearchHint;
++  String get titleStockAlerts;
++  String get stockOut;
++  String get stockLow;
++  String get stockAllHealthy;
++  String get stockAllHealthyBody;
++
++  // ── More sections/entries (WTM-33) ──────────────────────────────────────
++  String get moreSettings;
++  String get moreProfile;
++  String get moreNotifications;
++  String get moreTheme;
++  String get moreGrokKey;
++  String get moreBusinessSection;
++  String get moreBusinessInfo;
++  String get moreTeam;
++  String get morePermissions;
++  String get moreSupportSection;
++  String get moreReplayTutorial;
++  String get moreHelp;
++  String get moreSendFeedback;
++  String get moreLegalSection;
++  String get moreTerms;
++  String get morePrivacy;
++  String get moreLogout;
++
++  // ── opportunity feed extras (WTM-91) ────────────────────────────────────
++  String get titleOpportunities;
++
++  // ── Producer hub (WTM-24) ───────────────────────────────────────────────
++  String get titleProducerHub;
++  String get producerAiSummary;
++  String get producerAnalyzing;
++  String get producerAiCapabilities;
++  String get producerCapScoring;
++  String get producerCapRanking;
++  String get producerCapTrends;
++  String get producerCapPrice;
++  String get producerCapQuality;
++  String get producerCapDelivery;
++  String get producerRecentOpps;
++  String get producerEmptyOpps;
++  String get producerVerifiedSuppliers;
++  String get producerEmptySuppliers;
++
++  // ── product form extras (WTM-69) ────────────────────────────────────────
++  String get formWrite;
++  String get formPreview;
++  String get formNothingToPreview;
++  String get formMarkdownHint;
++  String get formUpload;
++  String get formCamera;
++  String get formRemoveImage;
++
++  String get titleEditProduct;
++  String get titleAddProduct;
++  String get formSaveChanges;
++  String get formSaveProduct;
++  String get favAdd;
++  String get lifecycleAwareness;
++  String get lifecycleConsideration;
++  String get lifecyclePurchase;
++  String get lifecycleRetention;
++
++  // ── supplier screens (WTM-63/64/65 — chrome only, catalog stays data) ───
++  String get labelSupplier;
++  String get supAbout;
++  String get supRatingsCerts;
++  String get supProductCatalog;
++  String get supTransactionHistory;
++  String get supTotalVolume;
++  String get supTotalOrders;
++  String get supRepeatBuyers;
++  String get supContact;
++  String get supMessage;
++  String get supAskHint;
++  String get titleSupplierSearch;
++  String get titleFavoriteSuppliers;
++  String get supSearchHint;
++  String get supShow;
++  String get supFavorites;
++  String get favRemove;
++  String get favEmpty;
++  String get favEmptyHint;
++
++  // ── finance / transaction type toggles (WTM-113) ────────────────────────
++  String get txnIncome;
++  String get txnExpense;
++
+   // ── Customer form (WTM-76) ──────────────────────────────────────────────
+   String get custNameHint;
+   String get custLocationHint;
+@@ -669,6 +847,318 @@ class AppStringsVi extends AppStrings {
+   @override
+   String get historyRangeLast90 => '90 ngày qua';
+ 
++  @override
++  String get navHome => 'Trang chủ';
++  @override
++  String get navProducer => 'Nguồn hàng';
++  @override
++  String get navInventory => 'Kho';
++  @override
++  String get navConsumer => 'Khách hàng';
++  @override
++  String get navMore => 'Thêm';
++
++  @override
++  String get actionAdd => 'Thêm';
++  @override
++  String get actionSave => 'Lưu';
++  @override
++  String get actionSend => 'Gửi';
++  @override
++  String get actionClearFilters => 'Xoá bộ lọc';
++  @override
++  String get actionPrevPage => 'Trang trước';
++  @override
++  String get actionNextPage => 'Trang sau';
++  @override
++  String get labelSort => 'Sắp xếp';
++  @override
++  String get labelStatus => 'Trạng thái';
++  @override
++  String get labelTotal => 'Tổng';
++  @override
++  String get labelType => 'Loại';
++  @override
++  String get labelLocation => 'Khu vực';
++  @override
++  String get labelPeriod => 'Kỳ';
++  @override
++  String get labelQuantity => 'Số lượng';
++  @override
++  String get labelDescription => 'Mô tả';
++  @override
++  String get formFixHighlighted => 'Vui lòng sửa các trường được đánh dấu.';
++  @override
++  String get changeHistory => 'Lịch sử thay đổi';
++
++  @override
++  String get chatRemoveAttachment => 'Gỡ tệp đính kèm';
++  @override
++  String get chatAttachFile => 'Đính kèm tệp';
++
++  @override
++  String get titleConsumerIntelligence => 'Chân dung khách hàng';
++  @override
++  String get titleCustomers => 'Khách hàng';
++  @override
++  String get segActive => 'Đang hoạt động';
++  @override
++  String get segVip => 'VIP';
++  @override
++  String get segNew => 'Mới';
++  @override
++  String get sectionCustomerSegments => 'Phân khúc khách hàng';
++  @override
++  String get emptyCustomerSegments => 'Chưa định nghĩa phân khúc khách hàng';
++  @override
++  String get sectionRecentInteractions => 'Tương tác gần đây';
++  @override
++  String get emptyRecentInteractions => 'Chưa có tương tác gần đây';
++  @override
++  String get sectionCustomerLifecycle => 'Vòng đời khách hàng';
++
++  @override
++  String get titleCreateOrder => 'Tạo đơn hàng';
++  @override
++  String get orderSoldPrice => 'Giá bán (mỗi đơn vị)';
++  @override
++  String get orderNeedProduct => 'Thêm ít nhất một sản phẩm';
++  @override
++  String get orderAddItem => 'Thêm sản phẩm';
++  @override
++  String get orderEmptyItems => 'Chưa có sản phẩm — bấm "Thêm sản phẩm"';
++
++  @override
++  String get custRemoveAddress => 'Xoá địa chỉ';
++  @override
++  String get custAddAddress => 'Thêm địa chỉ';
++  @override
++  String get custSegments => 'Phân khúc';
++  @override
++  String get custCustomSegmentHint => 'Phân khúc tuỳ chỉnh…';
++  @override
++  String get custAdd => 'Thêm khách hàng';
++  @override
++  String get custSearchHint => 'Tìm theo tên, SĐT hoặc khu vực';
++  @override
++  String get custPurchaseHistory => 'Lịch sử mua hàng';
++  @override
++  String get custEmptySearch => 'Không có khách hàng khớp tìm kiếm';
++  @override
++  String get custEmptySearchHint => 'Thử từ khoá khác hoặc xoá lọc khu vực.';
++
++  @override
++  String get historyRepurchase => 'Mua lại';
++  @override
++  String get historyEmptyOrders => 'Không có đơn hàng trong khoảng này';
++  @override
++  String get historyEmptyHint =>
++      'Thử khoảng thời gian rộng hơn hoặc xoá lọc danh mục.';
++
++  @override
++  String get titleBusinessGoals => 'Mục tiêu kinh doanh';
++  @override
++  String get goalNew => 'Mục tiêu mới';
++
++  @override
++  String get titleHomeDashboard => 'Bảng điều khiển';
++  @override
++  String get homeChatTooltip => 'Trò chuyện Workizen AI';
++  @override
++  String get homeAiSubtitle =>
++      'Trợ lý kinh doanh AI của bạn — nguồn hàng, kho, khách hàng và hơn nữa.';
++  @override
++  String get sectionBusinessKpis => 'Chỉ số kinh doanh';
++  @override
++  String get sectionTopOpportunities => 'Cơ hội nổi bật';
++  @override
++  String get homeCtaCustomer => 'Tạo khách hàng đầu tiên';
++  @override
++  String get homeCtaProduct => 'Thêm sản phẩm đầu tiên';
++  @override
++  String get homeCtaOrder => 'Tạo đơn hàng đầu tiên';
++  @override
++  String get homeCtaGoal => 'Đặt mục tiêu kinh doanh đầu tiên';
++  @override
++  String get homeCtaDemo => 'Khám phá dữ liệu mẫu';
++  @override
++  String get tileJourney => 'Hành trình';
++
++  @override
++  String get pickerTitle => 'Chọn sản phẩm';
++  @override
++  String get pickerSearchHint => 'Tìm theo tên, SKU hoặc danh mục';
++  @override
++  String get pickerNoMatch => 'Không có sản phẩm khớp';
++  @override
++  String get invAdd => 'Thêm sản phẩm';
++  @override
++  String get invView => 'Xem';
++  @override
++  String get invSearchHint => 'Tìm sản phẩm hoặc danh mục';
++  @override
++  String get invEmptySearch => 'Không có sản phẩm khớp tìm kiếm';
++  @override
++  String get invEmptySearchHint => 'Thử từ khoá khác hoặc xoá lọc danh mục.';
++  @override
++  String get titleStockAlerts => 'Cảnh báo tồn kho';
++  @override
++  String get stockOut => 'Hết hàng';
++  @override
++  String get stockLow => 'Sắp hết hàng';
++  @override
++  String get stockAllHealthy => 'Tồn kho đều ổn';
++  @override
++  String get stockAllHealthyBody =>
++      'Không có sản phẩm nào chạm ngưỡng đặt lại.';
++
++  @override
++  String get moreSettings => 'Cài đặt';
++  @override
++  String get moreProfile => 'Hồ sơ';
++  @override
++  String get moreNotifications => 'Thông báo';
++  @override
++  String get moreTheme => 'Giao diện';
++  @override
++  String get moreGrokKey => 'Khóa API Grok (xAI)';
++  @override
++  String get moreBusinessSection => 'Kinh doanh';
++  @override
++  String get moreBusinessInfo => 'Thông tin doanh nghiệp';
++  @override
++  String get moreTeam => 'Đội ngũ';
++  @override
++  String get morePermissions => 'Phân quyền';
++  @override
++  String get moreSupportSection => 'Hỗ trợ';
++  @override
++  String get moreReplayTutorial => 'Xem lại hướng dẫn';
++  @override
++  String get moreHelp => 'Trợ giúp & hỗ trợ';
++  @override
++  String get moreSendFeedback => 'Gửi phản hồi';
++  @override
++  String get moreLegalSection => 'Pháp lý';
++  @override
++  String get moreTerms => 'Điều khoản dịch vụ';
++  @override
++  String get morePrivacy => 'Chính sách quyền riêng tư';
++  @override
++  String get moreLogout => 'Đăng xuất';
++
++  @override
++  String get titleOpportunities => 'Cơ hội';
++
++  @override
++  String get titleProducerHub => 'Trung tâm nguồn hàng';
++  @override
++  String get producerAiSummary => 'Tóm tắt AI';
++  @override
++  String get producerAnalyzing =>
++      'Đang phân tích cơ hội nhà cung cấp và xu hướng thị trường...';
++  @override
++  String get producerAiCapabilities => 'Năng lực AI';
++  @override
++  String get producerCapScoring => 'Chấm điểm cơ hội';
++  @override
++  String get producerCapRanking => 'Xếp hạng nhà cung cấp';
++  @override
++  String get producerCapTrends => 'Xu hướng thị trường';
++  @override
++  String get producerCapPrice => 'Phân tích giá';
++  @override
++  String get producerCapQuality => 'Đánh giá chất lượng';
++  @override
++  String get producerCapDelivery => 'Thời gian giao hàng';
++  @override
++  String get producerRecentOpps => 'Cơ hội gần đây';
++  @override
++  String get producerEmptyOpps => 'Chưa phát hiện cơ hội nào';
++  @override
++  String get producerVerifiedSuppliers => 'Nhà cung cấp đã xác minh';
++  @override
++  String get producerEmptySuppliers => 'Chưa kết nối nhà cung cấp nào';
++
++  @override
++  String get formWrite => 'Soạn';
++  @override
++  String get formPreview => 'Xem trước';
++  @override
++  String get formNothingToPreview => 'Chưa có gì để xem trước.';
++  @override
++  String get formMarkdownHint =>
++      'Hỗ trợ **markdown** — tiêu đề, **đậm**, danh sách…';
++  @override
++  String get formUpload => 'Tải lên';
++  @override
++  String get formCamera => 'Máy ảnh';
++  @override
++  String get formRemoveImage => 'Xoá ảnh';
++  @override
++  String get titleEditProduct => 'Sửa sản phẩm';
++  @override
++  String get titleAddProduct => 'Thêm sản phẩm';
++  @override
++  String get formSaveChanges => 'Lưu thay đổi';
++  @override
++  String get formSaveProduct => 'Lưu sản phẩm';
++  @override
++  String get favAdd => 'Thêm vào yêu thích';
++  @override
++  String get lifecycleAwareness => 'Nhận biết';
++  @override
++  String get lifecycleConsideration => 'Cân nhắc';
++  @override
++  String get lifecyclePurchase => 'Mua hàng';
++  @override
++  String get lifecycleRetention => 'Giữ chân';
++
++  @override
++  String get labelSupplier => 'Nhà cung cấp';
++  @override
++  String get supAbout => 'Giới thiệu';
++  @override
++  String get supRatingsCerts => 'Đánh giá & chứng nhận';
++  @override
++  String get supProductCatalog => 'Danh mục sản phẩm';
++  @override
++  String get supTransactionHistory => 'Lịch sử giao dịch';
++  @override
++  String get supTotalVolume => 'Tổng khối lượng';
++  @override
++  String get supTotalOrders => 'Tổng đơn hàng';
++  @override
++  String get supRepeatBuyers => 'Khách mua lại';
++  @override
++  String get supContact => 'Liên hệ';
++  @override
++  String get supMessage => 'Nhắn nhà cung cấp';
++  @override
++  String get supAskHint => 'Hỏi về giá, MOQ, thời gian giao…';
++  @override
++  String get titleSupplierSearch => 'Tìm nhà cung cấp';
++  @override
++  String get titleFavoriteSuppliers => 'Nhà cung cấp yêu thích';
++  @override
++  String get supSearchHint => 'Tìm nhà cung cấp, danh mục, khu vực';
++  @override
++  String get supShow => 'Hiển thị';
++  @override
++  String get supFavorites => 'Yêu thích';
++  @override
++  String get favRemove => 'Bỏ khỏi yêu thích';
++  @override
++  String get favEmpty => 'Chưa có nhà cung cấp yêu thích';
++  @override
++  String get favEmptyHint =>
++      'Bấm biểu tượng tim trên nhà cung cấp để thêm vào đây.';
++
++  @override
++  String get txnIncome => 'Thu';
++  @override
++  String get txnExpense => 'Chi';
++
+   @override
+   String get custNameHint => 'VD: Phương Nguyễn';
+   @override
+@@ -1131,6 +1621,321 @@ class AppStringsEn extends AppStrings {
+   @override
+   String get historyRangeLast90 => 'Last 90 days';
+ 
++  @override
++  String get navHome => 'Home';
++  @override
++  String get navProducer => 'Producer';
++  @override
++  String get navInventory => 'Inventory';
++  @override
++  String get navConsumer => 'Consumer';
++  @override
++  String get navMore => 'More';
++
++  @override
++  String get actionAdd => 'Add';
++  @override
++  String get actionSave => 'Save';
++  @override
++  String get actionSend => 'Send';
++  @override
++  String get actionClearFilters => 'Clear filters';
++  @override
++  String get actionPrevPage => 'Previous page';
++  @override
++  String get actionNextPage => 'Next page';
++  @override
++  String get labelSort => 'Sort';
++  @override
++  String get labelStatus => 'Status';
++  @override
++  String get labelTotal => 'Total';
++  @override
++  String get labelType => 'Type';
++  @override
++  String get labelLocation => 'Location';
++  @override
++  String get labelPeriod => 'Period';
++  @override
++  String get labelQuantity => 'Quantity';
++  @override
++  String get labelDescription => 'Description';
++  @override
++  String get formFixHighlighted => 'Please fix the highlighted fields.';
++  @override
++  String get changeHistory => 'Change history';
++
++  @override
++  String get chatRemoveAttachment => 'Remove attachment';
++  @override
++  String get chatAttachFile => 'Attach file';
++
++  @override
++  String get titleConsumerIntelligence => 'Customer Intelligence';
++  @override
++  String get titleCustomers => 'Customers';
++  @override
++  String get segActive => 'Active';
++  @override
++  String get segVip => 'VIP';
++  @override
++  String get segNew => 'New';
++  @override
++  String get sectionCustomerSegments => 'Customer Segments';
++  @override
++  String get emptyCustomerSegments => 'No customer segments defined yet';
++  @override
++  String get sectionRecentInteractions => 'Recent Interactions';
++  @override
++  String get emptyRecentInteractions => 'No recent interactions';
++  @override
++  String get sectionCustomerLifecycle => 'Customer Lifecycle';
++
++  @override
++  String get titleCreateOrder => 'Create Order';
++  @override
++  String get orderSoldPrice => 'Sold price (per unit)';
++  @override
++  String get orderNeedProduct => 'Add at least one product';
++  @override
++  String get orderAddItem => 'Add item';
++  @override
++  String get orderEmptyItems => 'No products yet — tap "Add item"';
++
++  @override
++  String get custRemoveAddress => 'Remove address';
++  @override
++  String get custAddAddress => 'Add address';
++  @override
++  String get custSegments => 'Segments';
++  @override
++  String get custCustomSegmentHint => 'Custom segment…';
++  @override
++  String get custAdd => 'Add customer';
++  @override
++  String get custSearchHint => 'Search name, phone or location';
++  @override
++  String get custPurchaseHistory => 'Purchase history';
++  @override
++  String get custEmptySearch => 'No customers match your search';
++  @override
++  String get custEmptySearchHint =>
++      'Try a different keyword or clear the location filter.';
++
++  @override
++  String get historyRepurchase => 'Repurchase';
++  @override
++  String get historyEmptyOrders => 'No orders in this period';
++  @override
++  String get historyEmptyHint =>
++      'Try a wider period or clear the category filter.';
++
++  @override
++  String get titleBusinessGoals => 'Business Goals';
++  @override
++  String get goalNew => 'New goal';
++
++  @override
++  String get titleHomeDashboard => 'Home Dashboard';
++  @override
++  String get homeChatTooltip => 'Workizen AI chat';
++  @override
++  String get homeAiSubtitle =>
++      'Your AI-powered business assistant for sourcing, '
++      'inventory, customers, and more.';
++  @override
++  String get sectionBusinessKpis => 'Business KPIs';
++  @override
++  String get sectionTopOpportunities => 'Top Opportunities';
++  @override
++  String get homeCtaCustomer => 'Create your first customer';
++  @override
++  String get homeCtaProduct => 'Add your first product';
++  @override
++  String get homeCtaOrder => 'Create your first order';
++  @override
++  String get homeCtaGoal => 'Set your first business goal';
++  @override
++  String get homeCtaDemo => 'Explore Demo Mode';
++  @override
++  String get tileJourney => 'Journey';
++
++  @override
++  String get pickerTitle => 'Pick a product';
++  @override
++  String get pickerSearchHint => 'Search name, SKU or category';
++  @override
++  String get pickerNoMatch => 'No products match';
++  @override
++  String get invAdd => 'Add product';
++  @override
++  String get invView => 'View';
++  @override
++  String get invSearchHint => 'Search products or categories';
++  @override
++  String get invEmptySearch => 'No products match your search';
++  @override
++  String get invEmptySearchHint =>
++      'Try a different keyword or clear the category filter.';
++  @override
++  String get titleStockAlerts => 'Stock alerts';
++  @override
++  String get stockOut => 'Out of stock';
++  @override
++  String get stockLow => 'Low stock';
++  @override
++  String get stockAllHealthy => 'All stock levels healthy';
++  @override
++  String get stockAllHealthyBody =>
++      'No products are at or below their reorder threshold.';
++
++  @override
++  String get moreSettings => 'Settings';
++  @override
++  String get moreProfile => 'Profile';
++  @override
++  String get moreNotifications => 'Notifications';
++  @override
++  String get moreTheme => 'Theme';
++  @override
++  String get moreGrokKey => 'Grok (xAI) API key';
++  @override
++  String get moreBusinessSection => 'Business';
++  @override
++  String get moreBusinessInfo => 'Business Info';
++  @override
++  String get moreTeam => 'Team';
++  @override
++  String get morePermissions => 'Permissions';
++  @override
++  String get moreSupportSection => 'Support';
++  @override
++  String get moreReplayTutorial => 'Replay Tutorial';
++  @override
++  String get moreHelp => 'Help & Support';
++  @override
++  String get moreSendFeedback => 'Send Feedback';
++  @override
++  String get moreLegalSection => 'Legal';
++  @override
++  String get moreTerms => 'Terms of Service';
++  @override
++  String get morePrivacy => 'Privacy Policy';
++  @override
++  String get moreLogout => 'Logout';
++
++  @override
++  String get titleOpportunities => 'Opportunities';
++
++  @override
++  String get titleProducerHub => 'Producer Hub';
++  @override
++  String get producerAiSummary => 'AI Summary';
++  @override
++  String get producerAnalyzing =>
++      'Analyzing supplier opportunities and market trends...';
++  @override
++  String get producerAiCapabilities => 'AI Capabilities';
++  @override
++  String get producerCapScoring => 'Opportunity Scoring';
++  @override
++  String get producerCapRanking => 'Supplier Ranking';
++  @override
++  String get producerCapTrends => 'Market Trends';
++  @override
++  String get producerCapPrice => 'Price Analysis';
++  @override
++  String get producerCapQuality => 'Quality Rating';
++  @override
++  String get producerCapDelivery => 'Delivery Time';
++  @override
++  String get producerRecentOpps => 'Recent Opportunities';
++  @override
++  String get producerEmptyOpps => 'No opportunities discovered yet';
++  @override
++  String get producerVerifiedSuppliers => 'Verified Suppliers';
++  @override
++  String get producerEmptySuppliers => 'No suppliers connected yet';
++
++  @override
++  String get formWrite => 'Write';
++  @override
++  String get formPreview => 'Preview';
++  @override
++  String get formNothingToPreview => 'Nothing to preview yet.';
++  @override
++  String get formMarkdownHint =>
++      'Supports **markdown** — headings, **bold**, lists…';
++  @override
++  String get formUpload => 'Upload';
++  @override
++  String get formCamera => 'Camera';
++  @override
++  String get formRemoveImage => 'Remove image';
++  @override
++  String get titleEditProduct => 'Edit Product';
++  @override
++  String get titleAddProduct => 'Add Product';
++  @override
++  String get formSaveChanges => 'Save Changes';
++  @override
++  String get formSaveProduct => 'Save Product';
++  @override
++  String get favAdd => 'Add to favorites';
++  @override
++  String get lifecycleAwareness => 'Awareness';
++  @override
++  String get lifecycleConsideration => 'Consideration';
++  @override
++  String get lifecyclePurchase => 'Purchase';
++  @override
++  String get lifecycleRetention => 'Retention';
++
++  @override
++  String get labelSupplier => 'Supplier';
++  @override
++  String get supAbout => 'About';
++  @override
++  String get supRatingsCerts => 'Ratings & Certifications';
++  @override
++  String get supProductCatalog => 'Product Catalog';
++  @override
++  String get supTransactionHistory => 'Transaction History';
++  @override
++  String get supTotalVolume => 'Total volume';
++  @override
++  String get supTotalOrders => 'Total orders';
++  @override
++  String get supRepeatBuyers => 'Repeat buyers';
++  @override
++  String get supContact => 'Contact';
++  @override
++  String get supMessage => 'Message supplier';
++  @override
++  String get supAskHint => 'Ask about pricing, MOQ, lead time…';
++  @override
++  String get titleSupplierSearch => 'Supplier Search';
++  @override
++  String get titleFavoriteSuppliers => 'Favorite Suppliers';
++  @override
++  String get supSearchHint => 'Search suppliers, categories, locations';
++  @override
++  String get supShow => 'Show';
++  @override
++  String get supFavorites => 'Favorites';
++  @override
++  String get favRemove => 'Remove from favorites';
++  @override
++  String get favEmpty => 'No favorite suppliers yet';
++  @override
++  String get favEmptyHint =>
++      'Tap the heart on a supplier to add it here for quick access.';
++
++  @override
++  String get txnIncome => 'Income';
++  @override
++  String get txnExpense => 'Expense';
++
+   @override
+   String get custNameHint => 'e.g. Phương Nguyễn';
+   @override
+diff --git a/lib/features/tongtai/sample/sample_data_seeder.dart b/lib/features/tongtai/sample/sample_data_seeder.dart
+index 2cf4dd2..80e84bf 100644
+--- a/lib/features/tongtai/sample/sample_data_seeder.dart
++++ b/lib/features/tongtai/sample/sample_data_seeder.dart
+@@ -77,10 +77,16 @@ class SampleDataSeeder {
+ 
+   /// Removes every sample record across all repositories. User data (UUID ids)
+   /// is untouched — including sample rows the user has edited (same id).
++  ///
++  /// Orders go FIRST: on the real SQLite database `orders_table.customer_id`
++  /// enforces a foreign key into `customers_table` (PRAGMA foreign_keys=ON),
++  /// so deleting customers while their sample orders still exist throws
++  /// SqliteException 787. Found by `p0/drift_restart_test.dart` (WTM-146 §3) —
++  /// the in-memory repositories used before never enforced the constraint.
+   Future<void> removeAll() async {
++    await orders.deleteByIdPrefix(kSampleIdPrefix);
+     await customers.deleteByIdPrefix(kSampleIdPrefix);
+     await products.deleteByIdPrefix(kSampleIdPrefix);
+-    await orders.deleteByIdPrefix(kSampleIdPrefix);
+     await goals.deleteByIdPrefix(kSampleIdPrefix);
+     await finance.deleteByIdPrefix(kSampleIdPrefix);
+   }
+diff --git a/lib/features/tongtai/ui/screens/tongtai_chat_screen.dart b/lib/features/tongtai/ui/screens/tongtai_chat_screen.dart
+index fdc4494..5c284dc 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_chat_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_chat_screen.dart
+@@ -437,7 +437,7 @@ class _PendingAttachment extends StatelessWidget {
+           ),
+           IconButton(
+             key: const Key('chat-remove-attachment'),
+-            tooltip: 'Remove attachment',
++            tooltip: context.l10n.chatRemoveAttachment,
+             visualDensity: VisualDensity.compact,
+             icon: const Icon(Icons.close, size: 16),
+             onPressed: onRemove,
+@@ -473,7 +473,7 @@ class _InputBar extends StatelessWidget {
+         children: [
+           IconButton(
+             key: const Key('chat-attach'),
+-            tooltip: 'Attach file',
++            tooltip: context.l10n.chatAttachFile,
+             icon: const Icon(Icons.attach_file),
+             onPressed: onAttach,
+           ),
+@@ -505,7 +505,7 @@ class _InputBar extends StatelessWidget {
+           const SizedBox(width: TongtaiDesignTokens.spacing2),
+           IconButton.filled(
+             key: const Key('chat-send'),
+-            tooltip: 'Send',
++            tooltip: context.l10n.actionSend,
+             style: IconButton.styleFrom(
+               backgroundColor: TongtaiDesignTokens.copilotViolet,
+               foregroundColor: Colors.white,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_consumer_screen.dart b/lib/features/tongtai/ui/screens/tongtai_consumer_screen.dart
+index a1842d0..5ecd30d 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_consumer_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_consumer_screen.dart
+@@ -1,5 +1,7 @@
+ import 'package:flutter/material.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
++
+ /// Consumer/Customer Intelligence screen for Tổng Tài
+ /// Manages customer relationships and CDP (Customer Data Platform).
+ class TongtaiConsumerScreen extends StatelessWidget {
+@@ -10,7 +12,7 @@ class TongtaiConsumerScreen extends StatelessWidget {
+     return Scaffold(
+       backgroundColor: Colors.white,
+       appBar: AppBar(
+-        title: const Text('Customer Intelligence'),
++        title: Text(context.l10n.titleConsumerIntelligence),
+         elevation: 0,
+         backgroundColor: Colors.white,
+         foregroundColor: Colors.black,
+@@ -34,9 +36,9 @@ class TongtaiConsumerScreen extends StatelessWidget {
+                     Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       children: [
+-                        const Text(
+-                          'Customers',
+-                          style: TextStyle(
++                        Text(
++                          context.l10n.titleCustomers,
++                          style: const TextStyle(
+                             fontSize: 16,
+                             fontWeight: FontWeight.bold,
+                           ),
+@@ -66,17 +68,17 @@ class TongtaiConsumerScreen extends StatelessWidget {
+                       mainAxisAlignment: MainAxisAlignment.spaceAround,
+                       children: [
+                         _CustomerStat(
+-                          label: 'Active',
++                          label: context.l10n.segActive,
+                           value: '0',
+                           color: const Color(0xFF3B82F6),
+                         ),
+                         _CustomerStat(
+-                          label: 'VIP',
++                          label: context.l10n.segVip,
+                           value: '0',
+                           color: const Color(0xFF3B82F6),
+                         ),
+                         _CustomerStat(
+-                          label: 'New',
++                          label: context.l10n.segNew,
+                           value: '0',
+                           color: const Color(0xFF3B82F6),
+                         ),
+@@ -89,7 +91,7 @@ class TongtaiConsumerScreen extends StatelessWidget {
+             const SizedBox(height: 24),
+             // Customer segments
+             Text(
+-              'Customer Segments',
++              context.l10n.sectionCustomerSegments,
+               style: Theme.of(context).textTheme.titleLarge,
+             ),
+             const SizedBox(height: 12),
+@@ -99,14 +101,12 @@ class TongtaiConsumerScreen extends StatelessWidget {
+                 border: Border.all(color: const Color(0xFFE5E7EB)),
+                 borderRadius: BorderRadius.circular(8),
+               ),
+-              child: const Center(
+-                child: Text('No customer segments defined yet'),
+-              ),
++              child: Center(child: Text(context.l10n.emptyCustomerSegments)),
+             ),
+             const SizedBox(height: 24),
+             // Recent interactions
+             Text(
+-              'Recent Interactions',
++              context.l10n.sectionRecentInteractions,
+               style: Theme.of(context).textTheme.titleLarge,
+             ),
+             const SizedBox(height: 12),
+@@ -116,12 +116,12 @@ class TongtaiConsumerScreen extends StatelessWidget {
+                 border: Border.all(color: const Color(0xFFE5E7EB)),
+                 borderRadius: BorderRadius.circular(8),
+               ),
+-              child: const Center(child: Text('No recent interactions')),
++              child: Center(child: Text(context.l10n.emptyRecentInteractions)),
+             ),
+             const SizedBox(height: 24),
+             // Customer lifecycle
+             Text(
+-              'Customer Lifecycle',
++              context.l10n.sectionCustomerLifecycle,
+               style: Theme.of(context).textTheme.titleLarge,
+             ),
+             const SizedBox(height: 12),
+@@ -135,25 +135,25 @@ class TongtaiConsumerScreen extends StatelessWidget {
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: [
+                   _LifecycleStage(
+-                    stage: 'Awareness',
++                    stage: context.l10n.lifecycleAwareness,
+                     count: '0',
+                     color: const Color(0xFF3B82F6),
+                   ),
+                   const SizedBox(height: 12),
+                   _LifecycleStage(
+-                    stage: 'Consideration',
++                    stage: context.l10n.lifecycleConsideration,
+                     count: '0',
+                     color: const Color(0xFF3B82F6),
+                   ),
+                   const SizedBox(height: 12),
+                   _LifecycleStage(
+-                    stage: 'Purchase',
++                    stage: context.l10n.lifecyclePurchase,
+                     count: '0',
+                     color: const Color(0xFF3B82F6),
+                   ),
+                   const SizedBox(height: 12),
+                   _LifecycleStage(
+-                    stage: 'Retention',
++                    stage: context.l10n.lifecycleRetention,
+                     count: '0',
+                     color: const Color(0xFF3B82F6),
+                   ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_create_order_screen.dart b/lib/features/tongtai/ui/screens/tongtai_create_order_screen.dart
+index e550d68..7b2191f 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_create_order_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_create_order_screen.dart
+@@ -94,14 +94,16 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+               key: const Key('order-item-quantity'),
+               controller: qtyController,
+               keyboardType: TextInputType.number,
+-              decoration: const InputDecoration(labelText: 'Quantity'),
++              decoration: InputDecoration(
++                labelText: context.l10n.labelQuantity,
++              ),
+             ),
+             TextField(
+               key: const Key('order-item-price'),
+               controller: priceController,
+               keyboardType: TextInputType.number,
+-              decoration: const InputDecoration(
+-                labelText: 'Sold price (per unit)',
++              decoration: InputDecoration(
++                labelText: context.l10n.orderSoldPrice,
+               ),
+             ),
+           ],
+@@ -109,7 +111,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+         actions: [
+           TextButton(
+             onPressed: () => Navigator.of(context).pop(),
+-            child: const Text('Cancel'),
++            child: Text(context.l10n.actionCancel),
+           ),
+           FilledButton(
+             key: const Key('order-item-add'),
+@@ -124,7 +126,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+                 OrderItem.fromProduct(product, quantity: qty, soldPrice: price),
+               );
+             },
+-            child: const Text('Add'),
++            child: Text(context.l10n.actionAdd),
+           ),
+         ],
+       ),
+@@ -137,7 +139,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+     if (_items.isEmpty) {
+       ScaffoldMessenger.of(
+         context,
+-      ).showSnackBar(const SnackBar(content: Text('Add at least one product')));
++      ).showSnackBar(SnackBar(content: Text(context.l10n.orderNeedProduct)));
+       return;
+     }
+     final now = _clock();
+@@ -166,7 +168,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Create Order'),
++        title: Text(context.l10n.titleCreateOrder),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -174,7 +176,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+           TextButton(
+             key: const Key('create-order-save'),
+             onPressed: _save,
+-            child: const Text('Save'),
++            child: Text(context.l10n.actionSave),
+           ),
+         ],
+       ),
+@@ -184,7 +186,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+         backgroundColor: TongtaiDesignTokens.consumerBlue,
+         foregroundColor: Colors.white,
+         icon: const Icon(Icons.add),
+-        label: const Text('Add item'),
++        label: Text(context.l10n.orderAddItem),
+       ),
+       body: SafeArea(
+         child: Column(
+@@ -219,7 +221,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+               child: _items.isEmpty
+                   ? Center(
+                       child: Text(
+-                        'No products yet — tap "Add item"',
++                        context.l10n.orderEmptyItems,
+                         style: TongtaiDesignTokens.bodyStyle.copyWith(
+                           color: TongtaiDesignTokens.lightTextSecondary,
+                         ),
+@@ -264,7 +266,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+               Text(
+-                'Total',
++                context.l10n.labelTotal,
+                 style: TongtaiDesignTokens.captionStyle.copyWith(
+                   color: TongtaiDesignTokens.lightTextSecondary,
+                 ),
+@@ -302,7 +304,7 @@ class _StatusRow extends StatelessWidget {
+           SizedBox(
+             width: 68,
+             child: Text(
+-              'Status',
++              context.l10n.labelStatus,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+                 fontWeight: FontWeight.w600,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart b/lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart
+index 60a9996..c3edab9 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart
+@@ -160,7 +160,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
+       ScaffoldMessenger.of(context)
+         ..hideCurrentSnackBar()
+         ..showSnackBar(
+-          const SnackBar(content: Text('Please fix the highlighted fields.')),
++          SnackBar(content: Text(context.l10n.formFixHighlighted)),
+         );
+       return;
+     }
+@@ -516,7 +516,7 @@ class _AddressesSection extends StatelessWidget {
+                 if (onRemove != null)
+                   IconButton(
+                     key: Key('customer-address-remove-$i'),
+-                    tooltip: 'Remove address',
++                    tooltip: context.l10n.custRemoveAddress,
+                     icon: const Icon(Icons.remove_circle_outline),
+                     color: TongtaiDesignTokens.error,
+                     onPressed: () => onRemove!(i),
+@@ -528,7 +528,7 @@ class _AddressesSection extends StatelessWidget {
+           key: const Key('customer-add-address'),
+           onPressed: onAdd,
+           icon: const Icon(Icons.add),
+-          label: const Text('Add address'),
++          label: Text(context.l10n.custAddAddress),
+         ),
+       ],
+     );
+@@ -562,7 +562,7 @@ class _SegmentsSection extends StatelessWidget {
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         Text(
+-          'Segments',
++          context.l10n.custSegments,
+           style: TongtaiDesignTokens.smallStyle.copyWith(
+             fontWeight: FontWeight.w600,
+             color: TongtaiDesignTokens.lightTextPrimary,
+@@ -590,7 +590,7 @@ class _SegmentsSection extends StatelessWidget {
+                 controller: input,
+                 onSubmitted: (_) => onAddCustom(),
+                 decoration: InputDecoration(
+-                  hintText: 'Custom segment…',
++                  hintText: context.l10n.custCustomSegmentHint,
+                   isDense: true,
+                   filled: true,
+                   fillColor: TongtaiDesignTokens.lightHover,
+@@ -607,7 +607,7 @@ class _SegmentsSection extends StatelessWidget {
+             OutlinedButton(
+               key: const Key('customer-segment-add'),
+               onPressed: onAddCustom,
+-              child: const Text('Add'),
++              child: Text(context.l10n.actionAdd),
+             ),
+           ],
+         ),
+@@ -681,7 +681,7 @@ class _ChangeHistory extends StatelessWidget {
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         Text(
+-          'Change history',
++          context.l10n.changeHistory,
+           style: TongtaiDesignTokens.smallStyle.copyWith(
+             fontWeight: FontWeight.w700,
+             color: TongtaiDesignTokens.lightTextPrimary,
+@@ -737,7 +737,7 @@ class _SaveCancelBar extends StatelessWidget {
+                     TongtaiDesignTokens.buttonHeight,
+                   ),
+                 ),
+-                child: const Text('Cancel'),
++                child: Text(context.l10n.actionCancel),
+               ),
+             ),
+             const SizedBox(width: TongtaiDesignTokens.spacing3),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_customer_history_screen.dart b/lib/features/tongtai/ui/screens/tongtai_customer_history_screen.dart
+index b027500..1574918 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_customer_history_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_customer_history_screen.dart
+@@ -62,8 +62,8 @@ class TongtaiCustomerHistoryScreen extends StatefulWidget {
+   /// Whose history to show.
+   final Customer customer;
+ 
+-  /// Injectable sample source for tests; used only when [orderController] is
+-  /// null. Defaults to the built-in sample orders.
++  /// Injectable order source for tests; used only when [orderController] is
++  /// null. When both are null the history is empty (never fixtures — P0 §3).
+   final CustomerOrderHistoryService? service;
+ 
+   /// Injectable clock for the date-range presets (defaults to [DateTime.now]).
+@@ -99,11 +99,13 @@ class _TongtaiCustomerHistoryScreenState
+   OrderHistoryQuery get _query =>
+       OrderHistoryQuery(from: _range.fromFor(_clock()), category: _category);
+ 
+-  /// The order source: the real controller's orders when wired, else the sample
+-  /// service. A fresh service is built each frame so it reflects new orders.
++  /// The order source: the real controller's orders when wired, else the
++  /// injected service. A fresh service is built each frame so it reflects new
++  /// orders. NEVER falls back to fixtures (P0 §3, WTM-146): a bare-constructed
++  /// screen shows an empty history, not sample data.
+   CustomerOrderHistoryService get _service => widget.orderController != null
+       ? CustomerOrderHistoryService(widget.orderController!.orders)
+-      : (widget.service ?? CustomerOrderHistoryService.sample());
++      : (widget.service ?? CustomerOrderHistoryService(const []));
+ 
+   Future<void> _createOrder() async {
+     final controller = widget.orderController!;
+@@ -133,7 +135,9 @@ class _TongtaiCustomerHistoryScreenState
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: Text('Purchase History — ${widget.customer.name}'),
++        title: Text(
++          '${context.l10n.custPurchaseHistory} — ${widget.customer.name}',
++        ),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -146,7 +150,7 @@ class _TongtaiCustomerHistoryScreenState
+               backgroundColor: TongtaiDesignTokens.consumerBlue,
+               foregroundColor: Colors.white,
+               icon: const Icon(Icons.add),
+-              label: const Text('Create Order'),
++              label: Text(context.l10n.titleCreateOrder),
+             ),
+       body: SafeArea(
+         child: Column(
+@@ -154,7 +158,7 @@ class _TongtaiCustomerHistoryScreenState
+           children: [
+             _MetricsHeader(metrics: metrics),
+             _FilterRow(
+-              label: 'Period',
++              label: context.l10n.labelPeriod,
+               children: [
+                 for (final range in OrderHistoryRange.values)
+                   Padding(
+@@ -171,14 +175,14 @@ class _TongtaiCustomerHistoryScreenState
+             ),
+             if (categories.isNotEmpty)
+               _FilterRow(
+-                label: 'Category',
++                label: context.l10n.searchCategory,
+                 children: [
+                   Padding(
+                     padding: const EdgeInsets.only(
+                       right: TongtaiDesignTokens.spacing2,
+                     ),
+                     child: ChoiceChip(
+-                      label: const Text('All'),
++                      label: Text(context.l10n.filterAll),
+                       selected: _category == null,
+                       onSelected: (_) => setState(() => _category = null),
+                     ),
+@@ -260,17 +264,17 @@ class _MetricsHeader extends StatelessWidget {
+         children: [
+           _Metric(
+             key: const Key('history-metric-orders'),
+-            label: 'Orders',
++            label: context.l10n.kpiOrders,
+             value: '${metrics.orderCount}',
+           ),
+           _Metric(
+             key: const Key('history-metric-aov'),
+-            label: 'Avg order',
++            label: context.l10n.kpiAovShort,
+             value: TongtaiFormatters.vnd(metrics.averageOrderValue),
+           ),
+           _Metric(
+             key: const Key('history-metric-repurchase'),
+-            label: 'Repurchase',
++            label: context.l10n.historyRepurchase,
+             value: '${(metrics.repurchaseRate * 100).round()}%',
+           ),
+         ],
+@@ -469,7 +473,7 @@ class _EmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              'No orders in this period',
++              context.l10n.historyEmptyOrders,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.bodyStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -478,7 +482,7 @@ class _EmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing1),
+             Text(
+-              'Try a wider period or clear the category filter.',
++              context.l10n.historyEmptyHint,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart b/lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart
+index 4d6406d..3336a66 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart
+@@ -193,7 +193,7 @@ class _TongtaiCustomerListScreenState
+         return Scaffold(
+           backgroundColor: TongtaiDesignTokens.lightBackground,
+           appBar: AppBar(
+-            title: const Text('Customers'),
++            title: Text(context.l10n.titleCustomers),
+             elevation: 0,
+             backgroundColor: TongtaiDesignTokens.lightBackground,
+             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -203,7 +203,7 @@ class _TongtaiCustomerListScreenState
+             backgroundColor: TongtaiDesignTokens.consumerBlue,
+             foregroundColor: Colors.white,
+             icon: const Icon(Icons.add),
+-            label: const Text('Add customer'),
++            label: Text(context.l10n.custAdd),
+           ),
+           // The pagination controls sit in the bottom bar so the (endFloat)
+           // FAB is lifted clear above them instead of obscuring the Next-page
+@@ -290,13 +290,13 @@ class _SearchField extends StatelessWidget {
+       onChanged: onChanged,
+       textInputAction: TextInputAction.search,
+       decoration: InputDecoration(
+-        hintText: 'Search name, phone or location',
++        hintText: context.l10n.custSearchHint,
+         prefixIcon: const Icon(Icons.search),
+         suffixIcon: onClear == null
+             ? null
+             : IconButton(
+                 icon: const Icon(Icons.clear),
+-                tooltip: 'Clear',
++                tooltip: context.l10n.actionClear,
+                 onPressed: onClear,
+               ),
+         filled: true,
+@@ -329,12 +329,12 @@ class _LocationFilter extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return _ChipsRow(
+-      label: 'Location',
++      label: context.l10n.labelLocation,
+       children: [
+         Padding(
+           padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+           child: ChoiceChip(
+-            label: const Text('All'),
++            label: Text(context.l10n.filterAll),
+             selected: selected == null,
+             onSelected: (_) => onSelected(null),
+           ),
+@@ -370,7 +370,7 @@ class _SortBar extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return _ChipsRow(
+-      label: 'Sort',
++      label: context.l10n.labelSort,
+       trailing: IconButton(
+         icon: Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward),
+         tooltip: ascending ? 'Sort ascending' : 'Sort descending',
+@@ -584,7 +584,7 @@ class _CustomerRow extends StatelessWidget {
+                 ),
+                 IconButton(
+                   key: Key('customer-history-${customer.id}'),
+-                  tooltip: 'Purchase history',
++                  tooltip: context.l10n.custPurchaseHistory,
+                   visualDensity: VisualDensity.compact,
+                   icon: const Icon(
+                     Icons.receipt_long_outlined,
+@@ -683,7 +683,7 @@ class _PaginationBar extends StatelessWidget {
+             children: [
+               IconButton(
+                 icon: const Icon(Icons.chevron_left),
+-                tooltip: 'Previous page',
++                tooltip: context.l10n.actionPrevPage,
+                 onPressed: onPrevious,
+               ),
+               Text(
+@@ -695,7 +695,7 @@ class _PaginationBar extends StatelessWidget {
+               ),
+               IconButton(
+                 icon: const Icon(Icons.chevron_right),
+-                tooltip: 'Next page',
++                tooltip: context.l10n.actionNextPage,
+                 onPressed: onNext,
+               ),
+             ],
+@@ -720,7 +720,7 @@ class _EmptyState extends StatelessWidget {
+             const TongtaiFoxMascot.face(size: 64),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              'No customers match your search',
++              context.l10n.custEmptySearch,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.bodyStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -729,7 +729,7 @@ class _EmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing1),
+             Text(
+-              'Try a different keyword or clear the location filter.',
++              context.l10n.custEmptySearchHint,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart b/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
+index 9605e26..ac9666c 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
+@@ -270,9 +270,9 @@ class _CashflowLegend extends StatelessWidget {
+   Widget build(BuildContext context) {
+     return Row(
+       children: [
+-        _dot(TongtaiFinanceScreen._income, 'Thu'),
++        _dot(TongtaiFinanceScreen._income, context.l10n.txnIncome),
+         const SizedBox(width: TongtaiDesignTokens.spacing4),
+-        _dot(TongtaiFinanceScreen._expense, 'Chi'),
++        _dot(TongtaiFinanceScreen._expense, context.l10n.txnExpense),
+       ],
+     );
+   }
+diff --git a/lib/features/tongtai/ui/screens/tongtai_goal_form_screen.dart b/lib/features/tongtai/ui/screens/tongtai_goal_form_screen.dart
+index 62b73b1..abb2d28 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_goal_form_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_goal_form_screen.dart
+@@ -169,7 +169,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
+       ScaffoldMessenger.of(context)
+         ..hideCurrentSnackBar()
+         ..showSnackBar(
+-          const SnackBar(content: Text('Please fix the highlighted fields.')),
++          SnackBar(content: Text(context.l10n.formFixHighlighted)),
+         );
+     }
+   }
+diff --git a/lib/features/tongtai/ui/screens/tongtai_goals_screen.dart b/lib/features/tongtai/ui/screens/tongtai_goals_screen.dart
+index ebec1c6..b38385b 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_goals_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_goals_screen.dart
+@@ -147,7 +147,7 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
+         return Scaffold(
+           backgroundColor: TongtaiDesignTokens.lightBackground,
+           appBar: AppBar(
+-            title: const Text('Business Goals'),
++            title: Text(context.l10n.titleBusinessGoals),
+             elevation: 0,
+             backgroundColor: TongtaiDesignTokens.lightBackground,
+             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -157,7 +157,7 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
+             backgroundColor: TongtaiDesignTokens.financePurple,
+             foregroundColor: Colors.white,
+             icon: const Icon(Icons.add),
+-            label: const Text('New goal'),
++            label: Text(context.l10n.goalNew),
+           ),
+           body: SafeArea(
+             child: goals.isEmpty
+@@ -319,14 +319,6 @@ class _EmptyState extends StatelessWidget {
+                 fontWeight: FontWeight.w600,
+               ),
+             ),
+-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+-            Text(
+-              'Set your first business goal.',
+-              textAlign: TextAlign.center,
+-              style: TongtaiDesignTokens.smallStyle.copyWith(
+-                color: TongtaiDesignTokens.lightTextSecondary,
+-              ),
+-            ),
+           ],
+         ),
+       ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_home_screen.dart b/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
+index 765551f..7ae617e 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
+@@ -174,7 +174,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Home Dashboard'),
++        title: Text(context.l10n.titleHomeDashboard),
+         elevation: 0,
+         backgroundColor: Colors.white,
+         foregroundColor: Colors.black,
+@@ -186,7 +186,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+           ),
+           IconButton(
+             key: const Key('home-open-chat'),
+-            tooltip: 'Workizen AI chat',
++            tooltip: context.l10n.homeChatTooltip,
+             icon: const Icon(Icons.chat_bubble_outline),
+             onPressed: () => _openChat(context),
+           ),
+@@ -257,14 +257,25 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+                             ),
+                           ),
+                         ),
+-                        _HealthBadge(health: _health),
++                        // Scale down instead of overflowing on narrow
++                        // screens at accessibility text sizes (P0 §3).
++                        // Flexible bounds the width — a bare FittedBox in a
++                        // Row gets unbounded constraints and never shrinks.
++                        Flexible(
++                          child: FittedBox(
++                            fit: BoxFit.scaleDown,
++                            child: _HealthBadge(health: _health),
++                          ),
++                        ),
+                       ],
+                     ),
+                     const SizedBox(height: 8),
+-                    const Text(
+-                      'Your AI-powered business assistant for sourcing, '
+-                      'inventory, customers, and more.',
+-                      style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
++                    Text(
++                      context.l10n.homeAiSubtitle,
++                      style: const TextStyle(
++                        fontSize: 14,
++                        color: Color(0xFF6B7280),
++                      ),
+                     ),
+                     const SizedBox(height: 16),
+                     _ModuleSummaryGrid(
+@@ -335,7 +346,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+ 
+             // ── Business KPIs — real values, zero is valid (WTM-128) ──
+             _SectionHeader(
+-              title: 'Business KPIs',
++              title: context.l10n.sectionBusinessKpis,
+               actionKey: const Key('home-open-reports'),
+               actionLabel: context.l10n.homeViewReports,
+               onAction: () => _push(context, const TongtaiReportsScreen()),
+@@ -346,7 +357,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+ 
+             // ── Top opportunities (AI-generated; empty for new users) ─
+             _SectionHeader(
+-              title: 'Top Opportunities',
++              title: context.l10n.sectionTopOpportunities,
+               actionKey: const Key('home-open-opportunities'),
+               actionLabel: context.l10n.actionViewAll,
+               onAction: () =>
+@@ -466,31 +477,31 @@ class _GetStartedCard extends StatelessWidget {
+             _CtaTile(
+               tileKey: const Key('home-cta-customer'),
+               icon: Icons.person_add_alt_1,
+-              label: 'Create your first customer',
++              label: context.l10n.homeCtaCustomer,
+               onTap: onCustomer,
+             ),
+             _CtaTile(
+               tileKey: const Key('home-cta-product'),
+               icon: Icons.add_box_outlined,
+-              label: 'Add your first product',
++              label: context.l10n.homeCtaProduct,
+               onTap: onProduct,
+             ),
+             _CtaTile(
+               tileKey: const Key('home-cta-order'),
+               icon: Icons.receipt_long_outlined,
+-              label: 'Create your first order',
++              label: context.l10n.homeCtaOrder,
+               onTap: onOrder,
+             ),
+             _CtaTile(
+               tileKey: const Key('home-cta-goal'),
+               icon: Icons.flag_outlined,
+-              label: 'Set your first business goal',
++              label: context.l10n.homeCtaGoal,
+               onTap: onGoal,
+             ),
+             _CtaTile(
+               tileKey: const Key('home-cta-demo'),
+               icon: Icons.play_circle_outline,
+-              label: 'Explore Demo Mode',
++              label: context.l10n.homeCtaDemo,
+               onTap: onDemo,
+             ),
+           ],
+@@ -546,10 +557,17 @@ class _SectionHeader extends StatelessWidget {
+         Expanded(
+           child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+         ),
+-        TextButton(
+-          key: actionKey,
+-          onPressed: onAction,
+-          child: Text(actionLabel),
++        // Flexible + FittedBox: at large text scales the action label must
++        // shrink rather than push the Row past its bounds (P0 §3).
++        Flexible(
++          child: FittedBox(
++            fit: BoxFit.scaleDown,
++            child: TextButton(
++              key: actionKey,
++              onPressed: onAction,
++              child: Text(actionLabel),
++            ),
++          ),
+         ),
+       ],
+     );
+@@ -581,22 +599,22 @@ class _ModuleSummaryGrid extends StatelessWidget {
+       childAspectRatio: 2.4,
+       children: [
+         _ModuleCard(
+-          title: 'Producer',
++          title: context.l10n.navProducer,
+           count: '$producers',
+           color: TongtaiDesignTokens.producerGreen,
+         ),
+         _ModuleCard(
+-          title: 'Inventory',
++          title: context.l10n.navInventory,
+           count: '$inventory',
+           color: TongtaiDesignTokens.inventoryOrange,
+         ),
+         _ModuleCard(
+-          title: 'Consumer',
++          title: context.l10n.navConsumer,
+           count: '$consumers',
+           color: TongtaiDesignTokens.consumerBlue,
+         ),
+         _ModuleCard(
+-          title: 'Journey',
++          title: context.l10n.tileJourney,
+           count: '$journeys',
+           color: const Color(0xFFFBBF24),
+         ),
+@@ -623,19 +641,32 @@ class _ModuleCard extends StatelessWidget {
+         borderRadius: BorderRadius.circular(8),
+         border: Border.all(color: color, width: 2),
+       ),
+-      child: Column(
+-        mainAxisAlignment: MainAxisAlignment.center,
+-        children: [
+-          Text(
+-            title,
+-            style: TextStyle(fontWeight: FontWeight.bold, color: color),
+-          ),
+-          const SizedBox(height: 4),
+-          Text(
+-            count,
+-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
++      // FittedBox: the grid's fixed aspect ratio cannot grow with the text
++      // scale — shrink the content instead of overflowing (P0 §3).
++      child: Center(
++        child: FittedBox(
++          fit: BoxFit.scaleDown,
++          child: Padding(
++            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
++            child: Column(
++              mainAxisSize: MainAxisSize.min,
++              children: [
++                Text(
++                  title,
++                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
++                ),
++                const SizedBox(height: 4),
++                Text(
++                  count,
++                  style: const TextStyle(
++                    fontSize: 18,
++                    fontWeight: FontWeight.bold,
++                  ),
++                ),
++              ],
++            ),
+           ),
+-        ],
++        ),
+       ),
+     );
+   }
+@@ -657,7 +688,7 @@ class _KpiRow extends StatelessWidget {
+         Expanded(
+           child: _KpiTile(
+             tileKey: const Key('home-kpi-revenue'),
+-            label: 'Doanh thu',
++            label: context.l10n.kpiRevenue,
+             value: TongtaiFormatters.vndShort(metrics.revenue),
+             color: TongtaiDesignTokens.financePurple,
+           ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart b/lib/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart
+index 8bc9ee2..71cd8ee 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart
+@@ -50,7 +50,7 @@ class _TongtaiInventoryPickerScreenState
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Pick a product'),
++        title: Text(context.l10n.pickerTitle),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -65,7 +65,7 @@ class _TongtaiInventoryPickerScreenState
+                 onChanged: (v) => setState(() => _query = v),
+                 textInputAction: TextInputAction.search,
+                 decoration: InputDecoration(
+-                  hintText: 'Search name, SKU or category',
++                  hintText: context.l10n.pickerSearchHint,
+                   prefixIcon: const Icon(Icons.search),
+                   filled: true,
+                   fillColor: TongtaiDesignTokens.lightHover,
+@@ -82,7 +82,7 @@ class _TongtaiInventoryPickerScreenState
+               child: products.isEmpty
+                   ? Center(
+                       child: Text(
+-                        'No products match',
++                        context.l10n.pickerNoMatch,
+                         style: TongtaiDesignTokens.bodyStyle.copyWith(
+                           color: TongtaiDesignTokens.lightTextSecondary,
+                         ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_inventory_screen.dart b/lib/features/tongtai/ui/screens/tongtai_inventory_screen.dart
+index d27172c..102e9e7 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_inventory_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_inventory_screen.dart
+@@ -139,7 +139,7 @@ class _TongtaiInventoryScreenState
+         return Scaffold(
+           backgroundColor: TongtaiDesignTokens.lightBackground,
+           appBar: AppBar(
+-            title: const Text('Inventory'),
++            title: Text(context.l10n.navInventory),
+             elevation: 0,
+             backgroundColor: TongtaiDesignTokens.lightBackground,
+             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -149,7 +149,7 @@ class _TongtaiInventoryScreenState
+             backgroundColor: TongtaiDesignTokens.inventoryOrange,
+             foregroundColor: Colors.white,
+             icon: const Icon(Icons.add),
+-            label: const Text('Add product'),
++            label: Text(context.l10n.invAdd),
+           ),
+           // The pagination controls sit in the bottom bar so the (endFloat) FAB
+           // is lifted clear above them, instead of a bottom-right FAB obscuring
+@@ -316,7 +316,7 @@ class _AlertBanner extends StatelessWidget {
+                   ),
+                 ),
+                 Text(
+-                  'View',
++                  context.l10n.invView,
+                   style: TongtaiDesignTokens.smallStyle.copyWith(
+                     color: color,
+                     fontWeight: FontWeight.w700,
+@@ -350,13 +350,13 @@ class _SearchField extends StatelessWidget {
+       onChanged: onChanged,
+       textInputAction: TextInputAction.search,
+       decoration: InputDecoration(
+-        hintText: 'Search products or categories',
++        hintText: context.l10n.invSearchHint,
+         prefixIcon: const Icon(Icons.search),
+         suffixIcon: onClear == null
+             ? null
+             : IconButton(
+                 icon: const Icon(Icons.clear),
+-                tooltip: 'Clear',
++                tooltip: context.l10n.actionClear,
+                 onPressed: onClear,
+               ),
+         filled: true,
+@@ -389,12 +389,12 @@ class _CategoryFilter extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return _ChipsRow(
+-      label: 'Category',
++      label: context.l10n.searchCategory,
+       children: [
+         Padding(
+           padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+           child: ChoiceChip(
+-            label: const Text('All'),
++            label: Text(context.l10n.filterAll),
+             selected: selected == null,
+             onSelected: (_) => onSelected(null),
+           ),
+@@ -430,7 +430,7 @@ class _SortBar extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return _ChipsRow(
+-      label: 'Sort',
++      label: context.l10n.labelSort,
+       trailing: IconButton(
+         icon: Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward),
+         tooltip: ascending ? 'Sort ascending' : 'Sort descending',
+@@ -702,7 +702,7 @@ class _PaginationBar extends StatelessWidget {
+             children: [
+               IconButton(
+                 icon: const Icon(Icons.chevron_left),
+-                tooltip: 'Previous page',
++                tooltip: context.l10n.actionPrevPage,
+                 onPressed: onPrevious,
+               ),
+               Text(
+@@ -714,7 +714,7 @@ class _PaginationBar extends StatelessWidget {
+               ),
+               IconButton(
+                 icon: const Icon(Icons.chevron_right),
+-                tooltip: 'Next page',
++                tooltip: context.l10n.actionNextPage,
+                 onPressed: onNext,
+               ),
+             ],
+@@ -743,7 +743,7 @@ class _EmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              'No products match your search',
++              context.l10n.invEmptySearch,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.bodyStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -752,7 +752,7 @@ class _EmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing1),
+             Text(
+-              'Try a different keyword or clear the category filter.',
++              context.l10n.invEmptySearchHint,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_more_screen.dart b/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
+index 2309e3d..a877f11 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
+@@ -120,7 +120,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+     return Scaffold(
+       backgroundColor: Colors.white,
+       appBar: AppBar(
+-        title: const Text('More'),
++        title: Text(context.l10n.navMore),
+         elevation: 0,
+         backgroundColor: Colors.white,
+         foregroundColor: Colors.black,
+@@ -130,37 +130,39 @@ class TongtaiMoreScreen extends ConsumerWidget {
+           children: [
+             // App settings section
+             _SettingsSection(
+-              title: 'Settings',
++              title: context.l10n.moreSettings,
+               items: [
+                 _SettingsItem(
+                   icon: Icons.person_outline,
+-                  label: 'Profile',
++                  label: context.l10n.moreProfile,
+                   onTap: () {},
+                 ),
+                 _SettingsItem(
+                   icon: Icons.notifications_outlined,
+-                  label: 'Notifications',
++                  label: context.l10n.moreNotifications,
+                   onTap: () {},
+                 ),
+                 _SettingsItem(
++                  key: const Key('more-language'),
+                   icon: Icons.language,
+                   label: context.l10n.settingsLanguage,
+                   onTap: () => _pickLanguage(context, ref),
+                 ),
+                 _SettingsItem(
+                   icon: Icons.dark_mode_outlined,
+-                  label: 'Theme',
++                  label: context.l10n.moreTheme,
+                   onTap: () {},
+                 ),
+               ],
+             ),
+             // AI Assistant section (WTM-61) — BYOK Grok (xAI) key management.
+             _SettingsSection(
+-              title: 'AI Assistant',
++              title: context.l10n.titleAiAssistant,
+               items: [
+                 _SettingsItem(
++                  key: const Key('more-ai-key'),
+                   icon: Icons.auto_awesome,
+-                  label: 'Grok (xAI) API key',
++                  label: context.l10n.moreGrokKey,
+                   onTap: () => Navigator.of(context).push<void>(
+                     MaterialPageRoute(
+                       builder: (_) => const TongtaiAiKeyScreen(),
+@@ -171,7 +173,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+             ),
+             // Business settings section
+             _SettingsSection(
+-              title: 'Business',
++              title: context.l10n.moreBusinessSection,
+               items: [
+                 _SettingsItem(
+                   key: const Key('more-demo-mode'),
+@@ -186,6 +188,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                   onTap: () => _removeSamples(context, ref),
+                 ),
+                 _SettingsItem(
++                  key: const Key('more-timeline'),
+                   icon: Icons.timeline_outlined,
+                   label: context.l10n.titleTimeline,
+                   onTap: () => Navigator.of(context).push<void>(
+@@ -195,6 +198,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                   ),
+                 ),
+                 _SettingsItem(
++                  key: const Key('more-finance'),
+                   icon: Icons.account_balance_wallet_outlined,
+                   label: context.l10n.titleFinance,
+                   onTap: () => Navigator.of(context).push<void>(
+@@ -204,6 +208,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                   ),
+                 ),
+                 _SettingsItem(
++                  key: const Key('more-reports'),
+                   icon: Icons.bar_chart_outlined,
+                   label: context.l10n.titleReports,
+                   onTap: () => Navigator.of(context).push<void>(
+@@ -213,8 +218,9 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                   ),
+                 ),
+                 _SettingsItem(
++                  key: const Key('more-goals'),
+                   icon: Icons.flag_outlined,
+-                  label: 'Business Goals',
++                  label: context.l10n.titleBusinessGoals,
+                   onTap: () => Navigator.of(context).push<void>(
+                     MaterialPageRoute(
+                       builder: (_) => const TongtaiGoalsScreen(),
+@@ -222,8 +228,9 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                   ),
+                 ),
+                 _SettingsItem(
++                  key: const Key('more-export'),
+                   icon: Icons.ios_share,
+-                  label: 'Export Data (CSV)',
++                  label: context.l10n.titleExport,
+                   onTap: () => Navigator.of(context).push<void>(
+                     MaterialPageRoute(
+                       builder: (_) => const TongtaiExportScreen(),
+@@ -232,34 +239,34 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                 ),
+                 _SettingsItem(
+                   icon: Icons.business_outlined,
+-                  label: 'Business Info',
++                  label: context.l10n.moreBusinessInfo,
+                   onTap: () {},
+                 ),
+                 _SettingsItem(
+                   icon: Icons.people_outline,
+-                  label: 'Team',
++                  label: context.l10n.moreTeam,
+                   onTap: () {},
+                 ),
+                 _SettingsItem(
+                   icon: Icons.security_outlined,
+-                  label: 'Permissions',
++                  label: context.l10n.morePermissions,
+                   onTap: () {},
+                 ),
+               ],
+             ),
+             // Support section
+             _SettingsSection(
+-              title: 'Support',
++              title: context.l10n.moreSupportSection,
+               items: [
+                 _SettingsItem(
+                   icon: Icons.school_outlined,
+-                  label: 'Replay Tutorial',
++                  label: context.l10n.moreReplayTutorial,
+                   onTap: () =>
+                       ref.read(tongtaiOnboardingProvider.notifier).reset(),
+                 ),
+                 _SettingsItem(
+                   icon: Icons.help_outline,
+-                  label: 'Help & Support',
++                  label: context.l10n.moreHelp,
+                   onTap: () {},
+                 ),
+                 _SettingsItem(
+@@ -269,23 +276,23 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                 ),
+                 _SettingsItem(
+                   icon: Icons.feedback_outlined,
+-                  label: 'Send Feedback',
++                  label: context.l10n.moreSendFeedback,
+                   onTap: () {},
+                 ),
+               ],
+             ),
+             // Legal section
+             _SettingsSection(
+-              title: 'Legal',
++              title: context.l10n.moreLegalSection,
+               items: [
+                 _SettingsItem(
+                   icon: Icons.description_outlined,
+-                  label: 'Terms of Service',
++                  label: context.l10n.moreTerms,
+                   onTap: () {},
+                 ),
+                 _SettingsItem(
+                   icon: Icons.privacy_tip_outlined,
+-                  label: 'Privacy Policy',
++                  label: context.l10n.morePrivacy,
+                   onTap: () {},
+                 ),
+               ],
+@@ -302,7 +309,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                     side: const BorderSide(color: Color(0xFFEF4444)),
+                     padding: const EdgeInsets.symmetric(vertical: 12),
+                   ),
+-                  child: const Text('Logout'),
++                  child: Text(context.l10n.moreLogout),
+                 ),
+               ),
+             ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart b/lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart
+index f42e877..f357b22 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart
+@@ -136,7 +136,7 @@ class _TongtaiOpportunityFeedScreenState
+         return Scaffold(
+           backgroundColor: TongtaiDesignTokens.lightBackground,
+           appBar: AppBar(
+-            title: const Text('Opportunities'),
++            title: Text(context.l10n.titleOpportunities),
+             elevation: 0,
+             backgroundColor: TongtaiDesignTokens.lightBackground,
+             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -161,14 +161,14 @@ class _TongtaiOpportunityFeedScreenState
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 _ChipsRow(
+-                  label: 'Type',
++                  label: context.l10n.labelType,
+                   children: [
+                     Padding(
+                       padding: const EdgeInsets.only(
+                         right: TongtaiDesignTokens.spacing2,
+                       ),
+                       child: ChoiceChip(
+-                        label: const Text('All'),
++                        label: Text(context.l10n.filterAll),
+                         selected: _query.type == null,
+                         onSelected: (_) => setState(
+                           () => _query = _query.copyWith(clearType: true),
+@@ -194,7 +194,7 @@ class _TongtaiOpportunityFeedScreenState
+                   ],
+                 ),
+                 _ChipsRow(
+-                  label: 'Sort',
++                  label: context.l10n.labelSort,
+                   children: [
+                     for (final sort in OpportunitySort.values)
+                       Padding(
+diff --git a/lib/features/tongtai/ui/screens/tongtai_producer_screen.dart b/lib/features/tongtai/ui/screens/tongtai_producer_screen.dart
+index ab806ef..3a2084e 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_producer_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_producer_screen.dart
+@@ -1,5 +1,7 @@
+ import 'package:flutter/material.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
++
+ /// Producer/Sourcing screen for Tổng Tài
+ /// Shows supplier network, opportunities, and AI capability pills.
+ class TongtaiProducerScreen extends StatelessWidget {
+@@ -10,7 +12,7 @@ class TongtaiProducerScreen extends StatelessWidget {
+     return Scaffold(
+       backgroundColor: Colors.white,
+       appBar: AppBar(
+-        title: const Text('Producer Hub'),
++        title: Text(context.l10n.titleProducerHub),
+         elevation: 0,
+         backgroundColor: Colors.white,
+         foregroundColor: Colors.black,
+@@ -31,9 +33,9 @@ class TongtaiProducerScreen extends StatelessWidget {
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+-                    const Text(
+-                      'AI Summary',
+-                      style: TextStyle(
++                    Text(
++                      context.l10n.producerAiSummary,
++                      style: const TextStyle(
+                         fontSize: 16,
+                         fontWeight: FontWeight.bold,
+                       ),
+@@ -46,9 +48,9 @@ class TongtaiProducerScreen extends StatelessWidget {
+                         borderRadius: BorderRadius.circular(8),
+                         border: Border.all(color: const Color(0xFF10B981)),
+                       ),
+-                      child: const Text(
+-                        'Analyzing supplier opportunities and market trends...',
+-                        style: TextStyle(
++                      child: Text(
++                        context.l10n.producerAnalyzing,
++                        style: const TextStyle(
+                           fontSize: 14,
+                           color: Color(0xFF10B981),
+                         ),
+@@ -61,7 +63,7 @@ class TongtaiProducerScreen extends StatelessWidget {
+             const SizedBox(height: 24),
+             // AI Capabilities section
+             Text(
+-              'AI Capabilities',
++              context.l10n.producerAiCapabilities,
+               style: Theme.of(context).textTheme.titleLarge,
+             ),
+             const SizedBox(height: 12),
+@@ -70,35 +72,35 @@ class TongtaiProducerScreen extends StatelessWidget {
+               runSpacing: 8,
+               children: [
+                 _CapabilityPill(
+-                  label: 'Opportunity Scoring',
+-                  color: Color(0xFF10B981),
++                  label: context.l10n.producerCapScoring,
++                  color: const Color(0xFF10B981),
+                 ),
+                 _CapabilityPill(
+-                  label: 'Supplier Ranking',
+-                  color: Color(0xFF10B981),
++                  label: context.l10n.producerCapRanking,
++                  color: const Color(0xFF10B981),
+                 ),
+                 _CapabilityPill(
+-                  label: 'Market Trends',
+-                  color: Color(0xFF10B981),
++                  label: context.l10n.producerCapTrends,
++                  color: const Color(0xFF10B981),
+                 ),
+                 _CapabilityPill(
+-                  label: 'Price Analysis',
+-                  color: Color(0xFF10B981),
++                  label: context.l10n.producerCapPrice,
++                  color: const Color(0xFF10B981),
+                 ),
+                 _CapabilityPill(
+-                  label: 'Quality Rating',
+-                  color: Color(0xFF10B981),
++                  label: context.l10n.producerCapQuality,
++                  color: const Color(0xFF10B981),
+                 ),
+                 _CapabilityPill(
+-                  label: 'Delivery Time',
+-                  color: Color(0xFF10B981),
++                  label: context.l10n.producerCapDelivery,
++                  color: const Color(0xFF10B981),
+                 ),
+               ],
+             ),
+             const SizedBox(height: 24),
+             // Opportunities section
+             Text(
+-              'Recent Opportunities',
++              context.l10n.producerRecentOpps,
+               style: Theme.of(context).textTheme.titleLarge,
+             ),
+             const SizedBox(height: 12),
+@@ -108,14 +110,12 @@ class TongtaiProducerScreen extends StatelessWidget {
+                 border: Border.all(color: const Color(0xFFE5E7EB)),
+                 borderRadius: BorderRadius.circular(8),
+               ),
+-              child: const Center(
+-                child: Text('No opportunities discovered yet'),
+-              ),
++              child: Center(child: Text(context.l10n.producerEmptyOpps)),
+             ),
+             const SizedBox(height: 24),
+             // Suppliers section
+             Text(
+-              'Verified Suppliers',
++              context.l10n.producerVerifiedSuppliers,
+               style: Theme.of(context).textTheme.titleLarge,
+             ),
+             const SizedBox(height: 12),
+@@ -125,7 +125,7 @@ class TongtaiProducerScreen extends StatelessWidget {
+                 border: Border.all(color: const Color(0xFFE5E7EB)),
+                 borderRadius: BorderRadius.circular(8),
+               ),
+-              child: const Center(child: Text('No suppliers connected yet')),
++              child: Center(child: Text(context.l10n.producerEmptySuppliers)),
+             ),
+           ],
+         ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart b/lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart
+index d7cbc87..0983cd3 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart
+@@ -167,7 +167,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
+       ScaffoldMessenger.of(context)
+         ..hideCurrentSnackBar()
+         ..showSnackBar(
+-          const SnackBar(content: Text('Please fix the highlighted fields.')),
++          SnackBar(content: Text(context.l10n.formFixHighlighted)),
+         );
+       return;
+     }
+@@ -212,7 +212,11 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: Text(widget.isEditing ? 'Edit Product' : 'Add Product'),
++        title: Text(
++          widget.isEditing
++              ? context.l10n.titleEditProduct
++              : context.l10n.titleAddProduct,
++        ),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -318,7 +322,9 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
+         ),
+       ),
+       bottomNavigationBar: _SaveCancelBar(
+-        saveLabel: widget.isEditing ? 'Save Changes' : 'Save Product',
++        saveLabel: widget.isEditing
++            ? context.l10n.formSaveChanges
++            : context.l10n.formSaveProduct,
+         onSave: _save,
+         onCancel: _cancel,
+       ),
+@@ -421,7 +427,7 @@ class _DescriptionField extends StatelessWidget {
+           children: [
+             Expanded(
+               child: Text(
+-                'Description',
++                context.l10n.labelDescription,
+                 overflow: TextOverflow.ellipsis,
+                 style: TongtaiDesignTokens.smallStyle.copyWith(
+                   fontWeight: FontWeight.w600,
+@@ -430,13 +436,13 @@ class _DescriptionField extends StatelessWidget {
+               ),
+             ),
+             ChoiceChip(
+-              label: const Text('Write'),
++              label: Text(context.l10n.formWrite),
+               selected: !preview,
+               onSelected: (_) => onTogglePreview(false),
+             ),
+             const SizedBox(width: TongtaiDesignTokens.spacing2),
+             ChoiceChip(
+-              label: const Text('Preview'),
++              label: Text(context.l10n.formPreview),
+               selected: preview,
+               onSelected: (_) => onTogglePreview(true),
+             ),
+@@ -457,7 +463,7 @@ class _DescriptionField extends StatelessWidget {
+             ),
+             child: controller.text.trim().isEmpty
+                 ? Text(
+-                    'Nothing to preview yet.',
++                    context.l10n.formNothingToPreview,
+                     style: TongtaiDesignTokens.smallStyle.copyWith(
+                       color: TongtaiDesignTokens.lightTextSecondary,
+                     ),
+@@ -471,7 +477,7 @@ class _DescriptionField extends StatelessWidget {
+             maxLines: 5,
+             textCapitalization: TextCapitalization.sentences,
+             decoration: InputDecoration(
+-              hintText: 'Supports **markdown** — headings, **bold**, lists…',
++              hintText: context.l10n.formMarkdownHint,
+               filled: true,
+               fillColor: TongtaiDesignTokens.lightHover,
+               border: OutlineInputBorder(
+@@ -530,13 +536,13 @@ class _ImagesSection extends StatelessWidget {
+             OutlinedButton.icon(
+               onPressed: onUpload,
+               icon: const Icon(Icons.photo_library_outlined),
+-              label: const Text('Upload'),
++              label: Text(context.l10n.formUpload),
+             ),
+             const SizedBox(width: TongtaiDesignTokens.spacing3),
+             OutlinedButton.icon(
+               onPressed: onCamera,
+               icon: const Icon(Icons.camera_alt_outlined),
+-              label: const Text('Camera'),
++              label: Text(context.l10n.formCamera),
+             ),
+           ],
+         ),
+@@ -582,7 +588,7 @@ class _Thumbnail extends StatelessWidget {
+             top: -8,
+             right: -8,
+             child: IconButton(
+-              tooltip: 'Remove image',
++              tooltip: context.l10n.formRemoveImage,
+               iconSize: 18,
+               visualDensity: VisualDensity.compact,
+               icon: const CircleAvatar(
+@@ -681,7 +687,7 @@ class _ChangeHistory extends StatelessWidget {
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         Text(
+-          'Change history',
++          context.l10n.changeHistory,
+           style: TongtaiDesignTokens.smallStyle.copyWith(
+             fontWeight: FontWeight.w700,
+             color: TongtaiDesignTokens.lightTextPrimary,
+@@ -737,7 +743,7 @@ class _SaveCancelBar extends StatelessWidget {
+                     TongtaiDesignTokens.buttonHeight,
+                   ),
+                 ),
+-                child: const Text('Cancel'),
++                child: Text(context.l10n.actionCancel),
+               ),
+             ),
+             const SizedBox(width: TongtaiDesignTokens.spacing3),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart b/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
+index 35c1686..5f9ba86 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
+@@ -178,8 +178,10 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
+   void initState() {
+     super.initState();
+     if (widget.service != null || widget.metrics != null) {
+-      // Test / injected mode — no async load.
+-      _reports = widget.service ?? ReportsService.sample();
++      // Test / injected mode — no async load. NEVER fall back to fixtures
++      // (P0 §3, WTM-146): a metrics-only injection gets an empty order book,
++      // not sample data.
++      _reports = widget.service ?? ReportsService(const []);
+       _metrics =
+           widget.metrics ??
+           BusinessMetrics.from(
+diff --git a/lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart b/lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart
+index 828ba16..86e6fd5 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart
+@@ -49,7 +49,7 @@ class TongtaiStockAlertsScreen extends StatelessWidget {
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Stock alerts'),
++        title: Text(context.l10n.titleStockAlerts),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -135,7 +135,7 @@ class _AlertSummary extends StatelessWidget {
+           Expanded(
+             child: _SummaryStat(
+               count: outOfStock,
+-              label: 'Out of stock',
++              label: context.l10n.stockOut,
+               color: TongtaiDesignTokens.error,
+             ),
+           ),
+@@ -143,7 +143,7 @@ class _AlertSummary extends StatelessWidget {
+           Expanded(
+             child: _SummaryStat(
+               count: lowStock,
+-              label: 'Low stock',
++              label: context.l10n.stockLow,
+               color: TongtaiDesignTokens.warning,
+             ),
+           ),
+@@ -351,7 +351,7 @@ class _HealthyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              'All stock levels healthy',
++              context.l10n.stockAllHealthy,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.bodyStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -360,7 +360,7 @@ class _HealthyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing1),
+             Text(
+-              'No products are at or below their reorder threshold.',
++              context.l10n.stockAllHealthyBody,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_supplier_detail_screen.dart b/lib/features/tongtai/ui/screens/tongtai_supplier_detail_screen.dart
+index 0c97c84..8487769 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_supplier_detail_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_supplier_detail_screen.dart
+@@ -4,6 +4,7 @@ import '../../core/tongtai_formatters.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../producer/supplier.dart';
+ import '../../producer/supplier_profile.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Content width to use for the detail view given the available [width].
+ ///
+@@ -52,7 +53,7 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Supplier'),
++        title: Text(context.l10n.labelSupplier),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -217,7 +218,7 @@ class _AboutSection extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return _DetailSection(
+-      title: 'About',
++      title: context.l10n.supAbout,
+       child: Text(
+         description,
+         style: TongtaiDesignTokens.bodyStyle.copyWith(
+@@ -238,7 +239,7 @@ class _RatingsSection extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return _DetailSection(
+-      title: 'Ratings & Certifications',
++      title: context.l10n.supRatingsCerts,
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+@@ -330,7 +331,7 @@ class _CatalogSection extends StatelessWidget {
+   Widget build(BuildContext context) {
+     final categoryCount = profile.catalog.length;
+     return _DetailSection(
+-      title: 'Product Catalog',
++      title: context.l10n.supProductCatalog,
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+@@ -390,31 +391,31 @@ class _TransactionsSection extends StatelessWidget {
+   Widget build(BuildContext context) {
+     final repeatPercent = (summary.repeatBuyerRate * 100).round();
+     return _DetailSection(
+-      title: 'Transaction History',
++      title: context.l10n.supTransactionHistory,
+       child: Wrap(
+         spacing: TongtaiDesignTokens.spacing3,
+         runSpacing: TongtaiDesignTokens.spacing3,
+         children: [
+           _MetricTile(
+             icon: Icons.inventory_2_outlined,
+-            label: 'Total volume',
++            label: context.l10n.supTotalVolume,
+             value:
+                 '${TongtaiFormatters.compact(summary.totalVolumeUnits)} units',
+           ),
+           _MetricTile(
+             icon: Icons.repeat,
+-            label: 'Total orders',
++            label: context.l10n.supTotalOrders,
+             value: '${summary.totalOrders}',
+           ),
+           _MetricTile(
+             icon: Icons.local_shipping_outlined,
+-            label: 'Avg order',
++            label: context.l10n.kpiAovShort,
+             value:
+                 '${TongtaiFormatters.compact(summary.averageOrderVolume.round())} units',
+           ),
+           _MetricTile(
+             icon: Icons.people_alt_outlined,
+-            label: 'Repeat buyers',
++            label: context.l10n.supRepeatBuyers,
+             value: '$repeatPercent%',
+           ),
+         ],
+@@ -478,7 +479,7 @@ class _ContactSection extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return _DetailSection(
+-      title: 'Contact',
++      title: context.l10n.supContact,
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+@@ -506,7 +507,7 @@ class _ContactSection extends StatelessWidget {
+               ),
+               onPressed: onMessage,
+               icon: const Icon(Icons.chat_bubble_outline, size: 18),
+-              label: const Text('Message supplier'),
++              label: Text(context.l10n.supMessage),
+             ),
+           ),
+         ],
+@@ -628,7 +629,7 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
+             maxLines: 5,
+             autofocus: true,
+             decoration: InputDecoration(
+-              hintText: 'Ask about pricing, MOQ, lead time…',
++              hintText: context.l10n.supAskHint,
+               filled: true,
+               fillColor: TongtaiDesignTokens.lightHover,
+               border: OutlineInputBorder(
+@@ -653,7 +654,7 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
+                   ? () => Navigator.of(context).pop(true)
+                   : null,
+               icon: const Icon(Icons.send, size: 18),
+-              label: const Text('Send'),
++              label: Text(context.l10n.actionSend),
+             ),
+           ),
+         ],
+diff --git a/lib/features/tongtai/ui/screens/tongtai_supplier_favorites_screen.dart b/lib/features/tongtai/ui/screens/tongtai_supplier_favorites_screen.dart
+index fb9f6f1..0b67893 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_supplier_favorites_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_supplier_favorites_screen.dart
+@@ -5,6 +5,7 @@ import '../../producer/supplier.dart';
+ import '../../producer/supplier_favorites_controller.dart';
+ import '../../producer/supplier_search_service.dart';
+ import 'tongtai_supplier_detail_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Favorite Suppliers screen (WTM-65) — the user's starred sourcing shortlist.
+ ///
+@@ -50,7 +51,7 @@ class _TongtaiSupplierFavoritesScreenState
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Favorite Suppliers'),
++        title: Text(context.l10n.titleFavoriteSuppliers),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -178,7 +179,7 @@ class _FavoriteTile extends StatelessWidget {
+               // Filled heart — one tap removes from favorites (AC1/AC2).
+               IconButton(
+                 onPressed: onRemove,
+-                tooltip: 'Remove from favorites',
++                tooltip: context.l10n.favRemove,
+                 icon: const Icon(
+                   Icons.favorite,
+                   color: TongtaiDesignTokens.error,
+@@ -210,7 +211,7 @@ class _EmptyFavorites extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              'No favorite suppliers yet',
++              context.l10n.favEmpty,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.bodyStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -219,7 +220,7 @@ class _EmptyFavorites extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing1),
+             Text(
+-              'Tap the heart on a supplier to add it here for quick access.',
++              context.l10n.favEmptyHint,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_supplier_search_screen.dart b/lib/features/tongtai/ui/screens/tongtai_supplier_search_screen.dart
+index 3b78160..5b7e46d 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_supplier_search_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_supplier_search_screen.dart
+@@ -6,6 +6,7 @@ import '../../producer/supplier_favorites_controller.dart';
+ import '../../producer/supplier_search_service.dart';
+ import 'tongtai_supplier_detail_screen.dart';
+ import 'tongtai_supplier_favorites_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Number of result columns for a given available [width].
+ ///
+@@ -146,7 +147,7 @@ class _TongtaiSupplierSearchScreenState
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Supplier Search'),
++        title: Text(context.l10n.titleSupplierSearch),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -155,7 +156,7 @@ class _TongtaiSupplierSearchScreenState
+             listenable: _favorites,
+             builder: (context, _) => IconButton(
+               onPressed: _openFavorites,
+-              tooltip: 'Favorite suppliers',
++              tooltip: context.l10n.titleFavoriteSuppliers,
+               icon: Badge(
+                 isLabelVisible: _favorites.count > 0,
+                 label: Text('${_favorites.count}'),
+@@ -256,13 +257,13 @@ class _SearchField extends StatelessWidget {
+       onChanged: onChanged,
+       textInputAction: TextInputAction.search,
+       decoration: InputDecoration(
+-        hintText: 'Search suppliers, categories, locations',
++        hintText: context.l10n.supSearchHint,
+         prefixIcon: const Icon(Icons.search),
+         suffixIcon: onClear == null
+             ? null
+             : IconButton(
+                 icon: const Icon(Icons.clear),
+-                tooltip: 'Clear',
++                tooltip: context.l10n.actionClear,
+                 onPressed: onClear,
+               ),
+         filled: true,
+@@ -349,12 +350,12 @@ class _FilterBar extends StatelessWidget {
+     return Column(
+       children: [
+         _FilterRow(
+-          label: 'Show',
++          label: context.l10n.supShow,
+           child: Row(
+             children: [
+               // Favorites-only filter (WTM-65 AC4).
+               FilterChip(
+-                label: const Text('Favorites'),
++                label: Text(context.l10n.supFavorites),
+                 selected: favoritesOnly,
+                 avatar: Icon(
+                   favoritesOnly ? Icons.favorite : Icons.favorite_border,
+@@ -369,7 +370,7 @@ class _FilterBar extends StatelessWidget {
+           ),
+         ),
+         _FilterRow(
+-          label: 'Category',
++          label: context.l10n.searchCategory,
+           child: Row(
+             children: [
+               for (final category in service.categories)
+@@ -388,7 +389,7 @@ class _FilterBar extends StatelessWidget {
+           ),
+         ),
+         _FilterRow(
+-          label: 'Rating',
++          label: context.l10n.searchRating,
+           child: Row(
+             children: [
+               for (final rating in kSupplierRatingPresets)
+@@ -407,7 +408,7 @@ class _FilterBar extends StatelessWidget {
+           ),
+         ),
+         _FilterRow(
+-          label: 'Location',
++          label: context.l10n.labelLocation,
+           child: Row(
+             children: [
+               for (final country in service.countries)
+@@ -501,7 +502,7 @@ class _ResultsHeader extends StatelessWidget {
+             TextButton.icon(
+               onPressed: onReset,
+               icon: const Icon(Icons.filter_alt_off, size: 18),
+-              label: const Text('Clear filters'),
++              label: Text(context.l10n.actionClearFilters),
+             ),
+         ],
+       ),
+@@ -689,7 +690,7 @@ class _FavoriteHeart extends StatelessWidget {
+     // line box — an IconButton would add ~48px tap-target padding and overflow
+     // the card's fixed-height row.
+     return Tooltip(
+-      message: isFavorite ? 'Remove from favorites' : 'Add to favorites',
++      message: isFavorite ? context.l10n.favRemove : context.l10n.favAdd,
+       child: InkResponse(
+         onTap: onPressed,
+         radius: 20,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart b/lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart
+index dc08b4a..176aa75 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart
+@@ -105,7 +105,7 @@ class _TongtaiTransactionFormScreenState
+               Expanded(
+                 child: _TypeButton(
+                   buttonKey: const Key('transaction-type-income'),
+-                  label: 'Thu',
++                  label: l10n.txnIncome,
+                   icon: Icons.south_west,
+                   color: _income,
+                   selected: _data.type == TransactionType.income,
+@@ -118,7 +118,7 @@ class _TongtaiTransactionFormScreenState
+               Expanded(
+                 child: _TypeButton(
+                   buttonKey: const Key('transaction-type-expense'),
+-                  label: 'Chi',
++                  label: l10n.txnExpense,
+                   icon: Icons.north_east,
+                   color: _expense,
+                   selected: _data.type == TransactionType.expense,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart b/lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart
+index e830547..867077b 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart
+@@ -302,7 +302,7 @@ class _SearchField extends StatelessWidget {
+             ? null
+             : IconButton(
+                 icon: const Icon(Icons.clear),
+-                tooltip: 'Clear',
++                tooltip: context.l10n.actionClear,
+                 onPressed: onClear,
+               ),
+         filled: true,
+diff --git a/lib/features/tongtai/ui/tongtai_bottom_nav.dart b/lib/features/tongtai/ui/tongtai_bottom_nav.dart
+index a6daf3c..968f609 100644
+--- a/lib/features/tongtai/ui/tongtai_bottom_nav.dart
++++ b/lib/features/tongtai/ui/tongtai_bottom_nav.dart
+@@ -1,6 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
++import '../../../core/l10n/app_strings.dart';
+ import '../navigation/tongtai_design_tokens.dart';
+ 
+ /// Custom bottom navigation bar for Tổng Tài with 5 main tabs.
+@@ -43,7 +44,7 @@ class TongtaiBottomNav extends ConsumerWidget {
+                 selectedIndex: selectedIndex,
+                 icon: Icons.home_outlined,
+                 selectedIcon: Icons.home,
+-                label: 'Home',
++                label: context.l10n.navHome,
+                 onTap: onTabSelected,
+               ),
+               _NavTab(
+@@ -51,7 +52,7 @@ class TongtaiBottomNav extends ConsumerWidget {
+                 selectedIndex: selectedIndex,
+                 icon: Icons.shopping_bag_outlined,
+                 selectedIcon: Icons.shopping_bag,
+-                label: 'Producer',
++                label: context.l10n.navProducer,
+                 color: TongtaiDesignTokens.producerGreen,
+                 onTap: onTabSelected,
+               ),
+@@ -60,7 +61,7 @@ class TongtaiBottomNav extends ConsumerWidget {
+                 selectedIndex: selectedIndex,
+                 icon: Icons.warehouse_outlined,
+                 selectedIcon: Icons.warehouse,
+-                label: 'Inventory',
++                label: context.l10n.navInventory,
+                 color: TongtaiDesignTokens.inventoryOrange,
+                 onTap: onTabSelected,
+               ),
+@@ -69,7 +70,7 @@ class TongtaiBottomNav extends ConsumerWidget {
+                 selectedIndex: selectedIndex,
+                 icon: Icons.people_outline,
+                 selectedIcon: Icons.people,
+-                label: 'Consumer',
++                label: context.l10n.navConsumer,
+                 color: TongtaiDesignTokens.consumerBlue,
+                 onTap: onTabSelected,
+               ),
+@@ -78,7 +79,7 @@ class TongtaiBottomNav extends ConsumerWidget {
+                 selectedIndex: selectedIndex,
+                 icon: Icons.menu_outlined,
+                 selectedIcon: Icons.menu,
+-                label: 'More',
++                label: context.l10n.navMore,
+                 color: TongtaiDesignTokens.setupGray,
+                 onTap: onTabSelected,
+               ),
+diff --git a/test/features/tongtai/p0/drift_restart_test.dart b/test/features/tongtai/p0/drift_restart_test.dart
+new file mode 100644
+index 0000000..2d873a1
+--- /dev/null
++++ b/test/features/tongtai/p0/drift_restart_test.dart
+@@ -0,0 +1,155 @@
++import 'dart:io';
++
++import 'package:drift/native.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:tongtai/database/database.dart';
++import 'package:tongtai/features/tongtai/consumer/customer.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
++import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
++import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
++import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
++import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
++
++/// P0 §3 (WTM-146) — restart/persistence over a REAL SQLite FILE.
++///
++/// The §1 acceptance scenario proved the one-source model over in-memory
++/// repositories; this suite proves it across an actual process "restart":
++/// a brand-new [AppDatabase] instance opened on the SAME .db file must see
++/// exactly what the previous instance persisted — seeded samples, user rows,
++/// edits, and sample removal.
++void main() {
++  TestWidgetsFlutterBinding.ensureInitialized();
++
++  late Directory tempDir;
++  late File dbFile;
++
++  setUp(() async {
++    tempDir = await Directory.systemTemp.createTemp('tongtai-restart-');
++    dbFile = File('${tempDir.path}/tongtai.db');
++  });
++
++  tearDown(() async {
++    if (tempDir.existsSync()) await tempDir.delete(recursive: true);
++  });
++
++  AppDatabase open() => AppDatabase.forExecutor(NativeDatabase(dbFile));
++
++  ({
++    AppDatabase db,
++    DriftCustomerRepository customers,
++    DriftProductRepository products,
++    DriftOrderRepository orders,
++    DriftBusinessGoalRepository goals,
++    DriftFinanceRepository finance,
++    SampleDataSeeder seeder,
++  })
++  graph() {
++    final db = open();
++    final customers = DriftCustomerRepository(db);
++    final products = DriftProductRepository(db);
++    final orders = DriftOrderRepository(db);
++    final goals = DriftBusinessGoalRepository(db);
++    final finance = DriftFinanceRepository(db);
++    return (
++      db: db,
++      customers: customers,
++      products: products,
++      orders: orders,
++      goals: goals,
++      finance: finance,
++      seeder: SampleDataSeeder(
++        customers: customers,
++        products: products,
++        orders: orders,
++        goals: goals,
++        finance: finance,
++      ),
++    );
++  }
++
++  Customer user(String id) => Customer(
++    id: id,
++    name: 'Khách thật',
++    phone: '+84900000001',
++    location: 'Đà Nẵng',
++    orderCount: 0,
++    totalSpent: 0,
++    lastPurchaseDate: DateTime(2026, 7, 30),
++    email: 'that@example.com',
++  );
++
++  test(
++    'seed → RESTART → data intact; removeAll → RESTART → user survives',
++    () async {
++      // Session 1: seed samples + one real user row.
++      final s1 = graph();
++      await s1.seeder.seed();
++      await s1.customers.upsert(user('7c9e6679-7425-40de-963d-e35b1566ac1f'));
++      final seededCustomers = (await s1.customers.loadAll()).length;
++      final seededProducts = (await s1.products.loadAll()).length;
++      final seededOrders = (await s1.orders.loadAll()).length;
++      final seededGoals = (await s1.goals.loadAll()).length;
++      final seededTxns = (await s1.finance.loadAll()).length;
++      expect(seededCustomers, greaterThan(1)); // samples + user row
++      await s1.db.close();
++
++      // Session 2 (restart): a NEW database instance on the SAME file.
++      final s2 = graph();
++      expect((await s2.customers.loadAll()).length, seededCustomers);
++      expect((await s2.products.loadAll()).length, seededProducts);
++      expect((await s2.orders.loadAll()).length, seededOrders);
++      expect((await s2.goals.loadAll()).length, seededGoals);
++      expect((await s2.finance.loadAll()).length, seededTxns);
++      expect(
++        (await s2.customers.loadAll()).any((c) => c.name == 'Khách thật'),
++        isTrue,
++      );
++
++      // Still session 2: remove ALL samples — only `sample-` rows disappear.
++      await s2.seeder.removeAll();
++      final afterRemove = await s2.customers.loadAll();
++      expect(afterRemove.map((c) => c.name), contains('Khách thật'));
++      expect(
++        afterRemove.where((c) => c.id.startsWith(kSampleIdPrefix)),
++        isEmpty,
++      );
++      await s2.db.close();
++
++      // Session 3 (second restart): the removal itself persisted.
++      final s3 = graph();
++      final finalCustomers = await s3.customers.loadAll();
++      expect(finalCustomers.length, 1);
++      expect(finalCustomers.single.name, 'Khách thật');
++      expect(await s3.seeder.hasSamples(), isFalse);
++      expect((await s3.products.loadAll()), isEmpty);
++      expect((await s3.orders.loadAll()), isEmpty);
++      expect((await s3.goals.loadAll()), isEmpty);
++      expect((await s3.finance.loadAll()), isEmpty);
++      await s3.db.close();
++    },
++  );
++
++  test('editing a sample row persists across restart (ordinary row)', () async {
++    final s1 = graph();
++    await s1.seeder.seed();
++    final sample = (await s1.customers.loadAll()).firstWhere(
++      (c) => c.id.startsWith(kSampleIdPrefix),
++    );
++    await s1.customers.upsert(sample.copyWith(name: 'Đã sửa tay'));
++    await s1.db.close();
++
++    final s2 = graph();
++    final edited = (await s2.customers.loadAll()).firstWhere(
++      (c) => c.id == sample.id,
++    );
++    expect(edited.name, 'Đã sửa tay');
++    // Edited sample keeps its prefix — removeAll still cleans it up.
++    await s2.seeder.removeAll();
++    expect(
++      (await s2.customers.loadAll()).where((c) => c.id == sample.id),
++      isEmpty,
++    );
++    await s2.db.close();
++  });
++}
+diff --git a/test/features/tongtai/p0/l10n_placeholder_test.dart b/test/features/tongtai/p0/l10n_placeholder_test.dart
+new file mode 100644
+index 0000000..b0e9029
+--- /dev/null
++++ b/test/features/tongtai/p0/l10n_placeholder_test.dart
+@@ -0,0 +1,84 @@
++import 'package:flutter_test/flutter_test.dart';
++import 'package:tongtai/core/l10n/app_strings.dart';
++
++/// P0 §3 (WTM-146) — placeholder consistency: every parameterized AppStrings
++/// method must interpolate ALL of its arguments in BOTH locales. A locale
++/// that drops an argument (count, file name, model, title…) ships a broken
++/// message that no compile step can catch.
++void main() {
++  const locales = <AppStrings>[AppStringsVi(), AppStringsEn()];
++
++  test('every parameterized string contains all its arguments (vi + en)', () {
++    for (final s in locales) {
++      final code = s.languageCode;
++      void mustContain(String result, List<String> args, String method) {
++        for (final a in args) {
++          expect(
++            result.contains(a),
++            isTrue,
++            reason: '[$code] $method dropped "$a": "$result"',
++          );
++        }
++      }
++
++      mustContain(s.exportShareSubject('Customers', '20260730'), [
++        'Customers',
++        '20260730',
++      ], 'exportShareSubject');
++      mustContain(s.exportDoneSnack(12, 'customers-20260730.csv'), [
++        '12',
++        'customers-20260730.csv',
++      ], 'exportDoneSnack');
++      mustContain(s.exportHistoryLine('f.csv', 'Orders', 7, '2026-07-30'), [
++        'f.csv',
++        'Orders',
++        '7',
++        '2026-07-30',
++      ], 'exportHistoryLine');
++      mustContain(s.searchResultCount(2), ['2'], 'searchResultCount');
++      mustContain(s.oppDismissedSnack('Cơ hội A'), [
++        'Cơ hội A',
++      ], 'oppDismissedSnack');
++      mustContain(s.oppInterestedSnack('Cơ hội B'), [
++        'Cơ hội B',
++      ], 'oppInterestedSnack');
++      mustContain(s.oppGoalCreatedSnack('Mục tiêu X'), [
++        'Mục tiêu X',
++      ], 'oppGoalCreatedSnack');
++      mustContain(s.oppCreatedFromNote('mô tả'), [
++        'mô tả',
++      ], 'oppCreatedFromNote');
++      mustContain(s.daysCount(9), ['9'], 'daysCount');
++      mustContain(s.daysLeft(3), ['3'], 'daysLeft');
++      mustContain(s.percentOfGoal(42), ['42'], 'percentOfGoal');
++      mustContain(s.goalTemplateDays('Doanh thu', 30), [
++        'Doanh thu',
++        '30',
++      ], 'goalTemplateDays');
++      mustContain(s.reportsOrdersCount(4), ['4'], 'reportsOrdersCount');
++      mustContain(s.aiKeyRotatedSnack('grok-3'), [
++        'grok-3',
++      ], 'aiKeyRotatedSnack');
++      mustContain(s.aiKeyRotateFailedPrefix('401'), [
++        '401',
++      ], 'aiKeyRotateFailedPrefix');
++      mustContain(s.aiKeyTestOkSnack('grok-3'), ['grok-3'], 'aiKeyTestOkSnack');
++      mustContain(s.aiKeyConsoleHint('https://console.x.ai', 'xAI'), [
++        'https://console.x.ai',
++        'xAI',
++      ], 'aiKeyConsoleHint');
++      mustContain(s.aiKeyCardTitle('xAI'), ['xAI'], 'aiKeyCardTitle');
++    }
++  });
++
++  test('singular/plural boundary stays coherent in both locales', () {
++    for (final s in locales) {
++      expect(s.searchResultCount(1), contains('1'));
++      expect(s.searchResultCount(5), contains('5'));
++    }
++    // English pluralizes; Vietnamese does not — both must stay well-formed.
++    expect(const AppStringsEn().searchResultCount(1), '1 result');
++    expect(const AppStringsEn().searchResultCount(2), '2 results');
++    expect(const AppStringsVi().searchResultCount(2), '2 kết quả');
++  });
++}
+diff --git a/test/features/tongtai/p0/localization_test.dart b/test/features/tongtai/p0/localization_test.dart
+index 7da5150..d14ec6d 100644
+--- a/test/features/tongtai/p0/localization_test.dart
++++ b/test/features/tongtai/p0/localization_test.dart
+@@ -188,6 +188,50 @@ void main() {
+         );
+       });
+ 
++      test('NO string literal in any ui/ text position — keys only (§3)', () {
++        // The complete ratchet (WTM-146): after the EN sweep, every string
++        // rendered by a widget must come from AppStrings. A quoted literal in
++        // a text position can only be a new hard-coded label.
++        final uiDir = Directory('lib/features/tongtai/ui');
++        final offenders = <String>[];
++        // Text positions: Text('..'), label:/title:/tooltip:/hintText:/
++        // labelText:/actionLabel:/message: '..' (optionally const Text(..)).
++        final position = RegExp(
++          r"(?:Text\(\s*|label:\s*(?:const\s+)?(?:Text\(\s*)?|"
++          r"title:\s*(?:const\s+)?(?:Text\(\s*)?|tooltip:\s*|labelText:\s*|"
++          r"hintText:\s*|actionLabel:\s*|message:\s*|"
++          r"content:\s*(?:const\s+)?Text\(\s*)'((?:[^'\\]|\\.)+)'",
++        );
++        final letters = RegExp('[A-Za-zÀ-ỹ]{2,}');
++        // Product names / brands render verbatim in every locale. The dev-only
++        // component showcase is unreachable from production navigation.
++        const allowValues = ['Workizen AI', 'Tổng Tài', 'SKU'];
++        const allowFiles = ['tongtai_component_showcase_screen.dart'];
++        for (final f
++            in uiDir
++                .listSync(recursive: true)
++                .whereType<File>()
++                .where((f) => f.path.endsWith('.dart'))) {
++          if (allowFiles.any((ok) => f.path.endsWith(ok))) continue;
++          final src = f.readAsStringSync();
++          for (final m in position.allMatches(src)) {
++            final value = m.group(1)!;
++            if (value.contains(r'$')) continue; // interpolation = data-driven
++            if (allowValues.contains(value)) continue;
++            if (!letters.hasMatch(value)) continue; // symbols/numbers only
++            final line = src.substring(0, m.start).split('\n').length;
++            offenders.add('${f.path}:$line: \'$value\'');
++          }
++        }
++        expect(
++          offenders,
++          isEmpty,
++          reason:
++              'Chuỗi hard-code trong vị trí text của ui/ bị cấm (P0 §3) — '
++              'dùng context.l10n.<key>:\n${offenders.join('\n')}',
++        );
++      });
++
+       test(
+         'every AppStrings key is referenced somewhere in lib/ (unused check)',
+         () {
+diff --git a/test/features/tongtai/p0/nav_availability_test.dart b/test/features/tongtai/p0/nav_availability_test.dart
+new file mode 100644
+index 0000000..0dbc147
+--- /dev/null
++++ b/test/features/tongtai/p0/nav_availability_test.dart
+@@ -0,0 +1,192 @@
++import 'package:flutter/material.dart';
++import 'package:flutter_localizations/flutter_localizations.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:shared_preferences/shared_preferences.dart';
++import 'package:tongtai/core/prefs.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
++import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
++import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
++import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
++import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/producer/supplier_favorites_store.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_finance_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart';
++import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
++import 'package:tongtai/features/tongtai/ui/tongtai_app_shell.dart';
++
++/// P0 §3 (WTM-146) — navigation & action availability.
++///
++/// Every capability entry point must be reachable in EVERY data state: the 5
++/// bottom-nav tabs always render and switch, the More menu always exposes its
++/// full entry list, and create/seed actions never disappear (the §1 field bug
++/// was exactly this class: entry points vanishing after onboarding-gating).
++/// Production wiring: real shell, real providers over in-memory repositories.
++void main() {
++  TestWidgetsFlutterBinding.ensureInitialized();
++
++  late InMemoryCustomerRepository customerRepo;
++  late InMemoryProductRepository productRepo;
++  late InMemoryOrderRepository orderRepo;
++  late InMemoryBusinessGoalRepository goalRepo;
++  late InMemoryFinanceRepository financeRepo;
++
++  setUp(() {
++    customerRepo = InMemoryCustomerRepository();
++    productRepo = InMemoryProductRepository([]);
++    orderRepo = InMemoryOrderRepository();
++    goalRepo = InMemoryBusinessGoalRepository();
++    financeRepo = InMemoryFinanceRepository();
++    SharedPreferences.setMockInitialValues({});
++  });
++
++  SampleDataSeeder seeder() => SampleDataSeeder(
++    customers: customerRepo,
++    products: productRepo,
++    orders: orderRepo,
++    goals: goalRepo,
++    finance: financeRepo,
++  );
++
++  Future<Widget> shell() async => ProviderScope(
++    overrides: [
++      sharedPreferencesProvider.overrideWithValue(
++        await SharedPreferences.getInstance(),
++      ),
++      customerRepositoryProvider.overrideWithValue(customerRepo),
++      productRepositoryProvider.overrideWithValue(productRepo),
++      orderRepositoryProvider.overrideWithValue(orderRepo),
++      businessGoalRepositoryProvider.overrideWithValue(goalRepo),
++      financeRepositoryProvider.overrideWithValue(financeRepo),
++      tongtaiSearchFavoritesStoreProvider.overrideWithValue(
++        InMemorySupplierFavoritesStore(),
++      ),
++    ],
++    child: const MaterialApp(
++      localizationsDelegates: [
++        GlobalMaterialLocalizations.delegate,
++        GlobalWidgetsLocalizations.delegate,
++        GlobalCupertinoLocalizations.delegate,
++      ],
++      supportedLocales: [Locale('en'), Locale('vi')],
++      home: TongtaiAppShell(),
++    ),
++  );
++
++  Future<void> pumpShell(WidgetTester tester) async {
++    // The shell mounts all 5 tabs (IndexedStack) — give async loads room.
++    tester.view.physicalSize = const Size(400 * 3, 800 * 3);
++    tester.view.devicePixelRatio = 3.0;
++    addTearDown(() {
++      tester.view.resetPhysicalSize();
++      tester.view.resetDevicePixelRatio();
++    });
++    await tester.pumpWidget(await shell());
++    await tester.pumpAndSettle();
++  }
++
++  Future<void> tapNav(WidgetTester tester, String label) async {
++    await tester.tap(find.text(label).last);
++    await tester.pumpAndSettle();
++  }
++
++  testWidgets('all 5 tabs render and switch on a FRESH empty business', (
++    tester,
++  ) async {
++    await pumpShell(tester);
++
++    // Tab bar itself (EN test locale).
++    for (final label in ['Home', 'Producer', 'Inventory', 'Consumer', 'More']) {
++      expect(find.text(label), findsWidgets, reason: 'nav tab $label');
++    }
++
++    // Switching tabs actually swaps the visible screen.
++    await tapNav(tester, 'More');
++    expect(find.byType(TongtaiMoreScreen), findsOneWidget);
++    expect(find.byKey(const Key('more-demo-mode')), findsOneWidget);
++
++    await tapNav(tester, 'Home');
++    expect(find.byType(TongtaiHomeScreen), findsOneWidget);
++  });
++
++  testWidgets('More menu exposes the full entry list in EVERY data state', (
++    tester,
++  ) async {
++    Future<void> expectMoreEntries(WidgetTester tester) async {
++      for (final key in const [
++        'more-demo-mode',
++        'more-export',
++        'more-reports',
++        'more-timeline',
++        'more-finance',
++        'more-language',
++      ]) {
++        final finder = find.byKey(Key(key));
++        await tester.scrollUntilVisible(
++          finder,
++          200,
++          scrollable: find
++              .descendant(
++                of: find.byType(TongtaiMoreScreen),
++                matching: find.byType(Scrollable),
++              )
++              .first,
++        );
++        expect(finder, findsOneWidget, reason: 'More entry $key');
++      }
++    }
++
++    // Empty business.
++    await pumpShell(tester);
++    await tapNav(tester, 'More');
++    await expectMoreEntries(tester);
++
++    // Seeded business — same entries, plus remove-samples appears.
++    await seeder().seed();
++    await tester.pumpWidget(const SizedBox(key: Key('reset')));
++    await tester.pumpWidget(await shell());
++    await tester.pumpAndSettle();
++    await tapNav(tester, 'More');
++    await expectMoreEntries(tester);
++    final remove = find.byKey(const Key('more-remove-sample'));
++    await tester.scrollUntilVisible(
++      remove,
++      200,
++      scrollable: find
++          .descendant(
++            of: find.byType(TongtaiMoreScreen),
++            matching: find.byType(Scrollable),
++          )
++          .first,
++    );
++    expect(remove, findsOneWidget);
++  });
++
++  testWidgets('create paths never disappear: empty AND populated states', (
++    tester,
++  ) async {
++    // Empty: Home shows the Get-started CTAs (seed/demo entry among them).
++    await pumpShell(tester);
++    expect(find.byKey(const Key('home-cta-demo')), findsOneWidget);
++
++    // Populated: quick-create actions replace the CTAs — all four present.
++    await seeder().seed();
++    await tester.pumpWidget(const SizedBox(key: Key('reset2')));
++    await tester.pumpWidget(await shell());
++    await tester.pumpAndSettle();
++    for (final key in const [
++      'home-quick-customer',
++      'home-quick-product',
++      'home-quick-order',
++      'home-quick-goal',
++    ]) {
++      expect(find.byKey(Key(key)), findsOneWidget, reason: 'quick action $key');
++    }
++  });
++}
+diff --git a/test/features/tongtai/p0/overflow_test.dart b/test/features/tongtai/p0/overflow_test.dart
+new file mode 100644
+index 0000000..142def8
+--- /dev/null
++++ b/test/features/tongtai/p0/overflow_test.dart
+@@ -0,0 +1,177 @@
++import 'package:flutter/material.dart';
++import 'package:flutter_localizations/flutter_localizations.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:shared_preferences/shared_preferences.dart';
++import 'package:tongtai/core/prefs.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
++import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
++import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
++import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
++import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/producer/supplier_favorites_store.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_finance_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart';
++import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_export_screen.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_finance_screen.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_timeline_screen.dart';
++
++/// P0 §3 (WTM-146) — layout overflow governance.
++///
++/// Every key screen must render WITHOUT RenderFlex overflow in BOTH shipped
++/// locales on a narrow phone (320 logical px) at an accessibility text scale
++/// of 1.3 — in the empty state AND with seeded data. A 2.0-scale pass on the
++/// two text-heaviest screens stands in for a "long locale" until a third
++/// language ships (AppStrings is N-language-ready; the app ships vi+en today —
++/// gap documented in the P0 Review Package).
++void main() {
++  TestWidgetsFlutterBinding.ensureInitialized();
++
++  late InMemoryCustomerRepository customerRepo;
++  late InMemoryProductRepository productRepo;
++  late InMemoryOrderRepository orderRepo;
++  late InMemoryBusinessGoalRepository goalRepo;
++  late InMemoryFinanceRepository financeRepo;
++
++  setUp(() {
++    customerRepo = InMemoryCustomerRepository();
++    productRepo = InMemoryProductRepository([]);
++    orderRepo = InMemoryOrderRepository();
++    goalRepo = InMemoryBusinessGoalRepository();
++    financeRepo = InMemoryFinanceRepository();
++    SharedPreferences.setMockInitialValues({});
++  });
++
++  SampleDataSeeder seeder() => SampleDataSeeder(
++    customers: customerRepo,
++    products: productRepo,
++    orders: orderRepo,
++    goals: goalRepo,
++    finance: financeRepo,
++  );
++
++  Future<Widget> host(Widget screen, String locale) async => ProviderScope(
++    overrides: [
++      sharedPreferencesProvider.overrideWithValue(
++        await SharedPreferences.getInstance(),
++      ),
++      customerRepositoryProvider.overrideWithValue(customerRepo),
++      productRepositoryProvider.overrideWithValue(productRepo),
++      orderRepositoryProvider.overrideWithValue(orderRepo),
++      businessGoalRepositoryProvider.overrideWithValue(goalRepo),
++      financeRepositoryProvider.overrideWithValue(financeRepo),
++      tongtaiSearchFavoritesStoreProvider.overrideWithValue(
++        InMemorySupplierFavoritesStore(),
++      ),
++    ],
++    child: MaterialApp(
++      locale: Locale(locale),
++      localizationsDelegates: const [
++        GlobalMaterialLocalizations.delegate,
++        GlobalWidgetsLocalizations.delegate,
++        GlobalCupertinoLocalizations.delegate,
++      ],
++      supportedLocales: const [Locale('en'), Locale('vi')],
++      home: screen,
++    ),
++  );
++
++  /// Pumps [screen] at 320x640 logical px with [textScale], collecting every
++  /// RenderFlex overflow error instead of failing mid-frame.
++  Future<List<String>> overflowsFor(
++    WidgetTester tester,
++    Widget screen, {
++    required String locale,
++    required double textScale,
++  }) async {
++    final overflows = <String>[];
++    final prior = FlutterError.onError;
++    FlutterError.onError = (details) {
++      if (details.exceptionAsString().contains('overflowed')) {
++        overflows.add(details.exceptionAsString());
++      } else {
++        prior?.call(details);
++      }
++    };
++    tester.view.physicalSize = const Size(320 * 3, 640 * 3);
++    tester.view.devicePixelRatio = 3.0;
++    tester.platformDispatcher.textScaleFactorTestValue = textScale;
++    await tester.pumpWidget(await host(screen, locale));
++    await tester.pumpAndSettle();
++    await tester.pumpWidget(const SizedBox());
++    FlutterError.onError = prior;
++    tester.view.resetPhysicalSize();
++    tester.view.resetDevicePixelRatio();
++    tester.platformDispatcher.clearTextScaleFactorTestValue();
++    return overflows;
++  }
++
++  final screens = <String, Widget Function()>{
++    'home': () => TongtaiHomeScreen(clock: () => DateTime(2026, 7, 30)),
++    'more': () => const TongtaiMoreScreen(),
++    'reports': () => const TongtaiReportsScreen(),
++    'opportunity-feed': () => const TongtaiOpportunityFeedScreen(),
++    'export': () => const TongtaiExportScreen(),
++    'finance': () => const TongtaiFinanceScreen(),
++    'timeline': () => const TongtaiTimelineScreen(),
++  };
++
++  for (final locale in ['vi', 'en']) {
++    testWidgets('[$locale] no overflow @320px/1.3x — empty AND seeded states', (
++      tester,
++    ) async {
++      final all = <String>[];
++      for (final entry in screens.entries) {
++        final empty = await overflowsFor(
++          tester,
++          entry.value(),
++          locale: locale,
++          textScale: 1.3,
++        );
++        all.addAll(empty.map((e) => '[$locale empty ${entry.key}] $e'));
++      }
++      await seeder().seed();
++      for (final entry in screens.entries) {
++        final seeded = await overflowsFor(
++          tester,
++          entry.value(),
++          locale: locale,
++          textScale: 1.3,
++        );
++        all.addAll(seeded.map((e) => '[$locale seeded ${entry.key}] $e'));
++      }
++      expect(all, isEmpty, reason: all.join('\n'));
++    });
++  }
++
++  testWidgets('long-content proxy: More + Home @320px/2.0x do not overflow', (
++    tester,
++  ) async {
++    await seeder().seed();
++    final all = <String>[];
++    for (final locale in ['vi', 'en']) {
++      for (final entry in [
++        MapEntry('more', const TongtaiMoreScreen() as Widget),
++        MapEntry('home', TongtaiHomeScreen(clock: () => DateTime(2026, 7, 30))),
++      ]) {
++        final o = await overflowsFor(
++          tester,
++          entry.value,
++          locale: locale,
++          textScale: 2.0,
++        );
++        all.addAll(o.map((e) => '[$locale 2.0x ${entry.key}] $e'));
++      }
++    }
++    expect(all, isEmpty, reason: all.join('\n'));
++  });
++}
+diff --git a/test/features/tongtai/p0/sample_fallback_scan_test.dart b/test/features/tongtai/p0/sample_fallback_scan_test.dart
+new file mode 100644
+index 0000000..6994926
+--- /dev/null
++++ b/test/features/tongtai/p0/sample_fallback_scan_test.dart
+@@ -0,0 +1,47 @@
++import 'dart:io';
++
++import 'package:flutter_test/flutter_test.dart';
++
++/// P0 §3 (WTM-146) — no UI screen may silently fall back to fixture data.
++///
++/// The §1 bugs (Export/Chat/Timeline/Reports showing sample data in real mode)
++/// all shared one shape: a `?? Something.sample()` default in a widget. This
++/// scan bans `.sample()` from `lib/features/tongtai/ui/` forever.
++///
++/// Allowlisted: the Producer sourcing directory (supplier search + favorites).
++/// Phase 2 ships a curated static supplier catalog by design — there is no
++/// supplier repository, so the catalog is reference data, not a mask over
++/// user data (documented in the P0 Review Package).
++void main() {
++  test('ui/ never calls .sample() outside the curated supplier catalog', () {
++    const allowlist = [
++      'tongtai_supplier_search_screen.dart',
++      'tongtai_supplier_favorites_screen.dart',
++    ];
++    final offenders = <String>[];
++    final uiDir = Directory('lib/features/tongtai/ui');
++    for (final f
++        in uiDir
++            .listSync(recursive: true)
++            .whereType<File>()
++            .where((f) => f.path.endsWith('.dart'))) {
++      if (allowlist.any((ok) => f.path.endsWith(ok))) continue;
++      final lines = f.readAsLinesSync();
++      for (var i = 0; i < lines.length; i++) {
++        final line = lines[i].trimLeft();
++        if (line.startsWith('//') || line.startsWith('///')) continue;
++        if (lines[i].contains('.sample()')) {
++          offenders.add('${f.path}:${i + 1}: ${lines[i].trim()}');
++        }
++      }
++    }
++    expect(
++      offenders,
++      isEmpty,
++      reason:
++          'Fallback fixture ngầm trong UI bị cấm (P0 §3) — màn hình phải đọc '
++          'production repositories hoặc nhận service inject tường minh:\n'
++          '${offenders.join('\n')}',
++    );
++  });
++}
+diff --git a/test/features/tongtai/tongtai_customer_history_screen_test.dart b/test/features/tongtai/tongtai_customer_history_screen_test.dart
+index 87c1564..d55aad8 100644
+--- a/test/features/tongtai/tongtai_customer_history_screen_test.dart
++++ b/test/features/tongtai/tongtai_customer_history_screen_test.dart
+@@ -261,7 +261,7 @@ void main() {
+       await tester.pumpAndSettle();
+ 
+       expect(find.byType(TongtaiCustomerHistoryScreen), findsOneWidget);
+-      expect(find.text('Purchase History — Phương Nguyễn'), findsOneWidget);
++      expect(find.text('Purchase history — Phương Nguyễn'), findsOneWidget);
+       expect(find.textContaining('DH-2026-0101'), findsOneWidget);
+     },
+   );
+diff --git a/test/features/tongtai/tongtai_finance_screen_test.dart b/test/features/tongtai/tongtai_finance_screen_test.dart
+index e8696d0..cff1d0a 100644
+--- a/test/features/tongtai/tongtai_finance_screen_test.dart
++++ b/test/features/tongtai/tongtai_finance_screen_test.dart
+@@ -57,8 +57,10 @@ void main() {
+     expect(find.byKey(const Key('finance-cashflow-chart')), findsOneWidget);
+     expect(find.text('Th7'), findsOneWidget);
+     expect(find.text('Th2'), findsOneWidget);
+-    expect(find.text('Thu'), findsOneWidget);
+-    expect(find.text('Chi'), findsOneWidget);
++    // In EN the legend labels (txnIncome/txnExpense) match the KPI card labels
++    // (kpiIncome/kpiExpense), so each appears twice: KPI card + legend.
++    expect(find.text('Income'), findsNWidgets(2));
++    expect(find.text('Expense'), findsNWidgets(2));
+   });
+ 
+   testWidgets('lists the expense categories, largest first', (tester) async {

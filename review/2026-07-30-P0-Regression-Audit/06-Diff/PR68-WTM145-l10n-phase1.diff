@@ -1,0 +1,1021 @@
+commit 67ffb0f8687e28cb7d2afd24bc92ae5afd38da2e
+Author: poupou97 <nbp85hn@gmail.com>
+Date:   Thu Jul 30 14:17:02 2026 +0700
+
+    fix(WTM-145): P0 §2 — single-locale localization, ban bilingual labels (#68)
+    
+    - Extend AppStrings (~37 new keys VI/EN): titles, More entries, KPI/section
+      labels, AI action + result-card labels, journeyRealized*, opportunityCreateGoal
+    - Sweep every bilingual ' · ' label across 8 UI screens to context.l10n.<key>
+      (Home, More, Reports, Finance, Timeline, Goal detail, Opportunity detail)
+    - Wire orphan keys (actionCancel/actionSearch/actionViewAll/titleGoalDetail),
+      drop dead keys (actionAll/actionSave/actionRetry)
+    - P0 localization suite (test/features/tongtai/p0/localization_test.dart):
+      bilingual-literal scan (regression: fails on old code), unused-key check,
+      vi≠en spot check, runtime locale switch + persistence over languageProvider
+    - Update label assertions in finance/reports/timeline/app_strings tests to
+      single-locale strings
+    
+    Evidence: flutter analyze clean · 975/975 tests pass
+    
+    Co-authored-by: Claude Fable 5 <noreply@anthropic.com>
+
+diff --git a/docs/00-START-HERE/CURRENT-STATUS.md b/docs/00-START-HERE/CURRENT-STATUS.md
+index 707a063..d6e4269 100644
+--- a/docs/00-START-HERE/CURRENT-STATUS.md
++++ b/docs/00-START-HERE/CURRENT-STATUS.md
+@@ -24,7 +24,7 @@
+   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
+   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
+   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+-- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 localization single-locale + §3-6 đang tiếp.
++- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 XONG (WTM-145) — **CẤM label song ngữ**: quét toàn bộ nhãn " · " 2 ngôn ngữ → `context.l10n.<key>` (~37 key mới VI/EN); scan-test regex tự động chặn tái phạm + unused-key check + test switch-locale runtime & persist (`test/features/tongtai/p0/localization_test.dart`). Chuỗi đơn-ngữ còn lại migrate Boy-Scout theo ADR-TON-007. §3-6 đang tiếp.
+ - **Founder-gate blocking the next tier**: Workizen AI activation (BYOK/router,
+   privacy red-line — **G-3, deferred**; Founder sequenced the full Business Data
+   Foundation first). AI Phase-2 (Opportunity Win Probability / Recommendation /
+diff --git a/lib/core/l10n/app_strings.dart b/lib/core/l10n/app_strings.dart
+index 8f61b36..7dec16c 100644
+--- a/lib/core/l10n/app_strings.dart
++++ b/lib/core/l10n/app_strings.dart
+@@ -18,60 +18,253 @@ abstract class AppStrings {
+   }
+ 
+   // ── common actions (shared across screens) ─────────────────────────────
+-  String get actionAll;
+   String get actionViewAll;
+   String get actionSearch;
+   String get actionCancel;
+-  String get actionSave;
+-  String get actionRetry;
+ 
+   // ── settings / language ────────────────────────────────────────────────
+   String get settingsLanguage;
+   String get languagePickerTitle;
++
++  // ── navigation / screen titles (P0 §2 WTM-145: one active locale) ──────
++  String get titleReports;
++  String get titleFinance;
++  String get titleTimeline;
++  String get titleGoalDetail;
++
++  // ── More menu ───────────────────────────────────────────────────────────
++  String get moreLoadSample;
++  String get moreRemoveSample;
++
++  // ── KPI labels ──────────────────────────────────────────────────────────
++  String get kpiRevenue;
++  String get kpiOrders;
++  String get kpiCustomers;
++  String get kpiAov;
++  String get kpiIncome;
++  String get kpiExpense;
++  String get kpiProfit;
++  String get kpiMargin;
++
++  // ── section titles ──────────────────────────────────────────────────────
++  String get sectionGetStarted;
++  String get sectionRevenueTrend;
++  String get sectionTopCategories;
++  String get sectionTopProducts;
++  String get sectionTopCustomers;
++  String get sectionBreakdownByPeriod;
++  String get sectionPipeline;
++  String get sectionCashflow;
++  String get sectionExpensesByCategory;
++  String get sectionRecent;
++
++  // ── Workizen AI actions / results ───────────────────────────────────────
++  String get aiSummarize;
++  String get aiRecommend;
++  String get aiPlan;
++  String get aiHealth;
++  String get aiInsight;
++  String get aiResultSummary;
++  String get aiResultRecommendations;
++  String get aiResultWeeklyPlan;
++
++  // ── journey / opportunity ───────────────────────────────────────────────
++  String get journeyRealizedTitle;
++  String get journeyRealizedSource;
++  String get opportunityCreateGoal;
++
++  // ── reports misc ────────────────────────────────────────────────────────
++  String get reportsPeakPrefix;
+ }
+ 
+ class AppStringsVi extends AppStrings {
+   const AppStringsVi();
+ 
+-  @override
+-  String get actionAll => 'Tất cả';
+   @override
+   String get actionViewAll => 'Xem tất cả';
+   @override
+   String get actionSearch => 'Tìm kiếm';
+   @override
+   String get actionCancel => 'Hủy';
+-  @override
+-  String get actionSave => 'Lưu';
+-  @override
+-  String get actionRetry => 'Thử lại';
+ 
+   @override
+   String get settingsLanguage => 'Ngôn ngữ';
+   @override
+   String get languagePickerTitle => 'Chọn ngôn ngữ';
++
++  @override
++  String get titleReports => 'Báo cáo & Phân tích';
++  @override
++  String get titleFinance => 'Tài chính';
++  @override
++  String get titleTimeline => 'Dòng thời gian';
++  @override
++  String get titleGoalDetail => 'Chi tiết mục tiêu';
++
++  @override
++  String get moreLoadSample => 'Nạp dữ liệu mẫu';
++  @override
++  String get moreRemoveSample => 'Xóa dữ liệu mẫu';
++
++  @override
++  String get kpiRevenue => 'Doanh thu';
++  @override
++  String get kpiOrders => 'Đơn hàng';
++  @override
++  String get kpiCustomers => 'Khách hàng';
++  @override
++  String get kpiAov => 'Giá trị đơn TB';
++  @override
++  String get kpiIncome => 'Doanh thu';
++  @override
++  String get kpiExpense => 'Chi phí';
++  @override
++  String get kpiProfit => 'Lợi nhuận';
++  @override
++  String get kpiMargin => 'Biên lợi nhuận';
++
++  @override
++  String get sectionGetStarted => 'Bắt đầu';
++  @override
++  String get sectionRevenueTrend => 'Doanh thu theo tháng';
++  @override
++  String get sectionTopCategories => 'Nhóm bán chạy';
++  @override
++  String get sectionTopProducts => 'Sản phẩm bán chạy';
++  @override
++  String get sectionTopCustomers => 'Khách hàng hàng đầu';
++  @override
++  String get sectionBreakdownByPeriod => 'Chi tiết theo kỳ';
++  @override
++  String get sectionPipeline => 'Cơ hội đang mở';
++  @override
++  String get sectionCashflow => 'Dòng tiền';
++  @override
++  String get sectionExpensesByCategory => 'Chi phí theo nhóm';
++  @override
++  String get sectionRecent => 'Gần đây';
++
++  @override
++  String get aiSummarize => 'Tóm tắt';
++  @override
++  String get aiRecommend => 'Gợi ý hành động';
++  @override
++  String get aiPlan => 'Kế hoạch tuần';
++  @override
++  String get aiHealth => 'Sức khỏe';
++  @override
++  String get aiInsight => 'Đánh giá AI';
++  @override
++  String get aiResultSummary => 'Tóm tắt';
++  @override
++  String get aiResultRecommendations => 'Gợi ý hành động';
++  @override
++  String get aiResultWeeklyPlan => 'Kế hoạch tuần';
++
++  @override
++  String get journeyRealizedTitle => 'Doanh thu thực tế trong kỳ';
++  @override
++  String get journeyRealizedSource => 'Từ đơn hàng đã ghi nhận';
++  @override
++  String get opportunityCreateGoal => 'Tạo mục tiêu từ cơ hội';
++
++  @override
++  String get reportsPeakPrefix => 'Cao nhất';
+ }
+ 
+ class AppStringsEn extends AppStrings {
+   const AppStringsEn();
+ 
+-  @override
+-  String get actionAll => 'All';
+   @override
+   String get actionViewAll => 'View all';
+   @override
+   String get actionSearch => 'Search';
+   @override
+   String get actionCancel => 'Cancel';
+-  @override
+-  String get actionSave => 'Save';
+-  @override
+-  String get actionRetry => 'Retry';
+ 
+   @override
+   String get settingsLanguage => 'Language';
+   @override
+   String get languagePickerTitle => 'Choose language';
++
++  @override
++  String get titleReports => 'Reports & Analytics';
++  @override
++  String get titleFinance => 'Finance';
++  @override
++  String get titleTimeline => 'Timeline';
++  @override
++  String get titleGoalDetail => 'Goal details';
++
++  @override
++  String get moreLoadSample => 'Load sample data';
++  @override
++  String get moreRemoveSample => 'Remove sample data';
++
++  @override
++  String get kpiRevenue => 'Revenue';
++  @override
++  String get kpiOrders => 'Orders';
++  @override
++  String get kpiCustomers => 'Customers';
++  @override
++  String get kpiAov => 'Avg. order value';
++  @override
++  String get kpiIncome => 'Income';
++  @override
++  String get kpiExpense => 'Expense';
++  @override
++  String get kpiProfit => 'Profit';
++  @override
++  String get kpiMargin => 'Margin';
++
++  @override
++  String get sectionGetStarted => 'Get started';
++  @override
++  String get sectionRevenueTrend => 'Revenue trend';
++  @override
++  String get sectionTopCategories => 'Top categories';
++  @override
++  String get sectionTopProducts => 'Top products';
++  @override
++  String get sectionTopCustomers => 'Top customers';
++  @override
++  String get sectionBreakdownByPeriod => 'Breakdown by period';
++  @override
++  String get sectionPipeline => 'Open pipeline';
++  @override
++  String get sectionCashflow => 'Cashflow';
++  @override
++  String get sectionExpensesByCategory => 'Expenses by category';
++  @override
++  String get sectionRecent => 'Recent';
++
++  @override
++  String get aiSummarize => 'Summarize';
++  @override
++  String get aiRecommend => 'Recommendations';
++  @override
++  String get aiPlan => 'Weekly plan';
++  @override
++  String get aiHealth => 'Health';
++  @override
++  String get aiInsight => 'AI insight';
++  @override
++  String get aiResultSummary => 'Summary';
++  @override
++  String get aiResultRecommendations => 'Recommendations';
++  @override
++  String get aiResultWeeklyPlan => 'Weekly plan';
++
++  @override
++  String get journeyRealizedTitle => 'Booked sales this period';
++  @override
++  String get journeyRealizedSource => 'from recorded orders';
++  @override
++  String get opportunityCreateGoal => 'Create goal from opportunity';
++
++  @override
++  String get reportsPeakPrefix => 'Peak';
+ }
+ 
+ /// `context.l10n.<key>` — the ergonomic accessor used throughout the UI.
+diff --git a/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart b/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
+index ca07c0d..5802e0b 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
+@@ -9,6 +9,7 @@ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../providers/tongtai_finance_provider.dart';
+ import '../widgets/tongtai_fox_mascot.dart';
+ import 'tongtai_transaction_form_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Finance dashboard (WTM-27, WTM-113, WTM-120) — income, expenses, profit and
+ /// margin over the transaction ledger, an income-vs-expense cashflow chart, the
+@@ -79,7 +80,7 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
+         return Scaffold(
+           backgroundColor: TongtaiDesignTokens.lightBackground,
+           appBar: AppBar(
+-            title: const Text('Finance · Tài chính'),
++            title: Text(context.l10n.titleFinance),
+             backgroundColor: TongtaiDesignTokens.lightBackground,
+             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+             elevation: 0,
+@@ -118,7 +119,7 @@ class _FinanceBody extends StatelessWidget {
+             Expanded(
+               child: _KpiCard(
+                 cardKey: const Key('finance-kpi-income'),
+-                label: 'Doanh thu · Income',
++                label: context.l10n.kpiIncome,
+                 value: TongtaiFormatters.vnd(summary.incomeYtd),
+                 accent: TongtaiFinanceScreen._income,
+                 icon: Icons.south_west,
+@@ -128,7 +129,7 @@ class _FinanceBody extends StatelessWidget {
+             Expanded(
+               child: _KpiCard(
+                 cardKey: const Key('finance-kpi-expense'),
+-                label: 'Chi phí · Expense',
++                label: context.l10n.kpiExpense,
+                 value: TongtaiFormatters.vnd(summary.expenseYtd),
+                 accent: TongtaiFinanceScreen._expense,
+                 icon: Icons.north_east,
+@@ -142,7 +143,7 @@ class _FinanceBody extends StatelessWidget {
+             Expanded(
+               child: _KpiCard(
+                 cardKey: const Key('finance-kpi-profit'),
+-                label: 'Lợi nhuận · Profit',
++                label: context.l10n.kpiProfit,
+                 value: TongtaiFormatters.vnd(summary.profitYtd),
+                 accent: TongtaiDesignTokens.financePurple,
+                 icon: Icons.savings_outlined,
+@@ -152,7 +153,7 @@ class _FinanceBody extends StatelessWidget {
+             Expanded(
+               child: _KpiCard(
+                 cardKey: const Key('finance-kpi-margin'),
+-                label: 'Biên LN · Margin',
++                label: context.l10n.kpiMargin,
+                 value: '${(summary.marginYtd * 100).round()}%',
+                 accent: TongtaiDesignTokens.consumerBlue,
+                 icon: Icons.percent,
+@@ -164,7 +165,7 @@ class _FinanceBody extends StatelessWidget {
+         const SizedBox(height: TongtaiDesignTokens.spacing6),
+ 
+         // ── Cashflow: income vs expense per month ───────────────────────
+-        const _SectionTitle('Dòng tiền · Thu vs Chi'),
++        _SectionTitle(context.l10n.sectionCashflow),
+         const SizedBox(height: TongtaiDesignTokens.spacing2),
+         const _CashflowLegend(),
+         const SizedBox(height: TongtaiDesignTokens.spacing3),
+@@ -173,7 +174,7 @@ class _FinanceBody extends StatelessWidget {
+         const SizedBox(height: TongtaiDesignTokens.spacing6),
+ 
+         // ── Expense breakdown ───────────────────────────────────────────
+-        const _SectionTitle('Chi phí theo nhóm · Expenses'),
++        _SectionTitle(context.l10n.sectionExpensesByCategory),
+         const SizedBox(height: TongtaiDesignTokens.spacing3),
+         _ExpenseBreakdownCard(
+           categories: summary.expenseByCategory,
+@@ -183,7 +184,7 @@ class _FinanceBody extends StatelessWidget {
+         const SizedBox(height: TongtaiDesignTokens.spacing6),
+ 
+         // ── Recent activity ─────────────────────────────────────────────
+-        const _SectionTitle('Gần đây · Recent'),
++        _SectionTitle(context.l10n.sectionRecent),
+         const SizedBox(height: TongtaiDesignTokens.spacing3),
+         _RecentCard(transactions: recent),
+       ],
+diff --git a/lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart b/lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart
+index a869003..e22b768 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart
+@@ -5,6 +5,7 @@ import '../../journey/business_goal.dart';
+ import '../../journey/goal_action_plan.dart';
+ import '../../journey/goal_theme.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Goal Detail & Action Plan (WTM-88) — the tap target from the goals list.
+ ///
+@@ -45,7 +46,7 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Chi tiết mục tiêu'),
++        title: Text(context.l10n.titleGoalDetail),
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+         elevation: 0,
+@@ -273,7 +274,7 @@ class _RealizedSalesCard extends StatelessWidget {
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text(
+-                  'Doanh thu thực tế trong kỳ · Booked sales this period',
++                  context.l10n.journeyRealizedTitle,
+                   style: TongtaiDesignTokens.captionStyle.copyWith(
+                     color: TongtaiDesignTokens.lightTextSecondary,
+                   ),
+@@ -288,7 +289,7 @@ class _RealizedSalesCard extends StatelessWidget {
+                 ),
+                 const SizedBox(height: 2),
+                 Text(
+-                  'Từ đơn hàng đã ghi nhận · from recorded orders',
++                  context.l10n.journeyRealizedSource,
+                   style: TongtaiDesignTokens.captionStyle.copyWith(
+                     color: TongtaiDesignTokens.lightTextSecondary,
+                   ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_home_screen.dart b/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
+index 1c141a6..11a29c5 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
+@@ -18,6 +18,7 @@ import 'tongtai_inventory_screen.dart';
+ import 'tongtai_opportunity_feed_screen.dart';
+ import 'tongtai_reports_screen.dart';
+ import 'tongtai_unified_search_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Home dashboard for Tổng Tài — the app's front door.
+ ///
+@@ -185,7 +186,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+         foregroundColor: Colors.black,
+         actions: [
+           IconButton(
+-            tooltip: 'Search',
++            tooltip: context.l10n.actionSearch,
+             icon: const Icon(Icons.search),
+             onPressed: () => _openSearch(context),
+           ),
+@@ -355,7 +356,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+             _SectionHeader(
+               title: 'Top Opportunities',
+               actionKey: const Key('home-open-opportunities'),
+-              actionLabel: 'View all',
++              actionLabel: context.l10n.actionViewAll,
+               onAction: () =>
+                   _push(context, const TongtaiOpportunityFeedScreen()),
+             ),
+@@ -459,7 +460,7 @@ class _GetStartedCard extends StatelessWidget {
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+             Text(
+-              'Bắt đầu · Get started',
++              context.l10n.sectionGetStarted,
+               style: Theme.of(context).textTheme.titleLarge,
+             ),
+             const SizedBox(height: 4),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_more_screen.dart b/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
+index 8584057..c8f303f 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
+@@ -72,7 +72,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+         actions: [
+           TextButton(
+             onPressed: () => Navigator.of(dialogContext).pop(false),
+-            child: const Text('Hủy'),
++            child: Text(dialogContext.l10n.actionCancel),
+           ),
+           FilledButton(
+             key: const Key('more-demo-confirm'),
+@@ -106,7 +106,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+         actions: [
+           TextButton(
+             onPressed: () => Navigator.of(dialogContext).pop(false),
+-            child: const Text('Hủy'),
++            child: Text(dialogContext.l10n.actionCancel),
+           ),
+           FilledButton(
+             key: const Key('more-remove-sample-confirm'),
+@@ -187,18 +187,18 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                 _SettingsItem(
+                   key: const Key('more-demo-mode'),
+                   icon: Icons.science_outlined,
+-                  label: 'Nạp dữ liệu mẫu · Load sample data',
++                  label: context.l10n.moreLoadSample,
+                   onTap: () => _seedSamples(context, ref),
+                 ),
+                 _SettingsItem(
+                   key: const Key('more-remove-sample'),
+                   icon: Icons.delete_sweep_outlined,
+-                  label: 'Xóa dữ liệu mẫu · Remove sample data',
++                  label: context.l10n.moreRemoveSample,
+                   onTap: () => _removeSamples(context, ref),
+                 ),
+                 _SettingsItem(
+                   icon: Icons.timeline_outlined,
+-                  label: 'Timeline · Dòng thời gian',
++                  label: context.l10n.titleTimeline,
+                   onTap: () => Navigator.of(context).push<void>(
+                     MaterialPageRoute(
+                       builder: (_) => const TongtaiTimelineScreen(),
+@@ -207,7 +207,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                 ),
+                 _SettingsItem(
+                   icon: Icons.account_balance_wallet_outlined,
+-                  label: 'Finance · Tài chính',
++                  label: context.l10n.titleFinance,
+                   onTap: () => Navigator.of(context).push<void>(
+                     MaterialPageRoute(
+                       builder: (_) => const TongtaiFinanceScreen(),
+@@ -216,7 +216,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                 ),
+                 _SettingsItem(
+                   icon: Icons.bar_chart_outlined,
+-                  label: 'Reports & Analytics · Báo cáo',
++                  label: context.l10n.titleReports,
+                   onTap: () => Navigator.of(context).push<void>(
+                     MaterialPageRoute(
+                       builder: (_) => const TongtaiReportsScreen(),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart b/lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart
+index b0e711c..4fdcbb3 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart
+@@ -12,6 +12,7 @@ import '../../opportunity/opportunity_theme.dart';
+ import '../../providers/tongtai_ai_provider.dart';
+ import '../../providers/tongtai_journey_provider.dart';
+ import '../widgets/tongtai_opportunity_signal_badges.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Opportunity Detail & Action Plan (WTM-92).
+ ///
+@@ -282,7 +283,7 @@ class _TongtaiOpportunityDetailScreenState
+                     key: const Key('opportunity-ai-explain'),
+                     onPressed: _runExplain,
+                     icon: const Icon(Icons.auto_awesome, size: 16),
+-                    label: const Text('Đánh giá AI · AI insight'),
++                    label: Text(context.l10n.aiInsight),
+                   )
+                 else
+                   Text(
+@@ -321,7 +322,7 @@ class _TongtaiOpportunityDetailScreenState
+             key: const Key('opportunity-create-goal'),
+             onPressed: _createGoal,
+             icon: const Icon(Icons.flag_outlined),
+-            label: const Text('Tạo mục tiêu từ cơ hội · Create goal'),
++            label: Text(context.l10n.opportunityCreateGoal),
+           ),
+           const SizedBox(height: TongtaiDesignTokens.spacing3),
+ 
+diff --git a/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart b/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
+index 586cd84..bd24fa1 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
+@@ -17,6 +17,7 @@ import '../../providers/tongtai_orders_provider.dart';
+ import '../../reports/business_report.dart';
+ import '../widgets/tongtai_fox_mascot.dart';
+ import 'tongtai_opportunity_feed_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Reports & Analytics dashboard (WTM-95 layout/widgets, WTM-96 revenue KPI,
+ /// WTM-127 real data).
+@@ -101,7 +102,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
+     if (!mounted) return;
+     setState(() {
+       _aiResult = AiCardResult(
+-        title: 'Tóm tắt · Summary',
++        title: context.l10n.aiResultSummary,
+         text: summary.text,
+         sourceLabel: summary.isAi
+             ? (summary.provider?.displayName ?? 'AI')
+@@ -121,7 +122,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
+     if (!mounted) return;
+     setState(() {
+       _aiResult = AiCardResult(
+-        title: 'Gợi ý hành động · Recommendations',
++        title: context.l10n.aiResultRecommendations,
+         text: recommendation.text,
+         sourceLabel: recommendation.isAi
+             ? (recommendation.provider?.displayName ?? 'AI')
+@@ -140,7 +141,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
+     if (!mounted) return;
+     setState(() {
+       _aiResult = AiCardResult(
+-        title: 'Kế hoạch tuần · Weekly plan',
++        title: context.l10n.aiResultWeeklyPlan,
+         text: plan.text,
+         sourceLabel: plan.isAi
+             ? (plan.provider?.displayName ?? 'AI')
+@@ -227,7 +228,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Reports & Analytics · Báo cáo'),
++        title: Text(context.l10n.titleReports),
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+         elevation: 0,
+@@ -301,7 +302,7 @@ class _ReportBody extends StatelessWidget {
+             Expanded(
+               child: _KpiCard(
+                 key: const Key('reports-kpi-revenue'),
+-                label: 'Doanh thu · Revenue',
++                label: context.l10n.kpiRevenue,
+                 value: TongtaiFormatters.vnd(metrics.revenue),
+                 accent: TongtaiDesignTokens.financePurple,
+                 icon: Icons.trending_up,
+@@ -311,7 +312,7 @@ class _ReportBody extends StatelessWidget {
+             Expanded(
+               child: _KpiCard(
+                 key: const Key('reports-kpi-orders'),
+-                label: 'Đơn hàng · Orders',
++                label: context.l10n.kpiOrders,
+                 value: '${metrics.ordersCount}',
+                 accent: TongtaiDesignTokens.consumerBlue,
+                 icon: Icons.receipt_long_outlined,
+@@ -325,7 +326,7 @@ class _ReportBody extends StatelessWidget {
+             Expanded(
+               child: _KpiCard(
+                 key: const Key('reports-kpi-customers'),
+-                label: 'Khách hàng · Customers',
++                label: context.l10n.kpiCustomers,
+                 value: '${metrics.customersCount}',
+                 accent: TongtaiDesignTokens.inventoryOrange,
+                 icon: Icons.people_outline,
+@@ -335,7 +336,7 @@ class _ReportBody extends StatelessWidget {
+             Expanded(
+               child: _KpiCard(
+                 key: const Key('reports-kpi-aov'),
+-                label: 'Giá trị đơn TB · AOV',
++                label: context.l10n.kpiAov,
+                 value: TongtaiFormatters.vnd(metrics.averageOrderValue),
+                 accent: TongtaiDesignTokens.producerGreen,
+                 icon: Icons.shopping_bag_outlined,
+@@ -359,21 +360,21 @@ class _ReportBody extends StatelessWidget {
+         const SizedBox(height: TongtaiDesignTokens.spacing6),
+ 
+         // ── Revenue trend (WTM-95) ──────────────────────────────────────
+-        _SectionTitle('Doanh thu theo tháng · Revenue trend'),
++        _SectionTitle(context.l10n.sectionRevenueTrend),
+         const SizedBox(height: TongtaiDesignTokens.spacing3),
+         _RevenueTrendCard(report: report),
+ 
+         const SizedBox(height: TongtaiDesignTokens.spacing6),
+ 
+         // ── Period selector — scopes the breakdowns below (WTM-115) ─────
+-        _SectionTitle('Chi tiết theo kỳ · Breakdown by period'),
++        _SectionTitle(context.l10n.sectionBreakdownByPeriod),
+         const SizedBox(height: TongtaiDesignTokens.spacing2),
+         _PeriodSelector(period: period, onChanged: onPeriodChanged),
+ 
+         const SizedBox(height: TongtaiDesignTokens.spacing5),
+ 
+         // ── Top categories (WTM-95, period-scoped WTM-115) ──────────────
+-        _SectionTitle('Nhóm bán chạy · Top categories'),
++        _SectionTitle(context.l10n.sectionTopCategories),
+         const SizedBox(height: TongtaiDesignTokens.spacing3),
+         _TopCategoriesCard(
+           categories: breakdown.topCategories,
+@@ -383,14 +384,14 @@ class _ReportBody extends StatelessWidget {
+         const SizedBox(height: TongtaiDesignTokens.spacing6),
+ 
+         // ── Top products (WTM-97, period-scoped WTM-115) ────────────────
+-        _SectionTitle('Sản phẩm bán chạy · Top products'),
++        _SectionTitle(context.l10n.sectionTopProducts),
+         const SizedBox(height: TongtaiDesignTokens.spacing3),
+         _TopProductsCard(products: breakdown.topProducts),
+ 
+         const SizedBox(height: TongtaiDesignTokens.spacing6),
+ 
+         // ── Top customers (WTM-97, period-scoped WTM-115) ───────────────
+-        _SectionTitle('Khách hàng hàng đầu · Top customers'),
++        _SectionTitle(context.l10n.sectionTopCustomers),
+         const SizedBox(height: TongtaiDesignTokens.spacing3),
+         _TopCustomersCard(customers: breakdown.topCustomers),
+ 
+@@ -398,7 +399,7 @@ class _ReportBody extends StatelessWidget {
+ 
+         // ── Opportunity pipeline (WTM-98) ───────────────────────────────
+         _SectionHeader(
+-          title: 'Cơ hội đang mở · Pipeline',
++          title: context.l10n.sectionPipeline,
+           actionKey: const Key('reports-open-opportunities'),
+           onAction: () => Navigator.of(context).push<void>(
+             MaterialPageRoute(
+@@ -542,25 +543,25 @@ class _AiSummaryCard extends StatelessWidget {
+                   key: const Key('reports-ai-summary-run'),
+                   onPressed: onSummarize,
+                   icon: const Icon(Icons.auto_awesome, size: 16),
+-                  label: const Text('Tóm tắt · Summarize'),
++                  label: Text(context.l10n.aiSummarize),
+                 ),
+                 OutlinedButton.icon(
+                   key: const Key('reports-ai-recommend-run'),
+                   onPressed: onRecommend,
+                   icon: const Icon(Icons.tips_and_updates_outlined, size: 16),
+-                  label: const Text('Gợi ý hành động · Recommend'),
++                  label: Text(context.l10n.aiRecommend),
+                 ),
+                 OutlinedButton.icon(
+                   key: const Key('reports-ai-plan-run'),
+                   onPressed: onPlan,
+                   icon: const Icon(Icons.checklist_outlined, size: 16),
+-                  label: const Text('Kế hoạch tuần · Plan'),
++                  label: Text(context.l10n.aiPlan),
+                 ),
+                 OutlinedButton.icon(
+                   key: const Key('reports-ai-health-run'),
+                   onPressed: onHealth,
+                   icon: const Icon(Icons.favorite_outline, size: 16),
+-                  label: const Text('Sức khỏe · Health'),
++                  label: Text(context.l10n.aiHealth),
+                 ),
+               ],
+             ),
+@@ -975,7 +976,7 @@ class _RevenueTrendCard extends StatelessWidget {
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           Text(
+-            'Cao nhất · Peak ${TongtaiFormatters.vnd(report.peakMonthlyRevenue)}',
++            '${context.l10n.reportsPeakPrefix} ${TongtaiFormatters.vnd(report.peakMonthlyRevenue)}',
+             style: TongtaiDesignTokens.captionStyle.copyWith(
+               color: TongtaiDesignTokens.lightTextSecondary,
+             ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart b/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
+index 987cfbe..547118a 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
+@@ -12,6 +12,7 @@ import '../../timeline/business_event_sources.dart';
+ import '../../timeline/timeline_service.dart';
+ import '../../timeline/timeline_theme.dart';
+ import '../widgets/tongtai_fox_mascot.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Business Timeline (WTM-114) — a chronological feed of everything that
+ /// happened in the business (orders, finance, opportunities, goals…), grouped
+@@ -83,7 +84,7 @@ class _TongtaiTimelineScreenState extends ConsumerState<TongtaiTimelineScreen> {
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Dòng thời gian · Timeline'),
++        title: Text(context.l10n.titleTimeline),
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+         elevation: 0,
+diff --git a/test/core/l10n/app_strings_test.dart b/test/core/l10n/app_strings_test.dart
+index ecb4bbd..b724c74 100644
+--- a/test/core/l10n/app_strings_test.dart
++++ b/test/core/l10n/app_strings_test.dart
+@@ -31,7 +31,7 @@ void main() {
+     final s = await stringsFor(tester, const Locale('vi'));
+     expect(s, isA<AppStringsVi>());
+     expect(s.actionViewAll, 'Xem tất cả');
+-    expect(s.actionAll, 'Tất cả');
++    expect(s.titleReports, 'Báo cáo & Phân tích');
+     expect(s.settingsLanguage, 'Ngôn ngữ');
+   });
+ 
+@@ -47,14 +47,17 @@ void main() {
+     for (final s in const [AppStringsVi(), AppStringsEn()]) {
+       expect(
+         [
+-          s.actionAll,
+           s.actionViewAll,
+           s.actionSearch,
+           s.actionCancel,
+-          s.actionSave,
+-          s.actionRetry,
+           s.settingsLanguage,
+           s.languagePickerTitle,
++          s.titleReports,
++          s.titleFinance,
++          s.titleTimeline,
++          s.moreLoadSample,
++          s.moreRemoveSample,
++          s.sectionGetStarted,
+         ].every((v) => v.isNotEmpty),
+         isTrue,
+       );
+diff --git a/test/features/tongtai/p0/localization_test.dart b/test/features/tongtai/p0/localization_test.dart
+new file mode 100644
+index 0000000..a0f6e00
+--- /dev/null
++++ b/test/features/tongtai/p0/localization_test.dart
+@@ -0,0 +1,176 @@
++import 'dart:io';
++
++import 'package:flutter/material.dart';
++import 'package:flutter_localizations/flutter_localizations.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:shared_preferences/shared_preferences.dart';
++import 'package:tongtai/core/l10n/app_strings.dart';
++import 'package:tongtai/core/l10n/language_notifier.dart';
++import 'package:tongtai/core/prefs.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
++import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
++import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
++import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
++
++/// P0 §2 (WTM-145) — single-locale localization:
++///  - NO label may mix two languages ("Timeline · Dòng thời gian" is banned);
++///  - switching updates the whole app instantly and persists across restart;
++///  - every AppStrings key exists in both locales (compile-enforced) and is
++///    actually referenced by the UI (unused-key check).
++void main() {
++  TestWidgetsFlutterBinding.ensureInitialized();
++
++  group(
++    'hard-coded bilingual-label scan (regression: fails on the old code)',
++    () {
++      test('no UI string literal concatenates two languages around " · "', () {
++        final uiDir = Directory('lib/features/tongtai/ui');
++        final offenders = <String>[];
++        final literal = RegExp("'([^'\\\\]|\\\\.)*'");
++        final letters = RegExp('[A-Za-zÀ-ỹ]{2,}');
++        for (final f
++            in uiDir
++                .listSync(recursive: true)
++                .whereType<File>()
++                .where((f) => f.path.endsWith('.dart'))) {
++          final lines = f.readAsLinesSync();
++          for (var i = 0; i < lines.length; i++) {
++            final line = lines[i].trimLeft();
++            if (line.startsWith('//') || line.startsWith('///')) continue;
++            for (final m in literal.allMatches(lines[i])) {
++              final value = m.group(0)!;
++              if (!value.contains(' · ')) continue;
++              // Ban when TWO OR MORE segments carry static words — that is a
++              // bilingual (or multi-phrase) concatenation. Data separators like
++              // '$a · $b' have interpolations, not static words, per segment.
++              final staticSegments = value
++                  .substring(1, value.length - 1)
++                  .split(' · ')
++                  .where((seg) {
++                    final withoutInterp = seg.replaceAll(
++                      RegExp(r'\$\{[^}]*\}|\$[a-zA-Z_]\w*'),
++                      '',
++                    );
++                    return letters.hasMatch(withoutInterp);
++                  })
++                  .length;
++              if (staticSegments >= 2) {
++                offenders.add('${f.path}:${i + 1}: $value');
++              }
++            }
++          }
++        }
++        expect(
++          offenders,
++          isEmpty,
++          reason:
++              'Label song ngữ bị cấm (P0 §2) — dùng context.l10n.<key>:\n'
++              '${offenders.join('\n')}',
++        );
++      });
++
++      test(
++        'every AppStrings key is referenced somewhere in lib/ (unused check)',
++        () {
++          final keys = RegExp(r'String get (\w+);')
++              .allMatches(
++                File('lib/core/l10n/app_strings.dart').readAsStringSync(),
++              )
++              .map((m) => m.group(1)!)
++              .toList();
++          expect(keys, isNotEmpty);
++
++          final sources = Directory('lib')
++              .listSync(recursive: true)
++              .whereType<File>()
++              .where((f) => f.path.endsWith('.dart'))
++              .map((f) => f.readAsStringSync())
++              .join('\n');
++          final unused = [
++            for (final k in keys)
++              if (!sources.contains('l10n.$k')) k,
++          ];
++          expect(
++            unused,
++            isEmpty,
++            reason: 'Key khai báo nhưng không màn hình nào dùng: $unused',
++          );
++        },
++      );
++
++      test('vi and en implementations differ (no copy-paste locale)', () {
++        const vi = AppStringsVi();
++        const en = AppStringsEn();
++        expect(vi.titleReports, isNot(en.titleReports));
++        expect(vi.moreLoadSample, isNot(en.moreLoadSample));
++        expect(vi.sectionGetStarted, isNot(en.sectionGetStarted));
++      });
++    },
++  );
++
++  group('runtime switching + persistence (production wiring)', () {
++    Widget app(SharedPreferences prefs) => ProviderScope(
++      overrides: [
++        sharedPreferencesProvider.overrideWithValue(prefs),
++        customerRepositoryProvider.overrideWithValue(
++          InMemoryCustomerRepository(),
++        ),
++        productRepositoryProvider.overrideWithValue(
++          InMemoryProductRepository([]),
++        ),
++        orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
++      ],
++      child: Consumer(
++        builder: (context, ref, _) {
++          final code = ref.watch(languageProvider);
++          return MaterialApp(
++            locale: appLocale(code),
++            localizationsDelegates: const [
++              GlobalMaterialLocalizations.delegate,
++              GlobalWidgetsLocalizations.delegate,
++              GlobalCupertinoLocalizations.delegate,
++            ],
++            supportedLocales: const [Locale('en'), Locale('vi')],
++            home: const TongtaiMoreScreen(),
++          );
++        },
++      ),
++    );
++
++    testWidgets(
++      'switching locale re-renders the whole app in ONE language and persists',
++      (tester) async {
++        SharedPreferences.setMockInitialValues({'wz.locale': 'vi'});
++        final prefs = await SharedPreferences.getInstance();
++        await tester.pumpWidget(app(prefs));
++        await tester.pumpAndSettle();
++
++        // Vietnamese only — the English variant must NOT be on screen.
++        expect(find.text('Nạp dữ liệu mẫu'), findsOneWidget);
++        expect(find.text('Load sample data'), findsNothing);
++        expect(find.text('Timeline · Dòng thời gian'), findsNothing);
++
++        // Switch to English through the real notifier.
++        final container = ProviderScope.containerOf(
++          tester.element(find.byType(TongtaiMoreScreen)),
++        );
++        await container.read(languageProvider.notifier).setLocale('en');
++        await tester.pumpAndSettle();
++
++        expect(find.text('Load sample data'), findsOneWidget);
++        expect(find.text('Nạp dữ liệu mẫu'), findsNothing);
++
++        // Persisted: a fresh app over the SAME prefs restarts in English.
++        await tester.pumpWidget(const SizedBox());
++        await tester.pumpWidget(app(prefs));
++        await tester.pumpAndSettle();
++        expect(find.text('Load sample data'), findsOneWidget);
++        expect(find.text('Nạp dữ liệu mẫu'), findsNothing);
++      },
++    );
++  });
++}
+diff --git a/test/features/tongtai/tongtai_finance_screen_test.dart b/test/features/tongtai/tongtai_finance_screen_test.dart
+index 76dee70..7b3b2e1 100644
+--- a/test/features/tongtai/tongtai_finance_screen_test.dart
++++ b/test/features/tongtai/tongtai_finance_screen_test.dart
+@@ -96,7 +96,7 @@ void main() {
+       ),
+     );
+ 
+-    final entry = find.text('Finance · Tài chính');
++    final entry = find.text('Finance');
+     await tester.scrollUntilVisible(
+       entry,
+       200,
+diff --git a/test/features/tongtai/tongtai_reports_screen_test.dart b/test/features/tongtai/tongtai_reports_screen_test.dart
+index 76acdfd..66f0848 100644
+--- a/test/features/tongtai/tongtai_reports_screen_test.dart
++++ b/test/features/tongtai/tongtai_reports_screen_test.dart
+@@ -316,7 +316,7 @@ void main() {
+ 
+       expect(find.byKey(const Key('reports-ai-summary-text')), findsOneWidget);
+       expect(find.text('Rule-based'), findsOneWidget);
+-      expect(find.textContaining('Gợi ý hành động'), findsWidgets);
++      expect(find.textContaining('Recommendations'), findsWidgets);
+     },
+   );
+ 
+@@ -355,7 +355,7 @@ void main() {
+       ),
+     );
+ 
+-    final entry = find.text('Reports & Analytics · Báo cáo');
++    final entry = find.text('Reports & Analytics');
+     await tester.scrollUntilVisible(
+       entry,
+       200,
+diff --git a/test/features/tongtai/tongtai_timeline_screen_test.dart b/test/features/tongtai/tongtai_timeline_screen_test.dart
+index ca4bfdd..fed79bd 100644
+--- a/test/features/tongtai/tongtai_timeline_screen_test.dart
++++ b/test/features/tongtai/tongtai_timeline_screen_test.dart
+@@ -97,7 +97,7 @@ void main() {
+       const ProviderScope(child: MaterialApp(home: TongtaiMoreScreen())),
+     );
+ 
+-    final entry = find.text('Timeline · Dòng thời gian');
++    final entry = find.text('Timeline');
+     await tester.scrollUntilVisible(
+       entry,
+       200,

@@ -1,0 +1,8 @@
+30527199977 success [pull_request] feat/wtm-146-p0-governance — fix(WTM-146): P0 §3 — test governance: literal ratchet, fallback kill, real-DB restart, overflow + nav suites
+30527198729 success [workflow_dispatch] feat/wtm-146-p0-governance — CI
+30524930291 success [workflow_dispatch] feat/wtm-145-l10n-full-migration — CI
+30524876701 success [pull_request] feat/wtm-145-l10n-full-migration — fix(WTM-145): P0 §2 phase 2 — full UI string migration to l10n keys
+30524566502 success [workflow_dispatch] feat/wtm-145-l10n-full-migration — CI
+30524433694 success [pull_request] feat/wtm-145-p0-l10n-migration — fix(WTM-145): P0 §2 phase 2 — full UI string migration to l10n keys
+30522087632 success [pull_request] feat/wtm-145-p0-localization — fix(WTM-145): P0 §2 — single-locale localization, ban bilingual labels
+30520583573 success [pull_request] feat/wtm-144-p0-one-source — fix(WTM-144): P0 §1 — sample seeds into production repos; one source for every screen (ADR-TON-014)

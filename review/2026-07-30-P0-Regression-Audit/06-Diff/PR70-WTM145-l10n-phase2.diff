@@ -1,0 +1,3808 @@
+commit 2ee7b6cb97c5c6332b50383d2e12e34b7393cc55
+Author: poupou97 <nbp85hn@gmail.com>
+Date:   Thu Jul 30 15:05:16 2026 +0700
+
+    fix(WTM-145): P0 §2 phase 2 — full UI string migration to l10n keys (#70)
+    
+    * fix(WTM-145): P0 §2 phase 2 — full UI string migration to l10n keys
+    
+    - Migrate ALL remaining hardcoded user-facing literals in
+      lib/features/tongtai/ui/ (19 screens, ~173 VI + bilingual-pipe strings)
+      to context.l10n keys: Export, AI key + QR scan, Unified search,
+      Onboarding, Home, More, Opportunity detail/feed, Reports, Timeline,
+      Chat + chat search, Transaction form, Finance, Goal form/detail/list,
+      Customer form
+    - AppStrings +110 keys VI/EN + parameterized methods (snackbars, counts,
+      subjects) + languageCode accessor for domain-enum labels
+    - Kill remaining ' | ' bilingual pipe labels (export, goal form, chat) and
+      bilingual two-line empty states (reports, finance, key scan)
+    - UI never reads labelVi/labelEn directly anymore — always
+      label(context.l10n.languageCode); added labelVi+label() to CustomerSort,
+      ProductSort, BusinessEventType; OrderHistoryRange labels now l10n keys
+    - ai_key screen no longer bypasses the app language (dropped
+      platformDispatcher _lang; follows languageProvider via context.l10n)
+    - P0 scan suite extended (3 new permanent locks): ban ' | ' bilingual
+      labels · ban ANY Vietnamese literal under ui/ (allowlist: product name)
+      · ban direct labelVi/labelEn reads in ui/
+    - Update test assertions to single-locale EN values (tests run in EN)
+    
+    Evidence: flutter analyze clean · 978/978 tests pass
+    
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+    
+    * ci: retrigger checks
+    
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+    
+    * ci: add workflow_dispatch fallback trigger
+    
+    pull_request event delivery stalled on GitHub's side for new branches
+    today (#69/#70 never got runs while the workflow is active and earlier
+    branches fired normally). A manual dispatch produces the same
+    format+analyze+test evidence on GitHub runners.
+    
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+    
+    * docs(WTM-145): CURRENT-STATUS — §2 full-migration entry
+    
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+    
+    ---------
+    
+    Co-authored-by: Claude Fable 5 <noreply@anthropic.com>
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 189ee32..064a2b6 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -8,7 +8,8 @@
+ name: CI
+ 
+ on:
+-  pull_request: # sole trigger — a push trigger too would run every PR twice
++  pull_request: # primary trigger — a push trigger too would run every PR twice
++  workflow_dispatch: # manual fallback when pull_request event delivery stalls
+ 
+ concurrency:
+   group: ci-${{ github.ref }}
+diff --git a/docs/00-START-HERE/CURRENT-STATUS.md b/docs/00-START-HERE/CURRENT-STATUS.md
+index d6e4269..2dd7c64 100644
+--- a/docs/00-START-HERE/CURRENT-STATUS.md
++++ b/docs/00-START-HERE/CURRENT-STATUS.md
+@@ -24,7 +24,7 @@
+   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
+   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
+   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+-- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 XONG (WTM-145) — **CẤM label song ngữ**: quét toàn bộ nhãn " · " 2 ngôn ngữ → `context.l10n.<key>` (~37 key mới VI/EN); scan-test regex tự động chặn tái phạm + unused-key check + test switch-locale runtime & persist (`test/features/tongtai/p0/localization_test.dart`). Chuỗi đơn-ngữ còn lại migrate Boy-Scout theo ADR-TON-007. §3-6 đang tiếp.
++- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 XONG (WTM-145, 2 PR) — **một locale active, mọi UI string qua key**: quét sạch label song ngữ " · " và " | " + migrate TOÀN BỘ chuỗi user-facing trong `lib/features/tongtai/ui/` (19 màn, ~150 key VI/EN + method có tham số); UI cấm đọc `labelVi/labelEn` trực tiếp — luôn `label(context.l10n.languageCode)`; đổi ngôn ngữ runtime update toàn app + persist; 7 lock test trong `test/features/tongtai/p0/localization_test.dart` (scan " · "/" | "/chuỗi-VN-trong-ui/labelVi-labelEn + unused-key + vi≠en + switch-persist). Ranh giới: domain-generated content (rule summary, timeline event title, sample fixtures) là DATA — giữ tiếng Việt theo thiết kế. §3-6 đang tiếp.
+ - **Founder-gate blocking the next tier**: Workizen AI activation (BYOK/router,
+   privacy red-line — **G-3, deferred**; Founder sequenced the full Business Data
+   Foundation first). AI Phase-2 (Opportunity Win Probability / Recommendation /
+diff --git a/lib/core/l10n/app_strings.dart b/lib/core/l10n/app_strings.dart
+index 7dec16c..391381b 100644
+--- a/lib/core/l10n/app_strings.dart
++++ b/lib/core/l10n/app_strings.dart
+@@ -75,6 +75,200 @@ abstract class AppStrings {
+ 
+   // ── reports misc ────────────────────────────────────────────────────────
+   String get reportsPeakPrefix;
++
++  /// The locale code behind this strings set ('vi' / 'en') — for domain enums
++  /// exposing `label(String languageCode)` (WTM-145 P0 §2).
++  String get languageCode;
++
++  // ── common actions (P0 §2 full migration) ───────────────────────────────
++  String get actionClear;
++  String get actionSkip;
++  String get actionNext;
++  String get actionGetStarted;
++  String get actionUndo;
++  String get filterAll;
++  String get dateToday;
++  String get dateYesterday;
++  String get chatYou;
++
++  // ── screen titles ───────────────────────────────────────────────────────
++  String get titleExport;
++  String get titleOpportunityDetail;
++  String get titleTransactionForm;
++  String get titleAiAssistant;
++  String get titleKeyScan;
++
++  // ── Home ────────────────────────────────────────────────────────────────
++  String get homeWelcome;
++  String get homeEmptyBody;
++  String get homeSampleLoadedSnack;
++  String get homeSampleBanner;
++  String get homeAddCustomer;
++  String get homeAddProduct;
++  String get homeAddOrder;
++  String get homeAddGoal;
++  String get homeViewReports;
++  String get kpiAovShort;
++
++  // ── More ────────────────────────────────────────────────────────────────
++  String get moreAbout;
++  String get moreLoadSampleConfirmTitle;
++  String get moreLoadSampleConfirmBody;
++  String get moreLoadSampleAction;
++  String get moreSampleLoadedSnack;
++  String get moreRemoveSampleConfirmTitle;
++  String get moreRemoveSampleConfirmBody;
++  String get moreRemoveSampleAction;
++  String get moreSampleRemovedSnack;
++
++  // ── Export (WTM-99/100) ─────────────────────────────────────────────────
++  String get exportPickDataSet;
++  String get exportDateRange;
++  String get exportRangeAll;
++  String get exportRangeLast30;
++  String get exportRangeLast90;
++  String get exportEncryptTitle;
++  String get exportEncryptHint;
++  String get exportPassphraseLabel;
++  String get exportPassphraseTooShort;
++  String get exportRun;
++  String get exportRunning;
++  String get exportCsvHint;
++  String get exportHistory;
++  String get exportHistoryEmpty;
++  String exportShareSubject(String typeLabel, String stamp);
++  String exportDoneSnack(int rows, String fileName);
++  String exportHistoryLine(
++    String fileName,
++    String typeLabel,
++    int rows,
++    String date,
++  );
++
++  // ── Unified search (WTM-73) ─────────────────────────────────────────────
++  String get searchAdvancedFilters;
++  String get searchHint;
++  String get searchClearFilters;
++  String get searchCategory;
++  String get searchCountry;
++  String get searchRating;
++  String get searchEverythingTitle;
++  String get searchEverythingBody;
++  String get searchRecent;
++  String get searchNoResults;
++  String get searchNoResultsBody;
++  String get sectionSuppliers;
++  String get sectionProducts;
++  String get labelStock;
++  String searchResultCount(int count);
++
++  // ── Opportunity (WTM-91/92/94) ──────────────────────────────────────────
++  String get oppInterested;
++  String get oppDismiss;
++  String get oppSaveTooltip;
++  String get oppUnsaveTooltip;
++  String get oppEmptySaved;
++  String get oppEmptyTab;
++  String get oppRoi;
++  String get oppImpact;
++  String get oppDetected;
++  String get oppWhyWorth;
++  String get sectionActionPlan;
++  String get sectionSuggestions;
++  String get aiScoreLabel;
++  String get oppEstimatePrefix;
++  String get oppScoreLabel;
++  String oppDismissedSnack(String title);
++  String oppInterestedSnack(String title);
++  String oppGoalCreatedSnack(String title);
++  String oppCreatedFromNote(String description);
++
++  // ── Journey / goals (WTM-87/89) ─────────────────────────────────────────
++  String get goalEdit;
++  String get goalDaysLeftLabel;
++  String get goalTimeElapsed;
++  String get goalsEmptyPrompt;
++  String get goalWhatToAchieve;
++  String get goalCustom;
++  String get goalTitleHint;
++  String get goalRealizedHelp;
++  String get goalNotesHint;
++  String daysCount(int days);
++  String daysLeft(int days);
++  String percentOfGoal(int percent);
++  String goalTemplateDays(String typeLabel, int days);
++
++  // ── Timeline (WTM-114) ──────────────────────────────────────────────────
++  String get timelineEmptyTitle;
++  String get timelineEmptyBody;
++
++  // ── Chat (WTM-80/84) ────────────────────────────────────────────────────
++  String get chatTyping;
++  String get chatInputHint;
++  String get chatEmptyPrompt;
++  String get chatSearchHint;
++  String get chatSearchPrompt;
++  String get chatSearchNoResults;
++  String get chatSearchRange7d;
++
++  // ── Finance / transaction form (WTM-113) ────────────────────────────────
++  String get txnAmountLabel;
++  String get txnAmountHint;
++  String get txnCategoryLabel;
++  String get txnDateLabel;
++  String get txnNoteLabel;
++  String get txnNoteHint;
++  String get txnSave;
++  String get financeEmptyTitle;
++  String get financeEmptyBody;
++
++  // ── Reports (WTM-95..98/127) ────────────────────────────────────────────
++  String get reportsAnalyzing;
++  String get reportsNoPipeline;
++  String get reportsOpenLabel;
++  String get reportsPipelineValue;
++  String get reportsSoldPrefix;
++  String get reportsEmptyTitle;
++  String get reportsEmptyBody;
++  String reportsOrdersCount(int count);
++
++  // ── forms (shared) ──────────────────────────────────────────────────────
++  String get labelOptionalSuffix;
++
++  // ── purchase history (WTM-77) ───────────────────────────────────────────
++  String get historyRangeAll;
++  String get historyRangeLast30;
++  String get historyRangeLast90;
++
++  // ── Customer form (WTM-76) ──────────────────────────────────────────────
++  String get custNameHint;
++  String get custLocationHint;
++  String get custTagsHint;
++  String get custAddressHint;
++
++  // ── AI key / BYOK (WTM-61/83) ───────────────────────────────────────────
++  String get aiKeySavedSnack;
++  String get aiKeyRemovedSnack;
++  String get aiKeyScannedSnack;
++  String get aiKeyScanQr;
++  String get aiKeySave;
++  String get aiKeyTest;
++  String get aiKeyRotate;
++  String get aiKeyRemove;
++  String get aiKeyByokHint;
++  String get aiKeyStoredHint;
++  String get aiKeyPasteReplace;
++  String get aiKeyPaste;
++  String get aiKeyShow;
++  String get aiKeyHide;
++  String get aiKeyRolledBack;
++  String get aiKeyNoneStored;
++  String get keyScanHint;
++  String aiKeyRotatedSnack(String model);
++  String aiKeyRotateFailedPrefix(String message);
++  String aiKeyTestOkSnack(String model);
++  String aiKeyConsoleHint(String url, String provider);
++  String aiKeyCardTitle(String provider);
+ }
+ 
+ class AppStringsVi extends AppStrings {
+@@ -170,6 +364,374 @@ class AppStringsVi extends AppStrings {
+ 
+   @override
+   String get reportsPeakPrefix => 'Cao nhất';
++
++  @override
++  String get languageCode => 'vi';
++
++  @override
++  String get actionClear => 'Xoá';
++  @override
++  String get actionSkip => 'Bỏ qua';
++  @override
++  String get actionNext => 'Tiếp tục';
++  @override
++  String get actionGetStarted => 'Bắt đầu';
++  @override
++  String get actionUndo => 'Hoàn tác';
++  @override
++  String get filterAll => 'Tất cả';
++  @override
++  String get dateToday => 'Hôm nay';
++  @override
++  String get dateYesterday => 'Hôm qua';
++  @override
++  String get chatYou => 'Bạn';
++
++  @override
++  String get titleExport => 'Xuất dữ liệu (CSV)';
++  @override
++  String get titleOpportunityDetail => 'Chi tiết cơ hội';
++  @override
++  String get titleTransactionForm => 'Ghi giao dịch';
++  @override
++  String get titleAiAssistant => 'Trợ lý AI';
++  @override
++  String get titleKeyScan => 'Quét QR chứa API key';
++
++  @override
++  String get homeWelcome => 'Chào mừng đến Tổng Tài';
++  @override
++  String get homeEmptyBody => 'Nhập dữ liệu kinh doanh đầu tiên của bạn.';
++  @override
++  String get homeSampleLoadedSnack =>
++      'Đã nạp dữ liệu mẫu — tất cả màn hình đang dùng chung dữ liệu này. '
++      'Xóa trong More khi không cần nữa.';
++  @override
++  String get homeSampleBanner =>
++      'Đang hiển thị kèm DỮ LIỆU MẪU (mọi màn hình dùng chung dữ liệu này). '
++      'Bạn có thể sửa/xóa từng dòng, hoặc xóa toàn bộ mẫu trong More.';
++  @override
++  String get homeAddCustomer => '+ Khách hàng';
++  @override
++  String get homeAddProduct => '+ Sản phẩm';
++  @override
++  String get homeAddOrder => '+ Đơn hàng';
++  @override
++  String get homeAddGoal => '+ Mục tiêu';
++  @override
++  String get homeViewReports => 'Xem báo cáo';
++  @override
++  String get kpiAovShort => 'Đơn TB';
++
++  @override
++  String get moreAbout => 'Về Tổng Tài';
++  @override
++  String get moreLoadSampleConfirmTitle => 'Nạp dữ liệu mẫu?';
++  @override
++  String get moreLoadSampleConfirmBody =>
++      'Dữ liệu mẫu sẽ được thêm vào ứng dụng như dữ liệu bình thường — '
++      'mọi màn hình (Home, Kho, Khách hàng, Báo cáo, Cơ hội…) cùng hiển '
++      'thị. Bạn có thể sửa từng dòng hoặc xóa toàn bộ mẫu bất cứ lúc nào; '
++      'dữ liệu bạn tự nhập không bị ảnh hưởng.';
++  @override
++  String get moreLoadSampleAction => 'Nạp mẫu';
++  @override
++  String get moreSampleLoadedSnack =>
++      'Đã nạp dữ liệu mẫu — xem ở mọi màn hình.';
++  @override
++  String get moreRemoveSampleConfirmTitle => 'Xóa toàn bộ dữ liệu mẫu?';
++  @override
++  String get moreRemoveSampleConfirmBody =>
++      'Chỉ các bản ghi mẫu bị xóa. Dữ liệu bạn tự nhập được giữ nguyên.';
++  @override
++  String get moreRemoveSampleAction => 'Xóa mẫu';
++  @override
++  String get moreSampleRemovedSnack => 'Đã xóa toàn bộ dữ liệu mẫu.';
++
++  @override
++  String get exportPickDataSet => 'Chọn dữ liệu cần xuất';
++  @override
++  String get exportDateRange => 'Khoảng thời gian';
++  @override
++  String get exportRangeAll => 'Toàn bộ';
++  @override
++  String get exportRangeLast30 => '30 ngày';
++  @override
++  String get exportRangeLast90 => '90 ngày';
++  @override
++  String get exportEncryptTitle => 'Mã hoá bằng mật khẩu';
++  @override
++  String get exportEncryptHint =>
++      'File .ttbk chỉ mở được bằng mật khẩu này. Mật khẩu không '
++      'được lưu — quên là mất dữ liệu backup.';
++  @override
++  String get exportPassphraseLabel => 'Mật khẩu (≥ 6 ký tự)';
++  @override
++  String get exportPassphraseTooShort =>
++      'Mật khẩu mã hoá cần tối thiểu 6 ký tự.';
++  @override
++  String get exportRun => 'Xuất & chia sẻ (email…)';
++  @override
++  String get exportRunning => 'Đang xuất…';
++  @override
++  String get exportCsvHint =>
++      'File CSV mở đúng tiếng Việt trong Excel (UTF-8 BOM). Chia sẻ '
++      'qua share sheet — chọn Mail/Gmail để gửi email; dữ liệu chỉ '
++      'rời máy qua ứng dụng bạn chọn.';
++  @override
++  String get exportHistory => 'Lịch sử xuất';
++  @override
++  String get exportHistoryEmpty => 'Chưa có lần xuất nào.';
++  @override
++  String exportShareSubject(String typeLabel, String stamp) =>
++      'Tổng Tài — xuất $typeLabel ($stamp)';
++  @override
++  String exportDoneSnack(int rows, String fileName) =>
++      'Đã xuất $rows dòng — $fileName';
++  @override
++  String exportHistoryLine(
++    String fileName,
++    String typeLabel,
++    int rows,
++    String date,
++  ) => '$fileName — $typeLabel, $rows dòng, $date';
++
++  @override
++  String get searchAdvancedFilters => 'Bộ lọc nâng cao';
++  @override
++  String get searchHint => 'Tìm nhà cung cấp, sản phẩm…';
++  @override
++  String get searchClearFilters => 'Xoá lọc';
++  @override
++  String get searchCategory => 'Danh mục';
++  @override
++  String get searchCountry => 'Quốc gia';
++  @override
++  String get searchRating => 'Đánh giá';
++  @override
++  String get searchEverythingTitle => 'Tìm kiếm toàn bộ';
++  @override
++  String get searchEverythingBody =>
++      'Tìm nhà cung cấp, sản phẩm và hơn thế nữa.';
++  @override
++  String get searchRecent => 'Tìm kiếm gần đây';
++  @override
++  String get searchNoResults => 'Không có kết quả';
++  @override
++  String get searchNoResultsBody => 'Thử từ khoá khác hoặc điều chỉnh bộ lọc.';
++  @override
++  String get sectionSuppliers => 'Nhà cung cấp';
++  @override
++  String get sectionProducts => 'Sản phẩm';
++  @override
++  String get labelStock => 'Tồn';
++  @override
++  String searchResultCount(int count) =>
++      count == 1 ? '1 kết quả' : '$count kết quả';
++
++  @override
++  String get oppInterested => 'Quan tâm';
++  @override
++  String get oppDismiss => 'Bỏ qua';
++  @override
++  String get oppSaveTooltip => 'Lưu lại';
++  @override
++  String get oppUnsaveTooltip => 'Bỏ lưu';
++  @override
++  String get oppEmptySaved => 'Chưa có cơ hội nào được lưu';
++  @override
++  String get oppEmptyTab => 'Chưa có cơ hội nào trong mục này';
++  @override
++  String get oppRoi => 'ROI ước tính';
++  @override
++  String get oppImpact => 'Tác động';
++  @override
++  String get oppDetected => 'Phát hiện';
++  @override
++  String get oppWhyWorth => 'Vì sao đáng làm';
++  @override
++  String get sectionActionPlan => 'Kế hoạch hành động';
++  @override
++  String get sectionSuggestions => 'Gợi ý';
++  @override
++  String get aiScoreLabel => 'điểm AI';
++  @override
++  String get oppEstimatePrefix => 'Ước tính';
++  @override
++  String get oppScoreLabel => 'Điểm';
++  @override
++  String oppDismissedSnack(String title) => 'Đã bỏ qua "$title"';
++  @override
++  String oppInterestedSnack(String title) => 'Đã đánh dấu quan tâm "$title"';
++  @override
++  String oppGoalCreatedSnack(String title) =>
++      'Đã tạo mục tiêu "$title" trong Journey';
++  @override
++  String oppCreatedFromNote(String description) =>
++      'Tạo từ cơ hội: $description';
++
++  @override
++  String get goalEdit => 'Sửa mục tiêu';
++  @override
++  String get goalDaysLeftLabel => 'Còn lại';
++  @override
++  String get goalTimeElapsed => 'Thời gian đã trôi';
++  @override
++  String get goalsEmptyPrompt => 'Đặt mục tiêu kinh doanh đầu tiên của bạn';
++  @override
++  String get goalWhatToAchieve => 'Bạn muốn đạt điều gì?';
++  @override
++  String get goalCustom => 'Tự đặt mục tiêu';
++  @override
++  String get goalTitleHint => 'VD: Đạt 100 triệu ₫ trong quý';
++  @override
++  String get goalRealizedHelp =>
++      'Doanh thu đã đạt: tự tính từ đơn hàng đã ghi nhận.';
++  @override
++  String get goalNotesHint => 'Bối cảnh, kênh bán, nguồn hàng…';
++  @override
++  String daysCount(int days) => '$days ngày';
++  @override
++  String daysLeft(int days) => 'còn $days ngày';
++  @override
++  String percentOfGoal(int percent) => '$percent% mục tiêu';
++  @override
++  String goalTemplateDays(String typeLabel, int days) =>
++      '$typeLabel • $days ngày';
++
++  @override
++  String get timelineEmptyTitle => 'Chưa có hoạt động nào';
++  @override
++  String get timelineEmptyBody =>
++      'Đơn hàng, thu chi, cơ hội và mục tiêu sẽ xuất hiện ở đây theo '
++      'thời gian.';
++
++  @override
++  String get chatTyping => 'Workizen AI đang nhập…';
++  @override
++  String get chatInputHint => 'Nhắn cho Workizen AI…';
++  @override
++  String get chatEmptyPrompt => 'Hỏi Workizen AI về việc kinh doanh của bạn';
++  @override
++  String get chatSearchHint => 'Tìm trong trò chuyện…';
++  @override
++  String get chatSearchPrompt => 'Nhập từ khóa để tìm trong lịch sử trò chuyện';
++  @override
++  String get chatSearchNoResults => 'Không tìm thấy tin nhắn nào';
++  @override
++  String get chatSearchRange7d => '7 ngày';
++
++  @override
++  String get txnAmountLabel => 'Số tiền (₫)';
++  @override
++  String get txnAmountHint => 'Ví dụ: 1500000';
++  @override
++  String get txnCategoryLabel => 'Nhóm';
++  @override
++  String get txnDateLabel => 'Ngày';
++  @override
++  String get txnNoteLabel => 'Ghi chú (không bắt buộc)';
++  @override
++  String get txnNoteHint => 'Ví dụ: Bán lô quạt cho khách sỉ';
++  @override
++  String get txnSave => 'Lưu giao dịch';
++  @override
++  String get financeEmptyTitle => 'Chưa có giao dịch tài chính';
++  @override
++  String get financeEmptyBody =>
++      'Ghi khoản thu/chi đầu tiên và bảng tài chính sẽ hiện ở đây.';
++
++  @override
++  String get reportsAnalyzing => 'Workizen AI đang phân tích…';
++  @override
++  String get reportsNoPipeline => 'Không có cơ hội đang mở';
++  @override
++  String get reportsOpenLabel => 'Đang mở';
++  @override
++  String get reportsPipelineValue => 'Giá trị pipeline';
++  @override
++  String get reportsSoldPrefix => 'Đã bán';
++  @override
++  String get reportsEmptyTitle => 'Chưa có doanh thu để báo cáo';
++  @override
++  String get reportsEmptyBody =>
++      'Bán đơn hàng đầu tiên và các chỉ số sẽ hiện ở đây.';
++  @override
++  String reportsOrdersCount(int count) => '$count đơn';
++
++  @override
++  String get labelOptionalSuffix => '(không bắt buộc)';
++
++  @override
++  String get historyRangeAll => 'Toàn bộ';
++  @override
++  String get historyRangeLast30 => '30 ngày qua';
++  @override
++  String get historyRangeLast90 => '90 ngày qua';
++
++  @override
++  String get custNameHint => 'VD: Phương Nguyễn';
++  @override
++  String get custLocationHint => 'VD: Hà Nội';
++  @override
++  String get custTagsHint => 'Phân tách bằng dấu phẩy, VD: tiktok, bán sỉ';
++  @override
++  String get custAddressHint => 'VD: 12 Hàng Bài, Hoàn Kiếm';
++
++  @override
++  String get aiKeySavedSnack => 'Đã lưu khóa API an toàn.';
++  @override
++  String get aiKeyRemovedSnack => 'Đã xóa khóa API.';
++  @override
++  String get aiKeyScannedSnack =>
++      'Đã quét khóa từ QR — bấm Lưu (hoặc Đổi khóa) để xác nhận.';
++  @override
++  String get aiKeyScanQr => 'Quét QR';
++  @override
++  String get aiKeySave => 'Lưu khóa';
++  @override
++  String get aiKeyTest => 'Kiểm tra kết nối';
++  @override
++  String get aiKeyRotate => 'Đổi khóa (kiểm tra rồi mới thay)';
++  @override
++  String get aiKeyRemove => 'Xóa khóa';
++  @override
++  String get aiKeyByokHint =>
++      'Dùng khóa của riêng bạn (BYOK) để bật trợ lý AI. Khóa được lưu an '
++      'toàn trên thiết bị.';
++  @override
++  String get aiKeyStoredHint =>
++      'Đã lưu khóa API. Bạn có thể kiểm tra, thay thế hoặc xóa khóa.';
++  @override
++  String get aiKeyPasteReplace => 'Dán khóa mới để thay thế';
++  @override
++  String get aiKeyPaste => 'Dán khóa API của bạn';
++  @override
++  String get aiKeyShow => 'Hiện khóa';
++  @override
++  String get aiKeyHide => 'Ẩn khóa';
++  @override
++  String get aiKeyRolledBack => 'Đã khôi phục khóa cũ.';
++  @override
++  String get aiKeyNoneStored => 'Chưa có khóa nào được lưu.';
++  @override
++  String get keyScanHint =>
++      'Đưa mã QR vào khung hình — khóa sẽ tự điền vào ô nhập.';
++  @override
++  String aiKeyRotatedSnack(String model) =>
++      'Đã đổi khóa — $model phản hồi với khóa mới.';
++  @override
++  String aiKeyRotateFailedPrefix(String message) =>
++      'Khóa mới không hoạt động ($message). ';
++  @override
++  String aiKeyTestOkSnack(String model) =>
++      'Kết nối thành công — $model đã phản hồi.';
++  @override
++  String aiKeyConsoleHint(String url, String provider) =>
++      'Lấy khóa tại $url. Khóa chỉ lưu trên máy bạn và chỉ gửi trực tiếp '
++      'tới $provider.';
++  @override
++  String aiKeyCardTitle(String provider) => 'Khóa API $provider';
+ }
+ 
+ class AppStringsEn extends AppStrings {
+@@ -265,6 +827,373 @@ class AppStringsEn extends AppStrings {
+ 
+   @override
+   String get reportsPeakPrefix => 'Peak';
++
++  @override
++  String get languageCode => 'en';
++
++  @override
++  String get actionClear => 'Clear';
++  @override
++  String get actionSkip => 'Skip';
++  @override
++  String get actionNext => 'Next';
++  @override
++  String get actionGetStarted => 'Get Started';
++  @override
++  String get actionUndo => 'Undo';
++  @override
++  String get filterAll => 'All';
++  @override
++  String get dateToday => 'Today';
++  @override
++  String get dateYesterday => 'Yesterday';
++  @override
++  String get chatYou => 'You';
++
++  @override
++  String get titleExport => 'Export Data (CSV)';
++  @override
++  String get titleOpportunityDetail => 'Opportunity details';
++  @override
++  String get titleTransactionForm => 'Record transaction';
++  @override
++  String get titleAiAssistant => 'AI Assistant';
++  @override
++  String get titleKeyScan => 'Scan API-key QR';
++
++  @override
++  String get homeWelcome => 'Welcome to Tổng Tài';
++  @override
++  String get homeEmptyBody => 'Enter your first business data.';
++  @override
++  String get homeSampleLoadedSnack =>
++      'Sample data loaded — every screen now shares this data. '
++      'Remove it in More when you no longer need it.';
++  @override
++  String get homeSampleBanner =>
++      'Showing SAMPLE DATA alongside your data (every screen shares it). '
++      'You can edit/delete individual rows, or remove all samples in More.';
++  @override
++  String get homeAddCustomer => '+ Customer';
++  @override
++  String get homeAddProduct => '+ Product';
++  @override
++  String get homeAddOrder => '+ Order';
++  @override
++  String get homeAddGoal => '+ Goal';
++  @override
++  String get homeViewReports => 'View reports';
++  @override
++  String get kpiAovShort => 'Avg order';
++
++  @override
++  String get moreAbout => 'About Tổng Tài';
++  @override
++  String get moreLoadSampleConfirmTitle => 'Load sample data?';
++  @override
++  String get moreLoadSampleConfirmBody =>
++      'Sample data is added to the app as ordinary data — every screen '
++      '(Home, Inventory, Customers, Reports, Opportunities…) shows it. '
++      'You can edit individual rows or remove all samples at any time; '
++      'data you entered yourself is never touched.';
++  @override
++  String get moreLoadSampleAction => 'Load samples';
++  @override
++  String get moreSampleLoadedSnack =>
++      'Sample data loaded — visible on every screen.';
++  @override
++  String get moreRemoveSampleConfirmTitle => 'Remove all sample data?';
++  @override
++  String get moreRemoveSampleConfirmBody =>
++      'Only sample records are removed. Data you entered yourself is kept.';
++  @override
++  String get moreRemoveSampleAction => 'Remove samples';
++  @override
++  String get moreSampleRemovedSnack => 'All sample data removed.';
++
++  @override
++  String get exportPickDataSet => 'Pick a data set';
++  @override
++  String get exportDateRange => 'Date range';
++  @override
++  String get exportRangeAll => 'All data';
++  @override
++  String get exportRangeLast30 => '30 days';
++  @override
++  String get exportRangeLast90 => '90 days';
++  @override
++  String get exportEncryptTitle => 'Encrypt with passphrase';
++  @override
++  String get exportEncryptHint =>
++      'The .ttbk file opens only with this passphrase. It is never '
++      'stored — if you forget it, the backup is unrecoverable.';
++  @override
++  String get exportPassphraseLabel => 'Passphrase (≥ 6 characters)';
++  @override
++  String get exportPassphraseTooShort =>
++      'The encryption passphrase needs at least 6 characters.';
++  @override
++  String get exportRun => 'Export & share (email…)';
++  @override
++  String get exportRunning => 'Exporting…';
++  @override
++  String get exportCsvHint =>
++      'The CSV opens correctly in Excel (UTF-8 BOM). Share through the '
++      'share sheet — pick Mail/Gmail to send it by email; data leaves the '
++      'device only through the app you choose.';
++  @override
++  String get exportHistory => 'Export history';
++  @override
++  String get exportHistoryEmpty => 'No exports yet.';
++  @override
++  String exportShareSubject(String typeLabel, String stamp) =>
++      'Tổng Tài — $typeLabel export ($stamp)';
++  @override
++  String exportDoneSnack(int rows, String fileName) =>
++      'Exported $rows rows — $fileName';
++  @override
++  String exportHistoryLine(
++    String fileName,
++    String typeLabel,
++    int rows,
++    String date,
++  ) => '$fileName — $typeLabel, $rows rows, $date';
++
++  @override
++  String get searchAdvancedFilters => 'Advanced filters';
++  @override
++  String get searchHint => 'Search suppliers, products…';
++  @override
++  String get searchClearFilters => 'Clear';
++  @override
++  String get searchCategory => 'Category';
++  @override
++  String get searchCountry => 'Country';
++  @override
++  String get searchRating => 'Rating';
++  @override
++  String get searchEverythingTitle => 'Search everything';
++  @override
++  String get searchEverythingBody => 'Find suppliers, products and more.';
++  @override
++  String get searchRecent => 'Recent searches';
++  @override
++  String get searchNoResults => 'No results';
++  @override
++  String get searchNoResultsBody => 'Try another keyword or adjust filters.';
++  @override
++  String get sectionSuppliers => 'Suppliers';
++  @override
++  String get sectionProducts => 'Products';
++  @override
++  String get labelStock => 'Stock';
++  @override
++  String searchResultCount(int count) =>
++      count == 1 ? '1 result' : '$count results';
++
++  @override
++  String get oppInterested => 'Interested';
++  @override
++  String get oppDismiss => 'Dismiss';
++  @override
++  String get oppSaveTooltip => 'Save';
++  @override
++  String get oppUnsaveTooltip => 'Unsave';
++  @override
++  String get oppEmptySaved => 'No saved opportunities yet';
++  @override
++  String get oppEmptyTab => 'No opportunities in this tab yet';
++  @override
++  String get oppRoi => 'Est. ROI';
++  @override
++  String get oppImpact => 'Impact';
++  @override
++  String get oppDetected => 'Detected';
++  @override
++  String get oppWhyWorth => 'Why it matters';
++  @override
++  String get sectionActionPlan => 'Action plan';
++  @override
++  String get sectionSuggestions => 'Suggestions';
++  @override
++  String get aiScoreLabel => 'AI score';
++  @override
++  String get oppEstimatePrefix => 'Est.';
++  @override
++  String get oppScoreLabel => 'Score';
++  @override
++  String oppDismissedSnack(String title) => 'Dismissed "$title"';
++  @override
++  String oppInterestedSnack(String title) => 'Marked "$title" as interested';
++  @override
++  String oppGoalCreatedSnack(String title) =>
++      'Created goal "$title" in Journey';
++  @override
++  String oppCreatedFromNote(String description) =>
++      'Created from opportunity: $description';
++
++  @override
++  String get goalEdit => 'Edit goal';
++  @override
++  String get goalDaysLeftLabel => 'Remaining';
++  @override
++  String get goalTimeElapsed => 'Time elapsed';
++  @override
++  String get goalsEmptyPrompt => 'Set your first business goal';
++  @override
++  String get goalWhatToAchieve => 'What do you want to achieve?';
++  @override
++  String get goalCustom => 'Custom goal';
++  @override
++  String get goalTitleHint => 'e.g. Reach 100M ₫ this quarter';
++  @override
++  String get goalRealizedHelp =>
++      'Realized revenue: auto-derived from recorded orders.';
++  @override
++  String get goalNotesHint => 'Context, sales channels, sourcing…';
++  @override
++  String daysCount(int days) => '$days days';
++  @override
++  String daysLeft(int days) => '$days days left';
++  @override
++  String percentOfGoal(int percent) => '$percent% of goal';
++  @override
++  String goalTemplateDays(String typeLabel, int days) =>
++      '$typeLabel • $days days';
++
++  @override
++  String get timelineEmptyTitle => 'No activity yet';
++  @override
++  String get timelineEmptyBody =>
++      'Orders, income & expenses, opportunities and goals will appear '
++      'here over time.';
++
++  @override
++  String get chatTyping => 'Workizen AI is typing…';
++  @override
++  String get chatInputHint => 'Message Workizen AI…';
++  @override
++  String get chatEmptyPrompt => 'Ask Workizen AI about your business';
++  @override
++  String get chatSearchHint => 'Search chats…';
++  @override
++  String get chatSearchPrompt => 'Type a keyword to search your chat history';
++  @override
++  String get chatSearchNoResults => 'No messages found';
++  @override
++  String get chatSearchRange7d => '7 days';
++
++  @override
++  String get txnAmountLabel => 'Amount (₫)';
++  @override
++  String get txnAmountHint => 'e.g. 1500000';
++  @override
++  String get txnCategoryLabel => 'Category';
++  @override
++  String get txnDateLabel => 'Date';
++  @override
++  String get txnNoteLabel => 'Note (optional)';
++  @override
++  String get txnNoteHint => 'e.g. Sold a batch of fans wholesale';
++  @override
++  String get txnSave => 'Save transaction';
++  @override
++  String get financeEmptyTitle => 'No financial transactions yet';
++  @override
++  String get financeEmptyBody =>
++      'Record your first income or expense and the finance board appears '
++      'here.';
++
++  @override
++  String get reportsAnalyzing => 'Workizen AI is analyzing…';
++  @override
++  String get reportsNoPipeline => 'No open opportunities';
++  @override
++  String get reportsOpenLabel => 'Open';
++  @override
++  String get reportsPipelineValue => 'Pipeline value';
++  @override
++  String get reportsSoldPrefix => 'Sold';
++  @override
++  String get reportsEmptyTitle => 'No revenue to report yet';
++  @override
++  String get reportsEmptyBody => 'Your KPIs appear here after the first sale.';
++  @override
++  String reportsOrdersCount(int count) => '$count orders';
++
++  @override
++  String get labelOptionalSuffix => '(optional)';
++
++  @override
++  String get historyRangeAll => 'All time';
++  @override
++  String get historyRangeLast30 => 'Last 30 days';
++  @override
++  String get historyRangeLast90 => 'Last 90 days';
++
++  @override
++  String get custNameHint => 'e.g. Phương Nguyễn';
++  @override
++  String get custLocationHint => 'e.g. Hà Nội';
++  @override
++  String get custTagsHint => 'Comma-separated, e.g. tiktok, wholesale';
++  @override
++  String get custAddressHint => 'e.g. 12 Hàng Bài, Hoàn Kiếm';
++
++  @override
++  String get aiKeySavedSnack => 'API key saved securely.';
++  @override
++  String get aiKeyRemovedSnack => 'API key removed.';
++  @override
++  String get aiKeyScannedSnack =>
++      'Key scanned from QR — press Save (or Rotate) to confirm.';
++  @override
++  String get aiKeyScanQr => 'Scan QR';
++  @override
++  String get aiKeySave => 'Save key';
++  @override
++  String get aiKeyTest => 'Test connection';
++  @override
++  String get aiKeyRotate => 'Rotate key (verify, then replace)';
++  @override
++  String get aiKeyRemove => 'Remove key';
++  @override
++  String get aiKeyByokHint =>
++      'Use your own key (BYOK) to enable the AI assistant. The key is '
++      'stored securely on this device.';
++  @override
++  String get aiKeyStoredHint =>
++      'An API key is stored. You can test, replace or remove it.';
++  @override
++  String get aiKeyPasteReplace => 'Paste a new key to replace';
++  @override
++  String get aiKeyPaste => 'Paste your API key';
++  @override
++  String get aiKeyShow => 'Show key';
++  @override
++  String get aiKeyHide => 'Hide key';
++  @override
++  String get aiKeyRolledBack => 'The old key was restored.';
++  @override
++  String get aiKeyNoneStored => 'No key is stored.';
++  @override
++  String get keyScanHint =>
++      'Point the camera at the QR code — the key fills the input '
++      'automatically.';
++  @override
++  String aiKeyRotatedSnack(String model) =>
++      'Key rotated — $model responded with the new key.';
++  @override
++  String aiKeyRotateFailedPrefix(String message) =>
++      'The new key did not work ($message). ';
++  @override
++  String aiKeyTestOkSnack(String model) => 'Connection OK — $model responded.';
++  @override
++  String aiKeyConsoleHint(String url, String provider) =>
++      'Get a key at $url. It is stored only on your device and sent '
++      'directly to $provider only.';
++  @override
++  String aiKeyCardTitle(String provider) => '$provider API key';
+ }
+ 
+ /// `context.l10n.<key>` — the ergonomic accessor used throughout the UI.
+diff --git a/lib/features/tongtai/consumer/customer_directory_service.dart b/lib/features/tongtai/consumer/customer_directory_service.dart
+index 366eb64..2a5987c 100644
+--- a/lib/features/tongtai/consumer/customer_directory_service.dart
++++ b/lib/features/tongtai/consumer/customer_directory_service.dart
+@@ -16,6 +16,15 @@ enum CustomerSort {
+     CustomerSort.frequency => 'Frequency',
+     CustomerSort.recency => 'Recent',
+   };
++
++  String get labelVi => switch (this) {
++    CustomerSort.name => 'Tên',
++    CustomerSort.spent => 'Chi tiêu',
++    CustomerSort.frequency => 'Tần suất',
++    CustomerSort.recency => 'Gần đây',
++  };
++
++  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
+ }
+ 
+ /// Minimum / maximum customers shown per page (WTM-75 AC: 20–50 per page). The
+diff --git a/lib/features/tongtai/inventory/product_inventory_service.dart b/lib/features/tongtai/inventory/product_inventory_service.dart
+index 822022f..0d69e46 100644
+--- a/lib/features/tongtai/inventory/product_inventory_service.dart
++++ b/lib/features/tongtai/inventory/product_inventory_service.dart
+@@ -16,6 +16,15 @@ enum ProductSort {
+     ProductSort.quantity => 'Quantity',
+     ProductSort.lastUpdated => 'Updated',
+   };
++
++  String get labelVi => switch (this) {
++    ProductSort.name => 'Tên',
++    ProductSort.price => 'Giá',
++    ProductSort.quantity => 'Số lượng',
++    ProductSort.lastUpdated => 'Cập nhật',
++  };
++
++  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
+ }
+ 
+ /// Minimum / maximum products shown per page (WTM-68 AC: 20–50 per page). The
+diff --git a/lib/features/tongtai/timeline/business_event.dart b/lib/features/tongtai/timeline/business_event.dart
+index 7f5ade9..fbac55a 100644
+--- a/lib/features/tongtai/timeline/business_event.dart
++++ b/lib/features/tongtai/timeline/business_event.dart
+@@ -20,6 +20,18 @@ enum BusinessEventType {
+     BusinessEventType.recommendation => 'Gợi ý AI',
+     BusinessEventType.journey => 'Mục tiêu',
+   };
++
++  String get labelEn => switch (this) {
++    BusinessEventType.order => 'Orders',
++    BusinessEventType.finance => 'Finance',
++    BusinessEventType.inventory => 'Inventory',
++    BusinessEventType.customer => 'Customers',
++    BusinessEventType.opportunity => 'Opportunities',
++    BusinessEventType.recommendation => 'AI suggestions',
++    BusinessEventType.journey => 'Goals',
++  };
++
++  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
+ }
+ 
+ /// A single thing that happened in the business (WTM-114).
+diff --git a/lib/features/tongtai/ui/screens/tongtai_ai_key_screen.dart b/lib/features/tongtai/ui/screens/tongtai_ai_key_screen.dart
+index d66f301..e58bb78 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_ai_key_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_ai_key_screen.dart
+@@ -1,6 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../ai/tongtai_ai_errors.dart';
+ import '../../ai/tongtai_ai_key_validator.dart';
+ import '../../ai/tongtai_ai_provider_kind.dart';
+@@ -45,9 +46,6 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+   TongtaiAiService get _service => ref.read(tongtaiAiServiceProvider);
+   TongtaiAiProviderKind get _providerKind => TongtaiAiKeyScreen.provider;
+ 
+-  String get _lang =>
+-      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+-
+   @override
+   void initState() {
+     super.initState();
+@@ -74,6 +72,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+   }
+ 
+   Future<void> _save() async {
++    final l10n = context.l10n;
+     final validation = TongtaiAiKeyValidator.validate(
+       _controller.text,
+       provider: _providerKind,
+@@ -81,7 +80,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+     if (!validation.ok) {
+       // Reject up front so an invalid key is never stored (WTM-61 AC).
+       setState(() {
+-        _fieldError = validation.issue.message(_lang);
++        _fieldError = validation.issue.message(l10n.languageCode);
+         _statusMessage = null;
+       });
+       return;
+@@ -98,16 +97,14 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+       _busy = false;
+       _hasKey = true;
+     });
+-    _setStatus(
+-      _lang == 'vi' ? 'Đã lưu khóa API an toàn.' : 'API key saved securely.',
+-      _AiStatusTone.success,
+-    );
++    _setStatus(l10n.aiKeySavedSnack, _AiStatusTone.success);
+   }
+ 
+   /// Safe rotation (WTM-83): the new key from the field is validated, written
+   /// and live-verified; on failure the previous working key is restored by the
+   /// service — the seller can never brick a working setup.
+   Future<void> _rotate() async {
++    final l10n = context.l10n;
+     setState(() {
+       _busy = true;
+       _fieldError = null;
+@@ -124,20 +121,20 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+       _controller.clear();
+       setState(() => _hasKey = true);
+       _setStatus(
+-        _lang == 'vi'
+-            ? 'Đã đổi khóa — ${rotation.model} phản hồi với khóa mới.'
+-            : 'Key rotated — ${rotation.model} responded with the new key.',
++        l10n.aiKeyRotatedSnack(rotation.model!),
+         _AiStatusTone.success,
+       );
+     } else if (rotation.validation != null) {
+-      setState(() => _fieldError = rotation.validation!.issue.message(_lang));
++      setState(
++        () =>
++            _fieldError = rotation.validation!.issue.message(l10n.languageCode),
++      );
+     } else {
+       _setStatus(
+-        _lang == 'vi'
+-            ? 'Khóa mới không hoạt động (${rotation.error!.message(_lang)}). '
+-                  '${rotation.rolledBack ? 'Đã khôi phục khóa cũ.' : 'Chưa có khóa nào được lưu.'}'
+-            : 'The new key failed (${rotation.error!.message(_lang)}). '
+-                  '${rotation.rolledBack ? 'Previous key restored.' : 'No key stored.'}',
++        l10n.aiKeyRotateFailedPrefix(
++              rotation.error!.message(l10n.languageCode),
++            ) +
++            (rotation.rolledBack ? l10n.aiKeyRolledBack : l10n.aiKeyNoneStored),
+         _AiStatusTone.error,
+       );
+     }
+@@ -146,6 +143,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+   /// QR input (WTM-83): the scanned text only FILLS the field — it still goes
+   /// through the exact same validate→save/rotate path as a typed key.
+   Future<void> _scan() async {
++    final l10n = context.l10n;
+     final launcher =
+         widget.scanLauncher ??
+         (BuildContext context) => Navigator.of(context).push<String>(
+@@ -157,15 +155,11 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+       _controller.text = scanned.trim();
+       _fieldError = null;
+     });
+-    _setStatus(
+-      _lang == 'vi'
+-          ? 'Đã quét khóa từ QR — bấm Lưu (hoặc Đổi khóa) để xác nhận.'
+-          : 'Key scanned — press Save (or Rotate) to confirm.',
+-      _AiStatusTone.info,
+-    );
++    _setStatus(l10n.aiKeyScannedSnack, _AiStatusTone.info);
+   }
+ 
+   Future<void> _test() async {
++    final l10n = context.l10n;
+     setState(() {
+       _busy = true;
+       _statusMessage = null;
+@@ -173,21 +167,17 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+     try {
+       final res = await _service.testConnection(provider: _providerKind);
+       if (!mounted) return;
+-      _setStatus(
+-        _lang == 'vi'
+-            ? 'Kết nối thành công — ${res.model} đã phản hồi.'
+-            : 'Connected — ${res.model} responded.',
+-        _AiStatusTone.success,
+-      );
++      _setStatus(l10n.aiKeyTestOkSnack(res.model), _AiStatusTone.success);
+     } on TongtaiAiException catch (e) {
+       if (!mounted) return;
+-      _setStatus(e.message(_lang), _AiStatusTone.error);
++      _setStatus(e.message(l10n.languageCode), _AiStatusTone.error);
+     } finally {
+       if (mounted) setState(() => _busy = false);
+     }
+   }
+ 
+   Future<void> _delete() async {
++    final l10n = context.l10n;
+     setState(() => _busy = true);
+     await _service.deleteKey(provider: _providerKind);
+     ref.invalidate(tongtaiHasAiKeyProvider);
+@@ -196,19 +186,16 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+       _busy = false;
+       _hasKey = false;
+     });
+-    _setStatus(
+-      _lang == 'vi' ? 'Đã xóa khóa API.' : 'API key removed.',
+-      _AiStatusTone.info,
+-    );
++    _setStatus(l10n.aiKeyRemovedSnack, _AiStatusTone.info);
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final vi = _lang == 'vi';
++    final l10n = context.l10n;
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: Text(vi ? 'Trợ lý AI' : 'AI Assistant'),
++        title: Text(l10n.titleAiAssistant),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -219,9 +206,9 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+           child: Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+-              _Header(providerName: _providerKind.displayName, vi: vi),
++              _Header(providerName: _providerKind.displayName),
+               const SizedBox(height: TongtaiDesignTokens.spacing4),
+-              if (_hasKey == true) _KeySetBadge(vi: vi),
++              if (_hasKey == true) const _KeySetBadge(),
+               if (_hasKey == true)
+                 const SizedBox(height: TongtaiDesignTokens.spacing3),
+               _KeyField(
+@@ -230,7 +217,6 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+                 enabled: !_busy,
+                 errorText: _fieldError,
+                 hasKey: _hasKey == true,
+-                vi: vi,
+                 onToggleObscure: () => setState(() => _obscure = !_obscure),
+               ),
+               const SizedBox(height: TongtaiDesignTokens.spacing2),
+@@ -240,13 +226,14 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+                   key: const Key('tongtai-ai-scan'),
+                   onPressed: _busy ? null : _scan,
+                   icon: const Icon(Icons.qr_code_scanner, size: 18),
+-                  label: Text(vi ? 'Quét QR' : 'Scan QR'),
++                  label: Text(l10n.aiKeyScanQr),
+                 ),
+               ),
+               Text(
+-                vi
+-                    ? 'Lấy khóa tại ${_providerKind.keyConsoleUrl}. Khóa chỉ lưu trên máy bạn và chỉ gửi trực tiếp tới ${_providerKind.displayName}.'
+-                    : 'Get a key at ${_providerKind.keyConsoleUrl}. Your key stays on this device and is sent only to ${_providerKind.displayName}.',
++                l10n.aiKeyConsoleHint(
++                  _providerKind.keyConsoleUrl,
++                  _providerKind.displayName,
++                ),
+                 style: TongtaiDesignTokens.captionStyle.copyWith(
+                   color: TongtaiDesignTokens.lightTextSecondary,
+                 ),
+@@ -265,7 +252,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+                   style: FilledButton.styleFrom(
+                     backgroundColor: TongtaiDesignTokens.copilotViolet,
+                   ),
+-                  child: Text(vi ? 'Lưu khóa' : 'Save key'),
++                  child: Text(l10n.aiKeySave),
+                 ),
+               ),
+               const SizedBox(height: TongtaiDesignTokens.spacing3),
+@@ -275,7 +262,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+                 child: OutlinedButton(
+                   key: const Key('tongtai-ai-test'),
+                   onPressed: (_busy || _hasKey != true) ? null : _test,
+-                  child: Text(vi ? 'Kiểm tra kết nối' : 'Test connection'),
++                  child: Text(l10n.aiKeyTest),
+                 ),
+               ),
+               if (_hasKey == true) ...[
+@@ -286,11 +273,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+                   child: OutlinedButton(
+                     key: const Key('tongtai-ai-rotate'),
+                     onPressed: _busy ? null : _rotate,
+-                    child: Text(
+-                      vi
+-                          ? 'Đổi khóa (kiểm tra rồi mới thay)'
+-                          : 'Rotate key (verified swap)',
+-                    ),
++                    child: Text(l10n.aiKeyRotate),
+                   ),
+                 ),
+               ],
+@@ -306,7 +289,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+                       foregroundColor: TongtaiDesignTokens.error,
+                       side: const BorderSide(color: TongtaiDesignTokens.error),
+                     ),
+-                    child: Text(vi ? 'Xóa khóa' : 'Remove key'),
++                    child: Text(l10n.aiKeyRemove),
+                   ),
+                 ),
+               ],
+@@ -329,13 +312,13 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
+ }
+ 
+ class _Header extends StatelessWidget {
+-  const _Header({required this.providerName, required this.vi});
++  const _Header({required this.providerName});
+ 
+   final String providerName;
+-  final bool vi;
+ 
+   @override
+   Widget build(BuildContext context) {
++    final l10n = context.l10n;
+     return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+@@ -348,7 +331,7 @@ class _Header extends StatelessWidget {
+             const SizedBox(width: TongtaiDesignTokens.spacing2),
+             Expanded(
+               child: Text(
+-                vi ? 'Khóa API $providerName' : '$providerName API key',
++                l10n.aiKeyCardTitle(providerName),
+                 style: TongtaiDesignTokens.heading3Style.copyWith(
+                   color: TongtaiDesignTokens.lightTextPrimary,
+                 ),
+@@ -358,9 +341,7 @@ class _Header extends StatelessWidget {
+         ),
+         const SizedBox(height: TongtaiDesignTokens.spacing2),
+         Text(
+-          vi
+-              ? 'Dùng khóa của riêng bạn (BYOK) để bật trợ lý AI. Khóa được lưu an toàn trên thiết bị.'
+-              : 'Bring your own key (BYOK) to enable the AI assistant. The key is stored securely on your device.',
++          l10n.aiKeyByokHint,
+           style: TongtaiDesignTokens.smallStyle.copyWith(
+             color: TongtaiDesignTokens.lightTextSecondary,
+           ),
+@@ -371,9 +352,7 @@ class _Header extends StatelessWidget {
+ }
+ 
+ class _KeySetBadge extends StatelessWidget {
+-  const _KeySetBadge({required this.vi});
+-
+-  final bool vi;
++  const _KeySetBadge();
+ 
+   @override
+   Widget build(BuildContext context) {
+@@ -398,9 +377,7 @@ class _KeySetBadge extends StatelessWidget {
+           const SizedBox(width: TongtaiDesignTokens.spacing2),
+           Expanded(
+             child: Text(
+-              vi
+-                  ? 'Đã lưu khóa API. Bạn có thể kiểm tra, thay thế hoặc xóa khóa.'
+-                  : 'An API key is saved. You can test, replace or remove it.',
++              context.l10n.aiKeyStoredHint,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+               ),
+@@ -419,7 +396,6 @@ class _KeyField extends StatelessWidget {
+     required this.enabled,
+     required this.errorText,
+     required this.hasKey,
+-    required this.vi,
+     required this.onToggleObscure,
+   });
+ 
+@@ -428,14 +404,12 @@ class _KeyField extends StatelessWidget {
+   final bool enabled;
+   final String? errorText;
+   final bool hasKey;
+-  final bool vi;
+   final VoidCallback onToggleObscure;
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final hint = hasKey
+-        ? (vi ? 'Dán khóa mới để thay thế' : 'Paste a new key to replace')
+-        : (vi ? 'Dán khóa API của bạn' : 'Paste your API key');
++    final l10n = context.l10n;
++    final hint = hasKey ? l10n.aiKeyPasteReplace : l10n.aiKeyPaste;
+     return TextField(
+       key: const Key('tongtai-ai-key-field'),
+       controller: controller,
+@@ -454,9 +428,7 @@ class _KeyField extends StatelessWidget {
+         suffixIcon: IconButton(
+           key: const Key('tongtai-ai-key-visibility'),
+           icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+-          tooltip: obscure
+-              ? (vi ? 'Hiện khóa' : 'Show key')
+-              : (vi ? 'Ẩn khóa' : 'Hide key'),
++          tooltip: obscure ? l10n.aiKeyShow : l10n.aiKeyHide,
+           onPressed: onToggleObscure,
+         ),
+         border: OutlineInputBorder(
+diff --git a/lib/features/tongtai/ui/screens/tongtai_chat_screen.dart b/lib/features/tongtai/ui/screens/tongtai_chat_screen.dart
+index 48d3fe8..fdc4494 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_chat_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_chat_screen.dart
+@@ -10,6 +10,7 @@ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../providers/tongtai_chat_provider.dart';
+ import '../widgets/tongtai_fox_mascot.dart';
+ import 'tongtai_chat_search_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Chat screen (WTM-80) — the conversation surface for the AI Copilot.
+ ///
+@@ -165,7 +166,7 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
+             actions: [
+               IconButton(
+                 key: const Key('chat-open-search'),
+-                tooltip: 'Tìm kiếm',
++                tooltip: context.l10n.actionSearch,
+                 icon: const Icon(Icons.search),
+                 onPressed: _openSearch,
+               ),
+@@ -300,7 +301,7 @@ class _StatusTicks extends StatelessWidget {
+       ),
+     };
+     return Tooltip(
+-      message: status.labelEn,
++      message: status.label(context.l10n.languageCode),
+       child: Icon(icon, size: 14, color: color),
+     );
+   }
+@@ -390,7 +391,7 @@ class _TypingIndicator extends StatelessWidget {
+         vertical: TongtaiDesignTokens.spacing1,
+       ),
+       child: Text(
+-        'Workizen AI đang nhập… | typing…',
++        context.l10n.chatTyping,
+         style: TongtaiDesignTokens.captionStyle.copyWith(
+           color: TongtaiDesignTokens.lightTextSecondary,
+           fontStyle: FontStyle.italic,
+@@ -485,7 +486,7 @@ class _InputBar extends StatelessWidget {
+               textCapitalization: TextCapitalization.sentences,
+               onSubmitted: (_) => onSend(),
+               decoration: InputDecoration(
+-                hintText: 'Nhắn cho Workizen AI… | Message Workizen AI…',
++                hintText: context.l10n.chatInputHint,
+                 filled: true,
+                 fillColor: TongtaiDesignTokens.lightHover,
+                 border: OutlineInputBorder(
+@@ -532,21 +533,13 @@ class _EmptyState extends StatelessWidget {
+             const TongtaiFoxMascot.face(size: 72),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              'Hỏi Workizen AI về việc kinh doanh của bạn',
++              context.l10n.chatEmptyPrompt,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.bodyStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+                 fontWeight: FontWeight.w600,
+               ),
+             ),
+-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+-            Text(
+-              'Ask Workizen AI about your business.',
+-              textAlign: TextAlign.center,
+-              style: TongtaiDesignTokens.smallStyle.copyWith(
+-                color: TongtaiDesignTokens.lightTextSecondary,
+-              ),
+-            ),
+           ],
+         ),
+       ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_chat_search_screen.dart b/lib/features/tongtai/ui/screens/tongtai_chat_search_screen.dart
+index 459edc1..ae1efdd 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_chat_search_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_chat_search_screen.dart
+@@ -5,6 +5,7 @@ import '../../chat/chat_message_store.dart';
+ import '../../core/tongtai_formatters.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ import '../widgets/tongtai_fox_mascot.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Date window for the chat search (WTM-84) — "by session/period".
+ enum ChatSearchRange {
+@@ -12,10 +13,10 @@ enum ChatSearchRange {
+   today,
+   last7Days;
+ 
+-  String get labelVi => switch (this) {
+-    ChatSearchRange.all => 'Tất cả',
+-    ChatSearchRange.today => 'Hôm nay',
+-    ChatSearchRange.last7Days => '7 ngày',
++  String label(AppStrings l10n) => switch (this) {
++    ChatSearchRange.all => l10n.filterAll,
++    ChatSearchRange.today => l10n.dateToday,
++    ChatSearchRange.last7Days => l10n.chatSearchRange7d,
+   };
+ 
+   /// The `from` bound this preset represents at [now]; null = unbounded.
+@@ -102,8 +103,8 @@ class _TongtaiChatSearchScreenState extends State<TongtaiChatSearchScreen> {
+           key: const Key('chat-search-field'),
+           controller: _searchController,
+           autofocus: true,
+-          decoration: const InputDecoration(
+-            hintText: 'Tìm trong trò chuyện…',
++          decoration: InputDecoration(
++            hintText: context.l10n.chatSearchHint,
+             border: InputBorder.none,
+           ),
+           onChanged: _onKeyword,
+@@ -153,7 +154,7 @@ class _RangeRow extends StatelessWidget {
+               ),
+               child: ChoiceChip(
+                 key: Key('chat-search-range-${range.name}'),
+-                label: Text(range.labelVi),
++                label: Text(range.label(context.l10n)),
+                 selected: selected == range,
+                 onSelected: (_) => onSelected(range),
+               ),
+@@ -175,21 +176,22 @@ class _ResultList extends StatelessWidget {
+   final String keyword;
+   final DateTime now;
+ 
+-  String _dayLabel(DateTime ts) {
++  String _dayLabel(DateTime ts, AppStrings l10n) {
+     final today = DateTime(now.year, now.month, now.day);
+     final day = DateTime(ts.year, ts.month, ts.day);
+     final diff = today.difference(day).inDays;
+-    if (diff == 0) return 'Hôm nay';
+-    if (diff == 1) return 'Hôm qua';
++    if (diff == 0) return l10n.dateToday;
++    if (diff == 1) return l10n.dateYesterday;
+     return TongtaiFormatters.isoDate(day);
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
++    final l10n = context.l10n;
+     // Group results (already newest-first) into day sections.
+     final sections = <String, List<ChatMessage>>{};
+     for (final m in results) {
+-      (sections[_dayLabel(m.timestamp)] ??= []).add(m);
++      (sections[_dayLabel(m.timestamp, l10n)] ??= []).add(m);
+     }
+     return ListView(
+       key: const Key('chat-search-results'),
+@@ -202,7 +204,7 @@ class _ResultList extends StatelessWidget {
+             0,
+           ),
+           child: Text(
+-            results.length == 1 ? '1 kết quả' : '${results.length} kết quả',
++            l10n.searchResultCount(results.length),
+             style: TongtaiDesignTokens.captionStyle.copyWith(
+               color: TongtaiDesignTokens.lightTextSecondary,
+             ),
+@@ -242,7 +244,7 @@ class _ResultTile extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final who = _fromSeller ? 'Bạn' : 'Workizen AI';
++    final who = _fromSeller ? context.l10n.chatYou : 'Workizen AI';
+     final time =
+         '${message.timestamp.hour.toString().padLeft(2, '0')}:'
+         '${message.timestamp.minute.toString().padLeft(2, '0')}';
+@@ -317,7 +319,7 @@ class _Prompt extends StatelessWidget {
+     return Center(
+       key: const Key('chat-search-prompt'),
+       child: Text(
+-        'Nhập từ khóa để tìm trong lịch sử trò chuyện',
++        context.l10n.chatSearchPrompt,
+         style: TongtaiDesignTokens.smallStyle.copyWith(
+           color: TongtaiDesignTokens.lightTextSecondary,
+         ),
+@@ -341,7 +343,7 @@ class _NoResults extends StatelessWidget {
+             const TongtaiFoxMascot.face(size: 64),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              'Không tìm thấy tin nhắn nào',
++              context.l10n.chatSearchNoResults,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+               ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_create_order_screen.dart b/lib/features/tongtai/ui/screens/tongtai_create_order_screen.dart
+index 6374fbc..e550d68 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_create_order_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_create_order_screen.dart
+@@ -7,6 +7,7 @@ import '../../inventory/product.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../orders/order.dart';
+ import 'tongtai_inventory_picker_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Create Order form (WTM-126) — the Orders capability's create flow, launched
+ /// from a customer's screen with that [customer] pre-selected. Each line is added
+@@ -319,7 +320,7 @@ class _StatusRow extends StatelessWidget {
+                         right: TongtaiDesignTokens.spacing2,
+                       ),
+                       child: ChoiceChip(
+-                        label: Text(s.labelEn),
++                        label: Text(s.label(context.l10n.languageCode)),
+                         selected: status == s,
+                         onSelected: (_) => onSelected(s),
+                       ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart b/lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart
+index 5a90b4b..60a9996 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart
+@@ -1,6 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'package:uuid/uuid.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../consumer/customer.dart';
+ import '../../consumer/customer_form.dart';
+ import '../../consumer/customer_history.dart';
+@@ -243,7 +244,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
+               key: const Key('customer-name-field'),
+               controller: _name,
+               field: CustomerField.name,
+-              hint: 'e.g. Phương Nguyễn',
++              hint: context.l10n.custNameHint,
+               textCapitalization: TextCapitalization.words,
+             ),
+             _field(
+@@ -267,7 +268,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
+               key: const Key('customer-location-field'),
+               controller: _location,
+               field: CustomerField.location,
+-              hint: 'e.g. Hà Nội',
++              hint: context.l10n.custLocationHint,
+               optional: true,
+             ),
+             _LocationSuggestions(
+@@ -296,7 +297,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
+               key: const Key('customer-tags-field'),
+               controller: _tags,
+               field: CustomerField.tags,
+-              hint: 'Comma-separated, e.g. tiktok, bán sỉ',
++              hint: context.l10n.custTagsHint,
+               optional: true,
+             ),
+             _field(
+@@ -343,10 +344,10 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
+     TextInputType? keyboardType,
+   }) {
+     final label = optional
+-        ? '${field.labelEn} (optional)'
++        ? '${field.label(context.l10n.languageCode)} ${context.l10n.labelOptionalSuffix}'
+         : field.isRequired
+-        ? '${field.labelEn} *'
+-        : field.labelEn;
++        ? '${field.label(context.l10n.languageCode)} *'
++        : field.label(context.l10n.languageCode);
+     return Padding(
+       padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+       child: TextField(
+@@ -500,7 +501,7 @@ class _AddressesSection extends StatelessWidget {
+                     key: Key('customer-address-field-$i'),
+                     controller: controllers[i],
+                     decoration: InputDecoration(
+-                      hintText: 'e.g. 12 Hàng Bài, Hoàn Kiếm',
++                      hintText: context.l10n.custAddressHint,
+                       filled: true,
+                       fillColor: TongtaiDesignTokens.lightHover,
+                       border: OutlineInputBorder(
+@@ -654,7 +655,7 @@ class _ChangeList extends StatelessWidget {
+             Padding(
+               padding: const EdgeInsets.only(bottom: 2),
+               child: Text(
+-                '${change.field.labelEn}: '
++                '${change.field.label(context.l10n.languageCode)}: '
+                 '${change.before.isEmpty ? '—' : change.before} → '
+                 '${change.after.isEmpty ? '—' : change.after}',
+                 style: TongtaiDesignTokens.captionStyle.copyWith(
+diff --git a/lib/features/tongtai/ui/screens/tongtai_customer_history_screen.dart b/lib/features/tongtai/ui/screens/tongtai_customer_history_screen.dart
+index b318cfc..b027500 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_customer_history_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_customer_history_screen.dart
+@@ -9,6 +9,7 @@ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../orders/order.dart';
+ import '../../orders/order_controller.dart';
+ import 'tongtai_create_order_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Color for an [OrderStatus] chip. Pure function so the mapping is directly
+ /// unit-testable without pumping a widget (same convention as
+@@ -27,10 +28,10 @@ enum OrderHistoryRange {
+   last30Days,
+   last90Days;
+ 
+-  String get labelEn => switch (this) {
+-    OrderHistoryRange.all => 'All time',
+-    OrderHistoryRange.last30Days => 'Last 30 days',
+-    OrderHistoryRange.last90Days => 'Last 90 days',
++  String label(AppStrings l10n) => switch (this) {
++    OrderHistoryRange.all => l10n.historyRangeAll,
++    OrderHistoryRange.last30Days => l10n.historyRangeLast30,
++    OrderHistoryRange.last90Days => l10n.historyRangeLast90,
+   };
+ 
+   /// The `from` bound this preset represents; null = unbounded (all time).
+@@ -161,7 +162,7 @@ class _TongtaiCustomerHistoryScreenState
+                       right: TongtaiDesignTokens.spacing2,
+                     ),
+                     child: ChoiceChip(
+-                      label: Text(range.labelEn),
++                      label: Text(range.label(context.l10n)),
+                       selected: _range == range,
+                       onSelected: (_) => setState(() => _range = range),
+                     ),
+@@ -440,7 +441,7 @@ class _StatusChip extends StatelessWidget {
+         border: Border.all(color: color),
+       ),
+       child: Text(
+-        status.labelEn,
++        status.label(context.l10n.languageCode),
+         style: TongtaiDesignTokens.captionStyle.copyWith(
+           color: color,
+           fontWeight: FontWeight.w600,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart b/lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart
+index 05fd2e0..4d6406d 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart
+@@ -15,6 +15,7 @@ import '../../providers/tongtai_orders_provider.dart';
+ import '../widgets/tongtai_fox_mascot.dart';
+ import 'tongtai_customer_form_screen.dart';
+ import 'tongtai_customer_history_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Color for a [CustomerTier] badge (WTM-75 AC: visual indicators for VIP /
+ /// high-value customers). Pulled out as a pure function so the mapping is
+@@ -380,7 +381,7 @@ class _SortBar extends StatelessWidget {
+           Padding(
+             padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+             child: ChoiceChip(
+-              label: Text(option.labelEn),
++              label: Text(option.label(context.l10n.languageCode)),
+               selected: sort == option,
+               onSelected: (_) => onSort(option),
+             ),
+@@ -629,7 +630,7 @@ class _TierChip extends StatelessWidget {
+             const SizedBox(width: 2),
+           ],
+           Text(
+-            tier.labelEn,
++            tier.label(context.l10n.languageCode),
+             style: TongtaiDesignTokens.captionStyle.copyWith(
+               color: color,
+               fontWeight: FontWeight.w600,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_export_screen.dart b/lib/features/tongtai/ui/screens/tongtai_export_screen.dart
+index 8c3cb0b..e3add75 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_export_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_export_screen.dart
+@@ -1,6 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../consumer/customer.dart';
+ import '../../consumer/customer_order.dart';
+ import '../../core/tongtai_formatters.dart';
+@@ -20,10 +21,10 @@ enum ExportRange {
+   last30Days,
+   last90Days;
+ 
+-  String get labelVi => switch (this) {
+-    ExportRange.all => 'Toàn bộ',
+-    ExportRange.last30Days => '30 ngày',
+-    ExportRange.last90Days => '90 ngày',
++  String label(AppStrings l10n) => switch (this) {
++    ExportRange.all => l10n.exportRangeAll,
++    ExportRange.last30Days => l10n.exportRangeLast30,
++    ExportRange.last90Days => l10n.exportRangeLast90,
+   };
+ 
+   DateTime? fromFor(DateTime now) => switch (this) {
+@@ -153,6 +154,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+ 
+   Future<void> _export() async {
+     if (_busy) return;
++    final l10n = context.l10n;
+     setState(() => _busy = true);
+     try {
+       final now = _clock();
+@@ -166,9 +168,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+           ScaffoldMessenger.of(context)
+             ..hideCurrentSnackBar()
+             ..showSnackBar(
+-              const SnackBar(
+-                content: Text('Mật khẩu mã hoá cần tối thiểu 6 ký tự.'),
+-              ),
++              SnackBar(content: Text(l10n.exportPassphraseTooShort)),
+             );
+           return;
+         }
+@@ -185,7 +185,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+       await _delivery.deliver(
+         csv,
+         fileName,
+-        'Tổng Tài — xuất ${_type.labelVi} ($stamp)',
++        l10n.exportShareSubject(_type.label(l10n.languageCode), stamp),
+       );
+       await _history.add(
+         TongtaiExportRecord(
+@@ -200,7 +200,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+       ScaffoldMessenger.of(context)
+         ..hideCurrentSnackBar()
+         ..showSnackBar(
+-          SnackBar(content: Text('Đã xuất ${csv.rowCount} dòng — $fileName')),
++          SnackBar(content: Text(l10n.exportDoneSnack(csv.rowCount, fileName))),
+         );
+     } finally {
+       if (mounted) setState(() => _busy = false);
+@@ -209,10 +209,11 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+ 
+   @override
+   Widget build(BuildContext context) {
++    final l10n = context.l10n;
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Export Data (CSV)'),
++        title: Text(l10n.titleExport),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -222,7 +223,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+           padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+           children: [
+             Text(
+-              'Chọn dữ liệu cần xuất | Pick a data set',
++              l10n.exportPickDataSet,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 fontWeight: FontWeight.w600,
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -236,7 +237,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+                 for (final type in TongtaiExportType.values)
+                   ChoiceChip(
+                     key: Key('export-type-${type.name}'),
+-                    label: Text(type.labelVi),
++                    label: Text(type.label(l10n.languageCode)),
+                     selected: _type == type,
+                     onSelected: (_) => setState(() => _type = type),
+                   ),
+@@ -245,7 +246,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+             if (_type == TongtaiExportType.orders) ...[
+               const SizedBox(height: TongtaiDesignTokens.spacing3),
+               Text(
+-                'Khoảng thời gian | Date range',
++                l10n.exportDateRange,
+                 style: TongtaiDesignTokens.smallStyle.copyWith(
+                   fontWeight: FontWeight.w600,
+                   color: TongtaiDesignTokens.lightTextPrimary,
+@@ -258,7 +259,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+                   for (final range in ExportRange.values)
+                     ChoiceChip(
+                       key: Key('export-range-${range.name}'),
+-                      label: Text(range.labelVi),
++                      label: Text(range.label(l10n)),
+                       selected: _range == range,
+                       onSelected: (_) => setState(() => _range = range),
+                     ),
+@@ -271,15 +272,14 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+               key: const Key('export-encrypt-toggle'),
+               contentPadding: EdgeInsets.zero,
+               title: Text(
+-                'Mã hoá bằng mật khẩu | Encrypt with passphrase',
++                l10n.exportEncryptTitle,
+                 style: TongtaiDesignTokens.smallStyle.copyWith(
+                   fontWeight: FontWeight.w600,
+                   color: TongtaiDesignTokens.lightTextPrimary,
+                 ),
+               ),
+               subtitle: Text(
+-                'File .ttbk chỉ mở được bằng mật khẩu này. Mật khẩu không '
+-                'được lưu — quên là mất dữ liệu backup.',
++                l10n.exportEncryptHint,
+                 style: TongtaiDesignTokens.captionStyle.copyWith(
+                   color: TongtaiDesignTokens.lightTextSecondary,
+                 ),
+@@ -292,9 +292,9 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+                 key: const Key('export-passphrase'),
+                 controller: _passphrase,
+                 obscureText: true,
+-                decoration: const InputDecoration(
+-                  labelText: 'Mật khẩu (≥ 6 ký tự) | Passphrase',
+-                  border: OutlineInputBorder(),
++                decoration: InputDecoration(
++                  labelText: l10n.exportPassphraseLabel,
++                  border: const OutlineInputBorder(),
+                 ),
+               ),
+               const SizedBox(height: TongtaiDesignTokens.spacing3),
+@@ -310,22 +310,18 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+                 ),
+               ),
+               icon: const Icon(Icons.ios_share),
+-              label: Text(
+-                _busy ? 'Đang xuất…' : 'Xuất & chia sẻ (email…) | Export',
+-              ),
++              label: Text(_busy ? l10n.exportRunning : l10n.exportRun),
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing2),
+             Text(
+-              'File CSV mở đúng tiếng Việt trong Excel (UTF-8 BOM). Chia sẻ '
+-              'qua share sheet — chọn Mail/Gmail để gửi email; dữ liệu chỉ '
+-              'rời máy qua ứng dụng bạn chọn.',
++              l10n.exportCsvHint,
+               style: TongtaiDesignTokens.captionStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+               ),
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing4),
+             Text(
+-              'Lịch sử xuất | Export history',
++              l10n.exportHistory,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 fontWeight: FontWeight.w700,
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -334,7 +330,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+             const SizedBox(height: TongtaiDesignTokens.spacing2),
+             if (_records.isEmpty)
+               Text(
+-                'Chưa có lần xuất nào.',
++                l10n.exportHistoryEmpty,
+                 style: TongtaiDesignTokens.captionStyle.copyWith(
+                   color: TongtaiDesignTokens.lightTextSecondary,
+                 ),
+@@ -355,9 +351,12 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+                       const SizedBox(width: TongtaiDesignTokens.spacing2),
+                       Expanded(
+                         child: Text(
+-                          '${record.fileName} — ${record.type.labelVi}, '
+-                          '${record.rowCount} dòng, '
+-                          '${TongtaiFormatters.isoDate(record.exportedAt)}',
++                          l10n.exportHistoryLine(
++                            record.fileName,
++                            record.type.label(l10n.languageCode),
++                            record.rowCount,
++                            TongtaiFormatters.isoDate(record.exportedAt),
++                          ),
+                           style: TongtaiDesignTokens.captionStyle.copyWith(
+                             color: TongtaiDesignTokens.lightTextPrimary,
+                           ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart b/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
+index 5802e0b..9605e26 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_finance_screen.dart
+@@ -91,7 +91,7 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
+             backgroundColor: TongtaiDesignTokens.financePurple,
+             foregroundColor: Colors.white,
+             icon: const Icon(Icons.add),
+-            label: const Text('Ghi giao dịch'),
++            label: Text(context.l10n.titleTransactionForm),
+           ),
+           body: summary.hasActivity
+               ? _FinanceBody(summary: summary, recent: _controller.recent())
+@@ -576,7 +576,7 @@ class _FinanceEmptyState extends StatelessWidget {
+             const TongtaiFoxMascot.face(size: 72),
+             const SizedBox(height: TongtaiDesignTokens.spacing4),
+             Text(
+-              'Chưa có giao dịch tài chính',
++              context.l10n.financeEmptyTitle,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.heading3Style.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -584,8 +584,7 @@ class _FinanceEmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing2),
+             Text(
+-              'Ghi khoản thu/chi đầu tiên và bảng tài chính sẽ hiện ở đây.\n'
+-              'Your income & expenses appear here after the first entry.',
++              context.l10n.financeEmptyBody,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart b/lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart
+index e22b768..ed7d13c 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart
+@@ -54,7 +54,7 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
+           if (onEdit != null)
+             IconButton(
+               key: const Key('goal-detail-edit'),
+-              tooltip: 'Sửa mục tiêu',
++              tooltip: context.l10n.goalEdit,
+               icon: const Icon(Icons.edit_outlined),
+               onPressed: onEdit,
+             ),
+@@ -67,11 +67,14 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
+           Row(
+             children: [
+               _Badge(
+-                label: goal.type.labelVi,
++                label: goal.type.label(context.l10n.languageCode),
+                 color: TongtaiDesignTokens.financePurple,
+               ),
+               const SizedBox(width: TongtaiDesignTokens.spacing2),
+-              _Badge(label: pace.labelVi, color: paceColor),
++              _Badge(
++                label: pace.label(context.l10n.languageCode),
++                color: paceColor,
++              ),
+             ],
+           ),
+           const SizedBox(height: TongtaiDesignTokens.spacing3),
+@@ -128,7 +131,7 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
+           const SizedBox(height: TongtaiDesignTokens.spacing5),
+ 
+           // ── Action plan ──────────────────────────────────────────────
+-          _SectionTitle('Kế hoạch hành động'),
++          _SectionTitle(context.l10n.sectionActionPlan),
+           const SizedBox(height: TongtaiDesignTokens.spacing3),
+           Column(
+             key: const Key('goal-detail-plan'),
+@@ -140,7 +143,7 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
+           const SizedBox(height: TongtaiDesignTokens.spacing5),
+ 
+           // ── Guidance tips ────────────────────────────────────────────
+-          _SectionTitle('Gợi ý'),
++          _SectionTitle(context.l10n.sectionSuggestions),
+           const SizedBox(height: TongtaiDesignTokens.spacing2),
+           for (final tip in tips) _Tip(text: tip),
+         ],
+@@ -221,13 +224,13 @@ class _ProgressCard extends StatelessWidget {
+             children: [
+               Expanded(
+                 child: _MiniStat(
+-                  label: 'Còn lại',
+-                  value: '${goal.daysRemaining(now)} ngày',
++                  label: context.l10n.goalDaysLeftLabel,
++                  value: context.l10n.daysCount(goal.daysRemaining(now)),
+                 ),
+               ),
+               Expanded(
+                 child: _MiniStat(
+-                  label: 'Thời gian đã trôi',
++                  label: context.l10n.goalTimeElapsed,
+                   value: '${(goal.timelineElapsed(now) * 100).round()}%',
+                 ),
+               ),
+@@ -281,7 +284,8 @@ class _RealizedSalesCard extends StatelessWidget {
+                 ),
+                 const SizedBox(height: 2),
+                 Text(
+-                  '${TongtaiFormatters.vndShort(realized)} · $share% mục tiêu',
++                  '${TongtaiFormatters.vndShort(realized)} · '
++                  '${context.l10n.percentOfGoal(share)}',
+                   style: TongtaiDesignTokens.smallStyle.copyWith(
+                     color: TongtaiDesignTokens.lightTextPrimary,
+                     fontWeight: FontWeight.w700,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_goal_form_screen.dart b/lib/features/tongtai/ui/screens/tongtai_goal_form_screen.dart
+index feff757..62b73b1 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_goal_form_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_goal_form_screen.dart
+@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
+ import 'package:flutter/services.dart';
+ import 'package:uuid/uuid.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../core/tongtai_formatters.dart';
+ import '../../journey/business_goal.dart';
+ import '../../journey/business_goal_form.dart';
+@@ -224,7 +225,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
+                 key: const Key('goal-name-field'),
+                 controller: _name,
+                 field: GoalField.name,
+-                hint: 'e.g. Đạt 100 triệu ₫ trong quý',
++                hint: context.l10n.goalTitleHint,
+                 required: true,
+               ),
+               _TypePicker(
+@@ -261,8 +262,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
+                       const SizedBox(width: TongtaiDesignTokens.spacing2),
+                       Expanded(
+                         child: Text(
+-                          'Doanh thu đã đạt: tự tính từ đơn hàng đã ghi nhận '
+-                          '(auto-derived from recorded orders).',
++                          context.l10n.goalRealizedHelp,
+                           style: TongtaiDesignTokens.captionStyle.copyWith(
+                             color: TongtaiDesignTokens.lightTextSecondary,
+                           ),
+@@ -320,7 +320,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
+                 key: const Key('goal-notes-field'),
+                 controller: _notes,
+                 field: GoalField.notes,
+-                hint: 'Bối cảnh, kênh bán, nguồn hàng…',
++                hint: context.l10n.goalNotesHint,
+                 maxLines: 3,
+               ),
+               const SizedBox(height: TongtaiDesignTokens.spacing8),
+@@ -358,7 +358,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
+                 ),
+               ),
+               const SizedBox(height: TongtaiDesignTokens.spacing3),
+-              _reviewRow('Type', preview.type.labelVi),
++              _reviewRow('Type', preview.type.label(context.l10n.languageCode)),
+               if (preview.targetAmount > 0)
+                 _reviewRow(
+                   'Revenue target',
+@@ -462,7 +462,9 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
+               ]
+             : null,
+         decoration: InputDecoration(
+-          labelText: required ? '${field.labelEn} *' : field.labelEn,
++          labelText: required
++              ? '${field.label(context.l10n.languageCode)} *'
++              : field.label(context.l10n.languageCode),
+           hintText: hint,
+           suffixText: suffixText,
+           errorText: _errors[field],
+@@ -489,11 +491,12 @@ class _TemplateStep extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
++    final l10n = context.l10n;
+     return ListView(
+       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+       children: [
+         Text(
+-          'Bạn muốn đạt điều gì? | What do you want to achieve?',
++          l10n.goalWhatToAchieve,
+           style: TongtaiDesignTokens.bodyStyle.copyWith(
+             fontWeight: FontWeight.w700,
+             color: TongtaiDesignTokens.lightTextPrimary,
+@@ -534,7 +537,10 @@ class _TemplateStep extends StatelessWidget {
+                     ),
+                     const SizedBox(height: 2),
+                     Text(
+-                      '${template.type.labelVi} • ${template.suggestedDays} ngày',
++                      l10n.goalTemplateDays(
++                        template.type.label(l10n.languageCode),
++                        template.suggestedDays,
++                      ),
+                       style: TongtaiDesignTokens.captionStyle.copyWith(
+                         color: TongtaiDesignTokens.lightTextSecondary,
+                       ),
+@@ -548,7 +554,7 @@ class _TemplateStep extends StatelessWidget {
+           key: const Key('goal-template-blank'),
+           onPressed: onBlank,
+           icon: const Icon(Icons.edit_outlined),
+-          label: const Text('Tự đặt mục tiêu | Custom goal'),
++          label: Text(l10n.goalCustom),
+         ),
+       ],
+     );
+@@ -571,7 +577,7 @@ class _TypePicker extends StatelessWidget {
+         for (final type in GoalType.values)
+           ChoiceChip(
+             key: Key('goal-type-${type.name}'),
+-            label: Text(type.labelVi),
++            label: Text(type.label(context.l10n.languageCode)),
+             selected: selected == type,
+             onSelected: (_) => onSelected(type),
+           ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_goals_screen.dart b/lib/features/tongtai/ui/screens/tongtai_goals_screen.dart
+index a26900d..ebec1c6 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_goals_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_goals_screen.dart
+@@ -1,6 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../consumer/customer_order.dart';
+ import '../../core/tongtai_formatters.dart';
+ import '../../journey/business_goal.dart';
+@@ -238,7 +239,7 @@ class _GoalCard extends StatelessWidget {
+                     border: Border.all(color: color),
+                   ),
+                   child: Text(
+-                    pace.labelVi,
++                    pace.label(context.l10n.languageCode),
+                     style: TongtaiDesignTokens.captionStyle.copyWith(
+                       color: color,
+                       fontWeight: FontWeight.w600,
+@@ -250,10 +251,10 @@ class _GoalCard extends StatelessWidget {
+             const SizedBox(height: TongtaiDesignTokens.spacing1),
+             Text(
+               [
+-                goal.type.labelVi,
++                goal.type.label(context.l10n.languageCode),
+                 if (goal.targetAmount > 0)
+                   TongtaiFormatters.vnd(goal.targetAmount),
+-                'còn ${goal.daysRemaining(now)} ngày',
++                context.l10n.daysLeft(goal.daysRemaining(now)),
+               ].join(' • '),
+               style: TongtaiDesignTokens.captionStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+@@ -311,7 +312,7 @@ class _EmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              'Đặt mục tiêu kinh doanh đầu tiên của bạn',
++              context.l10n.goalsEmptyPrompt,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.bodyStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_home_screen.dart b/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
+index 11a29c5..765551f 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
+@@ -141,16 +141,10 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+     setState(() => _seeding = false);
+     await _load();
+     if (!mounted) return;
++    final l10n = context.l10n;
+     ScaffoldMessenger.of(context)
+       ..hideCurrentSnackBar()
+-      ..showSnackBar(
+-        const SnackBar(
+-          content: Text(
+-            'Đã nạp dữ liệu mẫu — tất cả màn hình đang dùng chung dữ liệu '
+-            'này. Xóa trong More khi không cần nữa.',
+-          ),
+-        ),
+-      );
++      ..showSnackBar(SnackBar(content: Text(l10n.homeSampleLoadedSnack)));
+   }
+ 
+   void _openSearch(BuildContext context) {
+@@ -229,9 +223,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+                     const SizedBox(width: 8),
+                     Expanded(
+                       child: Text(
+-                        'Đang hiển thị kèm DỮ LIỆU MẪU (mọi màn hình dùng '
+-                        'chung dữ liệu này). Bạn có thể sửa/xóa từng dòng, '
+-                        'hoặc xóa toàn bộ mẫu trong More.',
++                        context.l10n.homeSampleBanner,
+                         style: TongtaiDesignTokens.captionStyle.copyWith(
+                           color: TongtaiDesignTokens.lightTextPrimary,
+                           height: 1.4,
+@@ -256,10 +248,10 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+                   children: [
+                     Row(
+                       children: [
+-                        const Expanded(
++                        Expanded(
+                           child: Text(
+-                            'Welcome to Tổng Tài',
+-                            style: TextStyle(
++                            context.l10n.homeWelcome,
++                            style: const TextStyle(
+                               fontSize: 20,
+                               fontWeight: FontWeight.bold,
+                             ),
+@@ -312,28 +304,28 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+                   ActionChip(
+                     key: const Key('home-quick-customer'),
+                     avatar: const Icon(Icons.person_add_alt, size: 18),
+-                    label: const Text('+ Khách hàng'),
++                    label: Text(context.l10n.homeAddCustomer),
+                     onPressed: () =>
+                         _push(context, const TongtaiCustomerListScreen()),
+                   ),
+                   ActionChip(
+                     key: const Key('home-quick-product'),
+                     avatar: const Icon(Icons.add_box_outlined, size: 18),
+-                    label: const Text('+ Sản phẩm'),
++                    label: Text(context.l10n.homeAddProduct),
+                     onPressed: () =>
+                         _push(context, const TongtaiInventoryScreen()),
+                   ),
+                   ActionChip(
+                     key: const Key('home-quick-order'),
+                     avatar: const Icon(Icons.receipt_long_outlined, size: 18),
+-                    label: const Text('+ Đơn hàng'),
++                    label: Text(context.l10n.homeAddOrder),
+                     onPressed: () =>
+                         _push(context, const TongtaiCustomerListScreen()),
+                   ),
+                   ActionChip(
+                     key: const Key('home-quick-goal'),
+                     avatar: const Icon(Icons.flag_outlined, size: 18),
+-                    label: const Text('+ Mục tiêu'),
++                    label: Text(context.l10n.homeAddGoal),
+                     onPressed: () => _push(context, const TongtaiGoalsScreen()),
+                   ),
+                 ],
+@@ -345,7 +337,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+             _SectionHeader(
+               title: 'Business KPIs',
+               actionKey: const Key('home-open-reports'),
+-              actionLabel: 'Xem báo cáo',
++              actionLabel: context.l10n.homeViewReports,
+               onAction: () => _push(context, const TongtaiReportsScreen()),
+             ),
+             const SizedBox(height: 12),
+@@ -465,7 +457,7 @@ class _GetStartedCard extends StatelessWidget {
+             ),
+             const SizedBox(height: 4),
+             Text(
+-              'Nhập dữ liệu kinh doanh đầu tiên của bạn.',
++              context.l10n.homeEmptyBody,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+               ),
+@@ -674,7 +666,7 @@ class _KpiRow extends StatelessWidget {
+         Expanded(
+           child: _KpiTile(
+             tileKey: const Key('home-kpi-orders'),
+-            label: 'Đơn hàng',
++            label: context.l10n.kpiOrders,
+             value: '${metrics.ordersCount}',
+             color: TongtaiDesignTokens.consumerBlue,
+           ),
+@@ -683,7 +675,7 @@ class _KpiRow extends StatelessWidget {
+         Expanded(
+           child: _KpiTile(
+             tileKey: const Key('home-kpi-aov'),
+-            label: 'Đơn TB',
++            label: context.l10n.kpiAovShort,
+             value: TongtaiFormatters.vndShort(metrics.averageOrderValue),
+             color: TongtaiDesignTokens.producerGreen,
+           ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart b/lib/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart
+index 0c41893..8bc9ee2 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart
+@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
+ import '../../core/tongtai_formatters.dart';
+ import '../../inventory/product.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Inventory Picker (WTM-126) — the only way to add an order line: the seller
+ /// picks a real inventory [Product] (never free text, Founder G-2). Searchable
+@@ -107,7 +108,7 @@ class _TongtaiInventoryPickerScreenState
+                             ),
+                           ),
+                           trailing: Text(
+-                            p.stockStatus.labelEn,
++                            p.stockStatus.label(context.l10n.languageCode),
+                             style: TongtaiDesignTokens.captionStyle,
+                           ),
+                           onTap: () => Navigator.of(context).pop(p),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_inventory_screen.dart b/lib/features/tongtai/ui/screens/tongtai_inventory_screen.dart
+index a360e83..d27172c 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_inventory_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_inventory_screen.dart
+@@ -11,6 +11,7 @@ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../providers/tongtai_inventory_provider.dart';
+ import 'tongtai_product_form_screen.dart';
+ import 'tongtai_stock_alerts_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Color for a [StockStatus] badge (WTM-68 AC: color-coded in stock / low /
+ /// out). Pulled out as a pure function so the mapping is directly unit-testable
+@@ -440,7 +441,7 @@ class _SortBar extends StatelessWidget {
+           Padding(
+             padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+             child: ChoiceChip(
+-              label: Text(option.labelEn),
++              label: Text(option.label(context.l10n.languageCode)),
+               selected: sort == option,
+               onSelected: (_) => onSort(option),
+             ),
+@@ -650,7 +651,7 @@ class _StatusChip extends StatelessWidget {
+         border: Border.all(color: color),
+       ),
+       child: Text(
+-        status.labelEn,
++        status.label(context.l10n.languageCode),
+         style: TongtaiDesignTokens.captionStyle.copyWith(
+           color: color,
+           fontWeight: FontWeight.w600,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_key_scan_screen.dart b/lib/features/tongtai/ui/screens/tongtai_key_scan_screen.dart
+index 4be5c11..fb61781 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_key_scan_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_key_scan_screen.dart
+@@ -1,6 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'package:mobile_scanner/mobile_scanner.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ 
+ /// QR scanner for BYOK API keys (WTM-83, Founder-approved dependency).
+@@ -38,7 +39,7 @@ class _TongtaiKeyScanScreenState extends State<TongtaiKeyScanScreen> {
+     return Scaffold(
+       backgroundColor: Colors.black,
+       appBar: AppBar(
+-        title: const Text('Quét QR chứa API key'),
++        title: Text(context.l10n.titleKeyScan),
+         backgroundColor: Colors.black,
+         foregroundColor: Colors.white,
+       ),
+@@ -50,8 +51,7 @@ class _TongtaiKeyScanScreenState extends State<TongtaiKeyScanScreen> {
+             child: Padding(
+               padding: const EdgeInsets.all(TongtaiDesignTokens.spacing6),
+               child: Text(
+-                'Đưa mã QR vào khung hình — khóa sẽ tự điền vào ô nhập.\n'
+-                'Point the camera at the QR code.',
++                context.l10n.keyScanHint,
+                 textAlign: TextAlign.center,
+                 style: TongtaiDesignTokens.smallStyle.copyWith(
+                   color: Colors.white,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_more_screen.dart b/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
+index c8f303f..2309e3d 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
+@@ -62,13 +62,8 @@ class TongtaiMoreScreen extends ConsumerWidget {
+     final confirmed = await showDialog<bool>(
+       context: context,
+       builder: (dialogContext) => AlertDialog(
+-        title: const Text('Nạp dữ liệu mẫu?'),
+-        content: const Text(
+-          'Dữ liệu mẫu sẽ được thêm vào ứng dụng như dữ liệu bình thường — '
+-          'mọi màn hình (Home, Kho, Khách hàng, Báo cáo, Cơ hội…) cùng hiển '
+-          'thị. Bạn có thể sửa từng dòng hoặc xóa toàn bộ mẫu bất cứ lúc nào; '
+-          'dữ liệu bạn tự nhập không bị ảnh hưởng.',
+-        ),
++        title: Text(dialogContext.l10n.moreLoadSampleConfirmTitle),
++        content: Text(dialogContext.l10n.moreLoadSampleConfirmBody),
+         actions: [
+           TextButton(
+             onPressed: () => Navigator.of(dialogContext).pop(false),
+@@ -77,7 +72,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+           FilledButton(
+             key: const Key('more-demo-confirm'),
+             onPressed: () => Navigator.of(dialogContext).pop(true),
+-            child: const Text('Nạp mẫu'),
++            child: Text(dialogContext.l10n.moreLoadSampleAction),
+           ),
+         ],
+       ),
+@@ -85,13 +80,10 @@ class TongtaiMoreScreen extends ConsumerWidget {
+     if (confirmed != true || !context.mounted) return;
+     await ref.read(sampleDataSeederProvider).seed();
+     if (!context.mounted) return;
++    final l10n = context.l10n;
+     ScaffoldMessenger.of(context)
+       ..hideCurrentSnackBar()
+-      ..showSnackBar(
+-        const SnackBar(
+-          content: Text('Đã nạp dữ liệu mẫu — xem ở mọi màn hình.'),
+-        ),
+-      );
++      ..showSnackBar(SnackBar(content: Text(l10n.moreSampleLoadedSnack)));
+   }
+ 
+   /// Removes ONLY the `sample-` prefixed rows — user data stays (tested).
+@@ -99,10 +91,8 @@ class TongtaiMoreScreen extends ConsumerWidget {
+     final confirmed = await showDialog<bool>(
+       context: context,
+       builder: (dialogContext) => AlertDialog(
+-        title: const Text('Xóa toàn bộ dữ liệu mẫu?'),
+-        content: const Text(
+-          'Chỉ các bản ghi mẫu bị xóa. Dữ liệu bạn tự nhập được giữ nguyên.',
+-        ),
++        title: Text(dialogContext.l10n.moreRemoveSampleConfirmTitle),
++        content: Text(dialogContext.l10n.moreRemoveSampleConfirmBody),
+         actions: [
+           TextButton(
+             onPressed: () => Navigator.of(dialogContext).pop(false),
+@@ -111,7 +101,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+           FilledButton(
+             key: const Key('more-remove-sample-confirm'),
+             onPressed: () => Navigator.of(dialogContext).pop(true),
+-            child: const Text('Xóa mẫu'),
++            child: Text(dialogContext.l10n.moreRemoveSampleAction),
+           ),
+         ],
+       ),
+@@ -119,11 +109,10 @@ class TongtaiMoreScreen extends ConsumerWidget {
+     if (confirmed != true || !context.mounted) return;
+     await ref.read(sampleDataSeederProvider).removeAll();
+     if (!context.mounted) return;
++    final l10n = context.l10n;
+     ScaffoldMessenger.of(context)
+       ..hideCurrentSnackBar()
+-      ..showSnackBar(
+-        const SnackBar(content: Text('Đã xóa toàn bộ dữ liệu mẫu.')),
+-      );
++      ..showSnackBar(SnackBar(content: Text(l10n.moreSampleRemovedSnack)));
+   }
+ 
+   @override
+@@ -275,7 +264,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                 ),
+                 _SettingsItem(
+                   icon: Icons.info_outlined,
+-                  label: 'About Tổng Tài',
++                  label: context.l10n.moreAbout,
+                   onTap: () {},
+                 ),
+                 _SettingsItem(
+diff --git a/lib/features/tongtai/ui/screens/tongtai_onboarding_screen.dart b/lib/features/tongtai/ui/screens/tongtai_onboarding_screen.dart
+index b1de957..bc32aea 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_onboarding_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_onboarding_screen.dart
+@@ -1,5 +1,6 @@
+ import 'package:flutter/material.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../onboarding/tongtai_onboarding_content.dart';
+ 
+@@ -61,7 +62,6 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
+   Widget build(BuildContext context) {
+     final languageCode =
+         Localizations.maybeLocaleOf(context)?.languageCode ?? 'en';
+-    final isVi = languageCode == 'vi';
+     final pages = widget.pages;
+     final accent = pages[_index].accentColor;
+ 
+@@ -84,7 +84,7 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
+                   style: TextButton.styleFrom(
+                     foregroundColor: TongtaiDesignTokens.lightTextSecondary,
+                   ),
+-                  child: Text(isVi ? 'Bỏ qua' : 'Skip'),
++                  child: Text(context.l10n.actionSkip),
+                 ),
+               ),
+             ),
+@@ -132,8 +132,8 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
+                   ),
+                   child: Text(
+                     _isLast
+-                        ? (isVi ? 'Bắt đầu' : 'Get Started')
+-                        : (isVi ? 'Tiếp tục' : 'Next'),
++                        ? context.l10n.actionGetStarted
++                        : context.l10n.actionNext,
+                     style: TongtaiDesignTokens.bodyStyle.copyWith(
+                       fontWeight: FontWeight.w600,
+                     ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart b/lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart
+index 4fdcbb3..18a3ce9 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart
+@@ -76,6 +76,7 @@ class _TongtaiOpportunityDetailScreenState
+   /// WTM-94 — Opportunity Action: one tap turns this opportunity into a
+   /// Business Journey goal (idempotent id, so repeat taps never duplicate).
+   Future<void> _createGoal() async {
++    final l10n = context.l10n;
+     final now = (widget.clock ?? DateTime.now)();
+     final goal = BusinessGoal(
+       id: 'goal-from-${_o.id}',
+@@ -87,15 +88,15 @@ class _TongtaiOpportunityDetailScreenState
+       growthAchieved: 0,
+       startDate: now,
+       endDate: now.add(const Duration(days: 45)),
+-      notes: 'Tạo từ cơ hội: ${_o.description}',
++      notes: l10n.oppCreatedFromNote(_o.description),
+       createdAt: now,
+       updatedAt: now,
+     );
+     await ref.read(businessGoalRepositoryProvider).upsert(goal);
+     if (!mounted) return;
+-    ScaffoldMessenger.of(context).showSnackBar(
+-      SnackBar(content: Text('Đã tạo mục tiêu "${_o.title}" trong Journey')),
+-    );
++    ScaffoldMessenger.of(
++      context,
++    ).showSnackBar(SnackBar(content: Text(l10n.oppGoalCreatedSnack(_o.title))));
+   }
+ 
+   void _toggleSaved() {
+@@ -105,12 +106,12 @@ class _TongtaiOpportunityDetailScreenState
+ 
+   void _interested() {
+     widget.onInterested?.call();
+-    _closeWith('Đã đánh dấu quan tâm "${_o.title}"');
++    _closeWith(context.l10n.oppInterestedSnack(_o.title));
+   }
+ 
+   void _dismiss() {
+     widget.onDismiss?.call();
+-    _closeWith('Đã bỏ qua "${_o.title}"');
++    _closeWith(context.l10n.oppDismissedSnack(_o.title));
+   }
+ 
+   void _closeWith(String message) {
+@@ -122,20 +123,21 @@ class _TongtaiOpportunityDetailScreenState
+ 
+   @override
+   Widget build(BuildContext context) {
++    final l10n = context.l10n;
+     final color = tongtaiOpportunityTypeColor(_o.type);
+     final plan = opportunityActionPlan(_o);
+ 
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Chi tiết cơ hội'),
++        title: Text(l10n.titleOpportunityDetail),
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+         elevation: 0,
+         actions: [
+           IconButton(
+             key: const Key('opportunity-detail-save'),
+-            tooltip: _saved ? 'Bỏ lưu' : 'Lưu lại',
++            tooltip: _saved ? l10n.oppUnsaveTooltip : l10n.oppSaveTooltip,
+             icon: Icon(
+               _saved ? Icons.bookmark : Icons.bookmark_outline,
+               color: _saved
+@@ -152,7 +154,10 @@ class _TongtaiOpportunityDetailScreenState
+           // ── Type + AI score + title ──────────────────────────────────
+           Row(
+             children: [
+-              _TypeBadge(label: _o.type.labelVi, color: color),
++              _TypeBadge(
++                label: _o.type.label(context.l10n.languageCode),
++                color: color,
++              ),
+               const Spacer(),
+               _ScoreBadge(score: _o.aiScore),
+             ],
+@@ -187,7 +192,7 @@ class _TongtaiOpportunityDetailScreenState
+             children: [
+               Expanded(
+                 child: _StatTile(
+-                  label: 'ROI ước tính',
++                  label: l10n.oppRoi,
+                   value: '${(_o.estimatedRoi * 100).round()}%',
+                   accent: TongtaiDesignTokens.producerGreen,
+                 ),
+@@ -195,7 +200,7 @@ class _TongtaiOpportunityDetailScreenState
+               const SizedBox(width: TongtaiDesignTokens.spacing3),
+               Expanded(
+                 child: _StatTile(
+-                  label: 'Tác động',
++                  label: l10n.oppImpact,
+                   value: '+${TongtaiFormatters.vndShort(_o.expectedImpact)}',
+                   accent: TongtaiDesignTokens.financePurple,
+                 ),
+@@ -203,7 +208,7 @@ class _TongtaiOpportunityDetailScreenState
+               const SizedBox(width: TongtaiDesignTokens.spacing3),
+               Expanded(
+                 child: _StatTile(
+-                  label: 'Phát hiện',
++                  label: l10n.oppDetected,
+                   value: TongtaiFormatters.isoDate(_o.discoveredAt),
+                   accent: TongtaiDesignTokens.consumerBlue,
+                 ),
+@@ -214,7 +219,7 @@ class _TongtaiOpportunityDetailScreenState
+ 
+           // ── Reasoning ────────────────────────────────────────────────
+           Text(
+-            'Vì sao đáng làm',
++            l10n.oppWhyWorth,
+             style: TongtaiDesignTokens.heading3Style.copyWith(
+               color: TongtaiDesignTokens.lightTextPrimary,
+               fontWeight: FontWeight.w600,
+@@ -262,7 +267,7 @@ class _TongtaiOpportunityDetailScreenState
+                             ? 'Workizen AI'
+                             : 'Workizen AI — '
+                                   '${_insight!.isAi ? (_insight!.provider?.displayName ?? 'AI') : 'Rule-based'}'
+-                                  '${_insight!.aiScore != null ? ' · điểm AI ${_insight!.aiScore!.round()}' : ''}',
++                                  '${_insight!.aiScore != null ? ' · ${l10n.aiScoreLabel} ${_insight!.aiScore!.round()}' : ''}',
+                         style: TongtaiDesignTokens.captionStyle.copyWith(
+                           color: TongtaiDesignTokens.lightTextSecondary,
+                           fontWeight: FontWeight.w600,
+@@ -301,7 +306,7 @@ class _TongtaiOpportunityDetailScreenState
+ 
+           // ── Action plan ──────────────────────────────────────────────
+           Text(
+-            'Kế hoạch hành động',
++            l10n.sectionActionPlan,
+             style: TongtaiDesignTokens.heading3Style.copyWith(
+               color: TongtaiDesignTokens.lightTextPrimary,
+               fontWeight: FontWeight.w600,
+@@ -334,7 +339,7 @@ class _TongtaiOpportunityDetailScreenState
+                   key: const Key('opportunity-detail-dismiss'),
+                   onPressed: _dismiss,
+                   icon: const Icon(Icons.close),
+-                  label: const Text('Bỏ qua'),
++                  label: Text(l10n.oppDismiss),
+                   style: OutlinedButton.styleFrom(
+                     foregroundColor: TongtaiDesignTokens.error,
+                     side: const BorderSide(color: TongtaiDesignTokens.error),
+@@ -350,7 +355,7 @@ class _TongtaiOpportunityDetailScreenState
+                   key: const Key('opportunity-detail-interested'),
+                   onPressed: _interested,
+                   icon: const Icon(Icons.thumb_up_alt_outlined),
+-                  label: const Text('Quan tâm'),
++                  label: Text(l10n.oppInterested),
+                   style: FilledButton.styleFrom(
+                     backgroundColor: TongtaiDesignTokens.producerGreen,
+                     padding: const EdgeInsets.symmetric(
+@@ -421,7 +426,7 @@ class _ScoreBadge extends StatelessWidget {
+             ),
+           ),
+           Text(
+-            'điểm AI',
++            context.l10n.aiScoreLabel,
+             style: TongtaiDesignTokens.captionStyle.copyWith(
+               color: TongtaiDesignTokens.financePurple,
+               fontSize: 9,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart b/lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart
+index bd70d81..f42e877 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart
+@@ -11,6 +11,7 @@ import '../../providers/tongtai_context_provider.dart';
+ import '../widgets/tongtai_fox_mascot.dart';
+ import '../widgets/tongtai_opportunity_signal_badges.dart';
+ import 'tongtai_opportunity_detail_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ // The type→color helper now lives in opportunity_theme.dart (shared with the
+ // detail screen); re-exported so existing importers keep resolving it here.
+@@ -85,14 +86,15 @@ class _TongtaiOpportunityFeedScreenState
+   }
+ 
+   void _onDismissed(Opportunity opportunity) {
++    final l10n = context.l10n;
+     _controller.dismiss(opportunity.id);
+     ScaffoldMessenger.of(context)
+       ..hideCurrentSnackBar()
+       ..showSnackBar(
+         SnackBar(
+-          content: Text('Đã bỏ qua "${opportunity.title}"'),
++          content: Text(l10n.oppDismissedSnack(opportunity.title)),
+           action: SnackBarAction(
+-            label: 'Hoàn tác',
++            label: l10n.actionUndo,
+             onPressed: () => _controller.restore(opportunity.id),
+           ),
+         ),
+@@ -104,7 +106,9 @@ class _TongtaiOpportunityFeedScreenState
+     ScaffoldMessenger.of(context)
+       ..hideCurrentSnackBar()
+       ..showSnackBar(
+-        SnackBar(content: Text('Đã đánh dấu quan tâm "${opportunity.title}"')),
++        SnackBar(
++          content: Text(context.l10n.oppInterestedSnack(opportunity.title)),
++        ),
+       );
+   }
+ 
+@@ -178,7 +182,7 @@ class _TongtaiOpportunityFeedScreenState
+                         ),
+                         child: ChoiceChip(
+                           key: Key('opportunity-type-${type.name}'),
+-                          label: Text(type.labelVi),
++                          label: Text(type.label(context.l10n.languageCode)),
+                           selected: _query.type == type,
+                           onSelected: (selected) => setState(
+                             () => _query = selected
+@@ -199,7 +203,7 @@ class _TongtaiOpportunityFeedScreenState
+                         ),
+                         child: ChoiceChip(
+                           key: Key('opportunity-sort-${sort.name}'),
+-                          label: Text(sort.labelVi),
++                          label: Text(sort.label(context.l10n.languageCode)),
+                           selected: _query.sort == sort,
+                           onSelected: (_) => setState(
+                             () => _query = _query.copyWith(sort: sort),
+@@ -250,17 +254,17 @@ class _TongtaiOpportunityFeedScreenState
+                                 'opportunity-${opportunity.id}-'
+                                 '${opportunity.reaction.name}',
+                               ),
+-                              background: const _SwipeHint(
++                              background: _SwipeHint(
+                                 alignment: Alignment.centerLeft,
+                                 color: TongtaiDesignTokens.success,
+                                 icon: Icons.thumb_up_alt_outlined,
+-                                label: 'Quan tâm',
++                                label: context.l10n.oppInterested,
+                               ),
+-                              secondaryBackground: const _SwipeHint(
++                              secondaryBackground: _SwipeHint(
+                                 alignment: Alignment.centerRight,
+                                 color: TongtaiDesignTokens.error,
+                                 icon: Icons.close,
+-                                label: 'Bỏ qua',
++                                label: context.l10n.oppDismiss,
+                               ),
+                               onDismissed: (direction) =>
+                                   direction == DismissDirection.startToEnd
+@@ -342,7 +346,7 @@ class _OpportunityCard extends StatelessWidget {
+                     border: Border.all(color: color),
+                   ),
+                   child: Text(
+-                    opportunity.type.labelVi,
++                    opportunity.type.label(context.l10n.languageCode),
+                     style: TongtaiDesignTokens.captionStyle.copyWith(
+                       color: color,
+                       fontWeight: FontWeight.w600,
+@@ -352,7 +356,7 @@ class _OpportunityCard extends StatelessWidget {
+                 if (opportunity.reaction != OpportunityReaction.none) ...[
+                   const SizedBox(width: TongtaiDesignTokens.spacing2),
+                   Text(
+-                    opportunity.reaction.labelVi,
++                    opportunity.reaction.label(context.l10n.languageCode),
+                     style: TongtaiDesignTokens.captionStyle.copyWith(
+                       color: TongtaiDesignTokens.lightTextSecondary,
+                       fontStyle: FontStyle.italic,
+@@ -362,7 +366,9 @@ class _OpportunityCard extends StatelessWidget {
+                 const Spacer(),
+                 IconButton(
+                   key: Key('opportunity-save-${opportunity.id}'),
+-                  tooltip: opportunity.isSaved ? 'Bỏ lưu' : 'Lưu lại',
++                  tooltip: opportunity.isSaved
++                      ? context.l10n.oppUnsaveTooltip
++                      : context.l10n.oppSaveTooltip,
+                   visualDensity: VisualDensity.compact,
+                   icon: Icon(
+                     opportunity.isSaved
+@@ -398,9 +404,10 @@ class _OpportunityCard extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing2),
+             Text(
+-              'Ước tính +${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
++              '${context.l10n.oppEstimatePrefix} '
++              '+${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
+               ' • ROI ${(opportunity.estimatedRoi * 100).round()}%'
+-              ' • Điểm ${opportunity.aiScore.round()}',
++              ' • ${context.l10n.oppScoreLabel} ${opportunity.aiScore.round()}',
+               style: TongtaiDesignTokens.captionStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+                 fontWeight: FontWeight.w600,
+@@ -483,9 +490,7 @@ class _EmptyState extends StatelessWidget {
+               const TongtaiFoxMascot.face(size: 64),
+             const SizedBox(height: TongtaiDesignTokens.spacing3),
+             Text(
+-              savedOnly
+-                  ? 'Chưa có cơ hội nào được lưu'
+-                  : 'Chưa có cơ hội nào trong mục này',
++              savedOnly ? context.l10n.oppEmptySaved : context.l10n.oppEmptyTab,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.bodyStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart b/lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart
+index d8d1007..d7cbc87 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart
+@@ -11,6 +11,7 @@ import '../../inventory/product_form.dart';
+ import '../../inventory/product_history.dart';
+ import '../../inventory/product_image_source.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Add / Edit Product form (WTM-69).
+ ///
+@@ -335,11 +336,12 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
+     TextInputType? keyboardType,
+     List<TextInputFormatter>? inputFormatters,
+   }) {
++    final code = context.l10n.languageCode;
+     final label = optional
+-        ? '${field.labelEn} (optional)'
++        ? '${field.label(code)} ${context.l10n.labelOptionalSuffix}'
+         : field.isRequired
+-        ? '${field.labelEn} *'
+-        : field.labelEn;
++        ? '${field.label(code)} *'
++        : field.label(code);
+     return Padding(
+       padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+       child: TextField(
+@@ -654,7 +656,8 @@ class _ChangeList extends StatelessWidget {
+             Padding(
+               padding: const EdgeInsets.only(bottom: 2),
+               child: Text(
+-                '${change.field.labelEn}: ${change.before} → ${change.after}',
++                '${change.field.label(context.l10n.languageCode)}: '
++                '${change.before} → ${change.after}',
+                 style: TongtaiDesignTokens.captionStyle.copyWith(
+                   color: TongtaiDesignTokens.lightTextSecondary,
+                 ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart b/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
+index bd24fa1..35c1686 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
+@@ -158,11 +158,13 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
+         widget.healthAiService ?? ref.read(businessHealthAiServiceProvider);
+     final assessment = await service.assess();
+     if (!mounted) return;
++    final l10n = context.l10n;
+     setState(() {
+       _aiResult = AiCardResult(
+         // The badge status stays rule-based (G-3D) — the title carries it so
+         // the AI text is always read against the authoritative status.
+-        title: 'Sức khỏe: ${assessment.ruleHealth.label('vi')}',
++        title:
++            '${l10n.aiHealth}: ${assessment.ruleHealth.label(l10n.languageCode)}',
+         text: assessment.text,
+         sourceLabel: assessment.isAi
+             ? (assessment.provider?.displayName ?? 'AI')
+@@ -516,7 +518,7 @@ class _AiSummaryCard extends StatelessWidget {
+                 ),
+                 const SizedBox(width: TongtaiDesignTokens.spacing2),
+                 Text(
+-                  'Workizen AI đang phân tích…',
++                  context.l10n.reportsAnalyzing,
+                   style: TongtaiDesignTokens.smallStyle.copyWith(
+                     color: TongtaiDesignTokens.lightTextSecondary,
+                   ),
+@@ -590,7 +592,7 @@ class _PeriodSelector extends StatelessWidget {
+         for (final p in ReportPeriod.values)
+           ChoiceChip(
+             key: Key('reports-period-${p.name}'),
+-            label: Text(p.labelVi),
++            label: Text(p.label(context.l10n.languageCode)),
+             selected: p == period,
+             onSelected: (_) => onChanged(p),
+             visualDensity: VisualDensity.compact,
+@@ -629,7 +631,7 @@ class _SectionHeader extends StatelessWidget {
+         TextButton(
+           key: actionKey,
+           onPressed: onAction,
+-          child: const Text('Xem tất cả'),
++          child: Text(context.l10n.actionViewAll),
+         ),
+       ],
+     );
+@@ -651,7 +653,7 @@ class _PipelineCard extends StatelessWidget {
+         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+         decoration: _cardDecoration,
+         child: Text(
+-          'Không có cơ hội đang mở',
++          context.l10n.reportsNoPipeline,
+           style: TongtaiDesignTokens.smallStyle.copyWith(
+             color: TongtaiDesignTokens.lightTextSecondary,
+           ),
+@@ -670,13 +672,13 @@ class _PipelineCard extends StatelessWidget {
+             children: [
+               Expanded(
+                 child: _PipelineStat(
+-                  label: 'Đang mở',
++                  label: context.l10n.reportsOpenLabel,
+                   value: '${pipeline.activeCount}',
+                 ),
+               ),
+               Expanded(
+                 child: _PipelineStat(
+-                  label: 'Giá trị pipeline',
++                  label: context.l10n.reportsPipelineValue,
+                   value: TongtaiFormatters.vndShort(pipeline.pipelineValue),
+                 ),
+               ),
+@@ -773,7 +775,8 @@ class _TopProductsCard extends StatelessWidget {
+               rank: i + 1,
+               accent: TongtaiDesignTokens.inventoryOrange,
+               title: products[i].name,
+-              subtitle: 'Đã bán ${products[i].quantity}',
++              subtitle:
++                  '${context.l10n.reportsSoldPrefix} ${products[i].quantity}',
+               value: TongtaiFormatters.vndShort(products[i].revenue),
+             ),
+         ],
+@@ -803,7 +806,7 @@ class _TopCustomersCard extends StatelessWidget {
+               rank: i + 1,
+               accent: TongtaiDesignTokens.consumerBlue,
+               title: customers[i].name,
+-              subtitle: '${customers[i].orders} đơn',
++              subtitle: context.l10n.reportsOrdersCount(customers[i].orders),
+               value: TongtaiFormatters.vndShort(customers[i].spend),
+             ),
+         ],
+@@ -1147,7 +1150,7 @@ class _ReportsEmptyState extends StatelessWidget {
+             const TongtaiFoxMascot.face(size: 72),
+             const SizedBox(height: TongtaiDesignTokens.spacing4),
+             Text(
+-              'Chưa có doanh thu để báo cáo',
++              context.l10n.reportsEmptyTitle,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.heading3Style.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -1155,8 +1158,7 @@ class _ReportsEmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing2),
+             Text(
+-              'Bán đơn hàng đầu tiên và các chỉ số sẽ hiện ở đây.\n'
+-              'Your KPIs appear here after the first sale.',
++              context.l10n.reportsEmptyBody,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart b/lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart
+index 412b233..828ba16 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart
+@@ -7,6 +7,7 @@ import '../../inventory/stock_alert.dart';
+ import '../../inventory/stock_alert_service.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ import 'tongtai_product_form_screen.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// Color for a [StockAlertLevel] badge (WTM-70): out of stock is the error red,
+ /// low stock the warning amber. Pure function so the mapping is unit-testable
+@@ -322,7 +323,7 @@ class _LevelChip extends StatelessWidget {
+         border: Border.all(color: color),
+       ),
+       child: Text(
+-        level.labelEn,
++        level.label(context.l10n.languageCode),
+         style: TongtaiDesignTokens.captionStyle.copyWith(
+           color: color,
+           fontWeight: FontWeight.w600,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart b/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
+index 547118a..9ac54dd 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
+@@ -138,7 +138,7 @@ class _FilterRow extends StatelessWidget {
+           Padding(
+             padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+             child: ChoiceChip(
+-              label: const Text('Tất cả'),
++              label: Text(context.l10n.filterAll),
+               selected: selected == null,
+               onSelected: (_) => onSelected(null),
+             ),
+@@ -150,7 +150,7 @@ class _FilterRow extends StatelessWidget {
+               ),
+               child: ChoiceChip(
+                 key: Key('timeline-filter-${t.name}'),
+-                label: Text(t.labelVi),
++                label: Text(t.label(context.l10n.languageCode)),
+                 selected: selected == t,
+                 onSelected: (_) => onSelected(t),
+               ),
+@@ -167,11 +167,11 @@ class _DaySection extends StatelessWidget {
+   final TimelineDay day;
+   final DateTime now;
+ 
+-  String get _label {
++  String _label(AppStrings l10n) {
+     final today = DateTime(now.year, now.month, now.day);
+     final diff = today.difference(day.date).inDays;
+-    if (diff == 0) return 'Hôm nay';
+-    if (diff == 1) return 'Hôm qua';
++    if (diff == 0) return l10n.dateToday;
++    if (diff == 1) return l10n.dateYesterday;
+     return TongtaiFormatters.isoDate(day.date);
+   }
+ 
+@@ -188,7 +188,7 @@ class _DaySection extends StatelessWidget {
+             TongtaiDesignTokens.spacing2,
+           ),
+           child: Text(
+-            _label,
++            _label(context.l10n),
+             style: TongtaiDesignTokens.smallStyle.copyWith(
+               color: TongtaiDesignTokens.lightTextSecondary,
+               fontWeight: FontWeight.w700,
+@@ -305,7 +305,7 @@ class _TimelineEmptyState extends StatelessWidget {
+             const TongtaiFoxMascot.face(size: 72),
+             const SizedBox(height: TongtaiDesignTokens.spacing4),
+             Text(
+-              'Chưa có hoạt động nào',
++              context.l10n.timelineEmptyTitle,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.heading3Style.copyWith(
+                 color: TongtaiDesignTokens.lightTextPrimary,
+@@ -313,8 +313,7 @@ class _TimelineEmptyState extends StatelessWidget {
+             ),
+             const SizedBox(height: TongtaiDesignTokens.spacing2),
+             Text(
+-              'Đơn hàng, thu chi, cơ hội và mục tiêu sẽ xuất hiện ở đây theo '
+-              'thời gian.',
++              context.l10n.timelineEmptyBody,
+               textAlign: TextAlign.center,
+               style: TongtaiDesignTokens.smallStyle.copyWith(
+                 color: TongtaiDesignTokens.lightTextSecondary,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart b/lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart
+index 6785260..dc08b4a 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart
+@@ -1,6 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter/services.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../core/tongtai_enums.dart';
+ import '../../core/tongtai_formatters.dart';
+ import '../../finance/finance_transaction.dart';
+@@ -86,10 +87,11 @@ class _TongtaiTransactionFormScreenState
+   @override
+   Widget build(BuildContext context) {
+     final date = _data.date ?? _clock();
++    final l10n = context.l10n;
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: const Text('Ghi giao dịch'),
++        title: Text(l10n.titleTransactionForm),
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+         elevation: 0,
+@@ -130,7 +132,7 @@ class _TongtaiTransactionFormScreenState
+           const SizedBox(height: TongtaiDesignTokens.spacing5),
+ 
+           // ── Amount ───────────────────────────────────────────────────
+-          _Label('Số tiền (₫)'),
++          _Label(l10n.txnAmountLabel),
+           const SizedBox(height: TongtaiDesignTokens.spacing2),
+           TextField(
+             key: const Key('transaction-amount'),
+@@ -138,7 +140,7 @@ class _TongtaiTransactionFormScreenState
+             keyboardType: TextInputType.number,
+             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+             decoration: InputDecoration(
+-              hintText: 'Ví dụ: 1500000',
++              hintText: l10n.txnAmountHint,
+               border: const OutlineInputBorder(),
+               errorText: _errors[TransactionField.amount],
+               suffixText: _data.parsedAmount != null
+@@ -150,7 +152,7 @@ class _TongtaiTransactionFormScreenState
+           const SizedBox(height: TongtaiDesignTokens.spacing4),
+ 
+           // ── Category ─────────────────────────────────────────────────
+-          _Label('Nhóm'),
++          _Label(l10n.txnCategoryLabel),
+           const SizedBox(height: TongtaiDesignTokens.spacing2),
+           Wrap(
+             spacing: TongtaiDesignTokens.spacing2,
+@@ -177,7 +179,7 @@ class _TongtaiTransactionFormScreenState
+           const SizedBox(height: TongtaiDesignTokens.spacing4),
+ 
+           // ── Date ─────────────────────────────────────────────────────
+-          _Label('Ngày'),
++          _Label(l10n.txnDateLabel),
+           const SizedBox(height: TongtaiDesignTokens.spacing2),
+           OutlinedButton.icon(
+             key: const Key('transaction-date'),
+@@ -195,14 +197,14 @@ class _TongtaiTransactionFormScreenState
+           const SizedBox(height: TongtaiDesignTokens.spacing4),
+ 
+           // ── Description ──────────────────────────────────────────────
+-          _Label('Ghi chú (không bắt buộc)'),
++          _Label(l10n.txnNoteLabel),
+           const SizedBox(height: TongtaiDesignTokens.spacing2),
+           TextField(
+             key: const Key('transaction-description'),
+             controller: _descriptionController,
+-            decoration: const InputDecoration(
+-              hintText: 'Ví dụ: Bán lô quạt cho khách sỉ',
+-              border: OutlineInputBorder(),
++            decoration: InputDecoration(
++              hintText: l10n.txnNoteHint,
++              border: const OutlineInputBorder(),
+             ),
+             onChanged: (v) => _update(_data.copyWith(description: v)),
+           ),
+@@ -217,7 +219,7 @@ class _TongtaiTransactionFormScreenState
+                 vertical: TongtaiDesignTokens.spacing4,
+               ),
+             ),
+-            child: const Text('Lưu giao dịch'),
++            child: Text(l10n.txnSave),
+           ),
+         ],
+       ),
+diff --git a/lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart b/lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart
+index 2ec70fc..e830547 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart
+@@ -1,6 +1,7 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
++import '../../../../core/l10n/app_strings.dart';
+ import '../../../../database/search/tongtai_search_service.dart';
+ import '../../core/tongtai_formatters.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+@@ -174,11 +175,10 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final isVi = _lang == 'vi';
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: Text(isVi ? 'Tìm kiếm' : 'Search'),
++        title: Text(context.l10n.actionSearch),
+         elevation: 0,
+         backgroundColor: TongtaiDesignTokens.lightBackground,
+         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+@@ -186,7 +186,7 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
+           ListenableBuilder(
+             listenable: _controller,
+             builder: (context, _) => IconButton(
+-              tooltip: isVi ? 'Bộ lọc nâng cao' : 'Advanced filters',
++              tooltip: context.l10n.searchAdvancedFilters,
+               onPressed: () =>
+                   setState(() => _filtersExpanded = !_filtersExpanded),
+               icon: Badge(
+@@ -222,9 +222,7 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
+                   child: _SearchField(
+                     controller: _queryController,
+                     focusNode: _queryFocus,
+-                    hintText: isVi
+-                        ? 'Tìm nhà cung cấp, sản phẩm…'
+-                        : 'Search suppliers, products…',
++                    hintText: context.l10n.searchHint,
+                     onChanged: _controller.setQuery,
+                     onSubmitted: _onSubmit,
+                     onClear: _controller.query.isEmpty ? null : _clearQuery,
+@@ -393,7 +391,7 @@ class _AdvancedFilters extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final isVi = lang == 'vi';
++    final l10n = context.l10n;
+     return Container(
+       margin: const EdgeInsets.fromLTRB(
+         TongtaiDesignTokens.spacing4,
+@@ -415,7 +413,7 @@ class _AdvancedFilters extends StatelessWidget {
+           Row(
+             children: [
+               Text(
+-                isVi ? 'Bộ lọc nâng cao' : 'Advanced filters',
++                l10n.searchAdvancedFilters,
+                 style: TongtaiDesignTokens.smallStyle.copyWith(
+                   fontWeight: FontWeight.w700,
+                   color: TongtaiDesignTokens.lightTextPrimary,
+@@ -425,13 +423,13 @@ class _AdvancedFilters extends StatelessWidget {
+               if (filters.hasAny)
+                 TextButton(
+                   onPressed: onClear,
+-                  child: Text(isVi ? 'Xoá lọc' : 'Clear'),
++                  child: Text(l10n.searchClearFilters),
+                 ),
+             ],
+           ),
+           if (categories.isNotEmpty)
+             _FilterFacetRow(
+-              label: isVi ? 'Danh mục' : 'Category',
++              label: l10n.searchCategory,
+               children: [
+                 for (final category in categories)
+                   ChoiceChip(
+@@ -447,7 +445,7 @@ class _AdvancedFilters extends StatelessWidget {
+             ),
+           if (countries.isNotEmpty)
+             _FilterFacetRow(
+-              label: isVi ? 'Quốc gia' : 'Country',
++              label: l10n.searchCountry,
+               children: [
+                 for (final country in countries)
+                   ChoiceChip(
+@@ -462,7 +460,7 @@ class _AdvancedFilters extends StatelessWidget {
+               ],
+             ),
+           _FilterFacetRow(
+-            label: isVi ? 'Đánh giá' : 'Rating',
++            label: l10n.searchRating,
+             children: [
+               for (final rating in kTongtaiSearchRatingPresets)
+                 ChoiceChip(
+@@ -546,14 +544,12 @@ class _IdleView extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final isVi = lang == 'vi';
++    final l10n = context.l10n;
+     if (recent.isEmpty) {
+       return _CenteredMessage(
+         icon: Icons.search,
+-        title: isVi ? 'Tìm kiếm toàn bộ' : 'Search everything',
+-        subtitle: isVi
+-            ? 'Tìm nhà cung cấp, sản phẩm và hơn thế nữa.'
+-            : 'Find suppliers, products and more in one place.',
++        title: l10n.searchEverythingTitle,
++        subtitle: l10n.searchEverythingBody,
+       );
+     }
+     return SingleChildScrollView(
+@@ -570,7 +566,7 @@ class _IdleView extends StatelessWidget {
+               ),
+               const SizedBox(width: TongtaiDesignTokens.spacing2),
+               Text(
+-                isVi ? 'Tìm kiếm gần đây' : 'Recent searches',
++                l10n.searchRecent,
+                 style: TongtaiDesignTokens.smallStyle.copyWith(
+                   fontWeight: FontWeight.w700,
+                   color: TongtaiDesignTokens.lightTextPrimary,
+@@ -579,7 +575,7 @@ class _IdleView extends StatelessWidget {
+               const Spacer(),
+               TextButton(
+                 onPressed: onClearHistory,
+-                child: Text(isVi ? 'Xoá' : 'Clear'),
++                child: Text(l10n.actionClear),
+               ),
+             ],
+           ),
+@@ -664,14 +660,12 @@ class _ResultsTabView extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final isVi = lang == 'vi';
++    final l10n = context.l10n;
+     if (results.countFor(tab) == 0) {
+       return _CenteredMessage(
+         icon: Icons.search_off,
+-        title: isVi ? 'Không có kết quả' : 'No results',
+-        subtitle: isVi
+-            ? 'Thử từ khoá khác hoặc điều chỉnh bộ lọc.'
+-            : 'Try a different keyword or adjust your filters.',
++        title: l10n.searchNoResults,
++        subtitle: l10n.searchNoResultsBody,
+       );
+     }
+ 
+@@ -705,8 +699,7 @@ class _ResultsTabView extends StatelessWidget {
+           children: [
+             if (results.suppliers.isNotEmpty) ...[
+               _SectionHeader(
+-                label:
+-                    '${isVi ? 'Nhà cung cấp' : 'Suppliers'} (${results.supplierCount})',
++                label: '${l10n.sectionSuppliers} (${results.supplierCount})',
+                 color: TongtaiDesignTokens.producerGreen,
+               ),
+               for (final s in results.suppliers)
+@@ -714,8 +707,7 @@ class _ResultsTabView extends StatelessWidget {
+             ],
+             if (results.products.isNotEmpty) ...[
+               _SectionHeader(
+-                label:
+-                    '${isVi ? 'Sản phẩm' : 'Products'} (${results.productCount})',
++                label: '${l10n.sectionProducts} (${results.productCount})',
+                 color: TongtaiDesignTokens.inventoryOrange,
+               ),
+               for (final p in results.products)
+@@ -803,7 +795,6 @@ class _ProductResultCard extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final isVi = lang == 'vi';
+     return _ResultCard(
+       icon: Icons.inventory_2_outlined,
+       iconColor: TongtaiDesignTokens.inventoryOrange,
+@@ -811,7 +802,7 @@ class _ProductResultCard extends StatelessWidget {
+       subtitle: [
+         if (product.category != null && product.category!.isNotEmpty)
+           product.category!,
+-        '${isVi ? 'Tồn' : 'Stock'}: ${product.stock.toStringAsFixed(0)}',
++        '${context.l10n.labelStock}: ${product.stock.toStringAsFixed(0)}',
+       ].join(' • '),
+       trailing: Text(
+         TongtaiFormatters.vnd(product.price),
+diff --git a/lib/features/tongtai/ui/widgets/tongtai_opportunity_signal_badges.dart b/lib/features/tongtai/ui/widgets/tongtai_opportunity_signal_badges.dart
+index e4401a6..c4db93a 100644
+--- a/lib/features/tongtai/ui/widgets/tongtai_opportunity_signal_badges.dart
++++ b/lib/features/tongtai/ui/widgets/tongtai_opportunity_signal_badges.dart
+@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../opportunity/opportunity_signals.dart';
+ import '../../opportunity/opportunity_theme.dart';
++import '../../../../core/l10n/app_strings.dart';
+ 
+ /// A wrap of rule-based [OpportunitySignal] badges (WTM-130), in a stable
+ /// severity order. Shared by the Opportunity feed and detail screens so they
+@@ -50,7 +51,7 @@ class TongtaiOpportunitySignalBadges extends StatelessWidget {
+                 ),
+                 const SizedBox(width: 3),
+                 Text(
+-                  s.labelVi,
++                  s.label(context.l10n.languageCode),
+                   style: TongtaiDesignTokens.captionStyle.copyWith(
+                     color: tongtaiOpportunitySignalColor(s),
+                     fontWeight: FontWeight.w600,
+diff --git a/test/features/tongtai/p0/localization_test.dart b/test/features/tongtai/p0/localization_test.dart
+index a0f6e00..7da5150 100644
+--- a/test/features/tongtai/p0/localization_test.dart
++++ b/test/features/tongtai/p0/localization_test.dart
+@@ -73,6 +73,121 @@ void main() {
+         );
+       });
+ 
++      test('no UI string literal concatenates two languages around " | "', () {
++        final uiDir = Directory('lib/features/tongtai/ui');
++        final offenders = <String>[];
++        final literal = RegExp("'([^'\\\\]|\\\\.)*'");
++        final letters = RegExp('[A-Za-zÀ-ỹ]{2,}');
++        for (final f
++            in uiDir
++                .listSync(recursive: true)
++                .whereType<File>()
++                .where((f) => f.path.endsWith('.dart'))) {
++          final lines = f.readAsLinesSync();
++          for (var i = 0; i < lines.length; i++) {
++            final line = lines[i].trimLeft();
++            if (line.startsWith('//') || line.startsWith('///')) continue;
++            for (final m in literal.allMatches(lines[i])) {
++              final value = m.group(0)!;
++              if (!value.contains(' | ')) continue;
++              final staticSegments = value
++                  .substring(1, value.length - 1)
++                  .split(' | ')
++                  .where((seg) {
++                    final withoutInterp = seg.replaceAll(
++                      RegExp(r'\$\{[^}]*\}|\$[a-zA-Z_]\w*'),
++                      '',
++                    );
++                    return letters.hasMatch(withoutInterp);
++                  })
++                  .length;
++              if (staticSegments >= 2) {
++                offenders.add('${f.path}:${i + 1}: $value');
++              }
++            }
++          }
++        }
++        expect(
++          offenders,
++          isEmpty,
++          reason:
++              'Label song ngữ "vi | en" bị cấm (P0 §2) — dùng '
++              'context.l10n.<key>:\n${offenders.join('\n')}',
++        );
++      });
++
++      test('no Vietnamese hard-coded literal remains under ui/ (P0 §2)', () {
++        // After WTM-145 every user-facing string in lib/features/tongtai/ui/
++        // comes from AppStrings — a Vietnamese literal in a widget can only
++        // mean a new hard-coded label snuck in.
++        final uiDir = Directory('lib/features/tongtai/ui');
++        final offenders = <String>[];
++        final literal = RegExp("'([^'\\\\]|\\\\.)*'");
++        final viLetters = RegExp(
++          '[àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộ'
++          'ơờớởỡợùúủũụưừứửữựỳýỷỹỵ]',
++        );
++        // Proper nouns that legitimately keep their Vietnamese spelling in
++        // any locale (product name only — example hints live in AppStrings).
++        const allowlist = ['Tổng Tài'];
++        for (final f
++            in uiDir
++                .listSync(recursive: true)
++                .whereType<File>()
++                .where((f) => f.path.endsWith('.dart'))) {
++          final lines = f.readAsLinesSync();
++          for (var i = 0; i < lines.length; i++) {
++            final line = lines[i].trimLeft();
++            if (line.startsWith('//') || line.startsWith('///')) continue;
++            for (final m in literal.allMatches(lines[i])) {
++              var value = m.group(0)!;
++              for (final ok in allowlist) {
++                value = value.replaceAll(ok, '');
++              }
++              if (viLetters.hasMatch(value)) {
++                offenders.add('${f.path}:${i + 1}: ${m.group(0)!}');
++              }
++            }
++          }
++        }
++        expect(
++          offenders,
++          isEmpty,
++          reason:
++              'Chuỗi tiếng Việt hard-code trong ui/ bị cấm (P0 §2) — dùng '
++              'context.l10n.<key>:\n${offenders.join('\n')}',
++        );
++      });
++
++      test('ui/ never reads labelVi/labelEn directly — label(locale) only', () {
++        // Domain enums keep labelVi/labelEn, but a widget picking one side
++        // hard-wires a language and breaks runtime switching (P0 §2).
++        final uiDir = Directory('lib/features/tongtai/ui');
++        final offenders = <String>[];
++        final direct = RegExp(r'\.label(Vi|En)\b');
++        for (final f
++            in uiDir
++                .listSync(recursive: true)
++                .whereType<File>()
++                .where((f) => f.path.endsWith('.dart'))) {
++          final lines = f.readAsLinesSync();
++          for (var i = 0; i < lines.length; i++) {
++            final line = lines[i].trimLeft();
++            if (line.startsWith('//') || line.startsWith('///')) continue;
++            if (direct.hasMatch(lines[i])) {
++              offenders.add('${f.path}:${i + 1}: ${lines[i].trim()}');
++            }
++          }
++        }
++        expect(
++          offenders,
++          isEmpty,
++          reason:
++              'UI phải gọi label(context.l10n.languageCode) thay vì '
++              'labelVi/labelEn:\n${offenders.join('\n')}',
++        );
++      });
++
+       test(
+         'every AppStrings key is referenced somewhere in lib/ (unused check)',
+         () {
+diff --git a/test/features/tongtai/tongtai_ai_key_screen_test.dart b/test/features/tongtai/tongtai_ai_key_screen_test.dart
+index 5038364..d69eda6 100644
+--- a/test/features/tongtai/tongtai_ai_key_screen_test.dart
++++ b/test/features/tongtai/tongtai_ai_key_screen_test.dart
+@@ -96,7 +96,7 @@ void main() {
+     // Persisted, and the confirmation + set-state UI is shown.
+     expect(await store.read(TongtaiAiProviderKind.xai), validKey);
+     expect(find.text('API key saved securely.'), findsOneWidget);
+-    expect(find.textContaining('An API key is saved'), findsOneWidget);
++    expect(find.textContaining('An API key is stored'), findsOneWidget);
+     expect(find.byKey(const Key('tongtai-ai-delete')), findsOneWidget);
+ 
+     // Test connection is enabled now that a key is stored.
+@@ -120,7 +120,7 @@ void main() {
+     await tester.tap(find.byKey(const Key('tongtai-ai-test')));
+     await tester.pumpAndSettle();
+ 
+-    expect(find.textContaining('Connected'), findsOneWidget);
++    expect(find.textContaining('Connection OK'), findsOneWidget);
+   });
+ 
+   testWidgets('Test connection shows a friendly error on a bad key', (
+@@ -217,7 +217,7 @@ void main() {
+ 
+       // The broken key never sticks — the working key is restored.
+       expect(await store.read(TongtaiAiProviderKind.xai), validKey);
+-      expect(find.textContaining('Previous key restored'), findsOneWidget);
++      expect(find.textContaining('The old key was restored'), findsOneWidget);
+     });
+ 
+     testWidgets('QR scan fills the field through the launcher seam', (
+diff --git a/test/features/tongtai/tongtai_chat_search_screen_test.dart b/test/features/tongtai/tongtai_chat_search_screen_test.dart
+index 1000baf..b9aa929 100644
+--- a/test/features/tongtai/tongtai_chat_search_screen_test.dart
++++ b/test/features/tongtai/tongtai_chat_search_screen_test.dart
+@@ -58,13 +58,13 @@ void main() {
+     await tester.pumpAndSettle();
+ 
+     // Both "quạt" (m1) and "Quạt" (m2) match.
+-    expect(find.text('2 kết quả'), findsOneWidget);
++    expect(find.text('2 results'), findsOneWidget);
+     expect(find.byType(ListTile), findsNWidgets(2));
+     // Day header inside the results (distinct from the "Hôm nay" range chip).
+     expect(
+       find.descendant(
+         of: find.byKey(const Key('chat-search-results')),
+-        matching: find.text('Hôm nay'),
++        matching: find.text('Today'),
+       ),
+       findsOneWidget,
+     );
+diff --git a/test/features/tongtai/tongtai_chat_test.dart b/test/features/tongtai/tongtai_chat_test.dart
+index 792459f..5274ca5 100644
+--- a/test/features/tongtai/tongtai_chat_test.dart
++++ b/test/features/tongtai/tongtai_chat_test.dart
+@@ -269,14 +269,17 @@ void main() {
+       expect(find.byKey(const Key('chat-pending-attachment')), findsNothing);
+     });
+ 
+-    testWidgets('empty state greets bilingually', (tester) async {
++    testWidgets('empty state greets in ONE locale (P0 §2 WTM-145)', (
++      tester,
++    ) async {
+       final controller = makeController(_FixedResponder('x'));
+       await tester.pumpWidget(host(controller));
++      // Default test locale is EN; the VI variant must NOT be on screen.
++      expect(find.text('Ask Workizen AI about your business'), findsOneWidget);
+       expect(
+         find.text('Hỏi Workizen AI về việc kinh doanh của bạn'),
+-        findsOneWidget,
++        findsNothing,
+       );
+-      expect(find.text('Ask Workizen AI about your business.'), findsOneWidget);
+     });
+   });
+ 
+diff --git a/test/features/tongtai/tongtai_csv_export_test.dart b/test/features/tongtai/tongtai_csv_export_test.dart
+index 89f27df..9173635 100644
+--- a/test/features/tongtai/tongtai_csv_export_test.dart
++++ b/test/features/tongtai/tongtai_csv_export_test.dart
+@@ -189,7 +189,7 @@ void main() {
+       expect(delivery.delivered, hasLength(1));
+       final (csv, fileName, subject) = delivery.delivered.single;
+       expect(fileName, 'tongtai-khach-hang-20260723.csv');
+-      expect(subject, contains('Khách hàng'));
++      expect(subject, contains('Customers'));
+       expect(csv.rowCount, kSampleCustomers.length);
+ 
+       // AC5: history logged and visible.
+@@ -236,7 +236,7 @@ void main() {
+         await tester.tap(find.byKey(const Key('export-run')));
+         await tester.pumpAndSettle();
+         expect(delivery.delivered, isEmpty);
+-        expect(find.textContaining('tối thiểu 6 ký tự'), findsOneWidget);
++        expect(find.textContaining('at least 6 characters'), findsOneWidget);
+         await tester.pump(const Duration(seconds: 4));
+ 
+         // A proper passphrase delivers the armored container.
+diff --git a/test/features/tongtai/tongtai_finance_screen_test.dart b/test/features/tongtai/tongtai_finance_screen_test.dart
+index 7b3b2e1..e8696d0 100644
+--- a/test/features/tongtai/tongtai_finance_screen_test.dart
++++ b/test/features/tongtai/tongtai_finance_screen_test.dart
+@@ -79,7 +79,7 @@ void main() {
+     await pump(tester, controller: FinanceController.inMemory());
+ 
+     expect(find.byType(TongtaiFoxMascot), findsOneWidget);
+-    expect(find.text('Chưa có giao dịch tài chính'), findsOneWidget);
++    expect(find.text('No financial transactions yet'), findsOneWidget);
+     expect(find.byKey(const Key('finance-kpi-income')), findsNothing);
+   });
+ 
+@@ -125,7 +125,7 @@ void main() {
+     await pump(tester, controller: controller);
+ 
+     // Empty ledger → empty state, no KPIs.
+-    expect(find.text('Chưa có giao dịch tài chính'), findsOneWidget);
++    expect(find.text('No financial transactions yet'), findsOneWidget);
+ 
+     await controller.add(
+       FinanceTransaction(
+@@ -138,7 +138,7 @@ void main() {
+     );
+     await tester.pump();
+ 
+-    expect(find.text('Chưa có giao dịch tài chính'), findsNothing);
++    expect(find.text('No financial transactions yet'), findsNothing);
+     expect(
+       find.descendant(
+         of: find.byKey(const Key('finance-kpi-income')),
+diff --git a/test/features/tongtai/tongtai_goal_detail_screen_test.dart b/test/features/tongtai/tongtai_goal_detail_screen_test.dart
+index deaadf4..f68827f 100644
+--- a/test/features/tongtai/tongtai_goal_detail_screen_test.dart
++++ b/test/features/tongtai/tongtai_goal_detail_screen_test.dart
+@@ -38,7 +38,7 @@ void main() {
+     expect(find.byKey(const Key('goal-detail-title')), findsOneWidget);
+     expect(find.text('Mục tiêu quý 3'), findsOneWidget);
+     expect(find.text('55%'), findsOneWidget); // 55M / 100M progress
+-    expect(find.text('Đúng tiến độ'), findsOneWidget); // on-track pace
++    expect(find.text('On track'), findsOneWidget); // on-track pace
+     expect(find.byKey(const Key('goal-detail-plan')), findsOneWidget);
+ 
+     // The revenue plan's first step (may sit just below the fold).
+@@ -92,7 +92,7 @@ void main() {
+       );
+ 
+       expect(find.byKey(const Key('goal-detail-realized')), findsOneWidget);
+-      expect(find.textContaining('30% mục tiêu'), findsOneWidget);
++      expect(find.textContaining('30% of goal'), findsOneWidget);
+       // The manual progress (55%) is untouched — both are shown.
+       expect(find.text('55%'), findsOneWidget);
+     },
+diff --git a/test/features/tongtai/tongtai_goals_screen_test.dart b/test/features/tongtai/tongtai_goals_screen_test.dart
+index cd6f71a..f586342 100644
+--- a/test/features/tongtai/tongtai_goals_screen_test.dart
++++ b/test/features/tongtai/tongtai_goals_screen_test.dart
+@@ -97,7 +97,7 @@ void main() {
+         expect(find.text('Đạt 100 triệu ₫ trong quý 3'), findsOneWidget);
+         expect(find.text('62%'), findsOneWidget); // derived from the order
+         // 2026-07-22 is ~23% into Jul 1→Sep 30; 62% ≥ 23%+10 → ahead.
+-        expect(find.text(GoalPace.ahead.labelVi), findsOneWidget);
++        expect(find.text(GoalPace.ahead.labelEn), findsOneWidget);
+         expect(
+           find.textContaining('vượt tiến độ', findRichText: false),
+           findsOneWidget,
+@@ -124,10 +124,7 @@ void main() {
+       useTallViewport(tester);
+       final controller = BusinessGoalController.inMemory(const []);
+       await pumpGoals(tester, controller);
+-      expect(
+-        find.text('Đặt mục tiêu kinh doanh đầu tiên của bạn'),
+-        findsOneWidget,
+-      );
++      expect(find.text('Set your first business goal'), findsOneWidget);
+     });
+ 
+     testWidgets('pace colors map correctly (pure function)', (tester) async {
+diff --git a/test/features/tongtai/tongtai_opportunity_detail_screen_test.dart b/test/features/tongtai/tongtai_opportunity_detail_screen_test.dart
+index 85b7d78..1af0c7d 100644
+--- a/test/features/tongtai/tongtai_opportunity_detail_screen_test.dart
++++ b/test/features/tongtai/tongtai_opportunity_detail_screen_test.dart
+@@ -138,7 +138,7 @@ void main() {
+       expect(goal.name, 'Quạt tích điện sắp vào mùa nóng');
+       expect(goal.targetAmount, 5200000); // expectedImpact
+       expect(goal.endDate, DateTime(2026, 7, 29).add(const Duration(days: 45)));
+-      expect(find.textContaining('Đã tạo mục tiêu'), findsOneWidget);
++      expect(find.textContaining('Created goal'), findsOneWidget);
+ 
+       // Idempotent: a second tap upserts the same id — no duplicates.
+       await tester.tap(button);
+diff --git a/test/features/tongtai/tongtai_opportunity_feed_test.dart b/test/features/tongtai/tongtai_opportunity_feed_test.dart
+index 3077526..bb19be3 100644
+--- a/test/features/tongtai/tongtai_opportunity_feed_test.dart
++++ b/test/features/tongtai/tongtai_opportunity_feed_test.dart
+@@ -160,7 +160,7 @@ void main() {
+       expect(find.text('Cơ hội a'), findsOneWidget);
+       expect(find.text('Mô tả a'), findsOneWidget);
+       expect(find.textContaining('+10.000.000 ₫'), findsOneWidget);
+-      expect(find.text(OpportunityType.seasonal.labelVi), findsWidgets);
++      expect(find.text(OpportunityType.seasonal.labelEn), findsWidgets);
+     });
+ 
+     testWidgets('WTM-130: rule-based signal badges render on a card', (
+@@ -193,8 +193,8 @@ void main() {
+         find.byKey(const Key('opportunity-signal-highRisk')),
+         findsOneWidget,
+       );
+-      expect(find.text('Khẩn'), findsOneWidget);
+-      expect(find.text('Rủi ro cao'), findsOneWidget);
++      expect(find.text('Urgent'), findsOneWidget);
++      expect(find.text('High risk'), findsOneWidget);
+       expect(
+         find.byKey(const Key('opportunity-signal-highValue')),
+         findsNothing,
+@@ -218,7 +218,7 @@ void main() {
+       );
+ 
+       expect(find.byKey(const Key('opportunity-signal-stale')), findsOneWidget);
+-      expect(find.text('Nguội'), findsOneWidget);
++      expect(find.text('Stale'), findsOneWidget);
+     });
+ 
+     testWidgets('AC2/AC3: type chips filter, sort chips re-order', (
+@@ -287,10 +287,10 @@ void main() {
+       await tester.pumpAndSettle();
+ 
+       expect(find.text('Cơ hội a'), findsNothing);
+-      expect(find.textContaining('Đã bỏ qua'), findsOneWidget);
++      expect(find.textContaining('Dismissed'), findsOneWidget);
+ 
+       // Undo via the snackbar action.
+-      await tester.tap(find.text('Hoàn tác'));
++      await tester.tap(find.text('Undo'));
+       await tester.pumpAndSettle();
+       expect(find.text('Cơ hội a'), findsOneWidget);
+     });
+@@ -313,7 +313,7 @@ void main() {
+         OpportunityReaction.interested,
+       );
+       // Re-rendered with the reaction label.
+-      expect(find.text(OpportunityReaction.interested.labelVi), findsWidgets);
++      expect(find.text(OpportunityReaction.interested.labelEn), findsWidgets);
+       // Flush the confirmation snackbar timer.
+       await tester.pump(const Duration(seconds: 4));
+     });
+diff --git a/test/features/tongtai/tongtai_reports_screen_test.dart b/test/features/tongtai/tongtai_reports_screen_test.dart
+index 66f0848..d1a771a 100644
+--- a/test/features/tongtai/tongtai_reports_screen_test.dart
++++ b/test/features/tongtai/tongtai_reports_screen_test.dart
+@@ -137,7 +137,7 @@ void main() {
+       scrollable: scrollable,
+     );
+     expect(find.text('Thu Hà'), findsOneWidget);
+-    expect(find.text('4 đơn'), findsOneWidget);
++    expect(find.text('4 orders'), findsOneWidget);
+   });
+ 
+   testWidgets('opportunity pipeline card renders count + value (WTM-98)', (
+@@ -327,7 +327,7 @@ void main() {
+     await tester.pumpAndSettle();
+ 
+     expect(find.byType(TongtaiFoxMascot), findsOneWidget);
+-    expect(find.text('Chưa có doanh thu để báo cáo'), findsOneWidget);
++    expect(find.text('No revenue to report yet'), findsOneWidget);
+     expect(find.byKey(const Key('reports-kpi-revenue')), findsNothing);
+   });
+ 
+@@ -366,6 +366,6 @@ void main() {
+ 
+     expect(find.byType(TongtaiReportsScreen), findsOneWidget);
+     // Empty repositories → User Data First empty state.
+-    expect(find.text('Chưa có doanh thu để báo cáo'), findsOneWidget);
++    expect(find.text('No revenue to report yet'), findsOneWidget);
+   });
+ }
+diff --git a/test/features/tongtai/tongtai_timeline_screen_test.dart b/test/features/tongtai/tongtai_timeline_screen_test.dart
+index fed79bd..9fce55b 100644
+--- a/test/features/tongtai/tongtai_timeline_screen_test.dart
++++ b/test/features/tongtai/tongtai_timeline_screen_test.dart
+@@ -53,7 +53,7 @@ void main() {
+ 
+     expect(find.text('Thu: Bán hàng'), findsOneWidget);
+     expect(find.text('Đơn hàng DH-1'), findsOneWidget);
+-    expect(find.text('Tất cả'), findsOneWidget);
++    expect(find.text('All'), findsOneWidget);
+     expect(find.byKey(const Key('timeline-filter-finance')), findsOneWidget);
+     expect(find.byKey(const Key('timeline-filter-order')), findsOneWidget);
+   });
+@@ -89,7 +89,7 @@ void main() {
+     await tester.pumpWidget(host(TimelineService(const [])));
+ 
+     expect(find.byKey(const Key('timeline-empty')), findsOneWidget);
+-    expect(find.text('Chưa có hoạt động nào'), findsOneWidget);
++    expect(find.text('No activity yet'), findsOneWidget);
+   });
+ 
+   testWidgets('the More menu opens the Timeline', (tester) async {
