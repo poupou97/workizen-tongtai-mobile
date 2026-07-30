@@ -599,21 +599,25 @@ class _ModuleSummaryGrid extends StatelessWidget {
       childAspectRatio: 2.4,
       children: [
         _ModuleCard(
+          cardKey: const Key('home-tile-producer'),
           title: context.l10n.navProducer,
           count: '$producers',
           color: TongtaiDesignTokens.producerGreen,
         ),
         _ModuleCard(
+          cardKey: const Key('home-tile-inventory'),
           title: context.l10n.navInventory,
           count: '$inventory',
           color: TongtaiDesignTokens.inventoryOrange,
         ),
         _ModuleCard(
+          cardKey: const Key('home-tile-consumer'),
           title: context.l10n.navConsumer,
           count: '$consumers',
           color: TongtaiDesignTokens.consumerBlue,
         ),
         _ModuleCard(
+          cardKey: const Key('home-tile-journey'),
           title: context.l10n.tileJourney,
           count: '$journeys',
           color: const Color(0xFFFBBF24),
@@ -625,11 +629,13 @@ class _ModuleSummaryGrid extends StatelessWidget {
 
 class _ModuleCard extends StatelessWidget {
   const _ModuleCard({
+    this.cardKey,
     required this.title,
     required this.count,
     required this.color,
   });
 
+  final Key? cardKey;
   final String title;
   final String count;
   final Color color;
@@ -637,6 +643,7 @@ class _ModuleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: cardKey,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color, width: 2),
