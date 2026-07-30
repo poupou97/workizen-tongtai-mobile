@@ -240,6 +240,184 @@ abstract class AppStrings {
   String get historyRangeLast30;
   String get historyRangeLast90;
 
+  // ── bottom navigation (WTM-55, keyed in WTM-146 §3) ─────────────────────
+  String get navHome;
+  String get navProducer;
+  String get navInventory;
+  String get navConsumer;
+  String get navMore;
+
+  // ── common actions/labels (WTM-146 §3 EN-literal sweep) ─────────────────
+  String get actionAdd;
+  String get actionSave;
+  String get actionSend;
+  String get actionClearFilters;
+  String get actionPrevPage;
+  String get actionNextPage;
+  String get labelSort;
+  String get labelStatus;
+  String get labelTotal;
+  String get labelType;
+  String get labelLocation;
+  String get labelPeriod;
+  String get labelQuantity;
+  String get labelDescription;
+  String get formFixHighlighted;
+  String get changeHistory;
+
+  // ── chat extras ─────────────────────────────────────────────────────────
+  String get chatRemoveAttachment;
+  String get chatAttachFile;
+
+  // ── Consumer overview (WTM-26) ──────────────────────────────────────────
+  String get titleConsumerIntelligence;
+  String get titleCustomers;
+  String get segActive;
+  String get segVip;
+  String get segNew;
+  String get sectionCustomerSegments;
+  String get emptyCustomerSegments;
+  String get sectionRecentInteractions;
+  String get emptyRecentInteractions;
+  String get sectionCustomerLifecycle;
+
+  // ── orders (WTM-126) ────────────────────────────────────────────────────
+  String get titleCreateOrder;
+  String get orderSoldPrice;
+  String get orderNeedProduct;
+  String get orderAddItem;
+  String get orderEmptyItems;
+
+  // ── customer form/list (WTM-75/76) ──────────────────────────────────────
+  String get custRemoveAddress;
+  String get custAddAddress;
+  String get custSegments;
+  String get custCustomSegmentHint;
+  String get custAdd;
+  String get custSearchHint;
+  String get custPurchaseHistory;
+  String get custEmptySearch;
+  String get custEmptySearchHint;
+
+  // ── purchase history extras (WTM-77) ────────────────────────────────────
+  String get historyRepurchase;
+  String get historyEmptyOrders;
+  String get historyEmptyHint;
+
+  // ── goals extras (WTM-87) ───────────────────────────────────────────────
+  String get titleBusinessGoals;
+  String get goalNew;
+
+  // ── Home extras (WTM-128) ───────────────────────────────────────────────
+  String get titleHomeDashboard;
+  String get homeChatTooltip;
+  String get homeAiSubtitle;
+  String get sectionBusinessKpis;
+  String get sectionTopOpportunities;
+  String get homeCtaCustomer;
+  String get homeCtaProduct;
+  String get homeCtaOrder;
+  String get homeCtaGoal;
+  String get homeCtaDemo;
+  String get tileJourney;
+
+  // ── inventory (WTM-68/70) ───────────────────────────────────────────────
+  String get pickerTitle;
+  String get pickerSearchHint;
+  String get pickerNoMatch;
+  String get invAdd;
+  String get invView;
+  String get invSearchHint;
+  String get invEmptySearch;
+  String get invEmptySearchHint;
+  String get titleStockAlerts;
+  String get stockOut;
+  String get stockLow;
+  String get stockAllHealthy;
+  String get stockAllHealthyBody;
+
+  // ── More sections/entries (WTM-33) ──────────────────────────────────────
+  String get moreSettings;
+  String get moreProfile;
+  String get moreNotifications;
+  String get moreTheme;
+  String get moreGrokKey;
+  String get moreBusinessSection;
+  String get moreBusinessInfo;
+  String get moreTeam;
+  String get morePermissions;
+  String get moreSupportSection;
+  String get moreReplayTutorial;
+  String get moreHelp;
+  String get moreSendFeedback;
+  String get moreLegalSection;
+  String get moreTerms;
+  String get morePrivacy;
+  String get moreLogout;
+
+  // ── opportunity feed extras (WTM-91) ────────────────────────────────────
+  String get titleOpportunities;
+
+  // ── Producer hub (WTM-24) ───────────────────────────────────────────────
+  String get titleProducerHub;
+  String get producerAiSummary;
+  String get producerAnalyzing;
+  String get producerAiCapabilities;
+  String get producerCapScoring;
+  String get producerCapRanking;
+  String get producerCapTrends;
+  String get producerCapPrice;
+  String get producerCapQuality;
+  String get producerCapDelivery;
+  String get producerRecentOpps;
+  String get producerEmptyOpps;
+  String get producerVerifiedSuppliers;
+  String get producerEmptySuppliers;
+
+  // ── product form extras (WTM-69) ────────────────────────────────────────
+  String get formWrite;
+  String get formPreview;
+  String get formNothingToPreview;
+  String get formMarkdownHint;
+  String get formUpload;
+  String get formCamera;
+  String get formRemoveImage;
+
+  String get titleEditProduct;
+  String get titleAddProduct;
+  String get formSaveChanges;
+  String get formSaveProduct;
+  String get favAdd;
+  String get lifecycleAwareness;
+  String get lifecycleConsideration;
+  String get lifecyclePurchase;
+  String get lifecycleRetention;
+
+  // ── supplier screens (WTM-63/64/65 — chrome only, catalog stays data) ───
+  String get labelSupplier;
+  String get supAbout;
+  String get supRatingsCerts;
+  String get supProductCatalog;
+  String get supTransactionHistory;
+  String get supTotalVolume;
+  String get supTotalOrders;
+  String get supRepeatBuyers;
+  String get supContact;
+  String get supMessage;
+  String get supAskHint;
+  String get titleSupplierSearch;
+  String get titleFavoriteSuppliers;
+  String get supSearchHint;
+  String get supShow;
+  String get supFavorites;
+  String get favRemove;
+  String get favEmpty;
+  String get favEmptyHint;
+
+  // ── finance / transaction type toggles (WTM-113) ────────────────────────
+  String get txnIncome;
+  String get txnExpense;
+
   // ── Customer form (WTM-76) ──────────────────────────────────────────────
   String get custNameHint;
   String get custLocationHint;
@@ -668,6 +846,318 @@ class AppStringsVi extends AppStrings {
   String get historyRangeLast30 => '30 ngày qua';
   @override
   String get historyRangeLast90 => '90 ngày qua';
+
+  @override
+  String get navHome => 'Trang chủ';
+  @override
+  String get navProducer => 'Nguồn hàng';
+  @override
+  String get navInventory => 'Kho';
+  @override
+  String get navConsumer => 'Khách hàng';
+  @override
+  String get navMore => 'Thêm';
+
+  @override
+  String get actionAdd => 'Thêm';
+  @override
+  String get actionSave => 'Lưu';
+  @override
+  String get actionSend => 'Gửi';
+  @override
+  String get actionClearFilters => 'Xoá bộ lọc';
+  @override
+  String get actionPrevPage => 'Trang trước';
+  @override
+  String get actionNextPage => 'Trang sau';
+  @override
+  String get labelSort => 'Sắp xếp';
+  @override
+  String get labelStatus => 'Trạng thái';
+  @override
+  String get labelTotal => 'Tổng';
+  @override
+  String get labelType => 'Loại';
+  @override
+  String get labelLocation => 'Khu vực';
+  @override
+  String get labelPeriod => 'Kỳ';
+  @override
+  String get labelQuantity => 'Số lượng';
+  @override
+  String get labelDescription => 'Mô tả';
+  @override
+  String get formFixHighlighted => 'Vui lòng sửa các trường được đánh dấu.';
+  @override
+  String get changeHistory => 'Lịch sử thay đổi';
+
+  @override
+  String get chatRemoveAttachment => 'Gỡ tệp đính kèm';
+  @override
+  String get chatAttachFile => 'Đính kèm tệp';
+
+  @override
+  String get titleConsumerIntelligence => 'Chân dung khách hàng';
+  @override
+  String get titleCustomers => 'Khách hàng';
+  @override
+  String get segActive => 'Đang hoạt động';
+  @override
+  String get segVip => 'VIP';
+  @override
+  String get segNew => 'Mới';
+  @override
+  String get sectionCustomerSegments => 'Phân khúc khách hàng';
+  @override
+  String get emptyCustomerSegments => 'Chưa định nghĩa phân khúc khách hàng';
+  @override
+  String get sectionRecentInteractions => 'Tương tác gần đây';
+  @override
+  String get emptyRecentInteractions => 'Chưa có tương tác gần đây';
+  @override
+  String get sectionCustomerLifecycle => 'Vòng đời khách hàng';
+
+  @override
+  String get titleCreateOrder => 'Tạo đơn hàng';
+  @override
+  String get orderSoldPrice => 'Giá bán (mỗi đơn vị)';
+  @override
+  String get orderNeedProduct => 'Thêm ít nhất một sản phẩm';
+  @override
+  String get orderAddItem => 'Thêm sản phẩm';
+  @override
+  String get orderEmptyItems => 'Chưa có sản phẩm — bấm "Thêm sản phẩm"';
+
+  @override
+  String get custRemoveAddress => 'Xoá địa chỉ';
+  @override
+  String get custAddAddress => 'Thêm địa chỉ';
+  @override
+  String get custSegments => 'Phân khúc';
+  @override
+  String get custCustomSegmentHint => 'Phân khúc tuỳ chỉnh…';
+  @override
+  String get custAdd => 'Thêm khách hàng';
+  @override
+  String get custSearchHint => 'Tìm theo tên, SĐT hoặc khu vực';
+  @override
+  String get custPurchaseHistory => 'Lịch sử mua hàng';
+  @override
+  String get custEmptySearch => 'Không có khách hàng khớp tìm kiếm';
+  @override
+  String get custEmptySearchHint => 'Thử từ khoá khác hoặc xoá lọc khu vực.';
+
+  @override
+  String get historyRepurchase => 'Mua lại';
+  @override
+  String get historyEmptyOrders => 'Không có đơn hàng trong khoảng này';
+  @override
+  String get historyEmptyHint =>
+      'Thử khoảng thời gian rộng hơn hoặc xoá lọc danh mục.';
+
+  @override
+  String get titleBusinessGoals => 'Mục tiêu kinh doanh';
+  @override
+  String get goalNew => 'Mục tiêu mới';
+
+  @override
+  String get titleHomeDashboard => 'Bảng điều khiển';
+  @override
+  String get homeChatTooltip => 'Trò chuyện Workizen AI';
+  @override
+  String get homeAiSubtitle =>
+      'Trợ lý kinh doanh AI của bạn — nguồn hàng, kho, khách hàng và hơn nữa.';
+  @override
+  String get sectionBusinessKpis => 'Chỉ số kinh doanh';
+  @override
+  String get sectionTopOpportunities => 'Cơ hội nổi bật';
+  @override
+  String get homeCtaCustomer => 'Tạo khách hàng đầu tiên';
+  @override
+  String get homeCtaProduct => 'Thêm sản phẩm đầu tiên';
+  @override
+  String get homeCtaOrder => 'Tạo đơn hàng đầu tiên';
+  @override
+  String get homeCtaGoal => 'Đặt mục tiêu kinh doanh đầu tiên';
+  @override
+  String get homeCtaDemo => 'Khám phá dữ liệu mẫu';
+  @override
+  String get tileJourney => 'Hành trình';
+
+  @override
+  String get pickerTitle => 'Chọn sản phẩm';
+  @override
+  String get pickerSearchHint => 'Tìm theo tên, SKU hoặc danh mục';
+  @override
+  String get pickerNoMatch => 'Không có sản phẩm khớp';
+  @override
+  String get invAdd => 'Thêm sản phẩm';
+  @override
+  String get invView => 'Xem';
+  @override
+  String get invSearchHint => 'Tìm sản phẩm hoặc danh mục';
+  @override
+  String get invEmptySearch => 'Không có sản phẩm khớp tìm kiếm';
+  @override
+  String get invEmptySearchHint => 'Thử từ khoá khác hoặc xoá lọc danh mục.';
+  @override
+  String get titleStockAlerts => 'Cảnh báo tồn kho';
+  @override
+  String get stockOut => 'Hết hàng';
+  @override
+  String get stockLow => 'Sắp hết hàng';
+  @override
+  String get stockAllHealthy => 'Tồn kho đều ổn';
+  @override
+  String get stockAllHealthyBody =>
+      'Không có sản phẩm nào chạm ngưỡng đặt lại.';
+
+  @override
+  String get moreSettings => 'Cài đặt';
+  @override
+  String get moreProfile => 'Hồ sơ';
+  @override
+  String get moreNotifications => 'Thông báo';
+  @override
+  String get moreTheme => 'Giao diện';
+  @override
+  String get moreGrokKey => 'Khóa API Grok (xAI)';
+  @override
+  String get moreBusinessSection => 'Kinh doanh';
+  @override
+  String get moreBusinessInfo => 'Thông tin doanh nghiệp';
+  @override
+  String get moreTeam => 'Đội ngũ';
+  @override
+  String get morePermissions => 'Phân quyền';
+  @override
+  String get moreSupportSection => 'Hỗ trợ';
+  @override
+  String get moreReplayTutorial => 'Xem lại hướng dẫn';
+  @override
+  String get moreHelp => 'Trợ giúp & hỗ trợ';
+  @override
+  String get moreSendFeedback => 'Gửi phản hồi';
+  @override
+  String get moreLegalSection => 'Pháp lý';
+  @override
+  String get moreTerms => 'Điều khoản dịch vụ';
+  @override
+  String get morePrivacy => 'Chính sách quyền riêng tư';
+  @override
+  String get moreLogout => 'Đăng xuất';
+
+  @override
+  String get titleOpportunities => 'Cơ hội';
+
+  @override
+  String get titleProducerHub => 'Trung tâm nguồn hàng';
+  @override
+  String get producerAiSummary => 'Tóm tắt AI';
+  @override
+  String get producerAnalyzing =>
+      'Đang phân tích cơ hội nhà cung cấp và xu hướng thị trường...';
+  @override
+  String get producerAiCapabilities => 'Năng lực AI';
+  @override
+  String get producerCapScoring => 'Chấm điểm cơ hội';
+  @override
+  String get producerCapRanking => 'Xếp hạng nhà cung cấp';
+  @override
+  String get producerCapTrends => 'Xu hướng thị trường';
+  @override
+  String get producerCapPrice => 'Phân tích giá';
+  @override
+  String get producerCapQuality => 'Đánh giá chất lượng';
+  @override
+  String get producerCapDelivery => 'Thời gian giao hàng';
+  @override
+  String get producerRecentOpps => 'Cơ hội gần đây';
+  @override
+  String get producerEmptyOpps => 'Chưa phát hiện cơ hội nào';
+  @override
+  String get producerVerifiedSuppliers => 'Nhà cung cấp đã xác minh';
+  @override
+  String get producerEmptySuppliers => 'Chưa kết nối nhà cung cấp nào';
+
+  @override
+  String get formWrite => 'Soạn';
+  @override
+  String get formPreview => 'Xem trước';
+  @override
+  String get formNothingToPreview => 'Chưa có gì để xem trước.';
+  @override
+  String get formMarkdownHint =>
+      'Hỗ trợ **markdown** — tiêu đề, **đậm**, danh sách…';
+  @override
+  String get formUpload => 'Tải lên';
+  @override
+  String get formCamera => 'Máy ảnh';
+  @override
+  String get formRemoveImage => 'Xoá ảnh';
+  @override
+  String get titleEditProduct => 'Sửa sản phẩm';
+  @override
+  String get titleAddProduct => 'Thêm sản phẩm';
+  @override
+  String get formSaveChanges => 'Lưu thay đổi';
+  @override
+  String get formSaveProduct => 'Lưu sản phẩm';
+  @override
+  String get favAdd => 'Thêm vào yêu thích';
+  @override
+  String get lifecycleAwareness => 'Nhận biết';
+  @override
+  String get lifecycleConsideration => 'Cân nhắc';
+  @override
+  String get lifecyclePurchase => 'Mua hàng';
+  @override
+  String get lifecycleRetention => 'Giữ chân';
+
+  @override
+  String get labelSupplier => 'Nhà cung cấp';
+  @override
+  String get supAbout => 'Giới thiệu';
+  @override
+  String get supRatingsCerts => 'Đánh giá & chứng nhận';
+  @override
+  String get supProductCatalog => 'Danh mục sản phẩm';
+  @override
+  String get supTransactionHistory => 'Lịch sử giao dịch';
+  @override
+  String get supTotalVolume => 'Tổng khối lượng';
+  @override
+  String get supTotalOrders => 'Tổng đơn hàng';
+  @override
+  String get supRepeatBuyers => 'Khách mua lại';
+  @override
+  String get supContact => 'Liên hệ';
+  @override
+  String get supMessage => 'Nhắn nhà cung cấp';
+  @override
+  String get supAskHint => 'Hỏi về giá, MOQ, thời gian giao…';
+  @override
+  String get titleSupplierSearch => 'Tìm nhà cung cấp';
+  @override
+  String get titleFavoriteSuppliers => 'Nhà cung cấp yêu thích';
+  @override
+  String get supSearchHint => 'Tìm nhà cung cấp, danh mục, khu vực';
+  @override
+  String get supShow => 'Hiển thị';
+  @override
+  String get supFavorites => 'Yêu thích';
+  @override
+  String get favRemove => 'Bỏ khỏi yêu thích';
+  @override
+  String get favEmpty => 'Chưa có nhà cung cấp yêu thích';
+  @override
+  String get favEmptyHint =>
+      'Bấm biểu tượng tim trên nhà cung cấp để thêm vào đây.';
+
+  @override
+  String get txnIncome => 'Thu';
+  @override
+  String get txnExpense => 'Chi';
 
   @override
   String get custNameHint => 'VD: Phương Nguyễn';
@@ -1130,6 +1620,321 @@ class AppStringsEn extends AppStrings {
   String get historyRangeLast30 => 'Last 30 days';
   @override
   String get historyRangeLast90 => 'Last 90 days';
+
+  @override
+  String get navHome => 'Home';
+  @override
+  String get navProducer => 'Producer';
+  @override
+  String get navInventory => 'Inventory';
+  @override
+  String get navConsumer => 'Consumer';
+  @override
+  String get navMore => 'More';
+
+  @override
+  String get actionAdd => 'Add';
+  @override
+  String get actionSave => 'Save';
+  @override
+  String get actionSend => 'Send';
+  @override
+  String get actionClearFilters => 'Clear filters';
+  @override
+  String get actionPrevPage => 'Previous page';
+  @override
+  String get actionNextPage => 'Next page';
+  @override
+  String get labelSort => 'Sort';
+  @override
+  String get labelStatus => 'Status';
+  @override
+  String get labelTotal => 'Total';
+  @override
+  String get labelType => 'Type';
+  @override
+  String get labelLocation => 'Location';
+  @override
+  String get labelPeriod => 'Period';
+  @override
+  String get labelQuantity => 'Quantity';
+  @override
+  String get labelDescription => 'Description';
+  @override
+  String get formFixHighlighted => 'Please fix the highlighted fields.';
+  @override
+  String get changeHistory => 'Change history';
+
+  @override
+  String get chatRemoveAttachment => 'Remove attachment';
+  @override
+  String get chatAttachFile => 'Attach file';
+
+  @override
+  String get titleConsumerIntelligence => 'Customer Intelligence';
+  @override
+  String get titleCustomers => 'Customers';
+  @override
+  String get segActive => 'Active';
+  @override
+  String get segVip => 'VIP';
+  @override
+  String get segNew => 'New';
+  @override
+  String get sectionCustomerSegments => 'Customer Segments';
+  @override
+  String get emptyCustomerSegments => 'No customer segments defined yet';
+  @override
+  String get sectionRecentInteractions => 'Recent Interactions';
+  @override
+  String get emptyRecentInteractions => 'No recent interactions';
+  @override
+  String get sectionCustomerLifecycle => 'Customer Lifecycle';
+
+  @override
+  String get titleCreateOrder => 'Create Order';
+  @override
+  String get orderSoldPrice => 'Sold price (per unit)';
+  @override
+  String get orderNeedProduct => 'Add at least one product';
+  @override
+  String get orderAddItem => 'Add item';
+  @override
+  String get orderEmptyItems => 'No products yet — tap "Add item"';
+
+  @override
+  String get custRemoveAddress => 'Remove address';
+  @override
+  String get custAddAddress => 'Add address';
+  @override
+  String get custSegments => 'Segments';
+  @override
+  String get custCustomSegmentHint => 'Custom segment…';
+  @override
+  String get custAdd => 'Add customer';
+  @override
+  String get custSearchHint => 'Search name, phone or location';
+  @override
+  String get custPurchaseHistory => 'Purchase history';
+  @override
+  String get custEmptySearch => 'No customers match your search';
+  @override
+  String get custEmptySearchHint =>
+      'Try a different keyword or clear the location filter.';
+
+  @override
+  String get historyRepurchase => 'Repurchase';
+  @override
+  String get historyEmptyOrders => 'No orders in this period';
+  @override
+  String get historyEmptyHint =>
+      'Try a wider period or clear the category filter.';
+
+  @override
+  String get titleBusinessGoals => 'Business Goals';
+  @override
+  String get goalNew => 'New goal';
+
+  @override
+  String get titleHomeDashboard => 'Home Dashboard';
+  @override
+  String get homeChatTooltip => 'Workizen AI chat';
+  @override
+  String get homeAiSubtitle =>
+      'Your AI-powered business assistant for sourcing, '
+      'inventory, customers, and more.';
+  @override
+  String get sectionBusinessKpis => 'Business KPIs';
+  @override
+  String get sectionTopOpportunities => 'Top Opportunities';
+  @override
+  String get homeCtaCustomer => 'Create your first customer';
+  @override
+  String get homeCtaProduct => 'Add your first product';
+  @override
+  String get homeCtaOrder => 'Create your first order';
+  @override
+  String get homeCtaGoal => 'Set your first business goal';
+  @override
+  String get homeCtaDemo => 'Explore Demo Mode';
+  @override
+  String get tileJourney => 'Journey';
+
+  @override
+  String get pickerTitle => 'Pick a product';
+  @override
+  String get pickerSearchHint => 'Search name, SKU or category';
+  @override
+  String get pickerNoMatch => 'No products match';
+  @override
+  String get invAdd => 'Add product';
+  @override
+  String get invView => 'View';
+  @override
+  String get invSearchHint => 'Search products or categories';
+  @override
+  String get invEmptySearch => 'No products match your search';
+  @override
+  String get invEmptySearchHint =>
+      'Try a different keyword or clear the category filter.';
+  @override
+  String get titleStockAlerts => 'Stock alerts';
+  @override
+  String get stockOut => 'Out of stock';
+  @override
+  String get stockLow => 'Low stock';
+  @override
+  String get stockAllHealthy => 'All stock levels healthy';
+  @override
+  String get stockAllHealthyBody =>
+      'No products are at or below their reorder threshold.';
+
+  @override
+  String get moreSettings => 'Settings';
+  @override
+  String get moreProfile => 'Profile';
+  @override
+  String get moreNotifications => 'Notifications';
+  @override
+  String get moreTheme => 'Theme';
+  @override
+  String get moreGrokKey => 'Grok (xAI) API key';
+  @override
+  String get moreBusinessSection => 'Business';
+  @override
+  String get moreBusinessInfo => 'Business Info';
+  @override
+  String get moreTeam => 'Team';
+  @override
+  String get morePermissions => 'Permissions';
+  @override
+  String get moreSupportSection => 'Support';
+  @override
+  String get moreReplayTutorial => 'Replay Tutorial';
+  @override
+  String get moreHelp => 'Help & Support';
+  @override
+  String get moreSendFeedback => 'Send Feedback';
+  @override
+  String get moreLegalSection => 'Legal';
+  @override
+  String get moreTerms => 'Terms of Service';
+  @override
+  String get morePrivacy => 'Privacy Policy';
+  @override
+  String get moreLogout => 'Logout';
+
+  @override
+  String get titleOpportunities => 'Opportunities';
+
+  @override
+  String get titleProducerHub => 'Producer Hub';
+  @override
+  String get producerAiSummary => 'AI Summary';
+  @override
+  String get producerAnalyzing =>
+      'Analyzing supplier opportunities and market trends...';
+  @override
+  String get producerAiCapabilities => 'AI Capabilities';
+  @override
+  String get producerCapScoring => 'Opportunity Scoring';
+  @override
+  String get producerCapRanking => 'Supplier Ranking';
+  @override
+  String get producerCapTrends => 'Market Trends';
+  @override
+  String get producerCapPrice => 'Price Analysis';
+  @override
+  String get producerCapQuality => 'Quality Rating';
+  @override
+  String get producerCapDelivery => 'Delivery Time';
+  @override
+  String get producerRecentOpps => 'Recent Opportunities';
+  @override
+  String get producerEmptyOpps => 'No opportunities discovered yet';
+  @override
+  String get producerVerifiedSuppliers => 'Verified Suppliers';
+  @override
+  String get producerEmptySuppliers => 'No suppliers connected yet';
+
+  @override
+  String get formWrite => 'Write';
+  @override
+  String get formPreview => 'Preview';
+  @override
+  String get formNothingToPreview => 'Nothing to preview yet.';
+  @override
+  String get formMarkdownHint =>
+      'Supports **markdown** — headings, **bold**, lists…';
+  @override
+  String get formUpload => 'Upload';
+  @override
+  String get formCamera => 'Camera';
+  @override
+  String get formRemoveImage => 'Remove image';
+  @override
+  String get titleEditProduct => 'Edit Product';
+  @override
+  String get titleAddProduct => 'Add Product';
+  @override
+  String get formSaveChanges => 'Save Changes';
+  @override
+  String get formSaveProduct => 'Save Product';
+  @override
+  String get favAdd => 'Add to favorites';
+  @override
+  String get lifecycleAwareness => 'Awareness';
+  @override
+  String get lifecycleConsideration => 'Consideration';
+  @override
+  String get lifecyclePurchase => 'Purchase';
+  @override
+  String get lifecycleRetention => 'Retention';
+
+  @override
+  String get labelSupplier => 'Supplier';
+  @override
+  String get supAbout => 'About';
+  @override
+  String get supRatingsCerts => 'Ratings & Certifications';
+  @override
+  String get supProductCatalog => 'Product Catalog';
+  @override
+  String get supTransactionHistory => 'Transaction History';
+  @override
+  String get supTotalVolume => 'Total volume';
+  @override
+  String get supTotalOrders => 'Total orders';
+  @override
+  String get supRepeatBuyers => 'Repeat buyers';
+  @override
+  String get supContact => 'Contact';
+  @override
+  String get supMessage => 'Message supplier';
+  @override
+  String get supAskHint => 'Ask about pricing, MOQ, lead time…';
+  @override
+  String get titleSupplierSearch => 'Supplier Search';
+  @override
+  String get titleFavoriteSuppliers => 'Favorite Suppliers';
+  @override
+  String get supSearchHint => 'Search suppliers, categories, locations';
+  @override
+  String get supShow => 'Show';
+  @override
+  String get supFavorites => 'Favorites';
+  @override
+  String get favRemove => 'Remove from favorites';
+  @override
+  String get favEmpty => 'No favorite suppliers yet';
+  @override
+  String get favEmptyHint =>
+      'Tap the heart on a supplier to add it here for quick access.';
+
+  @override
+  String get txnIncome => 'Income';
+  @override
+  String get txnExpense => 'Expense';
 
   @override
   String get custNameHint => 'e.g. Phương Nguyễn';

@@ -57,8 +57,10 @@ void main() {
     expect(find.byKey(const Key('finance-cashflow-chart')), findsOneWidget);
     expect(find.text('Th7'), findsOneWidget);
     expect(find.text('Th2'), findsOneWidget);
-    expect(find.text('Thu'), findsOneWidget);
-    expect(find.text('Chi'), findsOneWidget);
+    // In EN the legend labels (txnIncome/txnExpense) match the KPI card labels
+    // (kpiIncome/kpiExpense), so each appears twice: KPI card + legend.
+    expect(find.text('Income'), findsNWidgets(2));
+    expect(find.text('Expense'), findsNWidgets(2));
   });
 
   testWidgets('lists the expense categories, largest first', (tester) async {

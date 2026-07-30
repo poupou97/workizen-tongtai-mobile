@@ -147,7 +147,7 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
           appBar: AppBar(
-            title: const Text('Business Goals'),
+            title: Text(context.l10n.titleBusinessGoals),
             elevation: 0,
             backgroundColor: TongtaiDesignTokens.lightBackground,
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -157,7 +157,7 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
             backgroundColor: TongtaiDesignTokens.financePurple,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
-            label: const Text('New goal'),
+            label: Text(context.l10n.goalNew),
           ),
           body: SafeArea(
             child: goals.isEmpty
@@ -317,14 +317,6 @@ class _EmptyState extends StatelessWidget {
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
                 fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
-            Text(
-              'Set your first business goal.',
-              textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
               ),
             ),
           ],

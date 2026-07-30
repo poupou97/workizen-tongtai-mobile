@@ -437,7 +437,7 @@ class _PendingAttachment extends StatelessWidget {
           ),
           IconButton(
             key: const Key('chat-remove-attachment'),
-            tooltip: 'Remove attachment',
+            tooltip: context.l10n.chatRemoveAttachment,
             visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.close, size: 16),
             onPressed: onRemove,
@@ -473,7 +473,7 @@ class _InputBar extends StatelessWidget {
         children: [
           IconButton(
             key: const Key('chat-attach'),
-            tooltip: 'Attach file',
+            tooltip: context.l10n.chatAttachFile,
             icon: const Icon(Icons.attach_file),
             onPressed: onAttach,
           ),
@@ -505,7 +505,7 @@ class _InputBar extends StatelessWidget {
           const SizedBox(width: TongtaiDesignTokens.spacing2),
           IconButton.filled(
             key: const Key('chat-send'),
-            tooltip: 'Send',
+            tooltip: context.l10n.actionSend,
             style: IconButton.styleFrom(
               backgroundColor: TongtaiDesignTokens.copilotViolet,
               foregroundColor: Colors.white,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_strings.dart';
+
 /// Producer/Sourcing screen for Tổng Tài
 /// Shows supplier network, opportunities, and AI capability pills.
 class TongtaiProducerScreen extends StatelessWidget {
@@ -10,7 +12,7 @@ class TongtaiProducerScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Producer Hub'),
+        title: Text(context.l10n.titleProducerHub),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -31,9 +33,9 @@ class TongtaiProducerScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'AI Summary',
-                      style: TextStyle(
+                    Text(
+                      context.l10n.producerAiSummary,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -46,9 +48,9 @@ class TongtaiProducerScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: const Color(0xFF10B981)),
                       ),
-                      child: const Text(
-                        'Analyzing supplier opportunities and market trends...',
-                        style: TextStyle(
+                      child: Text(
+                        context.l10n.producerAnalyzing,
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Color(0xFF10B981),
                         ),
@@ -61,7 +63,7 @@ class TongtaiProducerScreen extends StatelessWidget {
             const SizedBox(height: 24),
             // AI Capabilities section
             Text(
-              'AI Capabilities',
+              context.l10n.producerAiCapabilities,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -70,35 +72,35 @@ class TongtaiProducerScreen extends StatelessWidget {
               runSpacing: 8,
               children: [
                 _CapabilityPill(
-                  label: 'Opportunity Scoring',
-                  color: Color(0xFF10B981),
+                  label: context.l10n.producerCapScoring,
+                  color: const Color(0xFF10B981),
                 ),
                 _CapabilityPill(
-                  label: 'Supplier Ranking',
-                  color: Color(0xFF10B981),
+                  label: context.l10n.producerCapRanking,
+                  color: const Color(0xFF10B981),
                 ),
                 _CapabilityPill(
-                  label: 'Market Trends',
-                  color: Color(0xFF10B981),
+                  label: context.l10n.producerCapTrends,
+                  color: const Color(0xFF10B981),
                 ),
                 _CapabilityPill(
-                  label: 'Price Analysis',
-                  color: Color(0xFF10B981),
+                  label: context.l10n.producerCapPrice,
+                  color: const Color(0xFF10B981),
                 ),
                 _CapabilityPill(
-                  label: 'Quality Rating',
-                  color: Color(0xFF10B981),
+                  label: context.l10n.producerCapQuality,
+                  color: const Color(0xFF10B981),
                 ),
                 _CapabilityPill(
-                  label: 'Delivery Time',
-                  color: Color(0xFF10B981),
+                  label: context.l10n.producerCapDelivery,
+                  color: const Color(0xFF10B981),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             // Opportunities section
             Text(
-              'Recent Opportunities',
+              context.l10n.producerRecentOpps,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -108,14 +110,12 @@ class TongtaiProducerScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text('No opportunities discovered yet'),
-              ),
+              child: Center(child: Text(context.l10n.producerEmptyOpps)),
             ),
             const SizedBox(height: 24),
             // Suppliers section
             Text(
-              'Verified Suppliers',
+              context.l10n.producerVerifiedSuppliers,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -125,7 +125,7 @@ class TongtaiProducerScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(child: Text('No suppliers connected yet')),
+              child: Center(child: Text(context.l10n.producerEmptySuppliers)),
             ),
           ],
         ),

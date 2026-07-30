@@ -188,6 +188,50 @@ void main() {
         );
       });
 
+      test('NO string literal in any ui/ text position — keys only (§3)', () {
+        // The complete ratchet (WTM-146): after the EN sweep, every string
+        // rendered by a widget must come from AppStrings. A quoted literal in
+        // a text position can only be a new hard-coded label.
+        final uiDir = Directory('lib/features/tongtai/ui');
+        final offenders = <String>[];
+        // Text positions: Text('..'), label:/title:/tooltip:/hintText:/
+        // labelText:/actionLabel:/message: '..' (optionally const Text(..)).
+        final position = RegExp(
+          r"(?:Text\(\s*|label:\s*(?:const\s+)?(?:Text\(\s*)?|"
+          r"title:\s*(?:const\s+)?(?:Text\(\s*)?|tooltip:\s*|labelText:\s*|"
+          r"hintText:\s*|actionLabel:\s*|message:\s*|"
+          r"content:\s*(?:const\s+)?Text\(\s*)'((?:[^'\\]|\\.)+)'",
+        );
+        final letters = RegExp('[A-Za-zÀ-ỹ]{2,}');
+        // Product names / brands render verbatim in every locale. The dev-only
+        // component showcase is unreachable from production navigation.
+        const allowValues = ['Workizen AI', 'Tổng Tài', 'SKU'];
+        const allowFiles = ['tongtai_component_showcase_screen.dart'];
+        for (final f
+            in uiDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          if (allowFiles.any((ok) => f.path.endsWith(ok))) continue;
+          final src = f.readAsStringSync();
+          for (final m in position.allMatches(src)) {
+            final value = m.group(1)!;
+            if (value.contains(r'$')) continue; // interpolation = data-driven
+            if (allowValues.contains(value)) continue;
+            if (!letters.hasMatch(value)) continue; // symbols/numbers only
+            final line = src.substring(0, m.start).split('\n').length;
+            offenders.add('${f.path}:$line: \'$value\'');
+          }
+        }
+        expect(
+          offenders,
+          isEmpty,
+          reason:
+              'Chuỗi hard-code trong vị trí text của ui/ bị cấm (P0 §3) — '
+              'dùng context.l10n.<key>:\n${offenders.join('\n')}',
+        );
+      });
+
       test(
         'every AppStrings key is referenced somewhere in lib/ (unused check)',
         () {

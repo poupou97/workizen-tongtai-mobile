@@ -28,6 +28,12 @@ passed, because tests exercised the same mocked fallbacks.
 4. **Reversible.** More → "Xóa dữ liệu mẫu" calls `removeAll()` — deletes ONLY
    the `sample-` prefix (user ids are UUIDs, collision-free by construction).
    `Repository.deleteByIdPrefix(prefix)` is the seam on all five repositories.
+   **Deletion order: orders FIRST** — on the real SQLite database
+   `orders_table.customer_id` enforces a foreign key (PRAGMA foreign_keys=ON);
+   deleting customers while sample orders exist throws SqliteException 787.
+   Locked by `test/features/tongtai/p0/drift_restart_test.dart` (WTM-146 §3),
+   which runs the full lifecycle across three AppDatabase sessions on one
+   real .db file (the in-memory doubles never enforced the constraint).
 5. **Producer** counts persisted supplier favourites (no supplier table exists;
    the catalog remains a search surface until the Phase-4 APIs) — Home and the
    Producer screens read that same favourites store.

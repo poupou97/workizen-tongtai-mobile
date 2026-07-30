@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_strings.dart';
+
 /// Consumer/Customer Intelligence screen for Tổng Tài
 /// Manages customer relationships and CDP (Customer Data Platform).
 class TongtaiConsumerScreen extends StatelessWidget {
@@ -10,7 +12,7 @@ class TongtaiConsumerScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Customer Intelligence'),
+        title: Text(context.l10n.titleConsumerIntelligence),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -34,9 +36,9 @@ class TongtaiConsumerScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Customers',
-                          style: TextStyle(
+                        Text(
+                          context.l10n.titleCustomers,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -66,17 +68,17 @@ class TongtaiConsumerScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _CustomerStat(
-                          label: 'Active',
+                          label: context.l10n.segActive,
                           value: '0',
                           color: const Color(0xFF3B82F6),
                         ),
                         _CustomerStat(
-                          label: 'VIP',
+                          label: context.l10n.segVip,
                           value: '0',
                           color: const Color(0xFF3B82F6),
                         ),
                         _CustomerStat(
-                          label: 'New',
+                          label: context.l10n.segNew,
                           value: '0',
                           color: const Color(0xFF3B82F6),
                         ),
@@ -89,7 +91,7 @@ class TongtaiConsumerScreen extends StatelessWidget {
             const SizedBox(height: 24),
             // Customer segments
             Text(
-              'Customer Segments',
+              context.l10n.sectionCustomerSegments,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -99,14 +101,12 @@ class TongtaiConsumerScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text('No customer segments defined yet'),
-              ),
+              child: Center(child: Text(context.l10n.emptyCustomerSegments)),
             ),
             const SizedBox(height: 24),
             // Recent interactions
             Text(
-              'Recent Interactions',
+              context.l10n.sectionRecentInteractions,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -116,12 +116,12 @@ class TongtaiConsumerScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(child: Text('No recent interactions')),
+              child: Center(child: Text(context.l10n.emptyRecentInteractions)),
             ),
             const SizedBox(height: 24),
             // Customer lifecycle
             Text(
-              'Customer Lifecycle',
+              context.l10n.sectionCustomerLifecycle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -135,25 +135,25 @@ class TongtaiConsumerScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _LifecycleStage(
-                    stage: 'Awareness',
+                    stage: context.l10n.lifecycleAwareness,
                     count: '0',
                     color: const Color(0xFF3B82F6),
                   ),
                   const SizedBox(height: 12),
                   _LifecycleStage(
-                    stage: 'Consideration',
+                    stage: context.l10n.lifecycleConsideration,
                     count: '0',
                     color: const Color(0xFF3B82F6),
                   ),
                   const SizedBox(height: 12),
                   _LifecycleStage(
-                    stage: 'Purchase',
+                    stage: context.l10n.lifecyclePurchase,
                     count: '0',
                     color: const Color(0xFF3B82F6),
                   ),
                   const SizedBox(height: 12),
                   _LifecycleStage(
-                    stage: 'Retention',
+                    stage: context.l10n.lifecycleRetention,
                     count: '0',
                     color: const Color(0xFF3B82F6),
                   ),

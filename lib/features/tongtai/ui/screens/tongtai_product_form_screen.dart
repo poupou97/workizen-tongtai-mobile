@@ -167,7 +167,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('Please fix the highlighted fields.')),
+          SnackBar(content: Text(context.l10n.formFixHighlighted)),
         );
       return;
     }
@@ -212,7 +212,11 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Product' : 'Add Product'),
+        title: Text(
+          widget.isEditing
+              ? context.l10n.titleEditProduct
+              : context.l10n.titleAddProduct,
+        ),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -318,7 +322,9 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
         ),
       ),
       bottomNavigationBar: _SaveCancelBar(
-        saveLabel: widget.isEditing ? 'Save Changes' : 'Save Product',
+        saveLabel: widget.isEditing
+            ? context.l10n.formSaveChanges
+            : context.l10n.formSaveProduct,
         onSave: _save,
         onCancel: _cancel,
       ),
@@ -421,7 +427,7 @@ class _DescriptionField extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Description',
+                context.l10n.labelDescription,
                 overflow: TextOverflow.ellipsis,
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   fontWeight: FontWeight.w600,
@@ -430,13 +436,13 @@ class _DescriptionField extends StatelessWidget {
               ),
             ),
             ChoiceChip(
-              label: const Text('Write'),
+              label: Text(context.l10n.formWrite),
               selected: !preview,
               onSelected: (_) => onTogglePreview(false),
             ),
             const SizedBox(width: TongtaiDesignTokens.spacing2),
             ChoiceChip(
-              label: const Text('Preview'),
+              label: Text(context.l10n.formPreview),
               selected: preview,
               onSelected: (_) => onTogglePreview(true),
             ),
@@ -457,7 +463,7 @@ class _DescriptionField extends StatelessWidget {
             ),
             child: controller.text.trim().isEmpty
                 ? Text(
-                    'Nothing to preview yet.',
+                    context.l10n.formNothingToPreview,
                     style: TongtaiDesignTokens.smallStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextSecondary,
                     ),
@@ -471,7 +477,7 @@ class _DescriptionField extends StatelessWidget {
             maxLines: 5,
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
-              hintText: 'Supports **markdown** — headings, **bold**, lists…',
+              hintText: context.l10n.formMarkdownHint,
               filled: true,
               fillColor: TongtaiDesignTokens.lightHover,
               border: OutlineInputBorder(
@@ -530,13 +536,13 @@ class _ImagesSection extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onUpload,
               icon: const Icon(Icons.photo_library_outlined),
-              label: const Text('Upload'),
+              label: Text(context.l10n.formUpload),
             ),
             const SizedBox(width: TongtaiDesignTokens.spacing3),
             OutlinedButton.icon(
               onPressed: onCamera,
               icon: const Icon(Icons.camera_alt_outlined),
-              label: const Text('Camera'),
+              label: Text(context.l10n.formCamera),
             ),
           ],
         ),
@@ -582,7 +588,7 @@ class _Thumbnail extends StatelessWidget {
             top: -8,
             right: -8,
             child: IconButton(
-              tooltip: 'Remove image',
+              tooltip: context.l10n.formRemoveImage,
               iconSize: 18,
               visualDensity: VisualDensity.compact,
               icon: const CircleAvatar(
@@ -681,7 +687,7 @@ class _ChangeHistory extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Change history',
+          context.l10n.changeHistory,
           style: TongtaiDesignTokens.smallStyle.copyWith(
             fontWeight: FontWeight.w700,
             color: TongtaiDesignTokens.lightTextPrimary,
@@ -737,7 +743,7 @@ class _SaveCancelBar extends StatelessWidget {
                     TongtaiDesignTokens.buttonHeight,
                   ),
                 ),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.actionCancel),
               ),
             ),
             const SizedBox(width: TongtaiDesignTokens.spacing3),

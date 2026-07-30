@@ -139,7 +139,7 @@ class _TongtaiInventoryScreenState
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
           appBar: AppBar(
-            title: const Text('Inventory'),
+            title: Text(context.l10n.navInventory),
             elevation: 0,
             backgroundColor: TongtaiDesignTokens.lightBackground,
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -149,7 +149,7 @@ class _TongtaiInventoryScreenState
             backgroundColor: TongtaiDesignTokens.inventoryOrange,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
-            label: const Text('Add product'),
+            label: Text(context.l10n.invAdd),
           ),
           // The pagination controls sit in the bottom bar so the (endFloat) FAB
           // is lifted clear above them, instead of a bottom-right FAB obscuring
@@ -316,7 +316,7 @@ class _AlertBanner extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'View',
+                  context.l10n.invView,
                   style: TongtaiDesignTokens.smallStyle.copyWith(
                     color: color,
                     fontWeight: FontWeight.w700,
@@ -350,13 +350,13 @@ class _SearchField extends StatelessWidget {
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: 'Search products or categories',
+        hintText: context.l10n.invSearchHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: onClear == null
             ? null
             : IconButton(
                 icon: const Icon(Icons.clear),
-                tooltip: 'Clear',
+                tooltip: context.l10n.actionClear,
                 onPressed: onClear,
               ),
         filled: true,
@@ -389,12 +389,12 @@ class _CategoryFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ChipsRow(
-      label: 'Category',
+      label: context.l10n.searchCategory,
       children: [
         Padding(
           padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
           child: ChoiceChip(
-            label: const Text('All'),
+            label: Text(context.l10n.filterAll),
             selected: selected == null,
             onSelected: (_) => onSelected(null),
           ),
@@ -430,7 +430,7 @@ class _SortBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ChipsRow(
-      label: 'Sort',
+      label: context.l10n.labelSort,
       trailing: IconButton(
         icon: Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward),
         tooltip: ascending ? 'Sort ascending' : 'Sort descending',
@@ -702,7 +702,7 @@ class _PaginationBar extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.chevron_left),
-                tooltip: 'Previous page',
+                tooltip: context.l10n.actionPrevPage,
                 onPressed: onPrevious,
               ),
               Text(
@@ -714,7 +714,7 @@ class _PaginationBar extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.chevron_right),
-                tooltip: 'Next page',
+                tooltip: context.l10n.actionNextPage,
                 onPressed: onNext,
               ),
             ],
@@ -743,7 +743,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'No products match your search',
+              context.l10n.invEmptySearch,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -752,7 +752,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
-              'Try a different keyword or clear the category filter.',
+              context.l10n.invEmptySearchHint,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

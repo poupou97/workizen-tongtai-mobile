@@ -77,10 +77,16 @@ class SampleDataSeeder {
 
   /// Removes every sample record across all repositories. User data (UUID ids)
   /// is untouched — including sample rows the user has edited (same id).
+  ///
+  /// Orders go FIRST: on the real SQLite database `orders_table.customer_id`
+  /// enforces a foreign key into `customers_table` (PRAGMA foreign_keys=ON),
+  /// so deleting customers while their sample orders still exist throws
+  /// SqliteException 787. Found by `p0/drift_restart_test.dart` (WTM-146 §3) —
+  /// the in-memory repositories used before never enforced the constraint.
   Future<void> removeAll() async {
+    await orders.deleteByIdPrefix(kSampleIdPrefix);
     await customers.deleteByIdPrefix(kSampleIdPrefix);
     await products.deleteByIdPrefix(kSampleIdPrefix);
-    await orders.deleteByIdPrefix(kSampleIdPrefix);
     await goals.deleteByIdPrefix(kSampleIdPrefix);
     await finance.deleteByIdPrefix(kSampleIdPrefix);
   }

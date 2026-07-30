@@ -49,7 +49,7 @@ class TongtaiStockAlertsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Stock alerts'),
+        title: Text(context.l10n.titleStockAlerts),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -135,7 +135,7 @@ class _AlertSummary extends StatelessWidget {
           Expanded(
             child: _SummaryStat(
               count: outOfStock,
-              label: 'Out of stock',
+              label: context.l10n.stockOut,
               color: TongtaiDesignTokens.error,
             ),
           ),
@@ -143,7 +143,7 @@ class _AlertSummary extends StatelessWidget {
           Expanded(
             child: _SummaryStat(
               count: lowStock,
-              label: 'Low stock',
+              label: context.l10n.stockLow,
               color: TongtaiDesignTokens.warning,
             ),
           ),
@@ -351,7 +351,7 @@ class _HealthyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'All stock levels healthy',
+              context.l10n.stockAllHealthy,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -360,7 +360,7 @@ class _HealthyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
-              'No products are at or below their reorder threshold.',
+              context.l10n.stockAllHealthyBody,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

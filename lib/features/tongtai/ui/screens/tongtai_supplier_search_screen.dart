@@ -6,6 +6,7 @@ import '../../producer/supplier_favorites_controller.dart';
 import '../../producer/supplier_search_service.dart';
 import 'tongtai_supplier_detail_screen.dart';
 import 'tongtai_supplier_favorites_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Number of result columns for a given available [width].
 ///
@@ -146,7 +147,7 @@ class _TongtaiSupplierSearchScreenState
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Supplier Search'),
+        title: Text(context.l10n.titleSupplierSearch),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -155,7 +156,7 @@ class _TongtaiSupplierSearchScreenState
             listenable: _favorites,
             builder: (context, _) => IconButton(
               onPressed: _openFavorites,
-              tooltip: 'Favorite suppliers',
+              tooltip: context.l10n.titleFavoriteSuppliers,
               icon: Badge(
                 isLabelVisible: _favorites.count > 0,
                 label: Text('${_favorites.count}'),
@@ -256,13 +257,13 @@ class _SearchField extends StatelessWidget {
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: 'Search suppliers, categories, locations',
+        hintText: context.l10n.supSearchHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: onClear == null
             ? null
             : IconButton(
                 icon: const Icon(Icons.clear),
-                tooltip: 'Clear',
+                tooltip: context.l10n.actionClear,
                 onPressed: onClear,
               ),
         filled: true,
@@ -349,12 +350,12 @@ class _FilterBar extends StatelessWidget {
     return Column(
       children: [
         _FilterRow(
-          label: 'Show',
+          label: context.l10n.supShow,
           child: Row(
             children: [
               // Favorites-only filter (WTM-65 AC4).
               FilterChip(
-                label: const Text('Favorites'),
+                label: Text(context.l10n.supFavorites),
                 selected: favoritesOnly,
                 avatar: Icon(
                   favoritesOnly ? Icons.favorite : Icons.favorite_border,
@@ -369,7 +370,7 @@ class _FilterBar extends StatelessWidget {
           ),
         ),
         _FilterRow(
-          label: 'Category',
+          label: context.l10n.searchCategory,
           child: Row(
             children: [
               for (final category in service.categories)
@@ -388,7 +389,7 @@ class _FilterBar extends StatelessWidget {
           ),
         ),
         _FilterRow(
-          label: 'Rating',
+          label: context.l10n.searchRating,
           child: Row(
             children: [
               for (final rating in kSupplierRatingPresets)
@@ -407,7 +408,7 @@ class _FilterBar extends StatelessWidget {
           ),
         ),
         _FilterRow(
-          label: 'Location',
+          label: context.l10n.labelLocation,
           child: Row(
             children: [
               for (final country in service.countries)
@@ -501,7 +502,7 @@ class _ResultsHeader extends StatelessWidget {
             TextButton.icon(
               onPressed: onReset,
               icon: const Icon(Icons.filter_alt_off, size: 18),
-              label: const Text('Clear filters'),
+              label: Text(context.l10n.actionClearFilters),
             ),
         ],
       ),
@@ -689,7 +690,7 @@ class _FavoriteHeart extends StatelessWidget {
     // line box — an IconButton would add ~48px tap-target padding and overflow
     // the card's fixed-height row.
     return Tooltip(
-      message: isFavorite ? 'Remove from favorites' : 'Add to favorites',
+      message: isFavorite ? context.l10n.favRemove : context.l10n.favAdd,
       child: InkResponse(
         onTap: onPressed,
         radius: 20,

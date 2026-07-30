@@ -193,7 +193,7 @@ class _TongtaiCustomerListScreenState
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
           appBar: AppBar(
-            title: const Text('Customers'),
+            title: Text(context.l10n.titleCustomers),
             elevation: 0,
             backgroundColor: TongtaiDesignTokens.lightBackground,
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -203,7 +203,7 @@ class _TongtaiCustomerListScreenState
             backgroundColor: TongtaiDesignTokens.consumerBlue,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
-            label: const Text('Add customer'),
+            label: Text(context.l10n.custAdd),
           ),
           // The pagination controls sit in the bottom bar so the (endFloat)
           // FAB is lifted clear above them instead of obscuring the Next-page
@@ -290,13 +290,13 @@ class _SearchField extends StatelessWidget {
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: 'Search name, phone or location',
+        hintText: context.l10n.custSearchHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: onClear == null
             ? null
             : IconButton(
                 icon: const Icon(Icons.clear),
-                tooltip: 'Clear',
+                tooltip: context.l10n.actionClear,
                 onPressed: onClear,
               ),
         filled: true,
@@ -329,12 +329,12 @@ class _LocationFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ChipsRow(
-      label: 'Location',
+      label: context.l10n.labelLocation,
       children: [
         Padding(
           padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
           child: ChoiceChip(
-            label: const Text('All'),
+            label: Text(context.l10n.filterAll),
             selected: selected == null,
             onSelected: (_) => onSelected(null),
           ),
@@ -370,7 +370,7 @@ class _SortBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ChipsRow(
-      label: 'Sort',
+      label: context.l10n.labelSort,
       trailing: IconButton(
         icon: Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward),
         tooltip: ascending ? 'Sort ascending' : 'Sort descending',
@@ -584,7 +584,7 @@ class _CustomerRow extends StatelessWidget {
                 ),
                 IconButton(
                   key: Key('customer-history-${customer.id}'),
-                  tooltip: 'Purchase history',
+                  tooltip: context.l10n.custPurchaseHistory,
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(
                     Icons.receipt_long_outlined,
@@ -683,7 +683,7 @@ class _PaginationBar extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.chevron_left),
-                tooltip: 'Previous page',
+                tooltip: context.l10n.actionPrevPage,
                 onPressed: onPrevious,
               ),
               Text(
@@ -695,7 +695,7 @@ class _PaginationBar extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.chevron_right),
-                tooltip: 'Next page',
+                tooltip: context.l10n.actionNextPage,
                 onPressed: onNext,
               ),
             ],
@@ -720,7 +720,7 @@ class _EmptyState extends StatelessWidget {
             const TongtaiFoxMascot.face(size: 64),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'No customers match your search',
+              context.l10n.custEmptySearch,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -729,7 +729,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
-              'Try a different keyword or clear the location filter.',
+              context.l10n.custEmptySearchHint,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,
