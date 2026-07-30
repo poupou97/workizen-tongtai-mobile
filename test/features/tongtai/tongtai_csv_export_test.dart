@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/export/backup_crypto.dart';
 import 'package:tongtai/features/tongtai/export/csv_delivery.dart';
 import 'package:tongtai/features/tongtai/export/csv_exporter.dart';
 import 'package:tongtai/features/tongtai/export/export_history_store.dart';
@@ -189,6 +190,60 @@ void main() {
       // Flush the confirmation snackbar timer.
       await tester.pump(const Duration(seconds: 4));
     });
+
+    testWidgets(
+      'WTM-100: encrypted export delivers an armored .ttbk that round-trips '
+      'with the passphrase',
+      (tester) async {
+        useTallViewport(tester);
+        final delivery = RecordingCsvDelivery();
+        // Low-iteration crypto so PBKDF2 stays fast under test; the container
+        // embeds its own iteration count, so decrypt just works.
+        const crypto = BackupCrypto(iterations: 10);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: TongtaiExportScreen(
+              delivery: delivery,
+              history: InMemoryTongtaiExportHistoryStore(),
+              clock: () => DateTime(2026, 7, 23),
+              crypto: crypto,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Enable encryption; a short passphrase is rejected before delivery.
+        await tester.tap(find.byKey(const Key('export-encrypt-toggle')));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const Key('export-passphrase')),
+          'abc',
+        );
+        await tester.tap(find.byKey(const Key('export-run')));
+        await tester.pumpAndSettle();
+        expect(delivery.delivered, isEmpty);
+        expect(find.textContaining('tối thiểu 6 ký tự'), findsOneWidget);
+        await tester.pump(const Duration(seconds: 4));
+
+        // A proper passphrase delivers the armored container.
+        await tester.enterText(
+          find.byKey(const Key('export-passphrase')),
+          'mật-khẩu-mạnh',
+        );
+        await tester.tap(find.byKey(const Key('export-run')));
+        await tester.pumpAndSettle();
+
+        final (csv, fileName, _) = delivery.delivered.single;
+        expect(fileName, 'tongtai-khach-hang-20260723.csv.ttbk');
+        expect(csv.content, startsWith('TONGTAI-BACKUP-V1:'));
+        expect(csv.content, isNot(contains(kSampleCustomers.first.name)));
+
+        // The container round-trips back to the plain CSV with the passphrase.
+        final plain = await crypto.decryptArmored(csv.content, 'mật-khẩu-mạnh');
+        expect(plain, contains(kSampleCustomers.first.name));
+        await tester.pump(const Duration(seconds: 4));
+      },
+    );
 
     testWidgets('orders type exposes the date-range presets and filters', (
       tester,

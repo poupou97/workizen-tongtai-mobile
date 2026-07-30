@@ -4,7 +4,7 @@
 
 - **Phase 1 (Product Design Bible):** ✅ DONE + Founder-approved. 60 docs.
 - **Phase 2 (build):** 🔄 IN PROGRESS — developed autonomously by the
-  Evidence-Driven Runtime. `flutter analyze` clean; **946/946 tests passing**.
+  Evidence-Driven Runtime. `flutter analyze` clean; **952/952 tests passing**.
 - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
   app runs standalone.
 - **Data Foundation — persistence arc COMPLETE for user-authored capabilities**
@@ -50,7 +50,7 @@
 | Orders | WTM-125 **capability độc lập** tách khỏi `consumer/` + `OrderRepository`/Controller + Drift (ADR-TON-010) · WTM-126 **Create Order**: line PHẢI reference Inventory Product (Inventory Picker); `OrderItem` = snapshot bất biến productId/name/sku/unit/qty/**soldPrice** (override được; order lịch sử KHÔNG đổi khi giá kho đổi); model chừa chỗ Invoice/Payment/Shipment/Return |
 | Metrics / BusinessContext | WTM-127 **`BusinessMetricsService` = KPI SoT** (revenue·orders·customers·AOV; Reports/Home reuse, không recompute — ADR-TON-011) · WTM-129/131 **`BusinessContext` = Aggregate Root** — one Context Provider per capability, `BusinessContextService` composes (ADR-TON-012) · WTM-130 Opportunity Phase-1 rule-based signals (AI-off/offline) · WTM-132 versioned Business Snapshot + `BusinessHealth` model · WTM-133 Phase 2: Journey + Finance slices · **WTM-134 Phase 3: Timeline projection (activity-stream, live repos, loại khỏi `hasData`)** → **snapshot phi-AI HOÀN CHỈNH**. **AI reads ONLY BusinessContext**, never repos |
 | Finance | WTM-27 dashboard (KPI thu/chi/lợi nhuận/biên, biểu đồ dòng tiền, chi phí theo nhóm, feed) · WTM-113 nhập giao dịch (FAB → form) · WTM-120 **Drift persistence (ADR-TON-008, User Data First)**: `FinanceController → FinanceRepository → Drift`; app thật **bắt đầu RỖNG**, entry user persist qua `TransactionsTable` (scoped `LocalWorkspace` business); sample = Demo Mode (`SampleFinanceRepository`), không ghi vào DB thật. Mở từ More → Business |
-| Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) |
+| Backup | WTM-99 CSV export (customers/products/orders, UTF-8 BOM, date range, share/email, history — D-10 Phase 2) · **WTM-100 mã hoá backup (Founder-approved 2026-07-29)**: `BackupCrypto` — AES-256-GCM + PBKDF2 (150k, iteration count nhúng trong container `TONGTAI-BACKUP-V1:` armored base64), toggle "Mã hoá bằng mật khẩu" + passphrase ≥6 ký tự trên Export screen → file `.ttbk` qua CÙNG delivery seam; passphrase không rời máy/không lưu; dep mới `cryptography` (pure Dart) |
 | Brand | WTM-109 Business Fox mascot (Origami all) · 110 app icon + splash native · 111 mascot trong app (avatar chat, empty states) + đổi nhãn hiển thị "Workizen AI" |
 | i18n | WTM-119 **localization foundation** (ADR-TON-007, mirror Hub — KHÔNG ARB): `AppStrings` (VI/EN) + `LanguageNotifier` (persist 'wz.locale') + `context.l10n`; `MaterialApp` wired locale + delegates; picker ở More → Ngôn ngữ đổi ngôn ngữ runtime. Migrate chuỗi UI dần Boy-Scout |
 | Fixes | WTM-105 wire `TongtaiRootGate` vào `main.dart` (onboarding lần đầu) + ADR-TON-003 |
