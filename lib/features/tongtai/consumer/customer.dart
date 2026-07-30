@@ -173,4 +173,22 @@ class Customer {
 
   @override
   String toString() => 'Customer($id, $name, ${tier.labelEn})';
+
+  /// The same record under a different id — the sample-seeding remap hook
+  /// (WTM-144/ADR-TON-014).
+  Customer withId(String newId) => Customer(
+    id: newId,
+    name: name,
+    phone: phone,
+    location: location,
+    orderCount: orderCount,
+    totalSpent: totalSpent,
+    lastPurchaseDate: lastPurchaseDate,
+    email: email,
+    addresses: addresses,
+    segments: segments,
+    tags: tags,
+    notes: notes,
+    history: history,
+  );
 }

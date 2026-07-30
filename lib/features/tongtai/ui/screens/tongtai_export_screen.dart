@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../consumer/customer.dart';
-import '../../consumer/customer_directory_service.dart';
 import '../../consumer/customer_order.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../providers/tongtai_consumer_provider.dart';
+import '../../providers/tongtai_inventory_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
 import '../../export/backup_crypto.dart';
 import '../../export/csv_delivery.dart';
 import '../../export/csv_exporter.dart';
 import '../../export/export_history_store.dart';
 import '../../inventory/product.dart';
-import '../../inventory/product_inventory_service.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 
 /// Date-range presets for the orders export (WTM-99 AC3).
@@ -39,7 +41,7 @@ enum ExportRange {
 /// viewable history below (AC5). Local-first: data comes from the in-memory
 /// sources; nothing leaves the device except through the app the seller
 /// picks in the share sheet.
-class TongtaiExportScreen extends StatefulWidget {
+class TongtaiExportScreen extends ConsumerStatefulWidget {
   const TongtaiExportScreen({
     super.key,
     this.delivery,
@@ -70,10 +72,11 @@ class TongtaiExportScreen extends StatefulWidget {
   final BackupCrypto? crypto;
 
   @override
-  State<TongtaiExportScreen> createState() => _TongtaiExportScreenState();
+  ConsumerState<TongtaiExportScreen> createState() =>
+      _TongtaiExportScreenState();
 }
 
-class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
+class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
   static const _exporter = TongtaiCsvExporter();
 
   late final TongtaiCsvDelivery _delivery;
@@ -81,6 +84,12 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
   late final DateTime Function() _clock;
 
   TongtaiExportType _type = TongtaiExportType.customers;
+  // WTM-144 (P0 §1): real mode exports the PRODUCTION repositories' rows —
+  // the old kSample fallbacks silently exported fixture data instead of the
+  // user's business.
+  List<Customer> _customers = const [];
+  List<Product> _products = const [];
+  List<CustomerOrder> _orders = const [];
   ExportRange _range = ExportRange.all;
   List<TongtaiExportRecord> _records = const [];
   bool _busy = false;
@@ -104,6 +113,7 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
     _history = widget.history ?? InMemoryTongtaiExportHistoryStore();
     _clock = widget.clock ?? DateTime.now;
     _loadHistory();
+    _loadData();
   }
 
   Future<void> _loadHistory() async {
@@ -112,17 +122,32 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
     setState(() => _records = records);
   }
 
+  Future<void> _loadData() async {
+    // Injected lists (tests) win; otherwise read the same repositories every
+    // other screen uses (one source, WTM-144).
+    final customers =
+        widget.customers ??
+        await ref.read(customerRepositoryProvider).loadAll();
+    final products =
+        widget.products ?? await ref.read(productRepositoryProvider).loadAll();
+    final orders =
+        widget.orders ?? await ref.read(orderRepositoryProvider).loadAll();
+    if (!mounted) return;
+    setState(() {
+      _customers = customers;
+      _products = products;
+      _orders = orders;
+    });
+  }
+
   TongtaiCsv _buildCsv() {
     switch (_type) {
       case TongtaiExportType.customers:
-        return _exporter.customersCsv(widget.customers ?? kSampleCustomers);
+        return _exporter.customersCsv(_customers);
       case TongtaiExportType.products:
-        return _exporter.productsCsv(widget.products ?? kSampleProducts);
+        return _exporter.productsCsv(_products);
       case TongtaiExportType.orders:
-        return _exporter.ordersCsv(
-          widget.orders ?? kSampleCustomerOrders,
-          from: _range.fromFor(_clock()),
-        );
+        return _exporter.ordersCsv(_orders, from: _range.fromFor(_clock()));
     }
   }
 

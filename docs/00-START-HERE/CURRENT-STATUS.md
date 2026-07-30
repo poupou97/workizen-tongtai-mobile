@@ -4,7 +4,7 @@
 
 - **Phase 1 (Product Design Bible):** ✅ DONE + Founder-approved. 60 docs.
 - **Phase 2 (build):** 🔄 IN PROGRESS — developed autonomously by the
-  Evidence-Driven Runtime. `flutter analyze` clean; **965/965 tests passing**.
+  Evidence-Driven Runtime. `flutter analyze` clean; **~966 tests passing (P0 §1 suites added)**.
 - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
   app runs standalone.
 - **Data Foundation — persistence arc COMPLETE for user-authored capabilities**
@@ -24,6 +24,7 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 localization single-locale + §3-6 đang tiếp.
 - **Founder-gate blocking the next tier**: Workizen AI activation (BYOK/router,
   privacy red-line — **G-3, deferred**; Founder sequenced the full Business Data
   Foundation first). AI Phase-2 (Opportunity Win Probability / Recommendation /

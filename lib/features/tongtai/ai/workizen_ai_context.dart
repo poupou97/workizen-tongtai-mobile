@@ -1,10 +1,8 @@
 import '../consumer/customer.dart';
-import '../consumer/customer_directory_service.dart';
 import '../consumer/customer_order.dart';
 import '../consumer/customer_order_history_service.dart';
 import '../core/tongtai_formatters.dart';
 import '../inventory/product.dart';
-import '../inventory/product_inventory_service.dart';
 
 /// Builds the system prompt Workizen AI sends with every chat turn (WTM-82
 /// AC2/AC3/AC4) — deterministic, local-only, no network.
@@ -15,13 +13,17 @@ import '../inventory/product_inventory_service.dart';
 /// When it mentions a known product, the product's price/stock details are
 /// injected for grounded recommendations (AC3).
 class WorkizenAiContextBuilder {
+  /// WTM-144 (P0 §1): defaults are EMPTY, not samples — a real business must
+  /// never be answered from fixture data. Production wiring passes the live
+  /// repositories' rows; demo coherence comes from seeding those same
+  /// repositories (ADR-TON-014).
   WorkizenAiContextBuilder({
     List<Customer>? customers,
     List<Product>? products,
     CustomerOrderHistoryService? orderHistory,
-  }) : _customers = customers ?? kSampleCustomers,
-       _products = products ?? kSampleProducts,
-       _orderHistory = orderHistory ?? CustomerOrderHistoryService.sample();
+  }) : _customers = customers ?? const [],
+       _products = products ?? const [],
+       _orderHistory = orderHistory ?? CustomerOrderHistoryService(const []);
 
   final List<Customer> _customers;
   final List<Product> _products;

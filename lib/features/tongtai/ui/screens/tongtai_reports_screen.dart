@@ -8,7 +8,7 @@ import '../../ai/business_summary.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../metrics/business_metrics.dart';
 import '../../navigation/tongtai_design_tokens.dart';
-import '../../opportunity/opportunity.dart';
+import '../../opportunity/opportunity.dart' show Opportunity;
 import '../../opportunity/opportunity_pipeline.dart';
 import '../../providers/tongtai_ai_provider.dart';
 import '../../providers/tongtai_context_provider.dart';
@@ -219,13 +219,9 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     final breakdown =
         _reports?.breakdownFor(now, _period) ?? PeriodBreakdown.empty;
     final pipeline = opportunityPipeline(
-      // Real generated opportunities (WTM-139); tests may inject a list. In
-      // injected-service test mode with no explicit list, fall back to the
-      // samples so existing fixtures stay coherent.
-      widget.opportunities ??
-          (widget.service != null
-              ? kSampleOpportunities
-              : _generatedOpportunities),
+      // One source (WTM-144 P0 §1): real generated opportunities only — the
+      // sample fallback is gone; tests inject their fixtures explicitly.
+      widget.opportunities ?? _generatedOpportunities,
     );
 
     return Scaffold(

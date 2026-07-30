@@ -1,149 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
-import 'package:tongtai/features/tongtai/metrics/business_metrics.dart';
-import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/metrics/business_metrics.dart';
+import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/producer/supplier_favorites_store.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_finance_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart';
+import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
 
-/// WTM-128 — the Home dashboard is User Data First: real module counts + KPIs
-/// (from BusinessMetrics), a BusinessHealth read, onboarding CTAs for a new
-/// business, and Demo Mode only behind an explicit action.
+/// WTM-128 + WTM-144 (P0 §1) — Home is User Data First over ONE source: the
+/// production repositories. "Sample data" is ordinary rows seeded into those
+/// repositories (ADR-TON-014); there is no parallel demo state. These tests
+/// run through the real Riverpod wiring — the screen and the assertions read
+/// the same container.
 void main() {
   DateTime fixedNow() => DateTime(2026, 7, 24);
 
-  // Home + any real screen it opens (Reports, etc.) read repositories; override
-  // them empty so navigation targets stay off the real Drift database.
+  /// One production-like set of in-memory repositories per test.
+  late InMemoryCustomerRepository customerRepo;
+  late InMemoryProductRepository productRepo;
+  late InMemoryOrderRepository orderRepo;
+  late InMemoryBusinessGoalRepository goalRepo;
+  late InMemoryFinanceRepository financeRepo;
+
+  setUp(() {
+    customerRepo = InMemoryCustomerRepository();
+    productRepo = InMemoryProductRepository([]);
+    orderRepo = InMemoryOrderRepository();
+    goalRepo = InMemoryBusinessGoalRepository();
+    financeRepo = InMemoryFinanceRepository();
+  });
+
+  SampleDataSeeder seeder() => SampleDataSeeder(
+    customers: customerRepo,
+    products: productRepo,
+    orders: orderRepo,
+    goals: goalRepo,
+    finance: financeRepo,
+  );
+
   Widget wrap(Widget home) => ProviderScope(
     overrides: [
-      orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
-      customerRepositoryProvider.overrideWithValue(
-        InMemoryCustomerRepository(),
-      ),
-      // The generated-opportunities source (WTM-139) also reads these.
-      productRepositoryProvider.overrideWithValue(
-        InMemoryProductRepository([]),
-      ),
-      businessGoalRepositoryProvider.overrideWithValue(
-        InMemoryBusinessGoalRepository(),
+      customerRepositoryProvider.overrideWithValue(customerRepo),
+      productRepositoryProvider.overrideWithValue(productRepo),
+      orderRepositoryProvider.overrideWithValue(orderRepo),
+      businessGoalRepositoryProvider.overrideWithValue(goalRepo),
+      financeRepositoryProvider.overrideWithValue(financeRepo),
+      tongtaiSearchFavoritesStoreProvider.overrideWithValue(
+        InMemorySupplierFavoritesStore(),
       ),
     ],
     child: MaterialApp(home: home),
   );
 
-  // Demo dashboard (explicit action) — populated with sample data.
-  Widget demoHost() => wrap(TongtaiHomeScreen.demo(clock: fixedNow));
+  /// The REAL Home (no injected metrics — it loads from the repositories).
+  Widget realHost() => wrap(TongtaiHomeScreen(clock: fixedNow));
 
-  // A brand-new business — real zeros, onboarding CTAs.
-  Widget emptyHost() =>
-      wrap(TongtaiHomeScreen(metrics: BusinessMetrics.empty, clock: fixedNow));
-
-  group('quick actions (WTM-144)', () {
-    testWidgets(
-      'a business WITH data keeps one-tap shortcuts; the empty business shows '
-      'Get-started instead',
-      (tester) async {
-        // Demo host has data → quick actions visible, Get-started gone.
-        await tester.pumpWidget(
-          wrap(
-            TongtaiHomeScreen.demo(key: const Key('qa-demo'), clock: fixedNow),
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('home-quick-customer')), findsOneWidget);
-        expect(find.byKey(const Key('home-quick-goal')), findsOneWidget);
-        expect(find.byKey(const Key('home-cta-customer')), findsNothing);
-
-        // Empty business → Get-started card, no duplicate quick actions.
-        // Distinct key forces a fresh State (initState re-runs).
-        await tester.pumpWidget(
-          wrap(
-            TongtaiHomeScreen(
-              key: const Key('qa-empty'),
-              metrics: BusinessMetrics.empty,
-              clock: fixedNow,
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('home-cta-customer')), findsOneWidget);
-        expect(find.byKey(const Key('home-quick-customer')), findsNothing);
-      },
-    );
-  });
-
-  group('More → Demo entry (WTM-144)', () {
-    testWidgets('"Xem thử Demo" in More opens the labeled demo dashboard', (
+  group('seeded sample data — production wiring (WTM-144/ADR-TON-014)', () {
+    testWidgets('module tiles show the seeded counts from the repositories', (
       tester,
     ) async {
-      await tester.pumpWidget(wrap(const TongtaiMoreScreen()));
+      await seeder().seed();
+      await tester.pumpWidget(realHost());
       await tester.pumpAndSettle();
 
-      final entry = find.byKey(const Key('more-demo-mode'));
-      await tester.scrollUntilVisible(
-        entry,
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(entry);
-      await tester.pumpAndSettle();
-
-      // Lands on the demo home, clearly labeled (WTM-143).
-      expect(find.byKey(const Key('home-demo-banner')), findsOneWidget);
-      expect(find.text('Demo — Dữ liệu mẫu'), findsOneWidget);
-    });
-  });
-
-  group('demo mode (sample data)', () {
-    testWidgets(
-      'the demo introduces itself: banner + title, never "Home Dashboard" '
-      '(WTM-143)',
-      (tester) async {
-        await tester.pumpWidget(demoHost());
-        await tester.pumpAndSettle();
-
-        expect(find.byKey(const Key('home-demo-banner')), findsOneWidget);
-        expect(find.text('Demo — Dữ liệu mẫu'), findsOneWidget);
-        expect(find.text('Home Dashboard'), findsNothing);
-
-        // The REAL home never shows the demo label (guard both directions).
-        await tester.pumpWidget(emptyHost());
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('home-demo-banner')), findsNothing);
-        expect(find.text('Home Dashboard'), findsOneWidget);
-      },
-    );
-
-    testWidgets('module tiles show real counts', (tester) async {
-      await tester.pumpWidget(demoHost());
-      await tester.pumpAndSettle();
-
+      expect(find.text('26'), findsOneWidget); // customers (seeded)
+      expect(find.text('28'), findsOneWidget); // products (seeded)
+      // Journey tile: 2 seeded goals.
+      expect(find.text('2'), findsWidgets);
+      // Producer counts persisted favourites — none seeded → 0 real.
       expect(find.text('Producer'), findsOneWidget);
-      expect(find.text('Inventory'), findsOneWidget);
-      expect(find.text('Consumer'), findsOneWidget);
-      expect(find.text('Journey'), findsOneWidget);
-      expect(find.text('28'), findsOneWidget); // products
-      expect(find.text('26'), findsOneWidget); // customers
-      expect(find.text('12'), findsOneWidget); // suppliers
     });
 
-    testWidgets('KPIs come from BusinessMetrics + Healthy badge', (
+    testWidgets('KPIs + Healthy badge come from the seeded repositories', (
       tester,
     ) async {
-      await tester.pumpWidget(demoHost());
+      await seeder().seed();
+      await tester.pumpWidget(realHost());
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('home-kpi-revenue')), findsOneWidget);
       expect(find.text('4,06tr ₫'), findsOneWidget); // 4.058.000 billable
-      expect(find.text('Doanh thu'), findsOneWidget);
       expect(
         find.descendant(
           of: find.byKey(const Key('home-kpi-orders')),
@@ -160,25 +109,49 @@ void main() {
       );
     });
 
-    testWidgets('top opportunities + goal missions render', (tester) async {
-      await tester.pumpWidget(demoHost());
+    testWidgets('the sample banner shows while samples exist — and only then', (
+      tester,
+    ) async {
+      await seeder().seed();
+      await tester.pumpWidget(realHost());
       await tester.pumpAndSettle();
+      expect(find.byKey(const Key('home-sample-banner')), findsOneWidget);
 
-      expect(find.text('Quạt tích điện sắp vào mùa nóng'), findsOneWidget);
-      expect(find.text('92'), findsOneWidget);
-      expect(find.text("Today's Missions"), findsOneWidget);
-      expect(find.byType(LinearProgressIndicator), findsWidgets);
-      // A business with data shows no onboarding CTAs.
+      // Remove the samples → a fresh Home shows no banner.
+      await seeder().removeAll();
+      await tester.pumpWidget(
+        wrap(TongtaiHomeScreen(key: const Key('fresh'), clock: fixedNow)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('home-sample-banner')), findsNothing);
+    });
+
+    testWidgets('quick actions show with data; Get-started without', (
+      tester,
+    ) async {
+      await seeder().seed();
+      await tester.pumpWidget(realHost());
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('home-quick-customer')), findsOneWidget);
       expect(find.byKey(const Key('home-cta-customer')), findsNothing);
+
+      await seeder().removeAll();
+      await tester.pumpWidget(
+        wrap(TongtaiHomeScreen(key: const Key('fresh2'), clock: fixedNow)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('home-cta-customer')), findsOneWidget);
+      expect(find.byKey(const Key('home-quick-customer')), findsNothing);
     });
   });
 
-  group('new business (User Data First)', () {
-    testWidgets('KPIs show real zeros (never "No Data")', (tester) async {
-      await tester.pumpWidget(emptyHost());
+  group('new business (User Data First, real wiring)', () {
+    testWidgets('KPIs show real zeros (never "No Data") + CTAs', (
+      tester,
+    ) async {
+      await tester.pumpWidget(realHost());
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('home-kpi-revenue')), findsOneWidget);
       expect(
         find.descendant(
           of: find.byKey(const Key('home-kpi-orders')),
@@ -194,14 +167,6 @@ void main() {
         ),
         findsOneWidget,
       );
-    });
-
-    testWidgets('shows the five onboarding CTAs in priority order', (
-      tester,
-    ) async {
-      await tester.pumpWidget(emptyHost());
-      await tester.pumpAndSettle();
-
       expect(find.text('Create your first customer'), findsOneWidget);
       expect(find.text('Add your first product'), findsOneWidget);
       expect(find.text('Create your first order'), findsOneWidget);
@@ -209,28 +174,81 @@ void main() {
       expect(find.text('Explore Demo Mode'), findsOneWidget);
     });
 
-    testWidgets('Explore Demo Mode opens the demo dashboard (explicit)', (
-      tester,
-    ) async {
-      await tester.pumpWidget(emptyHost());
-      await tester.pumpAndSettle();
+    testWidgets(
+      '"Explore Demo Mode" seeds the PRODUCTION repositories in place — no '
+      'parallel demo screen (WTM-144 regression: fails on the old code)',
+      (tester) async {
+        await tester.pumpWidget(realHost());
+        await tester.pumpAndSettle();
 
-      final demo = find.byKey(const Key('home-cta-demo'));
-      await tester.ensureVisible(demo);
-      await tester.pumpAndSettle();
-      await tester.tap(demo);
-      await tester.pumpAndSettle();
+        final demo = find.byKey(const Key('home-cta-demo'));
+        await tester.ensureVisible(demo);
+        await tester.pumpAndSettle();
+        await tester.tap(demo);
+        await tester.pumpAndSettle();
 
-      // The pushed demo dashboard shows sample data.
-      expect(find.text('28'), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('home-health-badge')),
-          matching: find.text('Healthy'),
-        ),
-        findsOneWidget,
-      );
-    });
+        // SAME screen (no push), now showing the seeded data + banner…
+        expect(find.text('26'), findsOneWidget);
+        expect(find.byKey(const Key('home-sample-banner')), findsOneWidget);
+        // …and the repositories REALLY contain the sample rows (one source).
+        final customers = await customerRepo.loadAll();
+        expect(
+          customers.where((c) => c.id.startsWith(kSampleIdPrefix)).length,
+          26,
+        );
+      },
+    );
+  });
+
+  group('More → sample lifecycle (production wiring)', () {
+    testWidgets(
+      'Load sample data seeds; Remove deletes ONLY sample rows — user data '
+      'survives',
+      (tester) async {
+        // A user-created customer (UUID-style id) that must survive removal.
+        await customerRepo.upsert(
+          const Customer(
+            id: 'f47ac10b-user',
+            name: 'Khách Của Tôi',
+            phone: '0900000000',
+            location: 'HCM',
+            orderCount: 0,
+            totalSpent: 0,
+            lastPurchaseDate: null,
+          ),
+        );
+
+        await tester.pumpWidget(wrap(const TongtaiMoreScreen()));
+        await tester.pumpAndSettle();
+
+        // Seed via the More entry (confirm dialog).
+        final seedEntry = find.byKey(const Key('more-demo-mode'));
+        await tester.scrollUntilVisible(
+          seedEntry,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(seedEntry);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('more-demo-confirm')));
+        await tester.pumpAndSettle();
+        expect((await customerRepo.loadAll()).length, 27); // 26 sample + 1 user
+
+        // Remove via the More entry (confirm dialog).
+        final removeEntry = find.byKey(const Key('more-remove-sample'));
+        await tester.tap(removeEntry);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('more-remove-sample-confirm')));
+        await tester.pumpAndSettle();
+
+        final remaining = await customerRepo.loadAll();
+        expect(remaining.single.name, 'Khách Của Tôi'); // user data intact
+        expect(await productRepo.loadAll(), isEmpty);
+        expect(await orderRepo.loadAll(), isEmpty);
+        expect(await goalRepo.loadAll(), isEmpty);
+        expect(await financeRepo.loadAll(), isEmpty);
+      },
+    );
   });
 
   testWidgets('empty goals fall back to the no-missions box', (tester) async {
@@ -255,7 +273,8 @@ void main() {
   testWidgets('the KPI header opens the full Reports dashboard', (
     tester,
   ) async {
-    await tester.pumpWidget(demoHost());
+    await seeder().seed();
+    await tester.pumpWidget(realHost());
     await tester.pumpAndSettle();
 
     final action = find.byKey(const Key('home-open-reports'));

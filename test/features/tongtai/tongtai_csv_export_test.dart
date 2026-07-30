@@ -5,6 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
+import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/export/backup_crypto.dart';
 import 'package:tongtai/features/tongtai/export/csv_delivery.dart';
 import 'package:tongtai/features/tongtai/export/csv_exporter.dart';
@@ -166,6 +172,11 @@ void main() {
             delivery: delivery,
             history: history,
             clock: () => DateTime(2026, 7, 23),
+            // One-source (WTM-144): the screen exports the repositories; tests
+            // inject their fixtures explicitly.
+            customers: kSampleCustomers,
+            products: kSampleProducts,
+            orders: kSampleCustomerOrders,
           ),
         ),
       );
@@ -207,6 +218,9 @@ void main() {
               history: InMemoryTongtaiExportHistoryStore(),
               clock: () => DateTime(2026, 7, 23),
               crypto: crypto,
+              customers: kSampleCustomers,
+              products: kSampleProducts,
+              orders: kSampleCustomerOrders,
             ),
           ),
         );
@@ -256,6 +270,9 @@ void main() {
             delivery: delivery,
             history: InMemoryTongtaiExportHistoryStore(),
             clock: () => DateTime(2026, 7, 23),
+            customers: kSampleCustomers,
+            products: kSampleProducts,
+            orders: kSampleCustomerOrders,
           ),
         ),
       );
@@ -282,7 +299,7 @@ void main() {
 
     testWidgets('More → "Export Data (CSV)" opens the screen', (tester) async {
       useTallViewport(tester);
-      await tester.pumpWidget(const MaterialApp(home: _MoreHost()));
+      await tester.pumpWidget(const _MoreHost());
       await tester.ensureVisible(find.text('Export Data (CSV)'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Export Data (CSV)'));
@@ -293,11 +310,24 @@ void main() {
   });
 }
 
-/// More screen needs a Riverpod scope (onboarding provider read on tap only).
+/// More screen needs a Riverpod scope; the Export screen it opens now reads
+/// the production repositories (WTM-144) — keep it on in-memory overrides.
 class _MoreHost extends StatelessWidget {
   const _MoreHost();
 
   @override
-  Widget build(BuildContext context) =>
-      const ProviderScope(child: TongtaiMoreScreen());
+  Widget build(BuildContext context) => ProviderScope(
+    overrides: [
+      customerRepositoryProvider.overrideWithValue(
+        InMemoryCustomerRepository(),
+      ),
+      productRepositoryProvider.overrideWithValue(
+        InMemoryProductRepository([]),
+      ),
+      orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
+    ],
+    // The scope must sit ABOVE the Navigator so pushed routes (the real
+    // Export screen) inherit the in-memory overrides (WTM-144).
+    child: const MaterialApp(home: TongtaiMoreScreen()),
+  );
 }

@@ -15,6 +15,11 @@ abstract class CustomerRepository {
 
   /// Insert a new customer or replace the one with the same id.
   Future<void> upsert(Customer customer);
+
+  /// Deletes every row whose id starts with [prefix] — the sample-data
+  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
+  /// `sample-` id prefix so they can be removed without touching user data.
+  Future<void> deleteByIdPrefix(String prefix);
 }
 
 /// Real, persistent customer directory for the local business (WTM-123).
@@ -100,6 +105,15 @@ class DriftCustomerRepository implements CustomerRepository {
       // Audit history is not persisted (regenerable session state).
     );
   }
+
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(_db.customersTable)..where(
+          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
+        ))
+        .go();
+  }
 }
 
 /// Demo / Preview source (WTM-123): the built-in sample directory, **read-only**
@@ -113,6 +127,10 @@ class SampleCustomerRepository implements CustomerRepository {
   @override
   Future<void> upsert(Customer customer) async {
     // Demo data is read-only — do not persist.
+  }
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    // Demo fixtures are read-only — nothing to delete.
   }
 }
 
@@ -135,4 +153,8 @@ class InMemoryCustomerRepository implements CustomerRepository {
       _customers.add(customer);
     }
   }
+
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async =>
+      _customers.removeWhere((x) => x.id.startsWith(prefix));
 }

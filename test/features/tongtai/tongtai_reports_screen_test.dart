@@ -17,6 +17,7 @@ import 'package:tongtai/features/tongtai/journey/journey_context.dart';
 import 'package:tongtai/features/tongtai/metrics/business_context_service.dart';
 import 'package:tongtai/features/tongtai/metrics/business_metrics_service.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_context.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_context.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
@@ -142,7 +143,19 @@ void main() {
   testWidgets('opportunity pipeline card renders count + value (WTM-98)', (
     tester,
   ) async {
-    await tester.pumpWidget(host());
+    // One-source (WTM-144): the screen no longer falls back to samples —
+    // fixtures are injected explicitly.
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiReportsScreen(
+            service: ReportsService.sample(),
+            clock: fixedNow,
+            opportunities: kSampleOpportunities,
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     final card = find.byKey(const Key('reports-pipeline'));

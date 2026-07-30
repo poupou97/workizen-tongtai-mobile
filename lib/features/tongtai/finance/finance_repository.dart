@@ -11,6 +11,11 @@ import 'finance_transaction.dart';
 abstract class FinanceRepository {
   Future<List<FinanceTransaction>> loadAll();
   Future<void> add(FinanceTransaction transaction);
+
+  /// Deletes every row whose id starts with [prefix] — the sample-data
+  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
+  /// `sample-` id prefix so they can be removed without touching user data.
+  Future<void> deleteByIdPrefix(String prefix);
 }
 
 /// Real, persistent transactions for the local business (WTM-120).
@@ -63,6 +68,14 @@ class DriftFinanceRepository implements FinanceRepository {
         description: row.description ?? '',
         paymentMethod: row.paymentMethod ?? '',
       );
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(_db.transactionsTable)..where(
+          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
+        ))
+        .go();
+  }
 }
 
 /// Demo / Preview source (WTM-120): the built-in sample ledger, **read-only** —
@@ -77,6 +90,10 @@ class SampleFinanceRepository implements FinanceRepository {
   @override
   Future<void> add(FinanceTransaction transaction) async {
     // Demo data is read-only — do not persist.
+  }
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    // Demo fixtures are read-only — nothing to delete.
   }
 }
 
@@ -93,4 +110,7 @@ class InMemoryFinanceRepository implements FinanceRepository {
   @override
   Future<void> add(FinanceTransaction transaction) async =>
       _txns.add(transaction);
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async =>
+      _txns.removeWhere((x) => x.id.startsWith(prefix));
 }

@@ -7,6 +7,9 @@ import 'package:tongtai/features/tongtai/ai/tongtai_ai_provider_kind.dart';
 import 'package:tongtai/features/tongtai/ai/tongtai_ai_service.dart';
 import 'package:tongtai/features/tongtai/ai/workizen_ai_context.dart';
 import 'package:tongtai/features/tongtai/ai/workizen_ai_router.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_order_history_service.dart';
+import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart';
 import 'package:tongtai/features/tongtai/chat/chat_message.dart';
 
 /// WTM-82 — Workizen AI Router (ADR-TON-006):
@@ -64,6 +67,12 @@ class _ChatCall {
   final String? systemPrompt;
 }
 
+WorkizenAiContextBuilder sampleContext() => WorkizenAiContextBuilder(
+  customers: kSampleCustomers,
+  products: kSampleProducts,
+  orderHistory: CustomerOrderHistoryService.sample(),
+);
+
 void main() {
   late InMemoryTongtaiAiKeyStore keys;
   late List<_ChatCall> calls;
@@ -76,7 +85,9 @@ void main() {
       clientFactory: (provider, _) =>
           _FakeClient(provider, calls, behavior: behavior),
     );
-    return WorkizenAiRouter(service: service);
+    // One-source (WTM-144): the builder no longer defaults to samples — tests
+    // pass their fixtures explicitly.
+    return WorkizenAiRouter(service: service, context: sampleContext());
   }
 
   setUp(() {
@@ -195,7 +206,7 @@ void main() {
     test(
       'rule-based reply cites local data for a mentioned customer',
       () async {
-        final fallback = RuleBasedChatResponder();
+        final fallback = RuleBasedChatResponder(context: sampleContext());
         final reply = await fallback.reply(const [], 'Phương Nguyễn mua gì?');
         expect(reply, contains('Phương Nguyễn'));
         expect(reply, contains('hạng'));
@@ -204,7 +215,8 @@ void main() {
   });
 
   group('context injection (AC2/AC3/AC4)', () {
-    final builder = WorkizenAiContextBuilder();
+    // One-source (WTM-144): explicit sample fixtures — no sample defaults.
+    final builder = sampleContext();
 
     test('always includes identity + business snapshot', () {
       final prompt = builder.build('Xin chào');

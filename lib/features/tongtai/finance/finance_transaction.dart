@@ -52,6 +52,18 @@ class FinanceTransaction {
   @override
   String toString() =>
       'FinanceTransaction($id, ${type.name}, $category, $amount)';
+
+  /// The same record under a different id — the sample-seeding remap hook
+  /// (WTM-144/ADR-TON-014).
+  FinanceTransaction withId(String newId) => FinanceTransaction(
+    id: newId,
+    type: type,
+    category: category,
+    amount: amount,
+    date: date,
+    description: description,
+    paymentMethod: paymentMethod,
+  );
 }
 
 /// Deterministic sample transactions so the Finance dashboard has real data to

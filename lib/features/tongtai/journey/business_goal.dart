@@ -283,6 +283,23 @@ class BusinessGoal {
 
   @override
   String toString() => 'BusinessGoal($id, $name, ${type.name})';
+
+  /// The same record under a different id — the sample-seeding remap hook
+  /// (WTM-144/ADR-TON-014).
+  BusinessGoal withId(String newId) => BusinessGoal(
+    id: newId,
+    name: name,
+    type: type,
+    targetAmount: targetAmount,
+    achievedAmount: achievedAmount,
+    growthTarget: growthTarget,
+    growthAchieved: growthAchieved,
+    startDate: startDate,
+    endDate: endDate,
+    notes: notes,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
 }
 
 /// Deterministic sample goals so Demo/Preview surfaces have real data to
