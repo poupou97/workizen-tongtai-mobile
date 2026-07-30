@@ -150,6 +150,59 @@ void main() {
     });
   });
 
+  group('rotateKey (WTM-83 — verified swap with rollback)', () {
+    final newKey = 'xai-${'z9Y8x7W6' * 10}';
+
+    test('valid + live-verified new key replaces the old one', () async {
+      final service = serviceWith(MockClient((_) async => _okCompletion('ok')));
+      await service.saveKey(validKey);
+
+      final rotation = await service.rotateKey(newKey);
+
+      expect(rotation.ok, isTrue);
+      expect(rotation.model, 'grok-3');
+      expect(await store.read(TongtaiAiProviderKind.xai), newKey);
+    });
+
+    test('invalid format → nothing written, old key untouched', () async {
+      final service = serviceWith(MockClient((_) async => _okCompletion('ok')));
+      await service.saveKey(validKey);
+
+      final rotation = await service.rotateKey('not-a-key');
+
+      expect(rotation.ok, isFalse);
+      expect(rotation.validation, isNotNull);
+      expect(await store.read(TongtaiAiProviderKind.xai), validKey);
+    });
+
+    test('live-test failure rolls back to the previous working key', () async {
+      final service = serviceWith(
+        MockClient((_) async => http.Response('unauthorized', 401)),
+      );
+      await store.write(TongtaiAiProviderKind.xai, validKey);
+
+      final rotation = await service.rotateKey(newKey);
+
+      expect(rotation.ok, isFalse);
+      expect(rotation.error, isNotNull);
+      expect(rotation.rolledBack, isTrue);
+      // The broken new key never sticks — the working key is restored.
+      expect(await store.read(TongtaiAiProviderKind.xai), validKey);
+    });
+
+    test('live-test failure with no previous key clears the slot', () async {
+      final service = serviceWith(
+        MockClient((_) async => http.Response('unauthorized', 401)),
+      );
+
+      final rotation = await service.rotateKey(newKey);
+
+      expect(rotation.ok, isFalse);
+      expect(rotation.rolledBack, isFalse);
+      expect(await store.hasKey(TongtaiAiProviderKind.xai), isFalse);
+    });
+  });
+
   group('clientFactory injection', () {
     test(
       'service routes through the custom client factory when provided',

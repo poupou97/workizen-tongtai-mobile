@@ -41,6 +41,7 @@ dependencies:
 
   # In-app mascot rendering — Origami Business Fox as runtime vector (WTM-111)
   flutter_svg: ^2.0.17
+  mobile_scanner: ^7.4.0
 
 dev_dependencies:
   flutter_test:
