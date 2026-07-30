@@ -96,7 +96,7 @@ void main() {
     // Persisted, and the confirmation + set-state UI is shown.
     expect(await store.read(TongtaiAiProviderKind.xai), validKey);
     expect(find.text('API key saved securely.'), findsOneWidget);
-    expect(find.textContaining('An API key is saved'), findsOneWidget);
+    expect(find.textContaining('An API key is stored'), findsOneWidget);
     expect(find.byKey(const Key('tongtai-ai-delete')), findsOneWidget);
 
     // Test connection is enabled now that a key is stored.
@@ -120,7 +120,7 @@ void main() {
     await tester.tap(find.byKey(const Key('tongtai-ai-test')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Connected'), findsOneWidget);
+    expect(find.textContaining('Connection OK'), findsOneWidget);
   });
 
   testWidgets('Test connection shows a friendly error on a bad key', (
@@ -217,7 +217,7 @@ void main() {
 
       // The broken key never sticks — the working key is restored.
       expect(await store.read(TongtaiAiProviderKind.xai), validKey);
-      expect(find.textContaining('Previous key restored'), findsOneWidget);
+      expect(find.textContaining('The old key was restored'), findsOneWidget);
     });
 
     testWidgets('QR scan fills the field through the launcher seam', (

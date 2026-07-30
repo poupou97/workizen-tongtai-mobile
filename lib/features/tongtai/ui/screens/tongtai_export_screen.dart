@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../consumer/customer.dart';
 import '../../consumer/customer_order.dart';
 import '../../core/tongtai_formatters.dart';
@@ -20,10 +21,10 @@ enum ExportRange {
   last30Days,
   last90Days;
 
-  String get labelVi => switch (this) {
-    ExportRange.all => 'Toàn bộ',
-    ExportRange.last30Days => '30 ngày',
-    ExportRange.last90Days => '90 ngày',
+  String label(AppStrings l10n) => switch (this) {
+    ExportRange.all => l10n.exportRangeAll,
+    ExportRange.last30Days => l10n.exportRangeLast30,
+    ExportRange.last90Days => l10n.exportRangeLast90,
   };
 
   DateTime? fromFor(DateTime now) => switch (this) {
@@ -153,6 +154,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
 
   Future<void> _export() async {
     if (_busy) return;
+    final l10n = context.l10n;
     setState(() => _busy = true);
     try {
       final now = _clock();
@@ -166,9 +168,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              const SnackBar(
-                content: Text('Mật khẩu mã hoá cần tối thiểu 6 ký tự.'),
-              ),
+              SnackBar(content: Text(l10n.exportPassphraseTooShort)),
             );
           return;
         }
@@ -185,7 +185,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
       await _delivery.deliver(
         csv,
         fileName,
-        'Tổng Tài — xuất ${_type.labelVi} ($stamp)',
+        l10n.exportShareSubject(_type.label(l10n.languageCode), stamp),
       );
       await _history.add(
         TongtaiExportRecord(
@@ -200,7 +200,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          SnackBar(content: Text('Đã xuất ${csv.rowCount} dòng — $fileName')),
+          SnackBar(content: Text(l10n.exportDoneSnack(csv.rowCount, fileName))),
         );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -209,10 +209,11 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Export Data (CSV)'),
+        title: Text(l10n.titleExport),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -222,7 +223,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
           padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
           children: [
             Text(
-              'Chọn dữ liệu cần xuất | Pick a data set',
+              l10n.exportPickDataSet,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 fontWeight: FontWeight.w600,
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -236,7 +237,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
                 for (final type in TongtaiExportType.values)
                   ChoiceChip(
                     key: Key('export-type-${type.name}'),
-                    label: Text(type.labelVi),
+                    label: Text(type.label(l10n.languageCode)),
                     selected: _type == type,
                     onSelected: (_) => setState(() => _type = type),
                   ),
@@ -245,7 +246,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
             if (_type == TongtaiExportType.orders) ...[
               const SizedBox(height: TongtaiDesignTokens.spacing3),
               Text(
-                'Khoảng thời gian | Date range',
+                l10n.exportDateRange,
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   fontWeight: FontWeight.w600,
                   color: TongtaiDesignTokens.lightTextPrimary,
@@ -258,7 +259,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
                   for (final range in ExportRange.values)
                     ChoiceChip(
                       key: Key('export-range-${range.name}'),
-                      label: Text(range.labelVi),
+                      label: Text(range.label(l10n)),
                       selected: _range == range,
                       onSelected: (_) => setState(() => _range = range),
                     ),
@@ -271,15 +272,14 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
               key: const Key('export-encrypt-toggle'),
               contentPadding: EdgeInsets.zero,
               title: Text(
-                'Mã hoá bằng mật khẩu | Encrypt with passphrase',
+                l10n.exportEncryptTitle,
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   fontWeight: FontWeight.w600,
                   color: TongtaiDesignTokens.lightTextPrimary,
                 ),
               ),
               subtitle: Text(
-                'File .ttbk chỉ mở được bằng mật khẩu này. Mật khẩu không '
-                'được lưu — quên là mất dữ liệu backup.',
+                l10n.exportEncryptHint,
                 style: TongtaiDesignTokens.captionStyle.copyWith(
                   color: TongtaiDesignTokens.lightTextSecondary,
                 ),
@@ -292,9 +292,9 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
                 key: const Key('export-passphrase'),
                 controller: _passphrase,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Mật khẩu (≥ 6 ký tự) | Passphrase',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.exportPassphraseLabel,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: TongtaiDesignTokens.spacing3),
@@ -310,22 +310,18 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
                 ),
               ),
               icon: const Icon(Icons.ios_share),
-              label: Text(
-                _busy ? 'Đang xuất…' : 'Xuất & chia sẻ (email…) | Export',
-              ),
+              label: Text(_busy ? l10n.exportRunning : l10n.exportRun),
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing2),
             Text(
-              'File CSV mở đúng tiếng Việt trong Excel (UTF-8 BOM). Chia sẻ '
-              'qua share sheet — chọn Mail/Gmail để gửi email; dữ liệu chỉ '
-              'rời máy qua ứng dụng bạn chọn.',
+              l10n.exportCsvHint,
               style: TongtaiDesignTokens.captionStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,
               ),
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing4),
             Text(
-              'Lịch sử xuất | Export history',
+              l10n.exportHistory,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 fontWeight: FontWeight.w700,
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -334,7 +330,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
             const SizedBox(height: TongtaiDesignTokens.spacing2),
             if (_records.isEmpty)
               Text(
-                'Chưa có lần xuất nào.',
+                l10n.exportHistoryEmpty,
                 style: TongtaiDesignTokens.captionStyle.copyWith(
                   color: TongtaiDesignTokens.lightTextSecondary,
                 ),
@@ -355,9 +351,12 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
                       const SizedBox(width: TongtaiDesignTokens.spacing2),
                       Expanded(
                         child: Text(
-                          '${record.fileName} — ${record.type.labelVi}, '
-                          '${record.rowCount} dòng, '
-                          '${TongtaiFormatters.isoDate(record.exportedAt)}',
+                          l10n.exportHistoryLine(
+                            record.fileName,
+                            record.type.label(l10n.languageCode),
+                            record.rowCount,
+                            TongtaiFormatters.isoDate(record.exportedAt),
+                          ),
                           style: TongtaiDesignTokens.captionStyle.copyWith(
                             color: TongtaiDesignTokens.lightTextPrimary,
                           ),

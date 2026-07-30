@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../core/tongtai_enums.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../finance/finance_transaction.dart';
@@ -86,10 +87,11 @@ class _TongtaiTransactionFormScreenState
   @override
   Widget build(BuildContext context) {
     final date = _data.date ?? _clock();
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Ghi giao dịch'),
+        title: Text(l10n.titleTransactionForm),
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
         elevation: 0,
@@ -130,7 +132,7 @@ class _TongtaiTransactionFormScreenState
           const SizedBox(height: TongtaiDesignTokens.spacing5),
 
           // ── Amount ───────────────────────────────────────────────────
-          _Label('Số tiền (₫)'),
+          _Label(l10n.txnAmountLabel),
           const SizedBox(height: TongtaiDesignTokens.spacing2),
           TextField(
             key: const Key('transaction-amount'),
@@ -138,7 +140,7 @@ class _TongtaiTransactionFormScreenState
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: InputDecoration(
-              hintText: 'Ví dụ: 1500000',
+              hintText: l10n.txnAmountHint,
               border: const OutlineInputBorder(),
               errorText: _errors[TransactionField.amount],
               suffixText: _data.parsedAmount != null
@@ -150,7 +152,7 @@ class _TongtaiTransactionFormScreenState
           const SizedBox(height: TongtaiDesignTokens.spacing4),
 
           // ── Category ─────────────────────────────────────────────────
-          _Label('Nhóm'),
+          _Label(l10n.txnCategoryLabel),
           const SizedBox(height: TongtaiDesignTokens.spacing2),
           Wrap(
             spacing: TongtaiDesignTokens.spacing2,
@@ -177,7 +179,7 @@ class _TongtaiTransactionFormScreenState
           const SizedBox(height: TongtaiDesignTokens.spacing4),
 
           // ── Date ─────────────────────────────────────────────────────
-          _Label('Ngày'),
+          _Label(l10n.txnDateLabel),
           const SizedBox(height: TongtaiDesignTokens.spacing2),
           OutlinedButton.icon(
             key: const Key('transaction-date'),
@@ -195,14 +197,14 @@ class _TongtaiTransactionFormScreenState
           const SizedBox(height: TongtaiDesignTokens.spacing4),
 
           // ── Description ──────────────────────────────────────────────
-          _Label('Ghi chú (không bắt buộc)'),
+          _Label(l10n.txnNoteLabel),
           const SizedBox(height: TongtaiDesignTokens.spacing2),
           TextField(
             key: const Key('transaction-description'),
             controller: _descriptionController,
-            decoration: const InputDecoration(
-              hintText: 'Ví dụ: Bán lô quạt cho khách sỉ',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: l10n.txnNoteHint,
+              border: const OutlineInputBorder(),
             ),
             onChanged: (v) => _update(_data.copyWith(description: v)),
           ),
@@ -217,7 +219,7 @@ class _TongtaiTransactionFormScreenState
                 vertical: TongtaiDesignTokens.spacing4,
               ),
             ),
-            child: const Text('Lưu giao dịch'),
+            child: Text(l10n.txnSave),
           ),
         ],
       ),

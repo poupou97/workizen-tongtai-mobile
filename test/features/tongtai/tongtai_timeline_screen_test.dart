@@ -53,7 +53,7 @@ void main() {
 
     expect(find.text('Thu: Bán hàng'), findsOneWidget);
     expect(find.text('Đơn hàng DH-1'), findsOneWidget);
-    expect(find.text('Tất cả'), findsOneWidget);
+    expect(find.text('All'), findsOneWidget);
     expect(find.byKey(const Key('timeline-filter-finance')), findsOneWidget);
     expect(find.byKey(const Key('timeline-filter-order')), findsOneWidget);
   });
@@ -89,7 +89,7 @@ void main() {
     await tester.pumpWidget(host(TimelineService(const [])));
 
     expect(find.byKey(const Key('timeline-empty')), findsOneWidget);
-    expect(find.text('Chưa có hoạt động nào'), findsOneWidget);
+    expect(find.text('No activity yet'), findsOneWidget);
   });
 
   testWidgets('the More menu opens the Timeline', (tester) async {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Inventory Picker (WTM-126) — the only way to add an order line: the seller
 /// picks a real inventory [Product] (never free text, Founder G-2). Searchable
@@ -107,7 +108,7 @@ class _TongtaiInventoryPickerScreenState
                             ),
                           ),
                           trailing: Text(
-                            p.stockStatus.labelEn,
+                            p.stockStatus.label(context.l10n.languageCode),
                             style: TongtaiDesignTokens.captionStyle,
                           ),
                           onTap: () => Navigator.of(context).pop(p),

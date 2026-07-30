@@ -158,11 +158,13 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
         widget.healthAiService ?? ref.read(businessHealthAiServiceProvider);
     final assessment = await service.assess();
     if (!mounted) return;
+    final l10n = context.l10n;
     setState(() {
       _aiResult = AiCardResult(
         // The badge status stays rule-based (G-3D) — the title carries it so
         // the AI text is always read against the authoritative status.
-        title: 'Sức khỏe: ${assessment.ruleHealth.label('vi')}',
+        title:
+            '${l10n.aiHealth}: ${assessment.ruleHealth.label(l10n.languageCode)}',
         text: assessment.text,
         sourceLabel: assessment.isAi
             ? (assessment.provider?.displayName ?? 'AI')
@@ -516,7 +518,7 @@ class _AiSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(width: TongtaiDesignTokens.spacing2),
                 Text(
-                  'Workizen AI đang phân tích…',
+                  context.l10n.reportsAnalyzing,
                   style: TongtaiDesignTokens.smallStyle.copyWith(
                     color: TongtaiDesignTokens.lightTextSecondary,
                   ),
@@ -590,7 +592,7 @@ class _PeriodSelector extends StatelessWidget {
         for (final p in ReportPeriod.values)
           ChoiceChip(
             key: Key('reports-period-${p.name}'),
-            label: Text(p.labelVi),
+            label: Text(p.label(context.l10n.languageCode)),
             selected: p == period,
             onSelected: (_) => onChanged(p),
             visualDensity: VisualDensity.compact,
@@ -629,7 +631,7 @@ class _SectionHeader extends StatelessWidget {
         TextButton(
           key: actionKey,
           onPressed: onAction,
-          child: const Text('Xem tất cả'),
+          child: Text(context.l10n.actionViewAll),
         ),
       ],
     );
@@ -651,7 +653,7 @@ class _PipelineCard extends StatelessWidget {
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
         decoration: _cardDecoration,
         child: Text(
-          'Không có cơ hội đang mở',
+          context.l10n.reportsNoPipeline,
           style: TongtaiDesignTokens.smallStyle.copyWith(
             color: TongtaiDesignTokens.lightTextSecondary,
           ),
@@ -670,13 +672,13 @@ class _PipelineCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _PipelineStat(
-                  label: 'Đang mở',
+                  label: context.l10n.reportsOpenLabel,
                   value: '${pipeline.activeCount}',
                 ),
               ),
               Expanded(
                 child: _PipelineStat(
-                  label: 'Giá trị pipeline',
+                  label: context.l10n.reportsPipelineValue,
                   value: TongtaiFormatters.vndShort(pipeline.pipelineValue),
                 ),
               ),
@@ -773,7 +775,8 @@ class _TopProductsCard extends StatelessWidget {
               rank: i + 1,
               accent: TongtaiDesignTokens.inventoryOrange,
               title: products[i].name,
-              subtitle: 'Đã bán ${products[i].quantity}',
+              subtitle:
+                  '${context.l10n.reportsSoldPrefix} ${products[i].quantity}',
               value: TongtaiFormatters.vndShort(products[i].revenue),
             ),
         ],
@@ -803,7 +806,7 @@ class _TopCustomersCard extends StatelessWidget {
               rank: i + 1,
               accent: TongtaiDesignTokens.consumerBlue,
               title: customers[i].name,
-              subtitle: '${customers[i].orders} đơn',
+              subtitle: context.l10n.reportsOrdersCount(customers[i].orders),
               value: TongtaiFormatters.vndShort(customers[i].spend),
             ),
         ],
@@ -1147,7 +1150,7 @@ class _ReportsEmptyState extends StatelessWidget {
             const TongtaiFoxMascot.face(size: 72),
             const SizedBox(height: TongtaiDesignTokens.spacing4),
             Text(
-              'Chưa có doanh thu để báo cáo',
+              context.l10n.reportsEmptyTitle,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.heading3Style.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
@@ -1155,8 +1158,7 @@ class _ReportsEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing2),
             Text(
-              'Bán đơn hàng đầu tiên và các chỉ số sẽ hiện ở đây.\n'
-              'Your KPIs appear here after the first sale.',
+              context.l10n.reportsEmptyBody,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

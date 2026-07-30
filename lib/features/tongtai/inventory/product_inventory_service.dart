@@ -16,6 +16,15 @@ enum ProductSort {
     ProductSort.quantity => 'Quantity',
     ProductSort.lastUpdated => 'Updated',
   };
+
+  String get labelVi => switch (this) {
+    ProductSort.name => 'Tên',
+    ProductSort.price => 'Giá',
+    ProductSort.quantity => 'Số lượng',
+    ProductSort.lastUpdated => 'Cập nhật',
+  };
+
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
 /// Minimum / maximum products shown per page (WTM-68 AC: 20–50 per page). The

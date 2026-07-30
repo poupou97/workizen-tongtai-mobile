@@ -11,6 +11,7 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_inventory_provider.dart';
 import 'tongtai_product_form_screen.dart';
 import 'tongtai_stock_alerts_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Color for a [StockStatus] badge (WTM-68 AC: color-coded in stock / low /
 /// out). Pulled out as a pure function so the mapping is directly unit-testable
@@ -440,7 +441,7 @@ class _SortBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
             child: ChoiceChip(
-              label: Text(option.labelEn),
+              label: Text(option.label(context.l10n.languageCode)),
               selected: sort == option,
               onSelected: (_) => onSort(option),
             ),
@@ -650,7 +651,7 @@ class _StatusChip extends StatelessWidget {
         border: Border.all(color: color),
       ),
       child: Text(
-        status.labelEn,
+        status.label(context.l10n.languageCode),
         style: TongtaiDesignTokens.captionStyle.copyWith(
           color: color,
           fontWeight: FontWeight.w600,

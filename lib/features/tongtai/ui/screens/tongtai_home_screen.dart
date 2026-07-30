@@ -141,16 +141,10 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     setState(() => _seeding = false);
     await _load();
     if (!mounted) return;
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Đã nạp dữ liệu mẫu — tất cả màn hình đang dùng chung dữ liệu '
-            'này. Xóa trong More khi không cần nữa.',
-          ),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(l10n.homeSampleLoadedSnack)));
   }
 
   void _openSearch(BuildContext context) {
@@ -229,9 +223,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Đang hiển thị kèm DỮ LIỆU MẪU (mọi màn hình dùng '
-                        'chung dữ liệu này). Bạn có thể sửa/xóa từng dòng, '
-                        'hoặc xóa toàn bộ mẫu trong More.',
+                        context.l10n.homeSampleBanner,
                         style: TongtaiDesignTokens.captionStyle.copyWith(
                           color: TongtaiDesignTokens.lightTextPrimary,
                           height: 1.4,
@@ -256,10 +248,10 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                   children: [
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'Welcome to Tổng Tài',
-                            style: TextStyle(
+                            context.l10n.homeWelcome,
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -312,28 +304,28 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                   ActionChip(
                     key: const Key('home-quick-customer'),
                     avatar: const Icon(Icons.person_add_alt, size: 18),
-                    label: const Text('+ Khách hàng'),
+                    label: Text(context.l10n.homeAddCustomer),
                     onPressed: () =>
                         _push(context, const TongtaiCustomerListScreen()),
                   ),
                   ActionChip(
                     key: const Key('home-quick-product'),
                     avatar: const Icon(Icons.add_box_outlined, size: 18),
-                    label: const Text('+ Sản phẩm'),
+                    label: Text(context.l10n.homeAddProduct),
                     onPressed: () =>
                         _push(context, const TongtaiInventoryScreen()),
                   ),
                   ActionChip(
                     key: const Key('home-quick-order'),
                     avatar: const Icon(Icons.receipt_long_outlined, size: 18),
-                    label: const Text('+ Đơn hàng'),
+                    label: Text(context.l10n.homeAddOrder),
                     onPressed: () =>
                         _push(context, const TongtaiCustomerListScreen()),
                   ),
                   ActionChip(
                     key: const Key('home-quick-goal'),
                     avatar: const Icon(Icons.flag_outlined, size: 18),
-                    label: const Text('+ Mục tiêu'),
+                    label: Text(context.l10n.homeAddGoal),
                     onPressed: () => _push(context, const TongtaiGoalsScreen()),
                   ),
                 ],
@@ -345,7 +337,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             _SectionHeader(
               title: 'Business KPIs',
               actionKey: const Key('home-open-reports'),
-              actionLabel: 'Xem báo cáo',
+              actionLabel: context.l10n.homeViewReports,
               onAction: () => _push(context, const TongtaiReportsScreen()),
             ),
             const SizedBox(height: 12),
@@ -465,7 +457,7 @@ class _GetStartedCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Nhập dữ liệu kinh doanh đầu tiên của bạn.',
+              context.l10n.homeEmptyBody,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,
               ),
@@ -674,7 +666,7 @@ class _KpiRow extends StatelessWidget {
         Expanded(
           child: _KpiTile(
             tileKey: const Key('home-kpi-orders'),
-            label: 'Đơn hàng',
+            label: context.l10n.kpiOrders,
             value: '${metrics.ordersCount}',
             color: TongtaiDesignTokens.consumerBlue,
           ),
@@ -683,7 +675,7 @@ class _KpiRow extends StatelessWidget {
         Expanded(
           child: _KpiTile(
             tileKey: const Key('home-kpi-aov'),
-            label: 'Đơn TB',
+            label: context.l10n.kpiAovShort,
             value: TongtaiFormatters.vndShort(metrics.averageOrderValue),
             color: TongtaiDesignTokens.producerGreen,
           ),

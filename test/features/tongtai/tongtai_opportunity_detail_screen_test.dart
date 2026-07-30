@@ -138,7 +138,7 @@ void main() {
       expect(goal.name, 'Quạt tích điện sắp vào mùa nóng');
       expect(goal.targetAmount, 5200000); // expectedImpact
       expect(goal.endDate, DateTime(2026, 7, 29).add(const Duration(days: 45)));
-      expect(find.textContaining('Đã tạo mục tiêu'), findsOneWidget);
+      expect(find.textContaining('Created goal'), findsOneWidget);
 
       // Idempotent: a second tap upserts the same id — no duplicates.
       await tester.tap(button);

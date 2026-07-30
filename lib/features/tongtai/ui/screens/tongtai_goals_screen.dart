@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../consumer/customer_order.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
@@ -238,7 +239,7 @@ class _GoalCard extends StatelessWidget {
                     border: Border.all(color: color),
                   ),
                   child: Text(
-                    pace.labelVi,
+                    pace.label(context.l10n.languageCode),
                     style: TongtaiDesignTokens.captionStyle.copyWith(
                       color: color,
                       fontWeight: FontWeight.w600,
@@ -250,10 +251,10 @@ class _GoalCard extends StatelessWidget {
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
               [
-                goal.type.labelVi,
+                goal.type.label(context.l10n.languageCode),
                 if (goal.targetAmount > 0)
                   TongtaiFormatters.vnd(goal.targetAmount),
-                'còn ${goal.daysRemaining(now)} ngày',
+                context.l10n.daysLeft(goal.daysRemaining(now)),
               ].join(' • '),
               style: TongtaiDesignTokens.captionStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,
@@ -311,7 +312,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'Đặt mục tiêu kinh doanh đầu tiên của bạn',
+              context.l10n.goalsEmptyPrompt,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,

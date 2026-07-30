@@ -189,7 +189,7 @@ void main() {
       expect(delivery.delivered, hasLength(1));
       final (csv, fileName, subject) = delivery.delivered.single;
       expect(fileName, 'tongtai-khach-hang-20260723.csv');
-      expect(subject, contains('Khách hàng'));
+      expect(subject, contains('Customers'));
       expect(csv.rowCount, kSampleCustomers.length);
 
       // AC5: history logged and visible.
@@ -236,7 +236,7 @@ void main() {
         await tester.tap(find.byKey(const Key('export-run')));
         await tester.pumpAndSettle();
         expect(delivery.delivered, isEmpty);
-        expect(find.textContaining('tối thiểu 6 ký tự'), findsOneWidget);
+        expect(find.textContaining('at least 6 characters'), findsOneWidget);
         await tester.pump(const Duration(seconds: 4));
 
         // A proper passphrase delivers the armored container.

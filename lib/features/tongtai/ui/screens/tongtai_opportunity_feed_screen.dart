@@ -11,6 +11,7 @@ import '../../providers/tongtai_context_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 import 'tongtai_opportunity_detail_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 // The type→color helper now lives in opportunity_theme.dart (shared with the
 // detail screen); re-exported so existing importers keep resolving it here.
@@ -85,14 +86,15 @@ class _TongtaiOpportunityFeedScreenState
   }
 
   void _onDismissed(Opportunity opportunity) {
+    final l10n = context.l10n;
     _controller.dismiss(opportunity.id);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text('Đã bỏ qua "${opportunity.title}"'),
+          content: Text(l10n.oppDismissedSnack(opportunity.title)),
           action: SnackBarAction(
-            label: 'Hoàn tác',
+            label: l10n.actionUndo,
             onPressed: () => _controller.restore(opportunity.id),
           ),
         ),
@@ -104,7 +106,9 @@ class _TongtaiOpportunityFeedScreenState
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text('Đã đánh dấu quan tâm "${opportunity.title}"')),
+        SnackBar(
+          content: Text(context.l10n.oppInterestedSnack(opportunity.title)),
+        ),
       );
   }
 
@@ -178,7 +182,7 @@ class _TongtaiOpportunityFeedScreenState
                         ),
                         child: ChoiceChip(
                           key: Key('opportunity-type-${type.name}'),
-                          label: Text(type.labelVi),
+                          label: Text(type.label(context.l10n.languageCode)),
                           selected: _query.type == type,
                           onSelected: (selected) => setState(
                             () => _query = selected
@@ -199,7 +203,7 @@ class _TongtaiOpportunityFeedScreenState
                         ),
                         child: ChoiceChip(
                           key: Key('opportunity-sort-${sort.name}'),
-                          label: Text(sort.labelVi),
+                          label: Text(sort.label(context.l10n.languageCode)),
                           selected: _query.sort == sort,
                           onSelected: (_) => setState(
                             () => _query = _query.copyWith(sort: sort),
@@ -250,17 +254,17 @@ class _TongtaiOpportunityFeedScreenState
                                 'opportunity-${opportunity.id}-'
                                 '${opportunity.reaction.name}',
                               ),
-                              background: const _SwipeHint(
+                              background: _SwipeHint(
                                 alignment: Alignment.centerLeft,
                                 color: TongtaiDesignTokens.success,
                                 icon: Icons.thumb_up_alt_outlined,
-                                label: 'Quan tâm',
+                                label: context.l10n.oppInterested,
                               ),
-                              secondaryBackground: const _SwipeHint(
+                              secondaryBackground: _SwipeHint(
                                 alignment: Alignment.centerRight,
                                 color: TongtaiDesignTokens.error,
                                 icon: Icons.close,
-                                label: 'Bỏ qua',
+                                label: context.l10n.oppDismiss,
                               ),
                               onDismissed: (direction) =>
                                   direction == DismissDirection.startToEnd
@@ -342,7 +346,7 @@ class _OpportunityCard extends StatelessWidget {
                     border: Border.all(color: color),
                   ),
                   child: Text(
-                    opportunity.type.labelVi,
+                    opportunity.type.label(context.l10n.languageCode),
                     style: TongtaiDesignTokens.captionStyle.copyWith(
                       color: color,
                       fontWeight: FontWeight.w600,
@@ -352,7 +356,7 @@ class _OpportunityCard extends StatelessWidget {
                 if (opportunity.reaction != OpportunityReaction.none) ...[
                   const SizedBox(width: TongtaiDesignTokens.spacing2),
                   Text(
-                    opportunity.reaction.labelVi,
+                    opportunity.reaction.label(context.l10n.languageCode),
                     style: TongtaiDesignTokens.captionStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextSecondary,
                       fontStyle: FontStyle.italic,
@@ -362,7 +366,9 @@ class _OpportunityCard extends StatelessWidget {
                 const Spacer(),
                 IconButton(
                   key: Key('opportunity-save-${opportunity.id}'),
-                  tooltip: opportunity.isSaved ? 'Bỏ lưu' : 'Lưu lại',
+                  tooltip: opportunity.isSaved
+                      ? context.l10n.oppUnsaveTooltip
+                      : context.l10n.oppSaveTooltip,
                   visualDensity: VisualDensity.compact,
                   icon: Icon(
                     opportunity.isSaved
@@ -398,9 +404,10 @@ class _OpportunityCard extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing2),
             Text(
-              'Ước tính +${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
+              '${context.l10n.oppEstimatePrefix} '
+              '+${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
               ' • ROI ${(opportunity.estimatedRoi * 100).round()}%'
-              ' • Điểm ${opportunity.aiScore.round()}',
+              ' • ${context.l10n.oppScoreLabel} ${opportunity.aiScore.round()}',
               style: TongtaiDesignTokens.captionStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
                 fontWeight: FontWeight.w600,
@@ -483,9 +490,7 @@ class _EmptyState extends StatelessWidget {
               const TongtaiFoxMascot.face(size: 64),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              savedOnly
-                  ? 'Chưa có cơ hội nào được lưu'
-                  : 'Chưa có cơ hội nào trong mục này',
+              savedOnly ? context.l10n.oppEmptySaved : context.l10n.oppEmptyTab,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,

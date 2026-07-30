@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 
 /// QR scanner for BYOK API keys (WTM-83, Founder-approved dependency).
@@ -38,7 +39,7 @@ class _TongtaiKeyScanScreenState extends State<TongtaiKeyScanScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Quét QR chứa API key'),
+        title: Text(context.l10n.titleKeyScan),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
@@ -50,8 +51,7 @@ class _TongtaiKeyScanScreenState extends State<TongtaiKeyScanScreen> {
             child: Padding(
               padding: const EdgeInsets.all(TongtaiDesignTokens.spacing6),
               child: Text(
-                'Đưa mã QR vào khung hình — khóa sẽ tự điền vào ô nhập.\n'
-                'Point the camera at the QR code.',
+                context.l10n.keyScanHint,
                 textAlign: TextAlign.center,
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   color: Colors.white,

@@ -76,6 +76,7 @@ class _TongtaiOpportunityDetailScreenState
   /// WTM-94 — Opportunity Action: one tap turns this opportunity into a
   /// Business Journey goal (idempotent id, so repeat taps never duplicate).
   Future<void> _createGoal() async {
+    final l10n = context.l10n;
     final now = (widget.clock ?? DateTime.now)();
     final goal = BusinessGoal(
       id: 'goal-from-${_o.id}',
@@ -87,15 +88,15 @@ class _TongtaiOpportunityDetailScreenState
       growthAchieved: 0,
       startDate: now,
       endDate: now.add(const Duration(days: 45)),
-      notes: 'Tạo từ cơ hội: ${_o.description}',
+      notes: l10n.oppCreatedFromNote(_o.description),
       createdAt: now,
       updatedAt: now,
     );
     await ref.read(businessGoalRepositoryProvider).upsert(goal);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đã tạo mục tiêu "${_o.title}" trong Journey')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.oppGoalCreatedSnack(_o.title))));
   }
 
   void _toggleSaved() {
@@ -105,12 +106,12 @@ class _TongtaiOpportunityDetailScreenState
 
   void _interested() {
     widget.onInterested?.call();
-    _closeWith('Đã đánh dấu quan tâm "${_o.title}"');
+    _closeWith(context.l10n.oppInterestedSnack(_o.title));
   }
 
   void _dismiss() {
     widget.onDismiss?.call();
-    _closeWith('Đã bỏ qua "${_o.title}"');
+    _closeWith(context.l10n.oppDismissedSnack(_o.title));
   }
 
   void _closeWith(String message) {
@@ -122,20 +123,21 @@ class _TongtaiOpportunityDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final color = tongtaiOpportunityTypeColor(_o.type);
     final plan = opportunityActionPlan(_o);
 
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Chi tiết cơ hội'),
+        title: Text(l10n.titleOpportunityDetail),
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
         elevation: 0,
         actions: [
           IconButton(
             key: const Key('opportunity-detail-save'),
-            tooltip: _saved ? 'Bỏ lưu' : 'Lưu lại',
+            tooltip: _saved ? l10n.oppUnsaveTooltip : l10n.oppSaveTooltip,
             icon: Icon(
               _saved ? Icons.bookmark : Icons.bookmark_outline,
               color: _saved
@@ -152,7 +154,10 @@ class _TongtaiOpportunityDetailScreenState
           // ── Type + AI score + title ──────────────────────────────────
           Row(
             children: [
-              _TypeBadge(label: _o.type.labelVi, color: color),
+              _TypeBadge(
+                label: _o.type.label(context.l10n.languageCode),
+                color: color,
+              ),
               const Spacer(),
               _ScoreBadge(score: _o.aiScore),
             ],
@@ -187,7 +192,7 @@ class _TongtaiOpportunityDetailScreenState
             children: [
               Expanded(
                 child: _StatTile(
-                  label: 'ROI ước tính',
+                  label: l10n.oppRoi,
                   value: '${(_o.estimatedRoi * 100).round()}%',
                   accent: TongtaiDesignTokens.producerGreen,
                 ),
@@ -195,7 +200,7 @@ class _TongtaiOpportunityDetailScreenState
               const SizedBox(width: TongtaiDesignTokens.spacing3),
               Expanded(
                 child: _StatTile(
-                  label: 'Tác động',
+                  label: l10n.oppImpact,
                   value: '+${TongtaiFormatters.vndShort(_o.expectedImpact)}',
                   accent: TongtaiDesignTokens.financePurple,
                 ),
@@ -203,7 +208,7 @@ class _TongtaiOpportunityDetailScreenState
               const SizedBox(width: TongtaiDesignTokens.spacing3),
               Expanded(
                 child: _StatTile(
-                  label: 'Phát hiện',
+                  label: l10n.oppDetected,
                   value: TongtaiFormatters.isoDate(_o.discoveredAt),
                   accent: TongtaiDesignTokens.consumerBlue,
                 ),
@@ -214,7 +219,7 @@ class _TongtaiOpportunityDetailScreenState
 
           // ── Reasoning ────────────────────────────────────────────────
           Text(
-            'Vì sao đáng làm',
+            l10n.oppWhyWorth,
             style: TongtaiDesignTokens.heading3Style.copyWith(
               color: TongtaiDesignTokens.lightTextPrimary,
               fontWeight: FontWeight.w600,
@@ -262,7 +267,7 @@ class _TongtaiOpportunityDetailScreenState
                             ? 'Workizen AI'
                             : 'Workizen AI — '
                                   '${_insight!.isAi ? (_insight!.provider?.displayName ?? 'AI') : 'Rule-based'}'
-                                  '${_insight!.aiScore != null ? ' · điểm AI ${_insight!.aiScore!.round()}' : ''}',
+                                  '${_insight!.aiScore != null ? ' · ${l10n.aiScoreLabel} ${_insight!.aiScore!.round()}' : ''}',
                         style: TongtaiDesignTokens.captionStyle.copyWith(
                           color: TongtaiDesignTokens.lightTextSecondary,
                           fontWeight: FontWeight.w600,
@@ -301,7 +306,7 @@ class _TongtaiOpportunityDetailScreenState
 
           // ── Action plan ──────────────────────────────────────────────
           Text(
-            'Kế hoạch hành động',
+            l10n.sectionActionPlan,
             style: TongtaiDesignTokens.heading3Style.copyWith(
               color: TongtaiDesignTokens.lightTextPrimary,
               fontWeight: FontWeight.w600,
@@ -334,7 +339,7 @@ class _TongtaiOpportunityDetailScreenState
                   key: const Key('opportunity-detail-dismiss'),
                   onPressed: _dismiss,
                   icon: const Icon(Icons.close),
-                  label: const Text('Bỏ qua'),
+                  label: Text(l10n.oppDismiss),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: TongtaiDesignTokens.error,
                     side: const BorderSide(color: TongtaiDesignTokens.error),
@@ -350,7 +355,7 @@ class _TongtaiOpportunityDetailScreenState
                   key: const Key('opportunity-detail-interested'),
                   onPressed: _interested,
                   icon: const Icon(Icons.thumb_up_alt_outlined),
-                  label: const Text('Quan tâm'),
+                  label: Text(l10n.oppInterested),
                   style: FilledButton.styleFrom(
                     backgroundColor: TongtaiDesignTokens.producerGreen,
                     padding: const EdgeInsets.symmetric(
@@ -421,7 +426,7 @@ class _ScoreBadge extends StatelessWidget {
             ),
           ),
           Text(
-            'điểm AI',
+            context.l10n.aiScoreLabel,
             style: TongtaiDesignTokens.captionStyle.copyWith(
               color: TongtaiDesignTokens.financePurple,
               fontSize: 9,

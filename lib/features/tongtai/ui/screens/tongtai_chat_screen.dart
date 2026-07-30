@@ -10,6 +10,7 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_chat_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_chat_search_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Chat screen (WTM-80) — the conversation surface for the AI Copilot.
 ///
@@ -165,7 +166,7 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
             actions: [
               IconButton(
                 key: const Key('chat-open-search'),
-                tooltip: 'Tìm kiếm',
+                tooltip: context.l10n.actionSearch,
                 icon: const Icon(Icons.search),
                 onPressed: _openSearch,
               ),
@@ -300,7 +301,7 @@ class _StatusTicks extends StatelessWidget {
       ),
     };
     return Tooltip(
-      message: status.labelEn,
+      message: status.label(context.l10n.languageCode),
       child: Icon(icon, size: 14, color: color),
     );
   }
@@ -390,7 +391,7 @@ class _TypingIndicator extends StatelessWidget {
         vertical: TongtaiDesignTokens.spacing1,
       ),
       child: Text(
-        'Workizen AI đang nhập… | typing…',
+        context.l10n.chatTyping,
         style: TongtaiDesignTokens.captionStyle.copyWith(
           color: TongtaiDesignTokens.lightTextSecondary,
           fontStyle: FontStyle.italic,
@@ -485,7 +486,7 @@ class _InputBar extends StatelessWidget {
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: (_) => onSend(),
               decoration: InputDecoration(
-                hintText: 'Nhắn cho Workizen AI… | Message Workizen AI…',
+                hintText: context.l10n.chatInputHint,
                 filled: true,
                 fillColor: TongtaiDesignTokens.lightHover,
                 border: OutlineInputBorder(
@@ -532,19 +533,11 @@ class _EmptyState extends StatelessWidget {
             const TongtaiFoxMascot.face(size: 72),
             const SizedBox(height: TongtaiDesignTokens.spacing3),
             Text(
-              'Hỏi Workizen AI về việc kinh doanh của bạn',
+              context.l10n.chatEmptyPrompt,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
                 fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
-            Text(
-              'Ask Workizen AI about your business.',
-              textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
               ),
             ),
           ],

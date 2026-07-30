@@ -15,6 +15,7 @@ import '../../providers/tongtai_orders_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_customer_form_screen.dart';
 import 'tongtai_customer_history_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Color for a [CustomerTier] badge (WTM-75 AC: visual indicators for VIP /
 /// high-value customers). Pulled out as a pure function so the mapping is
@@ -380,7 +381,7 @@ class _SortBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
             child: ChoiceChip(
-              label: Text(option.labelEn),
+              label: Text(option.label(context.l10n.languageCode)),
               selected: sort == option,
               onSelected: (_) => onSort(option),
             ),
@@ -629,7 +630,7 @@ class _TierChip extends StatelessWidget {
             const SizedBox(width: 2),
           ],
           Text(
-            tier.labelEn,
+            tier.label(context.l10n.languageCode),
             style: TongtaiDesignTokens.captionStyle.copyWith(
               color: color,
               fontWeight: FontWeight.w600,

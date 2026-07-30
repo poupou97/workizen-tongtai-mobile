@@ -20,6 +20,18 @@ enum BusinessEventType {
     BusinessEventType.recommendation => 'Gợi ý AI',
     BusinessEventType.journey => 'Mục tiêu',
   };
+
+  String get labelEn => switch (this) {
+    BusinessEventType.order => 'Orders',
+    BusinessEventType.finance => 'Finance',
+    BusinessEventType.inventory => 'Inventory',
+    BusinessEventType.customer => 'Customers',
+    BusinessEventType.opportunity => 'Opportunities',
+    BusinessEventType.recommendation => 'AI suggestions',
+    BusinessEventType.journey => 'Goals',
+  };
+
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
 /// A single thing that happened in the business (WTM-114).

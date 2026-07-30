@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../../../database/search/tongtai_search_service.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
@@ -174,11 +175,10 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isVi = _lang == 'vi';
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: Text(isVi ? 'Tìm kiếm' : 'Search'),
+        title: Text(context.l10n.actionSearch),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -186,7 +186,7 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
           ListenableBuilder(
             listenable: _controller,
             builder: (context, _) => IconButton(
-              tooltip: isVi ? 'Bộ lọc nâng cao' : 'Advanced filters',
+              tooltip: context.l10n.searchAdvancedFilters,
               onPressed: () =>
                   setState(() => _filtersExpanded = !_filtersExpanded),
               icon: Badge(
@@ -222,9 +222,7 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
                   child: _SearchField(
                     controller: _queryController,
                     focusNode: _queryFocus,
-                    hintText: isVi
-                        ? 'Tìm nhà cung cấp, sản phẩm…'
-                        : 'Search suppliers, products…',
+                    hintText: context.l10n.searchHint,
                     onChanged: _controller.setQuery,
                     onSubmitted: _onSubmit,
                     onClear: _controller.query.isEmpty ? null : _clearQuery,
@@ -393,7 +391,7 @@ class _AdvancedFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isVi = lang == 'vi';
+    final l10n = context.l10n;
     return Container(
       margin: const EdgeInsets.fromLTRB(
         TongtaiDesignTokens.spacing4,
@@ -415,7 +413,7 @@ class _AdvancedFilters extends StatelessWidget {
           Row(
             children: [
               Text(
-                isVi ? 'Bộ lọc nâng cao' : 'Advanced filters',
+                l10n.searchAdvancedFilters,
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   fontWeight: FontWeight.w700,
                   color: TongtaiDesignTokens.lightTextPrimary,
@@ -425,13 +423,13 @@ class _AdvancedFilters extends StatelessWidget {
               if (filters.hasAny)
                 TextButton(
                   onPressed: onClear,
-                  child: Text(isVi ? 'Xoá lọc' : 'Clear'),
+                  child: Text(l10n.searchClearFilters),
                 ),
             ],
           ),
           if (categories.isNotEmpty)
             _FilterFacetRow(
-              label: isVi ? 'Danh mục' : 'Category',
+              label: l10n.searchCategory,
               children: [
                 for (final category in categories)
                   ChoiceChip(
@@ -447,7 +445,7 @@ class _AdvancedFilters extends StatelessWidget {
             ),
           if (countries.isNotEmpty)
             _FilterFacetRow(
-              label: isVi ? 'Quốc gia' : 'Country',
+              label: l10n.searchCountry,
               children: [
                 for (final country in countries)
                   ChoiceChip(
@@ -462,7 +460,7 @@ class _AdvancedFilters extends StatelessWidget {
               ],
             ),
           _FilterFacetRow(
-            label: isVi ? 'Đánh giá' : 'Rating',
+            label: l10n.searchRating,
             children: [
               for (final rating in kTongtaiSearchRatingPresets)
                 ChoiceChip(
@@ -546,14 +544,12 @@ class _IdleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isVi = lang == 'vi';
+    final l10n = context.l10n;
     if (recent.isEmpty) {
       return _CenteredMessage(
         icon: Icons.search,
-        title: isVi ? 'Tìm kiếm toàn bộ' : 'Search everything',
-        subtitle: isVi
-            ? 'Tìm nhà cung cấp, sản phẩm và hơn thế nữa.'
-            : 'Find suppliers, products and more in one place.',
+        title: l10n.searchEverythingTitle,
+        subtitle: l10n.searchEverythingBody,
       );
     }
     return SingleChildScrollView(
@@ -570,7 +566,7 @@ class _IdleView extends StatelessWidget {
               ),
               const SizedBox(width: TongtaiDesignTokens.spacing2),
               Text(
-                isVi ? 'Tìm kiếm gần đây' : 'Recent searches',
+                l10n.searchRecent,
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   fontWeight: FontWeight.w700,
                   color: TongtaiDesignTokens.lightTextPrimary,
@@ -579,7 +575,7 @@ class _IdleView extends StatelessWidget {
               const Spacer(),
               TextButton(
                 onPressed: onClearHistory,
-                child: Text(isVi ? 'Xoá' : 'Clear'),
+                child: Text(l10n.actionClear),
               ),
             ],
           ),
@@ -664,14 +660,12 @@ class _ResultsTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isVi = lang == 'vi';
+    final l10n = context.l10n;
     if (results.countFor(tab) == 0) {
       return _CenteredMessage(
         icon: Icons.search_off,
-        title: isVi ? 'Không có kết quả' : 'No results',
-        subtitle: isVi
-            ? 'Thử từ khoá khác hoặc điều chỉnh bộ lọc.'
-            : 'Try a different keyword or adjust your filters.',
+        title: l10n.searchNoResults,
+        subtitle: l10n.searchNoResultsBody,
       );
     }
 
@@ -705,8 +699,7 @@ class _ResultsTabView extends StatelessWidget {
           children: [
             if (results.suppliers.isNotEmpty) ...[
               _SectionHeader(
-                label:
-                    '${isVi ? 'Nhà cung cấp' : 'Suppliers'} (${results.supplierCount})',
+                label: '${l10n.sectionSuppliers} (${results.supplierCount})',
                 color: TongtaiDesignTokens.producerGreen,
               ),
               for (final s in results.suppliers)
@@ -714,8 +707,7 @@ class _ResultsTabView extends StatelessWidget {
             ],
             if (results.products.isNotEmpty) ...[
               _SectionHeader(
-                label:
-                    '${isVi ? 'Sản phẩm' : 'Products'} (${results.productCount})',
+                label: '${l10n.sectionProducts} (${results.productCount})',
                 color: TongtaiDesignTokens.inventoryOrange,
               ),
               for (final p in results.products)
@@ -803,7 +795,6 @@ class _ProductResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isVi = lang == 'vi';
     return _ResultCard(
       icon: Icons.inventory_2_outlined,
       iconColor: TongtaiDesignTokens.inventoryOrange,
@@ -811,7 +802,7 @@ class _ProductResultCard extends StatelessWidget {
       subtitle: [
         if (product.category != null && product.category!.isNotEmpty)
           product.category!,
-        '${isVi ? 'Tồn' : 'Stock'}: ${product.stock.toStringAsFixed(0)}',
+        '${context.l10n.labelStock}: ${product.stock.toStringAsFixed(0)}',
       ].join(' • '),
       trailing: Text(
         TongtaiFormatters.vnd(product.price),

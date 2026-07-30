@@ -11,6 +11,7 @@ import '../../inventory/product_form.dart';
 import '../../inventory/product_history.dart';
 import '../../inventory/product_image_source.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Add / Edit Product form (WTM-69).
 ///
@@ -335,11 +336,12 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
   }) {
+    final code = context.l10n.languageCode;
     final label = optional
-        ? '${field.labelEn} (optional)'
+        ? '${field.label(code)} ${context.l10n.labelOptionalSuffix}'
         : field.isRequired
-        ? '${field.labelEn} *'
-        : field.labelEn;
+        ? '${field.label(code)} *'
+        : field.label(code);
     return Padding(
       padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
       child: TextField(
@@ -654,7 +656,8 @@ class _ChangeList extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 2),
               child: Text(
-                '${change.field.labelEn}: ${change.before} → ${change.after}',
+                '${change.field.label(context.l10n.languageCode)}: '
+                '${change.before} → ${change.after}',
                 style: TongtaiDesignTokens.captionStyle.copyWith(
                   color: TongtaiDesignTokens.lightTextSecondary,
                 ),

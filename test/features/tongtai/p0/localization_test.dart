@@ -73,6 +73,121 @@ void main() {
         );
       });
 
+      test('no UI string literal concatenates two languages around " | "', () {
+        final uiDir = Directory('lib/features/tongtai/ui');
+        final offenders = <String>[];
+        final literal = RegExp("'([^'\\\\]|\\\\.)*'");
+        final letters = RegExp('[A-Za-zÀ-ỹ]{2,}');
+        for (final f
+            in uiDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          final lines = f.readAsLinesSync();
+          for (var i = 0; i < lines.length; i++) {
+            final line = lines[i].trimLeft();
+            if (line.startsWith('//') || line.startsWith('///')) continue;
+            for (final m in literal.allMatches(lines[i])) {
+              final value = m.group(0)!;
+              if (!value.contains(' | ')) continue;
+              final staticSegments = value
+                  .substring(1, value.length - 1)
+                  .split(' | ')
+                  .where((seg) {
+                    final withoutInterp = seg.replaceAll(
+                      RegExp(r'\$\{[^}]*\}|\$[a-zA-Z_]\w*'),
+                      '',
+                    );
+                    return letters.hasMatch(withoutInterp);
+                  })
+                  .length;
+              if (staticSegments >= 2) {
+                offenders.add('${f.path}:${i + 1}: $value');
+              }
+            }
+          }
+        }
+        expect(
+          offenders,
+          isEmpty,
+          reason:
+              'Label song ngữ "vi | en" bị cấm (P0 §2) — dùng '
+              'context.l10n.<key>:\n${offenders.join('\n')}',
+        );
+      });
+
+      test('no Vietnamese hard-coded literal remains under ui/ (P0 §2)', () {
+        // After WTM-145 every user-facing string in lib/features/tongtai/ui/
+        // comes from AppStrings — a Vietnamese literal in a widget can only
+        // mean a new hard-coded label snuck in.
+        final uiDir = Directory('lib/features/tongtai/ui');
+        final offenders = <String>[];
+        final literal = RegExp("'([^'\\\\]|\\\\.)*'");
+        final viLetters = RegExp(
+          '[àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộ'
+          'ơờớởỡợùúủũụưừứửữựỳýỷỹỵ]',
+        );
+        // Proper nouns that legitimately keep their Vietnamese spelling in
+        // any locale (product name only — example hints live in AppStrings).
+        const allowlist = ['Tổng Tài'];
+        for (final f
+            in uiDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          final lines = f.readAsLinesSync();
+          for (var i = 0; i < lines.length; i++) {
+            final line = lines[i].trimLeft();
+            if (line.startsWith('//') || line.startsWith('///')) continue;
+            for (final m in literal.allMatches(lines[i])) {
+              var value = m.group(0)!;
+              for (final ok in allowlist) {
+                value = value.replaceAll(ok, '');
+              }
+              if (viLetters.hasMatch(value)) {
+                offenders.add('${f.path}:${i + 1}: ${m.group(0)!}');
+              }
+            }
+          }
+        }
+        expect(
+          offenders,
+          isEmpty,
+          reason:
+              'Chuỗi tiếng Việt hard-code trong ui/ bị cấm (P0 §2) — dùng '
+              'context.l10n.<key>:\n${offenders.join('\n')}',
+        );
+      });
+
+      test('ui/ never reads labelVi/labelEn directly — label(locale) only', () {
+        // Domain enums keep labelVi/labelEn, but a widget picking one side
+        // hard-wires a language and breaks runtime switching (P0 §2).
+        final uiDir = Directory('lib/features/tongtai/ui');
+        final offenders = <String>[];
+        final direct = RegExp(r'\.label(Vi|En)\b');
+        for (final f
+            in uiDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          final lines = f.readAsLinesSync();
+          for (var i = 0; i < lines.length; i++) {
+            final line = lines[i].trimLeft();
+            if (line.startsWith('//') || line.startsWith('///')) continue;
+            if (direct.hasMatch(lines[i])) {
+              offenders.add('${f.path}:${i + 1}: ${lines[i].trim()}');
+            }
+          }
+        }
+        expect(
+          offenders,
+          isEmpty,
+          reason:
+              'UI phải gọi label(context.l10n.languageCode) thay vì '
+              'labelVi/labelEn:\n${offenders.join('\n')}',
+        );
+      });
+
       test(
         'every AppStrings key is referenced somewhere in lib/ (unused check)',
         () {
