@@ -45,6 +45,7 @@ Legend: ✅ done · 🟡 partial / gap noted · 🔴 not started · N/A không �
 | Telemetry | ✅ | WTM-108 shipped + **verified live trên S24** (app_open trong logcat/DebugView). Operational-only catalogue: `docs/05-OPERATIONS/TELEMETRY-EVENTS.md`; config thật bị `.gitignore` chặn. |
 | Privacy policy | 🔴 | **Cần văn bản privacy policy + telemetry disclosure trước Beta** (WTM-37) — candidate kế tiếp Phase 1. |
 | Release build | ✅ | `flutter build apk --release` PASS (85.5MB, debug-signed) với Firebase config — verify aapt2. |
+| **Smoke-launch release APK trên máy thật (BẮT BUỘC)** | ✅ | Bài học 2026-07-30: release + google-services.json + `firebase_crashlytics` nhưng THIẾU Crashlytics Gradle plugin → crash ngay khi mở ("Crashlytics build ID is missing") — aapt2/analyze/990 test KHÔNG bắt được lỗi tầng gradle-runtime này. Quy trình: `adb install -r` → mở app → `adb logcat -b crash` phải RỖNG + thấy `app_open`. Fix: apply `com.google.firebase.crashlytics` cùng điều kiện với google-services (settings.gradle.kts + app/build.gradle.kts). |
 | Release signing / store upload | 🔴 | Keystore thật + upload = **Founder gate** (release production). |
 | iOS build | 🔴 | Chưa verify (cần máy có Xcode signing — Founder/external). |
 | Backup/Restore | 🟡 | Export CSV + **mã hoá passphrase (WTM-100)** ✅; **chưa có luồng RESTORE/import trong app** (decrypt đã có API + test) — candidate Phase 1. |

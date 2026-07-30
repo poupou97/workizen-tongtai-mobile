@@ -10,6 +10,10 @@ plugins {
 // telemetry silently no-ops (see lib/core/telemetry/).
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
+    // Must accompany google-services whenever firebase_crashlytics is in the
+    // dependency tree: the plugin injects the Crashlytics build ID; without
+    // it the app crashes at launch inside FirebaseInitProvider.
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 android {

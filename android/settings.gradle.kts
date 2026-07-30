@@ -25,6 +25,10 @@ plugins {
     // Founder-provided google-services.json exists — the build never breaks
     // without it.
     id("com.google.gms.google-services") version "4.4.2" apply false
+    // Crashlytics REQUIRES its own Gradle plugin to inject the build ID;
+    // without it FirebaseInitProvider throws "Crashlytics build ID is
+    // missing" and the app dies on process start (found on-device 2026-07-30).
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false
 }
 
 include(":app")
