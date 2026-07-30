@@ -102,6 +102,7 @@ class _FavoriteTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      key: Key('supplier-fav-item-${supplier.id}'),
       color: Colors.transparent,
       child: InkWell(
         onTap: onOpen,
@@ -178,6 +179,7 @@ class _FavoriteTile extends StatelessWidget {
               const SizedBox(width: TongtaiDesignTokens.spacing2),
               // Filled heart — one tap removes from favorites (AC1/AC2).
               IconButton(
+                key: Key('supplier-fav-action-remove-${supplier.id}'),
                 onPressed: onRemove,
                 tooltip: context.l10n.favRemove,
                 icon: const Icon(
@@ -199,6 +201,7 @@ class _EmptyFavorites extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+      key: const Key('supplier-fav-empty'),
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
         child: Column(

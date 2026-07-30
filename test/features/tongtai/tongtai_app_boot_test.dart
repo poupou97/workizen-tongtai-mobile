@@ -43,8 +43,8 @@ void main() {
     child: const TongtaiApp(),
   );
 
-  Finder tutorial() => find.byKey(const ValueKey('tongtai_onboarding_skip'));
-  Finder nextButton() => find.byKey(const ValueKey('tongtai_onboarding_next'));
+  Finder tutorial() => find.byKey(const ValueKey('onboarding-action-skip'));
+  Finder nextButton() => find.byKey(const ValueKey('onboarding-action-next'));
   Finder appShell() => find.byType(TongtaiBottomNav);
 
   testWidgets('AC2: first launch (no flag) boots into the tutorial', (

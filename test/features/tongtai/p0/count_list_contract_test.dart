@@ -30,6 +30,8 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dar
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_producer_screen.dart';
 import 'package:tongtai/features/tongtai/ui/tongtai_app_shell.dart';
 
+import '../../../support/count_list_contract.dart';
+
 /// P0 Founder Correction 2026-07-30 — **Summary Count == Domain Visible
 /// Records** contract (WTM-144/WTM-146).
 ///
@@ -359,4 +361,71 @@ void main() {
       expect(find.text(userCustomerName), findsOneWidget); // recent interaction
     },
   );
+
+  testWidgets('REUSABLE contract: registered domains inherit '
+      'Summary Count == Visible Records', (tester) async {
+    // Demonstrates the inheritance path a NEW domain uses: describe the
+    // domain once with CountListContract, the shared verifier does the rest
+    // (test/support/count_list_contract.dart, ADR-TON-015 §2).
+    final s = await session();
+    await s.seeder.seed();
+    await s.customers.upsert(
+      Customer(
+        id: userCustomerId,
+        name: userCustomerName,
+        phone: '+84900000009',
+        location: 'Đà Nẵng',
+        orderCount: 0,
+        totalSpent: 0,
+        lastPurchaseDate: null,
+        email: 'contract@example.com',
+      ),
+    );
+    await pumpApp(tester, s.app);
+    await tapNav(tester, 'Home');
+
+    final contracts = <CountListContract>[
+      CountListContract(
+        domain: 'consumer',
+        summaryKey: const Key('home-tile-consumer'),
+        repositoryCount: () async => (await s.customers.loadAll()).length,
+        openDomain: (t) async {
+          await tapNav(t, 'Consumer');
+          await t.tap(find.byKey(const Key('consumer-view-all')));
+          await t.pumpAndSettle();
+        },
+        itemKeyPrefix: 'customer-item-',
+        mustBeVisible: [
+          // Paginated list: a real user searches for the record — the
+          // contract asserts REACHABLE, not "happens to be on page 1".
+          ContractRecord(
+            'customer-item-$userCustomerId',
+            reveal: (t) async {
+              await t.enterText(
+                find.byKey(const Key('customer-search-field')),
+                userCustomerName,
+              );
+              await t.pumpAndSettle();
+            },
+          ),
+        ],
+      ),
+      CountListContract(
+        domain: 'inventory',
+        summaryKey: const Key('home-tile-inventory'),
+        repositoryCount: () async => (await s.products.loadAll()).length,
+        openSummary: (t) async {
+          await t.pageBack();
+          await t.pumpAndSettle();
+          await tapNav(t, 'Home');
+        },
+        openDomain: (t) async => tapNav(t, 'Inventory'),
+        itemKeyPrefix: 'inventory-item-',
+      ),
+    ];
+
+    for (final contract in contracts) {
+      await verifyCountListContract(tester, contract);
+    }
+  });
 }

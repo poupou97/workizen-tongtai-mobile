@@ -79,7 +79,7 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
                   vertical: TongtaiDesignTokens.spacing1,
                 ),
                 child: TextButton(
-                  key: const ValueKey('tongtai_onboarding_skip'),
+                  key: const ValueKey('onboarding-action-skip'),
                   onPressed: widget.onFinished,
                   style: TextButton.styleFrom(
                     foregroundColor: TongtaiDesignTokens.lightTextSecondary,
@@ -118,7 +118,7 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
                 width: double.infinity,
                 height: TongtaiDesignTokens.buttonHeight,
                 child: ElevatedButton(
-                  key: const ValueKey('tongtai_onboarding_next'),
+                  key: const ValueKey('onboarding-action-next'),
                   onPressed: _onPrimaryPressed,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accent,

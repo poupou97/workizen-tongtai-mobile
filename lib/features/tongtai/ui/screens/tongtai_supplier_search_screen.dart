@@ -155,6 +155,7 @@ class _TongtaiSupplierSearchScreenState
           ListenableBuilder(
             listenable: _favorites,
             builder: (context, _) => IconButton(
+              key: const Key('supplier-search-open-favorites'),
               onPressed: _openFavorites,
               tooltip: context.l10n.titleFavoriteSuppliers,
               icon: Badge(
@@ -252,6 +253,7 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      key: const Key('supplier-search-field'),
       controller: controller,
       focusNode: focusNode,
       onChanged: onChanged,
@@ -355,6 +357,7 @@ class _FilterBar extends StatelessWidget {
             children: [
               // Favorites-only filter (WTM-65 AC4).
               FilterChip(
+                key: const Key('supplier-search-filter-favorites'),
                 label: Text(context.l10n.supFavorites),
                 selected: favoritesOnly,
                 avatar: Icon(
@@ -500,6 +503,7 @@ class _ResultsHeader extends StatelessWidget {
           const Spacer(),
           if (hasActiveFilters)
             TextButton.icon(
+              key: const Key('supplier-search-action-clear-filters'),
               onPressed: onReset,
               icon: const Icon(Icons.filter_alt_off, size: 18),
               label: Text(context.l10n.actionClearFilters),
@@ -568,6 +572,7 @@ class _SupplierCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      key: Key('supplier-search-item-${supplier.id}'),
       color: Colors.transparent,
       child: InkWell(
         onTap: () => _openDetail(context),
@@ -602,6 +607,7 @@ class _SupplierCard extends StatelessWidget {
                     ),
                   ),
                   _FavoriteHeart(
+                    heartKey: Key('supplier-search-fav-${supplier.id}'),
                     isFavorite: isFavorite,
                     onPressed: onToggleFavorite,
                   ),
@@ -679,10 +685,18 @@ class _SupplierCard extends StatelessWidget {
 /// otherwise. Sits inside the card's [InkWell]; because it is itself a button it
 /// wins the tap so favoriting never also opens the detail view.
 class _FavoriteHeart extends StatelessWidget {
-  const _FavoriteHeart({required this.isFavorite, required this.onPressed});
+  const _FavoriteHeart({
+    required this.isFavorite,
+    required this.onPressed,
+    this.heartKey,
+  });
 
   final bool isFavorite;
   final VoidCallback onPressed;
+
+  /// Stable per-supplier test id (`supplier-search-fav-<id>`) supplied by the
+  /// owning card, which is the only place the supplier id is known.
+  final Key? heartKey;
 
   @override
   Widget build(BuildContext context) {
@@ -690,6 +704,7 @@ class _FavoriteHeart extends StatelessWidget {
     // line box — an IconButton would add ~48px tap-target padding and overflow
     // the card's fixed-height row.
     return Tooltip(
+      key: heartKey,
       message: isFavorite ? context.l10n.favRemove : context.l10n.favAdd,
       child: InkResponse(
         onTap: onPressed,
@@ -746,6 +761,7 @@ class _EmptyState extends StatelessWidget {
     // is short (e.g. a small screen with the filter bar expanded) so it never
     // overflows.
     return LayoutBuilder(
+      key: const Key('supplier-search-empty'),
       builder: (context, constraints) => SingleChildScrollView(
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),

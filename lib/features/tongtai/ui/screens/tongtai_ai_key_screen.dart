@@ -223,7 +223,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
-                  key: const Key('tongtai-ai-scan'),
+                  key: const Key('ai-key-action-scan'),
                   onPressed: _busy ? null : _scan,
                   icon: const Icon(Icons.qr_code_scanner, size: 18),
                   label: Text(l10n.aiKeyScanQr),
@@ -247,7 +247,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                 width: double.infinity,
                 height: TongtaiDesignTokens.buttonHeight,
                 child: FilledButton(
-                  key: const Key('tongtai-ai-save'),
+                  key: const Key('ai-key-action-save'),
                   onPressed: _busy ? null : _save,
                   style: FilledButton.styleFrom(
                     backgroundColor: TongtaiDesignTokens.copilotViolet,
@@ -260,7 +260,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                 width: double.infinity,
                 height: TongtaiDesignTokens.buttonHeight,
                 child: OutlinedButton(
-                  key: const Key('tongtai-ai-test'),
+                  key: const Key('ai-key-action-test'),
                   onPressed: (_busy || _hasKey != true) ? null : _test,
                   child: Text(l10n.aiKeyTest),
                 ),
@@ -271,7 +271,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                   width: double.infinity,
                   height: TongtaiDesignTokens.buttonHeight,
                   child: OutlinedButton(
-                    key: const Key('tongtai-ai-rotate'),
+                    key: const Key('ai-key-action-rotate'),
                     onPressed: _busy ? null : _rotate,
                     child: Text(l10n.aiKeyRotate),
                   ),
@@ -283,7 +283,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                   width: double.infinity,
                   height: TongtaiDesignTokens.buttonHeight,
                   child: OutlinedButton(
-                    key: const Key('tongtai-ai-delete'),
+                    key: const Key('ai-key-action-delete'),
                     onPressed: _busy ? null : _delete,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: TongtaiDesignTokens.error,
@@ -411,7 +411,7 @@ class _KeyField extends StatelessWidget {
     final l10n = context.l10n;
     final hint = hasKey ? l10n.aiKeyPasteReplace : l10n.aiKeyPaste;
     return TextField(
-      key: const Key('tongtai-ai-key-field'),
+      key: const Key('ai-key-field'),
       controller: controller,
       enabled: enabled,
       obscureText: obscure,
@@ -426,7 +426,7 @@ class _KeyField extends StatelessWidget {
         errorText: errorText,
         prefixIcon: const Icon(Icons.key_outlined),
         suffixIcon: IconButton(
-          key: const Key('tongtai-ai-key-visibility'),
+          key: const Key('ai-key-action-visibility'),
           icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
           tooltip: obscure ? l10n.aiKeyShow : l10n.aiKeyHide,
           onPressed: onToggleObscure,
@@ -460,7 +460,7 @@ class _StatusBanner extends StatelessWidget {
       _AiStatusTone.info => Icons.info_outline,
     };
     return Container(
-      key: const Key('tongtai-ai-status'),
+      key: const Key('ai-key-status'),
       width: double.infinity,
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
       decoration: BoxDecoration(

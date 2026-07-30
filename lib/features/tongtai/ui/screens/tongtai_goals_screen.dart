@@ -153,6 +153,7 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
           ),
           floatingActionButton: FloatingActionButton.extended(
+            key: const Key('goals-action-new'),
             onPressed: () => _openForm(context),
             backgroundColor: TongtaiDesignTokens.financePurple,
             foregroundColor: Colors.white,
@@ -196,7 +197,7 @@ class _GoalCard extends StatelessWidget {
     final pace = goal.pace(now);
     final color = tongtaiGoalPaceColor(pace);
     return InkWell(
-      key: Key('goal-card-${goal.id}'),
+      key: Key('goals-item-${goal.id}'),
       borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
       onTap: onTap,
       child: Container(
@@ -300,6 +301,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+      key: const Key('goals-empty'),
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
         child: Column(

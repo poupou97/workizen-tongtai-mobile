@@ -51,6 +51,14 @@ domain model, AI matrix, ADRs.
 - SQLite + Drift, schema versioned in `lib/database/migrations/`;
   FTS5 search (đ-aware tokenizer) in `lib/database/search/`.
 - `lib/features/tongtai/` = product code · `lib/core/` = platform seams.
+- **ADR-TON-014** — sample data seed vào production repos (prefix `sample-`);
+  KHÔNG parallel demo state.
+- **ADR-TON-015** — **UI Implementation Maturity Model (L0–L4)** + **One Data
+  Path**: `Repository → Context Provider → BusinessContext → Screen`. Cấm
+  parallel cache, hardcode business data, mỗi màn tự tính summary. Contract
+  bắt buộc: **Summary Count == Domain Visible Records**. Level trong Jira PHẢI
+  == level thật trong code (ma trận:
+  `docs/02-ARCHITECTURE/UI-IMPLEMENTATION-LEVELS.md`).
 
 ## Development workflow (Evidence-Driven Runtime)
 
@@ -82,6 +90,16 @@ Fable 5 for hard tasks/retries.
 
 ## Conventions
 
-- Bilingual docs (EN + VI). Conventional commits with the WTM key.
+- Bilingual docs (EN + VI) — nhưng **UI chỉ một locale**, mọi chuỗi qua
+  `AppStrings` key (ADR-TON-007). Conventional commits with the WTM key.
 - Tests are real integration/widget tests; every feature ships with them
-  (519 passing at split time — keep it green).
+  (~992 passing — keep it green).
+- **Story có UI phải khai `IMPLEMENTATION_LEVEL=L0..L4` trong Jira** và cập
+  nhật ma trận cùng PR. Cấm đóng story ở level cao hơn thực tế.
+- **Stable test IDs** `<screen>-<role>` cho mọi màn L2+; test hành vi tìm bằng
+  Key, không bằng text hiển thị.
+- **Bug mới ⇒ thêm Pattern vào `docs/04-DELIVERY/TESTING-BIBLE.md`**
+  (Root-Cause · Regression · Test Pattern · Prevention Rule), không chỉ thêm
+  test case. Đọc file này trước khi viết test cho lỗi tương tự.
+- **Story chạm native/gradle/Firebase**: bắt buộc smoke-launch bản **release**
+  trên máy thật (`adb logcat -b crash` rỗng) trước khi coi là xong.
