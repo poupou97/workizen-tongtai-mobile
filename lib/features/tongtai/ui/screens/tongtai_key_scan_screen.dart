@@ -45,13 +45,17 @@ class _TongtaiKeyScanScreenState extends State<TongtaiKeyScanScreen> {
       ),
       body: Stack(
         children: [
-          MobileScanner(onDetect: (capture) => _onDetect(context, capture)),
+          MobileScanner(
+            key: const Key('key-scan-camera'),
+            onDetect: (capture) => _onDetect(context, capture),
+          ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.all(TongtaiDesignTokens.spacing6),
               child: Text(
                 context.l10n.keyScanHint,
+                key: const Key('key-scan-hint'),
                 textAlign: TextAlign.center,
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   color: Colors.white,

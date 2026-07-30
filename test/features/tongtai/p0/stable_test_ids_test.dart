@@ -38,6 +38,19 @@ void main() {
     'tongtai_supplier_detail_screen.dart': 'supplier-detail',
     'tongtai_customer_history_screen.dart': 'history',
     'tongtai_ai_key_screen.dart': 'ai-key',
+    // Flow screens (forms/pickers/detail) — reached from a domain screen but
+    // still Level 2: they render production records and must be drivable by
+    // key, not by label text.
+    'tongtai_chat_search_screen.dart': 'chat',
+    'tongtai_create_order_screen.dart': 'create-order',
+    'tongtai_customer_form_screen.dart': 'customer',
+    'tongtai_goal_detail_screen.dart': 'goal',
+    'tongtai_goal_form_screen.dart': 'goal',
+    'tongtai_inventory_picker_screen.dart': 'picker',
+    'tongtai_key_scan_screen.dart': 'key-scan',
+    'tongtai_onboarding_screen.dart': 'onboarding',
+    'tongtai_product_form_screen.dart': 'product',
+    'tongtai_transaction_form_screen.dart': 'transaction',
   };
 
   /// Screens that render a record list → must key each row with the record id
