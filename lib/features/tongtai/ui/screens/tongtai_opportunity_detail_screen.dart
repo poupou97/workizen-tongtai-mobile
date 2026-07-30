@@ -12,6 +12,7 @@ import '../../opportunity/opportunity_theme.dart';
 import '../../providers/tongtai_ai_provider.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Opportunity Detail & Action Plan (WTM-92).
 ///
@@ -282,7 +283,7 @@ class _TongtaiOpportunityDetailScreenState
                     key: const Key('opportunity-ai-explain'),
                     onPressed: _runExplain,
                     icon: const Icon(Icons.auto_awesome, size: 16),
-                    label: const Text('Đánh giá AI · AI insight'),
+                    label: Text(context.l10n.aiInsight),
                   )
                 else
                   Text(
@@ -321,7 +322,7 @@ class _TongtaiOpportunityDetailScreenState
             key: const Key('opportunity-create-goal'),
             onPressed: _createGoal,
             icon: const Icon(Icons.flag_outlined),
-            label: const Text('Tạo mục tiêu từ cơ hội · Create goal'),
+            label: Text(context.l10n.opportunityCreateGoal),
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing3),
 

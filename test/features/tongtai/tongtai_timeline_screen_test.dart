@@ -97,7 +97,7 @@ void main() {
       const ProviderScope(child: MaterialApp(home: TongtaiMoreScreen())),
     );
 
-    final entry = find.text('Timeline · Dòng thời gian');
+    final entry = find.text('Timeline');
     await tester.scrollUntilVisible(
       entry,
       200,

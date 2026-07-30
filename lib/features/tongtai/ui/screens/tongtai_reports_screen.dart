@@ -17,6 +17,7 @@ import '../../providers/tongtai_orders_provider.dart';
 import '../../reports/business_report.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_opportunity_feed_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Reports & Analytics dashboard (WTM-95 layout/widgets, WTM-96 revenue KPI,
 /// WTM-127 real data).
@@ -101,7 +102,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     if (!mounted) return;
     setState(() {
       _aiResult = AiCardResult(
-        title: 'Tóm tắt · Summary',
+        title: context.l10n.aiResultSummary,
         text: summary.text,
         sourceLabel: summary.isAi
             ? (summary.provider?.displayName ?? 'AI')
@@ -121,7 +122,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     if (!mounted) return;
     setState(() {
       _aiResult = AiCardResult(
-        title: 'Gợi ý hành động · Recommendations',
+        title: context.l10n.aiResultRecommendations,
         text: recommendation.text,
         sourceLabel: recommendation.isAi
             ? (recommendation.provider?.displayName ?? 'AI')
@@ -140,7 +141,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     if (!mounted) return;
     setState(() {
       _aiResult = AiCardResult(
-        title: 'Kế hoạch tuần · Weekly plan',
+        title: context.l10n.aiResultWeeklyPlan,
         text: plan.text,
         sourceLabel: plan.isAi
             ? (plan.provider?.displayName ?? 'AI')
@@ -227,7 +228,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Reports & Analytics · Báo cáo'),
+        title: Text(context.l10n.titleReports),
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
         elevation: 0,
@@ -301,7 +302,7 @@ class _ReportBody extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 key: const Key('reports-kpi-revenue'),
-                label: 'Doanh thu · Revenue',
+                label: context.l10n.kpiRevenue,
                 value: TongtaiFormatters.vnd(metrics.revenue),
                 accent: TongtaiDesignTokens.financePurple,
                 icon: Icons.trending_up,
@@ -311,7 +312,7 @@ class _ReportBody extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 key: const Key('reports-kpi-orders'),
-                label: 'Đơn hàng · Orders',
+                label: context.l10n.kpiOrders,
                 value: '${metrics.ordersCount}',
                 accent: TongtaiDesignTokens.consumerBlue,
                 icon: Icons.receipt_long_outlined,
@@ -325,7 +326,7 @@ class _ReportBody extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 key: const Key('reports-kpi-customers'),
-                label: 'Khách hàng · Customers',
+                label: context.l10n.kpiCustomers,
                 value: '${metrics.customersCount}',
                 accent: TongtaiDesignTokens.inventoryOrange,
                 icon: Icons.people_outline,
@@ -335,7 +336,7 @@ class _ReportBody extends StatelessWidget {
             Expanded(
               child: _KpiCard(
                 key: const Key('reports-kpi-aov'),
-                label: 'Giá trị đơn TB · AOV',
+                label: context.l10n.kpiAov,
                 value: TongtaiFormatters.vnd(metrics.averageOrderValue),
                 accent: TongtaiDesignTokens.producerGreen,
                 icon: Icons.shopping_bag_outlined,
@@ -359,21 +360,21 @@ class _ReportBody extends StatelessWidget {
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
         // ── Revenue trend (WTM-95) ──────────────────────────────────────
-        _SectionTitle('Doanh thu theo tháng · Revenue trend'),
+        _SectionTitle(context.l10n.sectionRevenueTrend),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _RevenueTrendCard(report: report),
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
         // ── Period selector — scopes the breakdowns below (WTM-115) ─────
-        _SectionTitle('Chi tiết theo kỳ · Breakdown by period'),
+        _SectionTitle(context.l10n.sectionBreakdownByPeriod),
         const SizedBox(height: TongtaiDesignTokens.spacing2),
         _PeriodSelector(period: period, onChanged: onPeriodChanged),
 
         const SizedBox(height: TongtaiDesignTokens.spacing5),
 
         // ── Top categories (WTM-95, period-scoped WTM-115) ──────────────
-        _SectionTitle('Nhóm bán chạy · Top categories'),
+        _SectionTitle(context.l10n.sectionTopCategories),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _TopCategoriesCard(
           categories: breakdown.topCategories,
@@ -383,14 +384,14 @@ class _ReportBody extends StatelessWidget {
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
         // ── Top products (WTM-97, period-scoped WTM-115) ────────────────
-        _SectionTitle('Sản phẩm bán chạy · Top products'),
+        _SectionTitle(context.l10n.sectionTopProducts),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _TopProductsCard(products: breakdown.topProducts),
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
         // ── Top customers (WTM-97, period-scoped WTM-115) ───────────────
-        _SectionTitle('Khách hàng hàng đầu · Top customers'),
+        _SectionTitle(context.l10n.sectionTopCustomers),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _TopCustomersCard(customers: breakdown.topCustomers),
 
@@ -398,7 +399,7 @@ class _ReportBody extends StatelessWidget {
 
         // ── Opportunity pipeline (WTM-98) ───────────────────────────────
         _SectionHeader(
-          title: 'Cơ hội đang mở · Pipeline',
+          title: context.l10n.sectionPipeline,
           actionKey: const Key('reports-open-opportunities'),
           onAction: () => Navigator.of(context).push<void>(
             MaterialPageRoute(
@@ -542,25 +543,25 @@ class _AiSummaryCard extends StatelessWidget {
                   key: const Key('reports-ai-summary-run'),
                   onPressed: onSummarize,
                   icon: const Icon(Icons.auto_awesome, size: 16),
-                  label: const Text('Tóm tắt · Summarize'),
+                  label: Text(context.l10n.aiSummarize),
                 ),
                 OutlinedButton.icon(
                   key: const Key('reports-ai-recommend-run'),
                   onPressed: onRecommend,
                   icon: const Icon(Icons.tips_and_updates_outlined, size: 16),
-                  label: const Text('Gợi ý hành động · Recommend'),
+                  label: Text(context.l10n.aiRecommend),
                 ),
                 OutlinedButton.icon(
                   key: const Key('reports-ai-plan-run'),
                   onPressed: onPlan,
                   icon: const Icon(Icons.checklist_outlined, size: 16),
-                  label: const Text('Kế hoạch tuần · Plan'),
+                  label: Text(context.l10n.aiPlan),
                 ),
                 OutlinedButton.icon(
                   key: const Key('reports-ai-health-run'),
                   onPressed: onHealth,
                   icon: const Icon(Icons.favorite_outline, size: 16),
-                  label: const Text('Sức khỏe · Health'),
+                  label: Text(context.l10n.aiHealth),
                 ),
               ],
             ),
@@ -975,7 +976,7 @@ class _RevenueTrendCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Cao nhất · Peak ${TongtaiFormatters.vnd(report.peakMonthlyRevenue)}',
+            '${context.l10n.reportsPeakPrefix} ${TongtaiFormatters.vnd(report.peakMonthlyRevenue)}',
             style: TongtaiDesignTokens.captionStyle.copyWith(
               color: TongtaiDesignTokens.lightTextSecondary,
             ),

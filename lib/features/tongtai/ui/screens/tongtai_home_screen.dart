@@ -18,6 +18,7 @@ import 'tongtai_inventory_screen.dart';
 import 'tongtai_opportunity_feed_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_unified_search_screen.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Home dashboard for Tổng Tài — the app's front door.
 ///
@@ -185,7 +186,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
         foregroundColor: Colors.black,
         actions: [
           IconButton(
-            tooltip: 'Search',
+            tooltip: context.l10n.actionSearch,
             icon: const Icon(Icons.search),
             onPressed: () => _openSearch(context),
           ),
@@ -355,7 +356,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             _SectionHeader(
               title: 'Top Opportunities',
               actionKey: const Key('home-open-opportunities'),
-              actionLabel: 'View all',
+              actionLabel: context.l10n.actionViewAll,
               onAction: () =>
                   _push(context, const TongtaiOpportunityFeedScreen()),
             ),
@@ -459,7 +460,7 @@ class _GetStartedCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Bắt đầu · Get started',
+              context.l10n.sectionGetStarted,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 4),

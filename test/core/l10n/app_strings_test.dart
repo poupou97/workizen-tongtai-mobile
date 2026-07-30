@@ -31,7 +31,7 @@ void main() {
     final s = await stringsFor(tester, const Locale('vi'));
     expect(s, isA<AppStringsVi>());
     expect(s.actionViewAll, 'Xem tất cả');
-    expect(s.actionAll, 'Tất cả');
+    expect(s.titleReports, 'Báo cáo & Phân tích');
     expect(s.settingsLanguage, 'Ngôn ngữ');
   });
 
@@ -47,14 +47,17 @@ void main() {
     for (final s in const [AppStringsVi(), AppStringsEn()]) {
       expect(
         [
-          s.actionAll,
           s.actionViewAll,
           s.actionSearch,
           s.actionCancel,
-          s.actionSave,
-          s.actionRetry,
           s.settingsLanguage,
           s.languagePickerTitle,
+          s.titleReports,
+          s.titleFinance,
+          s.titleTimeline,
+          s.moreLoadSample,
+          s.moreRemoveSample,
+          s.sectionGetStarted,
         ].every((v) => v.isNotEmpty),
         isTrue,
       );

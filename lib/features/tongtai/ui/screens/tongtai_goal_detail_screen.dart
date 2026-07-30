@@ -5,6 +5,7 @@ import '../../journey/business_goal.dart';
 import '../../journey/goal_action_plan.dart';
 import '../../journey/goal_theme.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../../../core/l10n/app_strings.dart';
 
 /// Goal Detail & Action Plan (WTM-88) — the tap target from the goals list.
 ///
@@ -45,7 +46,7 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: const Text('Chi tiết mục tiêu'),
+        title: Text(context.l10n.titleGoalDetail),
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
         elevation: 0,
@@ -273,7 +274,7 @@ class _RealizedSalesCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Doanh thu thực tế trong kỳ · Booked sales this period',
+                  context.l10n.journeyRealizedTitle,
                   style: TongtaiDesignTokens.captionStyle.copyWith(
                     color: TongtaiDesignTokens.lightTextSecondary,
                   ),
@@ -288,7 +289,7 @@ class _RealizedSalesCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Từ đơn hàng đã ghi nhận · from recorded orders',
+                  context.l10n.journeyRealizedSource,
                   style: TongtaiDesignTokens.captionStyle.copyWith(
                     color: TongtaiDesignTokens.lightTextSecondary,
                   ),
