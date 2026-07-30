@@ -83,9 +83,22 @@ class SampleDataSeeder {
   /// so deleting customers while their sample orders still exist throws
   /// SqliteException 787. Found by `p0/drift_restart_test.dart` (WTM-146 §3) —
   /// the in-memory repositories used before never enforced the constraint.
+  ///
+  /// **A sample customer the user has written their OWN order against is kept**
+  /// (WTM-162). Sample rows are ordinary rows (ADR-TON-014), so recording a
+  /// real sale for a sample contact is a legitimate thing to do — and the
+  /// resulting UUID order survives this sweep. Deleting its customer would hit
+  /// the same foreign key (SqliteException 787, the "Reset sample data" crash
+  /// this rule fixes) and, if it could, would take the user's order with it.
+  /// User data wins: the pinned customer row stays, and `hasSamples()` keeps
+  /// reporting it honestly.
   Future<void> removeAll() async {
     await orders.deleteByIdPrefix(kSampleIdPrefix);
-    await customers.deleteByIdPrefix(kSampleIdPrefix);
+    // Read AFTER the order sweep: only orders that survive can pin a customer.
+    final pinnedByUserOrders = <String>{
+      for (final o in await orders.loadAll()) o.customerId,
+    };
+    await customers.deleteByIdPrefix(kSampleIdPrefix, keep: pinnedByUserOrders);
     await products.deleteByIdPrefix(kSampleIdPrefix);
     await goals.deleteByIdPrefix(kSampleIdPrefix);
     await finance.deleteByIdPrefix(kSampleIdPrefix);

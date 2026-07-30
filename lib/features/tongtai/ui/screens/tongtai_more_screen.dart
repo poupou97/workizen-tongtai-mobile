@@ -5,10 +5,13 @@ import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/l10n/language_notifier.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_sample_provider.dart';
+import '../../sample/historical_data_generator.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
+import 'tongtai_customer_risk_screen.dart';
 import 'tongtai_export_screen.dart';
 import 'tongtai_finance_screen.dart';
+import 'tongtai_forecast_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_timeline_screen.dart';
@@ -84,6 +87,40 @@ class TongtaiMoreScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(l10n.moreSampleLoadedSnack)));
+  }
+
+  /// WTM-149/ADR-TON-016: seeds 12 consecutive months of history so the
+  /// seller can try Revenue forecast + Customer risk on realistic data.
+  /// Same sample lifecycle as [_seedSamples] — ordinary rows, `sample-`
+  /// prefixed, removed by "Xóa dữ liệu mẫu"; user data untouched.
+  Future<void> _seedHistory(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.moreLoadHistoryConfirmTitle),
+        content: Text(dialogContext.l10n.moreLoadHistoryConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(dialogContext.l10n.actionCancel),
+          ),
+          FilledButton(
+            key: const Key('more-history-confirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(dialogContext.l10n.moreLoadSampleAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ref
+        .read(historicalDataSeederProvider)
+        .seed(const HistoricalDataSpec());
+    if (!context.mounted) return;
+    final l10n = context.l10n;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l10n.moreHistoryLoadedSnack)));
   }
 
   /// Removes ONLY the `sample-` prefixed rows — user data stays (tested).
@@ -182,6 +219,12 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () => _seedSamples(context, ref),
                 ),
                 _SettingsItem(
+                  key: const Key('more-load-history'),
+                  icon: Icons.timeline,
+                  label: context.l10n.moreLoadHistory,
+                  onTap: () => _seedHistory(context, ref),
+                ),
+                _SettingsItem(
                   key: const Key('more-remove-sample'),
                   icon: Icons.delete_sweep_outlined,
                   label: context.l10n.moreRemoveSample,
@@ -214,6 +257,29 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiReportsScreen(),
+                    ),
+                  ),
+                ),
+                // Predictive Foundation (WTM-160/161 · ADR-TON-016): the
+                // deterministic revenue-forecast and churn/win-back twins —
+                // no AI, no key, no network.
+                _SettingsItem(
+                  key: const Key('more-forecast'),
+                  icon: Icons.insights_outlined,
+                  label: context.l10n.titleForecast,
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiForecastScreen(),
+                    ),
+                  ),
+                ),
+                _SettingsItem(
+                  key: const Key('more-customer-risk'),
+                  icon: Icons.trending_down,
+                  label: context.l10n.titleCustomerRisk,
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiCustomerRiskScreen(),
                     ),
                   ),
                 ),

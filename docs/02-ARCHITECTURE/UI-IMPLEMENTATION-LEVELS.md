@@ -2,7 +2,7 @@
 
 Chuẩn: [ADR-TON-015](../03-DECISIONS/ADR-TON-015-ui-maturity-and-one-data-path.md).
 Cập nhật **cùng PR** mỗi khi một màn đổi level. Level = sự thật đo được từ
-code, không phải ý định. Audit gần nhất: **2026-07-30** (32 màn + 3 shell).
+code, không phải ý định. Audit gần nhất: **2026-07-30** (34 màn + 3 shell — +2 màn predictive WTM-160/161).
 
 ## Cách đọc
 
@@ -46,6 +46,8 @@ màn — sẽ nâng ~25 màn từ L2 lên L3 cùng lúc. Đây là nợ **hiện
 | Màn | Data | CRUD | Keys | → L3 |
 |---|---|---|---|---|
 | `tongtai_home_screen` | BusinessContext + 5 repo + favorites | qua nav | ✅ 21 | error handling |
+| `tongtai_forecast_screen` | RevenueCapabilityContext + RevenueForecastRule (on-demand) | – | ✅ | error handling *(mới 2026-07-30, WTM-160)* |
+| `tongtai_customer_risk_screen` | CustomerCapabilityContext + CustomerRiskRule + customerRepository (join id→tên) | – | ✅ | error handling *(mới 2026-07-30, WTM-161)* |
 | `tongtai_consumer_screen` | customerRepository | qua list | ✅ | error handling *(sửa 2026-07-30: từng là L1 static shell)* |
 | `tongtai_producer_screen` | favorites store + generated opportunities | qua favorites | ✅ | error handling *(sửa 2026-07-30: từng là L1 static shell)* |
 | `tongtai_inventory_screen` | productRepository | ✅ thêm/sửa/xoá | ✅ | error handling |

@@ -134,6 +134,55 @@ enum ReasonCode {
   negativeCashflow;
 
   String get code => name;
+
+  /// Localized, user-facing wording. Reason codes are shown to the seller in
+  /// the Forecast/Risk screens and quoted verbatim by the AI explanation, so
+  /// the wording lives with the code (domain-enum convention, ADR-TON-007).
+  String get labelVi => switch (this) {
+    ReasonCode.notEnoughHistory => 'Chưa đủ lịch sử để dự báo',
+    ReasonCode.noRevenueYet => 'Chưa có doanh thu nào',
+    ReasonCode.noCustomers => 'Chưa có khách hàng nào',
+    ReasonCode.revenueGrowing => 'Doanh thu đang tăng',
+    ReasonCode.revenueDeclining => 'Doanh thu đang giảm',
+    ReasonCode.revenueFlat => 'Doanh thu đi ngang',
+    ReasonCode.highVolatility => 'Doanh thu biến động mạnh',
+    ReasonCode.seasonalPatternDetected => 'Có quy luật mùa vụ',
+    ReasonCode.partialMonthExcluded => 'Đã loại tháng đang chạy',
+    ReasonCode.recentPurchase => 'Vừa mua gần đây',
+    ReasonCode.purchaseGapExceeded => 'Lâu hơn nhịp mua thường lệ',
+    ReasonCode.inactiveBeyondChurnWindow => 'Im lặng quá ngưỡng rời bỏ',
+    ReasonCode.frequencyDropping => 'Tần suất mua đang giảm',
+    ReasonCode.highValueAtRisk => 'Khách giá trị cao đang rời',
+    ReasonCode.singlePurchaseOnly => 'Mới mua đúng một lần',
+    ReasonCode.revenueDropVsPrevious => 'Doanh thu giảm so với kỳ trước',
+    ReasonCode.ordersDropVsPrevious => 'Số đơn giảm so với kỳ trước',
+    ReasonCode.stockBelowReorder => 'Tồn kho dưới ngưỡng đặt lại',
+    ReasonCode.negativeCashflow => 'Dòng tiền âm',
+  };
+
+  String get labelEn => switch (this) {
+    ReasonCode.notEnoughHistory => 'Not enough history to forecast',
+    ReasonCode.noRevenueYet => 'No revenue recorded yet',
+    ReasonCode.noCustomers => 'No customers yet',
+    ReasonCode.revenueGrowing => 'Revenue is growing',
+    ReasonCode.revenueDeclining => 'Revenue is declining',
+    ReasonCode.revenueFlat => 'Revenue is flat',
+    ReasonCode.highVolatility => 'Revenue swings widely',
+    ReasonCode.seasonalPatternDetected => 'Seasonal pattern detected',
+    ReasonCode.partialMonthExcluded => 'Running month excluded',
+    ReasonCode.recentPurchase => 'Bought recently',
+    ReasonCode.purchaseGapExceeded => 'Longer than their usual gap',
+    ReasonCode.inactiveBeyondChurnWindow => 'Silent beyond the churn window',
+    ReasonCode.frequencyDropping => 'Buying less often',
+    ReasonCode.highValueAtRisk => 'High-value customer at risk',
+    ReasonCode.singlePurchaseOnly => 'Only ever bought once',
+    ReasonCode.revenueDropVsPrevious => 'Revenue down vs previous window',
+    ReasonCode.ordersDropVsPrevious => 'Orders down vs previous window',
+    ReasonCode.stockBelowReorder => 'Stock at or below reorder level',
+    ReasonCode.negativeCashflow => 'Negative cash flow',
+  };
+
+  String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
 /// The uniform envelope every Rule Twin returns.

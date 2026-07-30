@@ -19,7 +19,14 @@ abstract class CustomerRepository {
   /// Deletes every row whose id starts with [prefix] — the sample-data
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
-  Future<void> deleteByIdPrefix(String prefix);
+  ///
+  /// Ids in [keep] are spared even when they match [prefix]. This exists for
+  /// exactly one case, and it is a data-integrity one: `orders_table
+  /// .customer_id` is a hard foreign key with **no** cascade, so a sample
+  /// customer the user has since written their own order against cannot be
+  /// deleted (SqliteException 787) — and must not be, because the order is
+  /// user data (WTM-162).
+  Future<void> deleteByIdPrefix(String prefix, {Set<String> keep});
 }
 
 /// Real, persistent customer directory for the local business (WTM-123).
@@ -107,11 +114,17 @@ class DriftCustomerRepository implements CustomerRepository {
   }
 
   @override
-  Future<void> deleteByIdPrefix(String prefix) async {
+  Future<void> deleteByIdPrefix(
+    String prefix, {
+    Set<String> keep = const <String>{},
+  }) async {
     final businessId = await _workspace.ensureBusinessId(_db);
-    await (_db.delete(_db.customersTable)..where(
-          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
-        ))
+    await (_db.delete(_db.customersTable)..where((t) {
+          final match = t.businessId.equals(businessId) & t.id.like('$prefix%');
+          return keep.isEmpty
+              ? match
+              : match & t.id.isNotIn(keep.toList(growable: false));
+        }))
         .go();
   }
 }
@@ -129,7 +142,10 @@ class SampleCustomerRepository implements CustomerRepository {
     // Demo data is read-only — do not persist.
   }
   @override
-  Future<void> deleteByIdPrefix(String prefix) async {
+  Future<void> deleteByIdPrefix(
+    String prefix, {
+    Set<String> keep = const <String>{},
+  }) async {
     // Demo fixtures are read-only — nothing to delete.
   }
 }
@@ -155,6 +171,10 @@ class InMemoryCustomerRepository implements CustomerRepository {
   }
 
   @override
-  Future<void> deleteByIdPrefix(String prefix) async =>
-      _customers.removeWhere((x) => x.id.startsWith(prefix));
+  Future<void> deleteByIdPrefix(
+    String prefix, {
+    Set<String> keep = const <String>{},
+  }) async => _customers.removeWhere(
+    (x) => x.id.startsWith(prefix) && !keep.contains(x.id),
+  );
 }

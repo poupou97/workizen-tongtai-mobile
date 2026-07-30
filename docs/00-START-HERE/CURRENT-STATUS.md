@@ -24,6 +24,20 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐⭐ PREDICTIVE FOUNDATION (Founder Decision APPROVED 2026-07-30) — ADR-TON-016, Epic WTM-149:**
+  Trả lời được câu hỏi "AI dự báo doanh thu / khách rời bỏ chưa?" bằng **kiến trúc**, không phải prompt:
+  **Capability Context** độc lập tải on-demand (Revenue · Customer) giữ BusinessContext **không phình God Object**;
+  **Aggregation Services** thuần (revenue series · RFM · cashflow · month bucket, timezone = tháng lịch địa phương);
+  **Historical Data Generator** tham số hoá (months 3/12/24/36/60 · seed deterministic · profile · mùa vụ Tết/hè/cuối năm ·
+  growth/decline · 6 nhóm hành vi khách) seed vào **production repository** prefix `sample-`, có nút "Nạp dữ liệu mẫu 12 tháng" trong More;
+  **3 Rule Twin authoritative** chạy không cần AI/mạng/key — `revenue-forecast/1` (WMA+trend+seasonality, có guard chống nhầm mùa-vụ với xu hướng),
+  `customer-risk/1` (recency vs nhịp mua riêng + RFM), `business-alerts/1`; envelope `RuleTwinResult` assert **result==null ⟺ insufficient**
+  nên "chưa đủ dữ liệu" không thể giả dạng dự báo; **AI chỉ giải thích** (đọc Capability Context + Rule Twin output, KHÔNG còn snapshot phẳng),
+  hostile-AI test chứng minh AI không đổi được số; **AI Runtime Boundary** thiết kế sẵn nhưng KHÔNG bật (ratchet cấu trúc: không file nào trong lib/ chạm tool runtime).
+  UI mới: **Dự báo doanh thu** + **Rủi ro khách hàng** (stable keys, count==visible, l10n, trạng thái insufficient hiện lý do — không render số 0 giả).
+  **2 bug thật fix trong quá trình:** (1) reset dữ liệu mẫu crash FK 787 khi user ghi đơn của mình cho khách mẫu → giữ lại khách bị ghim;
+  (2) billable predicate bị chép tay 6 chỗ → gom về một nguồn. Docs: `CAPABILITY-BIBLE.md` (công thức 6 bước thêm capability) +
+  `AI-CAPABILITY-MATRIX.md` phần B (8 năng lực AI đang chạy + bất biến đang được test khoá). **1303 tests.**
 - **⭐ P0 Process Hardening (Founder 2026-07-30, sau audit) — ADR-TON-015:**
   **UI Implementation Maturity Model L0–L4** (level trong Jira PHẢI == level
   thật trong code; ma trận sống `docs/02-ARCHITECTURE/UI-IMPLEMENTATION-LEVELS.md`)

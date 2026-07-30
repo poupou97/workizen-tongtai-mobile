@@ -34,6 +34,10 @@ abstract class AppStrings {
 
   // ── More menu ───────────────────────────────────────────────────────────
   String get moreLoadSample;
+  String get moreLoadHistory;
+  String get moreLoadHistoryConfirmTitle;
+  String get moreLoadHistoryConfirmBody;
+  String get moreHistoryLoadedSnack;
   String get moreRemoveSample;
 
   // ── KPI labels ──────────────────────────────────────────────────────────
@@ -420,6 +424,37 @@ abstract class AppStrings {
   /// Deterministic Producer-hub summary line (rule-based, zero AI spend).
   String producerSummaryLine(int opportunities, int favorites);
 
+  // ── Predictive Foundation (WTM-149 · ADR-TON-016) ───────────────────────
+  String get titleForecast;
+  String get titleCustomerRisk;
+  String get forecastNextMonth;
+  String get forecastRange;
+  String get forecastConfidence;
+  String get forecastBasis;
+  String get forecastInsufficient;
+  String get forecastInsufficientBody;
+  String get forecastHistory;
+  String get forecastVsPrevious;
+  String get forecastWhy;
+  String get forecastRuleBased;
+  String get riskStageActive;
+  String get riskStageCooling;
+  String get riskStageAtRisk;
+  String get riskStageChurned;
+  String get riskStageNeverPurchased;
+  String get riskWinBack;
+  String get riskEmpty;
+  String get riskEmptyBody;
+  String get riskRecommendedActions;
+  String get riskActionContact;
+  String get riskActionOffer;
+  String get riskNoData;
+  String get aiExplain;
+  String get aiExplainRunning;
+  String daysSincePurchase(int days);
+  String riskScoreLabel(int score);
+  String customersAtRisk(int count);
+
   // ── Customer form (WTM-76) ──────────────────────────────────────────────
   String get custNameHint;
   String get custLocationHint;
@@ -477,6 +512,19 @@ class AppStringsVi extends AppStrings {
 
   @override
   String get moreLoadSample => 'Nạp dữ liệu mẫu';
+  @override
+  String get moreLoadHistory => 'Nạp dữ liệu mẫu 12 tháng';
+  @override
+  String get moreLoadHistoryConfirmTitle => 'Nạp lịch sử 12 tháng?';
+  @override
+  String get moreLoadHistoryConfirmBody =>
+      'Sinh 12 tháng đơn hàng, thu chi và khách hàng liên tiếp (có mùa vụ Tết, '
+      'hè, cuối năm) để thử Dự báo doanh thu và Rủi ro khách hàng. Dữ liệu này '
+      'là bản ghi mẫu bình thường — xoá bất cứ lúc nào bằng "Xóa dữ liệu mẫu"; '
+      'dữ liệu bạn tự nhập không bị ảnh hưởng.';
+  @override
+  String get moreHistoryLoadedSnack =>
+      'Đã nạp 12 tháng dữ liệu mẫu — mở Dự báo doanh thu để xem.';
   @override
   String get moreRemoveSample => 'Xóa dữ liệu mẫu';
 
@@ -1164,6 +1212,68 @@ class AppStringsVi extends AppStrings {
       '$favorites nhà cung cấp yêu thích.';
 
   @override
+  String get titleForecast => 'Dự báo doanh thu';
+  @override
+  String get titleCustomerRisk => 'Rủi ro khách hàng';
+  @override
+  String get forecastNextMonth => 'Dự báo tháng tới';
+  @override
+  String get forecastRange => 'Khoảng dự báo';
+  @override
+  String get forecastConfidence => 'Độ tin cậy';
+  @override
+  String get forecastBasis => 'Tính từ các tháng';
+  @override
+  String get forecastInsufficient => 'Chưa đủ dữ liệu để dự báo';
+  @override
+  String get forecastInsufficientBody =>
+      'Cần ít nhất 3 tháng có doanh thu. Ghi thêm đơn hàng hoặc nạp dữ liệu '
+      'mẫu 12 tháng trong More để xem thử.';
+  @override
+  String get forecastHistory => 'Doanh thu theo tháng';
+  @override
+  String get forecastVsPrevious => 'So với kỳ trước';
+  @override
+  String get forecastWhy => 'Vì sao';
+  @override
+  String get forecastRuleBased => 'Quy tắc (không cần AI)';
+  @override
+  String get riskStageActive => 'Đang mua';
+  @override
+  String get riskStageCooling => 'Đang nguội';
+  @override
+  String get riskStageAtRisk => 'Nguy cơ rời';
+  @override
+  String get riskStageChurned => 'Đã rời bỏ';
+  @override
+  String get riskStageNeverPurchased => 'Chưa mua lần nào';
+  @override
+  String get riskWinBack => 'Nên kéo lại';
+  @override
+  String get riskEmpty => 'Chưa có khách hàng để đánh giá';
+  @override
+  String get riskEmptyBody =>
+      'Thêm khách hàng và ghi đơn hàng để hệ thống theo dõi nhịp mua.';
+  @override
+  String get riskRecommendedActions => 'Nên làm gì';
+  @override
+  String get riskActionContact => 'Liên hệ hỏi thăm';
+  @override
+  String get riskActionOffer => 'Gửi ưu đãi kéo lại';
+  @override
+  String get riskNoData => 'Chưa đủ dữ liệu để đánh giá rủi ro';
+  @override
+  String get aiExplain => 'Nhờ AI giải thích';
+  @override
+  String get aiExplainRunning => 'Workizen AI đang giải thích…';
+  @override
+  String daysSincePurchase(int days) => '$days ngày chưa mua';
+  @override
+  String riskScoreLabel(int score) => 'Điểm rủi ro $score';
+  @override
+  String customersAtRisk(int count) => '$count khách có nguy cơ rời';
+
+  @override
   String get custNameHint => 'VD: Phương Nguyễn';
   @override
   String get custLocationHint => 'VD: Hà Nội';
@@ -1254,6 +1364,19 @@ class AppStringsEn extends AppStrings {
 
   @override
   String get moreLoadSample => 'Load sample data';
+  @override
+  String get moreLoadHistory => 'Load 12 months of sample data';
+  @override
+  String get moreLoadHistoryConfirmTitle => 'Load 12 months of history?';
+  @override
+  String get moreLoadHistoryConfirmBody =>
+      'Generates 12 consecutive months of orders, cash flow and customers '
+      '(with Tết, summer and year-end seasonality) so you can try Revenue '
+      'forecast and Customer risk. These are ordinary sample rows — remove '
+      'them any time with "Remove sample data"; your own data is untouched.';
+  @override
+  String get moreHistoryLoadedSnack =>
+      'Loaded 12 months of sample data — open Revenue forecast to see it.';
   @override
   String get moreRemoveSample => 'Remove sample data';
 
@@ -1941,6 +2064,68 @@ class AppStringsEn extends AppStrings {
   String producerSummaryLine(int opportunities, int favorites) =>
       '$opportunities opportunities from your data · '
       '$favorites favorite suppliers.';
+
+  @override
+  String get titleForecast => 'Revenue forecast';
+  @override
+  String get titleCustomerRisk => 'Customer risk';
+  @override
+  String get forecastNextMonth => 'Next month forecast';
+  @override
+  String get forecastRange => 'Forecast range';
+  @override
+  String get forecastConfidence => 'Confidence';
+  @override
+  String get forecastBasis => 'Based on months';
+  @override
+  String get forecastInsufficient => 'Not enough data to forecast';
+  @override
+  String get forecastInsufficientBody =>
+      'At least 3 months with revenue are needed. Record more orders, or load '
+      'the 12-month sample data from More to try it out.';
+  @override
+  String get forecastHistory => 'Monthly revenue';
+  @override
+  String get forecastVsPrevious => 'vs previous window';
+  @override
+  String get forecastWhy => 'Why';
+  @override
+  String get forecastRuleBased => 'Rule-based (no AI needed)';
+  @override
+  String get riskStageActive => 'Active';
+  @override
+  String get riskStageCooling => 'Cooling';
+  @override
+  String get riskStageAtRisk => 'At risk';
+  @override
+  String get riskStageChurned => 'Churned';
+  @override
+  String get riskStageNeverPurchased => 'Never purchased';
+  @override
+  String get riskWinBack => 'Win back';
+  @override
+  String get riskEmpty => 'No customers to assess yet';
+  @override
+  String get riskEmptyBody =>
+      'Add customers and record orders so the app can learn their buying rhythm.';
+  @override
+  String get riskRecommendedActions => 'Recommended actions';
+  @override
+  String get riskActionContact => 'Reach out and check in';
+  @override
+  String get riskActionOffer => 'Send a win-back offer';
+  @override
+  String get riskNoData => 'Not enough data to assess risk';
+  @override
+  String get aiExplain => 'Ask AI to explain';
+  @override
+  String get aiExplainRunning => 'Workizen AI is explaining…';
+  @override
+  String daysSincePurchase(int days) => '$days days since last purchase';
+  @override
+  String riskScoreLabel(int score) => 'Risk score $score';
+  @override
+  String customersAtRisk(int count) => '$count customers at risk';
 
   @override
   String get custNameHint => 'e.g. Phương Nguyễn';
