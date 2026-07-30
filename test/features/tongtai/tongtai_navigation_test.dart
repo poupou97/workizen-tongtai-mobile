@@ -3,8 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
+import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
+import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart'
+    hide tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/tongtai.dart';
 
 void main() {
@@ -75,6 +83,7 @@ void main() {
       // an in-memory one so this smoke test stays off the file-system.
       await tester.pumpWidget(
         ProviderScope(
+          key: const Key('nav-home-scope'),
           overrides: [
             tongtaiDatabaseProvider.overrideWithValue(
               AppDatabase.forExecutor(NativeDatabase.memory()),
@@ -86,8 +95,32 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Home Dashboard'), findsOneWidget);
 
-      // Test Producer Screen
-      await tester.pumpWidget(const MaterialApp(home: TongtaiProducerScreen()));
+      // Test Producer Screen — reads the favourites store + the
+      // rule-generated opportunities (P0 correction: no more static shell).
+      await tester.pumpWidget(
+        ProviderScope(
+          key: const Key('nav-producer-scope'),
+          overrides: [
+            customerRepositoryProvider.overrideWithValue(
+              InMemoryCustomerRepository(),
+            ),
+            productRepositoryProvider.overrideWithValue(
+              InMemoryProductRepository(),
+            ),
+            orderRepositoryProvider.overrideWithValue(
+              InMemoryOrderRepository(),
+            ),
+            businessGoalRepositoryProvider.overrideWithValue(
+              InMemoryBusinessGoalRepository(),
+            ),
+            tongtaiSearchFavoritesStoreProvider.overrideWithValue(
+              InMemorySupplierFavoritesStore(),
+            ),
+          ],
+          child: const MaterialApp(home: TongtaiProducerScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Producer Hub'), findsOneWidget);
 
       // Test Inventory Screen (WTM-68: product list; AppBar title "Inventory").
@@ -95,6 +128,7 @@ void main() {
       // off the real Drift database in this nav smoke test (WTM-121).
       await tester.pumpWidget(
         ProviderScope(
+          key: const Key('nav-inventory-scope'),
           overrides: [
             productRepositoryProvider.overrideWithValue(
               InMemoryProductRepository(),
@@ -106,8 +140,20 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Inventory'), findsOneWidget);
 
-      // Test Consumer Screen
-      await tester.pumpWidget(const MaterialApp(home: TongtaiConsumerScreen()));
+      // Test Consumer Screen — reads the customer repository
+      // (P0 correction: no more static shell).
+      await tester.pumpWidget(
+        ProviderScope(
+          key: const Key('nav-consumer-scope'),
+          overrides: [
+            customerRepositoryProvider.overrideWithValue(
+              InMemoryCustomerRepository(),
+            ),
+          ],
+          child: const MaterialApp(home: TongtaiConsumerScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Customer Intelligence'), findsOneWidget);
 
       // Test More Screen

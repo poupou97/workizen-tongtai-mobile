@@ -1,18 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../consumer/customer.dart';
+import '../../core/tongtai_formatters.dart';
+import '../../providers/tongtai_consumer_provider.dart';
+import 'tongtai_customer_list_screen.dart';
 
-/// Consumer/Customer Intelligence screen for Tổng Tài
-/// Manages customer relationships and CDP (Customer Data Platform).
-class TongtaiConsumerScreen extends StatelessWidget {
-  const TongtaiConsumerScreen({super.key});
+/// Consumer/Customer Intelligence tab for Tổng Tài (WTM-26).
+///
+/// P0 correction 2026-07-30: this screen previously was a static design shell
+/// that read NO data — the bottom-nav Consumer tab showed zeros while Home
+/// counted real customers (Founder repro: Home Consumer = 1, tab empty).
+/// It now derives EVERYTHING from the same [customerRepositoryProvider] that
+/// Home's BusinessContext counts, so the two can never disagree
+/// (Single Source of Truth — locked by p0/count_list_contract_test.dart).
+class TongtaiConsumerScreen extends ConsumerStatefulWidget {
+  const TongtaiConsumerScreen({super.key, this.clock});
+
+  /// Injectable clock for the "active in the last 90 days" segment.
+  final DateTime Function()? clock;
+
+  @override
+  ConsumerState<TongtaiConsumerScreen> createState() =>
+      _TongtaiConsumerScreenState();
+}
+
+class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
+  static const _blue = Color(0xFF3B82F6);
+
+  late final DateTime Function() _clock;
+  List<Customer> _customers = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _clock = widget.clock ?? DateTime.now;
+    _load();
+  }
+
+  Future<void> _load() async {
+    final customers = await ref.read(customerRepositoryProvider).loadAll();
+    if (!mounted) return;
+    setState(() => _customers = customers);
+  }
+
+  Future<void> _openList() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const TongtaiCustomerListScreen()),
+    );
+    // The user may have created/edited/deleted customers in the list — reload
+    // so the tab stays consistent without a restart.
+    await _load();
+  }
+
+  bool _isActive(Customer c) {
+    final last = c.lastPurchaseDate;
+    return last != null && _clock().difference(last).inDays <= 90;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final total = _customers.length;
+    final vip = _customers.where((c) => c.tier == CustomerTier.vip).length;
+    final active = _customers.where(_isActive).length;
+    final fresh = _customers.where((c) => c.orderCount == 0).length;
+
+    final segmentTally = <String, int>{};
+    for (final c in _customers) {
+      for (final s in c.segments) {
+        if (s.trim().isEmpty) continue;
+        segmentTally[s] = (segmentTally[s] ?? 0) + 1;
+      }
+    }
+
+    final recent = _customers.where((c) => c.lastPurchaseDate != null).toList()
+      ..sort((a, b) => b.lastPurchaseDate!.compareTo(a.lastPurchaseDate!));
+    final interactions = recent.take(5).toList();
+
+    final purchased = _customers.where((c) => c.orderCount >= 1).length;
+    final retained = _customers.where((c) => c.orderCount >= 2).length;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(context.l10n.titleConsumerIntelligence),
+        title: Text(l10n.titleConsumerIntelligence),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -22,7 +95,8 @@ class TongtaiConsumerScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Summary card with customer count badge
+            // Summary card — count badge MUST equal Home's Consumer tile
+            // (both read customerRepository; contract-tested).
             Card(
               elevation: 1,
               shape: RoundedRectangleBorder(
@@ -37,7 +111,7 @@ class TongtaiConsumerScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          context.l10n.titleCustomers,
+                          l10n.titleCustomers,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -49,12 +123,13 @@ class TongtaiConsumerScreen extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF3B82F6),
+                            color: _blue,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text(
-                            '0',
-                            style: TextStyle(
+                          child: Text(
+                            '$total',
+                            key: const Key('consumer-count-badge'),
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -68,60 +143,112 @@ class TongtaiConsumerScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _CustomerStat(
-                          label: context.l10n.segActive,
-                          value: '0',
-                          color: const Color(0xFF3B82F6),
+                          label: l10n.segActive,
+                          value: '$active',
+                          color: _blue,
                         ),
                         _CustomerStat(
-                          label: context.l10n.segVip,
-                          value: '0',
-                          color: const Color(0xFF3B82F6),
+                          label: l10n.segVip,
+                          value: '$vip',
+                          color: _blue,
                         ),
                         _CustomerStat(
-                          label: context.l10n.segNew,
-                          value: '0',
-                          color: const Color(0xFF3B82F6),
+                          label: l10n.segNew,
+                          value: '$fresh',
+                          color: _blue,
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        key: const Key('consumer-view-all'),
+                        onPressed: _openList,
+                        child: Text(l10n.actionViewAll),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            // Customer segments
+            // Customer segments — aggregated from the customers' own segment
+            // labels; empty state only when NO customer carries a segment.
             Text(
-              context.l10n.sectionCustomerSegments,
+              l10n.sectionCustomerSegments,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            Container(
-              height: 120,
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-                borderRadius: BorderRadius.circular(8),
+            if (segmentTally.isEmpty)
+              Container(
+                height: 120,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(child: Text(l10n.emptyCustomerSegments)),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final entry
+                      in (segmentTally.entries.toList()
+                        ..sort((a, b) => b.value.compareTo(a.value))))
+                    Chip(label: Text('${entry.key} (${entry.value})')),
+                ],
               ),
-              child: Center(child: Text(context.l10n.emptyCustomerSegments)),
-            ),
             const SizedBox(height: 24),
-            // Recent interactions
+            // Recent interactions — latest purchases, newest first.
             Text(
-              context.l10n.sectionRecentInteractions,
+              l10n.sectionRecentInteractions,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            Container(
-              height: 120,
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-                borderRadius: BorderRadius.circular(8),
+            if (interactions.isEmpty)
+              Container(
+                height: 120,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(child: Text(l10n.emptyRecentInteractions)),
+              )
+            else
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    for (final c in interactions)
+                      ListTile(
+                        dense: true,
+                        title: Text(c.name),
+                        subtitle: Text(
+                          '${TongtaiFormatters.vndShort(c.totalSpent)} · '
+                          '${TongtaiFormatters.isoDate(c.lastPurchaseDate!)}',
+                        ),
+                        trailing: Text(
+                          c.tier.label(l10n.languageCode),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              child: Center(child: Text(context.l10n.emptyRecentInteractions)),
-            ),
             const SizedBox(height: 24),
-            // Customer lifecycle
+            // Customer lifecycle — derived from order history, one source.
             Text(
-              context.l10n.sectionCustomerLifecycle,
+              l10n.sectionCustomerLifecycle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -135,27 +262,27 @@ class TongtaiConsumerScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _LifecycleStage(
-                    stage: context.l10n.lifecycleAwareness,
-                    count: '0',
-                    color: const Color(0xFF3B82F6),
+                    stage: l10n.lifecycleAwareness,
+                    count: '$total',
+                    color: _blue,
                   ),
                   const SizedBox(height: 12),
                   _LifecycleStage(
-                    stage: context.l10n.lifecycleConsideration,
-                    count: '0',
-                    color: const Color(0xFF3B82F6),
+                    stage: l10n.lifecycleConsideration,
+                    count: '$fresh',
+                    color: _blue,
                   ),
                   const SizedBox(height: 12),
                   _LifecycleStage(
-                    stage: context.l10n.lifecyclePurchase,
-                    count: '0',
-                    color: const Color(0xFF3B82F6),
+                    stage: l10n.lifecyclePurchase,
+                    count: '$purchased',
+                    color: _blue,
                   ),
                   const SizedBox(height: 12),
                   _LifecycleStage(
-                    stage: context.l10n.lifecycleRetention,
-                    count: '0',
-                    color: const Color(0xFF3B82F6),
+                    stage: l10n.lifecycleRetention,
+                    count: '$retained',
+                    color: _blue,
                   ),
                 ],
               ),

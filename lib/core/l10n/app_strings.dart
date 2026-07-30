@@ -361,7 +361,6 @@ abstract class AppStrings {
   // ── Producer hub (WTM-24) ───────────────────────────────────────────────
   String get titleProducerHub;
   String get producerAiSummary;
-  String get producerAnalyzing;
   String get producerAiCapabilities;
   String get producerCapScoring;
   String get producerCapRanking;
@@ -417,6 +416,9 @@ abstract class AppStrings {
   // ── finance / transaction type toggles (WTM-113) ────────────────────────
   String get txnIncome;
   String get txnExpense;
+
+  /// Deterministic Producer-hub summary line (rule-based, zero AI spend).
+  String producerSummaryLine(int opportunities, int favorites);
 
   // ── Customer form (WTM-76) ──────────────────────────────────────────────
   String get custNameHint;
@@ -1055,9 +1057,6 @@ class AppStringsVi extends AppStrings {
   @override
   String get producerAiSummary => 'Tóm tắt AI';
   @override
-  String get producerAnalyzing =>
-      'Đang phân tích cơ hội nhà cung cấp và xu hướng thị trường...';
-  @override
   String get producerAiCapabilities => 'Năng lực AI';
   @override
   String get producerCapScoring => 'Chấm điểm cơ hội';
@@ -1158,6 +1157,11 @@ class AppStringsVi extends AppStrings {
   String get txnIncome => 'Thu';
   @override
   String get txnExpense => 'Chi';
+
+  @override
+  String producerSummaryLine(int opportunities, int favorites) =>
+      '$opportunities cơ hội từ dữ liệu của bạn · '
+      '$favorites nhà cung cấp yêu thích.';
 
   @override
   String get custNameHint => 'VD: Phương Nguyễn';
@@ -1832,9 +1836,6 @@ class AppStringsEn extends AppStrings {
   @override
   String get producerAiSummary => 'AI Summary';
   @override
-  String get producerAnalyzing =>
-      'Analyzing supplier opportunities and market trends...';
-  @override
   String get producerAiCapabilities => 'AI Capabilities';
   @override
   String get producerCapScoring => 'Opportunity Scoring';
@@ -1935,6 +1936,11 @@ class AppStringsEn extends AppStrings {
   String get txnIncome => 'Income';
   @override
   String get txnExpense => 'Expense';
+
+  @override
+  String producerSummaryLine(int opportunities, int favorites) =>
+      '$opportunities opportunities from your data · '
+      '$favorites favorite suppliers.';
 
   @override
   String get custNameHint => 'e.g. Phương Nguyễn';
