@@ -1,0 +1,2203 @@
+commit 8b1e1d82b4685a42bcc26fbd4ea8f8ece7d63bd1
+Author: poupou97 <nbp85hn@gmail.com>
+Date:   Thu Jul 30 13:50:31 2026 +0700
+
+    fix(WTM-144): P0 §1 — sample data seeds into production repositories; one source for every screen (ADR-TON-014) (#67)
+    
+    Founder P0 Regression Audit §1. Kills the parallel demo state that let
+    foundational inconsistencies ship while 946+ tests passed.
+    
+    REAL BUGS FIXED (each regression-locked):
+    - Export screen silently exported FIXTURE rows instead of the user's data
+      (kSample defaults) → now loads the production repositories.
+    - Chat AI answered from SAMPLE customers/products for a real business
+      (WorkizenAiContextBuilder sample defaults) → builder defaults are EMPTY;
+      the responder rebuilds a data-grounded router per turn from the live repos.
+    - Timeline screen showed SAMPLE events in real mode → builds from the live
+      repositories + generated opportunities.
+    - Reports pipeline sample fallback removed (explicit fixtures in tests).
+    - Two dashboards that disagreed (real Home vs pushed demo Home) → the demo
+      screen is GONE.
+    
+    NEW MODEL (ADR-TON-014):
+    - SampleDataSeeder: "Xem thử Demo" seeds fixtures INTO the real repositories
+      with `sample-` ids (idempotent remove-then-insert; order→customer links
+      remapped). Sample rows are ordinary rows: editable, deletable.
+    - Repository.deleteByIdPrefix on all five repositories (Drift scoped by
+      business, in-memory, sample no-op); model withId/withIds remap helpers.
+    - Home: sample banner while samples exist; Get-started "Explore Demo Mode"
+      seeds in place; Top Opportunities row now uses the generated provider.
+    - More: "Nạp dữ liệu mẫu" + "Xóa dữ liệu mẫu" (confirm dialogs; removal
+      keeps user data — tested).
+    
+    TEST GOVERNANCE (§3, production wiring):
+    - test/features/tongtai/p0/: seeder lifecycle (idempotency, link remap,
+      sample-only deletion, edit-then-remove) · cross-screen consistency
+      (context == repositories) · Opportunity e2e (persisted → Rule Engine →
+      context slice) · full ACCEPTANCE scenario (fresh → seed → create → update
+      → delete-samples → restart → verify).
+    - Home tests rewritten over the real Riverpod wiring (seeded container);
+      router/export/reports tests now inject fixtures EXPLICITLY — no silent
+      sample defaults remain in lib/.
+    
+    Docs: ADR-TON-014 + ADR-INDEX + CURRENT-STATUS.
+    Evidence: flutter analyze clean; 971/971 tests pass.
+    
+    Co-authored-by: Claude Fable 5 <noreply@anthropic.com>
+
+diff --git a/docs/00-START-HERE/CURRENT-STATUS.md b/docs/00-START-HERE/CURRENT-STATUS.md
+index c542d26..707a063 100644
+--- a/docs/00-START-HERE/CURRENT-STATUS.md
++++ b/docs/00-START-HERE/CURRENT-STATUS.md
+@@ -4,7 +4,7 @@
+ 
+ - **Phase 1 (Product Design Bible):** ✅ DONE + Founder-approved. 60 docs.
+ - **Phase 2 (build):** 🔄 IN PROGRESS — developed autonomously by the
+-  Evidence-Driven Runtime. `flutter analyze` clean; **965/965 tests passing**.
++  Evidence-Driven Runtime. `flutter analyze` clean; **~966 tests passing (P0 §1 suites added)**.
+ - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
+   app runs standalone.
+ - **Data Foundation — persistence arc COMPLETE for user-authored capabilities**
+@@ -24,6 +24,7 @@
+   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
+   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
+   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
++- **⭐ P0 Regression Audit (Founder 2026-07-30, ĐANG CHẠY):** §1 XONG — **ADR-TON-014 sample-seeding**: demo song song bị loại; "Xem thử Demo" seed `sample-` vào repos THẬT; Export/Chat-AI/Timeline hết đọc fixture (bug thật đã fix + regression-lock); `test/features/tongtai/p0/` (lifecycle · consistency · e2e · acceptance). §2 localization single-locale + §3-6 đang tiếp.
+ - **Founder-gate blocking the next tier**: Workizen AI activation (BYOK/router,
+   privacy red-line — **G-3, deferred**; Founder sequenced the full Business Data
+   Foundation first). AI Phase-2 (Opportunity Win Probability / Recommendation /
+diff --git a/docs/03-DECISIONS/ADR-INDEX.md b/docs/03-DECISIONS/ADR-INDEX.md
+index ddb0c05..e932f3c 100644
+--- a/docs/03-DECISIONS/ADR-INDEX.md
++++ b/docs/03-DECISIONS/ADR-INDEX.md
+@@ -14,6 +14,7 @@
+ | [ADR-TON-012](ADR-TON-012-business-context-aggregate-root.md) | **BusinessContext = Aggregate Root** (Progressive Aggregation: Phase 1 = metrics+customers+orders+inventory; sau thêm opportunity/journey/timeline/goals/finance). **AI chỉ đọc BusinessContext**, tuyệt đối không repo/Drift. Chain Repos→BusinessMetricsService→BusinessContext→BusinessHealth→Home→AI. **Opportunity tách 2 phase** (P1 rule-based High Value/Risk/Urgent/Stale — KHÔNG khóa AI; P2 AI Win Prob/Recommendation/Summary). First: WTM-129 | ✅ ACCEPTED (Founder) | 2026-07-25 |
+ | [ADR-TON-011](ADR-TON-011-business-metrics-service-kpi-ssot.md) | **BusinessMetricsService = SoT cho KPI** (Repositories→BusinessMetricsService→Reports→Home→BusinessContext→AI). KPI đầu: revenue·orders·customers·AOV (billable). Reports/Home **tái dùng**, KHÔNG tự tính; KPI tương lai (top products, repeat, monthly, CLV, forecast) **mở rộng service**; input tương lai cho BusinessContext+AI (consume aggregate, không chạm repo/Drift). First: Reports (WTM-127); next Home (WTM-128) | ✅ ACCEPTED (Founder) | 2026-07-25 |
+ | [ADR-TON-010](ADR-TON-010-orders-independent-capability-and-layered-dod.md) | **Orders = capability độc lập** (sở hữu lifecycle/revenue/items/payment/invoice/shipment/returns; Consumer chỉ launch "Create Order", KHÔNG chứa order logic; Reports/Home consume OrderRepository) — G-2. **Home = User Data First** + zero-state CTA (G-1). **AI deferred** đến khi xong Data Foundation theo sequence Consumer→Orders→Reports→Home KPI→Opportunity→Journey→Timeline→BusinessContext→AI (G-3). **Layered DoD**: capability DONE chỉ khi đủ UI→Repository→Persistence→Report→BusinessContext→AI-Ready + không downstream nào còn xài Sample. Orders-first (WTM-125) | ✅ ACCEPTED (Founder) | 2026-07-25 |
++| [ADR-TON-014](ADR-TON-014-sample-data-seeding.md) | **Sample seeds vào production repos** (P0 Regression Audit §1): 1 nguồn cho MỌI màn + AI; "Xem thử Demo" = seed id `sample-` (idempotent, link remap); sample = row thường (sửa/xóa được); "Xóa dữ liệu mẫu" chỉ xóa prefix; bỏ `TongtaiHomeScreen.demo` + mọi kSample fallback trong lib. Supersede demo-song-song của WTM-128. First: WTM-144 | ✅ ACCEPTED (Founder) | 2026-07-30 |
+ | [ADR-TON-013](ADR-TON-013-staged-ai-activation.md) | **Staged AI activation (G-3A→G-3D)** — mở G-3 theo bậc pre-approved, auto-progress, TẤT CẢ read-only: G-3A AI Summary (chỉ đọc BusinessContext) → G-3B Recommendation (không mutate/execute) → G-3C Planner (không auto-execute) → G-3D BusinessHealth AI (rule-based vẫn là fallback mặc định). Defaults khóa kèm: Opportunity `Rule Engine → AI Scoring → Ranking → Explanation` (KHÔNG thay rule engine); Journey progress **auto-derived** từ data; **WTM-122 CLOSED**. Invariants: AI chỉ thấy `businessContextPromptText` (test phải chứng minh); mọi AI feature có twin rule-based; business rỗng không tốn provider call. First: WTM-116 | ✅ ACCEPTED (Founder) | 2026-07-29 |
+ 
+ ## Quyết định Founder khác (chưa thành ADR riêng)
+diff --git a/docs/03-DECISIONS/ADR-TON-014-sample-data-seeding.md b/docs/03-DECISIONS/ADR-TON-014-sample-data-seeding.md
+new file mode 100644
+index 0000000..418dbaa
+--- /dev/null
++++ b/docs/03-DECISIONS/ADR-TON-014-sample-data-seeding.md
+@@ -0,0 +1,51 @@
++# ADR-TON-014: Sample data seeds into the production repositories (one source for every screen)
++
++**Status:** ✅ ACCEPTED (Founder P0 Regression Audit directive, 2026-07-30)
++**Supersedes:** the parallel demo state of WTM-128 (`TongtaiHomeScreen.demo` +
++screen-local `kSample*` fallbacks). **Refines** G-1/ADR-TON-008: *User Data
++First* stays — nothing is preloaded; samples enter only on an explicit action.
++
++## Problem (found in the field, by the Founder)
++
++Demo data lived in a parallel world: a pushed demo dashboard + per-screen
++`kSample*` fallbacks. Consequences the Founder hit live: two dashboards that
++disagreed; Export shipping FIXTURE rows instead of user data; chat AI answering
++from samples; the Timeline screen showing sample events — while 946+ tests
++passed, because tests exercised the same mocked fallbacks.
++
++## Decision
++
++1. **One source.** Every screen and the AI read the production repositories and
++   the one BusinessContext. No screen-local sample list, no demo repository in
++   any production path, no `TongtaiHomeScreen.demo`.
++2. **"Xem thử Demo" = seed.** `SampleDataSeeder.seed()` writes the fixtures into
++   the real repositories with ids prefixed **`sample-`** (order→customer links
++   remapped consistently). Idempotent (remove-then-insert). Explicit action only
++   (Home CTA on an empty business; More → "Nạp dữ liệu mẫu" with confirm).
++3. **Sample rows are ordinary rows.** Users may open, edit and delete them;
++   Reports/Opportunity/AI treat them like any data. Home shows a banner while
++   samples exist (`home-sample-banner`).
++4. **Reversible.** More → "Xóa dữ liệu mẫu" calls `removeAll()` — deletes ONLY
++   the `sample-` prefix (user ids are UUIDs, collision-free by construction).
++   `Repository.deleteByIdPrefix(prefix)` is the seam on all five repositories.
++5. **Producer** counts persisted supplier favourites (no supplier table exists;
++   the catalog remains a search surface until the Phase-4 APIs) — Home and the
++   Producer screens read that same favourites store.
++
++## Test governance (§3 of the directive)
++
++`test/features/tongtai/p0/`: seeder lifecycle (idempotency, link remap,
++sample-only deletion, edit-then-remove) · cross-screen consistency (context
++counts ≡ repository counts) · Opportunity e2e (persisted rows → Rule Engine →
++context slice) · the full acceptance scenario (fresh → seed → create → update →
++delete-samples → restart → verify). Screen tests now run production wiring or
++inject fixtures EXPLICITLY — silent sample defaults are gone from `lib/`
++(`WorkizenAiContextBuilder` defaults to empty; Export/Timeline/Reports load
++repositories).
++
++## Consequences
++
++- The Export/Chat/Timeline sample leaks are fixed and regression-locked.
++- `kSample*` fixtures remain ONLY as seed material + explicit test fixtures.
++- WTM-143's demo labeling is replaced by the sample banner (the demo screen no
++  longer exists).
+diff --git a/lib/features/tongtai/ai/workizen_ai_context.dart b/lib/features/tongtai/ai/workizen_ai_context.dart
+index 5478b2e..279c99d 100644
+--- a/lib/features/tongtai/ai/workizen_ai_context.dart
++++ b/lib/features/tongtai/ai/workizen_ai_context.dart
+@@ -1,10 +1,8 @@
+ import '../consumer/customer.dart';
+-import '../consumer/customer_directory_service.dart';
+ import '../consumer/customer_order.dart';
+ import '../consumer/customer_order_history_service.dart';
+ import '../core/tongtai_formatters.dart';
+ import '../inventory/product.dart';
+-import '../inventory/product_inventory_service.dart';
+ 
+ /// Builds the system prompt Workizen AI sends with every chat turn (WTM-82
+ /// AC2/AC3/AC4) — deterministic, local-only, no network.
+@@ -15,13 +13,17 @@ import '../inventory/product_inventory_service.dart';
+ /// When it mentions a known product, the product's price/stock details are
+ /// injected for grounded recommendations (AC3).
+ class WorkizenAiContextBuilder {
++  /// WTM-144 (P0 §1): defaults are EMPTY, not samples — a real business must
++  /// never be answered from fixture data. Production wiring passes the live
++  /// repositories' rows; demo coherence comes from seeding those same
++  /// repositories (ADR-TON-014).
+   WorkizenAiContextBuilder({
+     List<Customer>? customers,
+     List<Product>? products,
+     CustomerOrderHistoryService? orderHistory,
+-  }) : _customers = customers ?? kSampleCustomers,
+-       _products = products ?? kSampleProducts,
+-       _orderHistory = orderHistory ?? CustomerOrderHistoryService.sample();
++  }) : _customers = customers ?? const [],
++       _products = products ?? const [],
++       _orderHistory = orderHistory ?? CustomerOrderHistoryService(const []);
+ 
+   final List<Customer> _customers;
+   final List<Product> _products;
+diff --git a/lib/features/tongtai/consumer/customer.dart b/lib/features/tongtai/consumer/customer.dart
+index d077ca0..ba4cbe3 100644
+--- a/lib/features/tongtai/consumer/customer.dart
++++ b/lib/features/tongtai/consumer/customer.dart
+@@ -173,4 +173,22 @@ class Customer {
+ 
+   @override
+   String toString() => 'Customer($id, $name, ${tier.labelEn})';
++
++  /// The same record under a different id — the sample-seeding remap hook
++  /// (WTM-144/ADR-TON-014).
++  Customer withId(String newId) => Customer(
++    id: newId,
++    name: name,
++    phone: phone,
++    location: location,
++    orderCount: orderCount,
++    totalSpent: totalSpent,
++    lastPurchaseDate: lastPurchaseDate,
++    email: email,
++    addresses: addresses,
++    segments: segments,
++    tags: tags,
++    notes: notes,
++    history: history,
++  );
+ }
+diff --git a/lib/features/tongtai/consumer/customer_repository.dart b/lib/features/tongtai/consumer/customer_repository.dart
+index 1263bf7..bb014f8 100644
+--- a/lib/features/tongtai/consumer/customer_repository.dart
++++ b/lib/features/tongtai/consumer/customer_repository.dart
+@@ -15,6 +15,11 @@ abstract class CustomerRepository {
+ 
+   /// Insert a new customer or replace the one with the same id.
+   Future<void> upsert(Customer customer);
++
++  /// Deletes every row whose id starts with [prefix] — the sample-data
++  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
++  /// `sample-` id prefix so they can be removed without touching user data.
++  Future<void> deleteByIdPrefix(String prefix);
+ }
+ 
+ /// Real, persistent customer directory for the local business (WTM-123).
+@@ -100,6 +105,15 @@ class DriftCustomerRepository implements CustomerRepository {
+       // Audit history is not persisted (regenerable session state).
+     );
+   }
++
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    final businessId = await _workspace.ensureBusinessId(_db);
++    await (_db.delete(_db.customersTable)..where(
++          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
++        ))
++        .go();
++  }
+ }
+ 
+ /// Demo / Preview source (WTM-123): the built-in sample directory, **read-only**
+@@ -114,6 +128,10 @@ class SampleCustomerRepository implements CustomerRepository {
+   Future<void> upsert(Customer customer) async {
+     // Demo data is read-only — do not persist.
+   }
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    // Demo fixtures are read-only — nothing to delete.
++  }
+ }
+ 
+ /// In-memory source for tests (mutable, no database).
+@@ -135,4 +153,8 @@ class InMemoryCustomerRepository implements CustomerRepository {
+       _customers.add(customer);
+     }
+   }
++
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async =>
++      _customers.removeWhere((x) => x.id.startsWith(prefix));
+ }
+diff --git a/lib/features/tongtai/finance/finance_repository.dart b/lib/features/tongtai/finance/finance_repository.dart
+index ec2da44..38cc775 100644
+--- a/lib/features/tongtai/finance/finance_repository.dart
++++ b/lib/features/tongtai/finance/finance_repository.dart
+@@ -11,6 +11,11 @@ import 'finance_transaction.dart';
+ abstract class FinanceRepository {
+   Future<List<FinanceTransaction>> loadAll();
+   Future<void> add(FinanceTransaction transaction);
++
++  /// Deletes every row whose id starts with [prefix] — the sample-data
++  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
++  /// `sample-` id prefix so they can be removed without touching user data.
++  Future<void> deleteByIdPrefix(String prefix);
+ }
+ 
+ /// Real, persistent transactions for the local business (WTM-120).
+@@ -63,6 +68,14 @@ class DriftFinanceRepository implements FinanceRepository {
+         description: row.description ?? '',
+         paymentMethod: row.paymentMethod ?? '',
+       );
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    final businessId = await _workspace.ensureBusinessId(_db);
++    await (_db.delete(_db.transactionsTable)..where(
++          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
++        ))
++        .go();
++  }
+ }
+ 
+ /// Demo / Preview source (WTM-120): the built-in sample ledger, **read-only** —
+@@ -78,6 +91,10 @@ class SampleFinanceRepository implements FinanceRepository {
+   Future<void> add(FinanceTransaction transaction) async {
+     // Demo data is read-only — do not persist.
+   }
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    // Demo fixtures are read-only — nothing to delete.
++  }
+ }
+ 
+ /// In-memory source for tests (mutable, no database).
+@@ -93,4 +110,7 @@ class InMemoryFinanceRepository implements FinanceRepository {
+   @override
+   Future<void> add(FinanceTransaction transaction) async =>
+       _txns.add(transaction);
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async =>
++      _txns.removeWhere((x) => x.id.startsWith(prefix));
+ }
+diff --git a/lib/features/tongtai/finance/finance_transaction.dart b/lib/features/tongtai/finance/finance_transaction.dart
+index 14abf0a..e13c72f 100644
+--- a/lib/features/tongtai/finance/finance_transaction.dart
++++ b/lib/features/tongtai/finance/finance_transaction.dart
+@@ -52,6 +52,18 @@ class FinanceTransaction {
+   @override
+   String toString() =>
+       'FinanceTransaction($id, ${type.name}, $category, $amount)';
++
++  /// The same record under a different id — the sample-seeding remap hook
++  /// (WTM-144/ADR-TON-014).
++  FinanceTransaction withId(String newId) => FinanceTransaction(
++    id: newId,
++    type: type,
++    category: category,
++    amount: amount,
++    date: date,
++    description: description,
++    paymentMethod: paymentMethod,
++  );
+ }
+ 
+ /// Deterministic sample transactions so the Finance dashboard has real data to
+diff --git a/lib/features/tongtai/inventory/product.dart b/lib/features/tongtai/inventory/product.dart
+index 0f0b62a..0e0e2bf 100644
+--- a/lib/features/tongtai/inventory/product.dart
++++ b/lib/features/tongtai/inventory/product.dart
+@@ -136,4 +136,20 @@ class Product {
+ 
+   @override
+   String toString() => 'Product($id, $sku, $name, qty=$quantity)';
++
++  /// The same record under a different id — the sample-seeding remap hook
++  /// (WTM-144/ADR-TON-014).
++  Product withId(String newId) => Product(
++    id: newId,
++    sku: sku,
++    name: name,
++    category: category,
++    quantity: quantity,
++    pricePerUnit: pricePerUnit,
++    reorderLevel: reorderLevel,
++    updatedAt: updatedAt,
++    description: description,
++    imagePaths: imagePaths,
++    history: history,
++  );
+ }
+diff --git a/lib/features/tongtai/inventory/product_repository.dart b/lib/features/tongtai/inventory/product_repository.dart
+index df65d2d..c22eb63 100644
+--- a/lib/features/tongtai/inventory/product_repository.dart
++++ b/lib/features/tongtai/inventory/product_repository.dart
+@@ -13,6 +13,11 @@ abstract class ProductRepository {
+ 
+   /// Insert a new product or replace the one with the same id.
+   Future<void> upsert(Product product);
++
++  /// Deletes every row whose id starts with [prefix] — the sample-data
++  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
++  /// `sample-` id prefix so they can be removed without touching user data.
++  Future<void> deleteByIdPrefix(String prefix);
+ }
+ 
+ /// Real, persistent catalog for the local business (WTM-121).
+@@ -84,6 +89,14 @@ class DriftProductRepository implements ProductRepository {
+       'imagePaths',
+     ),
+   );
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    final businessId = await _workspace.ensureBusinessId(_db);
++    await (_db.delete(_db.productsTable)..where(
++          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
++        ))
++        .go();
++  }
+ }
+ 
+ /// Demo / Preview source (WTM-121): the built-in sample catalogue, **read-only**
+@@ -98,6 +111,10 @@ class SampleProductRepository implements ProductRepository {
+   Future<void> upsert(Product product) async {
+     // Demo data is read-only — do not persist.
+   }
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    // Demo fixtures are read-only — nothing to delete.
++  }
+ }
+ 
+ /// In-memory source for tests (mutable, no database).
+@@ -119,4 +136,8 @@ class InMemoryProductRepository implements ProductRepository {
+       _products.add(product);
+     }
+   }
++
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async =>
++      _products.removeWhere((x) => x.id.startsWith(prefix));
+ }
+diff --git a/lib/features/tongtai/journey/business_goal.dart b/lib/features/tongtai/journey/business_goal.dart
+index bad0375..d7d89b6 100644
+--- a/lib/features/tongtai/journey/business_goal.dart
++++ b/lib/features/tongtai/journey/business_goal.dart
+@@ -283,6 +283,23 @@ class BusinessGoal {
+ 
+   @override
+   String toString() => 'BusinessGoal($id, $name, ${type.name})';
++
++  /// The same record under a different id — the sample-seeding remap hook
++  /// (WTM-144/ADR-TON-014).
++  BusinessGoal withId(String newId) => BusinessGoal(
++    id: newId,
++    name: name,
++    type: type,
++    targetAmount: targetAmount,
++    achievedAmount: achievedAmount,
++    growthTarget: growthTarget,
++    growthAchieved: growthAchieved,
++    startDate: startDate,
++    endDate: endDate,
++    notes: notes,
++    createdAt: createdAt,
++    updatedAt: updatedAt,
++  );
+ }
+ 
+ /// Deterministic sample goals so Demo/Preview surfaces have real data to
+diff --git a/lib/features/tongtai/journey/business_goal_repository.dart b/lib/features/tongtai/journey/business_goal_repository.dart
+index b35bff3..20f6a0d 100644
+--- a/lib/features/tongtai/journey/business_goal_repository.dart
++++ b/lib/features/tongtai/journey/business_goal_repository.dart
+@@ -14,6 +14,11 @@ abstract class BusinessGoalRepository {
+ 
+   /// Insert a new goal or replace the one with the same id.
+   Future<void> upsert(BusinessGoal goal);
++
++  /// Deletes every row whose id starts with [prefix] — the sample-data
++  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
++  /// `sample-` id prefix so they can be removed without touching user data.
++  Future<void> deleteByIdPrefix(String prefix);
+ }
+ 
+ /// Real, persistent business goals for the local business (WTM-124).
+@@ -121,6 +126,15 @@ class DriftBusinessGoalRepository implements BusinessGoalRepository {
+     }
+     return GoalType.revenue;
+   }
++
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    final businessId = await _workspace.ensureBusinessId(_db);
++    await (_db.delete(_db.journeysTable)..where(
++          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
++        ))
++        .go();
++  }
+ }
+ 
+ /// Demo / Preview source (WTM-124): the built-in sample goals, **read-only** —
+@@ -135,6 +149,10 @@ class SampleBusinessGoalRepository implements BusinessGoalRepository {
+   Future<void> upsert(BusinessGoal goal) async {
+     // Demo data is read-only — do not persist.
+   }
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    // Demo fixtures are read-only — nothing to delete.
++  }
+ }
+ 
+ /// In-memory source for tests (mutable, no database).
+@@ -156,4 +174,8 @@ class InMemoryBusinessGoalRepository implements BusinessGoalRepository {
+       _goals.add(goal);
+     }
+   }
++
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async =>
++      _goals.removeWhere((x) => x.id.startsWith(prefix));
+ }
+diff --git a/lib/features/tongtai/orders/order.dart b/lib/features/tongtai/orders/order.dart
+index 44b3a90..26c3d3b 100644
+--- a/lib/features/tongtai/orders/order.dart
++++ b/lib/features/tongtai/orders/order.dart
+@@ -149,6 +149,19 @@ class CustomerOrder {
+ 
+   @override
+   String toString() => 'CustomerOrder($id, $orderNumber, ${status.name})';
++
++  /// The same record under different ids — the sample-seeding remap hook
++  /// (WTM-144/ADR-TON-014). [newCustomerId] rewires the order to the remapped
++  /// sample customer.
++  CustomerOrder withIds({required String newId, String? newCustomerId}) =>
++      CustomerOrder(
++        id: newId,
++        customerId: newCustomerId ?? customerId,
++        orderNumber: orderNumber,
++        date: date,
++        status: status,
++        items: items,
++      );
+ }
+ 
+ /// Deterministic sample orders for the sample customer directory, until a
+diff --git a/lib/features/tongtai/orders/order_repository.dart b/lib/features/tongtai/orders/order_repository.dart
+index 1fc842b..319fff8 100644
+--- a/lib/features/tongtai/orders/order_repository.dart
++++ b/lib/features/tongtai/orders/order_repository.dart
+@@ -22,6 +22,11 @@ abstract class OrderRepository {
+ 
+   /// Insert a new order or replace the one with the same id.
+   Future<void> upsert(CustomerOrder order);
++
++  /// Deletes every row whose id starts with [prefix] — the sample-data
++  /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
++  /// `sample-` id prefix so they can be removed without touching user data.
++  Future<void> deleteByIdPrefix(String prefix);
+ }
+ 
+ /// Real, persistent sales orders for the local business (WTM-125).
+@@ -98,6 +103,14 @@ class DriftOrderRepository implements OrderRepository {
+     status: OrderStatus.fromStorage(row.status),
+     items: decodeOrderItems(row.items),
+   );
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    final businessId = await _workspace.ensureBusinessId(_db);
++    await (_db.delete(_db.ordersTable)..where(
++          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
++        ))
++        .go();
++  }
+ }
+ 
+ /// Demo / Preview source (WTM-125): the built-in sample orders, **read-only** —
+@@ -116,6 +129,10 @@ class SampleOrderRepository implements OrderRepository {
+   Future<void> upsert(CustomerOrder order) async {
+     // Demo data is read-only — do not persist.
+   }
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async {
++    // Demo fixtures are read-only — nothing to delete.
++  }
+ }
+ 
+ /// In-memory source for tests (mutable, no database).
+@@ -141,6 +158,10 @@ class InMemoryOrderRepository implements OrderRepository {
+       _orders.add(order);
+     }
+   }
++
++  @override
++  Future<void> deleteByIdPrefix(String prefix) async =>
++      _orders.removeWhere((x) => x.id.startsWith(prefix));
+ }
+ 
+ /// Encodes order lines into the `orders_table.items` JSON array — the immutable
+diff --git a/lib/features/tongtai/providers/tongtai_chat_provider.dart b/lib/features/tongtai/providers/tongtai_chat_provider.dart
+index 7d1ea2b..5401053 100644
+--- a/lib/features/tongtai/providers/tongtai_chat_provider.dart
++++ b/lib/features/tongtai/providers/tongtai_chat_provider.dart
+@@ -4,8 +4,13 @@ import '../../../database/database.dart';
+ import '../ai/workizen_ai_context.dart';
+ import '../ai/workizen_ai_router.dart';
+ import '../chat/chat_controller.dart';
++import '../chat/chat_message.dart';
+ import '../chat/chat_message_store.dart';
++import '../consumer/customer_order_history_service.dart';
+ import 'tongtai_ai_provider.dart';
++import 'tongtai_consumer_provider.dart';
++import 'tongtai_inventory_provider.dart';
++import 'tongtai_orders_provider.dart';
+ 
+ /// The app's Drift database (platform resource, WTM-81).
+ ///
+@@ -26,19 +31,39 @@ final tongtaiChatStoreProvider = Provider<ChatMessageStore>(
+   (ref) => DriftChatMessageStore(ref.watch(tongtaiDatabaseProvider)),
+ );
+ 
+-/// Local business context injected into every Workizen AI turn (WTM-82).
+-final tongtaiAiContextBuilderProvider = Provider<WorkizenAiContextBuilder>(
+-  (ref) => WorkizenAiContextBuilder(),
+-);
+-
+-/// The reply pipeline behind the chat screen (WTM-82, ADR-TON-006): Workizen
+-/// AI Router over the BYOK service, with the rule-based offline fallback.
+-/// Tests override this with a fixed responder.
++/// The reply pipeline behind the chat screen (WTM-82, ADR-TON-006 · rewired
++/// by WTM-144 P0 §1): every turn grounds Workizen AI in the CURRENT rows of
++/// the production repositories — the same source every screen reads. The old
++/// sample-defaulted context builder is gone. Tests override this provider
++/// with a fixed responder.
+ final tongtaiChatResponderProvider = Provider<ChatResponder>((ref) {
+-  final context = ref.watch(tongtaiAiContextBuilderProvider);
+-  return WorkizenAiRouter(
+-    service: ref.watch(tongtaiAiServiceProvider),
+-    context: context,
+-    fallback: RuleBasedChatResponder(context: context),
+-  );
++  return _RealDataChatResponder(() async {
++    final customers = await ref.read(customerRepositoryProvider).loadAll();
++    final products = await ref.read(productRepositoryProvider).loadAll();
++    final orders = await ref.read(orderRepositoryProvider).loadAll();
++    final context = WorkizenAiContextBuilder(
++      customers: customers,
++      products: products,
++      orderHistory: CustomerOrderHistoryService(orders),
++    );
++    return WorkizenAiRouter(
++      service: ref.read(tongtaiAiServiceProvider),
++      context: context,
++      fallback: RuleBasedChatResponder(context: context),
++    );
++  });
+ });
++
++/// Rebuilds a data-grounded router for every turn, so the chat always answers
++/// from the latest persisted rows (local SQLite — cheap to reload).
++class _RealDataChatResponder implements ChatResponder {
++  const _RealDataChatResponder(this._buildDelegate);
++
++  final Future<ChatResponder> Function() _buildDelegate;
++
++  @override
++  Future<String> reply(List<ChatMessage> history, String prompt) async {
++    final delegate = await _buildDelegate();
++    return delegate.reply(history, prompt);
++  }
++}
+diff --git a/lib/features/tongtai/providers/tongtai_sample_provider.dart b/lib/features/tongtai/providers/tongtai_sample_provider.dart
+new file mode 100644
+index 0000000..a78453e
+--- /dev/null
++++ b/lib/features/tongtai/providers/tongtai_sample_provider.dart
+@@ -0,0 +1,21 @@
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++
++import '../sample/sample_data_seeder.dart';
++import 'tongtai_consumer_provider.dart';
++import 'tongtai_finance_provider.dart';
++import 'tongtai_inventory_provider.dart';
++import 'tongtai_journey_provider.dart';
++import 'tongtai_orders_provider.dart';
++
++/// Sample-data lifecycle over the PRODUCTION repositories (WTM-144 /
++/// ADR-TON-014): "Xem thử Demo" seeds, "Xóa dữ liệu mẫu" removes — every
++/// screen keeps reading the one real source.
++final sampleDataSeederProvider = Provider<SampleDataSeeder>(
++  (ref) => SampleDataSeeder(
++    customers: ref.watch(customerRepositoryProvider),
++    products: ref.watch(productRepositoryProvider),
++    orders: ref.watch(orderRepositoryProvider),
++    goals: ref.watch(businessGoalRepositoryProvider),
++    finance: ref.watch(financeRepositoryProvider),
++  ),
++);
+diff --git a/lib/features/tongtai/sample/sample_data_seeder.dart b/lib/features/tongtai/sample/sample_data_seeder.dart
+new file mode 100644
+index 0000000..2cf4dd2
+--- /dev/null
++++ b/lib/features/tongtai/sample/sample_data_seeder.dart
+@@ -0,0 +1,99 @@
++import '../consumer/customer.dart';
++import '../consumer/customer_directory_service.dart' show kSampleCustomers;
++import '../consumer/customer_repository.dart';
++import '../finance/finance_repository.dart';
++import '../finance/finance_transaction.dart' show kSampleTransactions;
++import '../inventory/product_inventory_service.dart' show kSampleProducts;
++import '../inventory/product_repository.dart';
++import '../journey/business_goal.dart' show kSampleBusinessGoals;
++import '../journey/business_goal_repository.dart';
++import '../orders/order.dart' show kSampleCustomerOrders;
++import '../orders/order_repository.dart';
++
++/// Every seeded sample record carries this id prefix (WTM-144/ADR-TON-014) —
++/// user-created records use UUIDs, so the prefix can never collide and
++/// [SampleDataSeeder.removeAll] can delete samples without touching user data.
++const String kSampleIdPrefix = 'sample-';
++
++/// Seeds the built-in sample fixtures INTO the production repositories
++/// (WTM-144, P0 Regression Audit §1 → ADR-TON-014).
++///
++/// This replaces the old parallel demo state: after seeding, **every screen —
++/// Home, Inventory, Consumer, Orders, Journey, Finance, Reports, Opportunity,
++/// Timeline, AI — reads the exact same repositories and the same
++/// BusinessContext.** Sample rows are ordinary rows: the user can open, edit
++/// and delete them; [removeAll] wipes only the `sample-` prefixed ids.
++///
++/// [seed] is idempotent: it first removes existing sample rows, then inserts
++/// the fixtures fresh (so re-seeding never duplicates, and finance — an
++/// insert-only repository — stays clean).
++class SampleDataSeeder {
++  const SampleDataSeeder({
++    required this.customers,
++    required this.products,
++    required this.orders,
++    required this.goals,
++    required this.finance,
++  });
++
++  final CustomerRepository customers;
++  final ProductRepository products;
++  final OrderRepository orders;
++  final BusinessGoalRepository goals;
++  final FinanceRepository finance;
++
++  static String _sampleId(String originalId) => '$kSampleIdPrefix$originalId';
++
++  /// Seeds all fixtures with `sample-` ids (idempotent — see class doc).
++  Future<void> seed() async {
++    await removeAll();
++
++    final customerIds = <String>{for (final c in kSampleCustomers) c.id};
++    for (final Customer c in kSampleCustomers) {
++      await customers.upsert(c.withId(_sampleId(c.id)));
++    }
++    for (final p in kSampleProducts) {
++      await products.upsert(p.withId(_sampleId(p.id)));
++    }
++    for (final o in kSampleCustomerOrders) {
++      await orders.upsert(
++        o.withIds(
++          newId: _sampleId(o.id),
++          // Rewire to the remapped sample customer when the order pointed at a
++          // sample fixture; foreign links stay consistent inside the seed set.
++          newCustomerId: customerIds.contains(o.customerId)
++              ? _sampleId(o.customerId)
++              : null,
++        ),
++      );
++    }
++    for (final g in kSampleBusinessGoals) {
++      await goals.upsert(g.withId(_sampleId(g.id)));
++    }
++    for (final t in kSampleTransactions) {
++      await finance.add(t.withId(_sampleId(t.id)));
++    }
++  }
++
++  /// Removes every sample record across all repositories. User data (UUID ids)
++  /// is untouched — including sample rows the user has edited (same id).
++  Future<void> removeAll() async {
++    await customers.deleteByIdPrefix(kSampleIdPrefix);
++    await products.deleteByIdPrefix(kSampleIdPrefix);
++    await orders.deleteByIdPrefix(kSampleIdPrefix);
++    await goals.deleteByIdPrefix(kSampleIdPrefix);
++    await finance.deleteByIdPrefix(kSampleIdPrefix);
++  }
++
++  /// Whether any sample record is currently present (drives the Home banner
++  /// and the More "remove samples" affordance).
++  Future<bool> hasSamples() async {
++    bool anySample(Iterable<dynamic> rows) =>
++        rows.any((r) => (r.id as String).startsWith(kSampleIdPrefix));
++    if (anySample(await customers.loadAll())) return true;
++    if (anySample(await products.loadAll())) return true;
++    if (anySample(await orders.loadAll())) return true;
++    if (anySample(await goals.loadAll())) return true;
++    return anySample(await finance.loadAll());
++  }
++}
+diff --git a/lib/features/tongtai/ui/screens/tongtai_export_screen.dart b/lib/features/tongtai/ui/screens/tongtai_export_screen.dart
+index 905758d..8c3cb0b 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_export_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_export_screen.dart
+@@ -1,15 +1,17 @@
+ import 'package:flutter/material.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
+ import '../../consumer/customer.dart';
+-import '../../consumer/customer_directory_service.dart';
+ import '../../consumer/customer_order.dart';
+ import '../../core/tongtai_formatters.dart';
++import '../../providers/tongtai_consumer_provider.dart';
++import '../../providers/tongtai_inventory_provider.dart';
++import '../../providers/tongtai_orders_provider.dart';
+ import '../../export/backup_crypto.dart';
+ import '../../export/csv_delivery.dart';
+ import '../../export/csv_exporter.dart';
+ import '../../export/export_history_store.dart';
+ import '../../inventory/product.dart';
+-import '../../inventory/product_inventory_service.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ 
+ /// Date-range presets for the orders export (WTM-99 AC3).
+@@ -39,7 +41,7 @@ enum ExportRange {
+ /// viewable history below (AC5). Local-first: data comes from the in-memory
+ /// sources; nothing leaves the device except through the app the seller
+ /// picks in the share sheet.
+-class TongtaiExportScreen extends StatefulWidget {
++class TongtaiExportScreen extends ConsumerStatefulWidget {
+   const TongtaiExportScreen({
+     super.key,
+     this.delivery,
+@@ -70,10 +72,11 @@ class TongtaiExportScreen extends StatefulWidget {
+   final BackupCrypto? crypto;
+ 
+   @override
+-  State<TongtaiExportScreen> createState() => _TongtaiExportScreenState();
++  ConsumerState<TongtaiExportScreen> createState() =>
++      _TongtaiExportScreenState();
+ }
+ 
+-class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
++class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
+   static const _exporter = TongtaiCsvExporter();
+ 
+   late final TongtaiCsvDelivery _delivery;
+@@ -81,6 +84,12 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
+   late final DateTime Function() _clock;
+ 
+   TongtaiExportType _type = TongtaiExportType.customers;
++  // WTM-144 (P0 §1): real mode exports the PRODUCTION repositories' rows —
++  // the old kSample fallbacks silently exported fixture data instead of the
++  // user's business.
++  List<Customer> _customers = const [];
++  List<Product> _products = const [];
++  List<CustomerOrder> _orders = const [];
+   ExportRange _range = ExportRange.all;
+   List<TongtaiExportRecord> _records = const [];
+   bool _busy = false;
+@@ -104,6 +113,7 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
+     _history = widget.history ?? InMemoryTongtaiExportHistoryStore();
+     _clock = widget.clock ?? DateTime.now;
+     _loadHistory();
++    _loadData();
+   }
+ 
+   Future<void> _loadHistory() async {
+@@ -112,17 +122,32 @@ class _TongtaiExportScreenState extends State<TongtaiExportScreen> {
+     setState(() => _records = records);
+   }
+ 
++  Future<void> _loadData() async {
++    // Injected lists (tests) win; otherwise read the same repositories every
++    // other screen uses (one source, WTM-144).
++    final customers =
++        widget.customers ??
++        await ref.read(customerRepositoryProvider).loadAll();
++    final products =
++        widget.products ?? await ref.read(productRepositoryProvider).loadAll();
++    final orders =
++        widget.orders ?? await ref.read(orderRepositoryProvider).loadAll();
++    if (!mounted) return;
++    setState(() {
++      _customers = customers;
++      _products = products;
++      _orders = orders;
++    });
++  }
++
+   TongtaiCsv _buildCsv() {
+     switch (_type) {
+       case TongtaiExportType.customers:
+-        return _exporter.customersCsv(widget.customers ?? kSampleCustomers);
++        return _exporter.customersCsv(_customers);
+       case TongtaiExportType.products:
+-        return _exporter.productsCsv(widget.products ?? kSampleProducts);
++        return _exporter.productsCsv(_products);
+       case TongtaiExportType.orders:
+-        return _exporter.ordersCsv(
+-          widget.orders ?? kSampleCustomerOrders,
+-          from: _range.fromFor(_clock()),
+-        );
++        return _exporter.ordersCsv(_orders, from: _range.fromFor(_clock()));
+     }
+   }
+ 
+diff --git a/lib/features/tongtai/ui/screens/tongtai_home_screen.dart b/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
+index d4ed869..1c141a6 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_home_screen.dart
+@@ -1,18 +1,15 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
+-import '../../consumer/customer_directory_service.dart';
+ import '../../core/tongtai_formatters.dart';
+-import '../../inventory/product_inventory_service.dart';
+ import '../../journey/business_goal.dart';
+ import '../../metrics/business_health.dart';
+ import '../../metrics/business_metrics.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../opportunity/opportunity.dart';
+-import '../../orders/order.dart' show kSampleCustomerOrders;
+-import '../../producer/supplier_search_service.dart';
+ import '../../providers/tongtai_context_provider.dart';
+ import '../../providers/tongtai_journey_provider.dart';
++import '../../providers/tongtai_sample_provider.dart';
+ import '../../providers/tongtai_search_provider.dart';
+ import 'tongtai_chat_screen.dart';
+ import 'tongtai_customer_list_screen.dart';
+@@ -41,29 +38,8 @@ class TongtaiHomeScreen extends ConsumerStatefulWidget {
+     this.customerCount,
+     this.goals,
+     this.opportunities,
+-    this.isDemo = false,
+   });
+ 
+-  /// A demo dashboard populated with sample data — the explicit "Explore Demo
+-  /// Mode" action. Nothing here is written to the real database.
+-  factory TongtaiHomeScreen.demo({Key? key, DateTime Function()? clock}) {
+-    return TongtaiHomeScreen(
+-      key: key,
+-      clock: clock,
+-      isDemo: true,
+-      metrics: BusinessMetrics.from(
+-        orders: kSampleCustomerOrders,
+-        customersCount: kSampleCustomers.length,
+-      ),
+-      health: BusinessHealth.healthy,
+-      supplierCount: kSampleSuppliers.length,
+-      inventoryCount: kSampleProducts.length,
+-      customerCount: kSampleCustomers.length,
+-      goals: kSampleBusinessGoals,
+-      opportunities: kSampleOpportunities,
+-    );
+-  }
+-
+   /// Injectable KPIs (source of truth); when null they load from the
+   /// [businessMetricsServiceProvider].
+   final BusinessMetrics? metrics;
+@@ -81,18 +57,15 @@ class TongtaiHomeScreen extends ConsumerStatefulWidget {
+   /// Opportunity capability. A real user starts with none.
+   final List<Opportunity>? opportunities;
+ 
+-  /// True only behind the explicit "Explore Demo Mode" action (WTM-143): the
+-  /// screen then labels itself unmistakably as sample data — the Founder
+-  /// himself mistook the demo for a second real dashboard, so the demo must
+-  /// introduce itself.
+-  final bool isDemo;
+-
+   @override
+   ConsumerState<TongtaiHomeScreen> createState() => _TongtaiHomeScreenState();
+ }
+ 
+ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+   BusinessMetrics _metrics = BusinessMetrics.empty;
++  List<Opportunity> _loadedOpportunities = const [];
++  bool _hasSamples = false;
++  bool _seeding = false;
+   BusinessHealth _health = BusinessHealth.notEnoughData;
+   List<BusinessGoal> _goals = const [];
+   int _producers = 0;
+@@ -129,9 +102,13 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+     final contextService = ref.read(businessContextServiceProvider);
+     final goalRepo = ref.read(businessGoalRepositoryProvider);
+     final favoritesStore = ref.read(tongtaiSearchFavoritesStoreProvider);
++    final seeder = ref.read(sampleDataSeederProvider);
++    final opportunitiesFuture = ref.read(generatedOpportunitiesProvider.future);
+     final context = await contextService.load();
+     final goals = await goalRepo.loadAll();
+     final favorites = await favoritesStore.loadAll();
++    final List<Opportunity> generated = await opportunitiesFuture;
++    final hasSamples = await seeder.hasSamples();
+     if (!mounted) return;
+     setState(() {
+       _metrics = context.metrics;
+@@ -141,6 +118,8 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+       _goals = goals;
+       _journey = goals.length;
+       _producers = favorites.length;
++      _loadedOpportunities = generated;
++      _hasSamples = hasSamples;
+     });
+   }
+ 
+@@ -151,6 +130,28 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+       _journey == 0 &&
+       _metrics.ordersCount == 0;
+ 
++  /// "Xem thử Demo" (WTM-144/ADR-TON-014): seeds the sample fixtures into the
++  /// PRODUCTION repositories — no parallel demo screen — then reloads so this
++  /// same dashboard (and every other screen) shows them.
++  Future<void> _seedSamples() async {
++    setState(() => _seeding = true);
++    await ref.read(sampleDataSeederProvider).seed();
++    if (!mounted) return;
++    setState(() => _seeding = false);
++    await _load();
++    if (!mounted) return;
++    ScaffoldMessenger.of(context)
++      ..hideCurrentSnackBar()
++      ..showSnackBar(
++        const SnackBar(
++          content: Text(
++            'Đã nạp dữ liệu mẫu — tất cả màn hình đang dùng chung dữ liệu '
++            'này. Xóa trong More khi không cần nữa.',
++          ),
++        ),
++      );
++  }
++
+   void _openSearch(BuildContext context) {
+     Navigator.of(context).push(
+       MaterialPageRoute(builder: (_) => const TongtaiUnifiedSearchRoute()),
+@@ -169,14 +170,16 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+ 
+   @override
+   Widget build(BuildContext context) {
++    // Real mode: the Rule Engine's generated opportunities over persisted data
++    // (WTM-144 one-source); injected lists are for tests/previews only.
+     final topOpportunities =
+-        (widget.opportunities ?? const <Opportunity>[]).toList()
++        (widget.opportunities ?? _loadedOpportunities).toList()
+           ..sort((a, b) => b.aiScore.compareTo(a.aiScore));
+ 
+     return Scaffold(
+       backgroundColor: TongtaiDesignTokens.lightBackground,
+       appBar: AppBar(
+-        title: Text(widget.isDemo ? 'Demo — Dữ liệu mẫu' : 'Home Dashboard'),
++        title: const Text('Home Dashboard'),
+         elevation: 0,
+         backgroundColor: Colors.white,
+         foregroundColor: Colors.black,
+@@ -199,10 +202,12 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+         child: Column(
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+-            // ── Demo banner (WTM-143): the demo must introduce itself ──
+-            if (widget.isDemo) ...[
++            // ── Sample-data banner (WTM-144/ADR-TON-014): when sample rows
++            //    are present, every screen shows them as ordinary data — this
++            //    banner is the one reminder + pointer to the remover in More. ─
++            if (_hasSamples) ...[
+               Container(
+-                key: const Key('home-demo-banner'),
++                key: const Key('home-sample-banner'),
+                 width: double.infinity,
+                 padding: const EdgeInsets.all(12),
+                 decoration: BoxDecoration(
+@@ -223,10 +228,9 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+                     const SizedBox(width: 8),
+                     Expanded(
+                       child: Text(
+-                        'Bạn đang xem DEMO với dữ liệu mẫu — đây KHÔNG phải '
+-                        'số liệu của bạn. Bấm ← để về màn hình thật.\n'
+-                        'Demo with sample data — not your business. '
+-                        'Tap ← to go back.',
++                        'Đang hiển thị kèm DỮ LIỆU MẪU (mọi màn hình dùng '
++                        'chung dữ liệu này). Bạn có thể sửa/xóa từng dòng, '
++                        'hoặc xóa toàn bộ mẫu trong More.',
+                         style: TongtaiDesignTokens.captionStyle.copyWith(
+                           color: TongtaiDesignTokens.lightTextPrimary,
+                           height: 1.4,
+@@ -291,8 +295,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
+                 onOrder: () =>
+                     _push(context, const TongtaiCustomerListScreen()),
+                 onGoal: () => _push(context, const TongtaiGoalsScreen()),
+-                onDemo: () =>
+-                    _push(context, TongtaiHomeScreen.demo(clock: widget.clock)),
++                onDemo: _seeding ? () {} : _seedSamples,
+               ),
+               const SizedBox(height: 24),
+             ],
+diff --git a/lib/features/tongtai/ui/screens/tongtai_more_screen.dart b/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
+index fad4236..8584057 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_more_screen.dart
+@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ import '../../../../core/l10n/app_strings.dart';
+ import '../../../../core/l10n/language_notifier.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
++import '../../providers/tongtai_sample_provider.dart';
+ import '../../providers/tongtai_onboarding_provider.dart';
+ import 'tongtai_ai_key_screen.dart';
+ import 'tongtai_export_screen.dart';
+ import 'tongtai_finance_screen.dart';
+ import 'tongtai_goals_screen.dart';
+ import 'tongtai_reports_screen.dart';
+-import 'tongtai_home_screen.dart';
+ import 'tongtai_timeline_screen.dart';
+ 
+ /// Opens the language picker (WTM-119) and persists the choice; the app
+@@ -55,6 +55,77 @@ Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
+ class TongtaiMoreScreen extends ConsumerWidget {
+   const TongtaiMoreScreen({super.key});
+ 
++  /// WTM-144/ADR-TON-014: seeds the sample fixtures into the PRODUCTION
++  /// repositories (idempotent) after an explicit confirmation — every screen
++  /// then shows the same data; removable below.
++  Future<void> _seedSamples(BuildContext context, WidgetRef ref) async {
++    final confirmed = await showDialog<bool>(
++      context: context,
++      builder: (dialogContext) => AlertDialog(
++        title: const Text('Nạp dữ liệu mẫu?'),
++        content: const Text(
++          'Dữ liệu mẫu sẽ được thêm vào ứng dụng như dữ liệu bình thường — '
++          'mọi màn hình (Home, Kho, Khách hàng, Báo cáo, Cơ hội…) cùng hiển '
++          'thị. Bạn có thể sửa từng dòng hoặc xóa toàn bộ mẫu bất cứ lúc nào; '
++          'dữ liệu bạn tự nhập không bị ảnh hưởng.',
++        ),
++        actions: [
++          TextButton(
++            onPressed: () => Navigator.of(dialogContext).pop(false),
++            child: const Text('Hủy'),
++          ),
++          FilledButton(
++            key: const Key('more-demo-confirm'),
++            onPressed: () => Navigator.of(dialogContext).pop(true),
++            child: const Text('Nạp mẫu'),
++          ),
++        ],
++      ),
++    );
++    if (confirmed != true || !context.mounted) return;
++    await ref.read(sampleDataSeederProvider).seed();
++    if (!context.mounted) return;
++    ScaffoldMessenger.of(context)
++      ..hideCurrentSnackBar()
++      ..showSnackBar(
++        const SnackBar(
++          content: Text('Đã nạp dữ liệu mẫu — xem ở mọi màn hình.'),
++        ),
++      );
++  }
++
++  /// Removes ONLY the `sample-` prefixed rows — user data stays (tested).
++  Future<void> _removeSamples(BuildContext context, WidgetRef ref) async {
++    final confirmed = await showDialog<bool>(
++      context: context,
++      builder: (dialogContext) => AlertDialog(
++        title: const Text('Xóa toàn bộ dữ liệu mẫu?'),
++        content: const Text(
++          'Chỉ các bản ghi mẫu bị xóa. Dữ liệu bạn tự nhập được giữ nguyên.',
++        ),
++        actions: [
++          TextButton(
++            onPressed: () => Navigator.of(dialogContext).pop(false),
++            child: const Text('Hủy'),
++          ),
++          FilledButton(
++            key: const Key('more-remove-sample-confirm'),
++            onPressed: () => Navigator.of(dialogContext).pop(true),
++            child: const Text('Xóa mẫu'),
++          ),
++        ],
++      ),
++    );
++    if (confirmed != true || !context.mounted) return;
++    await ref.read(sampleDataSeederProvider).removeAll();
++    if (!context.mounted) return;
++    ScaffoldMessenger.of(context)
++      ..hideCurrentSnackBar()
++      ..showSnackBar(
++        const SnackBar(content: Text('Đã xóa toàn bộ dữ liệu mẫu.')),
++      );
++  }
++
+   @override
+   Widget build(BuildContext context, WidgetRef ref) {
+     return Scaffold(
+@@ -116,10 +187,14 @@ class TongtaiMoreScreen extends ConsumerWidget {
+                 _SettingsItem(
+                   key: const Key('more-demo-mode'),
+                   icon: Icons.science_outlined,
+-                  label: 'Xem thử Demo · Explore Demo',
+-                  onTap: () => Navigator.of(context).push<void>(
+-                    MaterialPageRoute(builder: (_) => TongtaiHomeScreen.demo()),
+-                  ),
++                  label: 'Nạp dữ liệu mẫu · Load sample data',
++                  onTap: () => _seedSamples(context, ref),
++                ),
++                _SettingsItem(
++                  key: const Key('more-remove-sample'),
++                  icon: Icons.delete_sweep_outlined,
++                  label: 'Xóa dữ liệu mẫu · Remove sample data',
++                  onTap: () => _removeSamples(context, ref),
+                 ),
+                 _SettingsItem(
+                   icon: Icons.timeline_outlined,
+diff --git a/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart b/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
+index ab38411..586cd84 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_reports_screen.dart
+@@ -8,7 +8,7 @@ import '../../ai/business_summary.dart';
+ import '../../core/tongtai_formatters.dart';
+ import '../../metrics/business_metrics.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+-import '../../opportunity/opportunity.dart';
++import '../../opportunity/opportunity.dart' show Opportunity;
+ import '../../opportunity/opportunity_pipeline.dart';
+ import '../../providers/tongtai_ai_provider.dart';
+ import '../../providers/tongtai_context_provider.dart';
+@@ -219,13 +219,9 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
+     final breakdown =
+         _reports?.breakdownFor(now, _period) ?? PeriodBreakdown.empty;
+     final pipeline = opportunityPipeline(
+-      // Real generated opportunities (WTM-139); tests may inject a list. In
+-      // injected-service test mode with no explicit list, fall back to the
+-      // samples so existing fixtures stay coherent.
+-      widget.opportunities ??
+-          (widget.service != null
+-              ? kSampleOpportunities
+-              : _generatedOpportunities),
++      // One source (WTM-144 P0 §1): real generated opportunities only — the
++      // sample fallback is gone; tests inject their fixtures explicitly.
++      widget.opportunities ?? _generatedOpportunities,
+     );
+ 
+     return Scaffold(
+diff --git a/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart b/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
+index 70e9c58..987cfbe 100644
+--- a/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
++++ b/lib/features/tongtai/ui/screens/tongtai_timeline_screen.dart
+@@ -1,8 +1,14 @@
+ import 'package:flutter/material.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
+ import '../../core/tongtai_formatters.dart';
+ import '../../navigation/tongtai_design_tokens.dart';
+ import '../../timeline/business_event.dart';
++import '../../providers/tongtai_context_provider.dart';
++import '../../providers/tongtai_finance_provider.dart';
++import '../../providers/tongtai_journey_provider.dart';
++import '../../providers/tongtai_orders_provider.dart';
++import '../../timeline/business_event_sources.dart';
+ import '../../timeline/timeline_service.dart';
+ import '../../timeline/timeline_theme.dart';
+ import '../widgets/tongtai_fox_mascot.dart';
+@@ -11,29 +17,54 @@ import '../widgets/tongtai_fox_mascot.dart';
+ /// happened in the business (orders, finance, opportunities, goals…), grouped
+ /// by day with a type filter.
+ ///
+-/// Local-first: events come from the in-memory [TimelineService], which merges
+-/// per-module sources. Both `service` and `clock` are injectable so the day
+-/// grouping is deterministic under test.
+-class TongtaiTimelineScreen extends StatefulWidget {
++/// Local-first: events come from [TimelineService], which merges per-module
++/// sources. **Real mode (WTM-144 P0 §1) builds the service from the PRODUCTION
++/// repositories** — the same rows every other screen shows; the old
++/// sample-default silently displayed fixture events. `service`/`clock` stay
++/// injectable for deterministic tests.
++class TongtaiTimelineScreen extends ConsumerStatefulWidget {
+   const TongtaiTimelineScreen({super.key, this.service, this.clock});
+ 
+   final TimelineService? service;
+   final DateTime Function()? clock;
+ 
+   @override
+-  State<TongtaiTimelineScreen> createState() => _TongtaiTimelineScreenState();
++  ConsumerState<TongtaiTimelineScreen> createState() =>
++      _TongtaiTimelineScreenState();
+ }
+ 
+-class _TongtaiTimelineScreenState extends State<TongtaiTimelineScreen> {
+-  late final TimelineService _service;
++class _TongtaiTimelineScreenState extends ConsumerState<TongtaiTimelineScreen> {
++  TimelineService _service = TimelineService(const []);
+   late final DateTime Function() _clock;
+   BusinessEventType? _filter;
+ 
+   @override
+   void initState() {
+     super.initState();
+-    _service = widget.service ?? TimelineService.sample();
+     _clock = widget.clock ?? DateTime.now;
++    if (widget.service != null) {
++      _service = widget.service!;
++    } else {
++      _loadReal();
++    }
++  }
++
++  Future<void> _loadReal() async {
++    // One source (WTM-144): finance/orders/goals from the live repositories +
++    // the Rule Engine's generated opportunities — mirrors TimelineContext.
++    final finance = await ref.read(financeRepositoryProvider).loadAll();
++    final orders = await ref.read(orderRepositoryProvider).loadAll();
++    final goals = await ref.read(businessGoalRepositoryProvider).loadAll();
++    final opportunities = await ref.read(generatedOpportunitiesProvider.future);
++    if (!mounted) return;
++    setState(() {
++      _service = TimelineService([
++        FinanceEventSource(finance),
++        OrderEventSource(orders),
++        JourneyEventSource(goals),
++        OpportunityEventSource(opportunities),
++      ]);
++    });
+   }
+ 
+   @override
+diff --git a/test/features/tongtai/p0/one_source_consistency_test.dart b/test/features/tongtai/p0/one_source_consistency_test.dart
+new file mode 100644
+index 0000000..32c83bd
+--- /dev/null
++++ b/test/features/tongtai/p0/one_source_consistency_test.dart
+@@ -0,0 +1,190 @@
++import 'package:flutter_test/flutter_test.dart';
++import 'package:tongtai/features/tongtai/consumer/customer.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_context.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
++import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
++import 'package:tongtai/features/tongtai/finance/finance_context.dart';
++import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
++import 'package:tongtai/features/tongtai/inventory/inventory_context.dart';
++import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart';
++import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
++import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
++import 'package:tongtai/features/tongtai/journey/journey_context.dart';
++import 'package:tongtai/features/tongtai/metrics/business_context_service.dart';
++import 'package:tongtai/features/tongtai/metrics/business_metrics_service.dart';
++import 'package:tongtai/features/tongtai/opportunity/opportunity_context.dart';
++import 'package:tongtai/features/tongtai/opportunity/opportunity_rule_engine.dart';
++import 'package:tongtai/features/tongtai/orders/order.dart';
++import 'package:tongtai/features/tongtai/orders/order_context.dart';
++import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
++import 'package:tongtai/features/tongtai/timeline/timeline_context.dart';
++
++/// P0 §1 (WTM-144) — ONE SOURCE end-to-end: after seeding, the
++/// BusinessContext (what Home + AI read), the domain repositories (what each
++/// capability screen reads) and the Opportunity Rule Engine all agree.
++/// Includes the mandated acceptance scenario:
++/// fresh → seed → create → update → delete-samples → restart → verify.
++void main() {
++  final now = DateTime(2026, 7, 24);
++  DateTime clock() => now;
++
++  late InMemoryCustomerRepository customers;
++  late InMemoryProductRepository products;
++  late InMemoryOrderRepository orders;
++  late InMemoryBusinessGoalRepository goals;
++  late InMemoryFinanceRepository finance;
++  late SampleDataSeeder seeder;
++
++  setUp(() {
++    customers = InMemoryCustomerRepository();
++    products = InMemoryProductRepository([]);
++    orders = InMemoryOrderRepository();
++    goals = InMemoryBusinessGoalRepository();
++    finance = InMemoryFinanceRepository();
++    seeder = SampleDataSeeder(
++      customers: customers,
++      products: products,
++      orders: orders,
++      goals: goals,
++      finance: finance,
++    );
++  });
++
++  /// The PRODUCTION BusinessContext composition — identical wiring to
++  /// tongtai_context_provider.dart, over these repositories. Building it
++  /// fresh simulates an app restart (the repos persist, like the DB file).
++  BusinessContextService buildContextService() {
++    Future<List<dynamic>> generated() async =>
++        const OpportunityRuleEngine().generate(
++          products: await products.loadAll(),
++          customers: await customers.loadAll(),
++          orders: await orders.loadAll(),
++          goals: await goals.loadAll(),
++          now: now,
++        );
++    return BusinessContextService(
++      BusinessMetricsService(orders, customers),
++      CustomerContextProvider(customers),
++      OrderContextProvider(orders),
++      InventoryContextProvider(products),
++      OpportunityContextProvider(
++        source: () async => (await generated()).cast(),
++        clock: clock,
++      ),
++      JourneyContextProvider(goals, orders: orders.loadAll, clock: clock),
++      FinanceContextProvider(finance, clock: clock),
++      TimelineContextProvider(finance, orders, goals, clock: clock),
++      clock: clock,
++    );
++  }
++
++  test('cross-screen consistency: context counts == repository counts after '
++      'seeding (Home ⇔ domain screens can never disagree)', () async {
++    await seeder.seed();
++    final ctx = await buildContextService().load();
++
++    expect(ctx.customers.total, (await customers.loadAll()).length);
++    expect(ctx.inventory.productCount, (await products.loadAll()).length);
++    expect(ctx.orders.total, (await orders.loadAll()).length);
++    expect(ctx.journey.total, (await goals.loadAll()).length);
++    expect(ctx.hasData, isTrue);
++
++    // And the fixture sizes, for absolute clarity.
++    expect(ctx.customers.total, kSampleCustomers.length);
++    expect(ctx.inventory.productCount, kSampleProducts.length);
++  });
++
++  test('Opportunity e2e: persisted rows → Rule Engine → context slice — no '
++      'screen-local list anywhere', () async {
++    await seeder.seed();
++    final engine = const OpportunityRuleEngine().generate(
++      products: await products.loadAll(),
++      customers: await customers.loadAll(),
++      orders: await orders.loadAll(),
++      goals: await goals.loadAll(),
++      now: now,
++    );
++    // The July sample orders guarantee at least category momentum.
++    expect(engine, isNotEmpty);
++    for (final o in engine) {
++      expect(o.id, startsWith('gen-'));
++    }
++
++    final ctx = await buildContextService().load();
++    expect(ctx.opportunity.total, engine.length);
++  });
++
++  test('ACCEPTANCE: fresh → seed → create → update → delete samples → restart '
++      '→ every slice verified', () async {
++    // 1. Fresh install: nothing anywhere.
++    var ctx = await buildContextService().load();
++    expect(ctx.hasData, isFalse);
++
++    // 2. Seed samples.
++    await seeder.seed();
++    ctx = await buildContextService().load();
++    expect(ctx.customers.total, kSampleCustomers.length);
++
++    // 3. User creates their own records (UUID-style ids).
++    await customers.upsert(
++      const Customer(
++        id: 'uuid-user-c1',
++        name: 'Khách Ruột',
++        phone: '0901',
++        location: 'HCM',
++        orderCount: 0,
++        totalSpent: 0,
++        lastPurchaseDate: null,
++      ),
++    );
++    await orders.upsert(
++      CustomerOrder(
++        id: 'uuid-user-o1',
++        customerId: 'uuid-user-c1',
++        orderNumber: 'DH-RUOT-1',
++        date: DateTime(2026, 7, 22),
++        status: OrderStatus.delivered,
++        items: const [
++          OrderItem(
++            productName: 'Hàng thật',
++            category: 'Home',
++            quantity: 2,
++            unitPrice: 250000,
++          ),
++        ],
++      ),
++    );
++    ctx = await buildContextService().load();
++    expect(ctx.customers.total, kSampleCustomers.length + 1);
++    expect(ctx.orders.total, kSampleCustomerOrders.length + 1);
++
++    // 4. User edits a sample product (allowed — ordinary rows).
++    final sampleProduct = (await products.loadAll()).first;
++    await products.upsert(sampleProduct.copyWith(quantity: 999));
++    final edited = (await products.loadAll()).firstWhere(
++      (p) => p.id == sampleProduct.id,
++    );
++    expect(edited.quantity, 999);
++
++    // 5. Delete ALL samples — user data must survive untouched.
++    await seeder.removeAll();
++    ctx = await buildContextService().load();
++    expect(ctx.customers.total, 1);
++    expect(ctx.orders.total, 1);
++    expect(ctx.inventory.productCount, 0);
++    expect(ctx.journey.total, 0);
++    // The user's revenue is still counted (billable order of 500k).
++    expect(ctx.metrics.revenue, 500000);
++
++    // 6. "Restart": a brand-new service graph over the same repositories
++    //    (repos persist like the DB file) — identical reads.
++    final afterRestart = await buildContextService().load();
++    expect(afterRestart.customers.total, 1);
++    expect(afterRestart.orders.total, 1);
++    expect(afterRestart.metrics.revenue, 500000);
++    expect(afterRestart.hasData, isTrue);
++    expect(await seeder.hasSamples(), isFalse);
++  });
++}
+diff --git a/test/features/tongtai/p0/sample_data_seeder_test.dart b/test/features/tongtai/p0/sample_data_seeder_test.dart
+new file mode 100644
+index 0000000..3a134aa
+--- /dev/null
++++ b/test/features/tongtai/p0/sample_data_seeder_test.dart
+@@ -0,0 +1,142 @@
++import 'package:flutter_test/flutter_test.dart';
++import 'package:tongtai/features/tongtai/consumer/customer.dart';
++import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
++import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
++import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
++import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart';
++import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
++import 'package:tongtai/features/tongtai/journey/business_goal.dart';
++import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
++import 'package:tongtai/features/tongtai/orders/order.dart';
++import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
++
++/// P0 §1 (WTM-144/ADR-TON-014) — the sample-data lifecycle over the
++/// repositories: seed is idempotent, links stay consistent, removal deletes
++/// ONLY sample rows.
++void main() {
++  late InMemoryCustomerRepository customers;
++  late InMemoryProductRepository products;
++  late InMemoryOrderRepository orders;
++  late InMemoryBusinessGoalRepository goals;
++  late InMemoryFinanceRepository finance;
++  late SampleDataSeeder seeder;
++
++  setUp(() {
++    customers = InMemoryCustomerRepository();
++    products = InMemoryProductRepository([]);
++    orders = InMemoryOrderRepository();
++    goals = InMemoryBusinessGoalRepository();
++    finance = InMemoryFinanceRepository();
++    seeder = SampleDataSeeder(
++      customers: customers,
++      products: products,
++      orders: orders,
++      goals: goals,
++      finance: finance,
++    );
++  });
++
++  test('seed populates every repository with sample- prefixed rows', () async {
++    await seeder.seed();
++
++    expect(await customers.loadAll(), hasLength(kSampleCustomers.length));
++    expect(await products.loadAll(), hasLength(kSampleProducts.length));
++    expect(await orders.loadAll(), hasLength(kSampleCustomerOrders.length));
++    expect(await goals.loadAll(), hasLength(kSampleBusinessGoals.length));
++    expect(await finance.loadAll(), hasLength(kSampleTransactions.length));
++
++    for (final c in await customers.loadAll()) {
++      expect(c.id, startsWith(kSampleIdPrefix));
++    }
++    expect(await seeder.hasSamples(), isTrue);
++  });
++
++  test('order → customer links are remapped consistently', () async {
++    await seeder.seed();
++    final seededCustomers = await customers.loadAll();
++    final ids = {for (final c in seededCustomers) c.id};
++    for (final o in await orders.loadAll()) {
++      expect(o.customerId, startsWith(kSampleIdPrefix));
++      expect(
++        ids,
++        contains(o.customerId),
++        reason: 'mỗi đơn mẫu phải trỏ tới một khách mẫu tồn tại',
++      );
++    }
++  });
++
++  test(
++    're-seeding never duplicates (idempotent, incl. insert-only finance)',
++    () async {
++      await seeder.seed();
++      await seeder.seed();
++      await seeder.seed();
++
++      expect(await customers.loadAll(), hasLength(kSampleCustomers.length));
++      expect(await finance.loadAll(), hasLength(kSampleTransactions.length));
++    },
++  );
++
++  test('removeAll deletes ONLY sample rows — user data survives', () async {
++    await seeder.seed();
++    // User records (UUID-style ids) in two repositories.
++    await customers.upsert(
++      const Customer(
++        id: 'a1b2c3d4-user',
++        name: 'Khách Thật',
++        phone: '09',
++        location: 'HN',
++        orderCount: 0,
++        totalSpent: 0,
++        lastPurchaseDate: null,
++      ),
++    );
++    await orders.upsert(
++      CustomerOrder(
++        id: 'e5f6-user-order',
++        customerId: 'a1b2c3d4-user',
++        orderNumber: 'DH-USER',
++        date: DateTime(2026, 7, 20),
++        status: OrderStatus.delivered,
++        items: const [
++          OrderItem(
++            productName: 'Hàng thật',
++            category: 'Home',
++            quantity: 1,
++            unitPrice: 100000,
++          ),
++        ],
++      ),
++    );
++
++    await seeder.removeAll();
++
++    expect((await customers.loadAll()).single.name, 'Khách Thật');
++    expect((await orders.loadAll()).single.orderNumber, 'DH-USER');
++    expect(await products.loadAll(), isEmpty);
++    expect(await goals.loadAll(), isEmpty);
++    expect(await finance.loadAll(), isEmpty);
++    expect(await seeder.hasSamples(), isFalse);
++  });
++
++  test(
++    'users may edit a sample row — the edit persists and stays removable',
++    () async {
++      await seeder.seed();
++      final first = (await customers.loadAll()).first;
++      await customers.upsert(first.copyWith(name: 'Đã Sửa Tên'));
++
++      final edited = (await customers.loadAll()).firstWhere(
++        (c) => c.id == first.id,
++      );
++      expect(edited.name, 'Đã Sửa Tên');
++
++      await seeder
++          .removeAll(); // the edited sample row still carries the prefix
++      expect(await customers.loadAll(), isEmpty);
++    },
++  );
++}
+diff --git a/test/features/tongtai/tongtai_csv_export_test.dart b/test/features/tongtai/tongtai_csv_export_test.dart
+index cf78149..89f27df 100644
+--- a/test/features/tongtai/tongtai_csv_export_test.dart
++++ b/test/features/tongtai/tongtai_csv_export_test.dart
+@@ -5,6 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
+ import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
+ import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
+ import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
++import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
++import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
+ import 'package:tongtai/features/tongtai/export/backup_crypto.dart';
+ import 'package:tongtai/features/tongtai/export/csv_delivery.dart';
+ import 'package:tongtai/features/tongtai/export/csv_exporter.dart';
+@@ -166,6 +172,11 @@ void main() {
+             delivery: delivery,
+             history: history,
+             clock: () => DateTime(2026, 7, 23),
++            // One-source (WTM-144): the screen exports the repositories; tests
++            // inject their fixtures explicitly.
++            customers: kSampleCustomers,
++            products: kSampleProducts,
++            orders: kSampleCustomerOrders,
+           ),
+         ),
+       );
+@@ -207,6 +218,9 @@ void main() {
+               history: InMemoryTongtaiExportHistoryStore(),
+               clock: () => DateTime(2026, 7, 23),
+               crypto: crypto,
++              customers: kSampleCustomers,
++              products: kSampleProducts,
++              orders: kSampleCustomerOrders,
+             ),
+           ),
+         );
+@@ -256,6 +270,9 @@ void main() {
+             delivery: delivery,
+             history: InMemoryTongtaiExportHistoryStore(),
+             clock: () => DateTime(2026, 7, 23),
++            customers: kSampleCustomers,
++            products: kSampleProducts,
++            orders: kSampleCustomerOrders,
+           ),
+         ),
+       );
+@@ -282,7 +299,7 @@ void main() {
+ 
+     testWidgets('More → "Export Data (CSV)" opens the screen', (tester) async {
+       useTallViewport(tester);
+-      await tester.pumpWidget(const MaterialApp(home: _MoreHost()));
++      await tester.pumpWidget(const _MoreHost());
+       await tester.ensureVisible(find.text('Export Data (CSV)'));
+       await tester.pumpAndSettle();
+       await tester.tap(find.text('Export Data (CSV)'));
+@@ -293,11 +310,24 @@ void main() {
+   });
+ }
+ 
+-/// More screen needs a Riverpod scope (onboarding provider read on tap only).
++/// More screen needs a Riverpod scope; the Export screen it opens now reads
++/// the production repositories (WTM-144) — keep it on in-memory overrides.
+ class _MoreHost extends StatelessWidget {
+   const _MoreHost();
+ 
+   @override
+-  Widget build(BuildContext context) =>
+-      const ProviderScope(child: TongtaiMoreScreen());
++  Widget build(BuildContext context) => ProviderScope(
++    overrides: [
++      customerRepositoryProvider.overrideWithValue(
++        InMemoryCustomerRepository(),
++      ),
++      productRepositoryProvider.overrideWithValue(
++        InMemoryProductRepository([]),
++      ),
++      orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
++    ],
++    // The scope must sit ABOVE the Navigator so pushed routes (the real
++    // Export screen) inherit the in-memory overrides (WTM-144).
++    child: const MaterialApp(home: TongtaiMoreScreen()),
++  );
+ }
+diff --git a/test/features/tongtai/tongtai_home_screen_test.dart b/test/features/tongtai/tongtai_home_screen_test.dart
+index a25b14f..142165d 100644
+--- a/test/features/tongtai/tongtai_home_screen_test.dart
++++ b/test/features/tongtai/tongtai_home_screen_test.dart
+@@ -1,149 +1,98 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+ import 'package:flutter_test/flutter_test.dart';
++import 'package:tongtai/features/tongtai/consumer/customer.dart';
+ import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
+-import 'package:tongtai/features/tongtai/metrics/business_metrics.dart';
+-import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
+ import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+ import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
++import 'package:tongtai/features/tongtai/metrics/business_metrics.dart';
++import 'package:tongtai/features/tongtai/orders/order_repository.dart';
++import 'package:tongtai/features/tongtai/producer/supplier_favorites_store.dart';
+ import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_finance_provider.dart';
+ import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
+ import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
+ import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
++import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart';
++import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
+ import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
+ import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
+ import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
+ 
+-/// WTM-128 — the Home dashboard is User Data First: real module counts + KPIs
+-/// (from BusinessMetrics), a BusinessHealth read, onboarding CTAs for a new
+-/// business, and Demo Mode only behind an explicit action.
++/// WTM-128 + WTM-144 (P0 §1) — Home is User Data First over ONE source: the
++/// production repositories. "Sample data" is ordinary rows seeded into those
++/// repositories (ADR-TON-014); there is no parallel demo state. These tests
++/// run through the real Riverpod wiring — the screen and the assertions read
++/// the same container.
+ void main() {
+   DateTime fixedNow() => DateTime(2026, 7, 24);
+ 
+-  // Home + any real screen it opens (Reports, etc.) read repositories; override
+-  // them empty so navigation targets stay off the real Drift database.
++  /// One production-like set of in-memory repositories per test.
++  late InMemoryCustomerRepository customerRepo;
++  late InMemoryProductRepository productRepo;
++  late InMemoryOrderRepository orderRepo;
++  late InMemoryBusinessGoalRepository goalRepo;
++  late InMemoryFinanceRepository financeRepo;
++
++  setUp(() {
++    customerRepo = InMemoryCustomerRepository();
++    productRepo = InMemoryProductRepository([]);
++    orderRepo = InMemoryOrderRepository();
++    goalRepo = InMemoryBusinessGoalRepository();
++    financeRepo = InMemoryFinanceRepository();
++  });
++
++  SampleDataSeeder seeder() => SampleDataSeeder(
++    customers: customerRepo,
++    products: productRepo,
++    orders: orderRepo,
++    goals: goalRepo,
++    finance: financeRepo,
++  );
++
+   Widget wrap(Widget home) => ProviderScope(
+     overrides: [
+-      orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
+-      customerRepositoryProvider.overrideWithValue(
+-        InMemoryCustomerRepository(),
+-      ),
+-      // The generated-opportunities source (WTM-139) also reads these.
+-      productRepositoryProvider.overrideWithValue(
+-        InMemoryProductRepository([]),
+-      ),
+-      businessGoalRepositoryProvider.overrideWithValue(
+-        InMemoryBusinessGoalRepository(),
++      customerRepositoryProvider.overrideWithValue(customerRepo),
++      productRepositoryProvider.overrideWithValue(productRepo),
++      orderRepositoryProvider.overrideWithValue(orderRepo),
++      businessGoalRepositoryProvider.overrideWithValue(goalRepo),
++      financeRepositoryProvider.overrideWithValue(financeRepo),
++      tongtaiSearchFavoritesStoreProvider.overrideWithValue(
++        InMemorySupplierFavoritesStore(),
+       ),
+     ],
+     child: MaterialApp(home: home),
+   );
+ 
+-  // Demo dashboard (explicit action) — populated with sample data.
+-  Widget demoHost() => wrap(TongtaiHomeScreen.demo(clock: fixedNow));
+-
+-  // A brand-new business — real zeros, onboarding CTAs.
+-  Widget emptyHost() =>
+-      wrap(TongtaiHomeScreen(metrics: BusinessMetrics.empty, clock: fixedNow));
+-
+-  group('quick actions (WTM-144)', () {
+-    testWidgets(
+-      'a business WITH data keeps one-tap shortcuts; the empty business shows '
+-      'Get-started instead',
+-      (tester) async {
+-        // Demo host has data → quick actions visible, Get-started gone.
+-        await tester.pumpWidget(
+-          wrap(
+-            TongtaiHomeScreen.demo(key: const Key('qa-demo'), clock: fixedNow),
+-          ),
+-        );
+-        await tester.pumpAndSettle();
+-        expect(find.byKey(const Key('home-quick-customer')), findsOneWidget);
+-        expect(find.byKey(const Key('home-quick-goal')), findsOneWidget);
+-        expect(find.byKey(const Key('home-cta-customer')), findsNothing);
++  /// The REAL Home (no injected metrics — it loads from the repositories).
++  Widget realHost() => wrap(TongtaiHomeScreen(clock: fixedNow));
+ 
+-        // Empty business → Get-started card, no duplicate quick actions.
+-        // Distinct key forces a fresh State (initState re-runs).
+-        await tester.pumpWidget(
+-          wrap(
+-            TongtaiHomeScreen(
+-              key: const Key('qa-empty'),
+-              metrics: BusinessMetrics.empty,
+-              clock: fixedNow,
+-            ),
+-          ),
+-        );
+-        await tester.pumpAndSettle();
+-        expect(find.byKey(const Key('home-cta-customer')), findsOneWidget);
+-        expect(find.byKey(const Key('home-quick-customer')), findsNothing);
+-      },
+-    );
+-  });
+-
+-  group('More → Demo entry (WTM-144)', () {
+-    testWidgets('"Xem thử Demo" in More opens the labeled demo dashboard', (
++  group('seeded sample data — production wiring (WTM-144/ADR-TON-014)', () {
++    testWidgets('module tiles show the seeded counts from the repositories', (
+       tester,
+     ) async {
+-      await tester.pumpWidget(wrap(const TongtaiMoreScreen()));
+-      await tester.pumpAndSettle();
+-
+-      final entry = find.byKey(const Key('more-demo-mode'));
+-      await tester.scrollUntilVisible(
+-        entry,
+-        200,
+-        scrollable: find.byType(Scrollable).first,
+-      );
+-      await tester.tap(entry);
+-      await tester.pumpAndSettle();
+-
+-      // Lands on the demo home, clearly labeled (WTM-143).
+-      expect(find.byKey(const Key('home-demo-banner')), findsOneWidget);
+-      expect(find.text('Demo — Dữ liệu mẫu'), findsOneWidget);
+-    });
+-  });
+-
+-  group('demo mode (sample data)', () {
+-    testWidgets(
+-      'the demo introduces itself: banner + title, never "Home Dashboard" '
+-      '(WTM-143)',
+-      (tester) async {
+-        await tester.pumpWidget(demoHost());
+-        await tester.pumpAndSettle();
+-
+-        expect(find.byKey(const Key('home-demo-banner')), findsOneWidget);
+-        expect(find.text('Demo — Dữ liệu mẫu'), findsOneWidget);
+-        expect(find.text('Home Dashboard'), findsNothing);
+-
+-        // The REAL home never shows the demo label (guard both directions).
+-        await tester.pumpWidget(emptyHost());
+-        await tester.pumpAndSettle();
+-        expect(find.byKey(const Key('home-demo-banner')), findsNothing);
+-        expect(find.text('Home Dashboard'), findsOneWidget);
+-      },
+-    );
+-
+-    testWidgets('module tiles show real counts', (tester) async {
+-      await tester.pumpWidget(demoHost());
++      await seeder().seed();
++      await tester.pumpWidget(realHost());
+       await tester.pumpAndSettle();
+ 
++      expect(find.text('26'), findsOneWidget); // customers (seeded)
++      expect(find.text('28'), findsOneWidget); // products (seeded)
++      // Journey tile: 2 seeded goals.
++      expect(find.text('2'), findsWidgets);
++      // Producer counts persisted favourites — none seeded → 0 real.
+       expect(find.text('Producer'), findsOneWidget);
+-      expect(find.text('Inventory'), findsOneWidget);
+-      expect(find.text('Consumer'), findsOneWidget);
+-      expect(find.text('Journey'), findsOneWidget);
+-      expect(find.text('28'), findsOneWidget); // products
+-      expect(find.text('26'), findsOneWidget); // customers
+-      expect(find.text('12'), findsOneWidget); // suppliers
+     });
+ 
+-    testWidgets('KPIs come from BusinessMetrics + Healthy badge', (
++    testWidgets('KPIs + Healthy badge come from the seeded repositories', (
+       tester,
+     ) async {
+-      await tester.pumpWidget(demoHost());
++      await seeder().seed();
++      await tester.pumpWidget(realHost());
+       await tester.pumpAndSettle();
+ 
+       expect(find.byKey(const Key('home-kpi-revenue')), findsOneWidget);
+       expect(find.text('4,06tr ₫'), findsOneWidget); // 4.058.000 billable
+-      expect(find.text('Doanh thu'), findsOneWidget);
+       expect(
+         find.descendant(
+           of: find.byKey(const Key('home-kpi-orders')),
+@@ -160,25 +109,49 @@ void main() {
+       );
+     });
+ 
+-    testWidgets('top opportunities + goal missions render', (tester) async {
+-      await tester.pumpWidget(demoHost());
++    testWidgets('the sample banner shows while samples exist — and only then', (
++      tester,
++    ) async {
++      await seeder().seed();
++      await tester.pumpWidget(realHost());
++      await tester.pumpAndSettle();
++      expect(find.byKey(const Key('home-sample-banner')), findsOneWidget);
++
++      // Remove the samples → a fresh Home shows no banner.
++      await seeder().removeAll();
++      await tester.pumpWidget(
++        wrap(TongtaiHomeScreen(key: const Key('fresh'), clock: fixedNow)),
++      );
+       await tester.pumpAndSettle();
++      expect(find.byKey(const Key('home-sample-banner')), findsNothing);
++    });
+ 
+-      expect(find.text('Quạt tích điện sắp vào mùa nóng'), findsOneWidget);
+-      expect(find.text('92'), findsOneWidget);
+-      expect(find.text("Today's Missions"), findsOneWidget);
+-      expect(find.byType(LinearProgressIndicator), findsWidgets);
+-      // A business with data shows no onboarding CTAs.
++    testWidgets('quick actions show with data; Get-started without', (
++      tester,
++    ) async {
++      await seeder().seed();
++      await tester.pumpWidget(realHost());
++      await tester.pumpAndSettle();
++      expect(find.byKey(const Key('home-quick-customer')), findsOneWidget);
+       expect(find.byKey(const Key('home-cta-customer')), findsNothing);
++
++      await seeder().removeAll();
++      await tester.pumpWidget(
++        wrap(TongtaiHomeScreen(key: const Key('fresh2'), clock: fixedNow)),
++      );
++      await tester.pumpAndSettle();
++      expect(find.byKey(const Key('home-cta-customer')), findsOneWidget);
++      expect(find.byKey(const Key('home-quick-customer')), findsNothing);
+     });
+   });
+ 
+-  group('new business (User Data First)', () {
+-    testWidgets('KPIs show real zeros (never "No Data")', (tester) async {
+-      await tester.pumpWidget(emptyHost());
++  group('new business (User Data First, real wiring)', () {
++    testWidgets('KPIs show real zeros (never "No Data") + CTAs', (
++      tester,
++    ) async {
++      await tester.pumpWidget(realHost());
+       await tester.pumpAndSettle();
+ 
+-      expect(find.byKey(const Key('home-kpi-revenue')), findsOneWidget);
+       expect(
+         find.descendant(
+           of: find.byKey(const Key('home-kpi-orders')),
+@@ -194,14 +167,6 @@ void main() {
+         ),
+         findsOneWidget,
+       );
+-    });
+-
+-    testWidgets('shows the five onboarding CTAs in priority order', (
+-      tester,
+-    ) async {
+-      await tester.pumpWidget(emptyHost());
+-      await tester.pumpAndSettle();
+-
+       expect(find.text('Create your first customer'), findsOneWidget);
+       expect(find.text('Add your first product'), findsOneWidget);
+       expect(find.text('Create your first order'), findsOneWidget);
+@@ -209,28 +174,81 @@ void main() {
+       expect(find.text('Explore Demo Mode'), findsOneWidget);
+     });
+ 
+-    testWidgets('Explore Demo Mode opens the demo dashboard (explicit)', (
+-      tester,
+-    ) async {
+-      await tester.pumpWidget(emptyHost());
+-      await tester.pumpAndSettle();
++    testWidgets(
++      '"Explore Demo Mode" seeds the PRODUCTION repositories in place — no '
++      'parallel demo screen (WTM-144 regression: fails on the old code)',
++      (tester) async {
++        await tester.pumpWidget(realHost());
++        await tester.pumpAndSettle();
+ 
+-      final demo = find.byKey(const Key('home-cta-demo'));
+-      await tester.ensureVisible(demo);
+-      await tester.pumpAndSettle();
+-      await tester.tap(demo);
+-      await tester.pumpAndSettle();
++        final demo = find.byKey(const Key('home-cta-demo'));
++        await tester.ensureVisible(demo);
++        await tester.pumpAndSettle();
++        await tester.tap(demo);
++        await tester.pumpAndSettle();
+ 
+-      // The pushed demo dashboard shows sample data.
+-      expect(find.text('28'), findsOneWidget);
+-      expect(
+-        find.descendant(
+-          of: find.byKey(const Key('home-health-badge')),
+-          matching: find.text('Healthy'),
+-        ),
+-        findsOneWidget,
+-      );
+-    });
++        // SAME screen (no push), now showing the seeded data + banner…
++        expect(find.text('26'), findsOneWidget);
++        expect(find.byKey(const Key('home-sample-banner')), findsOneWidget);
++        // …and the repositories REALLY contain the sample rows (one source).
++        final customers = await customerRepo.loadAll();
++        expect(
++          customers.where((c) => c.id.startsWith(kSampleIdPrefix)).length,
++          26,
++        );
++      },
++    );
++  });
++
++  group('More → sample lifecycle (production wiring)', () {
++    testWidgets(
++      'Load sample data seeds; Remove deletes ONLY sample rows — user data '
++      'survives',
++      (tester) async {
++        // A user-created customer (UUID-style id) that must survive removal.
++        await customerRepo.upsert(
++          const Customer(
++            id: 'f47ac10b-user',
++            name: 'Khách Của Tôi',
++            phone: '0900000000',
++            location: 'HCM',
++            orderCount: 0,
++            totalSpent: 0,
++            lastPurchaseDate: null,
++          ),
++        );
++
++        await tester.pumpWidget(wrap(const TongtaiMoreScreen()));
++        await tester.pumpAndSettle();
++
++        // Seed via the More entry (confirm dialog).
++        final seedEntry = find.byKey(const Key('more-demo-mode'));
++        await tester.scrollUntilVisible(
++          seedEntry,
++          200,
++          scrollable: find.byType(Scrollable).first,
++        );
++        await tester.tap(seedEntry);
++        await tester.pumpAndSettle();
++        await tester.tap(find.byKey(const Key('more-demo-confirm')));
++        await tester.pumpAndSettle();
++        expect((await customerRepo.loadAll()).length, 27); // 26 sample + 1 user
++
++        // Remove via the More entry (confirm dialog).
++        final removeEntry = find.byKey(const Key('more-remove-sample'));
++        await tester.tap(removeEntry);
++        await tester.pumpAndSettle();
++        await tester.tap(find.byKey(const Key('more-remove-sample-confirm')));
++        await tester.pumpAndSettle();
++
++        final remaining = await customerRepo.loadAll();
++        expect(remaining.single.name, 'Khách Của Tôi'); // user data intact
++        expect(await productRepo.loadAll(), isEmpty);
++        expect(await orderRepo.loadAll(), isEmpty);
++        expect(await goalRepo.loadAll(), isEmpty);
++        expect(await financeRepo.loadAll(), isEmpty);
++      },
++    );
+   });
+ 
+   testWidgets('empty goals fall back to the no-missions box', (tester) async {
+@@ -255,7 +273,8 @@ void main() {
+   testWidgets('the KPI header opens the full Reports dashboard', (
+     tester,
+   ) async {
+-    await tester.pumpWidget(demoHost());
++    await seeder().seed();
++    await tester.pumpWidget(realHost());
+     await tester.pumpAndSettle();
+ 
+     final action = find.byKey(const Key('home-open-reports'));
+diff --git a/test/features/tongtai/tongtai_reports_screen_test.dart b/test/features/tongtai/tongtai_reports_screen_test.dart
+index a4a024b..76acdfd 100644
+--- a/test/features/tongtai/tongtai_reports_screen_test.dart
++++ b/test/features/tongtai/tongtai_reports_screen_test.dart
+@@ -17,6 +17,7 @@ import 'package:tongtai/features/tongtai/journey/journey_context.dart';
+ import 'package:tongtai/features/tongtai/metrics/business_context_service.dart';
+ import 'package:tongtai/features/tongtai/metrics/business_metrics_service.dart';
+ import 'package:tongtai/features/tongtai/opportunity/opportunity_context.dart';
++import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
+ import 'package:tongtai/features/tongtai/orders/order.dart';
+ import 'package:tongtai/features/tongtai/orders/order_context.dart';
+ import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+@@ -142,7 +143,19 @@ void main() {
+   testWidgets('opportunity pipeline card renders count + value (WTM-98)', (
+     tester,
+   ) async {
+-    await tester.pumpWidget(host());
++    // One-source (WTM-144): the screen no longer falls back to samples —
++    // fixtures are injected explicitly.
++    await tester.pumpWidget(
++      ProviderScope(
++        child: MaterialApp(
++          home: TongtaiReportsScreen(
++            service: ReportsService.sample(),
++            clock: fixedNow,
++            opportunities: kSampleOpportunities,
++          ),
++        ),
++      ),
++    );
+     await tester.pumpAndSettle();
+ 
+     final card = find.byKey(const Key('reports-pipeline'));
+diff --git a/test/features/tongtai/tongtai_workizen_ai_router_test.dart b/test/features/tongtai/tongtai_workizen_ai_router_test.dart
+index 94027a5..91425b4 100644
+--- a/test/features/tongtai/tongtai_workizen_ai_router_test.dart
++++ b/test/features/tongtai/tongtai_workizen_ai_router_test.dart
+@@ -7,6 +7,9 @@ import 'package:tongtai/features/tongtai/ai/tongtai_ai_provider_kind.dart';
+ import 'package:tongtai/features/tongtai/ai/tongtai_ai_service.dart';
+ import 'package:tongtai/features/tongtai/ai/workizen_ai_context.dart';
+ import 'package:tongtai/features/tongtai/ai/workizen_ai_router.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
++import 'package:tongtai/features/tongtai/consumer/customer_order_history_service.dart';
++import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart';
+ import 'package:tongtai/features/tongtai/chat/chat_message.dart';
+ 
+ /// WTM-82 — Workizen AI Router (ADR-TON-006):
+@@ -64,6 +67,12 @@ class _ChatCall {
+   final String? systemPrompt;
+ }
+ 
++WorkizenAiContextBuilder sampleContext() => WorkizenAiContextBuilder(
++  customers: kSampleCustomers,
++  products: kSampleProducts,
++  orderHistory: CustomerOrderHistoryService.sample(),
++);
++
+ void main() {
+   late InMemoryTongtaiAiKeyStore keys;
+   late List<_ChatCall> calls;
+@@ -76,7 +85,9 @@ void main() {
+       clientFactory: (provider, _) =>
+           _FakeClient(provider, calls, behavior: behavior),
+     );
+-    return WorkizenAiRouter(service: service);
++    // One-source (WTM-144): the builder no longer defaults to samples — tests
++    // pass their fixtures explicitly.
++    return WorkizenAiRouter(service: service, context: sampleContext());
+   }
+ 
+   setUp(() {
+@@ -195,7 +206,7 @@ void main() {
+     test(
+       'rule-based reply cites local data for a mentioned customer',
+       () async {
+-        final fallback = RuleBasedChatResponder();
++        final fallback = RuleBasedChatResponder(context: sampleContext());
+         final reply = await fallback.reply(const [], 'Phương Nguyễn mua gì?');
+         expect(reply, contains('Phương Nguyễn'));
+         expect(reply, contains('hạng'));
+@@ -204,7 +215,8 @@ void main() {
+   });
+ 
+   group('context injection (AC2/AC3/AC4)', () {
+-    final builder = WorkizenAiContextBuilder();
++    // One-source (WTM-144): explicit sample fixtures — no sample defaults.
++    final builder = sampleContext();
+ 
+     test('always includes identity + business snapshot', () {
+       final prompt = builder.build('Xin chào');
