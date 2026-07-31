@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../ai/tongtai_ai_errors.dart';
 import '../../ai/tongtai_ai_key_validator.dart';
 import '../../ai/tongtai_ai_provider_kind.dart';
 import '../../ai/tongtai_ai_service.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../providers/tongtai_ai_provider.dart';
 import 'tongtai_key_scan_screen.dart';
 
@@ -164,15 +167,30 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
       _busy = true;
       _statusMessage = null;
     });
-    try {
-      final res = await _service.testConnection(provider: _providerKind);
-      if (!mounted) return;
-      _setStatus(l10n.aiKeyTestOkSnack(res.model), _AiStatusTone.success);
-    } on TongtaiAiException catch (e) {
-      if (!mounted) return;
-      _setStatus(e.message(l10n.languageCode), _AiStatusTone.error);
-    } finally {
-      if (mounted) setState(() => _busy = false);
+    // Through the shared action guard (WTM-148) rather than a bespoke catch:
+    // `TongtaiAiException` classifies itself, so this screen keeps its inline
+    // status line while every other surface renders the same failure the same
+    // way. The AI message is still what the user reads — the seam only decides
+    // the category and what may be reported.
+    final failure = await runTongtaiAction(
+      () async {
+        final res = await _service.testConnection(provider: _providerKind);
+        if (!mounted) return;
+        _setStatus(l10n.aiKeyTestOkSnack(res.model), _AiStatusTone.success);
+      },
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'ai-key',
+    );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (failure != null) {
+      final cause = failure.cause;
+      _setStatus(
+        cause is TongtaiAiException
+            ? cause.message(l10n.languageCode)
+            : tongtaiFailureTitle(l10n, failure.kind),
+        _AiStatusTone.error,
+      );
     }
   }
 
@@ -295,13 +313,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
               ],
               if (_busy) ...[
                 const SizedBox(height: TongtaiDesignTokens.spacing4),
-                const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
+                const Center(child: TongtaiInlineBusy()),
               ],
             ],
           ),

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../chat/chat_message.dart';
 import '../../chat/chat_message_store.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../../../../core/l10n/app_strings.dart';
 
@@ -50,35 +52,40 @@ class _TongtaiChatSearchScreenState extends State<TongtaiChatSearchScreen> {
 
   ChatSearchRange _range = ChatSearchRange.all;
   String _keyword = '';
-  List<ChatMessage> _results = const [];
-  int _searchToken = 0;
+
+  /// The current result set. Its generation counter also replaces this
+  /// screen's hand-rolled `_searchToken`: dropping stale responses is now the
+  /// seam's job, in one place, for every screen (WTM-148).
+  late final ScreenDataController<List<ChatMessage>> _data;
 
   @override
   void initState() {
     super.initState();
     _clock = widget.clock ?? DateTime.now;
+    _data = ScreenDataController<List<ChatMessage>>(
+      _read,
+      initialValue: const <ChatMessage>[],
+      screen: 'chat',
+    );
   }
 
   @override
   void dispose() {
+    _data.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _runSearch() async {
+  Future<List<ChatMessage>> _read() async {
     final keyword = _keyword.trim();
-    if (keyword.isEmpty) {
-      setState(() => _results = const []);
-      return;
-    }
-    final token = ++_searchToken;
+    if (keyword.isEmpty) return const [];
     final results = await widget.store.search(
       ChatHistoryQuery(text: keyword, from: _range.fromAt(_clock())),
     );
-    // Ignore stale responses if a newer search started meanwhile.
-    if (!mounted || token != _searchToken) return;
-    setState(() => _results = results.reversed.toList()); // newest first
+    return results.reversed.toList(); // newest first
   }
+
+  Future<void> _runSearch() => _data.refresh();
 
   void _onKeyword(String value) {
     setState(() => _keyword = value);
@@ -115,15 +122,22 @@ class _TongtaiChatSearchScreenState extends State<TongtaiChatSearchScreen> {
           _RangeRow(selected: _range, onSelected: _onRange),
           const Divider(height: 1),
           Expanded(
-            child: !hasKeyword
-                ? const _Prompt()
-                : _results.isEmpty
-                ? const _NoResults()
-                : _ResultList(
-                    results: _results,
-                    keyword: _keyword.trim(),
-                    now: _clock(),
-                  ),
+            child: ListenableBuilder(
+              listenable: _data,
+              builder: (context, _) => TongtaiScreenData<List<ChatMessage>>(
+                prefix: 'chat',
+                state: _data.state,
+                onRetry: _data.retry,
+                isEmpty: (results) => !hasKeyword || results.isEmpty,
+                emptyBuilder: (_) =>
+                    hasKeyword ? const _NoResults() : const _Prompt(),
+                builder: (context, results) => _ResultList(
+                  results: results,
+                  keyword: _keyword.trim(),
+                  now: _clock(),
+                ),
+              ),
+            ),
           ),
         ],
       ),

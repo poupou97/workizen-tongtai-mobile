@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../navigation/tongtai_design_tokens.dart';
-
 /// The Origami Business Fox mascot rendered as runtime vector (WTM-111).
 ///
 /// Mascot = Business Fox, visual language = Origami low-poly (Founder,
@@ -50,48 +48,6 @@ class TongtaiFoxMascot extends StatelessWidget {
       width: size,
       height: size,
       semanticsLabel: semanticsLabel ?? 'Workizen AI Business Fox',
-    );
-  }
-}
-
-/// A branded loading indicator: the Origami fox above a slim progress bar
-/// (WTM-111). Reusable wherever the app waits on local work.
-class TongtaiFoxLoader extends StatelessWidget {
-  const TongtaiFoxLoader({super.key, this.label, this.size = 72});
-
-  /// Optional caption under the bar (e.g. "Đang tải…").
-  final String? label;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TongtaiFoxMascot.face(size: size),
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
-          SizedBox(
-            width: size * 1.4,
-            child: const LinearProgressIndicator(
-              minHeight: 4,
-              backgroundColor: TongtaiDesignTokens.lightHover,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                TongtaiDesignTokens.inventoryOrange,
-              ),
-            ),
-          ),
-          if (label != null) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
-            Text(
-              label!,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }

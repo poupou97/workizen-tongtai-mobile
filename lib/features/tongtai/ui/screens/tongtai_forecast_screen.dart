@@ -344,24 +344,9 @@ class _AiExplainAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     if (running) {
-      return Row(
+      return TongtaiInlineBusy(
         key: const Key('forecast-action-ai'),
-        children: [
-          const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
-          Expanded(
-            child: Text(
-              l10n.aiExplainRunning,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
-            ),
-          ),
-        ],
+        label: l10n.aiExplainRunning,
       );
     }
     final answer = explanation;
