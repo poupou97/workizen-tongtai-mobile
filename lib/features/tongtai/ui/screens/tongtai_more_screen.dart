@@ -21,6 +21,7 @@ import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_timeline_screen.dart';
 import 'tongtai_privacy_policy_screen.dart';
+import 'tongtai_about_screen.dart';
 
 /// Opens the language picker (WTM-119) and persists the choice; the app
 /// re-renders in the chosen locale via [languageProvider].
@@ -223,14 +224,9 @@ class TongtaiMoreScreen extends ConsumerWidget {
               title: context.l10n.moreSettings,
               items: [
                 _SettingsItem(
-                  icon: Icons.person_outline,
-                  label: context.l10n.moreProfile,
-                  onTap: () {},
-                ),
-                _SettingsItem(
                   icon: Icons.notifications_outlined,
                   label: context.l10n.moreNotifications,
-                  onTap: () {},
+                  comingSoon: true,
                 ),
                 _SettingsItem(
                   key: const Key('more-language'),
@@ -241,7 +237,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 _SettingsItem(
                   icon: Icons.dark_mode_outlined,
                   label: context.l10n.moreTheme,
-                  onTap: () {},
+                  comingSoon: true,
                 ),
               ],
             ),
@@ -369,17 +365,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 _SettingsItem(
                   icon: Icons.business_outlined,
                   label: context.l10n.moreBusinessInfo,
-                  onTap: () {},
-                ),
-                _SettingsItem(
-                  icon: Icons.people_outline,
-                  label: context.l10n.moreTeam,
-                  onTap: () {},
-                ),
-                _SettingsItem(
-                  icon: Icons.security_outlined,
-                  label: context.l10n.morePermissions,
-                  onTap: () {},
+                  comingSoon: true,
                 ),
               ],
             ),
@@ -396,17 +382,22 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 _SettingsItem(
                   icon: Icons.help_outline,
                   label: context.l10n.moreHelp,
-                  onTap: () {},
+                  comingSoon: true,
                 ),
                 _SettingsItem(
                   icon: Icons.info_outlined,
+                  key: const Key('more-about'),
                   label: context.l10n.moreAbout,
-                  onTap: () {},
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const TongtaiAboutScreen(),
+                    ),
+                  ),
                 ),
                 _SettingsItem(
                   icon: Icons.feedback_outlined,
                   label: context.l10n.moreSendFeedback,
-                  onTap: () {},
+                  comingSoon: true,
                 ),
               ],
             ),
@@ -417,7 +408,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 _SettingsItem(
                   icon: Icons.description_outlined,
                   label: context.l10n.moreTerms,
-                  onTap: () {},
+                  comingSoon: true,
                 ),
                 _SettingsItem(
                   key: const Key('more-privacy'),
@@ -431,22 +422,10 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            // Logout button
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFEF4444),
-                    side: const BorderSide(color: Color(0xFFEF4444)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: Text(context.l10n.moreLogout),
-                ),
-              ),
-            ),
+            // No "Log out" button: there is no account to log out of (D-4 —
+            // no account required). It did nothing, and offering it implied a
+            // sign-in this product deliberately does not have. Removed rather
+            // than greyed out, because it is not a missing feature (WTM-170).
           ],
         ),
       ),
@@ -485,22 +464,39 @@ class _SettingsSection extends StatelessWidget {
 class _SettingsItem extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+
+  /// A row on the roadmap but not built. It renders visibly inert with a
+  /// "coming soon" note instead of looking tappable and doing nothing — which
+  /// is what eleven of these rows did until WTM-170.
+  final bool comingSoon;
 
   const _SettingsItem({
     super.key,
     required this.icon,
     required this.label,
-    required this.onTap,
-  });
+    this.onTap,
+    this.comingSoon = false,
+  }) : assert(
+         comingSoon || onTap != null,
+         'A row that is neither tappable nor marked coming-soon is a dead '
+         'control: it looks interactive and answers nothing.',
+       );
 
   @override
   Widget build(BuildContext context) {
+    final muted = TongtaiDesignTokens.lightTextSecondary;
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF6B7280)),
+      enabled: !comingSoon,
+      leading: Icon(icon, color: muted),
       title: Text(label),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFFD1D5DB)),
-      onTap: onTap,
+      trailing: comingSoon
+          ? Text(
+              context.l10n.settingsComingSoon,
+              style: TongtaiDesignTokens.captionStyle.copyWith(color: muted),
+            )
+          : const Icon(Icons.chevron_right, color: Color(0xFFD1D5DB)),
+      onTap: comingSoon ? null : onTap,
     );
   }
 }

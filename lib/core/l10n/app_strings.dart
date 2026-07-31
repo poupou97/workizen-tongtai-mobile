@@ -354,14 +354,11 @@ abstract class AppStrings {
 
   // ── More sections/entries (WTM-33) ──────────────────────────────────────
   String get moreSettings;
-  String get moreProfile;
   String get moreNotifications;
   String get moreTheme;
   String get moreGrokKey;
   String get moreBusinessSection;
   String get moreBusinessInfo;
-  String get moreTeam;
-  String get morePermissions;
   String get moreSupportSection;
   String get moreReplayTutorial;
   String get moreHelp;
@@ -373,6 +370,18 @@ abstract class AppStrings {
   // ── Privacy policy (WTM-37) ─────────────────────────────────────────────
   // Source of truth: docs/05-OPERATIONS/PRIVACY-POLICY.md. Adding a telemetry
   // event means editing both, in the same PR.
+  // ── About (WTM-170) ─────────────────────────────────────────────────────
+  String aboutVersion(String version);
+  String get aboutWhatTitle;
+  String get aboutWhatBody;
+  String get aboutDataTitle;
+  String get aboutDataBody;
+  String get aboutAiTitle;
+  String get aboutAiBody;
+
+  /// Trailing note on a settings row that is on the roadmap but not built.
+  String get settingsComingSoon;
+
   String get privacyTitle;
   String get privacyUpdated;
   String get privacyLocalTitle;
@@ -391,7 +400,6 @@ abstract class AppStrings {
   String get privacySampleBody;
   String get privacyRightsTitle;
   String get privacyRightsBody;
-  String get moreLogout;
 
   // ── opportunity feed extras (WTM-91) ────────────────────────────────────
   String get titleOpportunities;
@@ -1180,8 +1188,6 @@ class AppStringsVi extends AppStrings {
   @override
   String get moreSettings => 'Cài đặt';
   @override
-  String get moreProfile => 'Hồ sơ';
-  @override
   String get moreNotifications => 'Thông báo';
   @override
   String get moreTheme => 'Giao diện';
@@ -1191,10 +1197,6 @@ class AppStringsVi extends AppStrings {
   String get moreBusinessSection => 'Kinh doanh';
   @override
   String get moreBusinessInfo => 'Thông tin doanh nghiệp';
-  @override
-  String get moreTeam => 'Đội ngũ';
-  @override
-  String get morePermissions => 'Phân quyền';
   @override
   String get moreSupportSection => 'Hỗ trợ';
   @override
@@ -1209,6 +1211,32 @@ class AppStringsVi extends AppStrings {
   String get moreTerms => 'Điều khoản dịch vụ';
   @override
   String get morePrivacy => 'Chính sách quyền riêng tư';
+
+  @override
+  @override
+  String aboutVersion(String version) => 'Phiên bản $version';
+  @override
+  String get aboutWhatTitle => 'Tổng Tài là gì';
+  @override
+  String get aboutWhatBody =>
+      'Một hệ điều hành kinh doanh cho người bán hàng: nguồn hàng, tồn kho, '
+      'khách hàng, đơn hàng, tài chính, báo cáo, mục tiêu và cơ hội — trong '
+      'một ứng dụng chạy được cả khi mất mạng.';
+  @override
+  String get aboutDataTitle => 'Dữ liệu của bạn ở đâu';
+  @override
+  String get aboutDataBody =>
+      'Trên chính máy này. Không tài khoản, không máy chủ, không đồng bộ. Bạn '
+      'mang dữ liệu đi bằng file CSV hoặc bản sao lưu, và gỡ app là xoá sạch.';
+  @override
+  String get aboutAiTitle => 'Workizen AI';
+  @override
+  String get aboutAiBody =>
+      'AI là phần giải thích, không phải phần tính. Các con số do quy tắc xác '
+      'định tính ra và chạy được khi không có mạng, không có khoá; AI chỉ diễn '
+      'giải chúng bằng khoá của chính bạn.';
+  @override
+  String get settingsComingSoon => 'Sắp có';
 
   @override
   String get privacyTitle => 'Chính sách quyền riêng tư';
@@ -1274,9 +1302,6 @@ class AppStringsVi extends AppStrings {
       'Gỡ app hoặc xoá dữ liệu ứng dụng là xoá sạch — dữ liệu chỉ nằm trên máy '
       'nên không có bản sao ở nơi khác. Bạn có thể mang dữ liệu đi bằng file '
       'CSV hoặc bản sao lưu. Xoá khoá API là tắt AI; app vẫn chạy đủ chức năng.';
-
-  @override
-  String get moreLogout => 'Đăng xuất';
 
   @override
   String get titleOpportunities => 'Cơ hội';
@@ -2264,8 +2289,6 @@ class AppStringsEn extends AppStrings {
   @override
   String get moreSettings => 'Settings';
   @override
-  String get moreProfile => 'Profile';
-  @override
   String get moreNotifications => 'Notifications';
   @override
   String get moreTheme => 'Theme';
@@ -2275,10 +2298,6 @@ class AppStringsEn extends AppStrings {
   String get moreBusinessSection => 'Business';
   @override
   String get moreBusinessInfo => 'Business Info';
-  @override
-  String get moreTeam => 'Team';
-  @override
-  String get morePermissions => 'Permissions';
   @override
   String get moreSupportSection => 'Support';
   @override
@@ -2293,6 +2312,32 @@ class AppStringsEn extends AppStrings {
   String get moreTerms => 'Terms of Service';
   @override
   String get morePrivacy => 'Privacy Policy';
+
+  @override
+  @override
+  String aboutVersion(String version) => 'Version $version';
+  @override
+  String get aboutWhatTitle => 'What Tổng Tài is';
+  @override
+  String get aboutWhatBody =>
+      'A business operating system for sellers: sourcing, inventory, customers, '
+      'orders, finance, reports, goals and opportunities — in one app that '
+      'works offline.';
+  @override
+  String get aboutDataTitle => 'Where your data lives';
+  @override
+  String get aboutDataBody =>
+      'On this device. No account, no server, no sync. You can take it with you '
+      'as CSV or a backup file, and uninstalling deletes all of it.';
+  @override
+  String get aboutAiTitle => 'Workizen AI';
+  @override
+  String get aboutAiBody =>
+      'AI explains; it does not compute. The numbers come from deterministic '
+      'rules that run with no network and no key; AI only puts them into words, '
+      'using your own key.';
+  @override
+  String get settingsComingSoon => 'Coming soon';
 
   @override
   String get privacyTitle => 'Privacy Policy';
@@ -2361,9 +2406,6 @@ class AppStringsEn extends AppStrings {
       'is only on this device, so that is all of it. You can take your data '
       'with you as CSV or as a backup file. Removing your API key turns AI off; '
       'the app works fully without it.';
-
-  @override
-  String get moreLogout => 'Logout';
 
   @override
   String get titleOpportunities => 'Opportunities';
