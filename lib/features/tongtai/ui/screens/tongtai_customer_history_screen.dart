@@ -471,7 +471,8 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    // Scrollable: at a 2.0x system font this ran 114 px past the bottom.
+    return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
         child: Column(

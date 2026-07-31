@@ -64,13 +64,17 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
         children: [
           // ── Type + pace + name ───────────────────────────────────────
-          Row(
+          // Wrap, not Row: two Vietnamese badges side by side ran past a
+          // 320 px screen at a 2.0x font (WTM-168). Wrapping to a second line
+          // is the right answer for labels — truncating a goal's type is not.
+          Wrap(
+            spacing: TongtaiDesignTokens.spacing2,
+            runSpacing: TongtaiDesignTokens.spacing2,
             children: [
               _Badge(
                 label: goal.type.label(context.l10n.languageCode),
                 color: TongtaiDesignTokens.financePurple,
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing2),
               _Badge(
                 label: pace.label(context.l10n.languageCode),
                 color: paceColor,
@@ -201,10 +205,16 @@ class _ProgressCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              Text(
-                _progressLabel,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
+              // The percentage is the headline; the label beside it is what
+              // has to give way at a 2.0x font (WTM-168).
+              Flexible(
+                child: Text(
+                  _progressLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextSecondary,
+                  ),
                 ),
               ),
             ],
