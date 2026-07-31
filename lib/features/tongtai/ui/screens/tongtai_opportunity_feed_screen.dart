@@ -386,7 +386,10 @@ class _OpportunityCard extends StatelessWidget {
                   tooltip: opportunity.isSaved
                       ? context.l10n.oppUnsaveTooltip
                       : context.l10n.oppSaveTooltip,
-                  visualDensity: VisualDensity.compact,
+                  // No compact density here: it shrinks the button to 40 dp,
+                  // eight short of Android's minimum. The icon inside stays
+                  // 20 dp — what has to be 48 is the thing a thumb hits
+                  // (WTM-169).
                   icon: Icon(
                     opportunity.isSaved
                         ? Icons.bookmark

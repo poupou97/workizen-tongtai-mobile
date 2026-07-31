@@ -119,9 +119,26 @@ void main() {
     WidgetTester tester,
     Widget screen,
     String locale,
-    AccessibilityGuideline guideline,
-  ) async {
+    AccessibilityGuideline guideline, {
+    double textScale = 1.0,
+  }) async {
     final handle = tester.ensureSemantics();
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    // Capture layout overflow here rather than letting it explode anonymously:
+    // by the time the default handler prints, the widget is DEFUNCT and the
+    // message cannot say WHICH screen broke — which makes it unfixable.
+    final overflows = <String>[];
+    final priorOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      if (details.exceptionAsString().contains('overflowed')) {
+        overflows.add(details.exceptionAsString().split('\n').first);
+      } else {
+        priorOnError?.call(details);
+      }
+    };
+
     await tester.pumpWidget(await host(screen, locale));
     await tester.pumpAndSettle();
     String? failure;
@@ -131,7 +148,11 @@ void main() {
       failure = e.message;
     }
     await tester.pumpWidget(const SizedBox());
+    FlutterError.onError = priorOnError;
     handle.dispose();
+    if (overflows.isNotEmpty) {
+      failure = '${failure ?? ''}\nLAYOUT OVERFLOW: ${overflows.join(' | ')}';
+    }
     return failure;
   }
 
@@ -161,4 +182,25 @@ void main() {
       expect(failures, isEmpty, reason: failures.join('\n\n'));
     });
   }
+
+  // A seller who has turned the system font up is the person most likely to
+  // need a 48 dp target too — the two accessibility settings arrive together,
+  // so they have to be tested together.
+  testWidgets('tap targets survive a 2.0x system font', (tester) async {
+    await seeder().seed();
+    final failures = <String>[];
+    for (final entry in screens.entries) {
+      final failure = await check(
+        tester,
+        entry.value(),
+        'vi',
+        androidTapTargetGuideline,
+        textScale: 2.0,
+      );
+      if (failure != null) {
+        failures.add('── [vi 2.0x ${entry.key}] ─────\n$failure');
+      }
+    }
+    expect(failures, isEmpty, reason: failures.join('\n\n'));
+  });
 }

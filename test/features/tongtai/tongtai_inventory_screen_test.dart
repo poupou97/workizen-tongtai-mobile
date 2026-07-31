@@ -48,7 +48,12 @@ void main() {
 
     // The whole sample catalog (28 products) is counted, across two pages.
     expect(find.text('28 products'), findsOneWidget);
-    expect(find.text('Page 1 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 1/2',
+    );
   });
 
   testWidgets('a product row shows name, SKU, quantity and price', (
@@ -73,20 +78,35 @@ void main() {
     useTallViewport(tester);
     await pumpScreen(tester);
 
-    expect(find.text('Page 1 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 1/2',
+    );
     expect(find.textContaining('₫'), findsNWidgets(20)); // 20 rows on page 1
 
     // Advance to page 2.
     await tester.tap(find.byTooltip('Next page'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Page 2 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 2/2',
+    );
     expect(find.textContaining('₫'), findsNWidgets(8)); // remaining 8 rows
 
     // ...and back.
     await tester.tap(find.byTooltip('Previous page'));
     await tester.pumpAndSettle();
-    expect(find.text('Page 1 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 1/2',
+    );
   });
 
   testWidgets('search narrows the results by name', (tester) async {
@@ -97,7 +117,12 @@ void main() {
 
     // "Tai nghe bluetooth" + "Loa bluetooth mini".
     expect(find.text('2 products'), findsOneWidget);
-    expect(find.text('Page 1 of 1'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 1/1',
+    );
   });
 
   testWidgets('category filter narrows the results', (tester) async {
@@ -111,7 +136,12 @@ void main() {
 
     // Seven sample products are Electronics.
     expect(find.text('7 products'), findsOneWidget);
-    expect(find.text('Page 1 of 1'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 1/1',
+    );
   });
 
   testWidgets('shows a color-coded status label for an out-of-stock product', (
@@ -168,7 +198,12 @@ void main() {
 
     await tester.tap(find.byTooltip('Next page'));
     await tester.pumpAndSettle();
-    expect(find.text('Page 2 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 2/2',
+    );
 
     // Selecting a sort key should snap back to page 1.
     final quantityChip = find.widgetWithText(ChoiceChip, 'Quantity');
@@ -176,7 +211,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(quantityChip);
     await tester.pumpAndSettle();
-    expect(find.text('Page 1 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 1/2',
+    );
   });
 
   testWidgets('shows the empty state when nothing matches', (tester) async {
@@ -215,7 +255,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('3 products'), findsOneWidget);
-    expect(find.text('Page 1 of 1'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('inventory-page-indicator')))
+          .data,
+      'Page 1/1',
+    );
     expect(find.text('Injected 0'), findsOneWidget);
   });
 }

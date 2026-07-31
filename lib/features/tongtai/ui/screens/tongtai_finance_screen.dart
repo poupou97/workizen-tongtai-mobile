@@ -112,7 +112,9 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('finance-add'),
             onPressed: _addTransaction,
-            backgroundColor: TongtaiDesignTokens.financePurple,
+            // White label on violet-500 reads at 4.23:1 — near miss, still a
+            // miss (WTM-169).
+            backgroundColor: TongtaiDesignTokens.financeVioletText,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.titleTransactionForm),

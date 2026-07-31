@@ -332,6 +332,16 @@ abstract class AppStrings {
   String get invAdd;
   String get invView;
   String get invSearchHint;
+
+  /// Tappable stock banner. Was hardcoded English until WTM-169 — the
+  /// Vietnamese build showed "Stock alerts: 4 out of stock • 2 low".
+  String invStockAlerts(String parts);
+  String invUpdatedOn(String date);
+  String invShowingRange(int first, int last, int total);
+  String invPageOf(int page, int pageCount);
+  String invQuantity(int quantity);
+  String invOutOfStockCount(int count);
+  String invLowStockCount(int count);
   String get invEmptySearch;
   String get invEmptySearchHint;
   String get titleStockAlerts;
@@ -1106,6 +1116,23 @@ class AppStringsVi extends AppStrings {
   String get invView => 'Xem';
   @override
   String get invSearchHint => 'Tìm sản phẩm hoặc danh mục';
+  @override
+  @override
+  String invStockAlerts(String parts) => 'Cảnh báo tồn kho: $parts';
+  @override
+  String invUpdatedOn(String date) => 'Cập nhật $date';
+  @override
+  String invShowingRange(int first, int last, int total) =>
+      '$first–$last / $total';
+  @override
+  String invPageOf(int page, int pageCount) => 'Trang $page/$pageCount';
+  @override
+  String invQuantity(int quantity) => 'SL $quantity';
+  @override
+  String invOutOfStockCount(int count) => '$count hết hàng';
+  @override
+  String invLowStockCount(int count) => '$count sắp hết';
+
   @override
   String get invEmptySearch => 'Không có sản phẩm khớp tìm kiếm';
   @override
@@ -2102,6 +2129,23 @@ class AppStringsEn extends AppStrings {
   String get invView => 'View';
   @override
   String get invSearchHint => 'Search products or categories';
+  @override
+  @override
+  String invStockAlerts(String parts) => 'Stock alerts: $parts';
+  @override
+  String invUpdatedOn(String date) => 'Updated $date';
+  @override
+  String invShowingRange(int first, int last, int total) =>
+      '$first–$last of $total';
+  @override
+  String invPageOf(int page, int pageCount) => 'Page $page/$pageCount';
+  @override
+  String invQuantity(int quantity) => 'Qty $quantity';
+  @override
+  String invOutOfStockCount(int count) => '$count out of stock';
+  @override
+  String invLowStockCount(int count) => '$count low';
+
   @override
   String get invEmptySearch => 'No products match your search';
   @override

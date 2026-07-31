@@ -27,6 +27,9 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_timeline_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_producer_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_consumer_screen.dart';
 
 /// P0 §3 (WTM-146) — layout overflow governance.
 ///
@@ -120,6 +123,12 @@ void main() {
 
   final screens = <String, Widget Function()>{
     'home': () => TongtaiHomeScreen(clock: () => DateTime(2026, 7, 30)),
+    // The three shell tabs were missing from this list until WTM-169 — and
+    // Inventory turned out to clip by 103 px at a 2.0x system font. A screen
+    // absent from a governance suite is not a screen that passed it.
+    'producer': () => const TongtaiProducerScreen(),
+    'inventory': () => const TongtaiInventoryScreen(),
+    'consumer': () => const TongtaiConsumerScreen(),
     'more': () => const TongtaiMoreScreen(),
     'reports': () => const TongtaiReportsScreen(),
     'opportunity-feed': () => const TongtaiOpportunityFeedScreen(),

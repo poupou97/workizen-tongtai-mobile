@@ -13,6 +13,7 @@ import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_search_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_supplier_favorites_screen.dart';
+import '../../navigation/tongtai_design_tokens.dart';
 
 /// Producer/Sourcing tab for Tổng Tài (WTM-24).
 ///
@@ -317,7 +318,9 @@ class _CapabilityPill extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: color,
+          // The pill keeps the capability colour for its tint and border; the
+          // label needs the readable twin or it sits at 2.31:1 (WTM-169).
+          color: TongtaiDesignTokens.readableText(color),
         ),
       ),
     );

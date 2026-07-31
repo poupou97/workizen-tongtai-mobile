@@ -144,6 +144,11 @@ void main() {
     );
 
     expect(find.byKey(const Key('ai-key-action-delete')), findsOneWidget);
+    // Scroll to it first, exactly as a user would: once buttons became 48 dp
+    // tall (WTM-169) this one sits below the fold at the default test size,
+    // and a tap at an off-screen location silently hits nothing.
+    await tester.ensureVisible(find.byKey(const Key('ai-key-action-delete')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('ai-key-action-delete')));
     await tester.pumpAndSettle();
 

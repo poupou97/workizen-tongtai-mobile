@@ -250,6 +250,41 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   n / min / median / max. Nếu thay đổi nhỏ hơn biên độ dao động ⇒ báo cáo
   **"không đo được"**, không báo cáo hướng cải thiện.
 
+## P-17 · Màn vắng mặt trong governance suite **không phải** màn đã pass
+
+- **Root cause:** bộ overflow của P0 liệt kê 10 màn — và **thiếu ba tab chính**
+  (Producer · Inventory · Consumer). Ba màn người dùng mở nhiều nhất là ba màn
+  chưa ai đo. "Suite xanh" nói về **danh sách trong suite**, không nói về app.
+- **Regression:** WTM-169 thêm ba màn vào danh sách và lập tức có **năm** lỗi
+  tràn thật: Inventory clip 103px ở font 2.0x · empty state clip 55px ·
+  pagination bar clip 11px (nuốt luôn nút "trang sau") · Consumer clip 69px và
+  23px ở 320px tiếng Việt. Không lỗi nào mới — chúng đã ở đó suốt.
+- **Test pattern:** danh sách màn trong governance suite phải là **toàn bộ màn
+  L2+**, không phải các màn ai đó nhớ ra. Khi thêm màn mới, thêm vào suite
+  **cùng PR**. Guideline chạy được thì để guideline chạy: `androidTapTargetGuideline`
+  · `labeledTapTargetGuideline` · `textContrastGuideline` là **bar của Android**,
+  không phải ý kiến của mình.
+- **Prevention:** harness phải **bắt overflow và gọi tên màn**. Handler mặc định
+  in ra khi widget đã `DEFUNCT` — thông báo không nói được màn nào, và một lỗi
+  không truy được nguồn là một lỗi không sửa được.
+
+---
+
+## P-18 · Màu thương hiệu là màu **nền**, không mặc nhiên là màu **chữ**
+
+- **Root cause:** cùng một hằng số được dùng cho nền 10%, viền **và** chữ. Trên
+  nền sáng, `#10B981` đọc ở **2.31:1** và `#F59E0B` ở **2.15:1** — WCAG AA cần
+  **4.5:1**. Không ai thấy sai khi nhìn màn hình trong phòng.
+- **Regression:** WTM-169 — 16 vi phạm trên 13 màn, gồm nhãn nút chính.
+- **Test pattern:** chạy `textContrastGuideline` trên **mọi** màn, **cả hai
+  locale**, **có dữ liệu**. Trước khi sửa, tính tỉ lệ ra số — đừng chọn màu bằng
+  mắt.
+- **Prevention:** mỗi màu năng lực có **một cặp song sinh đọc được** (bước -700)
+  và `readableText(base)` để component dùng chung tự lấy đúng. Màu -500 **giữ
+  nguyên** cho nền/viền/icon/biểu đồ — thương hiệu không đổi, chỉ chữ mới phải
+  đọc được. `lightTextSecondary` chuyển gray-500 → **gray-600**: gray-500 pass
+  trên nền trắng (4.83) và **fail trên mọi thẻ có nền nhạt** (4.39).
+
 ---
 
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
