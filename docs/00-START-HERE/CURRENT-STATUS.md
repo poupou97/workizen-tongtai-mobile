@@ -48,6 +48,15 @@
   file `.db` và test override chỉ trúng nửa app (One Data Path violation);
   (2) export `try/finally` **không có catch** → xuất hỏng trông như xong.
   **1347 tests.**
+  · ✅ **Device smoke test PASS — Founder nghiệm thu 2026-07-31** (Galaxy S24 Ultra,
+  release build từ `main` `a974b7e`): `ready` (Home · Consumer badge khớp · Customer
+  risk) · **`insufficient`** (Dự báo: "Not enough data to forecast" + reason chips,
+  **không render `0 ₫`**) · **lỗi phân loại + hồi phục** (ngắt mạng → "Could not reach
+  the AI service" kind `network`; bật lại → "Connection OK — grok-4.3 responded") ·
+  **dữ liệu người dùng và khoá API giữ nguyên** · `adb logcat -b crash` **rỗng**.
+  ⚠️ Màn lỗi toàn trang + banner stale **không** ép trên máy thật vì sẽ phải xoá dữ
+  liệu thật của Founder — chứng minh bằng 8 test trên **file SQLite thật** (lỗi mặc
+  định = `SqliteException` FOREIGN KEY 787 thật).
 - **⭐⭐ PREDICTIVE FOUNDATION (Founder Decision APPROVED 2026-07-30) — ADR-TON-016, Epic WTM-149:**
   Trả lời được câu hỏi "AI dự báo doanh thu / khách rời bỏ chưa?" bằng **kiến trúc**, không phải prompt:
   **Capability Context** độc lập tải on-demand (Revenue · Customer) giữ BusinessContext **không phình God Object**;
