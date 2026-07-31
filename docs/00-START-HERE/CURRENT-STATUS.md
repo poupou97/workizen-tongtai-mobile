@@ -24,6 +24,33 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐⭐ BACKUP `.ttbk` v2 + RESTORE (WTM-164, 2026-07-31) — ADR-TON-018:**
+  Audit phát hiện **`.ttbk` v1 không khôi phục được doanh nghiệp**: nó là **một
+  CSV mã hoá của MỘT dataset**, phủ 3/6 repository, **bỏ hẳn `order.id` và
+  `OrderItem.productId`** (đứt liên kết Inventory↔Orders mà ADR-TON-010 bắt
+  buộc), lưu enum bằng **nhãn tiếng Việt**, và version hoá container mã hoá chứ
+  không phải schema dữ liệu. Xây restore trên đó = tính năng phục hồi **làm mất
+  dữ liệu trong im lặng**.
+  · **v2** = snapshot **toàn miền, lossless, có version** cho cả 6 repository;
+  manifest plaintext (format/content/app/db version · backupId · createdAt ·
+  encryption · SHA-256 + độ dài), **record counts nằm TRONG payload** nên file
+  mã hoá không rò rỉ quy mô kinh doanh; enum bằng **mã canonical**; mã enum lạ
+  là **bản ghi hỏng**, không phải default. **SHA-256 = chống hỏng, KHÔNG phải
+  chống giả mạo.**
+  · **Restore = Replace only** (Founder quyết 2026-07-31; Merge là capability
+  riêng, cấm nhét lén): validate toàn bộ **read-only** → preview → xác nhận phá
+  huỷ → **tạo + verify** bản sao lưu an toàn → **một transaction** {xoá theo
+  FK → ghi theo phụ thuộc → verify counts + FK} → commit → invalidate cache.
+  **Không verify được bản an toàn ⇒ không xoá gì.** Version mới hơn/file hỏng
+  ⇒ **chặn**, không partial import.
+  · **Bug production sửa kèm:** màn Export mặc định dùng **InMemory** history
+  store ngay ở bản production ⇒ lịch sử xuất mất sau mỗi lần khởi động lại
+  (trái AC5 của WTM-99). Governance mới: production **cấm** default sang
+  InMemory · `kTongtaiAppVersion` phải khớp pubspec · telemetry của backup
+  không được mang path/tên file/số bản ghi.
+  · Dep mới: `file_picker`, `crypto` (SHA-256 **đồng bộ** — bản async của
+  `cryptography` không hoàn tất trong fake-async zone của `testWidgets`).
+  · Testing Bible **P-13…P-15**. **1347 → 1387 tests.**
 - **⭐⭐ ERROR-HANDLING SEAM (WTM-148, 2026-07-31) — ADR-TON-017:** đóng gap hệ
   thống mà audit ADR-TON-015 phát hiện (**1/34 màn** có xử lý lỗi thật). Trước
   đó `initState → _load() → setState` để future lỗi không ai bắt, nên **"không

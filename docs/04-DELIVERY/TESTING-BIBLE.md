@@ -182,6 +182,56 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-13 · Backup không round-trip được — "khôi phục" làm mất dữ liệu
+
+- **Root cause (lớp lỗi phòng ngừa):** một file *export để đọc* bị dùng làm
+  *backup để khôi phục*. CSV v1 tối ưu cho Excel: enum in ra **nhãn tiếng
+  Việt**, tiền `.round()`, và **bỏ hẳn** `order.id` + `OrderItem.productId`.
+  Khôi phục từ nó thì đứt toàn bộ liên kết Inventory↔Orders, mất goals/
+  finance/favourites, mà **không có thông báo nào**.
+- **Regression:** test chỉ kiểm "xuất ra có đủ dòng" xanh với cả file khôi
+  phục được lẫn file không.
+- **Test pattern:** round-trip **qua database thật**: seed đủ mọi trường →
+  backup → **xoá sạch** → restore → assert **từng trường**, kể cả id, khoá
+  ngoại và số lẻ tiền. Thêm một test **codec-only** để tách "format giữ được
+  gì" khỏi "database giữ được gì". Và assert **payload không chứa nhãn hiển
+  thị** (`isNot(contains('Đã giao'))`).
+- **Prevention:** enum đi bằng `.name`; mã enum lạ là **bản ghi hỏng**, không
+  phải giá trị mặc định; trường dẫn xuất không được lưu vào backup.
+
+---
+
+## P-14 · Thao tác phá huỷ không có đường lùi đã được kiểm chứng
+
+- **Root cause:** "tạo bản sao lưu an toàn trước khi ghi đè" rất dễ trở thành
+  một file **ghi ra rồi không ai đọc lại** — an tâm giả. Và một restore không
+  atomic sẽ để lại doanh nghiệp **nửa vời** khi hỏng giữa chừng.
+- **Regression:** test chỉ chạy đường thành công không bao giờ chạm hai lỗi này.
+- **Test pattern:** ba test bắt buộc — (1) vault **ghi hỏng** ⇒ không xoá gì;
+  (2) vault ghi ra thứ **đọc lại không restore được** ⇒ không xoá gì; (3)
+  repository **ném lỗi giữa lúc ghi**, sau khi đã xoá ⇒ đếm lại phải bằng
+  đúng trước đó. Kèm một test đọc lại chính bản an toàn **qua validator thật**.
+- **Prevention:** verify bản an toàn bằng chính validator của người dùng; apply
+  trong **một** transaction và verify **bên trong** nó.
+
+---
+
+## P-15 · Real I/O trong `testWidgets` treo vĩnh viễn
+
+- **Root cause:** `testWidgets` chạy thân test trong **fake-async zone**.
+  Future của SQLite, file và cả `cryptography`'s `Sha256().hash()` **không bao
+  giờ hoàn tất** ở đó. Triệu chứng là test *treo*, không phải fail — nên rất
+  dễ bị đổ cho "máy chậm".
+- **Regression:** cả suite đứng im, không có dòng lỗi nào.
+- **Test pattern:** mọi đọc/ghi thật trong widget test đi qua
+  `tester.runAsync`; `pumpUntilFound` phải đẩy **cả hai đồng hồ** (`runAsync`
+  cho I/O thật + `pump(step)` cho timer trong zone).
+- **Prevention:** widget **không** tự chạm `dart:io` — nhận nội dung qua seam
+  (`TongtaiPickedBackup`); thứ vốn không cần async thì đừng async (checksum
+  chuyển sang `package:crypto` **đồng bộ**).
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:
@@ -232,6 +282,9 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `predictive/predictive_ai_test.dart` | hostile AI không đổi được số · zero-spend · không tool runtime |
 | `error_handling_governance_test.dart` | seam bắt buộc cho mọi IO trong `ui/` · cấm catch thủ công · cấm spinner tự chế · cấm FutureBuilder/`.when` · **đúng một** `tongtaiDatabaseProvider` · telemetry chỉ kind+code+screen |
 | `screen_data_seam_test.dart` | lỗi ≠ rỗng · retry hồi phục · refresh hỏng giữ dữ liệu + banner stale · 320px/1.3× · live region + tap target 44px · negative control telemetry |
+| `export/backup_restore_test.dart` | round-trip 6 dataset trên file SQLite thật · v1 bị từ chối · version mới hơn · checksum hỏng · file cụt · thiếu dataset · id trùng · FK gãy · enum lạ · lệch counts · vault hỏng · rollback giữa chừng · privacy negative control |
+| `export/backup_codec_test.dart` | format giữ **mọi trường** (kể cả history) · mã canonical · decoder từ chối thay vì đoán |
+| `export/backup_screen_test.dart` | preview không chạm DB · xác nhận phá huỷ · file hỏng không có nút phá huỷ · file mã hoá xin mật khẩu |
 | `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
 
 ## Khi sửa bug mới — checklist
