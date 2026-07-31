@@ -337,6 +337,19 @@ abstract class AppStrings {
   /// Vietnamese build showed "Stock alerts: 4 out of stock • 2 low".
   String invStockAlerts(String parts);
   String supplierReviewCount(int count);
+  String supplierProductCount(int count);
+  String supplierCatalogSummary(int products, int categories);
+  String supplierMessageTitle(String name);
+  String supplierMessageSent(String name);
+  String supplierMinOrder(int units, String leadTime);
+  String get homeTodaysMissions;
+
+  /// "ROI ×2.4" — the multiplier badge on a Home opportunity card.
+  String homeRoiMultiple(String multiple);
+  String orderForCustomer(String name);
+  String customerAddressCount(int count);
+  String productImageCount(int count);
+  String stockQtyOfThreshold(int quantity, int threshold);
   String supplierFromReviews(int count);
   String invUpdatedOn(String date);
   String invShowingRange(int first, int last, int total);
@@ -1145,6 +1158,32 @@ class AppStringsVi extends AppStrings {
   String invStockAlerts(String parts) => 'Cảnh báo tồn kho: $parts';
   @override
   String supplierReviewCount(int count) => '($count đánh giá)';
+  @override
+  String supplierProductCount(int count) => '$count sản phẩm';
+  @override
+  String supplierCatalogSummary(int products, int categories) =>
+      '$products sản phẩm thuộc $categories danh mục';
+  @override
+  String supplierMessageTitle(String name) => 'Nhắn cho $name';
+  @override
+  String supplierMessageSent(String name) => 'Đã gửi tin nhắn cho $name';
+  @override
+  String supplierMinOrder(int units, String leadTime) =>
+      'Tối thiểu $units • $leadTime';
+  @override
+  String get homeTodaysMissions => 'Việc hôm nay';
+  @override
+  String homeRoiMultiple(String multiple) => 'ROI ×$multiple';
+  @override
+  String orderForCustomer(String name) => 'Khách hàng: $name';
+  @override
+  String customerAddressCount(int count) => 'Địa chỉ ($count)';
+  @override
+  String productImageCount(int count) => 'Hình ảnh ($count)';
+  @override
+  String stockQtyOfThreshold(int quantity, int threshold) =>
+      'SL $quantity / $threshold';
+
   @override
   String supplierFromReviews(int count) => 'từ $count đánh giá';
   @override
@@ -2228,6 +2267,33 @@ class AppStringsEn extends AppStrings {
   String invStockAlerts(String parts) => 'Stock alerts: $parts';
   @override
   String supplierReviewCount(int count) => '($count reviews)';
+  @override
+  String supplierProductCount(int count) => '$count products';
+  @override
+  String supplierCatalogSummary(int products, int categories) =>
+      '$products products across $categories '
+      '${categories == 1 ? 'category' : 'categories'}';
+  @override
+  String supplierMessageTitle(String name) => 'Message $name';
+  @override
+  String supplierMessageSent(String name) => 'Message sent to $name';
+  @override
+  String supplierMinOrder(int units, String leadTime) =>
+      'Min $units • $leadTime';
+  @override
+  String get homeTodaysMissions => "Today's Missions";
+  @override
+  String homeRoiMultiple(String multiple) => 'ROI ×$multiple';
+  @override
+  String orderForCustomer(String name) => 'Customer: $name';
+  @override
+  String customerAddressCount(int count) => 'Addresses ($count)';
+  @override
+  String productImageCount(int count) => 'Images ($count)';
+  @override
+  String stockQtyOfThreshold(int quantity, int threshold) =>
+      'Qty $quantity / $threshold';
+
   @override
   String supplierFromReviews(int count) => 'from $count reviews';
   @override

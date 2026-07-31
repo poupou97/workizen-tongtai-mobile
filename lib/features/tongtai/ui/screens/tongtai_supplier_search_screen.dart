@@ -697,7 +697,10 @@ class _SupplierCard extends StatelessWidget {
               ),
               const SizedBox(height: TongtaiDesignTokens.spacing1),
               Text(
-                'Min ${supplier.minOrderUnits} • ${supplier.leadTime}',
+                context.l10n.supplierMinOrder(
+                  supplier.minOrderUnits,
+                  supplier.leadTime,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TongtaiDesignTokens.captionStyle.copyWith(

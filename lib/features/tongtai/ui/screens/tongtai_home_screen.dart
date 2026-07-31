@@ -425,7 +425,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
 
           // ── Today's missions = active goals ───────────────────────
           Text(
-            "Today's Missions",
+            context.l10n.homeTodaysMissions,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),

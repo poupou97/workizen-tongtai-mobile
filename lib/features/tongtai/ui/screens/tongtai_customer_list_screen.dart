@@ -716,8 +716,11 @@ class _PaginationBar extends StatelessWidget {
         children: [
           Flexible(
             child: Text(
-              'Showing ${page.firstItemNumber}–${page.lastItemNumber} '
-              'of ${page.totalCount}',
+              context.l10n.invShowingRange(
+                page.firstItemNumber,
+                page.lastItemNumber,
+                page.totalCount,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TongtaiDesignTokens.captionStyle.copyWith(
@@ -735,7 +738,8 @@ class _PaginationBar extends StatelessWidget {
                 onPressed: onPrevious,
               ),
               Text(
-                'Page ${page.pageIndex + 1} of ${page.pageCount}',
+                context.l10n.invPageOf(page.pageIndex + 1, page.pageCount),
+                key: const Key('customer-page-indicator'),
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   color: TongtaiDesignTokens.lightTextPrimary,
                   fontWeight: FontWeight.w600,

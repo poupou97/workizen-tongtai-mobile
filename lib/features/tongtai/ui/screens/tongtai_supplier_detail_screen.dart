@@ -43,7 +43,7 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
     );
     if (sent == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Message sent to ${profile.name}')),
+        SnackBar(content: Text(context.l10n.supplierMessageSent(profile.name))),
       );
     }
   }
@@ -349,8 +349,10 @@ class _CatalogSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${profile.productCount} products across '
-            '$categoryCount ${categoryCount == 1 ? 'category' : 'categories'}',
+            context.l10n.supplierCatalogSummary(
+              profile.productCount,
+              categoryCount,
+            ),
             style: TongtaiDesignTokens.smallStyle.copyWith(
               color: TongtaiDesignTokens.lightTextSecondary,
             ),
@@ -378,7 +380,7 @@ class _CatalogSection extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${row.count} products',
+                    context.l10n.supplierProductCount(row.count),
                     style: TongtaiDesignTokens.smallStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextSecondary,
                       fontWeight: FontWeight.w600,
@@ -640,7 +642,7 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Message ${widget.supplierName}',
+            context.l10n.supplierMessageTitle(widget.supplierName),
             style: TongtaiDesignTokens.heading3Style.copyWith(
               color: TongtaiDesignTokens.lightTextPrimary,
             ),

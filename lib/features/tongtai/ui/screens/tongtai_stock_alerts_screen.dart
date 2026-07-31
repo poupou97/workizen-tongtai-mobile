@@ -290,7 +290,10 @@ class _AlertRow extends StatelessWidget {
                   _LevelChip(level: alert.level),
                   const SizedBox(height: TongtaiDesignTokens.spacing2),
                   Text(
-                    'Qty ${alert.quantity} / ${alert.threshold}',
+                    context.l10n.stockQtyOfThreshold(
+                      alert.quantity,
+                      alert.threshold,
+                    ),
                     style: TongtaiDesignTokens.captionStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextSecondary,
                     ),
