@@ -590,10 +590,9 @@ class _Thumbnail extends StatelessWidget {
             child: IconButton(
               tooltip: context.l10n.formRemoveImage,
               iconSize: 18,
-              visualDensity: VisualDensity.compact,
               icon: const CircleAvatar(
                 radius: 11,
-                backgroundColor: TongtaiDesignTokens.error,
+                backgroundColor: TongtaiDesignTokens.errorText,
                 child: Icon(Icons.close, size: 14, color: Colors.white),
               ),
               onPressed: onRemove,
@@ -752,7 +751,7 @@ class _SaveCancelBar extends StatelessWidget {
               child: FilledButton(
                 onPressed: onSave,
                 style: FilledButton.styleFrom(
-                  backgroundColor: TongtaiDesignTokens.inventoryOrange,
+                  backgroundColor: TongtaiDesignTokens.inventoryOrangeText,
                   minimumSize: const Size.fromHeight(
                     TongtaiDesignTokens.buttonHeight,
                   ),

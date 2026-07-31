@@ -505,7 +505,7 @@ class _ContactSection extends StatelessWidget {
             child: FilledButton.icon(
               key: const Key('supplier-detail-action-message'),
               style: FilledButton.styleFrom(
-                backgroundColor: TongtaiDesignTokens.producerGreen,
+                backgroundColor: TongtaiDesignTokens.producerGreenText,
                 minimumSize: const Size.fromHeight(
                   TongtaiDesignTokens.buttonHeight,
                 ),
@@ -659,7 +659,7 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
             width: double.infinity,
             child: FilledButton.icon(
               style: FilledButton.styleFrom(
-                backgroundColor: TongtaiDesignTokens.producerGreen,
+                backgroundColor: TongtaiDesignTokens.producerGreenText,
                 minimumSize: const Size.fromHeight(
                   TongtaiDesignTokens.buttonHeight,
                 ),

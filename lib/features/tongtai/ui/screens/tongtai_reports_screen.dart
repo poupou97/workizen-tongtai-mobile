@@ -600,7 +600,6 @@ class _PeriodSelector extends StatelessWidget {
             label: Text(p.label(context.l10n.languageCode)),
             selected: p == period,
             onSelected: (_) => onChanged(p),
-            visualDensity: VisualDensity.compact,
             selectedColor: TongtaiDesignTokens.financePurple.withValues(
               alpha: 0.15,
             ),

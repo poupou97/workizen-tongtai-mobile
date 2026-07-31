@@ -158,7 +158,7 @@ class _TongtaiCustomerHistoryScreenState
           : FloatingActionButton.extended(
               key: const Key('history-create-order'),
               onPressed: _createOrder,
-              backgroundColor: TongtaiDesignTokens.consumerBlue,
+              backgroundColor: TongtaiDesignTokens.consumerBlueText,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add),
               label: Text(context.l10n.titleCreateOrder),

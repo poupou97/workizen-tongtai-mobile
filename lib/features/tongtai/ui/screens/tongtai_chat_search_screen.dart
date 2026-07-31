@@ -309,7 +309,7 @@ class _Highlighted extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.w700,
             color: TongtaiDesignTokens.financePurple,
-            backgroundColor: TongtaiDesignTokens.financePurple.withValues(
+            backgroundColor: TongtaiDesignTokens.financeVioletText.withValues(
               alpha: 0.12,
             ),
           ),

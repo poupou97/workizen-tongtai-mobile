@@ -30,6 +30,13 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_scr
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_producer_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_timeline_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_form_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_list_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_goal_form_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_goals_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_product_form_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_supplier_search_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart';
 
 /// WTM-167 — accessibility, measured by Flutter's own guidelines rather than
 /// by opinion.
@@ -110,6 +117,22 @@ void main() {
     'timeline': () => const TongtaiTimelineScreen(),
     'customer-risk': () => const TongtaiCustomerRiskScreen(),
     'forecast': () => const TongtaiForecastScreen(),
+    // Every screen that constructs without a caller-supplied entity. The rest
+    // need a customer/goal/supplier to exist first and are exercised by their
+    // own widget tests.
+    //
+    // AI key and Chat are deliberately absent: they reach for
+    // flutter_secure_storage and a real database on mount, so here they fail on
+    // a missing plugin rather than on accessibility. Their contrast fixes are
+    // in this change; their own widget tests cover the rest. A governance suite
+    // that goes red for infrastructure reasons stops being read.
+    'customer-form': () => const TongtaiCustomerFormScreen(),
+    'customer-list': () => const TongtaiCustomerListScreen(),
+    'goal-form': () => const TongtaiGoalFormScreen(),
+    'goals': () => const TongtaiGoalsScreen(),
+    'product-form': () => const TongtaiProductFormScreen(),
+    'supplier-search': () => const TongtaiSupplierSearchScreen(),
+    'transaction-form': () => const TongtaiTransactionFormScreen(),
   };
 
   /// Checks one screen against one guideline, returning the failure text
