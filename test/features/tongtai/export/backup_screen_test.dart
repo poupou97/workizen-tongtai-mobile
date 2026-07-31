@@ -238,6 +238,63 @@ void main() {
     expect(safety.contents!.counts['products'], 1);
   });
 
+  testWidgets('the safety copy can be opened back up from inside the app', (
+    tester,
+  ) async {
+    // WTM-173: the safety copy lands in the app's private documents directory,
+    // where the system file picker cannot reach it. Without this path, the one
+    // file that exists to undo a mistaken restore is the one file the seller
+    // cannot open.
+    final path = await setUpFixture(tester, 3);
+
+    await pumpScreen(tester, path);
+    await pumpUntilFound(tester, find.byKey(const Key('backup-preview')));
+    final replace = find.byKey(const Key('backup-action-replace'));
+    await tester.ensureVisible(replace);
+    await tester.pumpAndSettle();
+    await tester.tap(replace);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('backup-confirm-replace')));
+    await pumpUntilFound(tester, find.byKey(const Key('backup-restore-done')));
+
+    // The business is now the snapshot: 3 customers, no products.
+    expect(await real(tester, () => repos.products.loadAll()), isEmpty);
+
+    final undo = find.byKey(const Key('backup-action-undo'));
+    await tester.ensureVisible(undo);
+    await tester.pumpAndSettle();
+    await tester.tap(undo);
+    await pumpUntilFound(tester, find.byKey(const Key('backup-preview')));
+
+    expect(
+      find.byKey(const Key('backup-action-replace')),
+      findsOneWidget,
+      reason:
+          'the safety copy comes back as a PREVIEW — undoing a destructive '
+          'action with one tap is the same mistake pointing the other way',
+    );
+    expect(
+      await real(tester, () => repos.products.loadAll()),
+      isEmpty,
+      reason: 'opening the safety copy must not itself replace anything',
+    );
+
+    // Confirming does bring the product back.
+    final replaceAgain = find.byKey(const Key('backup-action-replace'));
+    await tester.ensureVisible(replaceAgain);
+    await tester.pumpAndSettle();
+    await tester.tap(replaceAgain);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('backup-confirm-replace')));
+    await pumpUntilFound(tester, find.byKey(const Key('backup-restore-done')));
+
+    expect(
+      await real(tester, () => repos.products.loadAll()),
+      hasLength(1),
+      reason: 'the safety copy held the business as it was before the restore',
+    );
+  });
+
   testWidgets('a rejected file explains itself and offers no destructive '
       'button', (tester) async {
     final path = '${tempDir.path}/not-a-backup.ttbk';

@@ -183,6 +183,41 @@ class _TongtaiBackupScreenState extends ConsumerState<TongtaiBackupScreen> {
     if (failure != null) showTongtaiFailure(context, failure);
   }
 
+  /// Loads the pre-restore safety copy back into the preview (WTM-173).
+  ///
+  /// WTM-164 creates and verifies a safety copy before replacing anything, but
+  /// it lands in the app's private documents directory — a place the system
+  /// file picker cannot reach. So the one file that exists to undo a mistaken
+  /// restore was the one file the seller could not open. This reads it through
+  /// the same vault that wrote it.
+  ///
+  /// It deliberately stops at the preview: applying it is still a destructive
+  /// Replace, and a one-tap undo that silently overwrites is the same mistake
+  /// pointing the other way.
+  Future<void> _openSafetyCopy(String path) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    String? armored;
+    final failure = await runTongtaiAction(
+      () async => armored = await _service.vault.read(path),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'backup',
+    );
+    if (!mounted) return;
+    if (failure != null) {
+      setState(() => _busy = false);
+      showTongtaiFailure(context, failure);
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _picked = TongtaiPickedBackup(path: path, content: armored!);
+      _validation = null;
+      _report = null;
+    });
+    await _validatePicked();
+  }
+
   // ── restore ──────────────────────────────────────────────────────────────
 
   Future<void> _restore() async {
@@ -286,7 +321,10 @@ class _TongtaiBackupScreenState extends ConsumerState<TongtaiBackupScreen> {
             ],
             if (_report != null) ...[
               const SizedBox(height: TongtaiDesignTokens.spacing4),
-              _RestoreDone(report: _report!),
+              _RestoreDone(
+                report: _report!,
+                onUndo: () => _openSafetyCopy(_report!.safetyBackupPath),
+              ),
             ] else if (_validation != null) ...[
               const SizedBox(height: TongtaiDesignTokens.spacing4),
               _Preview(
@@ -530,7 +568,9 @@ class _Preview extends StatelessWidget {
 }
 
 class _RestoreDone extends StatelessWidget {
-  const _RestoreDone({required this.report});
+  const _RestoreDone({required this.report, required this.onUndo});
+
+  final VoidCallback onUndo;
 
   final BackupRestoreReport report;
 
@@ -576,6 +616,20 @@ class _RestoreDone extends StatelessWidget {
             style: TongtaiDesignTokens.captionStyle.copyWith(
               color: TongtaiDesignTokens.lightTextSecondary,
             ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          Text(
+            l10n.backupUndoHint,
+            style: TongtaiDesignTokens.captionStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          OutlinedButton.icon(
+            key: const Key('backup-action-undo'),
+            onPressed: onUndo,
+            icon: const Icon(Icons.history, size: 18),
+            label: Text(l10n.backupUndoAction),
           ),
         ],
       ),

@@ -588,6 +588,12 @@ abstract class AppStrings {
   String get backupRestoring;
   String get backupRestoreDone;
   String get backupSafetyCopy;
+
+  /// Action on the success card: load the pre-restore safety copy back into
+  /// the preview, so a restore that turned out to be the wrong file can be
+  /// walked back from inside the app.
+  String get backupUndoAction;
+  String get backupUndoHint;
   String get backupRejected;
   String get backupIntegrityNote;
   String get datasetCustomers;
@@ -1683,6 +1689,12 @@ class AppStringsVi extends AppStrings {
   String get backupRestoreDone => 'Đã khôi phục xong';
   @override
   String get backupSafetyCopy => 'Bản sao lưu an toàn trước khi khôi phục';
+  @override
+  String get backupUndoAction => 'Quay lại dữ liệu trước khi khôi phục';
+  @override
+  String get backupUndoHint =>
+      'Mở bản sao lưu an toàn ở trên để xem trước. Bạn vẫn phải xác nhận lần '
+      'nữa trước khi nó thay thế dữ liệu hiện tại.';
   @override
   String get backupRejected => 'Không dùng được file này';
   @override
@@ -2814,6 +2826,12 @@ class AppStringsEn extends AppStrings {
   String get backupRestoreDone => 'Restore complete';
   @override
   String get backupSafetyCopy => 'Safety backup taken before restoring';
+  @override
+  String get backupUndoAction => 'Go back to the data from before';
+  @override
+  String get backupUndoHint =>
+      'Opens the safety copy above as a preview. You still have to confirm '
+      'again before it replaces the current data.';
   @override
   String get backupRejected => 'This file cannot be used';
   @override
