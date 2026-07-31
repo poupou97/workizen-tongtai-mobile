@@ -35,6 +35,13 @@ abstract class OrderRepository {
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
   Future<void> deleteByIdPrefix(String prefix);
+
+  /// Removes **every** record of this business (WTM-164 restore Replace).
+  ///
+  /// Separate from `deleteByIdPrefix('')` on purpose: "wipe the business" is a
+  /// destructive operation that should be spelled out at the call site, not
+  /// achieved by an empty-prefix trick nobody reading the code would notice.
+  Future<void> deleteAll();
 }
 
 /// Real, persistent sales orders for the local business (WTM-125).
@@ -135,6 +142,14 @@ class DriftOrderRepository implements OrderRepository {
         ))
         .go();
   }
+
+  @override
+  Future<void> deleteAll() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(
+      _db.ordersTable,
+    )..where((t) => t.businessId.equals(businessId))).go();
+  }
 }
 
 /// Demo / Preview source (WTM-125): the built-in sample orders, **read-only** —
@@ -161,6 +176,11 @@ class SampleOrderRepository implements OrderRepository {
 
   @override
   Future<void> deleteByIdPrefix(String prefix) async {
+    // Demo fixtures are read-only — nothing to delete.
+  }
+
+  @override
+  Future<void> deleteAll() async {
     // Demo fixtures are read-only — nothing to delete.
   }
 }
@@ -199,6 +219,9 @@ class InMemoryOrderRepository implements OrderRepository {
   @override
   Future<void> deleteByIdPrefix(String prefix) async =>
       _orders.removeWhere((x) => x.id.startsWith(prefix));
+
+  @override
+  Future<void> deleteAll() async => _orders.clear();
 }
 
 /// Encodes order lines into the `orders_table.items` JSON array — the immutable

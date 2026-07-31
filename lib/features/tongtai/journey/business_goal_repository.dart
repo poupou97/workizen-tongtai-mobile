@@ -23,6 +23,13 @@ abstract class BusinessGoalRepository {
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
   Future<void> deleteByIdPrefix(String prefix);
+
+  /// Removes **every** record of this business (WTM-164 restore Replace).
+  ///
+  /// Separate from `deleteByIdPrefix('')` on purpose: "wipe the business" is a
+  /// destructive operation that should be spelled out at the call site, not
+  /// achieved by an empty-prefix trick nobody reading the code would notice.
+  Future<void> deleteAll();
 }
 
 /// Real, persistent business goals for the local business (WTM-124).
@@ -154,6 +161,14 @@ class DriftBusinessGoalRepository implements BusinessGoalRepository {
         ))
         .go();
   }
+
+  @override
+  Future<void> deleteAll() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(
+      _db.journeysTable,
+    )..where((t) => t.businessId.equals(businessId))).go();
+  }
 }
 
 /// Demo / Preview source (WTM-124): the built-in sample goals, **read-only** —
@@ -176,6 +191,11 @@ class SampleBusinessGoalRepository implements BusinessGoalRepository {
 
   @override
   Future<void> deleteByIdPrefix(String prefix) async {
+    // Demo fixtures are read-only — nothing to delete.
+  }
+
+  @override
+  Future<void> deleteAll() async {
     // Demo fixtures are read-only — nothing to delete.
   }
 }
@@ -210,4 +230,7 @@ class InMemoryBusinessGoalRepository implements BusinessGoalRepository {
   @override
   Future<void> deleteByIdPrefix(String prefix) async =>
       _goals.removeWhere((x) => x.id.startsWith(prefix));
+
+  @override
+  Future<void> deleteAll() async => _goals.clear();
 }

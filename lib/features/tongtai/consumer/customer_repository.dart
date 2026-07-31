@@ -41,6 +41,13 @@ abstract class CustomerRepository {
   /// deleted (SqliteException 787) — and must not be, because the order is
   /// user data (WTM-162).
   Future<void> deleteByIdPrefix(String prefix, {Set<String> keep});
+
+  /// Removes **every** record of this business (WTM-164 restore Replace).
+  ///
+  /// Separate from `deleteByIdPrefix('')` on purpose: "wipe the business" is a
+  /// destructive operation that should be spelled out at the call site, not
+  /// achieved by an empty-prefix trick nobody reading the code would notice.
+  Future<void> deleteAll();
 }
 
 /// Real, persistent customer directory for the local business (WTM-123).
@@ -157,6 +164,14 @@ class DriftCustomerRepository implements CustomerRepository {
         }))
         .go();
   }
+
+  @override
+  Future<void> deleteAll() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(
+      _db.customersTable,
+    )..where((t) => t.businessId.equals(businessId))).go();
+  }
 }
 
 /// Demo / Preview source (WTM-123): the built-in sample directory, **read-only**
@@ -182,6 +197,11 @@ class SampleCustomerRepository implements CustomerRepository {
     String prefix, {
     Set<String> keep = const <String>{},
   }) async {
+    // Demo fixtures are read-only — nothing to delete.
+  }
+
+  @override
+  Future<void> deleteAll() async {
     // Demo fixtures are read-only — nothing to delete.
   }
 }
@@ -220,4 +240,7 @@ class InMemoryCustomerRepository implements CustomerRepository {
   }) async => _customers.removeWhere(
     (x) => x.id.startsWith(prefix) && !keep.contains(x.id),
   );
+
+  @override
+  Future<void> deleteAll() async => _customers.clear();
 }

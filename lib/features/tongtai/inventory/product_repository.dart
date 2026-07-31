@@ -22,6 +22,13 @@ abstract class ProductRepository {
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
   Future<void> deleteByIdPrefix(String prefix);
+
+  /// Removes **every** record of this business (WTM-164 restore Replace).
+  ///
+  /// Separate from `deleteByIdPrefix('')` on purpose: "wipe the business" is a
+  /// destructive operation that should be spelled out at the call site, not
+  /// achieved by an empty-prefix trick nobody reading the code would notice.
+  Future<void> deleteAll();
 }
 
 /// Real, persistent catalog for the local business (WTM-121).
@@ -117,6 +124,14 @@ class DriftProductRepository implements ProductRepository {
         ))
         .go();
   }
+
+  @override
+  Future<void> deleteAll() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(
+      _db.productsTable,
+    )..where((t) => t.businessId.equals(businessId))).go();
+  }
 }
 
 /// Demo / Preview source (WTM-121): the built-in sample catalogue, **read-only**
@@ -139,6 +154,11 @@ class SampleProductRepository implements ProductRepository {
 
   @override
   Future<void> deleteByIdPrefix(String prefix) async {
+    // Demo fixtures are read-only — nothing to delete.
+  }
+
+  @override
+  Future<void> deleteAll() async {
     // Demo fixtures are read-only — nothing to delete.
   }
 }
@@ -173,4 +193,7 @@ class InMemoryProductRepository implements ProductRepository {
   @override
   Future<void> deleteByIdPrefix(String prefix) async =>
       _products.removeWhere((x) => x.id.startsWith(prefix));
+
+  @override
+  Future<void> deleteAll() async => _products.clear();
 }

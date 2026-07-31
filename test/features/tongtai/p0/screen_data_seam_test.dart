@@ -338,6 +338,9 @@ class _ControllableCustomerRepository implements CustomerRepository {
   @override
   Future<void> deleteByIdPrefix(String prefix, {Set<String> keep = const {}}) =>
       inner.deleteByIdPrefix(prefix, keep: keep);
+
+  @override
+  Future<void> deleteAll() => inner.deleteAll();
 }
 
 class _RecordingTelemetry implements TongtaiTelemetry {
