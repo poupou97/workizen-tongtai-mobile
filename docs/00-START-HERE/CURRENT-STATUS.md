@@ -64,6 +64,17 @@
   được chứng minh bằng test trên **file SQLite thật** (rollback đầy đủ khi hỏng
   giữa chừng · vault ghi hỏng hoặc đọc lại hỏng ⇒ **không xoá gì** · verify
   counts + FK **bên trong** transaction).
+  · **Amendment 1 (WTM-165, Founder Note 2026-07-31):** `.ttbk` từ nay là
+  **Business Snapshot Package** — backup chỉ là **một** capability của nó.
+  Manifest chừa sẵn `packageKind` · `datasets` · `redaction` cho Restore ·
+  Clone Business · Migration · Demo Dataset · AI Sandbox · Support Bundle ·
+  Analytics Exchange (**không** triển khai vòng này). **Mã lạ ⇒ `unknown`,
+  không bao giờ ⇒ `backup`** (đoán nhầm = restore đè dữ liệu thật bằng dữ liệu
+  mẫu); **vắng mặt ⇒ mặc định**, nên hai file v2 đã phát hành vẫn restore được.
+  Lệnh cấm nằm ở **restore contract** chứ không ở format: gói bộ phận hoặc đã
+  lược bỏ vẫn là gói **hợp lệ**, chỉ **không restore được** —
+  `notRestorableKind` · `redactedPackage` · `missingDataset`. **1387 → 1394
+  tests.**
 - **⭐⭐ ERROR-HANDLING SEAM (WTM-148, 2026-07-31) — ADR-TON-017:** đóng gap hệ
   thống mà audit ADR-TON-015 phát hiện (**1/34 màn** có xử lý lỗi thật). Trước
   đó `initState → _load() → setState` để future lỗi không ai bắt, nên **"không

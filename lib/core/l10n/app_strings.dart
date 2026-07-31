@@ -1533,6 +1533,10 @@ class AppStringsVi extends AppStrings {
     'duplicateId' => 'File có bản ghi trùng mã.',
     'brokenForeignKey' => 'File có đơn hàng trỏ tới khách hàng không tồn tại.',
     'countMismatch' => 'Số bản ghi khai báo không khớp nội dung thật.',
+    'notRestorableKind' =>
+      'File này là gói dữ liệu loại khác (không phải bản sao lưu để khôi phục).',
+    'redactedPackage' =>
+      'File này đã bị lược bỏ thông tin cá nhân nên không dùng để khôi phục được.',
     _ => 'Không khôi phục được từ file này.',
   };
 }
@@ -2527,6 +2531,10 @@ class AppStringsEn extends AppStrings {
       'The file has an order pointing at a customer it does not contain.',
     'countMismatch' =>
       'The declared record counts do not match the actual contents.',
+    'notRestorableKind' =>
+      'This package is a different kind — not a backup meant to be restored.',
+    'redactedPackage' =>
+      'Personal data was removed from this package, so it cannot be restored.',
     _ => 'This file cannot be restored.',
   };
 }
