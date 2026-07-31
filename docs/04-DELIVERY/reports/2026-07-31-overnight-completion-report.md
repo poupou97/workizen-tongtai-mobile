@@ -123,6 +123,18 @@ onboarding (nút đã đổi màu, đọc được) · Home tiếng Việt · m�
 có", **không còn nút Đăng xuất**) · màn Chính sách quyền riêng tư mở được và
 hiển thị đúng.
 
+**Mốc trong app trên Nokia 6.1** (bỏ lần chạy sau khi cài vì có dexopt):
+`prefs 165ms` (S24: **13ms**) · `telemetry-init 204ms` · `db-open 288ms` ·
+`4 tab có dữ liệu 315–334ms` · `first-frame 425ms`. **Home vẫn có dữ liệu trước
+khung hình đầu tiên** — kết luận chính của WTM-166 đúng cả trên máy yếu.
+
+**Một tối ưu đã thử và bỏ.** Máy yếu lộ ra `SharedPreferences` tốn 165ms và chặn
+`runApp`, Firebase init nối đuôi sau. Hai việc độc lập ⇒ thử gộp chạy cùng lúc.
+**Đo lại: không nhanh hơn** (200/226/240ms vs 204/212ms) — cả hai đi qua **cùng
+một platform channel** vốn tuần tự, nên "song song" ở tầng Dart chỉ xếp cùng một
+hàng đợi. Đã bỏ, vì nó không mua được gì và **làm mất độ phân giải chẩn đoán**.
+Ghi lại trong `WTM-166-cold-start.md` §7 để người sau không thử lại.
+
 **Chưa đo:** hydration ở 24/60 tháng **trên thiết bị**. Baseline host cho thấy
 60 tháng nặng gấp ~25 lần 12 tháng, nhưng **nhân tỉ lệ host lên để suy ra
 mili-giây điện thoại là đúng thứ Testing Bible P-16 cấm**. Cần seed dữ liệu trên
