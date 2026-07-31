@@ -24,6 +24,31 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐ QUYỀN RIÊNG TƯ (WTM-37, 2026-07-31):** nút "Chính sách quyền riêng tư"
+  trong Cài đặt là `onTap: () {}` — **bấm không ra gì**. Viết policy song ngữ
+  **theo hành vi thật** (đối chiếu code trước khi viết chữ nào): chỉ `app_open`
+  + `screen_error` lên telemetry · Crashlytics thật · prompt BYOK **thật sự rời
+  máy** tới nhà cung cấp người dùng chọn · khoá ở Keystore, không nằm trong
+  backup · quyền AD_ID **bị gỡ** khỏi manifest · `google-services.json` gitignore
+  ⇒ bản dựng từ mã nguồn công khai không gửi gì. **Không ở đâu nói "không thu
+  thập dữ liệu"** — sẽ là khai sai. Test khoá: policy phải **thừa nhận**
+  app_open/screen_error/crash/bên thứ ba · cấm câu "không thu thập" · cấm bán
+  SHA-256 như chống giả mạo. `TELEMETRY-EVENTS.md`: nối sự kiện ⇒ sửa policy
+  **cùng PR**. ⚠️ **Thiếu địa chỉ liên hệ** — Founder cấp trước khi lên store.
+  **1412 tests.**
+- **⭐ ACCESSIBILITY (WTM-168, 2026-07-31):** đo bằng **guideline của Android**
+  (`androidTapTargetGuideline` · `labeledTapTargetGuideline` ·
+  `textContrastGuideline`), 20 màn × 2 locale × có dữ liệu. **28 vi phạm** →
+  sạch. Contrast: màu thương hiệu bị dùng làm **màu chữ** (2.15–4.49 so với
+  chuẩn 4.5) ⇒ mỗi màu có **cặp song sinh đọc được** (bước -700) +
+  `readableText()`; màu -500 **giữ nguyên** cho nền/viền/icon nên bảng màu không
+  đổi. Tap target: `buttonHeight` 44→48 · bỏ `visualDensity.compact` (40dp) ·
+  trái tim yêu thích 20×20 → 48dp (nới ô lưới 176→204). **Ba tab chính chưa từng
+  có trong suite overflow của P0** ⇒ thêm vào là lộ **5 lỗi tràn thật**, trong
+  đó pagination bar clip 11px **nuốt luôn nút "trang sau"**. Kèm **7 chuỗi tiếng
+  Anh hardcode** mà bản tiếng Việt vẫn hiện tiếng Anh. Testing Bible **P-17·P-18**.
+  ⚠️ Nút chính **đậm màu hơn** — hệ quả bắt buộc của 4.5:1. Chưa smoke test máy
+  thật. **1404 tests.**
 - **⭐ COLD START ĐÃ ĐO (WTM-166, 2026-07-31) — S24 Ultra, bản release:**
   **Không có vấn đề cold start ở khối lượng dữ liệu hiện tại.** Mốc trong app:
   `prefs 13ms · telemetry-init 31ms · run-app 39ms · db-open 51ms · 4 tab có

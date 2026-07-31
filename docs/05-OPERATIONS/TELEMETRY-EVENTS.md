@@ -8,6 +8,11 @@ Forbidden forever: ad SDKs, marketing tracking, user profiling, personalized ads
 **không bao giờ chứa dữ liệu kinh doanh** (tên khách, doanh thu, mục tiêu, nội
 dung chat). Cấm vĩnh viễn: ad SDK, marketing tracking, profiling, personalized ads.
 
+> ⚠️ **Đây cũng là danh sách người dùng được cho biết.** Nối một sự kiện vào code
+> ⇒ sửa `PRIVACY-POLICY.md` §3 **và** `AppStrings.privacyTelemetryBody` **trong
+> cùng PR**. Một chính sách nói ít hơn app làm là một lời khai sai, không phải
+> một thiếu sót giấy tờ.
+
 ## Event catalogue (v1 — the ONLY approved events)
 
 | Event | Params | Khi nào |
