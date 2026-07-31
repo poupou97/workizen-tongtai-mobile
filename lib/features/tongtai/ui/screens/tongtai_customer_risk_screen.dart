@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
 import '../../capability/customer_capability.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
+import '../../core/screen_data_controller.dart';
 import '../../core/screen_state.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../predictive/customer_risk_rule.dart';
@@ -55,12 +57,28 @@ class _TongtaiCustomerRiskScreenState
     _loadNames();
   }
 
+  /// Through `runTongtaiAction` (WTM-172): the risk assessment itself already
+  /// goes through the shared seam, but this name lookup did not — an
+  /// `await …loadAll()` with nobody watching. A failed read left `_names`
+  /// empty, and an empty name map does not look like an error: it looks like a
+  /// list of customers whose names are simply missing. The assessment beside
+  /// them would still be rendered, which is the worst version of this bug.
   Future<void> _loadNames() async {
-    final customers = await ref.read(customerRepositoryProvider).loadAll();
+    Map<String, String>? loaded;
+    final failure = await runTongtaiAction(
+      () async {
+        final customers = await ref.read(customerRepositoryProvider).loadAll();
+        loaded = {for (final c in customers) c.id: c.name};
+      },
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'risk',
+    );
     if (!mounted) return;
-    setState(() {
-      _names = {for (final customer in customers) customer.id: customer.name};
-    });
+    if (failure != null) {
+      showTongtaiFailure(context, failure, onRetry: _loadNames);
+      return;
+    }
+    setState(() => _names = loaded ?? const <String, String>{});
   }
 
   @override
