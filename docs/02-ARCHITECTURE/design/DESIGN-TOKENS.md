@@ -23,6 +23,25 @@ Each business module has a primary color identity to aid visual navigation and m
 | **Integration** | System Integration | Integration | Teal | `#14B8A6` | Connectors, webhooks, APIs |
 | **Business Setup** | Configuration | Cài Đặt | Gray | `#6B7280` | Settings, admin, configuration |
 
+### ⚠️ Màu trên là màu NỀN — không mặc nhiên là màu CHỮ (WTM-168, 2026-07-31)
+
+Đo bằng `textContrastGuideline`: trên nền sáng `#10B981` đọc ở **2.31:1** và
+`#F59E0B` ở **2.15:1**; WCAG AA cần **4.5:1**. Các màu ở bước -500 dùng cho
+**nền · viền · icon · biểu đồ**; khi cùng màu đó mang **chữ**, dùng **cặp song
+sinh đọc được** ở bước -700 (`TongtaiDesignTokens.producerGreenText` … hoặc
+`readableText(base)` cho component dùng chung):
+
+| vai trò | nền (-500) | chữ (-700) | tỉ lệ trên trắng |
+|---|---|---|---|
+| Producer / Success | `#10B981` | `#047857` | 5.48 |
+| Inventory / Warning | `#F59E0B` | `#B45309` | 5.02 |
+| Consumer / Info | `#3B82F6` | `#1D4ED8` | 6.70 |
+| Finance / Copilot | `#8B5CF6` | `#6D28D9` | 7.10 |
+| Error | `#EF4444` | `#B91C1C` | 6.47 |
+| Neutral / Setup | `#6B7280` | `#4B5563` | 7.56 |
+
+**Bảng màu thương hiệu không đổi** — chỉ chỗ có chữ mới phải đọc được.
+
 ### Color Hierarchy
 
 #### Primary Colors (Module Identity)
@@ -52,7 +71,7 @@ Neutral:    #6B7280 (Gray)
 ```
 Background:       #FFFFFF (Light) / #111827 (Dark)
 Text Primary:     #111827 (Light) / #F9FAFB (Dark)
-Text Secondary:   #6B7280 (Light) / #D1D5DB (Dark)
+Text Secondary:   #4B5563 (Light) / #D1D5DB (Dark)   ← gray-600 từ WTM-168
 Border:           #E5E7EB (Light) / #374151 (Dark)
 Hover:            #F3F4F6 (Light) / #1F2937 (Dark)
 ```
