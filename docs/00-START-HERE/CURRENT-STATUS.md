@@ -24,6 +24,30 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐ COLD START ĐÃ ĐO (WTM-166, 2026-07-31) — S24 Ultra, bản release:**
+  **Không có vấn đề cold start ở khối lượng dữ liệu hiện tại.** Mốc trong app:
+  `prefs 13ms · telemetry-init 31ms · run-app 39ms · db-open 51ms · 4 tab có
+  dữ liệu 55–56ms · first-frame 69ms`; tổng Android tự báo 249–316ms (n=5),
+  phần còn lại là tạo tiến trình + khởi động engine. **Home có dữ liệu TRƯỚC
+  khung hình đầu tiên** ⇒ người dùng không bao giờ thấy loading của Home. Ba
+  giả thuyết đọc từ code (IndexedStack dựng 5 tab · await nối đuôi · đọc lặp)
+  cộng lại **~5ms**.
+  · **Phát hiện thật:** một lần khởi động đọc `orders` **×5**, `customers`
+  **×4**, `goals` **×4**, `products` ×3, `finance` ×2 — mỗi consumer đều chính
+  đáng (hệ quả của Capability Context tự tải on-demand, ADR-TON-016). Ở **12
+  tháng buôn bán thật** (529 đơn · 42 khách · 544 giao dịch) = **3.0× chi phí
+  cần thiết**; hai phần ba công đọc lúc khởi động là đọc lại thứ vừa đọc.
+  · **Sửa duy nhất:** `unawaited(logEvent('app_open'))` — lý do không phải 8ms
+  mà là một backend telemetry chậm không được quyền giữ khung hình đầu tiên.
+  **KHÔNG đụng** Firebase init (Crashlytics phải cài trước khi có gì để bỏ
+  sót) · SharedPreferences · IndexedStack (giữ state tab là có chủ ý).
+  · **⛔ Founder Gate mở:** sửa đọc lặp = để **một** lượt đọc nuôi mọi
+  Capability Context, nhưng ADR-TON-016 nói chúng **độc lập, tải on-demand**.
+  ADR conflict + nhiều hướng hợp lệ ⇒ **chưa tự quyết**.
+  · Ratchet: khoá **số lần đọc** (không đổi theo máy) + khoá **tỉ lệ** ở một
+  năm dữ liệu. `StartupTrace` sau `--dart-define`, bản người dùng không tốn gì.
+  Testing Bible **P-16**. **1394 → 1396 tests.** Báo cáo:
+  `docs/04-DELIVERY/reports/WTM-166-cold-start.md`
 - **⭐⭐ BACKUP `.ttbk` v2 + RESTORE (WTM-164, 2026-07-31) — ADR-TON-018:**
   Audit phát hiện **`.ttbk` v1 không khôi phục được doanh nghiệp**: nó là **một
   CSV mã hoá của MỘT dataset**, phủ 3/6 repository, **bỏ hẳn `order.id` và
