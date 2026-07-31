@@ -14,8 +14,6 @@ import 'package:tongtai/features/tongtai/journey/business_goal.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
-import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
-    show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_context_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_finance_provider.dart';
