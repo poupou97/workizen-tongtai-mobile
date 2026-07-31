@@ -482,7 +482,7 @@ class _AddressesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Addresses (${controllers.length})',
+          context.l10n.customerAddressCount(controllers.length),
           style: TongtaiDesignTokens.smallStyle.copyWith(
             fontWeight: FontWeight.w600,
             color: TongtaiDesignTokens.lightTextPrimary,

@@ -513,7 +513,7 @@ class _ImagesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Images (${paths.length})',
+          context.l10n.productImageCount(paths.length),
           style: TongtaiDesignTokens.smallStyle.copyWith(
             fontWeight: FontWeight.w600,
             color: TongtaiDesignTokens.lightTextPrimary,

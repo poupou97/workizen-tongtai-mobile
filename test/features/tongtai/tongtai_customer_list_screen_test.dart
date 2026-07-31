@@ -49,7 +49,12 @@ void main() {
 
     // The whole sample directory (26 customers) is counted, across two pages.
     expect(find.text('26 customers'), findsOneWidget);
-    expect(find.text('Page 1 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 1/2',
+    );
   });
 
   testWidgets('a customer row shows name, phone, purchases and last purchase', (
@@ -75,20 +80,35 @@ void main() {
     useTallViewport(tester);
     await pumpScreen(tester);
 
-    expect(find.text('Page 1 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 1/2',
+    );
     expect(find.textContaining('₫'), findsNWidgets(20)); // 20 rows on page 1
 
     // Advance to page 2.
     await tester.tap(find.byTooltip('Next page'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Page 2 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 2/2',
+    );
     expect(find.textContaining('₫'), findsNWidgets(6)); // remaining 6 rows
 
     // ...and back.
     await tester.tap(find.byTooltip('Previous page'));
     await tester.pumpAndSettle();
-    expect(find.text('Page 1 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 1/2',
+    );
   });
 
   testWidgets('search narrows the results by name', (tester) async {
@@ -99,7 +119,12 @@ void main() {
 
     expect(find.text('1 customer'), findsOneWidget);
     expect(find.text('Phương Nguyễn'), findsOneWidget);
-    expect(find.text('Page 1 of 1'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 1/1',
+    );
   });
 
   testWidgets('location filter narrows the results', (tester) async {
@@ -113,7 +138,12 @@ void main() {
 
     // Six sample customers are in Hà Nội.
     expect(find.text('6 customers'), findsOneWidget);
-    expect(find.text('Page 1 of 1'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 1/1',
+    );
   });
 
   testWidgets('shows a VIP tier badge for a high-value customer', (
@@ -172,7 +202,12 @@ void main() {
 
     await tester.tap(find.byTooltip('Next page'));
     await tester.pumpAndSettle();
-    expect(find.text('Page 2 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 2/2',
+    );
 
     // Selecting a sort key should snap back to page 1.
     final frequencyChip = find.widgetWithText(ChoiceChip, 'Frequency');
@@ -180,7 +215,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(frequencyChip);
     await tester.pumpAndSettle();
-    expect(find.text('Page 1 of 2'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 1/2',
+    );
   });
 
   testWidgets('shows the empty state when nothing matches', (tester) async {
@@ -235,7 +275,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('3 customers'), findsOneWidget);
-    expect(find.text('Page 1 of 1'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('customer-page-indicator')))
+          .data,
+      'Page 1/1',
+    );
     expect(find.text('Injected One'), findsOneWidget);
     expect(find.text('VIP'), findsOneWidget);
   });

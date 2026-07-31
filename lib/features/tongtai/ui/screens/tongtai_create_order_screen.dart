@@ -195,7 +195,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
             Padding(
               padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
               child: Text(
-                'Customer: ${widget.customer.name}',
+                context.l10n.orderForCustomer(widget.customer.name),
                 style: TongtaiDesignTokens.bodyStyle.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
