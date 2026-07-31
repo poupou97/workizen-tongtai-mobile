@@ -1,8 +1,6 @@
 library;
 
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -77,13 +75,24 @@ class _TongtaiBackupScreenState extends ConsumerState<TongtaiBackupScreen> {
 
   TongtaiBackupService get _service => ref.read(tongtaiBackupServiceProvider);
 
+  /// The production chooser: `file_selector` (maintained by the Flutter team).
+  ///
+  /// Not `file_picker`: its Windows implementation pins `win32 ^5` while
+  /// `share_plus` needs `^6`, and Dart compiles every platform's sources even
+  /// for an Android build — so the app would not build at all. `file_selector`
+  /// has no such conflict.
+  ///
+  /// No `XTypeGroup` filter: Android's document picker treats an unknown
+  /// extension as "no matching files", which would leave the seller staring at
+  /// an empty chooser holding a backup they can see in their file manager.
+  /// The file is validated immediately anyway, so a wrong pick is a clear
+  /// refusal rather than a silent one.
   Future<TongtaiPickedBackup?> _defaultPick() async {
-    final result = await FilePicker.platform.pickFiles(withData: false);
-    final path = result?.files.single.path;
-    if (path == null) return null;
+    final file = await openFile();
+    if (file == null) return null;
     return TongtaiPickedBackup(
-      path: path,
-      content: await File(path).readAsString(),
+      path: file.path,
+      content: await file.readAsString(),
     );
   }
 

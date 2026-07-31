@@ -51,6 +51,19 @@
   · Dep mới: `file_picker`, `crypto` (SHA-256 **đồng bộ** — bản async của
   `cryptography` không hoàn tất trong fake-async zone của `testWidgets`).
   · Testing Bible **P-13…P-15**. **1347 → 1387 tests.**
+  · **Device smoke test (S24 Ultra, release build) — MỘT PHẦN:** cài + mở app
+  (có plugin native mới) không crash · màn Backup & restore render đúng · **tạo
+  backup** sinh `.ttbk` và mở share sheet · **chọn file** qua `file_selector`
+  (SAF picker) · **đọc + validate + preview** hiển thị đúng created/app+db
+  version/không mã hoá/SHA-256/**tương thích** và **counts khớp chính xác** file
+  kiểm thử (5·3·2·1·4·1) · cảnh báo phá huỷ + nút đỏ "Replace current data" ·
+  `adb logcat -b crash` **rỗng**. ⚠️ **Bước apply (bấm Replace) KHÔNG chạy trên
+  thiết bị**: bản release không `run-as` được và SAF không thấy thư mục riêng
+  của app, nên bản sao lưu an toàn **không khôi phục lại được qua UI** — chạy
+  thử sẽ phá dữ liệu thật của Founder mà không có đường lùi. Apply + rollback
+  được chứng minh bằng test trên **file SQLite thật** (rollback đầy đủ khi hỏng
+  giữa chừng · vault ghi hỏng hoặc đọc lại hỏng ⇒ **không xoá gì** · verify
+  counts + FK **bên trong** transaction).
 - **⭐⭐ ERROR-HANDLING SEAM (WTM-148, 2026-07-31) — ADR-TON-017:** đóng gap hệ
   thống mà audit ADR-TON-015 phát hiện (**1/34 màn** có xử lý lỗi thật). Trước
   đó `initState → _load() → setState` để future lỗi không ai bắt, nên **"không
