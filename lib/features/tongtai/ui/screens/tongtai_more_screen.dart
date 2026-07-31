@@ -20,6 +20,7 @@ import 'tongtai_forecast_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_timeline_screen.dart';
+import 'tongtai_privacy_policy_screen.dart';
 
 /// Opens the language picker (WTM-119) and persists the choice; the app
 /// re-renders in the chosen locale via [languageProvider].
@@ -419,9 +420,14 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () {},
                 ),
                 _SettingsItem(
+                  key: const Key('more-privacy'),
                   icon: Icons.privacy_tip_outlined,
                   label: context.l10n.morePrivacy,
-                  onTap: () {},
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const TongtaiPrivacyPolicyScreen(),
+                    ),
+                  ),
                 ),
               ],
             ),

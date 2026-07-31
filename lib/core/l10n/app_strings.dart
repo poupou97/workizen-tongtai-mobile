@@ -367,6 +367,28 @@ abstract class AppStrings {
   String get moreLegalSection;
   String get moreTerms;
   String get morePrivacy;
+
+  // ── Privacy policy (WTM-37) ─────────────────────────────────────────────
+  // Source of truth: docs/05-OPERATIONS/PRIVACY-POLICY.md. Adding a telemetry
+  // event means editing both, in the same PR.
+  String get privacyTitle;
+  String get privacyUpdated;
+  String get privacyLocalTitle;
+  String get privacyLocalBody;
+  String get privacyAiTitle;
+  String get privacyAiBody;
+  String get privacyTelemetryTitle;
+  String get privacyTelemetryBody;
+  String get privacyCrashTitle;
+  String get privacyCrashBody;
+  String get privacyNoAdsTitle;
+  String get privacyNoAdsBody;
+  String get privacyBackupTitle;
+  String get privacyBackupBody;
+  String get privacySampleTitle;
+  String get privacySampleBody;
+  String get privacyRightsTitle;
+  String get privacyRightsBody;
   String get moreLogout;
 
   // ── opportunity feed extras (WTM-91) ────────────────────────────────────
@@ -1181,6 +1203,72 @@ class AppStringsVi extends AppStrings {
   String get moreTerms => 'Điều khoản dịch vụ';
   @override
   String get morePrivacy => 'Chính sách quyền riêng tư';
+
+  @override
+  String get privacyTitle => 'Chính sách quyền riêng tư';
+  @override
+  String get privacyUpdated => 'Cập nhật 31/07/2026';
+  @override
+  String get privacyLocalTitle => 'Dữ liệu kinh doanh nằm trên máy bạn';
+  @override
+  String get privacyLocalBody =>
+      'Khách hàng, sản phẩm, đơn hàng, mục tiêu, giao dịch — tất cả lưu trên '
+      'thiết bị này. Không tài khoản, không máy chủ Tổng Tài, không đồng bộ. '
+      'Chúng tôi không nhận được dữ liệu kinh doanh của bạn.';
+  @override
+  String get privacyAiTitle => 'Workizen AI dùng khoá của chính bạn';
+  @override
+  String get privacyAiBody =>
+      'Khi bạn hỏi Workizen AI, nội dung câu hỏi đi thẳng từ máy bạn tới nhà '
+      'cung cấp bạn đã chọn, kèm khoá API của bạn. Chúng tôi không trung '
+      'chuyển và không thấy nội dung đó — chính sách của nhà cung cấp áp dụng '
+      'cho phần họ nhận. Dùng chế độ Local (Ollama) thì không có gì rời máy. '
+      'Khoá lưu trong kho bảo mật của hệ điều hành, không nằm trong bản sao lưu.';
+  @override
+  String get privacyTelemetryTitle => 'Số liệu vận hành chúng tôi nhận';
+  @override
+  String get privacyTelemetryBody =>
+      'Chỉ hai thứ: app được mở (không kèm tham số nào), và một màn không đọc '
+      'được dữ liệu (kèm tên màn, loại lỗi, mã lỗi cố định). Không có tên khách '
+      'hàng, số tiền, số bản ghi, tên file hay đường dẫn. Mô tả lỗi chi tiết '
+      'chỉ hiện trên máy bạn.';
+  @override
+  String get privacyCrashTitle => 'Báo cáo sự cố';
+  @override
+  String get privacyCrashBody =>
+      'Khi app dừng đột ngột, chúng tôi nhận stack trace, model máy và phiên '
+      'bản hệ điều hành để sửa lỗi. Báo cáo gọi tên loại lỗi nhưng cố ý không '
+      'mang theo giá trị dữ liệu, tên khách hàng hay con số doanh thu.';
+  @override
+  String get privacyNoAdsTitle => 'Không quảng cáo, không hồ sơ người dùng';
+  @override
+  String get privacyNoAdsBody =>
+      'Không SDK quảng cáo, không theo dõi tiếp thị, không lập hồ sơ, không '
+      'quảng cáo cá nhân hoá. Quyền Advertising ID bị gỡ khỏi ứng dụng. Quyền '
+      'duy nhất app xin là truy cập Internet, để gọi nhà cung cấp AI bạn chọn.';
+  @override
+  String get privacyBackupTitle => 'Sao lưu';
+  @override
+  String get privacyBackupBody =>
+      'Bản sao lưu tạo trên máy bạn và chỉ rời khỏi máy nếu bạn chủ động chia '
+      'sẻ. Bạn có thể đặt mật khẩu. Mã kiểm tra SHA-256 dùng để phát hiện file '
+      'hỏng — đó là chống hỏng, không phải chống giả mạo. Bản sao lưu chứa dữ '
+      'liệu kinh doanh, không chứa khoá API.';
+  @override
+  String get privacySampleTitle => 'Dữ liệu mẫu';
+  @override
+  String get privacySampleBody =>
+      'Dữ liệu mẫu được ghi vào chính kho dữ liệu thật với tiền tố riêng, và '
+      'chỉ đúng những bản ghi đó bị gỡ khi bạn xoá dữ liệu mẫu. Dữ liệu bạn tự '
+      'nhập không bao giờ bị xoá bởi thao tác này.';
+  @override
+  String get privacyRightsTitle => 'Quyền của bạn';
+  @override
+  String get privacyRightsBody =>
+      'Gỡ app hoặc xoá dữ liệu ứng dụng là xoá sạch — dữ liệu chỉ nằm trên máy '
+      'nên không có bản sao ở nơi khác. Bạn có thể mang dữ liệu đi bằng file '
+      'CSV hoặc bản sao lưu. Xoá khoá API là tắt AI; app vẫn chạy đủ chức năng.';
+
   @override
   String get moreLogout => 'Đăng xuất';
 
@@ -2195,6 +2283,75 @@ class AppStringsEn extends AppStrings {
   String get moreTerms => 'Terms of Service';
   @override
   String get morePrivacy => 'Privacy Policy';
+
+  @override
+  String get privacyTitle => 'Privacy Policy';
+  @override
+  String get privacyUpdated => 'Updated 31 July 2026';
+  @override
+  String get privacyLocalTitle => 'Your business data stays on your device';
+  @override
+  String get privacyLocalBody =>
+      'Customers, products, orders, goals and transactions are all stored on '
+      'this device. No account, no Tổng Tài server, no sync. We never receive '
+      'your business data.';
+  @override
+  String get privacyAiTitle => 'Workizen AI uses your own key';
+  @override
+  String get privacyAiBody =>
+      'When you ask Workizen AI, your message goes directly from this device to '
+      'the provider you chose, authenticated with your own API key. We do not '
+      'proxy it and never see it — the provider\'s own policy governs what they '
+      'receive. In Local (Ollama) mode nothing leaves the device. Keys live in '
+      'the operating system secure store and are never included in a backup.';
+  @override
+  String get privacyTelemetryTitle => 'The operational data we do receive';
+  @override
+  String get privacyTelemetryBody =>
+      'Two things only: that the app was opened (with no parameters at all), '
+      'and that a screen failed to load data (with the screen name, the failure '
+      'kind and a fixed error code). No customer names, amounts, record counts, '
+      'file names or paths. Detailed error text stays on your device.';
+  @override
+  String get privacyCrashTitle => 'Crash reports';
+  @override
+  String get privacyCrashBody =>
+      'If the app stops unexpectedly we receive a stack trace, your device '
+      'model and OS version so we can fix it. A report names the kind of '
+      'failure but deliberately carries no data value, customer name or revenue '
+      'figure.';
+  @override
+  String get privacyNoAdsTitle => 'No ads, no profiling';
+  @override
+  String get privacyNoAdsBody =>
+      'No ad SDKs, no marketing tracking, no profiling, no personalised ads. '
+      'The Advertising ID permission is stripped from the app. The only '
+      'permission requested is internet access, to reach the AI provider you '
+      'chose.';
+  @override
+  String get privacyBackupTitle => 'Backups';
+  @override
+  String get privacyBackupBody =>
+      'A backup is created on your device and leaves it only if you share it. '
+      'You can set a passphrase. The SHA-256 checksum detects a corrupted file '
+      '— it is corruption protection, not tamper protection. Backups contain '
+      'your business data; they never contain API keys.';
+  @override
+  String get privacySampleTitle => 'Sample data';
+  @override
+  String get privacySampleBody =>
+      'Sample data is written into the real repositories under its own prefix, '
+      'and only those records are removed when you delete it. Data you entered '
+      'yourself is never deleted by that action.';
+  @override
+  String get privacyRightsTitle => 'Your choices';
+  @override
+  String get privacyRightsBody =>
+      'Uninstalling the app or clearing its data deletes everything — the data '
+      'is only on this device, so that is all of it. You can take your data '
+      'with you as CSV or as a backup file. Removing your API key turns AI off; '
+      'the app works fully without it.';
+
   @override
   String get moreLogout => 'Logout';
 
