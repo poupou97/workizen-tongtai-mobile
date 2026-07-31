@@ -484,6 +484,31 @@ abstract class AppStrings {
   String aiKeyTestOkSnack(String model);
   String aiKeyConsoleHint(String url, String provider);
   String aiKeyCardTitle(String provider);
+
+  // ── shared screen states (WTM-148 / ADR-TON-017) ────────────────────────
+  // One wording for every screen: a data-path failure must read the same in
+  // Inventory as in Reports, or the user learns nothing from seeing it twice.
+  String get stateLoading;
+  String get stateEmpty;
+  String get stateRetry;
+  String get stateInsufficientTitle;
+  String get stateInsufficientBody;
+  String get stateStaleTitle;
+  String get stateTechnicalDetail;
+  String get errorStorageTitle;
+  String get errorStorageBody;
+  String get errorNetworkTitle;
+  String get errorNetworkBody;
+  String get errorPermissionTitle;
+  String get errorPermissionBody;
+  String get errorConfigurationTitle;
+  String get errorConfigurationBody;
+  String get errorUnexpectedTitle;
+  String get errorUnexpectedBody;
+
+  /// "Showing data from 09:41" — the stale banner always names the moment, so
+  /// "old" is never left to the imagination.
+  String stateStaleBody(String time);
 }
 
 class AppStringsVi extends AppStrings {
@@ -1336,6 +1361,54 @@ class AppStringsVi extends AppStrings {
       'tới $provider.';
   @override
   String aiKeyCardTitle(String provider) => 'Khóa API $provider';
+
+  @override
+  String get stateLoading => 'Đang tải…';
+  @override
+  String get stateEmpty => 'Chưa có dữ liệu';
+  @override
+  String get stateRetry => 'Thử lại';
+  @override
+  String get stateInsufficientTitle => 'Chưa đủ dữ liệu để kết luận';
+  @override
+  String get stateInsufficientBody =>
+      'Ghi thêm dữ liệu thật rồi quay lại — hệ thống sẽ không đoán bừa.';
+  @override
+  String get stateStaleTitle => 'Dữ liệu chưa được làm mới';
+  @override
+  String get stateTechnicalDetail => 'Chi tiết kỹ thuật';
+  @override
+  String get errorStorageTitle => 'Không đọc được dữ liệu trên máy';
+  @override
+  String get errorStorageBody =>
+      'Dữ liệu vẫn nằm trên máy bạn, nhưng lần đọc này thất bại. '
+      'Thử lại; nếu vẫn lỗi, khởi động lại ứng dụng.';
+  @override
+  String get errorNetworkTitle => 'Không kết nối được';
+  @override
+  String get errorNetworkBody =>
+      'Kiểm tra kết nối mạng rồi thử lại. Dữ liệu kinh doanh của bạn vẫn ở '
+      'trên máy và không cần mạng.';
+  @override
+  String get errorPermissionTitle => 'Thiếu quyền truy cập';
+  @override
+  String get errorPermissionBody =>
+      'Hệ điều hành đã từ chối. Cấp quyền trong Cài đặt rồi mở lại màn này.';
+  @override
+  String get errorConfigurationTitle => 'Cần thiết lập trước';
+  @override
+  String get errorConfigurationBody =>
+      'Thiếu cấu hình để chạy được thao tác này. Hoàn tất thiết lập rồi thử '
+      'lại.';
+  @override
+  String get errorUnexpectedTitle => 'Lỗi không mong đợi';
+  @override
+  String get errorUnexpectedBody =>
+      'Đây là lỗi chưa được phân loại. Chi tiết kỹ thuật bên dưới giữ nguyên '
+      'để bạn (hoặc chúng tôi) truy được nguyên nhân.';
+  @override
+  String stateStaleBody(String time) =>
+      'Đang xem dữ liệu lúc $time. Lần làm mới gần nhất thất bại.';
 }
 
 class AppStringsEn extends AppStrings {
@@ -2190,6 +2263,55 @@ class AppStringsEn extends AppStrings {
       'directly to $provider only.';
   @override
   String aiKeyCardTitle(String provider) => '$provider API key';
+
+  @override
+  String get stateLoading => 'Loading…';
+  @override
+  String get stateEmpty => 'No data yet';
+  @override
+  String get stateRetry => 'Try again';
+  @override
+  String get stateInsufficientTitle => 'Not enough data to conclude';
+  @override
+  String get stateInsufficientBody =>
+      'Record more real data and come back — this will not guess.';
+  @override
+  String get stateStaleTitle => 'Data is not up to date';
+  @override
+  String get stateTechnicalDetail => 'Technical detail';
+  @override
+  String get errorStorageTitle => 'Could not read your data';
+  @override
+  String get errorStorageBody =>
+      'Your data is still on this device, but this read failed. Try again; '
+      'if it keeps failing, restart the app.';
+  @override
+  String get errorNetworkTitle => 'Could not connect';
+  @override
+  String get errorNetworkBody =>
+      'Check your connection and try again. Your business data lives on this '
+      'device and does not need the network.';
+  @override
+  String get errorPermissionTitle => 'Permission needed';
+  @override
+  String get errorPermissionBody =>
+      'The system denied access. Grant it in Settings, then reopen this '
+      'screen.';
+  @override
+  String get errorConfigurationTitle => 'Setup needed first';
+  @override
+  String get errorConfigurationBody =>
+      'Something has to be set up before this can run. Finish the setup and '
+      'try again.';
+  @override
+  String get errorUnexpectedTitle => 'Unexpected error';
+  @override
+  String get errorUnexpectedBody =>
+      'This one is unclassified. The technical detail below is kept verbatim '
+      'so the cause stays traceable.';
+  @override
+  String stateStaleBody(String time) =>
+      'Showing data from $time. The last refresh failed.';
 }
 
 /// `context.l10n.<key>` — the ergonomic accessor used throughout the UI.

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/telemetry/tongtai_telemetry.dart';
+import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../finance/finance_controller.dart';
 import '../../finance/finance_summary.dart';
@@ -8,6 +10,7 @@ import '../../finance/finance_transaction.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_finance_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_transaction_form_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 
@@ -39,6 +42,7 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
   late final FinanceController _controller;
   late final bool _ownsController;
   late final DateTime Function() _clock;
+  late final ScreenDataController<FinanceController> _data;
 
   @override
   void initState() {
@@ -52,12 +56,27 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
       _ownsController = true;
     }
     _clock = widget.clock ?? DateTime.now;
-    // Load the ledger from its source (Drift / sample / in-memory).
-    _controller.hydrate();
+    // Load the ledger from its source (Drift / sample / in-memory). A failure
+    // here used to leave the finance dashboard showing a clean 0 ₫ — money the
+    // seller does have, reported as money they do not (WTM-148).
+    _data = ScreenDataController<FinanceController>(
+      _read,
+      initialValue: _ownsController ? null : _controller,
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'finance',
+    )..start();
+  }
+
+  /// The hydrated ledger. Returning the controller (rather than a snapshot)
+  /// keeps it the live source: every later add still notifies through it.
+  Future<FinanceController> _read() async {
+    await _controller.hydrate();
+    return _controller;
   }
 
   @override
   void dispose() {
+    _data.dispose();
     if (_ownsController) _controller.dispose();
     super.dispose();
   }
@@ -68,15 +87,20 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
         builder: (_) => TongtaiTransactionFormScreen(clock: widget.clock),
       ),
     );
-    if (result != null) await _controller.add(result);
+    if (result == null) return;
+    final failure = await runTongtaiAction(
+      () => _controller.add(result),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'finance',
+    );
+    if (failure != null && mounted) showTongtaiFailure(context, failure);
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _controller,
+      listenable: Listenable.merge([_controller, _data]),
       builder: (context, _) {
-        final summary = _controller.summaryAsOf(_clock());
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
           appBar: AppBar(
@@ -93,9 +117,17 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
             icon: const Icon(Icons.add),
             label: Text(context.l10n.titleTransactionForm),
           ),
-          body: summary.hasActivity
-              ? _FinanceBody(summary: summary, recent: _controller.recent())
-              : const _FinanceEmptyState(),
+          body: TongtaiScreenData<FinanceController>(
+            prefix: 'finance',
+            state: _data.state,
+            onRetry: _data.retry,
+            isEmpty: (ledger) => !ledger.summaryAsOf(_clock()).hasActivity,
+            emptyBuilder: (_) => const _FinanceEmptyState(),
+            builder: (context, ledger) => _FinanceBody(
+              summary: ledger.summaryAsOf(_clock()),
+              recent: ledger.recent(),
+            ),
+          ),
         );
       },
     );

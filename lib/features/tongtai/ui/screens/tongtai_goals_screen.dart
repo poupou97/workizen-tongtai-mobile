@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../consumer/customer_order.dart';
+import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
 import '../../journey/business_goal_controller.dart';
@@ -11,6 +13,7 @@ import '../../journey/journey_progress.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../../providers/tongtai_orders_provider.dart';
+import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_goal_detail_screen.dart';
 import 'tongtai_goal_form_screen.dart';
 
@@ -58,8 +61,13 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
   late final bool _ownsController;
   late final DateTime Function() _clock;
 
-  /// Real orders backing the goal-detail sales insight (WTM-89).
-  List<CustomerOrder> _orders = const [];
+  /// Goal hydration AND the orders behind the sales insight (WTM-89), loaded
+  /// as one unit (WTM-148). The controller stays the live source of goals —
+  /// it changes on every upsert — so the state's value is the orders; what the
+  /// controller adds is that a failing `hydrate()` is no longer invisible.
+  late final ScreenDataController<List<CustomerOrder>> _data;
+
+  List<CustomerOrder> get _orders => _data.state.value ?? const [];
 
   @override
   void initState() {
@@ -67,29 +75,34 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
     if (widget.controller != null) {
       _controller = widget.controller!;
       _ownsController = false;
-      // Test mode: never reach for a provider — use whatever was injected.
-      _orders = widget.orders ?? const [];
     } else {
       // Real app: persistent Drift goals (WTM-124), empty for new users.
       _controller = BusinessGoalController(
         ref.read(businessGoalRepositoryProvider),
       );
       _ownsController = true;
-      _loadOrders();
     }
     _clock = widget.clock ?? DateTime.now;
-    if (_ownsController) _controller.hydrate();
+    _data = ScreenDataController<List<CustomerOrder>>(
+      _read,
+      // Injected controller ⇒ test/preview mode: the orders are whatever was
+      // passed in, known synchronously.
+      initialValue: _ownsController ? null : (widget.orders ?? const []),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'goals',
+    )..start();
   }
 
-  Future<void> _loadOrders() async {
-    final orders =
-        widget.orders ?? await ref.read(orderRepositoryProvider).loadAll();
-    if (!mounted) return;
-    setState(() => _orders = orders);
+  Future<List<CustomerOrder>> _read() async {
+    if (_ownsController) await _controller.hydrate();
+    // Test mode with an injected controller never reaches for a provider.
+    if (!_ownsController) return widget.orders ?? const [];
+    return widget.orders ?? await ref.read(orderRepositoryProvider).loadAll();
   }
 
   @override
   void dispose() {
+    _data.dispose();
     if (_ownsController) _controller.dispose();
     super.dispose();
   }
@@ -101,7 +114,20 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
       ),
     );
     if (!context.mounted || result == null) return;
-    await _controller.upsert(result);
+    // A save that fails must say so — silently losing a goal the seller just
+    // typed is the write-side twin of the silent-empty bug (WTM-148).
+    final failure = await runTongtaiAction(
+      () => _controller.upsert(result),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'goals',
+    );
+    if (failure != null && context.mounted) {
+      showTongtaiFailure(
+        context,
+        failure,
+        onRetry: () => _openForm(context, goal: goal),
+      );
+    }
   }
 
   /// Opens the goal detail (WTM-88) — progress, pace, action plan and tips —
@@ -138,7 +164,7 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
   Widget build(BuildContext context) {
     final now = _clock();
     return ListenableBuilder(
-      listenable: _controller,
+      listenable: Listenable.merge([_controller, _data]),
       builder: (context, _) {
         final goals = _controller.goals;
         // Auto-derive (WTM-138, Founder default): revenue-goal progress comes
@@ -161,23 +187,28 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
             label: Text(context.l10n.goalNew),
           ),
           body: SafeArea(
-            child: goals.isEmpty
-                ? const _EmptyState()
-                : ListView.separated(
-                    padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
-                    itemCount: display.length,
-                    separatorBuilder: (context, _) =>
-                        const SizedBox(height: TongtaiDesignTokens.spacing3),
-                    itemBuilder: (context, index) => _GoalCard(
-                      goal: display[index],
-                      now: now,
-                      onTap: () => _openDetail(
-                        context,
-                        display: display[index],
-                        original: goals[index],
-                      ),
-                    ),
+            child: TongtaiScreenData<List<CustomerOrder>>(
+              prefix: 'goals',
+              state: _data.state,
+              onRetry: _data.retry,
+              isEmpty: (_) => goals.isEmpty,
+              emptyBuilder: (_) => const _EmptyState(),
+              builder: (context, _) => ListView.separated(
+                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+                itemCount: display.length,
+                separatorBuilder: (context, _) =>
+                    const SizedBox(height: TongtaiDesignTokens.spacing3),
+                itemBuilder: (context, index) => _GoalCard(
+                  goal: display[index],
+                  now: now,
+                  onTap: () => _openDetail(
+                    context,
+                    display: display[index],
+                    original: goals[index],
                   ),
+                ),
+              ),
+            ),
           ),
         );
       },

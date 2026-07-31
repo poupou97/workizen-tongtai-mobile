@@ -5,6 +5,7 @@ import '../../consumer/customer.dart';
 import '../../consumer/customer_directory_controller.dart';
 import '../../consumer/customer_directory_service.dart';
 import '../../consumer/customer_order_history_service.dart';
+import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
 import '../../navigation/tongtai_design_tokens.dart';
@@ -13,9 +14,11 @@ import '../../providers/tongtai_consumer_provider.dart';
 import '../../providers/tongtai_inventory_provider.dart';
 import '../../providers/tongtai_orders_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_customer_form_screen.dart';
 import 'tongtai_customer_history_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 
 /// Color for a [CustomerTier] badge (WTM-75 AC: visual indicators for VIP /
 /// high-value customers). Pulled out as a pure function so the mapping is
@@ -70,7 +73,14 @@ class _TongtaiCustomerListScreenState
   /// only in the real-app path so purchase history can create + show real
   /// orders. Null in test/injected modes (history stays read-only there).
   OrderController? _orders;
-  List<Product> _products = const [];
+
+  /// Directory hydration + the product catalogue behind Create Order, as one
+  /// visible unit (WTM-148). This screen is the one the Founder repro landed
+  /// on: an unreadable customer table must never look like an empty address
+  /// book again.
+  late final ScreenDataController<List<Product>> _data;
+
+  List<Product> get _products => _data.state.value ?? const [];
 
   CustomerQuery _query = const CustomerQuery();
 
@@ -90,21 +100,30 @@ class _TongtaiCustomerListScreenState
         ref.read(customerRepositoryProvider),
       );
       _ownsDirectory = true;
-      // Real order source + inventory catalogue for Create Order (WTM-126).
-      _orders = OrderController(ref.read(orderRepositoryProvider))..hydrate();
-      _loadProducts();
+      // Real order source for Create Order (WTM-126).
+      _orders = OrderController(ref.read(orderRepositoryProvider));
     }
-    if (_ownsDirectory) _directory.hydrate();
+    _data = ScreenDataController<List<Product>>(
+      _read,
+      // Injected directory/service ⇒ test mode, where Create Order is not
+      // wired and there is no product catalogue to wait for.
+      initialValue: _orders == null ? const <Product>[] : null,
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'customer',
+    )..start();
   }
 
-  Future<void> _loadProducts() async {
-    final products = await ref.read(productRepositoryProvider).loadAll();
-    if (!mounted) return;
-    setState(() => _products = products);
+  Future<List<Product>> _read() async {
+    if (_ownsDirectory) await _directory.hydrate();
+    final orders = _orders;
+    if (orders == null) return const [];
+    await orders.hydrate();
+    return ref.read(productRepositoryProvider).loadAll();
   }
 
   @override
   void dispose() {
+    _data.dispose();
     _searchController.dispose();
     _orders?.dispose();
     if (_ownsDirectory) _directory.dispose();
@@ -128,7 +147,15 @@ class _TongtaiCustomerListScreenState
       ),
     );
     if (!context.mounted || result == null) return;
-    await _directory.upsert(result);
+    final failure = await runTongtaiAction(
+      () => _directory.upsert(result),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'customer',
+    );
+    if (failure != null && context.mounted) {
+      showTongtaiFailure(context, failure);
+      return;
+    }
     if (!context.mounted) return;
     setState(() => _query = _query.copyWith(pageIndex: 0));
   }
@@ -185,7 +212,7 @@ class _TongtaiCustomerListScreenState
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _directory,
+      listenable: Listenable.merge([_directory, _data]),
       builder: (context, _) {
         final service = _directory.service;
         final page = service.page(_query);
@@ -254,15 +281,19 @@ class _TongtaiCustomerListScreenState
                 ),
                 _ResultsHeader(count: page.totalCount),
                 Expanded(
-                  child: page.isEmpty
-                      ? const _EmptyState()
-                      : _CustomerList(
-                          customers: page.items,
-                          onEdit: (customer) =>
-                              _openForm(context, customer: customer),
-                          onHistory: (customer) =>
-                              _openHistory(context, customer),
-                        ),
+                  child: TongtaiScreenData<List<Product>>(
+                    prefix: 'customer',
+                    state: _data.state,
+                    onRetry: _data.retry,
+                    isEmpty: (_) => page.isEmpty,
+                    emptyBuilder: (_) => const _EmptyState(),
+                    builder: (context, _) => _CustomerList(
+                      customers: page.items,
+                      onEdit: (customer) =>
+                          _openForm(context, customer: customer),
+                      onHistory: (customer) => _openHistory(context, customer),
+                    ),
+                  ),
                 ),
               ],
             ),
