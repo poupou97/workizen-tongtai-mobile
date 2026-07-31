@@ -28,6 +28,8 @@ void main() {
     'tongtai_opportunity_feed_screen.dart': 'opportunity',
     'tongtai_opportunity_detail_screen.dart': 'opportunity',
     'tongtai_reports_screen.dart': 'reports',
+    'tongtai_forecast_screen.dart': 'forecast',
+    'tongtai_customer_risk_screen.dart': 'risk',
     'tongtai_export_screen.dart': 'export',
     'tongtai_more_screen.dart': 'more',
     'tongtai_chat_screen.dart': 'chat',
@@ -64,6 +66,10 @@ void main() {
     'tongtai_stock_alerts_screen.dart',
     'tongtai_supplier_search_screen.dart',
     'tongtai_supplier_favorites_screen.dart',
+    'tongtai_customer_risk_screen.dart',
+    // Every month in the analysis window is a row, empties included — the
+    // forecast history is a record list like any other (WTM-160).
+    'tongtai_forecast_screen.dart',
   };
 
   final keyLiteral = RegExp(r"Key\(\s*'([^']+)'");

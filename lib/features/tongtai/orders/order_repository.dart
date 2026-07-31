@@ -23,6 +23,14 @@ abstract class OrderRepository {
   /// Insert a new order or replace the one with the same id.
   Future<void> upsert(CustomerOrder order);
 
+  /// [upsert] for a whole collection, as ONE write (WTM-149 device defect 2) —
+  /// see `CustomerRepository.upsertAll` for why the seam exists.
+  ///
+  /// Every referenced customer must already be **committed**: `customer_id` is a
+  /// hard foreign key, and a batch is a single transaction, so writing orders
+  /// before their customers fails as SqliteException 787.
+  Future<void> upsertAll(Iterable<CustomerOrder> orders);
+
   /// Deletes every row whose id starts with [prefix] — the sample-data
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
@@ -76,24 +84,40 @@ class DriftOrderRepository implements OrderRepository {
     final businessId = await _workspace.ensureBusinessId(_db);
     await _db
         .into(_db.ordersTable)
-        .insertOnConflictUpdate(
-          OrdersTableCompanion.insert(
-            id: o.id,
-            businessId: businessId,
-            customerId: o.customerId,
-            orderNumber: Value(o.orderNumber),
-            orderDate: o.date,
-            // Structured revenue columns (SoT for query/report aggregation).
-            totalQuantity: o.totalQuantity,
-            subtotal: o.totalAmount,
-            totalAmount: o.totalAmount,
-            status: o.status.name,
-            // Full line detail as a tolerant JSON array.
-            items: encodeOrderItems(o.items),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
+        .insertOnConflictUpdate(_companion(o, businessId));
   }
+
+  @override
+  Future<void> upsertAll(Iterable<CustomerOrder> orders) async {
+    final rows = orders.toList(growable: false);
+    if (rows.isEmpty) return;
+    final businessId = await _workspace.ensureBusinessId(_db);
+    // One batch = one transaction = one fsync, instead of one per row.
+    await _db.batch(
+      (b) => b.insertAllOnConflictUpdate(_db.ordersTable, [
+        for (final o in rows) _companion(o, businessId),
+      ]),
+    );
+  }
+
+  /// The single row mapping, shared by [upsert] and [upsertAll] so the bulk
+  /// path can never drift from the single-row path.
+  OrdersTableCompanion _companion(CustomerOrder o, String businessId) =>
+      OrdersTableCompanion.insert(
+        id: o.id,
+        businessId: businessId,
+        customerId: o.customerId,
+        orderNumber: Value(o.orderNumber),
+        orderDate: o.date,
+        // Structured revenue columns (SoT for query/report aggregation).
+        totalQuantity: o.totalQuantity,
+        subtotal: o.totalAmount,
+        totalAmount: o.totalAmount,
+        status: o.status.name,
+        // Full line detail as a tolerant JSON array.
+        items: encodeOrderItems(o.items),
+        updatedAt: Value(DateTime.now()),
+      );
 
   CustomerOrder _toOrder(OrdersTableData row) => CustomerOrder(
     id: row.id,
@@ -129,6 +153,12 @@ class SampleOrderRepository implements OrderRepository {
   Future<void> upsert(CustomerOrder order) async {
     // Demo data is read-only — do not persist.
   }
+
+  @override
+  Future<void> upsertAll(Iterable<CustomerOrder> orders) async {
+    // Demo data is read-only — do not persist.
+  }
+
   @override
   Future<void> deleteByIdPrefix(String prefix) async {
     // Demo fixtures are read-only — nothing to delete.
@@ -156,6 +186,13 @@ class InMemoryOrderRepository implements OrderRepository {
       _orders[index] = order;
     } else {
       _orders.add(order);
+    }
+  }
+
+  @override
+  Future<void> upsertAll(Iterable<CustomerOrder> orders) async {
+    for (final o in orders) {
+      await upsert(o);
     }
   }
 

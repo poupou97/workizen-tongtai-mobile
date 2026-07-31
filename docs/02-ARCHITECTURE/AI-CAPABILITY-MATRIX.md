@@ -867,3 +867,66 @@ Confidence: 70% (model has 500+ samples for training)
 **Date:** 2026-07-13  
 **Related Docs:** BUSINESS-CAPABILITY-MODEL.md, INTEGRATION-MAP.md, AI-BUSINESS-COPILOT.md  
 **Next:** Create Jira Stories + Confluence Page
+
+---
+
+# PHẦN B — ĐÃ TRIỂN KHAI THẬT (live, cập nhật 2026-07-30)
+
+> Phần A ở trên là **thiết kế Phase 1** (danh mục tính năng dự kiến). Phần B
+> này ghi **đúng những gì đang chạy trong code** — khi hai phần mâu thuẫn,
+> **code thắng** (quy tắc Canonical: câu hỏi *thực trạng* do hệ thống sống trả
+> lời). Chuẩn: ADR-TON-013 (staged AI, read-only) + ADR-TON-016 (Capability
+> Context, AI chỉ giải thích).
+
+## Nguyên tắc bất biến (áp cho MỌI năng lực)
+
+1. **Rule twin là authoritative** — mọi tính năng AI có bản deterministic chạy
+   được khi **không key · không mạng · không AI**.
+2. **AI không hành động** — không mutate, không execute, không tool calling,
+   không ReAct. Boundary `ai/ai_runtime_boundary.dart` có sẵn nhưng **chưa
+   bật**; bật là quyết định Founder (red-line G-3).
+3. **AI không tự lấy dữ liệu** — không repository/entity/DB; chỉ thấy khối text
+   được đưa.
+4. **Zero spend khi rỗng** — business chưa có dữ liệu hoặc twin `insufficient`
+   ⇒ **không gọi provider nào**.
+5. **Không PII trong prompt** — không tên/SĐT/email/địa chỉ; twin mang **id**,
+   UI mới join id → tên.
+6. **BYOK/Local** — khoá của người dùng, rời máy đúng một lần trong header lời
+   gọi trực tiếp tới provider.
+
+## Ma trận năng lực đang chạy
+
+| # | Năng lực | Tier | AI đọc gì | Rule twin (authoritative) | AI KHÔNG được |
+|---|---|---|---|---|---|
+| 1 | Business Summary | G-3A | `businessContextPromptText` (snapshot phẳng) | `BusinessSummaryService` | đổi số liệu snapshot |
+| 2 | Recommendation | G-3B | như trên | `BusinessRecommendationService` | thực thi gợi ý |
+| 3 | Weekly Planner | G-3C | như trên | `BusinessPlanService` | tự chạy kế hoạch |
+| 4 | BusinessHealth AI | G-3D | như trên | `BusinessHealth` rule — status giữ **verbatim** | đổi status sức khoẻ |
+| 5 | Opportunity insight | G-3B' | context + opportunity block | `ruleBasedOpportunityInsight` (điểm rule authoritative) | thay Rule Engine |
+| 6 | **Revenue Forecast explain** | Predictive | `RevenueCapabilityContext.promptBlock()` + rule block | `RevenueForecastRule` `revenue-forecast/1` | đưa con số khác twin |
+| 7 | **Customer Risk explain** | Predictive | `CustomerCapabilityContext.promptBlock()` + rule block (**id, không tên**) | `CustomerRiskRule` `customer-risk/1` | đưa danh sách/điểm khác twin |
+| 8 | **Business Alerts explain** | Predictive | 2 capability block + rule block | `BusinessAlertsRule` `business-alerts/1` | tự tạo/bỏ cảnh báo |
+
+**Khác biệt kiến trúc của #6–#8:** chúng **không** đọc snapshot phẳng nữa mà đọc
+**Capability Context + Rule Twin output**. Đây chính là thứ khiến câu hỏi "AI dự
+báo được doanh thu / khách rời bỏ không?" trả lời được — #1–#5 giữ nguyên hợp
+đồng cũ.
+
+## Bất biến nào đang được test khoá
+
+| Bất biến | Test |
+|---|---|
+| AI không đổi được số | `predictive_ai_test.dart` — hostile AI trả "999.999.999 ₫"; kết quả vẫn mang `ruleVersion` + `reasonCodes` của twin |
+| Zero spend | cùng file — twin `insufficient` + có key ⇒ **không** provider call |
+| Không PII | `predictive_privacy_test.dart` — tên/SĐT/email fixture vắng mặt trong mọi prompt block |
+| Không tool runtime | ratchet cấu trúc: không file nào trong `lib/` tham chiếu `AiToolRuntime` |
+| Rule chạy không AI | mọi twin test chạy **không** cấu hình key |
+
+## Khi thêm năng lực AI mới
+
+1. Viết **rule twin trước**, ship được một mình.
+2. AI chỉ bọc phần giải thích; số liệu **copy** từ twin, **không parse** từ text model.
+3. Thêm một dòng vào bảng trên + một test bất biến tương ứng.
+4. Nếu năng lực cần AI **hành động** → dừng: đây là Founder Gate G-3.
+
+**Chi tiết thi công:** [CAPABILITY-BIBLE.md](CAPABILITY-BIBLE.md).

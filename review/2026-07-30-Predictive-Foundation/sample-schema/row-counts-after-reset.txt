@@ -1,0 +1,5 @@
+customers|1
+products|9
+orders|0
+transactions|4
+goals|0

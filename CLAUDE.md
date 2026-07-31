@@ -53,6 +53,13 @@ domain model, AI matrix, ADRs.
 - `lib/features/tongtai/` = product code · `lib/core/` = platform seams.
 - **ADR-TON-014** — sample data seed vào production repos (prefix `sample-`);
   KHÔNG parallel demo state.
+- **ADR-TON-016** — **Capability Context · Rule Twin · AI Runtime Boundary**:
+  BusinessContext CHỈ giữ summary nhẹ (cấm God Object); phân tích chuyên sâu =
+  Capability Context độc lập tải on-demand; `Repository → Aggregation Services →
+  Capability Context → BusinessContext (summary) → Rule Twin → AI Router → AI →
+  (Tool Runtime optional) → Human`. **Rule Twin authoritative** (chạy không cần
+  AI/mạng/key, cấm bịa số khi thiếu dữ liệu); **AI chỉ giải thích**. Công thức
+  thêm capability: `docs/02-ARCHITECTURE/CAPABILITY-BIBLE.md`.
 - **ADR-TON-015** — **UI Implementation Maturity Model (L0–L4)** + **One Data
   Path**: `Repository → Context Provider → BusinessContext → Screen`. Cấm
   parallel cache, hardcode business data, mỗi màn tự tính summary. Contract

@@ -17,8 +17,10 @@ import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart';
 import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_risk_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_export_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_finance_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_forecast_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
@@ -123,6 +125,8 @@ void main() {
     'export': () => const TongtaiExportScreen(),
     'finance': () => const TongtaiFinanceScreen(),
     'timeline': () => const TongtaiTimelineScreen(),
+    'customer-risk': () => const TongtaiCustomerRiskScreen(),
+    'forecast': () => const TongtaiForecastScreen(),
   };
 
   for (final locale in ['vi', 'en']) {

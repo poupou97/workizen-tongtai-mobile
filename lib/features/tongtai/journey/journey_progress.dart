@@ -1,5 +1,5 @@
 import '../consumer/customer_order.dart';
-import '../core/tongtai_enums.dart';
+import '../metrics/business_metrics.dart';
 import 'business_goal.dart';
 
 /// Reconciles a [BusinessGoal] against **real recorded sales** (WTM-89).
@@ -28,8 +28,7 @@ class JourneyProgressService {
     // The window never runs past the goal's own end, nor into the future.
     final windowEnd = now.isBefore(goal.endDate) ? now : goal.endDate;
     if (windowEnd.isBefore(goal.startDate)) return 0;
-    return orders
-        .where((o) => o.status != OrderStatus.cancelled)
+    return orders.billable
         .where(
           (o) => !o.date.isBefore(goal.startDate) && !o.date.isAfter(windowEnd),
         )

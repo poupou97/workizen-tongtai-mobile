@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../sample/historical_data_generator.dart';
 import '../sample/sample_data_seeder.dart';
 import 'tongtai_consumer_provider.dart';
 import 'tongtai_finance_provider.dart';
@@ -18,4 +19,16 @@ final sampleDataSeederProvider = Provider<SampleDataSeeder>(
     goals: ref.watch(businessGoalRepositoryProvider),
     finance: ref.watch(financeRepositoryProvider),
   ),
+);
+
+/// Months-to-years of generated business history over the SAME repositories and
+/// the SAME `sample-` lifecycle (WTM-149 Predictive Foundation): it wraps
+/// [sampleDataSeederProvider], so "Xóa dữ liệu mẫu" removes generated history
+/// exactly like the hand-written fixtures — there is no second seeding path.
+///
+/// Opportunities and Timeline events are NOT seeded: the existing rule engine
+/// and event sources derive them from this data (ADR-TON-014 one source).
+final historicalDataSeederProvider = Provider<HistoricalDataSeeder>(
+  (ref) =>
+      HistoricalDataSeeder(sampleSeeder: ref.watch(sampleDataSeederProvider)),
 );

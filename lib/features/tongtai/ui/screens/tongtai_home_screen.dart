@@ -8,6 +8,7 @@ import '../../metrics/business_metrics.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../providers/tongtai_context_provider.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../../providers/tongtai_sample_provider.dart';
 import '../../providers/tongtai_search_provider.dart';
@@ -137,6 +138,11 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
   Future<void> _seedSamples() async {
     setState(() => _seeding = true);
     await ref.read(sampleDataSeederProvider).seed();
+    // The cached capability/twin/opportunity providers must drop their pre-seed
+    // answers BEFORE `_load()` reads them again (WTM-149 device defect 1) —
+    // `generatedOpportunitiesProvider` is one of them, so without this Home
+    // would repaint with the numbers it had before the seed.
+    invalidateBusinessDataProviders(ref);
     if (!mounted) return;
     setState(() => _seeding = false);
     await _load();

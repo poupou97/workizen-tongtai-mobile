@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_directory_service.dart';
 import '../consumer/customer_order.dart';
-import '../core/tongtai_enums.dart';
+import '../metrics/business_metrics.dart';
 
 /// Revenue booked in one calendar month — a single bar in the dashboard's
 /// revenue trend (WTM-95).
@@ -329,10 +329,9 @@ class ReportsService {
   /// How many trailing months the revenue trend spans (inclusive of `now`).
   final int monthsBack;
 
-  /// Orders that count toward revenue: everything except cancelled, matching
-  /// [OrderHistoryMetrics]'s billable rule.
-  Iterable<CustomerOrder> get _billable =>
-      _orders.where((o) => o.status != OrderStatus.cancelled);
+  /// Orders that count toward revenue — the shared [isBillableOrder] rule
+  /// (cancelled excluded), identical to KPIs, Journey and the analytics layer.
+  Iterable<CustomerOrder> get _billable => _orders.billable;
 
   /// Builds the dashboard snapshot as of [now].
   BusinessReport reportAsOf(DateTime now) {

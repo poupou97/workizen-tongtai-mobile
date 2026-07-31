@@ -4,6 +4,7 @@ import '../core/tongtai_enums.dart';
 import '../inventory/product.dart';
 import '../journey/business_goal.dart';
 import '../journey/journey_progress.dart';
+import '../metrics/business_metrics.dart';
 import 'opportunity.dart';
 
 /// The Opportunity **Rule Engine** (WTM-139, Founder default → ADR-TON-013):
@@ -34,9 +35,7 @@ class OpportunityRuleEngine {
     required List<BusinessGoal> goals,
     required DateTime now,
   }) {
-    final billable = orders
-        .where((o) => o.status != OrderStatus.cancelled)
-        .toList(growable: false);
+    final billable = orders.billable.toList(growable: false);
     final result = <Opportunity>[
       ..._restock(products, billable, now),
       ..._winBack(customers, billable, now),

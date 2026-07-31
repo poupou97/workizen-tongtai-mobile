@@ -14,6 +14,10 @@ abstract class ProductRepository {
   /// Insert a new product or replace the one with the same id.
   Future<void> upsert(Product product);
 
+  /// [upsert] for a whole collection, as ONE write (WTM-149 device defect 2) —
+  /// see `CustomerRepository.upsertAll` for why the seam exists.
+  Future<void> upsertAll(Iterable<Product> products);
+
   /// Deletes every row whose id starts with [prefix] — the sample-data
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
@@ -53,26 +57,42 @@ class DriftProductRepository implements ProductRepository {
     final businessId = await _workspace.ensureBusinessId(_db);
     await _db
         .into(_db.productsTable)
-        .insertOnConflictUpdate(
-          ProductsTableCompanion.insert(
-            id: p.id,
-            businessId: businessId,
-            sku: p.sku,
-            name: p.name,
-            listPrice: p.pricePerUnit,
-            category: Value(p.category),
-            description: Value(p.description),
-            totalStock: Value(p.quantity.toDouble()),
-            stockAlertLevel: Value(p.reorderLevel.toDouble()),
-            domainSnapshot: Value(
-              encodeDomainSnapshot({
-                'imagePaths': p.imagePaths,
-              }, version: _snapshotVersion),
-            ),
-            updatedAt: Value(p.updatedAt),
-          ),
-        );
+        .insertOnConflictUpdate(_companion(p, businessId));
   }
+
+  @override
+  Future<void> upsertAll(Iterable<Product> products) async {
+    final rows = products.toList(growable: false);
+    if (rows.isEmpty) return;
+    final businessId = await _workspace.ensureBusinessId(_db);
+    // One batch = one transaction = one fsync, instead of one per row.
+    await _db.batch(
+      (b) => b.insertAllOnConflictUpdate(_db.productsTable, [
+        for (final p in rows) _companion(p, businessId),
+      ]),
+    );
+  }
+
+  /// The single row mapping, shared by [upsert] and [upsertAll] so the bulk
+  /// path can never drift from the single-row path.
+  ProductsTableCompanion _companion(Product p, String businessId) =>
+      ProductsTableCompanion.insert(
+        id: p.id,
+        businessId: businessId,
+        sku: p.sku,
+        name: p.name,
+        listPrice: p.pricePerUnit,
+        category: Value(p.category),
+        description: Value(p.description),
+        totalStock: Value(p.quantity.toDouble()),
+        stockAlertLevel: Value(p.reorderLevel.toDouble()),
+        domainSnapshot: Value(
+          encodeDomainSnapshot({
+            'imagePaths': p.imagePaths,
+          }, version: _snapshotVersion),
+        ),
+        updatedAt: Value(p.updatedAt),
+      );
 
   Product _toProduct(ProductsTableData row) => Product(
     id: row.id,
@@ -111,6 +131,12 @@ class SampleProductRepository implements ProductRepository {
   Future<void> upsert(Product product) async {
     // Demo data is read-only — do not persist.
   }
+
+  @override
+  Future<void> upsertAll(Iterable<Product> products) async {
+    // Demo data is read-only — do not persist.
+  }
+
   @override
   Future<void> deleteByIdPrefix(String prefix) async {
     // Demo fixtures are read-only — nothing to delete.
@@ -134,6 +160,13 @@ class InMemoryProductRepository implements ProductRepository {
       _products[index] = product;
     } else {
       _products.add(product);
+    }
+  }
+
+  @override
+  Future<void> upsertAll(Iterable<Product> products) async {
+    for (final p in products) {
+      await upsert(p);
     }
   }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../core/tongtai_enums.dart';
+import '../metrics/business_metrics.dart';
 import 'customer_order.dart';
 
 /// Filters applied to a customer's purchase history (WTM-77 AC4): an optional
@@ -121,10 +121,8 @@ class CustomerOrderHistoryService {
   /// Purchase metrics over [customerId]'s non-cancelled orders (AC5).
   OrderHistoryMetrics metricsFor(String customerId) {
     final counted = [
-      for (final order in _orders)
-        if (order.customerId == customerId &&
-            order.status != OrderStatus.cancelled)
-          order,
+      for (final order in _orders.billable)
+        if (order.customerId == customerId) order,
     ];
     if (counted.isEmpty) return OrderHistoryMetrics.empty;
     final total = counted.fold<double>(0, (sum, o) => sum + o.totalAmount);

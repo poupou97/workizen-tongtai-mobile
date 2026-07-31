@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS "orders_table" ("id" TEXT NOT NULL, "business_id" TEXT NOT NULL REFERENCES businesses_table (id) ON DELETE CASCADE, "customer_id" TEXT NOT NULL REFERENCES customers_table (id), "channel_id" TEXT NULL REFERENCES channels_table (id), "order_number" TEXT NULL, "order_date" INTEGER NOT NULL, "total_quantity" INTEGER NOT NULL, "subtotal" REAL NOT NULL, "discount" REAL NOT NULL DEFAULT 0.0, "shipping_cost" REAL NULL, "total_amount" REAL NOT NULL, "status" TEXT NOT NULL, "payment_status" TEXT NULL, "items" TEXT NOT NULL, "external_id" TEXT NULL, "created_at" INTEGER NOT NULL DEFAULT 1784865953, "updated_at" INTEGER NOT NULL DEFAULT 1784865953, PRIMARY KEY ("id"));
+CREATE INDEX orders_business_id ON orders_table (business_id);
+CREATE INDEX orders_customer_id ON orders_table (customer_id);
+CREATE INDEX orders_order_date ON orders_table (order_date);

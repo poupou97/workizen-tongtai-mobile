@@ -101,6 +101,19 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 - **Prevention:** màn mới thêm vào ma trận `screens` của overflow suite trong
   cùng PR.
 
+## P-08 · Dự báo bịa khi chưa đủ dữ liệu
+
+- **Root cause (lớp lỗi phòng ngừa):** một rule dự báo rất dễ trả `0` hoặc một
+  con số "cho có" khi lịch sử quá ngắn — người dùng không phân biệt được *chưa
+  đủ dữ liệu* với *dự báo bằng 0*. Cùng họ với P-03.
+- **Regression:** test chỉ assert "có trả về số" sẽ xanh với cả hai trường hợp.
+- **Test pattern:** envelope `RuleTwinResult` assert ngay trong constructor —
+  `result == null` **⟺** `sufficiency == insufficient`, insufficient ⇒
+  `confidence == none`. Test tại **mọi ngưỡng biên** (2↔3, 5↔6, 11↔12 tháng);
+  UI phải assert **sự VẮNG MẶT** của headline ở trạng thái insufficient.
+- **Prevention:** không rule nào được trả số khi thiếu dữ liệu; màn hình render
+  lời từ chối + `reasonCodes`, không render 0.
+
 ---
 
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
@@ -144,6 +157,9 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `nav_availability_test.dart` | 5 tab + toàn bộ More + create paths ở mọi data state |
 | `overflow_test.dart` | không overflow 320px/1.3×/2.0×, 2 locale, rỗng + có dữ liệu |
 | `stable_test_ids_test.dart` | màn L2+ phải có Key theo quy ước |
+| `predictive/predictive_edge_cases_test.dart` | biên tháng · timezone · restart trên file SQLite thật · reset sample · user data cùng tồn tại · ngưỡng sufficiency |
+| `predictive/predictive_privacy_test.dart` | prompt/twin/telemetry không mang PII |
+| `predictive/predictive_ai_test.dart` | hostile AI không đổi được số · zero-spend · không tool runtime |
 
 ## Khi sửa bug mới — checklist
 

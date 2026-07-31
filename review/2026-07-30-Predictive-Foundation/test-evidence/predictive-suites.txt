@@ -1,0 +1,357 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (105.0.0 available)
+  analyzer 13.3.0 (14.1.0 available)
+  build 4.0.8 (4.0.9 available)
+  build_config 1.3.1 (1.3.2 available)
+  build_daemon 4.1.2 (4.1.3 available)
+  build_runner 2.15.2 (2.15.3 available)
+  cli_util 0.4.2 (0.5.2 available)
+  drift 2.34.2 (2.34.3 available)
+  drift_dev 2.34.4 (2.34.5 available)
+  flutter_markdown 0.7.7+1 (discontinued replaced by flutter_markdown_plus)
+  flutter_riverpod 3.3.2 (3.4.2 available)
+  flutter_secure_storage_darwin 0.3.2 (0.4.0 available)
+  flutter_secure_storage_platform_interface 2.0.1 (2.0.2 available)
+  hooks 2.0.2 (2.1.0 available)
+  jni 1.0.0 (1.0.2 available)
+  jni_flutter 1.0.1 (1.0.2 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.3 available)
+  objective_c 9.4.1 (9.5.0 available)
+  package_config 2.2.0 (3.0.0 available)
+  record_use 0.6.0 (1.0.0 available)
+  riverpod 3.3.2 (3.4.2 available)
+  share_plus 13.2.1 (13.3.0 available)
+  share_plus_platform_interface 7.1.0 (7.2.0 available)
+  source_gen 4.2.3 (4.2.4 available)
+  sqlite3_flutter_libs 0.5.42 (0.6.0+eol available)
+  test 1.31.1 (1.31.2 available)
+  test_api 0.7.12 (0.7.13 available)
+  test_core 0.6.18 (0.6.19 available)
+  vector_graphics_compiler 1.2.6 (1.3.0 available)
+  vector_math 2.4.0 (2.4.2 available)
+Got dependencies!
+1 package is discontinued.
+30 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_ai_test.dart
+00:00 +0: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +1: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +2: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +3: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +4: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +5: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +6: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +7: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +8: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +9: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism same spec + seed twice ⇒ identical ids, dates and amounts
+00:00 +10: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_ai_test.dart: predictiveAiPromptText (what actually leaves the device) customer risk: ids, counts and bands — never a person
+00:00 +11: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism the default end month follows the injected clock, not the wall clock
+00:00 +12: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism the default end month follows the injected clock, not the wall clock
+00:00 +13: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism the default end month follows the injected clock, not the wall clock
+00:00 +14: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_ai_test.dart: every provider fails → the deterministic explanation answers
+00:00 +15: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism a different seed produces different data
+00:00 +16: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism a different seed produces different data
+00:00 +17: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_data_generator_test.dart: determinism a different seed produces different data
+00:00 +18: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_ai_test.dart: AI Runtime Boundary (WTM-159, ADR-TON-016 Decision 5) structural: nothing under lib/ wires an AiToolRuntime
+00:00 +19: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_ai_test.dart: AI Runtime Boundary (WTM-159, ADR-TON-016 Decision 5) structural: nothing under lib/ wires an AiToolRuntime
+00:00 +20: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_ai_test.dart: AI Runtime Boundary (WTM-159, ADR-TON-016 Decision 5) structural: nothing under lib/ wires an AiToolRuntime
+00:00 +21: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_ai_test.dart: AI Runtime Boundary (WTM-159, ADR-TON-016 Decision 5) structural: nothing under lib/ wires an AiToolRuntime
+00:00 +22: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_ai_test.dart: AI Runtime Boundary (WTM-159, ADR-TON-016 Decision 5) structural: nothing under lib/ wires an AiToolRuntime
+00:00 +23: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +24: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +25: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +26: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +27: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +28: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +29: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +30: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +31: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +32: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +33: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +34: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +35: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +36: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +37: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +38: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +39: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +40: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +41: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +42: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +43: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +44: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +45: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +46: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +47: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +48: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +49: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +50: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +51: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary 23:59:59 on the 31st and 00:00:00 on the 1st are different months
+00:00 +52: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary a forecast computed on the 1st excludes the empty running month
+00:00 +53: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: month boundary an order inside the running month never enters the base
+00:00 +54: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: timezone — buckets follow the LOCAL calendar month MonthKey.of converts a UTC instant to local first
+00:00 +55: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: timezone — buckets follow the LOCAL calendar month a UTC-stored order buckets by the month the seller saw
+00:00 +56: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +57: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +58: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +59: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +60: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +61: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +62: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +63: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +64: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +65: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +66: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +67: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +68: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +69: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +70: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +71: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +72: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +73: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +74: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +75: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +76: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +77: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +78: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +79: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +80: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +81: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +82: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +83: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +84: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +85: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +86: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +87: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +88: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +89: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +90: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +91: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +92: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +93: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +94: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +95: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +96: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +97: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +98: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +99: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +100: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +101: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +102: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +103: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +104: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +105: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +106: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +107: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +108: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +109: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +110: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +111: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +112: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +113: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +114: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +115: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +116: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +117: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +118: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +119: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +120: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +121: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +122: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +123: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +124: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +125: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +126: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +127: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +128: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +129: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +130: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +131: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +132: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +133: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +134: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +135: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +136: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +137: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +138: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +139: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +140: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +141: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +142: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +143: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +144: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +145: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +146: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +147: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +148: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: RESTART: a new AppDatabase on the same file reproduces the exact forecast and the exact risk ranking
+00:00 +149: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +150: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +151: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +152: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +153: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +154: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +155: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +156: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +157: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +158: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/revenue_forecast_rule_test.dart: revenueForecastProvider (production wiring, no AI/network/key) an empty repository resolves to an honest refusal
+00:00 +159: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +160: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +161: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +162: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +163: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +164: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +165: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +166: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +167: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +168: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:00 +169: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:01 +170: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:01 +171: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: reset sample data after removeAll the twins refuse — no fabricated zeros
+00:01 +172: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: 12 months seeded into a REAL SQLite file persist EXACTLY the generated HistoricalDataSet (batch path ≡ per-row path)
+00:01 +173: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: 12 months seeded into a REAL SQLite file persist EXACTLY the generated HistoricalDataSet (batch path ≡ per-row path)
+seed(12 months): 225 ms for 42 customers, 14 products, 529 orders, 2 goals, 544 transactions
+00:01 +174: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: 12 months seeded into a REAL SQLite file persist EXACTLY the generated HistoricalDataSet (batch path ≡ per-row path)
+00:01 +175: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: sample history and user rows are BOTH consumed — no prefix filtering in the predictive path
+00:01 +176: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: re-seeding is idempotent and removal wipes every generated row
+00:01 +177: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: re-seeding is idempotent and removal wipes every generated row
+00:01 +178: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: re-seeding is idempotent and removal wipes every generated row
+00:01 +179: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: re-seeding is idempotent and removal wipes every generated row
+00:01 +180: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: re-seeding is idempotent and removal wipes every generated row
+00:01 +181: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: sufficiency boundaries (months WITH revenue) 6 months → sufficient + medium (the flip)
+00:01 +182: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: a user order written against a seeded customer pins that customer through removal (WTM-162 foreign key)
+00:01 +183: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/historical_seed_file_test.dart: a user order written against a seeded customer pins that customer through removal (WTM-162 foreign key)
+00:01 +184: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/predictive_edge_cases_test.dart: empty and degenerate businesses return well-formed envelopes six months of orders that all booked ZERO revenue
+00:01 +185: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:01 +186: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:01 +187: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +188: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +189: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +190: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +191: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +192: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +193: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +194: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +195: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +196: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +197: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +198: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +199: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +200: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +201: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +202: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +203: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +204: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +205: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +206: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +207: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +208: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +209: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +210: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +211: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +212: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: no orders → the honest refusal, and NO headline at all
+00:02 +213: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/customer_risk_screen_test.dart: empty directory → the empty state, and NOT a single row
+00:02 +214: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/customer_risk_screen_test.dart: empty directory → the empty state, and NOT a single row
+00:02 +215: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/customer_risk_screen_test.dart: empty directory → the empty state, and NOT a single row
+00:02 +216: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/customer_risk_screen_test.dart: empty directory → the empty state, and NOT a single row
+00:02 +217: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: 12 months of history → a forecast, and EVERY month as a row
+00:02 +218: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: 12 months of history → a forecast, and EVERY month as a row
+00:02 +219: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: 12 months of history → a forecast, and EVERY month as a row
+00:02 +220: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/customer_risk_screen_test.dart: Summary Count == Visible Records: every stage counter equals its rows
+00:02 +221: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: the rendered headline IS the twin number — no second computation, no friendlier rounding
+00:02 +222: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/customer_risk_screen_test.dart: the row shows the NAME joined from the repository, while the assessment itself still holds no PII
+00:02 +223: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: the AI action EXPLAINS the twin — it never replaces the number, and with no BYOK key it still answers
+00:02 +224: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: the AI action EXPLAINS the twin — it never replaces the number, and with no BYOK key it still answers
+00:02 +225: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: the AI action EXPLAINS the twin — it never replaces the number, and with no BYOK key it still answers
+00:02 +226: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/predictive/forecast_screen_test.dart: reason codes render as localized text — both locales
+00:02 +227: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: provider + metadata default window: 12 completed months, running month excluded
+00:02 +228: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: provider + metadata generatedAt is the injected clock, never DateTime.now()
+00:02 +229: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: provider + metadata a different clock moves the window — the clock is the only input that is not the orders
+00:02 +230: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: provider + metadata the running month never enters the analysable base
+00:02 +231: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: billable exclusion (the shared isBillableOrder rule) cancelled orders are not revenue, but stay in the lifetime order history
+00:02 +232: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: billable exclusion (the shared isBillableOrder rule) a window of nothing but cancelled orders is honestly "no data"
+00:02 +233: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: growth · trend · comparison — ramp 100k…600k (Jan–Jun 2026) totals and AOV
+00:02 +234: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: growth · trend · comparison — ramp 100k…600k (Jan–Jun 2026) month-over-month growth = (600k − 500k) / 500k = +20%
+00:02 +235: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: growth · trend · comparison — ramp 100k…600k (Jan–Jun 2026) trend slope = a perfect +100k per month
+00:02 +236: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/revenue_capability_test.dart: growth · trend · comparison — ramp 100k…600k (Jan–Jun 2026) window comparison: Apr–Jun 1.5M vs Jan–Mar 600k = +150%
+00:02 +237: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +238: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +239: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +240: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +241: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +242: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +243: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +244: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +245: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +246: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata one profile per customer, in directory order, clock injected
+00:02 +247: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: provider + metadata recency + monetary come straight from the RFM service
+00:02 +248: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: lifecycle segmentation each fixture lands in its expected bucket
+00:02 +249: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: lifecycle segmentation a customer's own cadence beats the fixed window — both ways
+00:02 +250: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: lifecycle segmentation the cadence floor protects very frequent buyers
+00:02 +251: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: lifecycle segmentation stage counts are mutually exclusive and sum to the directory
+00:02 +252: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: lifecycle segmentation overlapping counts: new · returning · win-back
+00:02 +253: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: lifecycle segmentation cancelled orders are invisible to the segmentation
+00:02 +254: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: recency distribution + bands the raw histogram uses the fixed windows, not the cadence
+00:02 +255: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: recency distribution + bands monetary bands: p50 = 700k, p80 = 3.8M over the 8 spends
+00:02 +256: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: recency distribution + bands frequency bands: p50 = 1 order, p80 = 3.6 orders
+00:02 +257: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: hasData honesty an empty directory has no data and says so plainly
+00:02 +258: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: hasData honesty a directory where nobody has bought is still real data
+00:02 +259: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: promptBlock — the AI-facing surface reports the segmentation with its thresholds
+00:02 +260: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: promptBlock — the AI-facing surface is PII-free: no name, phone, email or customer id
+00:02 +261: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/capability/customer_capability_test.dart: promptBlock — the AI-facing surface is pure: same directory + same clock → byte-identical block
+00:03 +262: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: compute — recency / frequency / monetary a regular buyer: R = 10 days, F = 3, M = 600
+00:03 +263: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: compute — recency / frequency / monetary recency counts whole calendar days, not elapsed hours
+00:03 +264: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: compute — recency / frequency / monetary a long-lapsed single buyer: 186 days since 10 Jan 2026
+00:03 +265: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: compute — recency / frequency / monetary a customer with no orders keeps every signal absent
+00:03 +266: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: compute — recency / frequency / monetary cancelled orders are invisible (shared billable rule)
+00:03 +267: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: compute — recency / frequency / monetary one profile per customer, in input order; empty in → empty out
+00:03 +268: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: medianGapDays — the customer's own cadence a regular monthly buyer → 30 days
+00:03 +269: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: medianGapDays — the customer's own cadence an irregular buyer: gaps 10 · 100 · 30 → median 30, not the mean 46.7
+00:03 +270: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: medianGapDays — the customer's own cadence gapRatioWithFloor never divides by a cadence below the floor
+00:03 +271: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: medianGapDays — the customer's own cadence gapRatioWithFloor is null without a cadence or without orders
+00:03 +272: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: medianGapDays — the customer's own cadence even gap count averages the two middles: 10 and 20 → 15
+00:03 +273: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: medianGapDays — the customer's own cadence unsorted input gives the same answer; < 2 dates → null
+00:03 +274: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: window filtering windowMonths counts calendar months and includes the running one
+00:03 +275: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: window filtering a customer who has gone quiet has 0 orders in the window
+00:03 +276: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: quantile banding helpers monetaryQuantiles interpolates like a spreadsheet
+00:03 +277: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: quantile banding helpers frequencyQuantiles uses lifetime order counts
+00:03 +278: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: quantile banding helpers empty input → empty cut-offs, never a throw
+00:03 +279: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/customer_rfm_test.dart: quantile banding helpers band: a value exactly on a cut-off lands in the higher band
+00:03 +280: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/cashflow_series_test.dart: fromTransactions — monthly income / expense / profit each month carries its own income, expense and profit
+00:03 +281: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape emits one point per month, oldest → newest, current month dropped
+00:03 +282: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape emits one point per month, oldest → newest, current month dropped
+00:03 +283: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape emits one point per month, oldest → newest, current month dropped
+00:03 +284: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape emits one point per month, oldest → newest, current month dropped
+00:03 +285: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape emits one point per month, oldest → newest, current month dropped
+00:03 +286: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape emits one point per month, oldest → newest, current month dropped
+00:03 +287: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape emits one point per month, oldest → newest, current month dropped
+00:03 +288: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/cashflow_series_test.dart: empty / degenerate input no transactions still emits the full window as zeros
+00:03 +289: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape excludeCurrentMonth: false ends on the running month
+00:03 +290: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape excludeCurrentMonth: false ends on the running month
+00:03 +291: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape non-positive months yields an empty, well-formed series
+00:03 +292: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — window shape RevenueSeries.empty is a usable zero snapshot
+00:03 +293: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — bucketing month boundaries: 1st 00:00 and last day 23:59 stay in their month
+00:03 +294: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — bucketing the running month is excluded from the analysable base
+00:03 +295: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — bucketing months without orders are emitted as explicit zeros, not gaps
+00:03 +296: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — bucketing cancelled orders never count as revenue (shared billable rule)
+00:03 +297: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — bucketing orders outside the window are ignored
+00:03 +298: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: fromOrders — bucketing a point counts distinct customers and derives AOV
+00:03 +299: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: statistics — linear fixture 100·200·300·400·500·600 (Jan–Jun 2026) totals
+00:03 +300: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: statistics — linear fixture 100·200·300·400·500·600 (Jan–Jun 2026) averageOrderValue over the window: 2100 / 6 = 350
+00:03 +301: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: statistics — linear fixture 100·200·300·400·500·600 (Jan–Jun 2026) monthOverMonthChange = (600 − 500) / 500 = 0.2
+00:03 +302: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: statistics — linear fixture 100·200·300·400·500·600 (Jan–Jun 2026) trailingAverage: (400+500+600)/3 = 500; whole series = 350
+00:03 +303: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: statistics — linear fixture 100·200·300·400·500·600 (Jan–Jun 2026) weightedTrailingAverage(3): (1·400 + 2·500 + 3·600)/6 = 533.33…
+00:03 +304: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: statistics — linear fixture 100·200·300·400·500·600 (Jan–Jun 2026) linearTrendSlope: a perfect +100/month ramp
+00:03 +305: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: statistics — linear fixture 100·200·300·400·500·600 (Jan–Jun 2026) compareWindows(3): 1500 vs 600 = +150%, orders flat
+00:03 +306: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: statistics — linear fixture 100·200·300·400·500·600 (Jan–Jun 2026) compareWindows refuses a half-covered comparison
+00:03 +307: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: monthOverMonthChange edge cases null with fewer than two months
+00:03 +308: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: monthOverMonthChange edge cases null when the earlier month booked nothing (no growth from zero)
+00:03 +309: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: volatility swinging 100·200·100·200 → σ 0.70710678 / mean|Δ| 0.83333 = 0.848528
+00:03 +310: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: volatility steady +10% every month → 0 (no dispersion)
+00:03 +311: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: volatility null with fewer than two usable changes
+00:03 +312: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: volatility a jump out of a zero month is skipped, not treated as +∞
+00:03 +313: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: seasonalIndex null below 12 months — a yearly shape needs a year
+00:03 +314: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: seasonalIndex null when 12 months booked nothing at all
+00:03 +315: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: seasonalIndex 12 months: a 200 July against eleven 100s → mean 108.33, index 1.846
+00:03 +316: /Users/alexnguyen/projects/workizen-tongtai-mobile/test/features/tongtai/analytics/revenue_series_test.dart: purity: same orders + same now → identical points
+00:03 +317: All tests passed!
