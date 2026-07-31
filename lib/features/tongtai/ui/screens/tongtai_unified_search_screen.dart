@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../database/search/tongtai_search_service.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
+import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
@@ -34,11 +38,18 @@ class _TongtaiUnifiedSearchRouteState
   @override
   void initState() {
     super.initState();
-    // Fire-and-forget: seed the demo catalogue if empty. It's a handful of
-    // inserts and the screen opens on an empty query, so it completes well
-    // before the user types anything worth searching.
+    // Not awaited — the screen opens on an empty query, so seeding finishes
+    // long before there is anything to search. But not unwatched either
+    // (WTM-172): a throwing seed used to vanish into an unhandled future, and
+    // the seller would then search a catalogue that silently never filled.
     final db = ref.read(tongtaiDatabaseProvider);
-    ref.read(tongtaiCatalogSeederProvider).ensureSeeded(db);
+    unawaited(
+      runTongtaiAction(
+        () => ref.read(tongtaiCatalogSeederProvider).ensureSeeded(db),
+        telemetry: () => ref.read(tongtaiTelemetryProvider),
+        screen: 'search',
+      ),
+    );
   }
 
   @override
