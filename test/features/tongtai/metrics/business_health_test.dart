@@ -35,4 +35,28 @@ void main() {
     expect(BusinessHealth.notEnoughData.label('vi'), 'Chưa đủ dữ liệu');
     expect(BusinessHealthStatus.healthy.labelEn, 'Healthy');
   });
+
+  test('the badge speaks the reader\'s language, both ways (WTM-173)', () {
+    // The Vietnamese build used to render "Not enough data" because Home called
+    // label('en'); the English build would have shown a Vietnamese tooltip
+    // because the reason was a Vietnamese string inside the model.
+    for (final health in [
+      BusinessHealth.healthy,
+      BusinessHealth.notEnoughData,
+    ]) {
+      expect(health.label('vi'), isNot(equals(health.label('en'))));
+      expect(
+        health.reasonFor('vi'),
+        isNot(equals(health.reasonFor('en'))),
+        reason: 'a reason that is the same in both locales is untranslated',
+      );
+      expect(
+        RegExp(
+          r'[àáâãèéêìíòóôõùúýăđĩũơưạảấầẩậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]',
+        ).hasMatch(health.reasonFor('en').toLowerCase()),
+        isFalse,
+        reason: 'the English reason must not be Vietnamese text',
+      );
+    }
+  });
 }

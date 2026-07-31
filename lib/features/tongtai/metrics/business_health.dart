@@ -20,6 +20,21 @@ enum BusinessHealthStatus {
   };
 
   String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
+
+  /// The reason, in the reader's language.
+  ///
+  /// The model used to carry `reason` as a Vietnamese string, so the English
+  /// build showed a Vietnamese tooltip and nothing could translate it after the
+  /// fact. Same principle as ADR-TON-018: **store the code, render the label.**
+  String reasonFor(String languageCode) => switch ((this, languageCode)) {
+    (BusinessHealthStatus.healthy, 'vi') =>
+      'Doanh nghiệp đang ghi nhận doanh thu.',
+    (BusinessHealthStatus.healthy, _) => 'The business is recording revenue.',
+    (BusinessHealthStatus.notEnoughData, 'vi') =>
+      'Chưa đủ dữ liệu để đánh giá sức khỏe.',
+    (BusinessHealthStatus.notEnoughData, _) =>
+      'Not enough data to assess health yet.',
+  };
 }
 
 /// A read on how the business is doing (WTM-128/132, Founder) — a **model**, not
@@ -58,6 +73,10 @@ class BusinessHealth {
 
   /// Localized status label ('vi' -> Vietnamese, otherwise English).
   String label(String languageCode) => status.label(languageCode);
+
+  /// Localized explanation. Prefer this over [reason], which is kept as the
+  /// Vietnamese default for the AI prompt blocks that already assume it.
+  String reasonFor(String languageCode) => status.reasonFor(languageCode);
 
   /// The current (v1) rule over the KPIs: sales ⇒ healthy, otherwise not enough
   /// data. Pure so a later AI assessor can replace it without touching Home.
