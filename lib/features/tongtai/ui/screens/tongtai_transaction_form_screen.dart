@@ -172,7 +172,7 @@ class _TongtaiTransactionFormScreenState
               child: Text(
                 _errors[TransactionField.category]!,
                 style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.error,
+                  color: TongtaiDesignTokens.errorText,
                 ),
               ),
             ),
@@ -214,7 +214,7 @@ class _TongtaiTransactionFormScreenState
             key: const Key('transaction-save'),
             onPressed: _save,
             style: FilledButton.styleFrom(
-              backgroundColor: TongtaiDesignTokens.financePurple,
+              backgroundColor: TongtaiDesignTokens.financeVioletText,
               padding: const EdgeInsets.symmetric(
                 vertical: TongtaiDesignTokens.spacing4,
               ),
@@ -271,7 +271,11 @@ class _TypeButton extends StatelessWidget {
             Text(
               label,
               style: TongtaiDesignTokens.bodyStyle.copyWith(
-                color: selected ? color : TongtaiDesignTokens.lightTextPrimary,
+                // Selected state tints the card at 12 %; the label has to be
+                // the readable twin or it sits at 3.23:1 on that tint.
+                color: selected
+                    ? TongtaiDesignTokens.readableText(color)
+                    : TongtaiDesignTokens.lightTextPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),

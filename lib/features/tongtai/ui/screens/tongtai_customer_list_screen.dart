@@ -228,7 +228,7 @@ class _TongtaiCustomerListScreenState
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('customer-action-add'),
             onPressed: () => _openForm(context),
-            backgroundColor: TongtaiDesignTokens.consumerBlue,
+            backgroundColor: TongtaiDesignTokens.consumerBlueText,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.custAdd),
@@ -633,11 +633,10 @@ class _CustomerRow extends StatelessWidget {
                 IconButton(
                   key: Key('customer-history-${customer.id}'),
                   tooltip: context.l10n.custPurchaseHistory,
-                  visualDensity: VisualDensity.compact,
                   icon: const Icon(
                     Icons.receipt_long_outlined,
                     size: 20,
-                    color: TongtaiDesignTokens.consumerBlue,
+                    color: TongtaiDesignTokens.consumerBlueText,
                   ),
                   onPressed: onHistory,
                 ),

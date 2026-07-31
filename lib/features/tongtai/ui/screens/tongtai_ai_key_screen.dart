@@ -268,7 +268,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                   key: const Key('ai-key-action-save'),
                   onPressed: _busy ? null : _save,
                   style: FilledButton.styleFrom(
-                    backgroundColor: TongtaiDesignTokens.copilotViolet,
+                    backgroundColor: TongtaiDesignTokens.financeVioletText,
                   ),
                   child: Text(l10n.aiKeySave),
                 ),
@@ -338,7 +338,7 @@ class _Header extends StatelessWidget {
           children: [
             const Icon(
               Icons.auto_awesome,
-              color: TongtaiDesignTokens.copilotViolet,
+              color: TongtaiDesignTokens.financeVioletText,
             ),
             const SizedBox(width: TongtaiDesignTokens.spacing2),
             Expanded(

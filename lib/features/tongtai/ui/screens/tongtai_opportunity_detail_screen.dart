@@ -364,7 +364,7 @@ class _TongtaiOpportunityDetailScreenState
                   icon: const Icon(Icons.thumb_up_alt_outlined),
                   label: Text(l10n.oppInterested),
                   style: FilledButton.styleFrom(
-                    backgroundColor: TongtaiDesignTokens.producerGreen,
+                    backgroundColor: TongtaiDesignTokens.producerGreenText,
                     padding: const EdgeInsets.symmetric(
                       vertical: TongtaiDesignTokens.spacing3,
                     ),

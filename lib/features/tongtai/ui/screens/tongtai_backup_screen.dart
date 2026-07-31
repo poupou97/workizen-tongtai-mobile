@@ -203,7 +203,7 @@ class _TongtaiBackupScreenState extends ConsumerState<TongtaiBackupScreen> {
           FilledButton(
             key: const Key('backup-confirm-replace'),
             style: FilledButton.styleFrom(
-              backgroundColor: TongtaiDesignTokens.error,
+              backgroundColor: TongtaiDesignTokens.errorText,
             ),
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(l10n.backupReplaceAction),
@@ -514,7 +514,7 @@ class _Preview extends StatelessWidget {
               child: FilledButton.icon(
                 key: const Key('backup-action-replace'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: TongtaiDesignTokens.error,
+                  backgroundColor: TongtaiDesignTokens.errorText,
                 ),
                 onPressed: busy ? null : () => onReplace(),
                 icon: const Icon(Icons.swap_horiz),

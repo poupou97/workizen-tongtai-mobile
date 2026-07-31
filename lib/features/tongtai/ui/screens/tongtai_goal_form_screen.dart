@@ -640,7 +640,7 @@ class _TimelineRow extends StatelessWidget {
             child: Text(
               error!,
               style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.error,
+                color: TongtaiDesignTokens.errorText,
               ),
             ),
           ),
@@ -696,7 +696,7 @@ class _BottomBar extends StatelessWidget {
                 key: primaryKey,
                 onPressed: onPrimary,
                 style: FilledButton.styleFrom(
-                  backgroundColor: TongtaiDesignTokens.financePurple,
+                  backgroundColor: TongtaiDesignTokens.financeVioletText,
                   minimumSize: const Size.fromHeight(
                     TongtaiDesignTokens.buttonHeight,
                   ),

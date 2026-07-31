@@ -518,7 +518,7 @@ class _AddressesSection extends StatelessWidget {
                     key: Key('customer-address-remove-$i'),
                     tooltip: context.l10n.custRemoveAddress,
                     icon: const Icon(Icons.remove_circle_outline),
-                    color: TongtaiDesignTokens.error,
+                    color: TongtaiDesignTokens.errorText,
                     onPressed: () => onRemove!(i),
                   ),
               ],
@@ -747,7 +747,7 @@ class _SaveCancelBar extends StatelessWidget {
                 key: const Key('customer-save'),
                 onPressed: onSave,
                 style: FilledButton.styleFrom(
-                  backgroundColor: TongtaiDesignTokens.consumerBlue,
+                  backgroundColor: TongtaiDesignTokens.consumerBlueText,
                   minimumSize: const Size.fromHeight(
                     TongtaiDesignTokens.buttonHeight,
                   ),

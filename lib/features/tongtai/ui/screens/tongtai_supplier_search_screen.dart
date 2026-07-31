@@ -170,40 +170,50 @@ class _TongtaiSupplierSearchScreenState
         ],
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TongtaiDesignTokens.spacing4,
-                TongtaiDesignTokens.spacing3,
-                TongtaiDesignTokens.spacing4,
-                TongtaiDesignTokens.spacing2,
+        // Search field + suggestions + filter bar are fixed-height chrome; at a
+        // 2.0x system font they ran 196 px past a short viewport. Same shape,
+        // same fix as Inventory: let the chrome scroll away.
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      TongtaiDesignTokens.spacing4,
+                      TongtaiDesignTokens.spacing3,
+                      TongtaiDesignTokens.spacing4,
+                      TongtaiDesignTokens.spacing2,
+                    ),
+                    child: _SearchField(
+                      controller: _queryController,
+                      focusNode: _queryFocus,
+                      onChanged: _onQueryChanged,
+                      onClear: _filter.query.isEmpty ? null : _clearQuery,
+                    ),
+                  ),
+                  if (showSuggestions)
+                    _SuggestionsList(
+                      suggestions: suggestions,
+                      onSelected: _applySuggestion,
+                    ),
+                  _FilterBar(
+                    service: _service,
+                    filter: _filter,
+                    onCategory: _selectCategory,
+                    onRating: _selectRating,
+                    onLocation: _selectLocation,
+                    favoritesOnly: _favoritesOnly,
+                    onFavoritesOnly: _setFavoritesOnly,
+                  ),
+                ],
               ),
-              child: _SearchField(
-                controller: _queryController,
-                focusNode: _queryFocus,
-                onChanged: _onQueryChanged,
-                onClear: _filter.query.isEmpty ? null : _clearQuery,
-              ),
-            ),
-            if (showSuggestions)
-              _SuggestionsList(
-                suggestions: suggestions,
-                onSelected: _applySuggestion,
-              ),
-            _FilterBar(
-              service: _service,
-              filter: _filter,
-              onCategory: _selectCategory,
-              onRating: _selectRating,
-              onLocation: _selectLocation,
-              favoritesOnly: _favoritesOnly,
-              onFavoritesOnly: _setFavoritesOnly,
             ),
             // Results (+ heart state + favorites-only) rebuild whenever the
             // shared favorites change.
-            Expanded(
+            SliverFillRemaining(
+              hasScrollBody: true,
               child: ListenableBuilder(
                 listenable: _favorites,
                 builder: (context, _) {
@@ -536,7 +546,10 @@ class _ResultsGrid extends StatelessWidget {
           ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
-            mainAxisExtent: 176,
+            // 176 fitted a 20 px heart; a 48 dp tap target needs the extra
+            // 28 (WTM-168). Growing the tile is the honest trade — shrinking
+            // the target back is how it got to 20x20 in the first place.
+            mainAxisExtent: 204,
             crossAxisSpacing: TongtaiDesignTokens.spacing3,
             mainAxisSpacing: TongtaiDesignTokens.spacing3,
           ),
@@ -718,21 +731,26 @@ class _FavoriteHeart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A plain InkResponse (not IconButton) keeps the control at the name's 24px
-    // line box — an IconButton would add ~48px tap-target padding and overflow
-    // the card's fixed-height row.
+    // The heart stays visually 20 px so it does not dominate the card, but the
+    // thing a thumb has to hit is 48 (WTM-168). An earlier version used a bare
+    // InkResponse to avoid IconButton's padding; that left a 20x20 target,
+    // which is a heart you have to aim at.
     return Tooltip(
       key: heartKey,
       message: isFavorite ? context.l10n.favRemove : context.l10n.favAdd,
-      child: InkResponse(
-        onTap: onPressed,
-        radius: 20,
-        child: Icon(
-          isFavorite ? Icons.favorite : Icons.favorite_border,
-          size: 20,
-          color: isFavorite
-              ? TongtaiDesignTokens.error
-              : TongtaiDesignTokens.lightTextSecondary,
+      child: SizedBox(
+        width: TongtaiDesignTokens.buttonHeight,
+        height: TongtaiDesignTokens.buttonHeight,
+        child: InkResponse(
+          onTap: onPressed,
+          radius: 24,
+          child: Icon(
+            isFavorite ? Icons.favorite : Icons.favorite_border,
+            size: 20,
+            color: isFavorite
+                ? TongtaiDesignTokens.errorText
+                : TongtaiDesignTokens.lightTextSecondary,
+          ),
         ),
       ),
     );
