@@ -136,8 +136,20 @@ enum BackupProblem {
   /// Payload decrypted but is not a valid v2 payload document.
   malformedPayload,
 
-  /// One of the six datasets is absent. A partial snapshot is not a snapshot.
+  /// One of the six datasets is absent. A partial package is a legitimate
+  /// *package* (WTM-165) — it is just not a **restorable** one, so this is
+  /// raised against the restore contract, not against the format.
   missingDataset,
+
+  /// The package declares itself as something other than a backup (clone,
+  /// demo dataset, support bundle…). Reserved kinds are identified, never
+  /// guessed at: honouring one without its rules is how a "clone" becomes a
+  /// data-loss event.
+  notRestorableKind,
+
+  /// Personal data was stripped before the package was written. Restoring it
+  /// would write blanks over real customers.
+  redactedPackage,
 
   /// A row could not be decoded: missing field, wrong type, or an enum code
   /// this build does not know.
@@ -348,6 +360,12 @@ class TongtaiBackupService {
       checksumAlgorithm: 'SHA-256',
       payloadSha256: backupSha256Hex(stored),
       payloadBytes: stored.length,
+      // WTM-165: a package says what it is and what it holds. Today the app
+      // only writes complete, unredacted backups — but it says so explicitly
+      // rather than leaving a future reader to assume it.
+      packageKind: PackageKind.backup,
+      datasets: BackupDatasets.all,
+      redaction: BackupRedaction.none,
     );
     return encodeBackupDocument(manifest, stored);
   }
@@ -449,6 +467,29 @@ class TongtaiBackupService {
     }
 
     final issues = <BackupIssue>[];
+
+    // ── restore contract (WTM-165) ──────────────────────────────────────────
+    // These are not format errors. The package parsed fine; it is simply not
+    // something that may be written over a live business.
+    if (!manifest.packageKind.isRestorable) {
+      issues.add(
+        BackupIssue(
+          BackupProblem.notRestorableKind,
+          detail: manifest.packageKind.code,
+        ),
+      );
+    }
+    if (manifest.redaction != BackupRedaction.none) {
+      issues.add(
+        BackupIssue(
+          BackupProblem.redactedPackage,
+          detail: manifest.redaction.code,
+        ),
+      );
+    }
+
+    // A restorable package must carry the whole business. A package missing a
+    // dataset is still a valid package — it just cannot be restored.
     for (final dataset in BackupDatasets.all) {
       if (!payload.datasets.containsKey(dataset)) {
         issues.add(BackupIssue(BackupProblem.missingDataset, dataset: dataset));

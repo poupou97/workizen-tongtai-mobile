@@ -7,8 +7,33 @@ import 'package:flutter/foundation.dart';
 
 import '../../../database/migrations/tongtai_migrations.dart';
 
-/// The `.ttbk` **v2** backup format — a complete, lossless snapshot of the
-/// business (WTM-164, ADR-TON-018).
+/// The `.ttbk` **v2** format — a **Business Snapshot Package** (WTM-164/165,
+/// ADR-TON-018).
+///
+/// **Backup is one capability of the package, not the package itself**
+/// (Founder note, 2026-07-31). The same envelope is meant to carry, later:
+/// Restore · Clone Business · Migration · Demo Dataset · AI Sandbox · Support
+/// Bundle · Analytics Exchange. None of those are implemented; the format
+/// simply must not foreclose them, which costs three manifest fields now and
+/// a schema migration later.
+///
+/// What that reservation buys, concretely:
+///
+/// - [BackupManifest.packageKind] — a package states what it is *for*, so a
+///   demo dataset, a support bundle and a real backup are not indistinguishable
+///   files that a reader has to guess about.
+/// - [BackupManifest.datasets] — a package declares what it *contains*.
+///   "A snapshot must hold all six datasets" is a rule of **restore**, not of
+///   the format: an Analytics Exchange or a Demo Dataset carrying three of them
+///   is legitimate, and the parser has no business rejecting it.
+/// - [BackupManifest.redaction] — a Support Bundle will need customer names and
+///   phones stripped. A reader must be able to see that happened, and restore
+///   must be able to refuse a redacted package rather than silently writing
+///   holes into a business.
+///
+/// Unknown manifest keys are **ignored, never fatal**, so a newer writer adding
+/// a field does not turn its packages into "corrupt" for an older reader — the
+/// version fields are what gate compatibility.
 ///
 /// **Why v2 exists.** v1 was a single *CSV export* encrypted with a passphrase.
 /// It covered 3 of 6 repositories, dropped `order.id` and
@@ -85,6 +110,94 @@ class BackupDatasets {
   ];
 }
 
+/// What a package is **for**.
+///
+/// Reserved now, used later. Only [backup] is produced or accepted today —
+/// everything else is declared so a future writer has a name to put in the
+/// manifest and a future reader has something to switch on, instead of both
+/// having to invent one and disagree.
+///
+/// Stored as a stable string: an unknown kind from a newer app parses to
+/// [unknown] rather than failing, and `restore` refuses it explicitly.
+enum PackageKind {
+  /// A full snapshot of one business, taken to be restored onto itself.
+  backup,
+
+  /// A snapshot taken to seed a *different* business. Will need id re-keying
+  /// rules before it can be honoured.
+  clone,
+
+  /// A snapshot carried across a schema change.
+  migration,
+
+  /// Curated sample data shipped for demos (cf. ADR-TON-014 `sample-` rows).
+  demoDataset,
+
+  /// A dataset handed to an AI sandbox — never the live business.
+  aiSandbox,
+
+  /// A diagnostic bundle for support. Will be redacted; see [BackupRedaction].
+  supportBundle,
+
+  /// Aggregates for exchange. Not a restorable business.
+  analyticsExchange,
+
+  /// A kind this build does not know. Kept as a value so an unknown package is
+  /// *identified* rather than mistaken for a backup.
+  unknown;
+
+  String get code => switch (this) {
+    PackageKind.backup => 'backup',
+    PackageKind.clone => 'clone',
+    PackageKind.migration => 'migration',
+    PackageKind.demoDataset => 'demo-dataset',
+    PackageKind.aiSandbox => 'ai-sandbox',
+    PackageKind.supportBundle => 'support-bundle',
+    PackageKind.analyticsExchange => 'analytics-exchange',
+    PackageKind.unknown => 'unknown',
+  };
+
+  static PackageKind fromCode(String? code) => switch (code) {
+    'backup' => PackageKind.backup,
+    'clone' => PackageKind.clone,
+    'migration' => PackageKind.migration,
+    'demo-dataset' => PackageKind.demoDataset,
+    'ai-sandbox' => PackageKind.aiSandbox,
+    'support-bundle' => PackageKind.supportBundle,
+    'analytics-exchange' => PackageKind.analyticsExchange,
+    // A package written before this field existed is a backup — that is all
+    // the format could produce at the time.
+    null => PackageKind.backup,
+    _ => PackageKind.unknown,
+  };
+
+  /// Whether a package of this kind may be written over a live business.
+  /// Only [backup] today; the rest need rules that do not exist yet, and
+  /// guessing at them is how a "clone" quietly becomes a data-loss event.
+  bool get isRestorable => this == PackageKind.backup;
+}
+
+/// What was removed from a package before it was written.
+enum BackupRedaction {
+  /// Nothing removed — a faithful snapshot.
+  none,
+
+  /// Personal fields (names, phones, emails, addresses, notes) stripped.
+  /// Reserved for Support Bundle; **never restorable**, because restoring it
+  /// would write blanks over real customers.
+  personalData;
+
+  String get code => switch (this) {
+    BackupRedaction.none => 'none',
+    BackupRedaction.personalData => 'personal-data',
+  };
+
+  static BackupRedaction fromCode(String? code) => switch (code) {
+    'personal-data' => BackupRedaction.personalData,
+    _ => BackupRedaction.none,
+  };
+}
+
 /// How the payload bytes are protected.
 enum BackupEncryption {
   /// Plain UTF-8 JSON. Still checksummed — corruption is still detected.
@@ -124,6 +237,9 @@ class BackupManifest {
     required this.checksumAlgorithm,
     required this.payloadSha256,
     required this.payloadBytes,
+    this.packageKind = PackageKind.backup,
+    this.datasets = BackupDatasets.all,
+    this.redaction = BackupRedaction.none,
   });
 
   final int formatVersion;
@@ -154,6 +270,19 @@ class BackupManifest {
   /// before the (more expensive) hash is even computed.
   final int payloadBytes;
 
+  /// What this package is for (WTM-165). Defaults to [PackageKind.backup] for
+  /// packages written before the field existed — that is all v2 could produce.
+  final PackageKind packageKind;
+
+  /// Which datasets the payload declares. **Completeness is a rule of restore,
+  /// not of the format**: a Demo Dataset or an Analytics Exchange carrying a
+  /// subset is a valid package, just not a restorable one.
+  final List<String> datasets;
+
+  /// What was stripped before writing. A redacted package is readable and
+  /// inspectable but must never be written over a live business.
+  final BackupRedaction redaction;
+
   Map<String, Object?> toJson() => {
     'formatVersion': formatVersion,
     'contentSchemaVersion': contentSchemaVersion,
@@ -166,6 +295,9 @@ class BackupManifest {
     'checksumAlgorithm': checksumAlgorithm,
     'payloadSha256': payloadSha256,
     'payloadBytes': payloadBytes,
+    'packageKind': packageKind.code,
+    'datasets': datasets,
+    'redaction': redaction.code,
   };
 
   /// Parses a manifest, returning `null` when any required field is missing or
@@ -198,6 +330,10 @@ class BackupManifest {
     final parsedEncryption = BackupEncryption.fromCode(encryption);
     final parsedCreatedAt = DateTime.tryParse(createdAt);
     if (parsedEncryption == null || parsedCreatedAt == null) return null;
+    // The three WTM-165 fields are OPTIONAL on read. A package written before
+    // they existed is a complete, unredacted backup — which is exactly what
+    // the format could produce then, so the defaults are facts, not guesses.
+    final rawDatasets = json['datasets'];
     return BackupManifest(
       formatVersion: formatVersion,
       contentSchemaVersion: contentSchemaVersion,
@@ -212,6 +348,18 @@ class BackupManifest {
       checksumAlgorithm: checksumAlgorithm,
       payloadSha256: payloadSha256,
       payloadBytes: payloadBytes,
+      packageKind: PackageKind.fromCode(
+        json['packageKind'] is String ? json['packageKind'] as String : null,
+      ),
+      datasets: rawDatasets is List
+          ? [
+              for (final d in rawDatasets)
+                if (d is String) d,
+            ]
+          : BackupDatasets.all,
+      redaction: BackupRedaction.fromCode(
+        json['redaction'] is String ? json['redaction'] as String : null,
+      ),
     );
   }
 }

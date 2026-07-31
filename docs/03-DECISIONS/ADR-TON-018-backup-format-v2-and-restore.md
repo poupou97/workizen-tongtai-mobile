@@ -1,7 +1,8 @@
 # ADR-TON-018 — `.ttbk` v2 Backup Format & Replace Restore
 
 - **Status:** ✅ ACCEPTED (Founder decision "WTM-164 restore mode", 2026-07-31)
-- **Jira:** WTM-164
+  · **Amendment 1** (Founder Note "Business Snapshot Package", 2026-07-31 — §9)
+- **Jira:** WTM-164 · WTM-165 (amendment 1)
 - **Extends:** ADR-TON-008/009 (persistence) · ADR-TON-010 (Orders ↔ Inventory
   reference) · ADR-TON-017 (error-handling seam) · ADR-TON-005/D-7 (telemetry)
 - **Supersedes:** không. `.ttbk` **v1 vẫn tồn tại như một file CSV mã hoá** —
@@ -113,6 +114,56 @@ best-effort partial import**: file dùng được hoặc không.
 Đường dẫn file, tên file, nội dung backup và số bản ghi **không bao giờ** lên
 telemetry — chỉ `kind`/`code`/`screen` như mọi lỗi khác (ADR-TON-017). Có
 governance test quét đúng điều này trên màn backup.
+
+### 9. `.ttbk` là **Business Snapshot Package** — backup chỉ là một capability
+
+*(Amendment 1 — Founder Note, 2026-07-31. WTM-165.)*
+
+File này không phải "file backup". Nó là **một ảnh chụp doanh nghiệp đóng gói**;
+*backup* là **capability đầu tiên** dùng nó, không phải bản chất của nó. Các
+capability đã thấy trước: **Restore · Clone Business · Migration · Demo Dataset ·
+AI Sandbox · Support Bundle · Analytics Exchange**.
+
+**Vòng này KHÔNG triển khai các capability đó.** Việc duy nhất phải làm bây giờ
+là **không khoá đường** — vì đổi format sau khi người dùng đã cầm file trong tay
+là thứ đắt nhất, còn chừa chỗ lúc này gần như miễn phí.
+
+Ba trường được thêm vào manifest, mỗi trường trả lời một câu mà một reader tương
+lai **bắt buộc** phải hỏi trước khi làm gì với file:
+
+| Trường | Câu hỏi | Mặc định khi vắng mặt |
+|---|---|---|
+| `packageKind` | *Đây là gói loại gì?* | `backup` |
+| `datasets` | *Bên trong có những miền nào?* | cả 6 |
+| `redaction` | *Dữ liệu có bị lược bỏ không?* | `none` |
+
+**Vì sao đây là điều kiện cần, không phải trang trí:** thiếu `packageKind`, một
+Demo Dataset và một backup thật là **hai file không phân biệt được** — và cái
+giá của việc nhầm lẫn chính là restore đè dữ liệu thật bằng dữ liệu mẫu. Thiếu
+`redaction`, một Support Bundle đã bôi tên khách sẽ **restore đè lên khách
+thật**. Thiếu `datasets`, một gói bộ phận chỉ lộ ra là thiếu **sau khi** đã
+parse hết payload.
+
+Quy tắc đọc:
+
+- **Mã lạ ⇒ `unknown`, không bao giờ ⇒ `backup`.** Một app mới hơn có thể ghi
+  loại mà bản này chưa biết; đoán nó là backup nghĩa là restore một thứ không
+  hiểu — đúng cái ADR này sinh ra để chặn.
+- **Vắng mặt ⇒ mặc định như bảng trên.** Hai file v2 đã tồn tại ngoài đời được
+  ghi trước khi có ba trường này; với format lúc đó chúng **chỉ có thể** là
+  backup đầy đủ, không lược bỏ. Đây là **sự thật của format**, không phải phỏng
+  đoán — nên đọc chúng vẫn restore được.
+- **Khoá manifest lạ ⇒ bỏ qua.** Reader tương lai thêm trường không được biến
+  gói của nó thành "hỏng" ở bản này; tương thích do các trường version quyết
+  định, không do sự có mặt của từng khoá.
+
+**Chỗ đặt lệnh cấm nằm ở restore contract, không ở format.** Một gói bộ phận
+hoặc đã lược bỏ là **một gói hợp lệ** — nó chỉ không phải thứ để restore. Vì
+vậy `notRestorableKind` / `redactedPackage` / `missingDataset` là lý do **từ
+chối restore**, và manifest vẫn parse được để preview nói ra **file này là gì**
+thay vì chỉ nói "không dùng được". Phân biệt này là thứ cho phép Clone Business
+hay Support Bundle sau này dùng chung đúng validator mà không phải nới lỏng
+một dòng nào của restore.
 
 ## Hệ quả
 

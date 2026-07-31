@@ -506,6 +506,140 @@ void main() {
     });
   });
 
+  // ── Business Snapshot Package: room reserved, not opened ─────────────────
+
+  group('the package declares what it is and what it holds (WTM-165)', () {
+    test('a backup this app writes says so explicitly', () async {
+      await seedBusiness();
+      final armored = await service.createBackup();
+      final manifest = decodeBackupDocument(armored)!.manifest;
+
+      expect(manifest.packageKind, PackageKind.backup);
+      expect(manifest.redaction, BackupRedaction.none);
+      expect(
+        manifest.datasets,
+        BackupDatasets.all,
+        reason: 'a restorable package carries the whole business',
+      );
+    });
+
+    test(
+      'a package written BEFORE these fields existed still restores',
+      () async {
+        // The two real backups the Founder already holds were written without
+        // packageKind/datasets/redaction. Dropping them on the floor would make
+        // this change a data-loss event of its own.
+        await seedBusiness();
+        final armored = await service.createBackup();
+        final legacy = _withManifest(armored, (m) {
+          return m
+            ..remove('packageKind')
+            ..remove('datasets')
+            ..remove('redaction');
+        });
+
+        final validation = await service.validate(legacy);
+        expect(validation.isRestorable, isTrue, reason: '${validation.issues}');
+        expect(
+          validation.manifest!.packageKind,
+          PackageKind.backup,
+          reason:
+              'that is all the format could produce at the time — a fact, '
+              'not a guess',
+        );
+        expect(validation.manifest!.datasets, BackupDatasets.all);
+      },
+    );
+
+    test(
+      'a reserved kind is identified and refused, never guessed at',
+      () async {
+        await seedBusiness();
+        final armored = await service.createBackup();
+        for (final kind in [
+          PackageKind.clone,
+          PackageKind.demoDataset,
+          PackageKind.supportBundle,
+          PackageKind.analyticsExchange,
+        ]) {
+          final tagged = _withManifest(
+            armored,
+            (m) => m..['packageKind'] = kind.code,
+          );
+          final validation = await service.validate(tagged);
+          expect(
+            validation.firstProblem,
+            BackupProblem.notRestorableKind,
+            reason: '${kind.code} has no restore rules yet',
+          );
+          expect(
+            validation.manifest!.packageKind,
+            kind,
+            reason: 'the preview must still be able to say WHAT it is',
+          );
+        }
+      },
+    );
+
+    test(
+      'a kind from a newer app parses as unknown, not as a backup',
+      () async {
+        await seedBusiness();
+        final armored = await service.createBackup();
+        final future = _withManifest(
+          armored,
+          (m) => m..['packageKind'] = 'time-machine',
+        );
+        final validation = await service.validate(future);
+        expect(validation.manifest!.packageKind, PackageKind.unknown);
+        expect(validation.firstProblem, BackupProblem.notRestorableKind);
+      },
+    );
+
+    test('a redacted package is readable but never restorable', () async {
+      await seedBusiness();
+      final armored = await service.createBackup();
+      final redacted = _withManifest(
+        armored,
+        (m) => m..['redaction'] = 'personal-data',
+      );
+      final validation = await service.validate(redacted);
+      expect(validation.firstProblem, BackupProblem.redactedPackage);
+      expect(
+        validation.manifest!.redaction,
+        BackupRedaction.personalData,
+        reason: 'restoring blanks over real customers is the failure mode',
+      );
+    });
+
+    test('an unknown manifest key is ignored, not fatal', () async {
+      // A newer writer adding a field must not turn its packages into
+      // "corrupt" for this reader — the version fields gate compatibility.
+      await seedBusiness();
+      final armored = await service.createBackup();
+      final extended = _withManifest(
+        armored,
+        (m) => m..['somethingFromTheFuture'] = {'a': 1},
+      );
+      expect((await service.validate(extended)).isRestorable, isTrue);
+    });
+
+    test('a partial package is a valid package, just not restorable', () async {
+      // Analytics Exchange / Demo Dataset will legitimately carry a subset.
+      // The refusal must come from the RESTORE contract, and the manifest must
+      // still parse so a reader can see what is inside.
+      final armored = await _payloadEdited(service, (payload) {
+        (payload['datasets'] as Map).remove('favourites');
+        (payload['counts'] as Map).remove('favourites');
+      }, seed: seedBusiness);
+      final validation = await service.validate(armored);
+
+      expect(validation.manifest, isNotNull);
+      expect(validation.firstProblem, BackupProblem.missingDataset);
+      expect(validation.issues.single.dataset, 'favourites');
+    });
+  });
+
   // ── safety backup + rollback ─────────────────────────────────────────────
 
   group('nothing is destroyed without a verified safety copy', () {
