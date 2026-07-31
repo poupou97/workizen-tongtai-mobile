@@ -346,7 +346,7 @@ class TongtaiBackupService {
       encryption: encrypted ? BackupEncryption.aesGcm : BackupEncryption.none,
       compression: 'none',
       checksumAlgorithm: 'SHA-256',
-      payloadSha256: await backupSha256Hex(stored),
+      payloadSha256: backupSha256Hex(stored),
       payloadBytes: stored.length,
     );
     return encodeBackupDocument(manifest, stored);
@@ -409,7 +409,7 @@ class TongtaiBackupService {
         ),
       );
     }
-    final digest = await backupSha256Hex(envelope.payloadBytes);
+    final digest = backupSha256Hex(envelope.payloadBytes);
     if (digest != manifest.payloadSha256) {
       return reject(const BackupIssue(BackupProblem.checksumMismatch));
     }

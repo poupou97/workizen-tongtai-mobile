@@ -2,7 +2,7 @@ library;
 
 import 'dart:convert';
 
-import 'package:cryptography/cryptography.dart';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/foundation.dart';
 
 import '../../../database/migrations/tongtai_migrations.dart';
@@ -313,10 +313,15 @@ class BackupPayload {
 }
 
 /// Hex SHA-256 of [bytes].
-Future<String> backupSha256Hex(List<int> bytes) async {
-  final digest = await Sha256().hash(bytes);
-  return digest.bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-}
+///
+/// **Synchronous on purpose.** The `cryptography` package's `Sha256().hash()`
+/// returns a Future that never completes inside `testWidgets`' fake-async
+/// zone, so a screen that checksums a file could not be widget tested at all
+/// — the whole restore flow would have been unverifiable above the service
+/// layer. A checksum has no reason to be asynchronous; `package:crypto` does
+/// it in pure Dart, synchronously, everywhere.
+String backupSha256Hex(List<int> bytes) =>
+    crypto.sha256.convert(bytes).toString();
 
 /// Builds the armored v2 document from a manifest and stored payload bytes.
 String encodeBackupDocument(BackupManifest manifest, List<int> payloadBytes) {

@@ -246,4 +246,81 @@ void main() {
           '(D-7 / ADR-TON-005)',
     );
   });
+
+  test('production code never defaults to an in-memory store', () {
+    // WTM-164 found `tongtai_export_screen` doing exactly this: it defaulted
+    // to `InMemoryTongtaiExportHistoryStore` in production, so the export
+    // history WTM-99 promised was wiped on every launch while the persistent
+    // implementation sat unused. In-memory implementations are for tests and
+    // for explicitly-named `.inMemory()` factories — never a silent fallback.
+    final offenders = <String>[];
+    final fallback = RegExp(r'\?\?\s*(const\s+)?InMemory');
+    for (final file
+        in Directory('lib')
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.dart'))) {
+      final lines = file.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        final line = lines[i];
+        if (line.trimLeft().startsWith('//')) continue;
+        if (fallback.hasMatch(line)) {
+          offenders.add('${file.path}:${i + 1}: ${line.trim()}');
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'Production KHÔNG được rơi về InMemory store — dữ liệu sẽ mất lặng '
+          'lẽ sau mỗi lần khởi động lại (WTM-164). Dùng implementation bền và '
+          'inject InMemory ở test:\n${offenders.join('\n')}',
+    );
+  });
+
+  test('the app version stamped into backups matches pubspec', () {
+    // `kTongtaiAppVersion` is written into every `.ttbk` manifest and shown in
+    // the restore preview. A stale constant would make a backup claim it came
+    // from a version that never existed.
+    final pubspec = File('pubspec.yaml').readAsLinesSync();
+    final versionLine = pubspec.firstWhere((l) => l.startsWith('version:'));
+    final pubspecVersion = versionLine.split(':')[1].trim().split('+').first;
+    final format = File(
+      'lib/features/tongtai/export/backup_format.dart',
+    ).readAsStringSync();
+
+    expect(
+      format,
+      contains("kTongtaiAppVersion = '$pubspecVersion'"),
+      reason:
+          'kTongtaiAppVersion phải bằng version trong pubspec.yaml '
+          '($pubspecVersion)',
+    );
+  });
+
+  test('backup telemetry carries no file path, name or business counts', () {
+    // The restore flow handles a user-chosen file. Its path and name are the
+    // user's, and its contents are their business — none of it may be
+    // reported (Founder rule, WTM-164).
+    final screen = File(
+      'lib/features/tongtai/ui/screens/tongtai_backup_screen.dart',
+    ).readAsStringSync();
+    final calls = RegExp(
+      r'runTongtaiAction\([\s\S]*?screen: .backup.,',
+    ).allMatches(screen);
+    expect(calls, isNotEmpty, reason: 'the screen must guard its actions');
+
+    for (final call in calls) {
+      final text = call.group(0)!;
+      for (final leak in ['path', 'fileName', 'counts', 'armored']) {
+        expect(
+          RegExp("'\$leak':").hasMatch(text),
+          isFalse,
+          reason: 'telemetry may not carry $leak',
+        );
+      }
+    }
+  });
 }

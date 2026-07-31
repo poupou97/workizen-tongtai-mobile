@@ -690,7 +690,7 @@ Future<String> _payloadEdited(
   edit(payload);
   final stored = utf8.encode(jsonEncode(payload));
   final manifest = Map<String, Object?>.from(body['manifest'] as Map)
-    ..['payloadSha256'] = await backupSha256Hex(stored)
+    ..['payloadSha256'] = backupSha256Hex(stored)
     ..['payloadBytes'] = stored.length;
   return '$kBackupV2Header'
       '${jsonEncode({'manifest': manifest, 'payload': base64Encode(stored)})}';

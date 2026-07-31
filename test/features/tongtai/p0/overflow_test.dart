@@ -17,6 +17,7 @@ import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart';
 import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_backup_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_risk_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_export_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_finance_screen.dart';
@@ -123,6 +124,7 @@ void main() {
     'reports': () => const TongtaiReportsScreen(),
     'opportunity-feed': () => const TongtaiOpportunityFeedScreen(),
     'export': () => const TongtaiExportScreen(),
+    'backup': () => const TongtaiBackupScreen(),
     'finance': () => const TongtaiFinanceScreen(),
     'timeline': () => const TongtaiTimelineScreen(),
     'customer-risk': () => const TongtaiCustomerRiskScreen(),
