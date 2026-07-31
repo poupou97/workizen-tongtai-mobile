@@ -167,7 +167,9 @@ class _TongtaiInventoryScreenState
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('inventory-action-add'),
             onPressed: () => _openForm(context),
-            backgroundColor: TongtaiDesignTokens.inventoryOrange,
+            // White label on amber-500 reads at 2.15:1 — the worst pairing
+            // in the palette. Same hue, deep enough to read (WTM-169).
+            backgroundColor: TongtaiDesignTokens.inventoryOrangeText,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.invAdd),
@@ -191,41 +193,56 @@ class _TongtaiInventoryScreenState
               : null,
           body: SafeArea(
             bottom: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (alerts.hasAlerts)
-                  _AlertBanner(
-                    outOfStock: alerts.outOfStockCount,
-                    lowStock: alerts.lowStockCount,
-                    onTap: () => _openAlerts(context),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TongtaiDesignTokens.spacing4,
-                    TongtaiDesignTokens.spacing3,
-                    TongtaiDesignTokens.spacing4,
-                    TongtaiDesignTokens.spacing2,
-                  ),
-                  child: _SearchField(
-                    controller: _searchController,
-                    onChanged: _onSearchChanged,
-                    onClear: _query.text.isEmpty ? null : _clearSearch,
+            // The chrome above the list (alert banner · search · category
+            // filter · sort bar · result count) is fixed-height content, and at
+            // a 2.0x system font it grew past a short viewport and clipped by
+            // 103 px — measured, not guessed (WTM-169). `Expanded` cannot save
+            // it: the non-flex children alone were taller than the screen.
+            //
+            // Letting the chrome scroll away is both the fix and the ordinary
+            // mobile behaviour; the list keeps the rest of the space.
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (alerts.hasAlerts)
+                        _AlertBanner(
+                          outOfStock: alerts.outOfStockCount,
+                          lowStock: alerts.lowStockCount,
+                          onTap: () => _openAlerts(context),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TongtaiDesignTokens.spacing4,
+                          TongtaiDesignTokens.spacing3,
+                          TongtaiDesignTokens.spacing4,
+                          TongtaiDesignTokens.spacing2,
+                        ),
+                        child: _SearchField(
+                          controller: _searchController,
+                          onChanged: _onSearchChanged,
+                          onClear: _query.text.isEmpty ? null : _clearSearch,
+                        ),
+                      ),
+                      _CategoryFilter(
+                        categories: service.categories,
+                        selected: _query.category,
+                        onSelected: _selectCategory,
+                      ),
+                      _SortBar(
+                        sort: _query.sort,
+                        ascending: _query.ascending,
+                        onSort: _selectSort,
+                        onToggleDirection: _toggleDirection,
+                      ),
+                      _ResultsHeader(count: page.totalCount),
+                    ],
                   ),
                 ),
-                _CategoryFilter(
-                  categories: service.categories,
-                  selected: _query.category,
-                  onSelected: _selectCategory,
-                ),
-                _SortBar(
-                  sort: _query.sort,
-                  ascending: _query.ascending,
-                  onSort: _selectSort,
-                  onToggleDirection: _toggleDirection,
-                ),
-                _ResultsHeader(count: page.totalCount),
-                Expanded(
+                SliverFillRemaining(
+                  hasScrollBody: true,
                   child: TongtaiScreenData<ProductCatalogController>(
                     prefix: 'inventory',
                     state: _data.state,
@@ -308,9 +325,10 @@ class _AlertBanner extends StatelessWidget {
     final color = outOfStock > 0
         ? TongtaiDesignTokens.error
         : TongtaiDesignTokens.warning;
+    final l10n = context.l10n;
     final parts = <String>[
-      if (outOfStock > 0) '$outOfStock out of stock',
-      if (lowStock > 0) '$lowStock low',
+      if (outOfStock > 0) l10n.invOutOfStockCount(outOfStock),
+      if (lowStock > 0) l10n.invLowStockCount(lowStock),
     ];
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -328,6 +346,11 @@ class _AlertBanner extends StatelessWidget {
             TongtaiDesignTokens.cardBorderRadius,
           ),
           child: Container(
+            // A tappable banner is a tap target: 12 dp padding around a 22 dp
+            // row came to 46, and Android asks for 48 (WTM-169).
+            constraints: const BoxConstraints(
+              minHeight: TongtaiDesignTokens.buttonHeight,
+            ),
             padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.10),
@@ -342,7 +365,7 @@ class _AlertBanner extends StatelessWidget {
                 const SizedBox(width: TongtaiDesignTokens.spacing2),
                 Expanded(
                   child: Text(
-                    'Stock alerts: ${parts.join(' • ')}',
+                    l10n.invStockAlerts(parts.join(' • ')),
                     key: const Key('inventory-summary-alerts'),
                     style: TongtaiDesignTokens.smallStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextPrimary,
@@ -632,7 +655,9 @@ class _ProductRow extends StatelessWidget {
                     ),
                     const SizedBox(height: TongtaiDesignTokens.spacing1),
                     Text(
-                      'Updated ${TongtaiFormatters.isoDate(product.updatedAt)}',
+                      context.l10n.invUpdatedOn(
+                        TongtaiFormatters.isoDate(product.updatedAt),
+                      ),
                       style: TongtaiDesignTokens.captionStyle.copyWith(
                         color: TongtaiDesignTokens.lightTextSecondary,
                       ),
@@ -641,26 +666,31 @@ class _ProductRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: TongtaiDesignTokens.spacing3),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    TongtaiFormatters.vnd(product.pricePerUnit),
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: TongtaiDesignTokens.lightTextPrimary,
+              // Bounded, or a long price on a 320 px phone pushes the row 11 px
+              // past the screen edge (WTM-169) — the Expanded on the left can
+              // only give way if the right-hand side is allowed to shrink.
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      TongtaiFormatters.vnd(product.pricePerUnit),
+                      style: TongtaiDesignTokens.smallStyle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: TongtaiDesignTokens.lightTextPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing1),
-                  Text(
-                    'Qty ${product.quantity}',
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    Text(
+                      context.l10n.invQuantity(product.quantity),
+                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                        color: TongtaiDesignTokens.lightTextSecondary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing2),
-                  _StatusChip(status: product.stockStatus),
-                ],
+                    const SizedBox(height: TongtaiDesignTokens.spacing2),
+                    _StatusChip(status: product.stockStatus),
+                  ],
+                ),
               ),
             ],
           ),
@@ -726,8 +756,11 @@ class _PaginationBar extends StatelessWidget {
         children: [
           Flexible(
             child: Text(
-              'Showing ${page.firstItemNumber}–${page.lastItemNumber} '
-              'of ${page.totalCount}',
+              context.l10n.invShowingRange(
+                page.firstItemNumber,
+                page.lastItemNumber,
+                page.totalCount,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TongtaiDesignTokens.captionStyle.copyWith(
@@ -735,29 +768,39 @@ class _PaginationBar extends StatelessWidget {
               ),
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                key: const Key('inventory-action-prev-page'),
-                icon: const Icon(Icons.chevron_left),
-                tooltip: context.l10n.actionPrevPage,
-                onPressed: onPrevious,
-              ),
-              Text(
-                'Page ${page.pageIndex + 1} of ${page.pageCount}',
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                  fontWeight: FontWeight.w600,
+          // Flexible, because two 48 dp tap targets plus a page label is wider
+          // than a 320 px phone at a 1.3x font — the bar clipped by 11 px and
+          // took the "next page" button with it (WTM-169).
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  key: const Key('inventory-action-prev-page'),
+                  icon: const Icon(Icons.chevron_left),
+                  tooltip: context.l10n.actionPrevPage,
+                  onPressed: onPrevious,
                 ),
-              ),
-              IconButton(
-                key: const Key('inventory-action-next-page'),
-                icon: const Icon(Icons.chevron_right),
-                tooltip: context.l10n.actionNextPage,
-                onPressed: onNext,
-              ),
-            ],
+                Flexible(
+                  child: Text(
+                    context.l10n.invPageOf(page.pageIndex + 1, page.pageCount),
+                    key: const Key('inventory-page-indicator'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TongtaiDesignTokens.smallStyle.copyWith(
+                      color: TongtaiDesignTokens.lightTextPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  key: const Key('inventory-action-next-page'),
+                  icon: const Icon(Icons.chevron_right),
+                  tooltip: context.l10n.actionNextPage,
+                  onPressed: onNext,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -770,7 +813,10 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    // Scrollable, because "empty" is not the same as "small": at 320 px with a
+    // 1.3x font this icon + two lines of Vietnamese ran 55 px past the bottom
+    // (WTM-169). A centred Column cannot shrink, so it has to be able to move.
+    return SingleChildScrollView(
       key: const Key('inventory-empty'),
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),

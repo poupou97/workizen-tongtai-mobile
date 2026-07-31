@@ -40,11 +40,68 @@ abstract final class TongtaiDesignTokens {
   /// Neutral state
   static const Color neutral = Color(0xFF6B7280);
 
+  // ── Readable-as-text twins (WTM-169) ───────────────────────────────────
+  //
+  // The colours above ARE the brand — they stay exactly as they are for fills,
+  // borders, icons and charts, where no contrast rule applies.
+  //
+  // What they cannot do is carry TEXT. Measured against the surfaces this app
+  // actually pairs them with, `producerGreen` reads at 2.31:1 and
+  // `inventoryOrange` at 2.15:1 — WCAG AA asks for 4.5:1, and a seller reading
+  // a phone in daylight is exactly the person that number is about.
+  //
+  // Each twin is the same hue two steps darker, verified ≥4.5:1 on white and on
+  // every 10 %-tint surface these colours are used behind
+  // (test/features/tongtai/p0/accessibility_test.dart).
+
+  /// Producer green, dark enough to read (5.48:1 on white).
+  static const Color producerGreenText = Color(0xFF047857);
+
+  /// Inventory amber, dark enough to read (5.02:1) — amber at full saturation
+  /// is the worst offender of the set and cannot be used for text at all.
+  static const Color inventoryOrangeText = Color(0xFFB45309);
+
+  /// Consumer blue, dark enough to read (6.70:1).
+  static const Color consumerBlueText = Color(0xFF1D4ED8);
+
+  /// Finance violet, dark enough to read (7.10:1).
+  static const Color financeVioletText = Color(0xFF6D28D9);
+
+  /// Error red, dark enough to read (6.47:1).
+  static const Color errorText = Color(0xFFB91C1C);
+
+  /// Secondary text (7.56:1 on white). `lightTextSecondary` passes on white but
+  /// fails at 4.39:1 on the tinted card surfaces it is routinely placed on —
+  /// so the readable twin is the one text should use.
+  static const Color neutralText = Color(0xFF4B5563);
+
+  /// The readable twin of a capability/semantic colour.
+  ///
+  /// Exists so a shared component that is *handed* a capability colour (pills,
+  /// badges, headers) can render its label legibly without every caller having
+  /// to remember a second constant. Anything unrecognised falls back to primary
+  /// text, because guessing at a contrast ratio is how this bug happened.
+  static Color readableText(Color base) => switch (base.toARGB32()) {
+    0xFF10B981 => producerGreenText, // producerGreen / success
+    0xFFF59E0B => inventoryOrangeText, // inventoryOrange / warning
+    0xFF3B82F6 => consumerBlueText, // consumerBlue / info
+    0xFF8B5CF6 => financeVioletText, // financePurple
+    0xFFA78BFA => financeVioletText, // copilotViolet
+    0xFFEF4444 => errorText, // error
+    0xFF6B7280 => neutralText, // setupGray / neutral
+    _ => lightTextPrimary,
+  };
+
   // ── Light Theme ────────────────────────────────────────────────────────
 
   static const Color lightBackground = Color(0xFFFFFFFF);
   static const Color lightTextPrimary = Color(0xFF111827);
-  static const Color lightTextSecondary = Color(0xFF6B7280);
+
+  /// Gray-600, not gray-500. The lighter step passes on pure white (4.83:1)
+  /// and fails on every tinted card this app puts it on (4.39:1) — and
+  /// secondary text is precisely where a business puts the number a seller
+  /// squints at. Measured, not guessed (WTM-169).
+  static const Color lightTextSecondary = Color(0xFF4B5563);
   static const Color lightBorder = Color(0xFFE5E7EB);
   static const Color lightHover = Color(0xFFF3F4F6);
 
@@ -129,7 +186,11 @@ abstract final class TongtaiDesignTokens {
   static const double componentBorderRadius = 8;
 
   /// Button height (touch target)
-  static const double buttonHeight = 44;
+  /// 48 dp, not 44 — Android's minimum tap target, and the number
+  /// `androidTapTargetGuideline` enforces. At 44 the rendered control measured
+  /// 46 dp and failed by two pixels, which is exactly the kind of miss nobody
+  /// spots by looking (WTM-169).
+  static const double buttonHeight = 48;
 
   /// Input height
   static const double inputHeight = 48;

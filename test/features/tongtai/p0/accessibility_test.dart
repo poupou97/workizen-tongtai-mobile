@@ -18,27 +18,32 @@ import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart'
 import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart';
 import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_backup_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_consumer_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_risk_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_export_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_finance_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_forecast_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_producer_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_timeline_screen.dart';
-import 'package:tongtai/features/tongtai/ui/screens/tongtai_producer_screen.dart';
-import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dart';
-import 'package:tongtai/features/tongtai/ui/screens/tongtai_consumer_screen.dart';
 
-/// P0 §3 (WTM-146) — layout overflow governance.
+/// WTM-167 — accessibility, measured by Flutter's own guidelines rather than
+/// by opinion.
 ///
-/// Every key screen must render WITHOUT RenderFlex overflow in BOTH shipped
-/// locales on a narrow phone (320 logical px) at an accessibility text scale
-/// of 1.3 — in the empty state AND with seeded data. A 2.0-scale pass on the
-/// two text-heaviest screens stands in for a "long locale" until a third
-/// language ships (AppStrings is N-language-ready; the app ships vi+en today —
-/// gap documented in the P0 Review Package).
+/// Three of these are shipped matchers, so the bar is Android's, not ours:
+///
+/// - **tap target** — every tappable is at least 48×48 dp. A seller counting
+///   stock with one hand does not get to try again on a 24 dp icon.
+/// - **labeled tap target** — every tappable has a name a screen reader can
+///   speak. An unlabelled button is announced as nothing at all.
+/// - **text contrast** — text stays legible against its background.
+///
+/// Run in **both shipped locales**: Vietnamese is longer than English almost
+/// everywhere, so a control that only just fits in `en` is the one that breaks.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -91,41 +96,8 @@ void main() {
     ),
   );
 
-  /// Pumps [screen] at 320x640 logical px with [textScale], collecting every
-  /// RenderFlex overflow error instead of failing mid-frame.
-  Future<List<String>> overflowsFor(
-    WidgetTester tester,
-    Widget screen, {
-    required String locale,
-    required double textScale,
-  }) async {
-    final overflows = <String>[];
-    final prior = FlutterError.onError;
-    FlutterError.onError = (details) {
-      if (details.exceptionAsString().contains('overflowed')) {
-        overflows.add(details.exceptionAsString());
-      } else {
-        prior?.call(details);
-      }
-    };
-    tester.view.physicalSize = const Size(320 * 3, 640 * 3);
-    tester.view.devicePixelRatio = 3.0;
-    tester.platformDispatcher.textScaleFactorTestValue = textScale;
-    await tester.pumpWidget(await host(screen, locale));
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(const SizedBox());
-    FlutterError.onError = prior;
-    tester.view.resetPhysicalSize();
-    tester.view.resetDevicePixelRatio();
-    tester.platformDispatcher.clearTextScaleFactorTestValue();
-    return overflows;
-  }
-
   final screens = <String, Widget Function()>{
     'home': () => TongtaiHomeScreen(clock: () => DateTime(2026, 7, 30)),
-    // The three shell tabs were missing from this list until WTM-169 — and
-    // Inventory turned out to clip by 103 px at a 2.0x system font. A screen
-    // absent from a governance suite is not a screen that passed it.
     'producer': () => const TongtaiProducerScreen(),
     'inventory': () => const TongtaiInventoryScreen(),
     'consumer': () => const TongtaiConsumerScreen(),
@@ -140,53 +112,95 @@ void main() {
     'forecast': () => const TongtaiForecastScreen(),
   };
 
-  for (final locale in ['vi', 'en']) {
-    testWidgets('[$locale] no overflow @320px/1.3x — empty AND seeded states', (
+  /// Checks one screen against one guideline, returning the failure text
+  /// instead of throwing — so one run reports every screen that is wrong
+  /// rather than only the first.
+  Future<String?> check(
+    WidgetTester tester,
+    Widget screen,
+    String locale,
+    AccessibilityGuideline guideline, {
+    double textScale = 1.0,
+  }) async {
+    final handle = tester.ensureSemantics();
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    // Capture layout overflow here rather than letting it explode anonymously:
+    // by the time the default handler prints, the widget is DEFUNCT and the
+    // message cannot say WHICH screen broke — which makes it unfixable.
+    final overflows = <String>[];
+    final priorOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      if (details.exceptionAsString().contains('overflowed')) {
+        overflows.add(details.exceptionAsString().split('\n').first);
+      } else {
+        priorOnError?.call(details);
+      }
+    };
+
+    await tester.pumpWidget(await host(screen, locale));
+    await tester.pumpAndSettle();
+    String? failure;
+    try {
+      await expectLater(tester, meetsGuideline(guideline));
+    } on TestFailure catch (e) {
+      failure = e.message;
+    }
+    await tester.pumpWidget(const SizedBox());
+    FlutterError.onError = priorOnError;
+    handle.dispose();
+    if (overflows.isNotEmpty) {
+      failure = '${failure ?? ''}\nLAYOUT OVERFLOW: ${overflows.join(' | ')}';
+    }
+    return failure;
+  }
+
+  for (final guideline in <String, AccessibilityGuideline>{
+    'tap target ≥48dp': androidTapTargetGuideline,
+    'every tappable is named': labeledTapTargetGuideline,
+    'text contrast': textContrastGuideline,
+  }.entries) {
+    testWidgets('${guideline.key} — every screen, both locales, with data', (
       tester,
     ) async {
-      final all = <String>[];
-      for (final entry in screens.entries) {
-        final empty = await overflowsFor(
-          tester,
-          entry.value(),
-          locale: locale,
-          textScale: 1.3,
-        );
-        all.addAll(empty.map((e) => '[$locale empty ${entry.key}] $e'));
-      }
       await seeder().seed();
-      for (final entry in screens.entries) {
-        final seeded = await overflowsFor(
-          tester,
-          entry.value(),
-          locale: locale,
-          textScale: 1.3,
-        );
-        all.addAll(seeded.map((e) => '[$locale seeded ${entry.key}] $e'));
+      final failures = <String>[];
+      for (final locale in ['vi', 'en']) {
+        for (final entry in screens.entries) {
+          final failure = await check(
+            tester,
+            entry.value(),
+            locale,
+            guideline.value,
+          );
+          if (failure != null) {
+            failures.add('── [$locale ${entry.key}] ─────\n$failure');
+          }
+        }
       }
-      expect(all, isEmpty, reason: all.join('\n'));
+      expect(failures, isEmpty, reason: failures.join('\n\n'));
     });
   }
 
-  testWidgets('long-content proxy: More + Home @320px/2.0x do not overflow', (
-    tester,
-  ) async {
+  // A seller who has turned the system font up is the person most likely to
+  // need a 48 dp target too — the two accessibility settings arrive together,
+  // so they have to be tested together.
+  testWidgets('tap targets survive a 2.0x system font', (tester) async {
     await seeder().seed();
-    final all = <String>[];
-    for (final locale in ['vi', 'en']) {
-      for (final entry in [
-        MapEntry('more', const TongtaiMoreScreen() as Widget),
-        MapEntry('home', TongtaiHomeScreen(clock: () => DateTime(2026, 7, 30))),
-      ]) {
-        final o = await overflowsFor(
-          tester,
-          entry.value,
-          locale: locale,
-          textScale: 2.0,
-        );
-        all.addAll(o.map((e) => '[$locale 2.0x ${entry.key}] $e'));
+    final failures = <String>[];
+    for (final entry in screens.entries) {
+      final failure = await check(
+        tester,
+        entry.value(),
+        'vi',
+        androidTapTargetGuideline,
+        textScale: 2.0,
+      );
+      if (failure != null) {
+        failures.add('── [vi 2.0x ${entry.key}] ─────\n$failure');
       }
     }
-    expect(all, isEmpty, reason: all.join('\n'));
+    expect(failures, isEmpty, reason: failures.join('\n\n'));
   });
 }

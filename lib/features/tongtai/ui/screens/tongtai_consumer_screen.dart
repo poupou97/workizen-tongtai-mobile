@@ -135,13 +135,20 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        l10n.titleCustomers,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      // The count badge is fixed width; the title is the part
+                      // that has to give way on a 320 px phone (WTM-169).
+                      Expanded(
+                        child: Text(
+                          l10n.titleCustomers,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -164,23 +171,31 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  // Three Vietnamese segment labels side by side ran 69 px
+                  // past a 320 px screen at a 1.3x font — each column now takes
+                  // an equal third instead of its natural width (WTM-169).
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _CustomerStat(
-                        label: l10n.segActive,
-                        value: '$active',
-                        color: _blue,
+                      Expanded(
+                        child: _CustomerStat(
+                          label: l10n.segActive,
+                          value: '$active',
+                          color: _blue,
+                        ),
                       ),
-                      _CustomerStat(
-                        label: l10n.segVip,
-                        value: '$vip',
-                        color: _blue,
+                      Expanded(
+                        child: _CustomerStat(
+                          label: l10n.segVip,
+                          value: '$vip',
+                          color: _blue,
+                        ),
                       ),
-                      _CustomerStat(
-                        label: l10n.segNew,
-                        value: '$fresh',
-                        color: _blue,
+                      Expanded(
+                        child: _CustomerStat(
+                          label: l10n.segNew,
+                          value: '$fresh',
+                          color: _blue,
+                        ),
                       ),
                     ],
                   ),
@@ -367,7 +382,17 @@ class _LifecycleStage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(stage, style: const TextStyle(fontSize: 14)),
+        // The stage name is the flexible half; the count is two characters and
+        // must never be the thing that gets clipped (WTM-169).
+        Expanded(
+          child: Text(
+            stage,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
+        const SizedBox(width: 8),
         Text(
           count,
           style: TextStyle(

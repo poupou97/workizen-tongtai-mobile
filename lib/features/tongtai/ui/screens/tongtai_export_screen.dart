@@ -361,7 +361,9 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
           key: const Key('export-run'),
           onPressed: _busy ? null : _export,
           style: FilledButton.styleFrom(
-            backgroundColor: TongtaiDesignTokens.producerGreen,
+            // White label on producerGreen reads at 2.54:1; the readable twin
+            // takes it to 5.48:1 (WTM-169). Same hue, deeper.
+            backgroundColor: TongtaiDesignTokens.producerGreenText,
             minimumSize: const Size.fromHeight(
               TongtaiDesignTokens.buttonHeight,
             ),
