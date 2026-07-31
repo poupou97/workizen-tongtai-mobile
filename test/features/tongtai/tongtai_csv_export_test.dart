@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tongtai/core/prefs.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
@@ -18,6 +19,8 @@ import 'package:tongtai/features/tongtai/export/export_history_store.dart';
 import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_export_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
+
+import '../../support/pump_until.dart';
 
 /// WTM-99 — Data Export to CSV (Phase 2 per D-10):
 ///  - AC1: customers / products / orders exports
@@ -299,7 +302,8 @@ void main() {
 
     testWidgets('More → "Export Data (CSV)" opens the screen', (tester) async {
       useTallViewport(tester);
-      await tester.pumpWidget(const _MoreHost());
+      SharedPreferences.setMockInitialValues({});
+      await tester.pumpWidget(_MoreHost(await SharedPreferences.getInstance()));
       await tester.ensureVisible(find.text('Export Data (CSV)'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Export Data (CSV)'));
@@ -308,12 +312,58 @@ void main() {
       expect(find.byType(TongtaiExportScreen), findsOneWidget);
     });
   });
+  testWidgets('WTM-164: export history survives a restart (production wiring)', (
+    tester,
+  ) async {
+    // Fail-before/pass-after: the screen defaulted to the IN-MEMORY store even
+    // in production, so the history WTM-99 AC5 promises reset on every launch
+    // while `SharedPrefsTongtaiExportHistoryStore` sat unused.
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    await SharedPrefsTongtaiExportHistoryStore(prefs).add(
+      TongtaiExportRecord(
+        type: TongtaiExportType.customers,
+        fileName: 'tongtai-khach-hang-20260731.csv',
+        rowCount: 2,
+        exportedAt: DateTime(2026, 7, 31, 9, 41),
+      ),
+    );
+
+    // A NEW screen with NO injected history must still find that record — it
+    // has to resolve the persistent store, not build a fresh in-memory one.
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          customerRepositoryProvider.overrideWithValue(
+            InMemoryCustomerRepository(),
+          ),
+          productRepositoryProvider.overrideWithValue(
+            InMemoryProductRepository(),
+          ),
+          orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
+        ],
+        child: const MaterialApp(home: TongtaiExportScreen()),
+      ),
+    );
+    await pumpUntilFound(
+      tester,
+      find.textContaining('tongtai-khach-hang-20260731.csv'),
+    );
+
+    expect(
+      find.textContaining('tongtai-khach-hang-20260731.csv'),
+      findsWidgets,
+    );
+  });
 }
 
 /// More screen needs a Riverpod scope; the Export screen it opens now reads
 /// the production repositories (WTM-144) — keep it on in-memory overrides.
 class _MoreHost extends StatelessWidget {
-  const _MoreHost();
+  const _MoreHost(this.prefs);
+
+  final SharedPreferences prefs;
 
   @override
   Widget build(BuildContext context) => ProviderScope(
@@ -325,6 +375,10 @@ class _MoreHost extends StatelessWidget {
         InMemoryProductRepository([]),
       ),
       orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
+      // The Export screen persists its history in SharedPreferences
+      // (WTM-164) exactly as production does, so this override is required
+      // rather than optional.
+      sharedPreferencesProvider.overrideWithValue(prefs),
     ],
     // The scope must sit ABOVE the Navigator so pushed routes (the real
     // Export screen) inherit the in-memory overrides (WTM-144).
