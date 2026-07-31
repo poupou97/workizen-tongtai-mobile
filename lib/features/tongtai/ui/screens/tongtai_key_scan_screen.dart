@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../core/screen_state.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 
 /// QR scanner for BYOK API keys (WTM-83, Founder-approved dependency).
 ///
@@ -48,6 +50,18 @@ class _TongtaiKeyScanScreenState extends State<TongtaiKeyScanScreen> {
           MobileScanner(
             key: const Key('key-scan-camera'),
             onDetect: (capture) => _onDetect(context, capture),
+            // A denied camera is the whole screen failing (WTM-148). Without
+            // this the scanner renders a black rectangle and the user is left
+            // pointing a dead camera at their key.
+            errorBuilder: (context, error) => TongtaiFailureView(
+              prefix: 'key-scan',
+              failure: TongtaiFailure(
+                kind: TongtaiFailureKind.permission,
+                code: 'permission.camera',
+                detail: error.errorDetails?.message ?? error.errorCode.name,
+                cause: error,
+              ),
+            ),
           ),
           Align(
             alignment: Alignment.bottomCenter,

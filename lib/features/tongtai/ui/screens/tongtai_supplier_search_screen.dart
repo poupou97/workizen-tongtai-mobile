@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../producer/supplier.dart';
 import '../../producer/supplier_favorites_controller.dart';
 import '../../producer/supplier_search_service.dart';
@@ -542,12 +544,28 @@ class _ResultsGrid extends StatelessWidget {
           itemBuilder: (context, index) => _SupplierCard(
             supplier: suppliers[index],
             isFavorite: favorites.isFavorite(suppliers[index].id),
-            onToggleFavorite: () => favorites.toggle(suppliers[index].id),
+            // A favourite is persisted (WTM-65) — a write that fails must not
+            // leave the heart looking saved (WTM-148).
+            onToggleFavorite: () =>
+                _toggleFavorite(context, favorites, suppliers[index].id),
           ),
         );
       },
     );
   }
+}
+
+/// Persists a favourite toggle, surfacing a failure instead of dropping it.
+Future<void> _toggleFavorite(
+  BuildContext context,
+  SupplierFavoritesController favorites,
+  String supplierId,
+) async {
+  final failure = await runTongtaiAction(
+    () => favorites.toggle(supplierId),
+    screen: 'supplier-search',
+  );
+  if (failure != null && context.mounted) showTongtaiFailure(context, failure);
 }
 
 class _SupplierCard extends StatelessWidget {

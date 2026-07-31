@@ -635,7 +635,15 @@ class _ResultsArea extends StatelessWidget {
               Tab(text: '${tab.label(lang)} (${results.countFor(tab)})'),
           ],
         ),
-        if (controller.isSearching && results.isEmpty)
+        if (controller.failure != null)
+          Expanded(
+            child: TongtaiFailureView(
+              prefix: 'search',
+              failure: controller.failure!,
+              onRetry: () => controller.repeat(controller.query),
+            ),
+          )
+        else if (controller.isSearching && results.isEmpty)
           const Expanded(child: TongtaiLoadingView(prefix: 'search'))
         else
           Expanded(
