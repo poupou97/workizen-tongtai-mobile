@@ -492,7 +492,10 @@ class _HealthBadge extends StatelessWidget {
         ? TongtaiDesignTokens.success
         : TongtaiDesignTokens.neutral;
     return Tooltip(
-      message: health.reason,
+      // Was health.label('en') below and a Vietnamese-only reason here, so the
+      // Vietnamese build showed "Not enough data" and the English build would
+      // show a Vietnamese tooltip (WTM-173). Both now follow the active locale.
+      message: health.reasonFor(context.l10n.languageCode),
       child: Container(
         key: const Key('home-health-badge'),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -511,7 +514,7 @@ class _HealthBadge extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              health.label('en'),
+              health.label(context.l10n.languageCode),
               style: TongtaiDesignTokens.captionStyle.copyWith(
                 color: color,
                 fontWeight: FontWeight.w600,
