@@ -171,7 +171,7 @@ class _LogoMonogram extends StatelessWidget {
       child: Text(
         initials,
         style: TongtaiDesignTokens.heading3Style.copyWith(
-          color: TongtaiDesignTokens.producerGreen,
+          color: TongtaiDesignTokens.producerGreenText,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -198,10 +198,16 @@ class _RatingRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: TongtaiDesignTokens.spacing1),
-        Text(
-          '(${profile.reviewCount} reviews)',
-          style: TongtaiDesignTokens.smallStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
+        // Flexible + localized: the review count was hardcoded English and
+        // pushed the header 190 px past the edge at a 2.0x font (WTM-168).
+        Flexible(
+          child: Text(
+            context.l10n.supplierReviewCount(profile.reviewCount),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
           ),
         ),
       ],
@@ -258,10 +264,14 @@ class _RatingsSection extends StatelessWidget {
               const SizedBox(width: TongtaiDesignTokens.spacing1),
               const Icon(Icons.star, size: 20, color: Color(0xFFF59E0B)),
               const SizedBox(width: TongtaiDesignTokens.spacing2),
-              Text(
-                'from ${profile.reviewCount} reviews',
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
+              Flexible(
+                child: Text(
+                  context.l10n.supplierFromReviews(profile.reviewCount),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextSecondary,
+                  ),
                 ),
               ),
             ],
@@ -306,13 +316,13 @@ class _CertificationBadge extends StatelessWidget {
           const Icon(
             Icons.verified_outlined,
             size: 14,
-            color: TongtaiDesignTokens.producerGreen,
+            color: TongtaiDesignTokens.producerGreenText,
           ),
           const SizedBox(width: TongtaiDesignTokens.spacing1),
           Text(
             label,
             style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.producerGreen,
+              color: TongtaiDesignTokens.producerGreenText,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -356,7 +366,7 @@ class _CatalogSection extends StatelessWidget {
                   const Icon(
                     Icons.category_outlined,
                     size: 16,
-                    color: TongtaiDesignTokens.producerGreen,
+                    color: TongtaiDesignTokens.producerGreenText,
                   ),
                   const SizedBox(width: TongtaiDesignTokens.spacing2),
                   Expanded(

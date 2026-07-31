@@ -121,7 +121,10 @@ class _TongtaiOnboardingScreenState extends State<TongtaiOnboardingScreen> {
                   key: const ValueKey('onboarding-action-next'),
                   onPressed: _onPrimaryPressed,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: accent,
+                    // Each page carries its capability colour; a white label on
+                    // the -500 step reads at 2.72:1, so the button takes the
+                    // readable twin while the page art keeps the brand hue.
+                    backgroundColor: TongtaiDesignTokens.readableText(accent),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -183,9 +186,13 @@ class _OnboardingPageView extends StatelessWidget {
           ),
         );
       },
-      child: Padding(
+      // Scrollable: at a 2.0x system font the 160 px illustration plus a
+      // headline and body ran 184 px past the page (WTM-168). Centring is kept
+      // for the common case; the scroll only engages when it has to.
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
           horizontal: TongtaiDesignTokens.spacing8,
+          vertical: TongtaiDesignTokens.spacing4,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

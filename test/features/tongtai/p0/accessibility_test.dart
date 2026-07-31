@@ -37,6 +37,27 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_goals_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_product_form_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_supplier_search_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart';
+import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart'
+    show kSampleCustomers;
+import 'package:tongtai/features/tongtai/inventory/product_catalog_controller.dart';
+import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart'
+    show kSampleProducts;
+import 'package:tongtai/features/tongtai/journey/business_goal.dart'
+    show kSampleBusinessGoals;
+import 'package:tongtai/features/tongtai/opportunity/opportunity.dart'
+    show kSampleOpportunities;
+import 'package:tongtai/features/tongtai/producer/supplier_favorites_controller.dart';
+import 'package:tongtai/features/tongtai/producer/supplier_search_service.dart'
+    show kSampleSuppliers;
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_create_order_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_history_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_onboarding_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_supplier_detail_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_supplier_favorites_screen.dart';
 
 /// WTM-167 — accessibility, measured by Flutter's own guidelines rather than
 /// by opinion.
@@ -133,6 +154,28 @@ void main() {
     'product-form': () => const TongtaiProductFormScreen(),
     'supplier-search': () => const TongtaiSupplierSearchScreen(),
     'transaction-form': () => const TongtaiTransactionFormScreen(),
+    // Screens that need an entity to exist. They are the ones a seller reaches
+    // by tapping something, which is most of the app.
+    'onboarding': () => TongtaiOnboardingScreen(onFinished: () {}),
+    'supplier-detail': () =>
+        TongtaiSupplierDetailScreen.forSupplier(kSampleSuppliers.first),
+    'supplier-favorites': () => TongtaiSupplierFavoritesScreen(
+      favorites: SupplierFavoritesController.inMemory(),
+    ),
+    'inventory-picker': () =>
+        TongtaiInventoryPickerScreen(products: kSampleProducts),
+    'stock-alerts': () =>
+        TongtaiStockAlertsScreen(catalog: ProductCatalogController.sample()),
+    'goal-detail': () =>
+        TongtaiGoalDetailScreen(goal: kSampleBusinessGoals.first),
+    'opportunity-detail': () =>
+        TongtaiOpportunityDetailScreen(opportunity: kSampleOpportunities.first),
+    'customer-history': () =>
+        TongtaiCustomerHistoryScreen(customer: kSampleCustomers.first),
+    'create-order': () => TongtaiCreateOrderScreen(
+      customer: kSampleCustomers.first,
+      products: kSampleProducts,
+    ),
   };
 
   /// Checks one screen against one guideline, returning the failure text

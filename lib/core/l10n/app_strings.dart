@@ -336,6 +336,8 @@ abstract class AppStrings {
   /// Tappable stock banner. Was hardcoded English until WTM-169 — the
   /// Vietnamese build showed "Stock alerts: 4 out of stock • 2 low".
   String invStockAlerts(String parts);
+  String supplierReviewCount(int count);
+  String supplierFromReviews(int count);
   String invUpdatedOn(String date);
   String invShowingRange(int first, int last, int total);
   String invPageOf(int page, int pageCount);
@@ -1141,6 +1143,10 @@ class AppStringsVi extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Cảnh báo tồn kho: $parts';
+  @override
+  String supplierReviewCount(int count) => '($count đánh giá)';
+  @override
+  String supplierFromReviews(int count) => 'từ $count đánh giá';
   @override
   String invUpdatedOn(String date) => 'Cập nhật $date';
   @override
@@ -2220,6 +2226,10 @@ class AppStringsEn extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Stock alerts: $parts';
+  @override
+  String supplierReviewCount(int count) => '($count reviews)';
+  @override
+  String supplierFromReviews(int count) => 'from $count reviews';
   @override
   String invUpdatedOn(String date) => 'Updated $date';
   @override

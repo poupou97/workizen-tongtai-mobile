@@ -416,13 +416,20 @@ class _ScoreBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 52,
-      height: 52,
+      // Was a hard 52 px; at a 2.0x system font its own text no longer fits
+      // and the badge clipped by 132 px (WTM-168). A minimum keeps the shape
+      // without capping what has to be readable.
+      // Was a hard 52x52 circle; at a 2.0x system font its own two lines no
+      // longer fit and it clipped (WTM-168). A minimum keeps the shape at
+      // normal sizes and lets it grow rather than swallow the score.
+      constraints: const BoxConstraints(minWidth: 52, minHeight: 52),
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing1),
       decoration: BoxDecoration(
         color: TongtaiDesignTokens.copilotViolet.withValues(alpha: 0.12),
         shape: BoxShape.circle,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
