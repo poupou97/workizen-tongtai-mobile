@@ -31,6 +31,7 @@ void main() {
     'tongtai_forecast_screen.dart': 'forecast',
     'tongtai_customer_risk_screen.dart': 'risk',
     'tongtai_export_screen.dart': 'export',
+    'tongtai_backup_screen.dart': 'backup',
     'tongtai_more_screen.dart': 'more',
     'tongtai_chat_screen.dart': 'chat',
     'tongtai_unified_search_screen.dart': 'search',

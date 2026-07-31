@@ -24,6 +24,46 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐⭐ BACKUP `.ttbk` v2 + RESTORE (WTM-164, 2026-07-31) — ADR-TON-018:**
+  Audit phát hiện **`.ttbk` v1 không khôi phục được doanh nghiệp**: nó là **một
+  CSV mã hoá của MỘT dataset**, phủ 3/6 repository, **bỏ hẳn `order.id` và
+  `OrderItem.productId`** (đứt liên kết Inventory↔Orders mà ADR-TON-010 bắt
+  buộc), lưu enum bằng **nhãn tiếng Việt**, và version hoá container mã hoá chứ
+  không phải schema dữ liệu. Xây restore trên đó = tính năng phục hồi **làm mất
+  dữ liệu trong im lặng**.
+  · **v2** = snapshot **toàn miền, lossless, có version** cho cả 6 repository;
+  manifest plaintext (format/content/app/db version · backupId · createdAt ·
+  encryption · SHA-256 + độ dài), **record counts nằm TRONG payload** nên file
+  mã hoá không rò rỉ quy mô kinh doanh; enum bằng **mã canonical**; mã enum lạ
+  là **bản ghi hỏng**, không phải default. **SHA-256 = chống hỏng, KHÔNG phải
+  chống giả mạo.**
+  · **Restore = Replace only** (Founder quyết 2026-07-31; Merge là capability
+  riêng, cấm nhét lén): validate toàn bộ **read-only** → preview → xác nhận phá
+  huỷ → **tạo + verify** bản sao lưu an toàn → **một transaction** {xoá theo
+  FK → ghi theo phụ thuộc → verify counts + FK} → commit → invalidate cache.
+  **Không verify được bản an toàn ⇒ không xoá gì.** Version mới hơn/file hỏng
+  ⇒ **chặn**, không partial import.
+  · **Bug production sửa kèm:** màn Export mặc định dùng **InMemory** history
+  store ngay ở bản production ⇒ lịch sử xuất mất sau mỗi lần khởi động lại
+  (trái AC5 của WTM-99). Governance mới: production **cấm** default sang
+  InMemory · `kTongtaiAppVersion` phải khớp pubspec · telemetry của backup
+  không được mang path/tên file/số bản ghi.
+  · Dep mới: `file_picker`, `crypto` (SHA-256 **đồng bộ** — bản async của
+  `cryptography` không hoàn tất trong fake-async zone của `testWidgets`).
+  · Testing Bible **P-13…P-15**. **1347 → 1387 tests.**
+  · **Device smoke test (S24 Ultra, release build) — MỘT PHẦN:** cài + mở app
+  (có plugin native mới) không crash · màn Backup & restore render đúng · **tạo
+  backup** sinh `.ttbk` và mở share sheet · **chọn file** qua `file_selector`
+  (SAF picker) · **đọc + validate + preview** hiển thị đúng created/app+db
+  version/không mã hoá/SHA-256/**tương thích** và **counts khớp chính xác** file
+  kiểm thử (5·3·2·1·4·1) · cảnh báo phá huỷ + nút đỏ "Replace current data" ·
+  `adb logcat -b crash` **rỗng**. ⚠️ **Bước apply (bấm Replace) KHÔNG chạy trên
+  thiết bị**: bản release không `run-as` được và SAF không thấy thư mục riêng
+  của app, nên bản sao lưu an toàn **không khôi phục lại được qua UI** — chạy
+  thử sẽ phá dữ liệu thật của Founder mà không có đường lùi. Apply + rollback
+  được chứng minh bằng test trên **file SQLite thật** (rollback đầy đủ khi hỏng
+  giữa chừng · vault ghi hỏng hoặc đọc lại hỏng ⇒ **không xoá gì** · verify
+  counts + FK **bên trong** transaction).
 - **⭐⭐ ERROR-HANDLING SEAM (WTM-148, 2026-07-31) — ADR-TON-017:** đóng gap hệ
   thống mà audit ADR-TON-015 phát hiện (**1/34 màn** có xử lý lỗi thật). Trước
   đó `initState → _load() → setState` để future lỗi không ai bắt, nên **"không
@@ -48,6 +88,15 @@
   file `.db` và test override chỉ trúng nửa app (One Data Path violation);
   (2) export `try/finally` **không có catch** → xuất hỏng trông như xong.
   **1347 tests.**
+  · ✅ **Device smoke test PASS — Founder nghiệm thu 2026-07-31** (Galaxy S24 Ultra,
+  release build từ `main` `a974b7e`): `ready` (Home · Consumer badge khớp · Customer
+  risk) · **`insufficient`** (Dự báo: "Not enough data to forecast" + reason chips,
+  **không render `0 ₫`**) · **lỗi phân loại + hồi phục** (ngắt mạng → "Could not reach
+  the AI service" kind `network`; bật lại → "Connection OK — grok-4.3 responded") ·
+  **dữ liệu người dùng và khoá API giữ nguyên** · `adb logcat -b crash` **rỗng**.
+  ⚠️ Màn lỗi toàn trang + banner stale **không** ép trên máy thật vì sẽ phải xoá dữ
+  liệu thật của Founder — chứng minh bằng 8 test trên **file SQLite thật** (lỗi mặc
+  định = `SqliteException` FOREIGN KEY 787 thật).
 - **⭐⭐ PREDICTIVE FOUNDATION (Founder Decision APPROVED 2026-07-30) — ADR-TON-016, Epic WTM-149:**
   Trả lời được câu hỏi "AI dự báo doanh thu / khách rời bỏ chưa?" bằng **kiến trúc**, không phải prompt:
   **Capability Context** độc lập tải on-demand (Revenue · Customer) giữ BusinessContext **không phình God Object**;

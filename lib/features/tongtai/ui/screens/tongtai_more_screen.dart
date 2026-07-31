@@ -13,6 +13,7 @@ import '../../sample/historical_data_generator.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
 import 'tongtai_customer_risk_screen.dart';
+import 'tongtai_backup_screen.dart';
 import 'tongtai_export_screen.dart';
 import 'tongtai_finance_screen.dart';
 import 'tongtai_forecast_screen.dart';
@@ -351,6 +352,16 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiExportScreen(),
+                    ),
+                  ),
+                ),
+                _SettingsItem(
+                  key: const Key('more-backup'),
+                  icon: Icons.settings_backup_restore,
+                  label: context.l10n.titleBackup,
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiBackupScreen(),
                     ),
                   ),
                 ),

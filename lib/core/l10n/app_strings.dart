@@ -509,6 +509,41 @@ abstract class AppStrings {
   /// "Showing data from 09:41" — the stale banner always names the moment, so
   /// "old" is never left to the imagination.
   String stateStaleBody(String time);
+
+  // ── backup & restore (WTM-164 / ADR-TON-018) ────────────────────────────
+  String get titleBackup;
+  String get backupCreate;
+  String get backupCreateHint;
+  String get backupRestore;
+  String get backupRestoreHint;
+  String get backupPickFile;
+  String get backupPassphraseLabel;
+  String get backupPassphraseNeeded;
+  String get backupPreviewTitle;
+  String get backupCreatedAt;
+  String get backupAppVersion;
+  String get backupEncrypted;
+  String get backupNotEncrypted;
+  String get backupCompatible;
+  String get backupContents;
+  String get backupReplaceWarning;
+  String get backupReplaceAction;
+  String get backupConfirmTitle;
+  String get backupConfirmBody;
+  String get backupRestoring;
+  String get backupRestoreDone;
+  String get backupSafetyCopy;
+  String get backupRejected;
+  String get backupIntegrityNote;
+  String get datasetCustomers;
+  String get datasetProducts;
+  String get datasetOrders;
+  String get datasetGoals;
+  String get datasetTransactions;
+  String get datasetFavourites;
+
+  /// Why a backup file was refused — one sentence per [BackupProblem].
+  String backupProblem(String code);
 }
 
 class AppStringsVi extends AppStrings {
@@ -1409,6 +1444,97 @@ class AppStringsVi extends AppStrings {
   @override
   String stateStaleBody(String time) =>
       'Đang xem dữ liệu lúc $time. Lần làm mới gần nhất thất bại.';
+
+  @override
+  String get titleBackup => 'Sao lưu & khôi phục';
+  @override
+  String get backupCreate => 'Tạo file sao lưu (.ttbk)';
+  @override
+  String get backupCreateHint =>
+      'Toàn bộ dữ liệu kinh doanh trong một file: khách hàng, sản phẩm, đơn '
+      'hàng, mục tiêu, thu chi, nhà cung cấp yêu thích.';
+  @override
+  String get backupRestore => 'Khôi phục từ file sao lưu';
+  @override
+  String get backupRestoreHint =>
+      'Thay thế toàn bộ dữ liệu hiện tại bằng nội dung file sao lưu.';
+  @override
+  String get backupPickFile => 'Chọn file .ttbk';
+  @override
+  String get backupPassphraseLabel => 'Mật khẩu của file sao lưu';
+  @override
+  String get backupPassphraseNeeded =>
+      'File này được mã hoá. Nhập mật khẩu để xem nội dung.';
+  @override
+  String get backupPreviewTitle => 'Nội dung file sao lưu';
+  @override
+  String get backupCreatedAt => 'Tạo lúc';
+  @override
+  String get backupAppVersion => 'Phiên bản app / CSDL';
+  @override
+  String get backupEncrypted => 'Có mã hoá';
+  @override
+  String get backupNotEncrypted => 'Không mã hoá';
+  @override
+  String get backupCompatible => 'Tương thích với bản app này';
+  @override
+  String get backupContents => 'Số bản ghi sẽ được khôi phục';
+  @override
+  String get backupReplaceWarning =>
+      'Toàn bộ dữ liệu kinh doanh hiện tại trên máy sẽ bị THAY THẾ bằng dữ '
+      'liệu trong file này. App sẽ tự tạo một bản sao lưu an toàn trước khi '
+      'thay.';
+  @override
+  String get backupReplaceAction => 'Thay thế dữ liệu hiện tại';
+  @override
+  String get backupConfirmTitle => 'Thay thế dữ liệu hiện tại?';
+  @override
+  String get backupConfirmBody =>
+      'Không thể hoàn tác bằng một nút bấm. Bản sao lưu an toàn sẽ được tạo '
+      'trước, và đường dẫn hiện ngay sau khi xong.';
+  @override
+  String get backupRestoring => 'Đang khôi phục…';
+  @override
+  String get backupRestoreDone => 'Đã khôi phục xong';
+  @override
+  String get backupSafetyCopy => 'Bản sao lưu an toàn trước khi khôi phục';
+  @override
+  String get backupRejected => 'Không dùng được file này';
+  @override
+  String get backupIntegrityNote =>
+      'Checksum SHA-256 phát hiện file hỏng hoặc thiếu, KHÔNG chứng minh file '
+      'là thật. Chỉ file có mã hoá mới chống sửa đổi.';
+  @override
+  String get datasetCustomers => 'Khách hàng';
+  @override
+  String get datasetProducts => 'Sản phẩm';
+  @override
+  String get datasetOrders => 'Đơn hàng';
+  @override
+  String get datasetGoals => 'Mục tiêu';
+  @override
+  String get datasetTransactions => 'Thu chi';
+  @override
+  String get datasetFavourites => 'NCC yêu thích';
+  @override
+  String backupProblem(String code) => switch (code) {
+    'notABackup' => 'Đây không phải file sao lưu Tổng Tài (.ttbk v2).',
+    'tooNew' =>
+      'File được tạo bởi bản app mới hơn. Hãy cập nhật app rồi thử lại.',
+    'unsupportedVersion' => 'Bản app này không đọc được phiên bản file đó.',
+    'truncated' => 'File bị thiếu dữ liệu (có thể sao chép chưa xong).',
+    'checksumMismatch' => 'File bị hỏng — checksum không khớp.',
+    'passphraseRequired' => 'File có mã hoá. Cần nhập mật khẩu.',
+    'wrongPassphrase' => 'Mật khẩu không đúng, hoặc file đã bị sửa đổi.',
+    'malformedPayload' => 'Nội dung file không đọc được.',
+    'missingDataset' =>
+      'File thiếu một phần dữ liệu nên không phải bản đầy đủ.',
+    'invalidRecord' => 'Có bản ghi trong file bị sai định dạng.',
+    'duplicateId' => 'File có bản ghi trùng mã.',
+    'brokenForeignKey' => 'File có đơn hàng trỏ tới khách hàng không tồn tại.',
+    'countMismatch' => 'Số bản ghi khai báo không khớp nội dung thật.',
+    _ => 'Không khôi phục được từ file này.',
+  };
 }
 
 class AppStringsEn extends AppStrings {
@@ -2312,6 +2438,97 @@ class AppStringsEn extends AppStrings {
   @override
   String stateStaleBody(String time) =>
       'Showing data from $time. The last refresh failed.';
+
+  @override
+  String get titleBackup => 'Backup & restore';
+  @override
+  String get backupCreate => 'Create a backup file (.ttbk)';
+  @override
+  String get backupCreateHint =>
+      'Your whole business in one file: customers, products, orders, goals, '
+      'transactions and favourite suppliers.';
+  @override
+  String get backupRestore => 'Restore from a backup file';
+  @override
+  String get backupRestoreHint =>
+      'Replaces all current data with the contents of a backup file.';
+  @override
+  String get backupPickFile => 'Choose a .ttbk file';
+  @override
+  String get backupPassphraseLabel => 'Passphrase for this backup';
+  @override
+  String get backupPassphraseNeeded =>
+      'This file is encrypted. Enter the passphrase to see what is inside.';
+  @override
+  String get backupPreviewTitle => 'What this backup contains';
+  @override
+  String get backupCreatedAt => 'Created';
+  @override
+  String get backupAppVersion => 'App / database version';
+  @override
+  String get backupEncrypted => 'Encrypted';
+  @override
+  String get backupNotEncrypted => 'Not encrypted';
+  @override
+  String get backupCompatible => 'Compatible with this app version';
+  @override
+  String get backupContents => 'Records that will be restored';
+  @override
+  String get backupReplaceWarning =>
+      'ALL current business data on this device will be REPLACED with the data '
+      'in this file. A safety backup is created automatically first.';
+  @override
+  String get backupReplaceAction => 'Replace current data';
+  @override
+  String get backupConfirmTitle => 'Replace current data?';
+  @override
+  String get backupConfirmBody =>
+      'This cannot be undone with one tap. A safety backup is written first, '
+      'and its location is shown as soon as the restore finishes.';
+  @override
+  String get backupRestoring => 'Restoring…';
+  @override
+  String get backupRestoreDone => 'Restore complete';
+  @override
+  String get backupSafetyCopy => 'Safety backup taken before restoring';
+  @override
+  String get backupRejected => 'This file cannot be used';
+  @override
+  String get backupIntegrityNote =>
+      'The SHA-256 checksum detects a damaged or incomplete file. It does not '
+      'prove the file is genuine — only an encrypted backup resists tampering.';
+  @override
+  String get datasetCustomers => 'Customers';
+  @override
+  String get datasetProducts => 'Products';
+  @override
+  String get datasetOrders => 'Orders';
+  @override
+  String get datasetGoals => 'Goals';
+  @override
+  String get datasetTransactions => 'Transactions';
+  @override
+  String get datasetFavourites => 'Favourite suppliers';
+  @override
+  String backupProblem(String code) => switch (code) {
+    'notABackup' => 'This is not a Tổng Tài backup file (.ttbk v2).',
+    'tooNew' => 'Written by a newer app. Update the app and try again.',
+    'unsupportedVersion' => 'This app cannot read that file version.',
+    'truncated' => 'The file is incomplete — the copy may not have finished.',
+    'checksumMismatch' => 'The file is damaged — its checksum does not match.',
+    'passphraseRequired' => 'The file is encrypted. A passphrase is needed.',
+    'wrongPassphrase' => 'Wrong passphrase, or the file has been altered.',
+    'malformedPayload' => 'The contents of the file could not be read.',
+    'missingDataset' =>
+      'The file is missing part of the data, so it is not a full snapshot.',
+    'invalidRecord' => 'A record inside the file is malformed.',
+    'duplicateId' => 'The file contains records with the same id.',
+    'brokenForeignKey' =>
+      'The file has an order pointing at a customer it does not contain.',
+    'countMismatch' =>
+      'The declared record counts do not match the actual contents.',
+    _ => 'This file cannot be restored.',
+  };
 }
 
 /// `context.l10n.<key>` — the ergonomic accessor used throughout the UI.

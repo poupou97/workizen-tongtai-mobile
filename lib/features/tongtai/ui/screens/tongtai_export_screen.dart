@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/prefs.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../consumer/customer.dart';
 import '../../consumer/customer_order.dart';
@@ -130,7 +131,14 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
   void initState() {
     super.initState();
     _delivery = widget.delivery ?? const ShareSheetCsvDelivery();
-    _history = widget.history ?? InMemoryTongtaiExportHistoryStore();
+    // WTM-164: this used to default to the IN-MEMORY store even in production,
+    // so the export history WTM-99 AC5 promises was wiped on every app restart
+    // while `SharedPrefsTongtaiExportHistoryStore` sat unused.
+    _history =
+        widget.history ??
+        SharedPrefsTongtaiExportHistoryStore(
+          ref.read(sharedPreferencesProvider),
+        );
     _clock = widget.clock ?? DateTime.now;
     _data = ScreenDataController<_ExportData>(
       _read,

@@ -26,6 +26,13 @@ abstract class FinanceRepository {
   /// lifecycle hook (WTM-144/ADR-TON-014): sample records carry the
   /// `sample-` id prefix so they can be removed without touching user data.
   Future<void> deleteByIdPrefix(String prefix);
+
+  /// Removes **every** record of this business (WTM-164 restore Replace).
+  ///
+  /// Separate from `deleteByIdPrefix('')` on purpose: "wipe the business" is a
+  /// destructive operation that should be spelled out at the call site, not
+  /// achieved by an empty-prefix trick nobody reading the code would notice.
+  Future<void> deleteAll();
 }
 
 /// Real, persistent transactions for the local business (WTM-120).
@@ -104,6 +111,14 @@ class DriftFinanceRepository implements FinanceRepository {
         ))
         .go();
   }
+
+  @override
+  Future<void> deleteAll() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(
+      _db.transactionsTable,
+    )..where((t) => t.businessId.equals(businessId))).go();
+  }
 }
 
 /// Demo / Preview source (WTM-120): the built-in sample ledger, **read-only** —
@@ -127,6 +142,11 @@ class SampleFinanceRepository implements FinanceRepository {
 
   @override
   Future<void> deleteByIdPrefix(String prefix) async {
+    // Demo fixtures are read-only — nothing to delete.
+  }
+
+  @override
+  Future<void> deleteAll() async {
     // Demo fixtures are read-only — nothing to delete.
   }
 }
@@ -155,4 +175,7 @@ class InMemoryFinanceRepository implements FinanceRepository {
   @override
   Future<void> deleteByIdPrefix(String prefix) async =>
       _txns.removeWhere((x) => x.id.startsWith(prefix));
+
+  @override
+  Future<void> deleteAll() async => _txns.clear();
 }

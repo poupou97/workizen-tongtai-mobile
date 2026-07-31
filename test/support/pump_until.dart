@@ -21,10 +21,13 @@ Future<void> pumpUntilFound(
   Duration step = const Duration(milliseconds: 10),
 }) async {
   for (var i = 0; i < maxPumps; i++) {
-    // Real SQLite I/O completes off the test clock, so give it wall time
-    // (`runAsync`) before pumping the frame its `setState` scheduled.
+    // Two different clocks have to advance. Real I/O (SQLite, files, hashing)
+    // runs off the test clock, so it needs wall time via `runAsync`; timers
+    // created inside the test zone only fire when the FAKE clock moves, which
+    // is what `pump(step)` does. Pumping without a duration advances neither,
+    // and a screen whose work is split across both simply never finishes.
     await tester.runAsync(() => Future<void>.delayed(step));
-    await tester.pump();
+    await tester.pump(step);
     if (finder.evaluate().isNotEmpty) return;
   }
   // Name the seam state that IS on screen — "still loading" and "failed to

@@ -26,6 +26,9 @@ abstract interface class SupplierFavoritesStore {
 
   /// Remove [supplierId] from favorites. A no-op if it was not a favorite.
   Future<void> remove(String supplierId);
+
+  /// Removes every favourite of this business (WTM-164 restore Replace).
+  Future<void> deleteAll();
 }
 
 /// SQLite-backed favorites store (WTM-65 AC5: "persisted locally in SQLite with
@@ -95,6 +98,13 @@ class DriftSupplierFavoritesStore implements SupplierFavoritesStore {
       );
     }
   }
+
+  @override
+  Future<void> deleteAll() async {
+    // The favourites table is not business-scoped (it predates the workspace
+    // column), so "all" really is all — which is what a Replace restore wants.
+    await _db.delete(_table).go();
+  }
 }
 
 /// In-memory favorites store for tests and standalone screen previews.
@@ -127,4 +137,7 @@ class InMemorySupplierFavoritesStore implements SupplierFavoritesStore {
 
   @override
   Future<void> remove(String supplierId) async => _byId.remove(supplierId);
+
+  @override
+  Future<void> deleteAll() async => _byId.clear();
 }

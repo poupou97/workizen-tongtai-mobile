@@ -60,6 +60,13 @@ domain model, AI matrix, ADRs.
   (Tool Runtime optional) → Human`. **Rule Twin authoritative** (chạy không cần
   AI/mạng/key, cấm bịa số khi thiếu dữ liệu); **AI chỉ giải thích**. Công thức
   thêm capability: `docs/02-ARCHITECTURE/CAPABILITY-BIBLE.md`.
+- **ADR-TON-018** — **`.ttbk` v2 + Restore = Replace**: backup là snapshot
+  **toàn miền, lossless, có version** của cả 6 repository; enum lưu bằng **mã
+  canonical**, cấm nhãn hiển thị; SHA-256 **bắt buộc** (chống hỏng, KHÔNG phải
+  chống giả mạo); record counts nằm **trong** payload. Restore **chỉ Replace**
+  (Merge là capability riêng): validate toàn bộ → preview → xác nhận phá huỷ →
+  **tạo + verify bản sao lưu an toàn** → **một transaction** → verify → commit.
+  Không verify được bản an toàn ⇒ **không xoá gì**. CSV export vẫn chỉ để Excel.
 - **ADR-TON-017** — **Error-Handling Seam**: mọi màn biểu diễn trạng thái bằng
   `ScreenState` (loading·ready·empty·insufficient·refreshing·failed) và lỗi bằng
   `TongtaiFailure` (kind·code·detail). Đọc qua `ScreenDataController`, ghi qua
