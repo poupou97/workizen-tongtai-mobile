@@ -131,6 +131,61 @@ valid directions"**. Nên story này **đo, khoá, và báo cáo**, không tự 
 Cả hai đều là **hàng rào**, không phải mục tiêu: chúng ghi lại số đang có, không
 phải số mong muốn.
 
+## 7. Bổ sung 2026-07-31 đêm — máy tầm thấp (Nokia 6.1)
+
+Báo cáo trên chỉ có số của **một máy đầu bảng**. Người bán mục tiêu không dùng
+máy đó. Đo lại trên **Nokia 6.1** (Android 10, Snapdragon 630), cùng bản
+release, cùng cách cold thật sự:
+
+| | n | min | median | max |
+|---|---|---|---|---|
+| Galaxy S24 Ultra | 5 | 249ms | 255ms | 316ms |
+| **Nokia 6.1** | 5 | **750ms** | **778ms** | **794ms** |
+
+Chậm hơn **~3×** nhưng vẫn **dưới một giây**. Kết luận "không có vấn đề cold
+start" giữ nguyên, và giờ nó dựa trên hai máy chứ không phải một.
+
+Mốc trong app (Nokia, bỏ lần chạy ngay sau khi cài vì có dexopt):
+
+```
+bindings            1ms
+prefs             165ms   ← 13ms trên S24: chậm hơn 12 lần
+telemetry-init    204ms
+run-app           205ms
+db-open           288ms
+4 tab có dữ liệu  315–334ms
+first-frame       425ms
+```
+
+**Home vẫn có dữ liệu trước khung hình đầu tiên** (334ms < 425ms) — kết luận
+chính của báo cáo đúng cả trên máy yếu.
+
+### Một thử nghiệm tối ưu — và vì sao nó bị bỏ
+
+`SharedPreferences` chiếm 165ms và **chặn `runApp`**, còn `Firebase.initializeApp`
+nối đuôi sau nó. Hai việc **độc lập**, nên thử gộp chúng chạy cùng lúc:
+
+```dart
+final (prefs, telemetry) = await (
+  SharedPreferences.getInstance(),
+  initTongtaiTelemetry(),
+).wait;
+```
+
+**Đo lại: không nhanh hơn.** 200/226/240ms so với 204/212ms trước đó — trong
+biên độ dao động, thậm chí nhỉnh hơn.
+
+**Lý do:** cả hai đi qua **cùng một platform channel**, vốn xử lý tuần tự. Gộp
+song song ở tầng Dart không tạo ra song song ở tầng dưới; nó chỉ xếp cùng một
+hàng đợi.
+
+Thay đổi đã được **bỏ**, vì nó không mua được gì và làm **mất độ phân giải chẩn
+đoán**: gộp hai mốc `prefs` và `telemetry-init` thành một thì lần sau không còn
+nhìn thấy cái nào chậm. Một thay đổi lấy đi thông tin mà không trả lại hiệu năng
+là một trao đổi tồi.
+
+Ghi lại ở đây để người sau **không thử lại** rồi cũng bỏ.
+
 ## 6. Cách đo lại
 
 ```bash
