@@ -24,6 +24,33 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐ ĐÊM 2026-07-31 — SĂN LỖI SẢN PHẨM (Founder Autonomous Overnight Mode).**
+  Bốn lỗi thật, mỗi lỗi tìm ra bằng cách **quét có hệ thống** chứ không phải đọc lướt:
+  · **WTM-169 — 11 nút bấm không ra gì ở màn Cài đặt**, gồm **"Đăng xuất" trong
+  một app không có tài khoản** (D-4). Xử theo ba nhóm: **gỡ hẳn** 4 dòng mô tả
+  hệ thống tài khoản mà sản phẩm cố ý không có (Hồ sơ · Đội ngũ · Phân quyền ·
+  Đăng xuất) — không phải chưa làm mà **không thể có**; **"Sắp có"** cho 6 dòng
+  thật sự trên lộ trình (`ListTile(enabled: false)`); **làm luôn** màn *Về Tổng
+  Tài* (phiên bản lấy từ `kTongtaiAppVersion` đã ghim vào pubspec ⇒ không thể
+  khai sai). `_SettingsItem` có `assert(comingSoon || onTap != null)` — constructor
+  từ chối một dòng chết, không cần thêm scan.
+  · **WTM-170 — 13 chuỗi tiếng Anh hardcode**, gồm **"Today's Missions" là tiêu
+  đề đầu tiên trên Home**. Lọt lưới vì scan l10n cũ kiểm tra **key tồn tại**,
+  không kiểm tra UI có dùng chuỗi trần.
+  · **WTM-171 — hai future đọc dữ liệu không ai bắt lỗi.** Màn Rủi ro khách hàng
+  `await loadAll()` trần: đọc hỏng ⇒ map tên rỗng, mà **map tên rỗng không trông
+  giống lỗi** — nó trông giống danh sách khách không có tên, còn phần đánh giá
+  rủi ro bên cạnh vẫn render như sự thật. Màn Tìm kiếm: `ensureSeeded` fire-and-
+  forget biến mất vào unhandled future. Cả hai qua `runTongtaiAction`; test
+  **fail-before/pass-after** đã chứng minh.
+  · **WTM-172 — bản sao lưu an toàn không mở lại được (ADR-TON-018 am.2).**
+  WTM-164 tạo + verify nó rồi ghi vào thư mục riêng của app, **nơi trình chọn
+  file không với tới** ⇒ file duy nhất để cứu một lần restore nhầm là file duy
+  nhất người bán không mở được. Đây chính là lý do bước apply không chạy được
+  trên máy Founder — lúc đó ghi là *hạn chế của phép thử*, thực ra là **lỗ hổng
+  an toàn dữ liệu**. Giờ đọc lại qua chính vault đã ghi, **dừng ở preview** vì
+  hoàn tác một-chạm mà ghi đè là cùng sai lầm chĩa ngược lại.
+  **1404 → 1415 tests.**
 - **⭐ QUYỀN RIÊNG TƯ (WTM-37, 2026-07-31):** nút "Chính sách quyền riêng tư"
   trong Cài đặt là `onTap: () {}` — **bấm không ra gì**. Viết policy song ngữ
   **theo hành vi thật** (đối chiếu code trước khi viết chữ nào): chỉ `app_open`
