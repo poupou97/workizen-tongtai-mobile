@@ -2,6 +2,7 @@
 
 - **Status:** ✅ ACCEPTED (Founder decision "WTM-164 restore mode", 2026-07-31)
   · **Amendment 1** (Founder Note "Business Snapshot Package", 2026-07-31 — §9)
+  · **Amendment 2** (bản sao lưu an toàn phải mở lại được, 2026-07-31 — §10)
 - **Jira:** WTM-164 · WTM-165 (amendment 1)
 - **Extends:** ADR-TON-008/009 (persistence) · ADR-TON-010 (Orders ↔ Inventory
   reference) · ADR-TON-017 (error-handling seam) · ADR-TON-005/D-7 (telemetry)
@@ -164,6 +165,23 @@ chối restore**, và manifest vẫn parse được để preview nói ra **file
 thay vì chỉ nói "không dùng được". Phân biệt này là thứ cho phép Clone Business
 hay Support Bundle sau này dùng chung đúng validator mà không phải nới lỏng
 một dòng nào của restore.
+
+### 10. Bản sao lưu an toàn phải **mở lại được** từ trong app
+
+*(Amendment 2 — WTM-173.)*
+
+§6 bắt buộc tạo **và verify** một bản sao lưu an toàn trước khi xoá bất cứ thứ
+gì. Nhưng nó ghi vào thư mục documents **riêng của app** — nơi trình chọn file
+của hệ thống **không với tới**. Kết quả: **file duy nhất tồn tại để cứu một lần
+restore nhầm lại là file duy nhất người bán không mở được.** Một bản cứu hộ
+không dùng được thì không cứu ai; nó chỉ làm ta yên tâm.
+
+Màn Backup vì vậy đọc lại nó qua **chính cái vault đã ghi nó** và đưa vào
+preview.
+
+**Nó dừng ở preview, cố ý.** Áp dụng bản an toàn vẫn là một lệnh Replace phá
+huỷ, và một nút "hoàn tác" chỉ-một-chạm mà âm thầm ghi đè chính là cùng một sai
+lầm chĩa theo hướng ngược lại. Người dùng vẫn phải xác nhận lần nữa.
 
 ## Hệ quả
 
