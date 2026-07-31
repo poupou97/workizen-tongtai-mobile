@@ -230,6 +230,26 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   (`TongtaiPickedBackup`); thứ vốn không cần async thì đừng async (checksum
   chuyển sang `package:crypto` **đồng bộ**).
 
+## P-16 · Test hiệu năng phải đo thứ **không đổi theo máy**
+
+- **Root cause:** một test hiệu năng viết bằng mili-giây trên máy dev là một
+  **benchmark desktop đội lốt tuyên bố về thiết bị**: nó vừa nói sai về trải
+  nghiệm người dùng, vừa đỏ ngẫu nhiên trên CI. Nhưng bỏ hẳn test hiệu năng thì
+  hồi quy chỉ lộ ra ở người bán có nhiều dữ liệu nhất — người ít có khả năng
+  biết vì sao app chậm.
+- **Regression:** WTM-166 — một lần cold start đọc `orders` **5 lần**,
+  `customers`/`goals` **4 lần**. Ở máy test 20 dòng thì tốn ~5ms nên **không có
+  phép đo nào trên thiết bị nhìn thấy nó**; ở 12 tháng dữ liệu thật (529 đơn)
+  nó là **3.0× chi phí cần thiết**.
+- **Test pattern:** khoá **số lần đọc** (giống nhau trên mọi máy) bằng
+  repository decorator đếm, chạy qua **đúng wiring production**; nếu cần nói về
+  chi phí thì khoá **tỉ lệ** đo trong cùng một lần chạy (`đọc-thật / đọc-một-lần`),
+  không bao giờ khoá con số tuyệt đối.
+- **Prevention:** mili-giây **của người dùng** chỉ được lấy từ **máy thật, bản
+  release** (`am start -W` + mốc trong app sau `--dart-define`), và ghi kèm
+  n / min / median / max. Nếu thay đổi nhỏ hơn biên độ dao động ⇒ báo cáo
+  **"không đo được"**, không báo cáo hướng cải thiện.
+
 ---
 
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)

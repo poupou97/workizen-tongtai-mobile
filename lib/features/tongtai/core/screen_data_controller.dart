@@ -2,6 +2,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/perf/startup_trace.dart';
 import '../../../core/telemetry/tongtai_telemetry.dart';
 import 'screen_state.dart';
 
@@ -99,6 +100,11 @@ class ScreenDataController<T> extends ChangeNotifier {
       final value = await _load();
       if (_disposed || generation != _generation) return;
       _emit(_state.toReady(value, _clock()));
+      // Cold-start measurement (WTM-166) lives here rather than in each
+      // screen: "the data arrived" is a property of this seam, and putting it
+      // in four screens would mean four chances to measure a different moment.
+      // Off unless --dart-define=TT_STARTUP_TRACE=true.
+      if (screen != null) StartupTrace.mark('$screen-data');
     } catch (error, stackTrace) {
       if (_disposed || generation != _generation) return;
       final failure = TongtaiFailure.from(error, stackTrace);

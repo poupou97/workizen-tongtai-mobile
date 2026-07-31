@@ -4,6 +4,8 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../core/perf/startup_trace.dart';
+
 import 'tables/users.dart';
 import 'tables/businesses.dart';
 import 'tables/producers.dart';
@@ -112,6 +114,9 @@ class AppDatabase extends _$AppDatabase {
     return LazyDatabase(() async {
       final dbFolder = await getApplicationDocumentsDirectory();
       final file = File(p.join(dbFolder.path, 'tongtai.db'));
+      // Cold-start measurement (WTM-166): this callback runs on the FIRST
+      // query, not at app launch — which is exactly the fact worth recording.
+      StartupTrace.mark('db-open');
       return NativeDatabase(file);
     });
   }
