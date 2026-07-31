@@ -60,6 +60,13 @@ domain model, AI matrix, ADRs.
   (Tool Runtime optional) → Human`. **Rule Twin authoritative** (chạy không cần
   AI/mạng/key, cấm bịa số khi thiếu dữ liệu); **AI chỉ giải thích**. Công thức
   thêm capability: `docs/02-ARCHITECTURE/CAPABILITY-BIBLE.md`.
+- **ADR-TON-017** — **Error-Handling Seam**: mọi màn biểu diễn trạng thái bằng
+  `ScreenState` (loading·ready·empty·insufficient·refreshing·failed) và lỗi bằng
+  `TongtaiFailure` (kind·code·detail). Đọc qua `ScreenDataController`, ghi qua
+  `runTongtaiAction`, render qua `TongtaiScreenData`. **Cấm trong `ui/`:** catch
+  thủ công · spinner vô hạn tự chế · `FutureBuilder`/`AsyncValue.when` (không có
+  trạng thái *stale*). Refresh lỗi **giữ dữ liệu cũ**. `detail` chỉ hiện trên
+  máy người dùng — telemetry chỉ `kind`+`code`+`screen`.
 - **ADR-TON-015** — **UI Implementation Maturity Model (L0–L4)** + **One Data
   Path**: `Repository → Context Provider → BusinessContext → Screen`. Cấm
   parallel cache, hardcode business data, mỗi màn tự tính summary. Contract

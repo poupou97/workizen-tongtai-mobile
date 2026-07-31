@@ -6,11 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../chat/chat_controller.dart';
 import '../../chat/chat_message.dart';
 import '../../inventory/product_image_source.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../providers/tongtai_chat_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_chat_search_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 
 /// Chat screen (WTM-80) — the conversation surface for the AI Copilot.
 ///
@@ -65,25 +68,52 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
     _pickAttachment =
         widget.attachmentPicker ??
         () => ImagePickerProductImageSource().pickFromGallery();
-    // Restore the persisted conversation (WTM-81); the controller notifies
-    // when history lands.
-    _controller.hydrate();
+    // Restore the persisted conversation (WTM-81). Through the seam (WTM-148):
+    // an unreadable history is "we could not load your conversation", not a
+    // chat that silently starts over.
+    _data = ScreenDataController<TongtaiChatController>(
+      _read,
+      // An injected controller (tests, preview) already holds its messages.
+      initialValue: _ownsController ? null : _controller,
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'chat',
+    )..start();
+  }
+
+  late final ScreenDataController<TongtaiChatController> _data;
+
+  Future<TongtaiChatController> _read() async {
+    await _controller.hydrate();
+    return _controller;
   }
 
   @override
   void dispose() {
+    _data.dispose();
     _input.dispose();
     if (_ownsController) _controller.dispose();
     super.dispose();
   }
 
   Future<void> _attach() async {
-    final path = await _pickAttachment();
-    if (!mounted || path == null) return;
+    String? path;
+    // Picking an image crosses an OS permission boundary — a denial must read
+    // as "permission needed", never as a silently ignored tap.
+    final failure = await runTongtaiAction(
+      () async => path = await _pickAttachment(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'chat',
+    );
+    if (!mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(context, failure);
+      return;
+    }
+    if (path == null) return;
     setState(() {
       _pendingAttachment = ChatAttachment(
-        path: path,
-        name: path.split(Platform.pathSeparator).last.split('/').last,
+        path: path!,
+        name: path!.split(Platform.pathSeparator).last.split('/').last,
       );
     });
   }
@@ -115,7 +145,7 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _controller,
+      listenable: Listenable.merge([_controller, _data]),
       builder: (context, _) {
         final messages = _controller.messages;
         return Scaffold(
@@ -173,30 +203,39 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
             ],
           ),
           body: SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: messages.isEmpty
-                      ? const _EmptyState()
-                      : ListView.builder(
-                          reverse: true,
-                          padding: const EdgeInsets.all(
-                            TongtaiDesignTokens.spacing4,
+            child: TongtaiScreenData<TongtaiChatController>(
+              prefix: 'chat',
+              state: _data.state,
+              onRetry: _data.retry,
+              builder: (context, _) => Column(
+                children: [
+                  Expanded(
+                    child: messages.isEmpty
+                        ? const _EmptyState()
+                        : ListView.builder(
+                            reverse: true,
+                            padding: const EdgeInsets.all(
+                              TongtaiDesignTokens.spacing4,
+                            ),
+                            itemCount: messages.length,
+                            itemBuilder: (context, index) => _MessageBubble(
+                              message: messages[messages.length - 1 - index],
+                            ),
                           ),
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) => _MessageBubble(
-                            message: messages[messages.length - 1 - index],
-                          ),
-                        ),
-                ),
-                if (_controller.isAssistantTyping) const _TypingIndicator(),
-                if (_pendingAttachment != null)
-                  _PendingAttachment(
-                    attachment: _pendingAttachment!,
-                    onRemove: _removePendingAttachment,
                   ),
-                _InputBar(controller: _input, onAttach: _attach, onSend: _send),
-              ],
+                  if (_controller.isAssistantTyping) const _TypingIndicator(),
+                  if (_pendingAttachment != null)
+                    _PendingAttachment(
+                      attachment: _pendingAttachment!,
+                      onRemove: _removePendingAttachment,
+                    ),
+                  _InputBar(
+                    controller: _input,
+                    onAttach: _attach,
+                    onSend: _send,
+                  ),
+                ],
+              ),
             ),
           ),
         );

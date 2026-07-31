@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_feed_controller.dart';
 import '../../opportunity/opportunity_signals.dart';
 import '../../opportunity/opportunity_theme.dart';
 import '../../providers/tongtai_context_provider.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 import 'tongtai_opportunity_detail_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 
 // The type→color helper now lives in opportunity_theme.dart (shared with the
 // detail screen); re-exported so existing importers keep resolving it here.
@@ -51,6 +54,12 @@ class _TongtaiOpportunityFeedScreenState
 
   OpportunityQuery _query = const OpportunityQuery();
 
+  /// The generator behind the feed (WTM-139) reads four repositories, so it
+  /// has four ways to fail. Through the shared seam a failure now says so and
+  /// offers a retry, instead of leaving the "no opportunities" empty state to
+  /// speak for a generator that never ran (WTM-148).
+  late final ScreenDataController<OpportunityFeedController> _data;
+
   @override
   void initState() {
     super.initState();
@@ -59,28 +68,31 @@ class _TongtaiOpportunityFeedScreenState
       _controller = widget.controller!;
       _ownsController = false;
     } else {
-      // Real mode: start empty, then hydrate with the rule-generated
-      // opportunities (WTM-139) — progressive, no blocking spinner.
       _controller = OpportunityFeedController(const []);
       _ownsController = true;
-      _loadGenerated();
     }
+    _data = ScreenDataController<OpportunityFeedController>(
+      _read,
+      initialValue: _ownsController ? null : _controller,
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'opportunity',
+    )..start();
   }
 
-  Future<void> _loadGenerated() async {
+  Future<OpportunityFeedController> _read() async {
+    if (!_ownsController) return _controller;
     final List<Opportunity> generated = await ref.read(
       generatedOpportunitiesProvider.future,
     );
-    if (!mounted) return;
-    setState(() {
-      final old = _controller;
-      _controller = OpportunityFeedController(generated);
-      old.dispose();
-    });
+    final old = _controller;
+    _controller = OpportunityFeedController(generated);
+    old.dispose();
+    return _controller;
   }
 
   @override
   void dispose() {
+    _data.dispose();
     if (_ownsController) _controller.dispose();
     super.dispose();
   }
@@ -130,7 +142,7 @@ class _TongtaiOpportunityFeedScreenState
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _controller,
+      listenable: Listenable.merge([_controller, _data]),
       builder: (context, _) {
         final items = _controller.feed(_query);
         return Scaffold(
@@ -229,60 +241,65 @@ class _TongtaiOpportunityFeedScreenState
                   ),
                 ),
                 Expanded(
-                  child: items.isEmpty
-                      ? _EmptyState(savedOnly: _query.savedOnly)
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(
-                            TongtaiDesignTokens.spacing4,
-                            0,
-                            TongtaiDesignTokens.spacing4,
-                            TongtaiDesignTokens.spacing4,
+                  child: TongtaiScreenData<OpportunityFeedController>(
+                    prefix: 'opportunity',
+                    state: _data.state,
+                    onRetry: _data.retry,
+                    isEmpty: (_) => items.isEmpty,
+                    emptyBuilder: (_) =>
+                        _EmptyState(savedOnly: _query.savedOnly),
+                    builder: (context, _) => ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(
+                        TongtaiDesignTokens.spacing4,
+                        0,
+                        TongtaiDesignTokens.spacing4,
+                        TongtaiDesignTokens.spacing4,
+                      ),
+                      itemCount: items.length,
+                      separatorBuilder: (context, _) =>
+                          const SizedBox(height: TongtaiDesignTokens.spacing3),
+                      itemBuilder: (context, index) {
+                        final opportunity = items[index];
+                        // AC5: swipe right = interested, left = dismiss.
+                        // The reaction is part of the key: a swiped-right
+                        // card stays in the feed, so its Dismissible must
+                        // be recreated fresh (a keyed Dismissible state
+                        // stays dismissed forever otherwise).
+                        return Dismissible(
+                          key: Key(
+                            'opportunity-${opportunity.id}-'
+                            '${opportunity.reaction.name}',
                           ),
-                          itemCount: items.length,
-                          separatorBuilder: (context, _) => const SizedBox(
-                            height: TongtaiDesignTokens.spacing3,
+                          background: _SwipeHint(
+                            alignment: Alignment.centerLeft,
+                            color: TongtaiDesignTokens.success,
+                            icon: Icons.thumb_up_alt_outlined,
+                            label: context.l10n.oppInterested,
                           ),
-                          itemBuilder: (context, index) {
-                            final opportunity = items[index];
-                            // AC5: swipe right = interested, left = dismiss.
-                            // The reaction is part of the key: a swiped-right
-                            // card stays in the feed, so its Dismissible must
-                            // be recreated fresh (a keyed Dismissible state
-                            // stays dismissed forever otherwise).
-                            return Dismissible(
-                              key: Key(
-                                'opportunity-${opportunity.id}-'
-                                '${opportunity.reaction.name}',
-                              ),
-                              background: _SwipeHint(
-                                alignment: Alignment.centerLeft,
-                                color: TongtaiDesignTokens.success,
-                                icon: Icons.thumb_up_alt_outlined,
-                                label: context.l10n.oppInterested,
-                              ),
-                              secondaryBackground: _SwipeHint(
-                                alignment: Alignment.centerRight,
-                                color: TongtaiDesignTokens.error,
-                                icon: Icons.close,
-                                label: context.l10n.oppDismiss,
-                              ),
-                              onDismissed: (direction) =>
-                                  direction == DismissDirection.startToEnd
-                                  ? _onInterested(opportunity)
-                                  : _onDismissed(opportunity),
-                              child: _OpportunityCard(
-                                opportunity: opportunity,
-                                signals: opportunitySignals(
-                                  opportunity,
-                                  now: _clock(),
-                                ),
-                                onOpen: () => _openDetail(opportunity),
-                                onToggleSaved: () =>
-                                    _controller.toggleSaved(opportunity.id),
-                              ),
-                            );
-                          },
-                        ),
+                          secondaryBackground: _SwipeHint(
+                            alignment: Alignment.centerRight,
+                            color: TongtaiDesignTokens.error,
+                            icon: Icons.close,
+                            label: context.l10n.oppDismiss,
+                          ),
+                          onDismissed: (direction) =>
+                              direction == DismissDirection.startToEnd
+                              ? _onInterested(opportunity)
+                              : _onDismissed(opportunity),
+                          child: _OpportunityCard(
+                            opportunity: opportunity,
+                            signals: opportunitySignals(
+                              opportunity,
+                              now: _clock(),
+                            ),
+                            onOpen: () => _openDetail(opportunity),
+                            onToggleSaved: () =>
+                                _controller.toggleSaved(opportunity.id),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ],
             ),

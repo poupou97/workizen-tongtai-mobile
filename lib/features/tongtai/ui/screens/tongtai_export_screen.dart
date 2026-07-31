@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../consumer/customer.dart';
 import '../../consumer/customer_order.dart';
 import '../../core/tongtai_formatters.dart';
@@ -13,7 +14,9 @@ import '../../export/csv_delivery.dart';
 import '../../export/csv_exporter.dart';
 import '../../export/export_history_store.dart';
 import '../../inventory/product.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 
 /// Date-range presets for the orders export (WTM-99 AC3).
 enum ExportRange {
@@ -88,12 +91,27 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
   // WTM-144 (P0 §1): real mode exports the PRODUCTION repositories' rows —
   // the old kSample fallbacks silently exported fixture data instead of the
   // user's business.
-  List<Customer> _customers = const [];
-  List<Product> _products = const [];
-  List<CustomerOrder> _orders = const [];
   ExportRange _range = ExportRange.all;
-  List<TongtaiExportRecord> _records = const [];
   bool _busy = false;
+
+  /// Everything the screen exports, read as one unit (WTM-148). Exporting a
+  /// dataset we could not read would ship an empty CSV that looks like an
+  /// empty business — so a failed read blocks the export and says why.
+  late final ScreenDataController<_ExportData> _data;
+
+  _ExportData get _loaded =>
+      _data.state.value ??
+      (
+        customers: const [],
+        products: const [],
+        orders: const [],
+        records: const [],
+      );
+
+  List<Customer> get _customers => _loaded.customers;
+  List<Product> get _products => _loaded.products;
+  List<CustomerOrder> get _orders => _loaded.orders;
+  List<TongtaiExportRecord> get _records => _loaded.records;
 
   /// WTM-100 (Founder-approved): optionally encrypt the export with a
   /// passphrase before it leaves the app. The passphrase never leaves the
@@ -103,6 +121,7 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
 
   @override
   void dispose() {
+    _data.dispose();
     _passphrase.dispose();
     super.dispose();
   }
@@ -113,32 +132,36 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
     _delivery = widget.delivery ?? const ShareSheetCsvDelivery();
     _history = widget.history ?? InMemoryTongtaiExportHistoryStore();
     _clock = widget.clock ?? DateTime.now;
-    _loadHistory();
-    _loadData();
+    _data = ScreenDataController<_ExportData>(
+      _read,
+      // Injected datasets ⇒ everything but the history is already in hand.
+      initialValue: widget.customers == null
+          ? null
+          : (
+              customers: widget.customers!,
+              products: widget.products ?? const [],
+              orders: widget.orders ?? const [],
+              records: const <TongtaiExportRecord>[],
+            ),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'export',
+    )..start();
   }
 
-  Future<void> _loadHistory() async {
-    final records = await _history.load();
-    if (!mounted) return;
-    setState(() => _records = records);
-  }
-
-  Future<void> _loadData() async {
+  Future<_ExportData> _read() async {
     // Injected lists (tests) win; otherwise read the same repositories every
     // other screen uses (one source, WTM-144).
-    final customers =
-        widget.customers ??
-        await ref.read(customerRepositoryProvider).loadAll();
-    final products =
-        widget.products ?? await ref.read(productRepositoryProvider).loadAll();
-    final orders =
-        widget.orders ?? await ref.read(orderRepositoryProvider).loadAll();
-    if (!mounted) return;
-    setState(() {
-      _customers = customers;
-      _products = products;
-      _orders = orders;
-    });
+    return (
+      customers:
+          widget.customers ??
+          await ref.read(customerRepositoryProvider).loadAll(),
+      products:
+          widget.products ??
+          await ref.read(productRepositoryProvider).loadAll(),
+      orders:
+          widget.orders ?? await ref.read(orderRepositoryProvider).loadAll(),
+      records: await _history.load(),
+    );
   }
 
   TongtaiCsv _buildCsv() {
@@ -156,7 +179,21 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
     if (_busy) return;
     final l10n = context.l10n;
     setState(() => _busy = true);
-    try {
+    // WTM-148: this used to be `try { … } finally { … }` with NO catch — a
+    // failed encryption, a denied share sheet or an unwritable history file
+    // stopped the spinner and looked exactly like a successful export.
+    final failure = await runTongtaiAction(
+      () => _runExport(l10n),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'export',
+    );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (failure != null) showTongtaiFailure(context, failure, onRetry: _export);
+  }
+
+  Future<void> _runExport(AppStrings l10n) async {
+    {
       final now = _clock();
       var csv = _buildCsv();
       final stamp =
@@ -195,15 +232,13 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
           exportedAt: now,
         ),
       );
-      await _loadHistory();
+      await _data.refresh();
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(content: Text(l10n.exportDoneSnack(csv.rowCount, fileName))),
         );
-    } finally {
-      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -219,155 +254,175 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
-          children: [
-            Text(
-              l10n.exportPickDataSet,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                fontWeight: FontWeight.w600,
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
-            ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
-            Wrap(
-              spacing: TongtaiDesignTokens.spacing2,
-              runSpacing: TongtaiDesignTokens.spacing1,
-              children: [
-                for (final type in TongtaiExportType.values)
-                  ChoiceChip(
-                    key: Key('export-type-${type.name}'),
-                    label: Text(type.label(l10n.languageCode)),
-                    selected: _type == type,
-                    onSelected: (_) => setState(() => _type = type),
-                  ),
-              ],
-            ),
-            if (_type == TongtaiExportType.orders) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
-              Text(
-                l10n.exportDateRange,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
-              Wrap(
-                spacing: TongtaiDesignTokens.spacing2,
-                children: [
-                  for (final range in ExportRange.values)
-                    ChoiceChip(
-                      key: Key('export-range-${range.name}'),
-                      label: Text(range.label(l10n)),
-                      selected: _range == range,
-                      onSelected: (_) => setState(() => _range = range),
-                    ),
-                ],
-              ),
-            ],
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
-            // ── Encryption (WTM-100) ─────────────────────────────────────
-            SwitchListTile(
-              key: const Key('export-encrypt-toggle'),
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                l10n.exportEncryptTitle,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                ),
-              ),
-              subtitle: Text(
-                l10n.exportEncryptHint,
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
-              ),
-              value: _encrypt,
-              onChanged: (v) => setState(() => _encrypt = v),
-            ),
-            if (_encrypt) ...[
-              TextField(
-                key: const Key('export-passphrase'),
-                controller: _passphrase,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: l10n.exportPassphraseLabel,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
-            ],
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
-            FilledButton.icon(
-              key: const Key('export-run'),
-              onPressed: _busy ? null : _export,
-              style: FilledButton.styleFrom(
-                backgroundColor: TongtaiDesignTokens.producerGreen,
-                minimumSize: const Size.fromHeight(
-                  TongtaiDesignTokens.buttonHeight,
-                ),
-              ),
-              icon: const Icon(Icons.ios_share),
-              label: Text(_busy ? l10n.exportRunning : l10n.exportRun),
-            ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
-            Text(
-              l10n.exportCsvHint,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
-            ),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
-            Text(
-              l10n.exportHistory,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                fontWeight: FontWeight.w700,
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
-            ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
-            if (_records.isEmpty)
-              Text(
-                l10n.exportHistoryEmpty,
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
-              )
-            else
-              for (final record in _records)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: TongtaiDesignTokens.spacing2,
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.description_outlined,
-                        size: 18,
-                        color: TongtaiDesignTokens.lightTextSecondary,
-                      ),
-                      const SizedBox(width: TongtaiDesignTokens.spacing2),
-                      Expanded(
-                        child: Text(
-                          l10n.exportHistoryLine(
-                            record.fileName,
-                            record.type.label(l10n.languageCode),
-                            record.rowCount,
-                            TongtaiFormatters.isoDate(record.exportedAt),
-                          ),
-                          style: TongtaiDesignTokens.captionStyle.copyWith(
-                            color: TongtaiDesignTokens.lightTextPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-          ],
+        child: ListenableBuilder(
+          listenable: _data,
+          builder: (context, _) => TongtaiScreenData<_ExportData>(
+            prefix: 'export',
+            state: _data.state,
+            onRetry: _data.retry,
+            builder: (context, _) => _form(context, l10n),
+          ),
         ),
       ),
     );
   }
+
+  Widget _form(BuildContext context, AppStrings l10n) {
+    return ListView(
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      children: [
+        Text(
+          l10n.exportPickDataSet,
+          style: TongtaiDesignTokens.smallStyle.copyWith(
+            fontWeight: FontWeight.w600,
+            color: TongtaiDesignTokens.lightTextPrimary,
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        Wrap(
+          spacing: TongtaiDesignTokens.spacing2,
+          runSpacing: TongtaiDesignTokens.spacing1,
+          children: [
+            for (final type in TongtaiExportType.values)
+              ChoiceChip(
+                key: Key('export-type-${type.name}'),
+                label: Text(type.label(l10n.languageCode)),
+                selected: _type == type,
+                onSelected: (_) => setState(() => _type = type),
+              ),
+          ],
+        ),
+        if (_type == TongtaiExportType.orders) ...[
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          Text(
+            l10n.exportDateRange,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              fontWeight: FontWeight.w600,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          Wrap(
+            spacing: TongtaiDesignTokens.spacing2,
+            children: [
+              for (final range in ExportRange.values)
+                ChoiceChip(
+                  key: Key('export-range-${range.name}'),
+                  label: Text(range.label(l10n)),
+                  selected: _range == range,
+                  onSelected: (_) => setState(() => _range = range),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        // ── Encryption (WTM-100) ─────────────────────────────────────
+        SwitchListTile(
+          key: const Key('export-encrypt-toggle'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(
+            l10n.exportEncryptTitle,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              fontWeight: FontWeight.w600,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          subtitle: Text(
+            l10n.exportEncryptHint,
+            style: TongtaiDesignTokens.captionStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+          value: _encrypt,
+          onChanged: (v) => setState(() => _encrypt = v),
+        ),
+        if (_encrypt) ...[
+          TextField(
+            key: const Key('export-passphrase'),
+            controller: _passphrase,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: l10n.exportPassphraseLabel,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+        ],
+        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        FilledButton.icon(
+          key: const Key('export-run'),
+          onPressed: _busy ? null : _export,
+          style: FilledButton.styleFrom(
+            backgroundColor: TongtaiDesignTokens.producerGreen,
+            minimumSize: const Size.fromHeight(
+              TongtaiDesignTokens.buttonHeight,
+            ),
+          ),
+          icon: const Icon(Icons.ios_share),
+          label: Text(_busy ? l10n.exportRunning : l10n.exportRun),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        Text(
+          l10n.exportCsvHint,
+          style: TongtaiDesignTokens.captionStyle.copyWith(
+            color: TongtaiDesignTokens.lightTextSecondary,
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing4),
+        Text(
+          l10n.exportHistory,
+          style: TongtaiDesignTokens.smallStyle.copyWith(
+            fontWeight: FontWeight.w700,
+            color: TongtaiDesignTokens.lightTextPrimary,
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        if (_records.isEmpty)
+          Text(
+            l10n.exportHistoryEmpty,
+            style: TongtaiDesignTokens.captionStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          )
+        else
+          for (final record in _records)
+            Padding(
+              padding: const EdgeInsets.only(
+                bottom: TongtaiDesignTokens.spacing2,
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.description_outlined,
+                    size: 18,
+                    color: TongtaiDesignTokens.lightTextSecondary,
+                  ),
+                  const SizedBox(width: TongtaiDesignTokens.spacing2),
+                  Expanded(
+                    child: Text(
+                      l10n.exportHistoryLine(
+                        record.fileName,
+                        record.type.label(l10n.languageCode),
+                        record.rowCount,
+                        TongtaiFormatters.isoDate(record.exportedAt),
+                      ),
+                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                        color: TongtaiDesignTokens.lightTextPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+      ],
+    );
+  }
 }
+
+/// Everything the Export screen reads in one go.
+typedef _ExportData = ({
+  List<Customer> customers,
+  List<Product> products,
+  List<CustomerOrder> orders,
+  List<TongtaiExportRecord> records,
+});

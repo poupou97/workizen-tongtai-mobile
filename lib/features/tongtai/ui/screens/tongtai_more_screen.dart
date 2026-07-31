@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../../../core/l10n/language_notifier.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../core/screen_data_controller.dart';
 import '../../providers/tongtai_data_invalidation.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../providers/tongtai_sample_provider.dart';
 import '../../sample/historical_data_generator.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
@@ -87,9 +90,24 @@ class TongtaiMoreScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    await ref.read(sampleDataSeederProvider).seed();
-    invalidateBusinessDataProviders(ref);
+    // WTM-148: seeding writes to five repositories. A failure here used to
+    // throw into the void (the FK-787 "Reset sample data" crash) — now it is
+    // reported, retryable, and the caches are only invalidated on success.
+    final failure = await runTongtaiAction(
+      () => ref.read(sampleDataSeederProvider).seed(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'more',
+    );
     if (!context.mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(
+        context,
+        failure,
+        onRetry: () => _seedSamples(context, ref),
+      );
+      return;
+    }
+    invalidateBusinessDataProviders(ref);
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -120,11 +138,23 @@ class TongtaiMoreScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    await ref
-        .read(historicalDataSeederProvider)
-        .seed(const HistoricalDataSpec());
-    invalidateBusinessDataProviders(ref);
+    final failure = await runTongtaiAction(
+      () => ref
+          .read(historicalDataSeederProvider)
+          .seed(const HistoricalDataSpec()),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'more',
+    );
     if (!context.mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(
+        context,
+        failure,
+        onRetry: () => _seedHistory(context, ref),
+      );
+      return;
+    }
+    invalidateBusinessDataProviders(ref);
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -152,9 +182,21 @@ class TongtaiMoreScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    await ref.read(sampleDataSeederProvider).removeAll();
-    invalidateBusinessDataProviders(ref);
+    final failure = await runTongtaiAction(
+      () => ref.read(sampleDataSeederProvider).removeAll(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'more',
+    );
     if (!context.mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(
+        context,
+        failure,
+        onRetry: () => _removeSamples(context, ref),
+      );
+      return;
+    }
+    invalidateBusinessDataProviders(ref);
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()

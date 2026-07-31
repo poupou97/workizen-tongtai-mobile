@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/telemetry/tongtai_telemetry.dart';
+import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../timeline/business_event.dart';
@@ -12,6 +14,7 @@ import '../../timeline/business_event_sources.dart';
 import '../../timeline/timeline_service.dart';
 import '../../timeline/timeline_theme.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../../../core/l10n/app_strings.dart';
 
 /// Business Timeline (WTM-114) — a chronological feed of everything that
@@ -35,43 +38,81 @@ class TongtaiTimelineScreen extends ConsumerStatefulWidget {
 }
 
 class _TongtaiTimelineScreenState extends ConsumerState<TongtaiTimelineScreen> {
-  TimelineService _service = TimelineService(const []);
   late final DateTime Function() _clock;
   BusinessEventType? _filter;
+
+  /// The timeline is a *derived projection* over four repositories (WTM-134),
+  /// so it has four ways to fail. Loading them through one controller means a
+  /// single failure is reported once, with a retry, instead of the feed simply
+  /// looking like a business where nothing ever happened (WTM-148).
+  late final ScreenDataController<TimelineService> _data;
 
   @override
   void initState() {
     super.initState();
     _clock = widget.clock ?? DateTime.now;
-    if (widget.service != null) {
-      _service = widget.service!;
-    } else {
-      _loadReal();
-    }
+    _data = ScreenDataController<TimelineService>(
+      _read,
+      // An injected service (tests, preview) is already true data: render it
+      // on the first frame instead of a loading state that resolves to the
+      // same thing one microtask later.
+      initialValue: widget.service,
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'timeline',
+    )..start();
   }
 
-  Future<void> _loadReal() async {
+  @override
+  void dispose() {
+    _data.dispose();
+    super.dispose();
+  }
+
+  Future<TimelineService> _read() async {
+    // Injected service (tests/preview) short-circuits the repositories.
+    final injected = widget.service;
+    if (injected != null) return injected;
     // One source (WTM-144): finance/orders/goals from the live repositories +
     // the Rule Engine's generated opportunities — mirrors TimelineContext.
     final finance = await ref.read(financeRepositoryProvider).loadAll();
     final orders = await ref.read(orderRepositoryProvider).loadAll();
     final goals = await ref.read(businessGoalRepositoryProvider).loadAll();
     final opportunities = await ref.read(generatedOpportunitiesProvider.future);
-    if (!mounted) return;
-    setState(() {
-      _service = TimelineService([
-        FinanceEventSource(finance),
-        OrderEventSource(orders),
-        JourneyEventSource(goals),
-        OpportunityEventSource(opportunities),
-      ]);
-    });
+    return TimelineService([
+      FinanceEventSource(finance),
+      OrderEventSource(orders),
+      JourneyEventSource(goals),
+      OpportunityEventSource(opportunities),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: TongtaiDesignTokens.lightBackground,
+      appBar: AppBar(
+        title: Text(context.l10n.titleTimeline),
+        backgroundColor: TongtaiDesignTokens.lightBackground,
+        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        elevation: 0,
+      ),
+      body: ListenableBuilder(
+        listenable: _data,
+        builder: (context, _) => TongtaiScreenData<TimelineService>(
+          prefix: 'timeline',
+          state: _data.state,
+          onRetry: _data.retry,
+          isEmpty: (service) => service.timeline().isEmpty,
+          emptyBuilder: (_) => const _TimelineEmptyState(),
+          builder: _body,
+        ),
+      ),
+    );
+  }
+
+  Widget _body(BuildContext context, TimelineService service) {
     final now = _clock();
-    final all = _service.timeline();
+    final all = service.timeline();
     final availableTypes = <BusinessEventType>[
       for (final t in BusinessEventType.values)
         if (all.any((e) => e.type == t)) t,
@@ -81,35 +122,22 @@ class _TongtaiTimelineScreenState extends ConsumerState<TongtaiTimelineScreen> {
         : all.where((e) => e.type == _filter).toList();
     final days = groupEventsByDay(filtered);
 
-    return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
-      appBar: AppBar(
-        title: Text(context.l10n.titleTimeline),
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
-        elevation: 0,
-      ),
-      body: all.isEmpty
-          ? const _TimelineEmptyState()
-          : Column(
-              children: [
-                _FilterRow(
-                  types: availableTypes,
-                  selected: _filter,
-                  onSelected: (t) => setState(() => _filter = t),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.only(
-                      bottom: TongtaiDesignTokens.spacing6,
-                    ),
-                    children: [
-                      for (final day in days) _DaySection(day: day, now: now),
-                    ],
-                  ),
-                ),
-              ],
+    return Column(
+      children: [
+        _FilterRow(
+          types: availableTypes,
+          selected: _filter,
+          onSelected: (t) => setState(() => _filter = t),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.only(
+              bottom: TongtaiDesignTokens.spacing6,
             ),
+            children: [for (final day in days) _DaySection(day: day, now: now)],
+          ),
+        ),
+      ],
     );
   }
 }

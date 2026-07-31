@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
 import '../../capability/customer_capability.dart';
+import '../../core/screen_state.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../predictive/customer_risk_rule.dart';
 import '../../predictive/rule_twin.dart';
 import '../../providers/tongtai_consumer_provider.dart';
 import '../../providers/tongtai_predictive_provider.dart';
+import '../widgets/tongtai_screen_data.dart';
 
 /// **Customer Risk screen** (WTM-161 · ADR-TON-016) — "which customers am I
 /// about to lose?", answered by the deterministic [CustomerRiskRule] twin.
@@ -75,33 +77,46 @@ class _TongtaiCustomerRiskScreenState
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
       ),
       body: SafeArea(
-        child: risk.when(
-          loading: () => const Center(
-            key: Key('risk-loading'),
-            child: CircularProgressIndicator(),
-          ),
-          // A failed load is NOT "no risk" — it is "could not compute", and it
-          // renders as the same honest refusal with no reasons to quote.
-          error: (error, stack) =>
-              const _RiskInsufficient(reasonCodes: <ReasonCode>[]),
-          data: _body,
+        // Through the shared seam (WTM-148). A failed load is NOT "no risk" —
+        // it is "could not compute", and it now renders as a retryable failure
+        // rather than as a refusal the twin never made.
+        child: TongtaiAsyncScreenData<RuleTwinResult<CustomerRiskAssessment>>(
+          prefix: 'risk',
+          async: risk,
+          onRetry: () async => ref.invalidate(customerRiskProvider),
+          // The twin's only refusal today is an empty directory
+          // (ReasonCode.noCustomers) — that is the *empty* state, a fact about
+          // the business, not a computation that failed.
+          isEmpty: (twin) =>
+              twin.reasonCodes.contains(ReasonCode.noCustomers) ||
+              (twin.result?.entries.isEmpty ?? false),
+          emptyBuilder: (_) => const _RiskEmpty(),
+          // Any OTHER refusal is "not enough data", WITH its reasons. The
+          // empty-directory refusal is handled above and must not also match
+          // here — a business with no customers is not a computation that
+          // could not be done.
+          insufficiencyOf: (context, twin) =>
+              twin.result == null &&
+                  !twin.reasonCodes.contains(ReasonCode.noCustomers)
+              ? TongtaiInsufficiency(
+                  title: context.l10n.riskNoData,
+                  body: context.l10n.riskEmptyBody,
+                  reasons: [
+                    for (final reason in twin.reasonCodes)
+                      reason.label(context.l10n.languageCode),
+                  ],
+                )
+              : null,
+          builder: (context, twin) => _body(twin),
         ),
       ),
     );
   }
 
   Widget _body(RuleTwinResult<CustomerRiskAssessment> twin) {
-    final assessment = twin.result;
-    if (assessment == null) {
-      // The twin refused. Its only refusal today is an empty directory
-      // (ReasonCode.noCustomers) — that is the *empty* state, a fact about the
-      // business, not a computation that failed. Any other refusal is shown as
-      // "not enough data" WITH its reasons.
-      return twin.reasonCodes.contains(ReasonCode.noCustomers)
-          ? const _RiskEmpty()
-          : _RiskInsufficient(reasonCodes: twin.reasonCodes);
-    }
-    if (assessment.entries.isEmpty) return const _RiskEmpty();
+    // Non-null by construction: a refusing twin is routed to the shared
+    // insufficient/empty states above.
+    final assessment = twin.result!;
 
     // index 0 is the summary + provenance header; the rest are the ranked
     // entries, highest risk first (the twin's own total order).
@@ -578,35 +593,6 @@ class _RiskEmpty extends StatelessWidget {
   }
 }
 
-/// The twin refused to answer: show WHY, and no numbers at all.
-///
-/// Rendering zeros here would be the exact failure ADR-TON-016 forbids — a
-/// fabricated assessment that looks like "no risk" when the truth is "cannot
-/// tell yet".
-class _RiskInsufficient extends StatelessWidget {
-  const _RiskInsufficient({required this.reasonCodes});
-
-  final List<ReasonCode> reasonCodes;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return _CenteredNotice(
-      noticeKey: const Key('risk-insufficient'),
-      icon: Icons.help_outline,
-      color: TongtaiDesignTokens.warning,
-      title: l10n.riskNoData,
-      body: l10n.riskEmptyBody,
-      footer: reasonCodes.isEmpty
-          ? null
-          : _ReasonCodes(
-              reasonCodes: reasonCodes,
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
-    );
-  }
-}
-
 class _CenteredNotice extends StatelessWidget {
   const _CenteredNotice({
     required this.noticeKey,
@@ -614,7 +600,6 @@ class _CenteredNotice extends StatelessWidget {
     required this.color,
     required this.title,
     required this.body,
-    this.footer,
   });
 
   final Key noticeKey;
@@ -622,7 +607,6 @@ class _CenteredNotice extends StatelessWidget {
   final Color color;
   final String title;
   final String body;
-  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -650,10 +634,6 @@ class _CenteredNotice extends StatelessWidget {
               color: TongtaiDesignTokens.lightTextSecondary,
             ),
           ),
-          if (footer != null) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
-            footer!,
-          ],
         ],
       ),
     );

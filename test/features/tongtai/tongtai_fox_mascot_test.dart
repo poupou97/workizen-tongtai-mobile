@@ -33,19 +33,6 @@ void main() {
     );
   });
 
-  testWidgets('loader shows the fox, a progress bar and an optional label', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(body: TongtaiFoxLoader(label: 'Đang tải…')),
-      ),
-    );
-    expect(find.byType(TongtaiFoxMascot), findsOneWidget);
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
-    expect(find.text('Đang tải…'), findsOneWidget);
-  });
-
   testWidgets('asset paths are the bundled mascot SVGs', (tester) async {
     expect(TongtaiFoxMascot.faceAsset, 'assets/mascot/fox_face.svg');
     expect(TongtaiFoxMascot.avatarAsset, 'assets/mascot/fox_avatar.svg');

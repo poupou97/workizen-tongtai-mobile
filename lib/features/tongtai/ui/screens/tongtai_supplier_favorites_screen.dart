@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../producer/supplier.dart';
 import '../../producer/supplier_favorites_controller.dart';
 import '../../producer/supplier_search_service.dart';
@@ -69,7 +71,7 @@ class _TongtaiSupplierFavoritesScreenState
                   const SizedBox(height: TongtaiDesignTokens.spacing3),
               itemBuilder: (context, index) => _FavoriteTile(
                 supplier: suppliers[index],
-                onRemove: () => widget.favorites.toggle(suppliers[index].id),
+                onRemove: () => _removeFavorite(context, suppliers[index].id),
                 onOpen: () => _openDetail(context, suppliers[index]),
               ),
             );
@@ -77,6 +79,18 @@ class _TongtaiSupplierFavoritesScreenState
         ),
       ),
     );
+  }
+
+  /// Un-favouriting writes to the store; a failed write must say so rather
+  /// than leaving the row visually removed and actually still saved (WTM-148).
+  Future<void> _removeFavorite(BuildContext context, String supplierId) async {
+    final failure = await runTongtaiAction(
+      () => widget.favorites.toggle(supplierId),
+      screen: 'supplier-fav',
+    );
+    if (failure != null && context.mounted) {
+      showTongtaiFailure(context, failure);
+    }
   }
 
   void _openDetail(BuildContext context, Supplier supplier) {

@@ -5,7 +5,9 @@ import '../../consumer/customer_order_history_service.dart';
 import '../../core/tongtai_enums.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../orders/order.dart';
 import '../../orders/order_controller.dart';
 import 'tongtai_create_order_screen.dart';
@@ -119,8 +121,17 @@ class _TongtaiCustomerHistoryScreenState
       ),
     );
     if (!mounted || order == null) return;
-    await controller.upsert(order);
+    // The seller just typed a whole order; losing it silently is not an option
+    // (WTM-148). A failed write says so and offers the flow again.
+    final failure = await runTongtaiAction(
+      () => controller.upsert(order),
+      screen: 'history',
+    );
     if (!mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(context, failure, onRetry: _createOrder);
+      return;
+    }
     setState(() {});
   }
 

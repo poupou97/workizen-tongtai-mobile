@@ -2,6 +2,10 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tongtai/core/prefs.dart';
+
+import '../../support/pump_until.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
@@ -343,17 +347,31 @@ void main() {
       useTallViewport(tester);
       // Home loads its KPIs/counts from the repositories (WTM-128); keep it off
       // the real Drift database with an in-memory override.
+      SharedPreferences.setMockInitialValues({});
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             tongtaiDatabaseProvider.overrideWithValue(
               AppDatabase.forExecutor(NativeDatabase.memory()),
             ),
+            sharedPreferencesProvider.overrideWithValue(
+              await SharedPreferences.getInstance(),
+            ),
           ],
           child: const MaterialApp(home: TongtaiHomeScreen()),
         ),
       );
-      await tester.pumpAndSettle();
+      // Home now has a real loading state (WTM-148); wait for the dashboard
+      // rather than assuming it painted on frame one.
+      // Home now has a real loading state AND a real failure state (WTM-148),
+      // so this must wait for the dashboard rather than assuming it painted on
+      // frame one. Before the seam, the SharedPreferences plugin missing from
+      // this test threw INSIDE `_load()` and Home simply stayed at zeros —
+      // which is precisely the silent-empty class this story removes.
+      await pumpUntilFound(
+        tester,
+        find.byKey(const Key('home-open-opportunities')),
+      );
       await tester.tap(find.byKey(const Key('home-open-opportunities')));
       await tester.pumpAndSettle();
 

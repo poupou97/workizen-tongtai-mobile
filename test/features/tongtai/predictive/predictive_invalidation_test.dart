@@ -246,14 +246,31 @@ void main() {
             continue; // not a seeder call (e.g. a list `.removeAll()`)
           }
           checked++;
-          // The invalidation must follow within a few lines — i.e. before the
-          // handler does anything else with the (now stale) providers.
+          // The invalidation must follow before the handler does anything
+          // else with the (now stale) providers. The window is 20 lines, not
+          // 6, because WTM-148 put the shared failure guard in between: the
+          // mutation runs inside `runTongtaiAction`, the failure branch
+          // returns early, and the invalidation happens on the success path.
+          // That ordering is stricter than before — caches are no longer
+          // dropped for a write that never landed.
           final window = lines
               .skip(i + 1)
-              .take(6)
+              .take(20)
               .where((l) => l.contains(helperCall));
           if (window.isEmpty) {
             offenders.add('${file.path}:${i + 1}: ${lines[i].trim()}');
+          }
+          // …and the mutation itself must be guarded, or a failed seed would
+          // still vanish silently (ADR-TON-017).
+          final guarded = lines
+              .skip((i - 6).clamp(0, lines.length))
+              .take(8)
+              .any((l) => l.contains('runTongtaiAction'));
+          if (!guarded) {
+            offenders.add(
+              '${file.path}:${i + 1}: ghi dữ liệu KHÔNG qua runTongtaiAction '
+              '— lỗi sẽ biến mất im lặng (WTM-148)',
+            );
           }
         }
       }

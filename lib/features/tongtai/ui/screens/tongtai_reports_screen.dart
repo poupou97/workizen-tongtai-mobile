@@ -7,7 +7,9 @@ import '../../ai/business_recommendation.dart';
 import '../../ai/business_summary.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../metrics/business_metrics.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../opportunity/opportunity.dart' show Opportunity;
 import '../../opportunity/opportunity_pipeline.dart';
 import '../../providers/tongtai_ai_provider.dart';
@@ -18,6 +20,7 @@ import '../../reports/business_report.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_opportunity_feed_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 
 /// Reports & Analytics dashboard (WTM-95 layout/widgets, WTM-96 revenue KPI,
 /// WTM-127 real data).
@@ -80,10 +83,6 @@ class TongtaiReportsScreen extends ConsumerStatefulWidget {
 }
 
 class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
-  ReportsService? _reports;
-  BusinessMetrics? _metrics;
-  bool _loading = true;
-
   /// Which window the breakdown sections are scoped to (WTM-115). Defaults to
   /// this-year, matching the classic YTD breakdown.
   ReportPeriod _period = ReportPeriod.thisYear;
@@ -174,47 +173,60 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     });
   }
 
+  /// Everything the report is computed from, read as one unit (WTM-148). A
+  /// failed read here is the most expensive kind of silent empty: "no sales"
+  /// is a statement about the business, and this screen must never make it by
+  /// accident.
+  late final ScreenDataController<_ReportsData> _data;
+
+  ReportsService? get _reports => _data.state.value?.reports;
+  BusinessMetrics? get _metrics => _data.state.value?.metrics;
+  List<Opportunity> get _generatedOpportunities =>
+      _data.state.value?.opportunities ?? const [];
+
   @override
   void initState() {
     super.initState();
-    if (widget.service != null || widget.metrics != null) {
+    _data = ScreenDataController<_ReportsData>(
+      _read,
       // Test / injected mode — no async load. NEVER fall back to fixtures
       // (P0 §3, WTM-146): a metrics-only injection gets an empty order book,
       // not sample data.
-      _reports = widget.service ?? ReportsService(const []);
-      _metrics =
+      initialValue: _injected(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'reports',
+    );
+    if (_injected() == null) _data.load();
+  }
+
+  @override
+  void dispose() {
+    _data.dispose();
+    super.dispose();
+  }
+
+  _ReportsData? _injected() {
+    if (widget.service == null && widget.metrics == null) return null;
+    final reports = widget.service ?? ReportsService(const []);
+    return (
+      reports: reports,
+      metrics:
           widget.metrics ??
           BusinessMetrics.from(
-            orders: _reports!.all,
-            customersCount: _reports!.all
-                .map((o) => o.customerId)
-                .toSet()
-                .length,
-          );
-      _loading = false;
-    } else {
-      _load();
-    }
-  }
-
-  /// Real generated opportunities (WTM-139) backing the pipeline card in real
-  /// mode; sample only when the test injects a list.
-  List<Opportunity> _generatedOpportunities = const [];
-
-  Future<void> _load() async {
-    final orders = await ref.read(orderRepositoryProvider).loadAll();
-    final metrics = await ref.read(businessMetricsServiceProvider).load();
-    final List<Opportunity> generated = await ref.read(
-      generatedOpportunitiesProvider.future,
+            orders: reports.all,
+            customersCount: reports.all.map((o) => o.customerId).toSet().length,
+          ),
+      opportunities: const <Opportunity>[],
     );
-    if (!mounted) return;
-    setState(() {
-      _reports = ReportsService(orders);
-      _metrics = metrics;
-      _generatedOpportunities = generated;
-      _loading = false;
-    });
   }
+
+  Future<_ReportsData> _read() async => (
+    reports: ReportsService(await ref.read(orderRepositoryProvider).loadAll()),
+    metrics: await ref.read(businessMetricsServiceProvider).load(),
+    // Real generated opportunities (WTM-139) back the pipeline card in real
+    // mode; sample only when the test injects a list.
+    opportunities: await ref.read(generatedOpportunitiesProvider.future),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -237,24 +249,30 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
         elevation: 0,
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : (metrics.hasSales && report != null
-                ? _ReportBody(
-                    report: report,
-                    metrics: metrics,
-                    breakdown: breakdown,
-                    period: _period,
-                    onPeriodChanged: (p) => setState(() => _period = p),
-                    pipeline: pipeline,
-                    aiResult: _aiResult,
-                    aiRunning: _aiRunning,
-                    onSummarize: _runSummary,
-                    onRecommend: _runRecommendation,
-                    onPlan: _runPlan,
-                    onHealth: _runHealth,
-                  )
-                : const _ReportsEmptyState()),
+      body: ListenableBuilder(
+        listenable: _data,
+        builder: (context, _) => TongtaiScreenData<_ReportsData>(
+          prefix: 'reports',
+          state: _data.state,
+          onRetry: _data.retry,
+          isEmpty: (_) => !metrics.hasSales || report == null,
+          emptyBuilder: (_) => const _ReportsEmptyState(),
+          builder: (context, _) => _ReportBody(
+            report: report!,
+            metrics: metrics,
+            breakdown: breakdown,
+            period: _period,
+            onPeriodChanged: (p) => setState(() => _period = p),
+            pipeline: pipeline,
+            aiResult: _aiResult,
+            aiRunning: _aiRunning,
+            onSummarize: _runSummary,
+            onRecommend: _runRecommendation,
+            onPlan: _runPlan,
+            onHealth: _runHealth,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -511,22 +529,7 @@ class _AiSummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing3),
           if (running)
-            Row(
-              children: [
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                const SizedBox(width: TongtaiDesignTokens.spacing2),
-                Text(
-                  context.l10n.reportsAnalyzing,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
-                ),
-              ],
-            )
+            TongtaiInlineBusy(label: context.l10n.reportsAnalyzing)
           else ...[
             if (result != null) ...[
               Text(
@@ -1178,3 +1181,10 @@ final BoxDecoration _cardDecoration = BoxDecoration(
   borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
   border: Border.all(color: TongtaiDesignTokens.lightBorder),
 );
+
+/// Everything the Reports screen is computed from, in one read.
+typedef _ReportsData = ({
+  ReportsService reports,
+  BusinessMetrics metrics,
+  List<Opportunity> opportunities,
+});

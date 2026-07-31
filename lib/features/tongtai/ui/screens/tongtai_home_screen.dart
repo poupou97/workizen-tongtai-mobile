@@ -5,7 +5,9 @@ import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
 import '../../metrics/business_health.dart';
 import '../../metrics/business_metrics.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../opportunity/opportunity.dart';
 import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
@@ -20,6 +22,7 @@ import 'tongtai_opportunity_feed_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_unified_search_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 
 /// Home dashboard for Tổng Tài — the app's front door.
 ///
@@ -64,38 +67,64 @@ class TongtaiHomeScreen extends ConsumerStatefulWidget {
 }
 
 class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
-  BusinessMetrics _metrics = BusinessMetrics.empty;
-  List<Opportunity> _loadedOpportunities = const [];
-  bool _hasSamples = false;
   bool _seeding = false;
-  BusinessHealth _health = BusinessHealth.notEnoughData;
-  List<BusinessGoal> _goals = const [];
-  int _producers = 0;
-  int _inventory = 0;
-  int _consumer = 0;
-  int _journey = 0;
+
+  /// The whole dashboard in one read (WTM-148). Home reads five sources; if
+  /// any of them throws, every tile on this screen would otherwise show a
+  /// confident zero — the most damaging version of the silent-empty bug,
+  /// because zero revenue reads as a fact about the business.
+  late final ScreenDataController<_HomeData> _data;
+
+  _HomeData get _d => _data.state.value ?? _injected() ?? _HomeData.empty;
+
+  BusinessMetrics get _metrics => _d.metrics;
+  BusinessHealth get _health => widget.health ?? _d.health;
+  List<BusinessGoal> get _goals => _d.goals;
+  int get _producers => _d.producers;
+  int get _inventory => _d.inventory;
+  int get _consumer => _d.consumer;
+  int get _journey => _d.goals.length;
+  List<Opportunity> get _loadedOpportunities => _d.opportunities;
+  bool get _hasSamples => _d.hasSamples;
+
+  /// Injected / demo mode — everything is known synchronously.
+  _HomeData? _injected() {
+    final metrics = widget.metrics;
+    if (metrics == null) return null;
+    return _HomeData(
+      metrics: metrics,
+      health: widget.health ?? BusinessHealth.from(metrics),
+      producers: widget.supplierCount ?? 0,
+      inventory: widget.inventoryCount ?? 0,
+      consumer: widget.customerCount ?? metrics.customersCount,
+      goals: widget.goals ?? const [],
+      opportunities: const [],
+      hasSamples: false,
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    if (widget.metrics != null) {
-      // Injected / demo mode — data is available synchronously.
-      _metrics = widget.metrics!;
-      _health = widget.health ?? BusinessHealth.from(_metrics);
-      _producers = widget.supplierCount ?? 0;
-      _inventory = widget.inventoryCount ?? 0;
-      _consumer = widget.customerCount ?? _metrics.customersCount;
-      _goals = widget.goals ?? const [];
-      _journey = _goals.length;
-    } else {
-      // Real app: render the dashboard progressively (starts at the empty/zero
-      // state, fills in when the repositories resolve). No blocking spinner, so
-      // there is no perpetual animation to stall widget tests.
-      _load();
-    }
+    _data = ScreenDataController<_HomeData>(
+      _read,
+      // Injected mode renders on the first frame; real mode renders
+      // progressively, exactly as before — what is new is that a failing read
+      // now says so instead of leaving the zeros to speak for it.
+      initialValue: _injected(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'home',
+    );
+    if (widget.metrics == null) _data.load();
   }
 
-  Future<void> _load() async {
+  @override
+  void dispose() {
+    _data.dispose();
+    super.dispose();
+  }
+
+  Future<_HomeData> _read() async {
     // Home consumes the BusinessContext Aggregate Root (WTM-129) for its KPIs +
     // capability counts + health — the same seam AI reads. Journey (goals) and
     // Producer (favourites) are not in the Phase-1 context yet, so they load
@@ -110,19 +139,16 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     final goals = await goalRepo.loadAll();
     final favorites = await favoritesStore.loadAll();
     final List<Opportunity> generated = await opportunitiesFuture;
-    final hasSamples = await seeder.hasSamples();
-    if (!mounted) return;
-    setState(() {
-      _metrics = context.metrics;
-      _health = widget.health ?? context.health;
-      _inventory = context.inventory.productCount;
-      _consumer = context.customers.total;
-      _goals = goals;
-      _journey = goals.length;
-      _producers = favorites.length;
-      _loadedOpportunities = generated;
-      _hasSamples = hasSamples;
-    });
+    return _HomeData(
+      metrics: context.metrics,
+      health: context.health,
+      inventory: context.inventory.productCount,
+      consumer: context.customers.total,
+      goals: goals,
+      producers: favorites.length,
+      opportunities: generated,
+      hasSamples: await seeder.hasSamples(),
+    );
   }
 
   /// A brand-new business — nothing created in any capability yet.
@@ -137,15 +163,23 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
   /// same dashboard (and every other screen) shows them.
   Future<void> _seedSamples() async {
     setState(() => _seeding = true);
-    await ref.read(sampleDataSeederProvider).seed();
+    final failure = await runTongtaiAction(
+      () => ref.read(sampleDataSeederProvider).seed(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'home',
+    );
+    if (!mounted) return;
+    setState(() => _seeding = false);
+    if (failure != null) {
+      showTongtaiFailure(context, failure, onRetry: _seedSamples);
+      return;
+    }
     // The cached capability/twin/opportunity providers must drop their pre-seed
-    // answers BEFORE `_load()` reads them again (WTM-149 device defect 1) —
+    // answers BEFORE the refresh reads them again (WTM-149 device defect 1) —
     // `generatedOpportunitiesProvider` is one of them, so without this Home
     // would repaint with the numbers it had before the seed.
     invalidateBusinessDataProviders(ref);
-    if (!mounted) return;
-    setState(() => _seeding = false);
-    await _load();
+    await _data.refresh();
     if (!mounted) return;
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)
@@ -171,12 +205,6 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Real mode: the Rule Engine's generated opportunities over persisted data
-    // (WTM-144 one-source); injected lists are for tests/previews only.
-    final topOpportunities =
-        (widget.opportunities ?? _loadedOpportunities).toList()
-          ..sort((a, b) => b.aiScore.compareTo(a.aiScore));
-
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
@@ -198,201 +226,256 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Sample-data banner (WTM-144/ADR-TON-014): when sample rows
-            //    are present, every screen shows them as ordinary data — this
-            //    banner is the one reminder + pointer to the remover in More. ─
-            if (_hasSamples) ...[
-              Container(
-                key: const Key('home-sample-banner'),
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: TongtaiDesignTokens.warning.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: TongtaiDesignTokens.warning.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.science_outlined,
-                      size: 20,
-                      color: TongtaiDesignTokens.warning,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.l10n.homeSampleBanner,
-                        style: TongtaiDesignTokens.captionStyle.copyWith(
-                          color: TongtaiDesignTokens.lightTextPrimary,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            // ── Welcome + health + module counts ──────────────────────
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            context.l10n.homeWelcome,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        // Scale down instead of overflowing on narrow
-                        // screens at accessibility text sizes (P0 §3).
-                        // Flexible bounds the width — a bare FittedBox in a
-                        // Row gets unbounded constraints and never shrinks.
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: _HealthBadge(health: _health),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.l10n.homeAiSubtitle,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _ModuleSummaryGrid(
-                      producers: _producers,
-                      inventory: _inventory,
-                      consumers: _consumer,
-                      journeys: _journey,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // ── Get started (new business) ────────────────────────────
-            if (_isEmptyBusiness) ...[
-              _GetStartedCard(
-                onCustomer: () =>
-                    _push(context, const TongtaiCustomerListScreen()),
-                onProduct: () => _push(context, const TongtaiInventoryScreen()),
-                onOrder: () =>
-                    _push(context, const TongtaiCustomerListScreen()),
-                onGoal: () => _push(context, const TongtaiGoalsScreen()),
-                onDemo: _seeding ? () {} : _seedSamples,
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            // ── Quick actions (WTM-144): once the business has data the
-            //    Get-started card retires, but Home keeps one-tap shortcuts —
-            //    field feedback: the Founder thought the features were gone. ──
-            if (!_isEmptyBusiness) ...[
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ActionChip(
-                    key: const Key('home-quick-customer'),
-                    avatar: const Icon(Icons.person_add_alt, size: 18),
-                    label: Text(context.l10n.homeAddCustomer),
-                    onPressed: () =>
-                        _push(context, const TongtaiCustomerListScreen()),
-                  ),
-                  ActionChip(
-                    key: const Key('home-quick-product'),
-                    avatar: const Icon(Icons.add_box_outlined, size: 18),
-                    label: Text(context.l10n.homeAddProduct),
-                    onPressed: () =>
-                        _push(context, const TongtaiInventoryScreen()),
-                  ),
-                  ActionChip(
-                    key: const Key('home-quick-order'),
-                    avatar: const Icon(Icons.receipt_long_outlined, size: 18),
-                    label: Text(context.l10n.homeAddOrder),
-                    onPressed: () =>
-                        _push(context, const TongtaiCustomerListScreen()),
-                  ),
-                  ActionChip(
-                    key: const Key('home-quick-goal'),
-                    avatar: const Icon(Icons.flag_outlined, size: 18),
-                    label: Text(context.l10n.homeAddGoal),
-                    onPressed: () => _push(context, const TongtaiGoalsScreen()),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            // ── Business KPIs — real values, zero is valid (WTM-128) ──
-            _SectionHeader(
-              title: context.l10n.sectionBusinessKpis,
-              actionKey: const Key('home-open-reports'),
-              actionLabel: context.l10n.homeViewReports,
-              onAction: () => _push(context, const TongtaiReportsScreen()),
-            ),
-            const SizedBox(height: 12),
-            _KpiRow(metrics: _metrics),
-            const SizedBox(height: 24),
-
-            // ── Top opportunities (AI-generated; empty for new users) ─
-            _SectionHeader(
-              title: context.l10n.sectionTopOpportunities,
-              actionKey: const Key('home-open-opportunities'),
-              actionLabel: context.l10n.actionViewAll,
-              onAction: () =>
-                  _push(context, const TongtaiOpportunityFeedScreen()),
-            ),
-            const SizedBox(height: 12),
-            if (topOpportunities.isEmpty)
-              const _EmptyBox('No opportunities available')
-            else
-              ...topOpportunities
-                  .take(3)
-                  .map((o) => _OpportunityTile(opportunity: o)),
-            const SizedBox(height: 24),
-
-            // ── Today's missions = active goals ───────────────────────
-            Text(
-              "Today's Missions",
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
-            if (_goals.isEmpty)
-              const _EmptyBox('No missions yet')
-            else
-              ..._goals.take(3).map((g) => _MissionTile(goal: g)),
-          ],
+      body: ListenableBuilder(
+        listenable: _data,
+        builder: (context, _) => TongtaiScreenData<_HomeData>(
+          prefix: 'home',
+          state: _data.state,
+          onRetry: _data.retry,
+          builder: _dashboard,
         ),
       ),
     );
   }
+
+  Widget _dashboard(BuildContext context, _HomeData data) {
+    // Real mode: the Rule Engine's generated opportunities over persisted data
+    // (WTM-144 one-source); injected lists are for tests/previews only.
+    final topOpportunities =
+        (widget.opportunities ?? _loadedOpportunities).toList()
+          ..sort((a, b) => b.aiScore.compareTo(a.aiScore));
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Sample-data banner (WTM-144/ADR-TON-014): when sample rows
+          //    are present, every screen shows them as ordinary data — this
+          //    banner is the one reminder + pointer to the remover in More. ─
+          if (_hasSamples) ...[
+            Container(
+              key: const Key('home-sample-banner'),
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: TongtaiDesignTokens.warning.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: TongtaiDesignTokens.warning.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.science_outlined,
+                    size: 20,
+                    color: TongtaiDesignTokens.warning,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      context.l10n.homeSampleBanner,
+                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                        color: TongtaiDesignTokens.lightTextPrimary,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          // ── Welcome + health + module counts ──────────────────────
+          Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.homeWelcome,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      // Scale down instead of overflowing on narrow
+                      // screens at accessibility text sizes (P0 §3).
+                      // Flexible bounds the width — a bare FittedBox in a
+                      // Row gets unbounded constraints and never shrinks.
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: _HealthBadge(health: _health),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context.l10n.homeAiSubtitle,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _ModuleSummaryGrid(
+                    producers: _producers,
+                    inventory: _inventory,
+                    consumers: _consumer,
+                    journeys: _journey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // ── Get started (new business) ────────────────────────────
+          if (_isEmptyBusiness) ...[
+            _GetStartedCard(
+              onCustomer: () =>
+                  _push(context, const TongtaiCustomerListScreen()),
+              onProduct: () => _push(context, const TongtaiInventoryScreen()),
+              onOrder: () => _push(context, const TongtaiCustomerListScreen()),
+              onGoal: () => _push(context, const TongtaiGoalsScreen()),
+              onDemo: _seeding ? () {} : _seedSamples,
+            ),
+            const SizedBox(height: 24),
+          ],
+
+          // ── Quick actions (WTM-144): once the business has data the
+          //    Get-started card retires, but Home keeps one-tap shortcuts —
+          //    field feedback: the Founder thought the features were gone. ──
+          if (!_isEmptyBusiness) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ActionChip(
+                  key: const Key('home-quick-customer'),
+                  avatar: const Icon(Icons.person_add_alt, size: 18),
+                  label: Text(context.l10n.homeAddCustomer),
+                  onPressed: () =>
+                      _push(context, const TongtaiCustomerListScreen()),
+                ),
+                ActionChip(
+                  key: const Key('home-quick-product'),
+                  avatar: const Icon(Icons.add_box_outlined, size: 18),
+                  label: Text(context.l10n.homeAddProduct),
+                  onPressed: () =>
+                      _push(context, const TongtaiInventoryScreen()),
+                ),
+                ActionChip(
+                  key: const Key('home-quick-order'),
+                  avatar: const Icon(Icons.receipt_long_outlined, size: 18),
+                  label: Text(context.l10n.homeAddOrder),
+                  onPressed: () =>
+                      _push(context, const TongtaiCustomerListScreen()),
+                ),
+                ActionChip(
+                  key: const Key('home-quick-goal'),
+                  avatar: const Icon(Icons.flag_outlined, size: 18),
+                  label: Text(context.l10n.homeAddGoal),
+                  onPressed: () => _push(context, const TongtaiGoalsScreen()),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+
+          // ── Business KPIs — real values, zero is valid (WTM-128) ──
+          _SectionHeader(
+            title: context.l10n.sectionBusinessKpis,
+            actionKey: const Key('home-open-reports'),
+            actionLabel: context.l10n.homeViewReports,
+            onAction: () => _push(context, const TongtaiReportsScreen()),
+          ),
+          const SizedBox(height: 12),
+          _KpiRow(metrics: _metrics),
+          const SizedBox(height: 24),
+
+          // ── Top opportunities (AI-generated; empty for new users) ─
+          _SectionHeader(
+            title: context.l10n.sectionTopOpportunities,
+            actionKey: const Key('home-open-opportunities'),
+            actionLabel: context.l10n.actionViewAll,
+            onAction: () =>
+                _push(context, const TongtaiOpportunityFeedScreen()),
+          ),
+          const SizedBox(height: 12),
+          if (topOpportunities.isEmpty)
+            const _EmptyBox('No opportunities available')
+          else
+            ...topOpportunities
+                .take(3)
+                .map((o) => _OpportunityTile(opportunity: o)),
+          const SizedBox(height: 24),
+
+          // ── Today's missions = active goals ───────────────────────
+          Text(
+            "Today's Missions",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          if (_goals.isEmpty)
+            const _EmptyBox('No missions yet')
+          else
+            ..._goals.take(3).map((g) => _MissionTile(goal: g)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Everything the Home dashboard shows, read as one unit.
+///
+/// A record rather than nine `setState` fields: with one value there is one
+/// state to be loading, ready, stale or failed — nine fields could (and did)
+/// disagree with each other while a partial read was in flight.
+@immutable
+class _HomeData {
+  const _HomeData({
+    required this.metrics,
+    required this.health,
+    required this.inventory,
+    required this.consumer,
+    required this.goals,
+    required this.producers,
+    required this.opportunities,
+    required this.hasSamples,
+  });
+
+  static const _HomeData empty = _HomeData(
+    metrics: BusinessMetrics.empty,
+    health: BusinessHealth.notEnoughData,
+    inventory: 0,
+    consumer: 0,
+    goals: [],
+    producers: 0,
+    opportunities: [],
+    hasSamples: false,
+  );
+
+  final BusinessMetrics metrics;
+  final BusinessHealth health;
+  final int inventory;
+  final int consumer;
+  final List<BusinessGoal> goals;
+  final int producers;
+  final List<Opportunity> opportunities;
+  final bool hasSamples;
 }
 
 /// Coarse business-health chip (WTM-128). Home renders the value; the assessor

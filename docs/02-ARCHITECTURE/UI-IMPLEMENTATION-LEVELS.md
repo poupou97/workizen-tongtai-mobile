@@ -2,7 +2,7 @@
 
 Chuẩn: [ADR-TON-015](../03-DECISIONS/ADR-TON-015-ui-maturity-and-one-data-path.md).
 Cập nhật **cùng PR** mỗi khi một màn đổi level. Level = sự thật đo được từ
-code, không phải ý định. Audit gần nhất: **2026-07-30** (34 màn + 3 shell — +2 màn predictive WTM-160/161).
+code, không phải ý định. Audit gần nhất: **2026-07-31** (34 màn + 3 shell — WTM-148 nâng 21 màn lên L3, 2 màn lên L4).
 
 ## Cách đọc
 
@@ -13,67 +13,73 @@ code, không phải ý định. Audit gần nhất: **2026-07-30** (34 màn + 3 
 - **Err**: có xử lý lỗi hiển thị cho người dùng khi data path hỏng.
 - **→ Next**: điều kiện còn thiếu để lên level kế tiếp.
 
-## Phát hiện hệ thống (2026-07-30)
+## Phát hiện hệ thống — và cách nó được đóng lại
 
-**Chỉ 1/32 màn có error handling thật** (`tongtai_ai_key_screen`). Mọi màn
-khác nếu repository/IO ném lỗi sẽ hiện trạng thái rỗng im lặng — đúng lớp lỗi
-"không phân biệt được *không có dữ liệu* với *không đọc được dữ liệu*" đã sinh
-ra bug Consumer. Vì vậy phần lớn màn dừng ở **L2 (+CRUD)**, chưa phải L3.
+**Audit 2026-07-30:** chỉ **1/34 màn** có error handling thật
+(`tongtai_ai_key_screen`). Mọi màn khác nếu repository/IO ném lỗi sẽ hiện
+trạng thái rỗng im lặng — đúng lớp lỗi "không phân biệt được *không có dữ liệu*
+với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 
-→ Một backlog item hệ thống (**WTM-148**) — seam xử lý lỗi dùng chung cho mọi
-màn — sẽ nâng ~25 màn từ L2 lên L3 cùng lúc. Đây là nợ **hiện**, không phải nợ ẩn.
+**WTM-148 (2026-07-31) đã đóng gap này** bằng **seam dùng chung**
+([ADR-TON-017](../03-DECISIONS/ADR-TON-017-error-handling-seam.md)):
+`ScreenState` sáu trạng thái · `TongtaiFailure` phân loại · `ScreenDataController`
+(refresh lỗi giữ dữ liệu cũ) · `runTongtaiAction` (ghi không im lặng) ·
+`TongtaiScreenData`/`TongtaiAsyncScreenData` (một cách render, stable key).
+**22 màn** tham chiếu seam; governance test chặn màn tự chế lại
+(`p0/error_handling_governance_test.dart`).
 
 ## Ma trận
 
 ### L4 — AI Enabled
-*(chưa màn nào đạt: tính năng AI đã ship nhưng L3 chưa xong — xem 2 màn dưới)*
-
-### L2 + AI shipped (lên L4 ngay khi L3 error handling xong)
-
-| Màn | Data | CRUD | Keys | Err | → Next |
-|---|---|---|---|---|---|
-| `tongtai_reports_screen` | BusinessContext + BusinessMetrics + orders repo | – | ✅ 19 | ❌ | error handling → L3 → L4 (AI G-3A→D đã ship, có rule twin) |
-| `tongtai_opportunity_detail_screen` | generated opportunities + goal repo | tạo goal | ✅ 9 | ❌ | error handling → L3 → L4 (AI insight đã ship) |
-
-### L3 — Interactive (đủ CRUD + error handling)
 
 | Màn | Data | CRUD | Keys | Err | Ghi chú |
 |---|---|---|---|---|---|
-| `tongtai_ai_key_screen` | secure storage (BYOK) | lưu/đổi/xoá khoá | ✅ 8 | ✅ | mẫu chuẩn: `catch (TongtaiAiException)` → status hiển thị |
+| `tongtai_reports_screen` | BusinessContext + BusinessMetrics + orders repo | – | ✅ 19 | ✅ seam | AI G-3A→D đã ship, mỗi tính năng có rule twin |
+| `tongtai_opportunity_detail_screen` | generated opportunities + goal repo | tạo goal (guarded) | ✅ 9 | ✅ seam | AI insight (WTM-141) + rule score authoritative |
 
-### L2 — Production Data (số liệu đúng nguồn; phần lớn có CRUD, thiếu error handling)
+### L3 — Interactive (đủ CRUD + error handling)
 
-| Màn | Data | CRUD | Keys | → L3 |
-|---|---|---|---|---|
-| `tongtai_home_screen` | BusinessContext + 5 repo + favorites | qua nav | ✅ 21 | error handling |
-| `tongtai_forecast_screen` | RevenueCapabilityContext + RevenueForecastRule (on-demand) | – | ✅ | error handling *(mới 2026-07-30, WTM-160)* |
-| `tongtai_customer_risk_screen` | CustomerCapabilityContext + CustomerRiskRule + customerRepository (join id→tên) | – | ✅ | error handling *(mới 2026-07-30, WTM-161)* |
-| `tongtai_consumer_screen` | customerRepository | qua list | ✅ | error handling *(sửa 2026-07-30: từng là L1 static shell)* |
-| `tongtai_producer_screen` | favorites store + generated opportunities | qua favorites | ✅ | error handling *(sửa 2026-07-30: từng là L1 static shell)* |
-| `tongtai_inventory_screen` | productRepository | ✅ thêm/sửa/xoá | ✅ | error handling |
-| `tongtai_customer_list_screen` | customer + order + product repo | ✅ | ✅ | error handling |
-| `tongtai_goals_screen` | goal repo + orders (auto-derive) | ✅ | ✅ | error handling |
-| `tongtai_finance_screen` | financeRepository | ✅ ghi giao dịch | ✅ 6 | error handling |
-| `tongtai_timeline_screen` | finance/order/goal repo + opportunities | read-only | ✅ 2 | error handling |
-| `tongtai_opportunity_feed_screen` | generated opportunities | quan tâm/bỏ qua | ✅ 5 | error handling |
-| `tongtai_export_screen` | 3 repo thật | xuất + mã hoá | ✅ 5 | `try/finally` **không có catch** → error handling |
-| `tongtai_more_screen` | seeder + prefs | seed/xoá mẫu | ✅ 12 | error handling |
-| `tongtai_chat_screen` | chat store + 3 repo (per-turn context) | gửi/xoá | ✅ 8 | error handling |
-| `tongtai_chat_search_screen` | chat store (inject từ chat) | – | ✅ 5 | error handling |
-| `tongtai_unified_search_screen` | FTS5 + history + favorites store | – | ✅ | error handling |
-| `tongtai_customer_history_screen` | orderController thật | tạo đơn | ✅ 4 | error handling |
-| `tongtai_create_order_screen` | products thật (inject) | tạo đơn | ✅ 8 | error handling |
-| `tongtai_customer_form_screen` | form → parent persist | ✅ | ✅ 13 | error handling |
-| `tongtai_product_form_screen` | form → parent persist | ✅ | ✅ 7 | error handling |
-| `tongtai_goal_form_screen` | form → parent persist | ✅ | ✅ 14 | error handling |
-| `tongtai_transaction_form_screen` | form → parent persist | ✅ | ✅ 7 | error handling |
-| `tongtai_goal_detail_screen` | goal thật + realized revenue | sửa qua form | ✅ 4 | error handling |
-| `tongtai_inventory_picker_screen` | products thật (inject) | chọn | ✅ | error handling |
-| `tongtai_stock_alerts_screen` | catalog thật (derived) | – | ✅ | error handling |
-| `tongtai_supplier_search_screen` | curated catalog (Phase 2) + favorites persisted | ✅ favorite | ✅ | error handling |
-| `tongtai_supplier_favorites_screen` | favorites persisted | ✅ bỏ favorite | ✅ | error handling |
-| `tongtai_supplier_detail_screen` | catalog profile (inject) | – | ✅ | error handling |
-| `tongtai_key_scan_screen` | camera → trả khoá (không có business data) | – | – | error handling khi camera lỗi |
+| Màn | Data | Err qua seam | Ghi chú |
+|---|---|---|---|
+| `tongtai_home_screen` | BusinessContext + 5 nguồn, một `_HomeData` | `ScreenDataController` + `runTongtaiAction` (seed) | KPI = 0 do đọc hỏng nay là **failed**, không phải "doanh thu 0 ₫" |
+| `tongtai_consumer_screen` | customerRepository | `ScreenDataController` | màn của bug gốc — có suite hành vi riêng |
+| `tongtai_producer_screen` | favorites store + generated opportunities | `ScreenDataController` | hai nguồn, một trạng thái |
+| `tongtai_inventory_screen` | productRepository | `ScreenDataController` + guarded upsert | |
+| `tongtai_customer_list_screen` | customer + order + product repo | `ScreenDataController` + guarded upsert | |
+| `tongtai_goals_screen` | goal repo + orders | `ScreenDataController` + guarded upsert | |
+| `tongtai_finance_screen` | financeRepository | `ScreenDataController` + guarded add | |
+| `tongtai_timeline_screen` | 4 repo (derived projection) | `ScreenDataController` | |
+| `tongtai_opportunity_feed_screen` | generated opportunities | `ScreenDataController` | |
+| `tongtai_forecast_screen` | RevenueCapabilityContext + Rule Twin | `TongtaiAsyncScreenData` | `insufficient` ≠ `failed` ≠ `empty` |
+| `tongtai_customer_risk_screen` | CustomerCapabilityContext + Rule Twin + customer repo | `TongtaiAsyncScreenData` | khách rỗng = **empty**, không phải từ chối |
+| `tongtai_export_screen` | 3 repo + history store | `ScreenDataController` + guarded export | sửa `try/finally` **không có catch** |
+| `tongtai_more_screen` | seeder + prefs | `runTongtaiAction` ×3 | invalidate cache **chỉ khi ghi thành công** |
+| `tongtai_chat_screen` | chat store + 3 repo | `ScreenDataController` + guarded attach | ảnh bị từ chối quyền nay báo rõ |
+| `tongtai_chat_search_screen` | chat store | `ScreenDataController` | bỏ `_searchToken` tự chế — seam lo drop response cũ |
+| `tongtai_unified_search_screen` | FTS5 + history + favorites | `TongtaiFailureView` + controller mang `failure` | FTS hỏng từng làm spinner quay mãi |
+| `tongtai_customer_history_screen` | orderController thật | `runTongtaiAction` | đơn vừa nhập không thể mất im lặng |
+| `tongtai_supplier_search_screen` | curated catalog + favorites persisted | `runTongtaiAction` (toggle) | |
+| `tongtai_supplier_favorites_screen` | favorites persisted | `runTongtaiAction` (toggle) | |
+| `tongtai_ai_key_screen` | secure storage (BYOK) | `runTongtaiAction` | `TongtaiAiException` nay là `TongtaiClassifiedError` |
+| `tongtai_key_scan_screen` | camera | `errorBuilder` → `TongtaiFailureView` | camera bị từ chối nay có màn lỗi, không phải khung đen |
+
+### L2 — Production Data (không có đường IO riêng để hỏng)
+
+Các màn dưới đây **không tự đọc/ghi IO**: chúng nhận dữ liệu qua constructor từ
+một màn L3 và trả kết quả về cho màn đó ghi (nơi ghi đã được `runTongtaiAction`
+bảo vệ). Chúng lên L3 khi/nếu tự chạm IO.
+
+| Màn | Nguồn | Ghi ở đâu |
+|---|---|---|
+| `tongtai_create_order_screen` | products inject | `customer_history` ghi (guarded) |
+| `tongtai_customer_form_screen` | form → parent | `customer_list` ghi (guarded) |
+| `tongtai_product_form_screen` | form → parent | `inventory` ghi (guarded) |
+| `tongtai_goal_form_screen` | form → parent | `goals` ghi (guarded) |
+| `tongtai_transaction_form_screen` | form → parent | `finance` ghi (guarded) |
+| `tongtai_goal_detail_screen` | goal + realized revenue inject | read-only |
+| `tongtai_inventory_picker_screen` | products inject | read-only |
+| `tongtai_stock_alerts_screen` | catalog inject (derived) | catalog chung với `inventory` |
+| `tongtai_supplier_detail_screen` | catalog profile inject | read-only |
 
 ### L1 — Static UI
 
@@ -91,8 +97,9 @@ persistence do RootGate giữ).
 
 | Level thật | Story Jira liên quan (label `IMPLEMENTATION_LEVEL`) |
 |---|---|
-| L2 | WTM-24 (Producer) · WTM-26 (Consumer) · WTM-25/68 (Inventory) · WTM-75 (Customer list) · WTM-87/89 (Journey) · WTM-27/113 (Finance) · WTM-95/96/97 (Home/Reports) · WTM-91/92 (Opportunity) · WTM-99/100 (Export) · WTM-80/84 (Chat) · WTM-73 (Search) · WTM-63/64/65 (Supplier) · WTM-114 (Timeline) |
-| L3 | WTM-61/83 (AI key BYOK) |
+| L4 | WTM-95/96/97 (Reports) · WTM-91/92 (Opportunity detail) |
+| L3 | WTM-24 (Producer) · WTM-26 (Consumer) · WTM-25/68 (Inventory) · WTM-75 (Customer list) · WTM-87/89 (Journey) · WTM-27/113 (Finance) · WTM-99/100 (Export) · WTM-80/84 (Chat) · WTM-73 (Search) · WTM-63/64/65 (Supplier) · WTM-114 (Timeline) · WTM-160/161 (Forecast/Risk) · WTM-61/83 (AI key BYOK) |
+| L2 | form/picker/detail screens — nhận dữ liệu qua constructor, không tự chạm IO |
 | L1 | WTM-12/13/17/18/20/22/23 (component design stories — chưa production) |
 
 **Luật:** không đóng story ở level cao hơn ma trận này.

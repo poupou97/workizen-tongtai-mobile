@@ -1,3 +1,5 @@
+import '../core/screen_state.dart';
+
 /// Failure categories for a BYOK AI call (WTM-61 AC: "error handling for
 /// invalid keys, network errors, and API rate limits; user sees friendly error
 /// messages"). Each kind carries a bilingual, non-technical message the UI can
@@ -34,7 +36,12 @@ enum TongtaiAiErrorKind {
 /// A friendly, user-facing AI failure. The message never echoes the raw
 /// provider body (defense in depth against leaking a key back to the screen)
 /// and is available in both English and Vietnamese.
-class TongtaiAiException implements Exception {
+///
+/// Also speaks the shared screen-state vocabulary (WTM-148): implementing
+/// [TongtaiClassifiedError] means an AI failure reaching any screen renders
+/// with the same wording, the same retry rule and the same telemetry shape as
+/// a storage or network failure — without the seam knowing this type exists.
+class TongtaiAiException implements Exception, TongtaiClassifiedError {
   const TongtaiAiException(this.kind, this.messageEn, this.messageVi);
 
   final TongtaiAiErrorKind kind;
@@ -101,4 +108,28 @@ class TongtaiAiException implements Exception {
 
   @override
   String toString() => 'TongtaiAiException(${kind.name}): $messageEn';
+
+  /// How this failure reads to the shared seam (WTM-148).
+  ///
+  /// The split that matters: a missing/invalid key or an exhausted quota is
+  /// **configuration** — retrying the identical call cannot help, so no retry
+  /// button is offered. Everything transient is **network**, which is
+  /// retryable. The message travels as `detail` (on-device only); telemetry
+  /// still sees only kind + code.
+  @override
+  TongtaiFailure get failure => TongtaiFailure(
+    kind: switch (kind) {
+      TongtaiAiErrorKind.missingKey ||
+      TongtaiAiErrorKind.invalidKey ||
+      TongtaiAiErrorKind.quota => TongtaiFailureKind.configuration,
+      TongtaiAiErrorKind.network ||
+      TongtaiAiErrorKind.timeout ||
+      TongtaiAiErrorKind.rateLimit ||
+      TongtaiAiErrorKind.serverError => TongtaiFailureKind.network,
+      TongtaiAiErrorKind.badResponse ||
+      TongtaiAiErrorKind.unknown => TongtaiFailureKind.unexpected,
+    },
+    code: 'ai.${kind.name}',
+    detail: messageEn,
+  );
 }

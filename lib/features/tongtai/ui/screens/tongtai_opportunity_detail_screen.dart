@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ai/opportunity_ai.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_action_plan.dart';
 import '../../opportunity/opportunity_signals.dart';
@@ -13,6 +15,7 @@ import '../../providers/tongtai_ai_provider.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 
 /// Opportunity Detail & Action Plan (WTM-92).
 ///
@@ -92,8 +95,16 @@ class _TongtaiOpportunityDetailScreenState
       createdAt: now,
       updatedAt: now,
     );
-    await ref.read(businessGoalRepositoryProvider).upsert(goal);
+    final failure = await runTongtaiAction(
+      () => ref.read(businessGoalRepositoryProvider).upsert(goal),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'opportunity',
+    );
     if (!mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(context, failure, onRetry: _createGoal);
+      return;
+    }
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.oppGoalCreatedSnack(_o.title))));
@@ -278,11 +289,7 @@ class _TongtaiOpportunityDetailScreenState
                 ),
                 const SizedBox(height: TongtaiDesignTokens.spacing2),
                 if (_explaining)
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                  const TongtaiInlineBusy()
                 else if (_insight == null)
                   OutlinedButton.icon(
                     key: const Key('opportunity-ai-explain'),

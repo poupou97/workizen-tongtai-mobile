@@ -5,6 +5,7 @@ import '../../../../core/l10n/app_strings.dart';
 import '../../../../database/search/tongtai_search_service.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../widgets/tongtai_screen_data.dart';
 import '../../producer/supplier_favorites_store.dart';
 import '../../providers/tongtai_identity_provider.dart';
 import '../../providers/tongtai_search_provider.dart';
@@ -634,8 +635,16 @@ class _ResultsArea extends StatelessWidget {
               Tab(text: '${tab.label(lang)} (${results.countFor(tab)})'),
           ],
         ),
-        if (controller.isSearching && results.isEmpty)
-          const Expanded(child: Center(child: CircularProgressIndicator()))
+        if (controller.failure != null)
+          Expanded(
+            child: TongtaiFailureView(
+              prefix: 'search',
+              failure: controller.failure!,
+              onRetry: () => controller.repeat(controller.query),
+            ),
+          )
+        else if (controller.isSearching && results.isEmpty)
+          const Expanded(child: TongtaiLoadingView(prefix: 'search'))
         else
           Expanded(
             child: TabBarView(

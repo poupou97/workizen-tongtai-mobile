@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../consumer/customer.dart';
+import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../providers/tongtai_consumer_provider.dart';
+import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_customer_list_screen.dart';
 
 /// Consumer/Customer Intelligence tab for Tổng Tài (WTM-26).
@@ -30,28 +33,36 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
   static const _blue = Color(0xFF3B82F6);
 
   late final DateTime Function() _clock;
-  List<Customer> _customers = const [];
+
+  /// The screen's single data path (WTM-148): a throwing repository now
+  /// becomes a visible, retryable failure instead of an empty tab that looks
+  /// exactly like "you have no customers".
+  late final ScreenDataController<List<Customer>> _data;
 
   @override
   void initState() {
     super.initState();
     _clock = widget.clock ?? DateTime.now;
-    _load();
+    _data = ScreenDataController<List<Customer>>(
+      () => ref.read(customerRepositoryProvider).loadAll(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'consumer',
+    )..load();
   }
 
-  Future<void> _load() async {
-    final customers = await ref.read(customerRepositoryProvider).loadAll();
-    if (!mounted) return;
-    setState(() => _customers = customers);
+  @override
+  void dispose() {
+    _data.dispose();
+    super.dispose();
   }
 
   Future<void> _openList() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(builder: (_) => const TongtaiCustomerListScreen()),
     );
-    // The user may have created/edited/deleted customers in the list — reload
-    // so the tab stays consistent without a restart.
-    await _load();
+    // The user may have created/edited/deleted customers in the list — refresh
+    // (not reload) so the tab stays consistent without blanking on the way.
+    await _data.refresh();
   }
 
   bool _isActive(Customer c) {
@@ -62,26 +73,6 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final total = _customers.length;
-    final vip = _customers.where((c) => c.tier == CustomerTier.vip).length;
-    final active = _customers.where(_isActive).length;
-    final fresh = _customers.where((c) => c.orderCount == 0).length;
-
-    final segmentTally = <String, int>{};
-    for (final c in _customers) {
-      for (final s in c.segments) {
-        if (s.trim().isEmpty) continue;
-        segmentTally[s] = (segmentTally[s] ?? 0) + 1;
-      }
-    }
-
-    final recent = _customers.where((c) => c.lastPurchaseDate != null).toList()
-      ..sort((a, b) => b.lastPurchaseDate!.compareTo(a.lastPurchaseDate!));
-    final interactions = recent.take(5).toList();
-
-    final purchased = _customers.where((c) => c.orderCount >= 1).length;
-    final retained = _customers.where((c) => c.orderCount >= 2).length;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -90,205 +81,238 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Summary card — count badge MUST equal Home's Consumer tile
-            // (both read customerRepository; contract-tested).
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          l10n.titleCustomers,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _blue,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '$total',
-                            key: const Key('consumer-count-badge'),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _CustomerStat(
-                          label: l10n.segActive,
-                          value: '$active',
-                          color: _blue,
-                        ),
-                        _CustomerStat(
-                          label: l10n.segVip,
-                          value: '$vip',
-                          color: _blue,
-                        ),
-                        _CustomerStat(
-                          label: l10n.segNew,
-                          value: '$fresh',
-                          color: _blue,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        key: const Key('consumer-view-all'),
-                        onPressed: _openList,
-                        child: Text(l10n.actionViewAll),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      body: ListenableBuilder(
+        listenable: _data,
+        builder: (context, _) => TongtaiScreenData<List<Customer>>(
+          prefix: 'consumer',
+          state: _data.state,
+          onRetry: _data.retry,
+          builder: _body,
+        ),
+      ),
+    );
+  }
+
+  Widget _body(BuildContext context, List<Customer> customers) {
+    final l10n = context.l10n;
+    final total = customers.length;
+    final vip = customers.where((c) => c.tier == CustomerTier.vip).length;
+    final active = customers.where(_isActive).length;
+    final fresh = customers.where((c) => c.orderCount == 0).length;
+
+    final segmentTally = <String, int>{};
+    for (final c in customers) {
+      for (final s in c.segments) {
+        if (s.trim().isEmpty) continue;
+        segmentTally[s] = (segmentTally[s] ?? 0) + 1;
+      }
+    }
+
+    final recent = customers.where((c) => c.lastPurchaseDate != null).toList()
+      ..sort((a, b) => b.lastPurchaseDate!.compareTo(a.lastPurchaseDate!));
+    final interactions = recent.take(5).toList();
+
+    final purchased = customers.where((c) => c.orderCount >= 1).length;
+    final retained = customers.where((c) => c.orderCount >= 2).length;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Summary card — count badge MUST equal Home's Consumer tile
+          // (both read customerRepository; contract-tested).
+          Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(height: 24),
-            // Customer segments — aggregated from the customers' own segment
-            // labels; empty state only when NO customer carries a segment.
-            Text(
-              l10n.sectionCustomerSegments,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
-            if (segmentTally.isEmpty)
-              Container(
-                height: 120,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(child: Text(l10n.emptyCustomerSegments)),
-              )
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (final entry
-                      in (segmentTally.entries.toList()
-                        ..sort((a, b) => b.value.compareTo(a.value))))
-                    Chip(label: Text('${entry.key} (${entry.value})')),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.titleCustomers,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _blue,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '$total',
+                          key: const Key('consumer-count-badge'),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _CustomerStat(
+                        label: l10n.segActive,
+                        value: '$active',
+                        color: _blue,
+                      ),
+                      _CustomerStat(
+                        label: l10n.segVip,
+                        value: '$vip',
+                        color: _blue,
+                      ),
+                      _CustomerStat(
+                        label: l10n.segNew,
+                        value: '$fresh',
+                        color: _blue,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      key: const Key('consumer-view-all'),
+                      onPressed: _openList,
+                      child: Text(l10n.actionViewAll),
+                    ),
+                  ),
                 ],
               ),
-            const SizedBox(height: 24),
-            // Recent interactions — latest purchases, newest first.
-            Text(
-              l10n.sectionRecentInteractions,
-              style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 12),
-            if (interactions.isEmpty)
-              Container(
-                height: 120,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(child: Text(l10n.emptyRecentInteractions)),
-              )
-            else
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    for (final c in interactions)
-                      ListTile(
-                        dense: true,
-                        title: Text(c.name),
-                        subtitle: Text(
-                          '${TongtaiFormatters.vndShort(c.totalSpent)} · '
-                          '${TongtaiFormatters.isoDate(c.lastPurchaseDate!)}',
-                        ),
-                        trailing: Text(
-                          c.tier.label(l10n.languageCode),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 24),
-            // Customer lifecycle — derived from order history, one source.
-            Text(
-              l10n.sectionCustomerLifecycle,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 24),
+          // Customer segments — aggregated from the customers' own segment
+          // labels; empty state only when NO customer carries a segment.
+          Text(
+            l10n.sectionCustomerSegments,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          if (segmentTally.isEmpty)
             Container(
-              padding: const EdgeInsets.all(16),
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(child: Text(l10n.emptyCustomerSegments)),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final entry
+                    in (segmentTally.entries.toList()
+                      ..sort((a, b) => b.value.compareTo(a.value))))
+                  Chip(label: Text('${entry.key} (${entry.value})')),
+              ],
+            ),
+          const SizedBox(height: 24),
+          // Recent interactions — latest purchases, newest first.
+          Text(
+            l10n.sectionRecentInteractions,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          if (interactions.isEmpty)
+            Container(
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(child: Text(l10n.emptyRecentInteractions)),
+            )
+          else
+            Container(
               decoration: BoxDecoration(
                 border: Border.all(color: const Color(0xFFE5E7EB)),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _LifecycleStage(
-                    stage: l10n.lifecycleAwareness,
-                    count: '$total',
-                    color: _blue,
-                  ),
-                  const SizedBox(height: 12),
-                  _LifecycleStage(
-                    stage: l10n.lifecycleConsideration,
-                    count: '$fresh',
-                    color: _blue,
-                  ),
-                  const SizedBox(height: 12),
-                  _LifecycleStage(
-                    stage: l10n.lifecyclePurchase,
-                    count: '$purchased',
-                    color: _blue,
-                  ),
-                  const SizedBox(height: 12),
-                  _LifecycleStage(
-                    stage: l10n.lifecycleRetention,
-                    count: '$retained',
-                    color: _blue,
-                  ),
+                  for (final c in interactions)
+                    ListTile(
+                      dense: true,
+                      title: Text(c.name),
+                      subtitle: Text(
+                        '${TongtaiFormatters.vndShort(c.totalSpent)} · '
+                        '${TongtaiFormatters.isoDate(c.lastPurchaseDate!)}',
+                      ),
+                      trailing: Text(
+                        c.tier.label(l10n.languageCode),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
-          ],
-        ),
+          const SizedBox(height: 24),
+          // Customer lifecycle — derived from order history, one source.
+          Text(
+            l10n.sectionCustomerLifecycle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _LifecycleStage(
+                  stage: l10n.lifecycleAwareness,
+                  count: '$total',
+                  color: _blue,
+                ),
+                const SizedBox(height: 12),
+                _LifecycleStage(
+                  stage: l10n.lifecycleConsideration,
+                  count: '$fresh',
+                  color: _blue,
+                ),
+                const SizedBox(height: 12),
+                _LifecycleStage(
+                  stage: l10n.lifecyclePurchase,
+                  count: '$purchased',
+                  color: _blue,
+                ),
+                const SizedBox(height: 12),
+                _LifecycleStage(
+                  stage: l10n.lifecycleRetention,
+                  count: '$retained',
+                  color: _blue,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

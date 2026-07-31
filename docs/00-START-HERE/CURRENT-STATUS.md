@@ -24,6 +24,30 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐⭐ ERROR-HANDLING SEAM (WTM-148, 2026-07-31) — ADR-TON-017:** đóng gap hệ
+  thống mà audit ADR-TON-015 phát hiện (**1/34 màn** có xử lý lỗi thật). Trước
+  đó `initState → _load() → setState` để future lỗi không ai bắt, nên **"không
+  có dữ liệu" và "không đọc được dữ liệu" hiển thị y hệt nhau** — lớp lỗi sinh
+  ra bug "Home Consumer = 1, tab trống", và nguy hiểm nhất ở màn tiền (`0 ₫` do
+  đọc hỏng đọc như một sự thật). Seam dùng chung: **`ScreenState` sáu trạng
+  thái** (loading·ready·empty·insufficient·refreshing·failed — `empty`/
+  `insufficient` là câu trả lời, `failed` là **không** có câu trả lời) ·
+  **`TongtaiFailure`** phân loại + code cố định, `permission`/`configuration`
+  không mời retry vì retry vô nghĩa · **`ScreenDataController`** giữ dữ liệu cũ
+  khi refresh hỏng (**stale**, có banner nói rõ cũ từ lúc nào) và bỏ response
+  lạc thế hệ · **`runTongtaiAction`** để ghi không thể im lặng ·
+  **`TongtaiScreenData`/`TongtaiAsyncScreenData`** một cách render với stable
+  key. **Loading không animation** (local-first + để `pumpAndSettle` không
+  treo; idiom kèm theo: `pumpUntilFound`). **Riêng tư:** `detail` nguyên văn
+  chỉ hiện trên máy người dùng, telemetry `screen_error` chỉ mang
+  `kind`+`code`+`screen`, `toString()` bỏ `detail` vì crash reporter ghi nó —
+  có negative control. **21 màn → L3, 2 màn → L4.** Governance test cấm trong
+  `ui/`: catch thủ công · spinner tự chế · `FutureBuilder`/`.when` · nhiều
+  `tongtaiDatabaseProvider`. **2 lỗi thật seam phát hiện ngay:** (1)
+  `tongtaiDatabaseProvider` khai báo **hai lần** → app mở hai kết nối vào cùng
+  file `.db` và test override chỉ trúng nửa app (One Data Path violation);
+  (2) export `try/finally` **không có catch** → xuất hỏng trông như xong.
+  **1347 tests.**
 - **⭐⭐ PREDICTIVE FOUNDATION (Founder Decision APPROVED 2026-07-30) — ADR-TON-016, Epic WTM-149:**
   Trả lời được câu hỏi "AI dự báo doanh thu / khách rời bỏ chưa?" bằng **kiến trúc**, không phải prompt:
   **Capability Context** độc lập tải on-demand (Revenue · Customer) giữ BusinessContext **không phình God Object**;

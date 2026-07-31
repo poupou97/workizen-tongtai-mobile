@@ -6,12 +6,14 @@ import '../../ai/predictive_ai.dart';
 import '../../analytics/revenue_series.dart';
 import '../../capability/capability_context.dart';
 import '../../capability/revenue_capability.dart';
+import '../../core/screen_state.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../predictive/revenue_forecast_rule.dart';
 import '../../predictive/rule_twin.dart';
 import '../../providers/tongtai_capability_provider.dart';
 import '../../providers/tongtai_predictive_provider.dart';
+import '../widgets/tongtai_screen_data.dart';
 
 /// **Revenue Forecast screen** (WTM-160 · ADR-TON-016) — "how much will I make
 /// next month?", answered by the deterministic [RevenueForecastRule] twin.
@@ -87,17 +89,33 @@ class _TongtaiForecastScreenState extends ConsumerState<TongtaiForecastScreen> {
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
       ),
       body: SafeArea(
-        child: forecast.when(
-          loading: () => const Center(
-            key: Key('forecast-loading'),
-            child: CircularProgressIndicator(),
-          ),
-          // A failed load is NOT "you will earn nothing" — it is "could not
-          // compute", and renders as the same honest refusal with no reasons
-          // to quote and no history to show.
-          error: (error, stack) =>
-              const _ForecastInsufficient(reasonCodes: <ReasonCode>[]),
-          data: (twin) => _body(twin, revenue.value),
+        // Through the shared seam (WTM-148): loading, a failed load, a stale
+        // read and the twin's own refusal each get their own state. A failed
+        // load is NOT "you will earn nothing" — it is "could not compute", and
+        // conflating the two is exactly what ADR-TON-016 forbids.
+        child: TongtaiAsyncScreenData<RuleTwinResult<RevenueForecast>>(
+          prefix: 'forecast',
+          async: forecast,
+          onRetry: () async => ref.invalidate(revenueForecastProvider),
+          insufficiencyOf: (context, twin) => twin.result == null
+              ? TongtaiInsufficiency(
+                  title: context.l10n.forecastInsufficient,
+                  body: context.l10n.forecastInsufficientBody,
+                  reasons: [
+                    for (final reason in twin.reasonCodes)
+                      reason.label(context.l10n.languageCode),
+                  ],
+                )
+              : null,
+          // The months that really happened are still worth showing — a refusal
+          // means "cannot forecast", not "nothing exists". A window that booked
+          // no revenue at all shows no chart: zeros are not a history.
+          insufficientExtra: (context, twin) {
+            final context0 = revenue.value;
+            if (context0 == null || !context0.hasData) return null;
+            return _HistorySection(series: context0.series);
+          },
+          builder: (context, twin) => _body(twin, revenue.value),
         ),
       ),
     );
@@ -107,16 +125,9 @@ class _TongtaiForecastScreenState extends ConsumerState<TongtaiForecastScreen> {
     RuleTwinResult<RevenueForecast> twin,
     RevenueCapabilityContext? revenue,
   ) {
-    final forecast = twin.result;
-    if (forecast == null) {
-      return _ForecastInsufficient(
-        reasonCodes: twin.reasonCodes,
-        // The months that really happened are still worth showing — a refusal
-        // means "cannot forecast", not "nothing exists". A window that booked
-        // no revenue at all shows no chart: zeros are not a history.
-        series: revenue != null && revenue.hasData ? revenue.series : null,
-      );
-    }
+    // Non-null by construction: the seam routes a refusing twin to the shared
+    // insufficient state above, so this path only ever renders a real forecast.
+    final forecast = twin.result!;
 
     // The twin was computed over exactly this context, so the history the
     // seller sees is the history the forecast was made from. The fallback keeps
@@ -333,24 +344,9 @@ class _AiExplainAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     if (running) {
-      return Row(
+      return TongtaiInlineBusy(
         key: const Key('forecast-action-ai'),
-        children: [
-          const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
-          Expanded(
-            child: Text(
-              l10n.aiExplainRunning,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
-            ),
-          ),
-        ],
+        label: l10n.aiExplainRunning,
       );
     }
     final answer = explanation;
@@ -789,68 +785,6 @@ class _Chip extends StatelessWidget {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── The honest non-answer ───────────────────────────────────────────────────
-
-/// The twin refused to forecast: say so, say WHY, and show no number.
-///
-/// Rendering a zero headline or a chart of zeros here is the exact failure
-/// ADR-TON-016 forbids — a fabricated forecast that reads as "you will earn
-/// nothing" when the truth is "we cannot tell yet".
-class _ForecastInsufficient extends StatelessWidget {
-  const _ForecastInsufficient({required this.reasonCodes, this.series});
-
-  final List<ReasonCode> reasonCodes;
-
-  /// Real months to show under the refusal, or `null` when the window booked
-  /// nothing at all — a chart of zeros is not a history.
-  final RevenueSeries? series;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final history = series;
-    return SingleChildScrollView(
-      key: const Key('forecast-insufficient'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing6),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.help_outline,
-            size: 48,
-            color: TongtaiDesignTokens.warning,
-          ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
-          Text(
-            l10n.forecastInsufficient,
-            textAlign: TextAlign.center,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
-          Text(
-            l10n.forecastInsufficientBody,
-            textAlign: TextAlign.center,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
-          ),
-          if (reasonCodes.isNotEmpty) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
-            _ReasonCodes(reasonCodes: reasonCodes),
-          ],
-          if (history != null) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing6),
-            _HistorySection(series: history),
-          ],
         ],
       ),
     );

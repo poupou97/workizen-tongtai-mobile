@@ -16,18 +16,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../database/database.dart';
 import '../../../database/search/tongtai_search_service.dart';
 import 'package:tongtai/core/prefs.dart' show sharedPreferencesProvider;
+import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
 import '../producer/supplier_favorites_store.dart';
+// ONE database provider for the whole app (WTM-148). This file used to declare
+// its own `tongtaiDatabaseProvider`, so search + favourites ran on a SECOND
+// `AppDatabase` over the same file: two connections in production, and a test
+// that overrode "the" database silently only overrode half the app. Re-exported
+// so every existing importer of this file keeps resolving the same symbol —
+// now the canonical one (ADR-TON-015 One Data Path).
+export 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
 import '../search/tongtai_catalog_seeder.dart';
 import '../search/tongtai_ranking.dart';
 import '../search/tongtai_search_history_store.dart';
-
-/// The on-device Tổng Tài SQLite database (file `tongtai.db`), opened once and
-/// closed on dispose.
-final tongtaiDatabaseProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase();
-  ref.onDispose(db.close);
-  return db;
-});
 
 /// FTS5 full-text search over the on-device catalogue (WTM-72).
 final tongtaiSearchServiceProvider = Provider<TongtaiSearchService>(

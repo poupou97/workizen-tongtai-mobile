@@ -24,7 +24,8 @@ Một UI chỉ được coi là DONE ở **Level đã khai báo** khi:
 | U4 | **Không parallel state** (demo state / cache song song) | L2 |
 | U5 | Có **integration/contract test** qua production wiring (không mock riêng từng màn) | L2 |
 | U6 | Có **stable test keys** theo quy ước `<screen>-<role>` | L2 |
-| U7 | CRUD · refresh · navigation · persistence · empty state · **error handling** | L3 |
+| U7 | CRUD · refresh · navigation · persistence · empty state · **error handling qua seam dùng chung** (`ScreenDataController` / `runTongtaiAction`, ADR-TON-017) — cấm tự chế `catch`, spinner, hay card lỗi riêng | L3 |
+| U7b | Phân biệt được **6 trạng thái**: loading · ready · empty · insufficient · stale · failed. Test phải assert **sự VẮNG MẶT** của empty state khi đường dữ liệu hỏng | L3 |
 | U8 | AI đọc BusinessContext + có twin rule-based (ADR-TON-012/013) | L4 |
 | U9 | Đã **smoke test trên release build, máy thật** (nếu chạm native/gradle/Firebase) | mọi level |
 

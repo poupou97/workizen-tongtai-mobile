@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
 import '../../inventory/product_catalog_controller.dart';
@@ -10,8 +11,10 @@ import '../../inventory/stock_alert_service.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_inventory_provider.dart';
 import 'tongtai_product_form_screen.dart';
+import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_stock_alerts_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 
 /// Color for a [StockStatus] badge (WTM-68 AC: color-coded in stock / low /
 /// out). Pulled out as a pure function so the mapping is directly unit-testable
@@ -64,6 +67,10 @@ class _TongtaiInventoryScreenState
   late final bool _ownsCatalog;
   final TextEditingController _searchController = TextEditingController();
 
+  /// Catalogue hydration as a visible state (WTM-148): an unreadable product
+  /// table must not render as "you sell nothing".
+  late final ScreenDataController<ProductCatalogController> _data;
+
   ProductQuery _query = const ProductQuery();
 
   @override
@@ -81,11 +88,24 @@ class _TongtaiInventoryScreenState
       _catalog = ProductCatalogController(ref.read(productRepositoryProvider));
       _ownsCatalog = true;
     }
-    _catalog.hydrate();
+    _data = ScreenDataController<ProductCatalogController>(
+      _read,
+      // Injected catalogue/service ⇒ the rows are already in memory; hydrating
+      // them is a refresh, not a cold start.
+      initialValue: _ownsCatalog && widget.service == null ? null : _catalog,
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'inventory',
+    )..start();
+  }
+
+  Future<ProductCatalogController> _read() async {
+    await _catalog.hydrate();
+    return _catalog;
   }
 
   @override
   void dispose() {
+    _data.dispose();
     _searchController.dispose();
     if (_ownsCatalog) _catalog.dispose();
     super.dispose();
@@ -128,7 +148,7 @@ class _TongtaiInventoryScreenState
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _catalog,
+      listenable: Listenable.merge([_catalog, _data]),
       builder: (context, _) {
         final service = _catalog.service;
         final page = service.page(_query);
@@ -206,13 +226,17 @@ class _TongtaiInventoryScreenState
                 ),
                 _ResultsHeader(count: page.totalCount),
                 Expanded(
-                  child: page.isEmpty
-                      ? const _EmptyState()
-                      : _ProductList(
-                          products: page.items,
-                          onEdit: (product) =>
-                              _openForm(context, product: product),
-                        ),
+                  child: TongtaiScreenData<ProductCatalogController>(
+                    prefix: 'inventory',
+                    state: _data.state,
+                    onRetry: _data.retry,
+                    isEmpty: (_) => page.isEmpty,
+                    emptyBuilder: (_) => const _EmptyState(),
+                    builder: (context, _) => _ProductList(
+                      products: page.items,
+                      onEdit: (product) => _openForm(context, product: product),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -236,8 +260,16 @@ class _TongtaiInventoryScreenState
       ),
     );
     if (!context.mounted || result == null) return;
-    await _catalog.upsert(result);
+    final failure = await runTongtaiAction(
+      () => _catalog.upsert(result),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'inventory',
+    );
     if (!context.mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(context, failure);
+      return;
+    }
     setState(() => _query = _query.copyWith(pageIndex: 0));
   }
 

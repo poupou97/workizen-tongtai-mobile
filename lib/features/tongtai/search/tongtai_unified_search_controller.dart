@@ -16,6 +16,7 @@ import '../producer/supplier_favorites_store.dart';
 import 'tongtai_ranking.dart';
 import 'tongtai_search_history_store.dart';
 import 'tongtai_search_models.dart';
+import '../core/screen_state.dart';
 
 class TongtaiUnifiedSearchController extends ChangeNotifier {
   TongtaiUnifiedSearchController(
@@ -82,6 +83,11 @@ class TongtaiUnifiedSearchController extends ChangeNotifier {
 
   /// Whether an FTS query is currently in flight.
   bool get isSearching => _isSearching;
+
+  /// Set when the last search threw; null once a search starts or succeeds.
+  /// The screen renders it through the shared seam (ADR-TON-017).
+  TongtaiFailure? get failure => _failure;
+  TongtaiFailure? _failure;
 
   /// Whether at least one non-empty search has completed — lets the screen tell
   /// "nothing searched yet" apart from "searched, no matches".
@@ -210,10 +216,27 @@ class TongtaiUnifiedSearchController extends ChangeNotifier {
     }
 
     _isSearching = true;
+    _failure = null;
     _safeNotify();
 
-    final suppliers = await _searchService.searchSuppliers(q, limit: _limit);
-    final products = await _searchService.searchProducts(q, limit: _limit);
+    final TongtaiSearchResults ftsResults;
+    try {
+      final suppliers = await _searchService.searchSuppliers(q, limit: _limit);
+      final products = await _searchService.searchProducts(q, limit: _limit);
+      ftsResults = TongtaiSearchResults(
+        suppliers: suppliers.map(TongtaiSupplierResult.fromRow).toList(),
+        products: products.map(TongtaiProductResult.fromRow).toList(),
+      );
+    } catch (error, stackTrace) {
+      // WTM-148: an FTS failure used to leave `_isSearching` true forever —
+      // a search box that spins for a query that will never come back. Now it
+      // is a classified failure the screen can render and the user can retry.
+      if (seq != _searchSeq || _disposed) return;
+      _isSearching = false;
+      _failure = TongtaiFailure.from(error, stackTrace);
+      _safeNotify();
+      return;
+    }
 
     // A newer search (or a dispose) superseded this one — discard its results.
     if (seq != _searchSeq || _disposed) return;
@@ -221,10 +244,6 @@ class TongtaiUnifiedSearchController extends ChangeNotifier {
     // FTS hands rows back in bm25 order; re-rank them with the WTM-74 signals
     // (text quality, rating, recency, personalization) before they are exposed.
     // Filtering downstream only removes rows, so this ranked order is preserved.
-    final ftsResults = TongtaiSearchResults(
-      suppliers: suppliers.map(TongtaiSupplierResult.fromRow).toList(),
-      products: products.map(TongtaiProductResult.fromRow).toList(),
-    );
     _rawResults = _ranker.rank(
       ftsResults,
       query: q,

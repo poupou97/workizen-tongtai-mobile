@@ -116,6 +116,72 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-09 · Đường dữ liệu hỏng trông y hệt "không có dữ liệu"
+
+- **Root cause (lớp lỗi phòng ngừa):** `initState → _load() → setState`. Nếu
+  repository ném lỗi, future không ai bắt, `setState` không chạy, màn đứng
+  nguyên ở giá trị khởi tạo rỗng **vĩnh viễn**. Người dùng không có tín hiệu
+  nào. Nguy hiểm nhất ở màn tiền: `0 ₫` do đọc hỏng **đọc như một sự thật**.
+  Đây là P-03 nhìn từ phía runtime thay vì phía thiết kế.
+- **Regression:** test "màn rỗng hiện empty state" xanh với **cả hai** trường
+  hợp — không có dữ liệu và không đọc được dữ liệu.
+- **Test pattern:** repository **thật** (Drift trên file SQLite thật) bọc một
+  decorator chỉ điều khiển **thời điểm** hỏng; assert màn hiện `<prefix>-error`
+  **và assert sự VẮNG MẶT** của `<prefix>-empty` + của con số tổng. Rồi bấm
+  `<prefix>-error-retry` và assert dữ liệu thật hiện ra. Mẫu:
+  `p0/screen_data_seam_test.dart`.
+- **Prevention:** mọi đường IO đi qua `ScreenDataController` / `runTongtaiAction`
+  (ADR-TON-017); governance test cấm `catch` thủ công trong `ui/`.
+
+---
+
+## P-10 · Refresh hỏng xoá trắng màn đang chạy
+
+- **Root cause:** `AsyncValue.when` và `FutureBuilder` chỉ có ba nhánh —
+  không có *stale*. Một lần refresh hỏng biến màn đang có dữ liệu thành màn
+  lỗi (hoặc rỗng), dù dữ liệu cũ vẫn dùng được.
+- **Regression:** test chỉ kiểm tra "load lần đầu thành công" không bao giờ
+  chạm nhánh này.
+- **Test pattern:** load thành công → assert dữ liệu → **làm hỏng nguồn** →
+  kích hoạt refresh **đúng cách người dùng làm** (mở màn con rồi quay lại) →
+  assert dữ liệu **vẫn còn** + `<prefix>-stale` xuất hiện + `<prefix>-error`
+  **không** xuất hiện.
+- **Prevention:** `ScreenState.toFailed` giữ `value` theo thiết kế; governance
+  test cấm `FutureBuilder`/`.when` trong `ui/`.
+
+---
+
+## P-11 · Spinner vô hạn làm `pumpAndSettle` treo
+
+- **Root cause:** `CircularProgressIndicator` luôn lên lịch frame mới, nên
+  `pumpAndSettle` không bao giờ "settle" khi màn còn ở trạng thái loading.
+  Trước WTM-148 vài màn né bằng cách **không có** trạng thái loading — vô tình
+  biến "chưa tải xong" thành "rỗng".
+- **Regression:** 30 test treo cùng lúc ngay khi thêm spinner chuẩn.
+- **Test pattern:** trạng thái loading của seam là **text tĩnh** (không
+  animation). Hệ quả: `pumpAndSettle` cũng không *chờ* load nữa → dùng
+  `pumpUntilFound` (`test/support/pump_until.dart`), nó `runAsync` để I/O
+  SQLite thật có thời gian thực chạy và báo rõ seam đang ở trạng thái nào khi
+  hết lượt pump.
+- **Prevention:** governance test cấm indicator vô hạn tự chế trong `ui/`;
+  thanh có `value:` (tiến độ mục tiêu, biên lợi nhuận) là **dữ liệu**, được phép.
+
+---
+
+## P-12 · Provider khai báo hai lần ⇒ test override chỉ trúng một nửa app
+
+- **Root cause:** `tongtaiDatabaseProvider` được khai báo ở **hai** file. Production
+  mở hai kết nối vào cùng một file `.db`; test override "database" chỉ trúng
+  nửa app import đúng ký hiệu đó. Nửa còn lại lặng lẽ mở database thật.
+- **Regression:** mọi assertion vẫn xanh — vì nửa được override trả đúng dữ
+  liệu, còn nửa kia hỏng im lặng (P-09 che mất).
+- **Test pattern:** scan tĩnh đếm số khai báo `final <name>Provider` cho các
+  provider hạ tầng dùng chung; assert **đúng một**.
+- **Prevention:** một provider hạ tầng = một khai báo, các file khác `export`
+  lại. Khoá trong `p0/error_handling_governance_test.dart`.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:
@@ -128,6 +194,10 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 | list item | `<screen>-item-<recordId>` | `customer-item-${c.id}` |
 | primary action | `<screen>-action-<verb>` | `inventory-action-add` |
 | empty state | `<screen>-empty` | `search-empty` |
+| loading | `<screen>-loading` | `consumer-loading` |
+| lỗi tải dữ liệu | `<screen>-error` (+ `-retry`, `-code`, `-detail`) | `consumer-error-retry` |
+| dữ liệu cũ (refresh hỏng) | `<screen>-stale` | `consumer-stale` |
+| domain từ chối kết luận | `<screen>-insufficient` | `forecast-insufficient` |
 | navigation | `<screen>-open-<target>` | `home-open-reports` |
 | search input | `<screen>-search-field` | `customer-search-field` |
 
@@ -160,6 +230,9 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `predictive/predictive_edge_cases_test.dart` | biên tháng · timezone · restart trên file SQLite thật · reset sample · user data cùng tồn tại · ngưỡng sufficiency |
 | `predictive/predictive_privacy_test.dart` | prompt/twin/telemetry không mang PII |
 | `predictive/predictive_ai_test.dart` | hostile AI không đổi được số · zero-spend · không tool runtime |
+| `error_handling_governance_test.dart` | seam bắt buộc cho mọi IO trong `ui/` · cấm catch thủ công · cấm spinner tự chế · cấm FutureBuilder/`.when` · **đúng một** `tongtaiDatabaseProvider` · telemetry chỉ kind+code+screen |
+| `screen_data_seam_test.dart` | lỗi ≠ rỗng · retry hồi phục · refresh hỏng giữ dữ liệu + banner stale · 320px/1.3× · live region + tap target 44px · negative control telemetry |
+| `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
 
 ## Khi sửa bug mới — checklist
 
