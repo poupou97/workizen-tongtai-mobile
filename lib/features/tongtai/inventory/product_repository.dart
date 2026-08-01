@@ -89,6 +89,9 @@ class DriftProductRepository implements ProductRepository {
         sku: p.sku,
         name: p.name,
         listPrice: p.pricePerUnit,
+        // WTM-204: the column has existed since v1; the domain finally
+        // carries it. Null-aware — absent means "not entered", never 0.
+        costPerUnit: Value(p.costPrice),
         category: Value(p.category),
         description: Value(p.description),
         totalStock: Value(p.quantity.toDouble()),
@@ -108,6 +111,7 @@ class DriftProductRepository implements ProductRepository {
     category: row.category ?? '',
     quantity: row.totalStock.round(),
     pricePerUnit: row.listPrice,
+    costPrice: row.costPerUnit,
     reorderLevel: (row.stockAlertLevel ?? 0).round(),
     updatedAt: row.updatedAt,
     description: row.description ?? '',

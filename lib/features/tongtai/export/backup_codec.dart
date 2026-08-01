@@ -188,6 +188,8 @@ class BackupCodec {
     'description': p.description,
     'quantity': p.quantity,
     'pricePerUnit': p.pricePerUnit,
+    // WTM-204: nullable on purpose — absent means "not entered", never 0.
+    'costPrice': p.costPrice,
     'reorderLevel': p.reorderLevel,
     'updatedAt': _iso(p.updatedAt),
     'imagePaths': p.imagePaths,
@@ -240,6 +242,10 @@ class BackupCodec {
       category: category,
       quantity: quantity,
       pricePerUnit: pricePerUnit,
+      // WTM-204: every `.ttbk` written before cost prices existed lacks this
+      // key, and those files must restore — the product simply comes back with
+      // no cost entered, which is the truth.
+      costPrice: _double(json['costPrice']),
       reorderLevel: reorderLevel,
       updatedAt: updatedAt,
       description: description,

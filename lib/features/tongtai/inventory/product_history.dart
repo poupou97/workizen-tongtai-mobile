@@ -9,6 +9,9 @@ enum ProductField {
   category,
   description,
   unitPrice,
+
+  /// Optional (WTM-204) — empty means `costPrice = null`, never 0.
+  costPrice,
   quantity,
   reorderLevel,
   images;
@@ -30,6 +33,7 @@ enum ProductField {
     ProductField.category => 'Category',
     ProductField.description => 'Description',
     ProductField.unitPrice => 'Unit price',
+    ProductField.costPrice => 'Cost price',
     ProductField.quantity => 'Quantity',
     ProductField.reorderLevel => 'Reorder level',
     ProductField.images => 'Images',
@@ -41,6 +45,7 @@ enum ProductField {
     ProductField.category => 'Danh mục',
     ProductField.description => 'Mô tả',
     ProductField.unitPrice => 'Đơn giá',
+    ProductField.costPrice => 'Giá vốn',
     ProductField.quantity => 'Số lượng',
     ProductField.reorderLevel => 'Mức đặt lại',
     ProductField.images => 'Hình ảnh',

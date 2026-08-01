@@ -68,6 +68,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
   late final TextEditingController _sku;
   late final TextEditingController _category;
   late final TextEditingController _price;
+  late final TextEditingController _costPrice;
   late final TextEditingController _quantity;
   late final TextEditingController _reorder;
   late final TextEditingController _description;
@@ -94,6 +95,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     _sku = TextEditingController(text: data.sku);
     _category = TextEditingController(text: data.category);
     _price = TextEditingController(text: data.priceText);
+    _costPrice = TextEditingController(text: data.costPriceText);
     _quantity = TextEditingController(text: data.quantityText);
     _reorder = TextEditingController(text: data.reorderLevelText);
     _description = TextEditingController(text: data.description);
@@ -104,6 +106,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
       _sku,
       _category,
       _price,
+      _costPrice,
       _quantity,
       _reorder,
       _description,
@@ -141,6 +144,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     category: _category.text,
     description: _description.text,
     priceText: _price.text,
+    costPriceText: _costPrice.text,
     quantityText: _quantity.text,
     reorderLevelText: _reorder.text,
     imagePaths: _imagePaths,
@@ -255,6 +259,23 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
               key: const Key('product-price-field'),
               controller: _price,
               field: ProductField.unitPrice,
+              hint: '0',
+              suffixText: '₫',
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
+            ),
+            // WTM-204: optional on purpose. Empty means `costPrice = null` —
+            // "not entered", never 0, which would claim the stock is free and
+            // print a 100% margin nobody computed. This one field unblocks
+            // real opportunity ROI, the High Risk badge and per-product margin.
+            _field(
+              key: const Key('product-cost-price-field'),
+              controller: _costPrice,
+              field: ProductField.costPrice,
               hint: '0',
               suffixText: '₫',
               keyboardType: const TextInputType.numberWithOptions(
