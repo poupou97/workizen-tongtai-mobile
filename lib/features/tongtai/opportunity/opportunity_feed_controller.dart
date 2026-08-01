@@ -84,7 +84,12 @@ class OpportunityFeedController extends ChangeNotifier {
   List<Opportunity> feed(OpportunityQuery query) {
     final results = <Opportunity>[
       for (final o in _items)
-        if ((query.savedOnly ? o.isSaved : !o.isDismissed) &&
+        // WTM-182: a type the rule engine cannot produce is filtered out of
+        // the feed, not deleted from the store. A seller who restores a backup
+        // holding one keeps the record; they simply do not see it until the
+        // data source that justifies it exists.
+        if (o.type.isVisible &&
+            (query.savedOnly ? o.isSaved : !o.isDismissed) &&
             (query.type == null || o.type == query.type))
           o,
     ];
@@ -102,10 +107,14 @@ class OpportunityFeedController extends ChangeNotifier {
   }
 
   /// Distinct types present in the (non-dismissed) feed — the AC2 facet row.
+  ///
+  /// Types the rule engine cannot produce yet are filtered out here rather than
+  /// removed from the domain (WTM-182): a facet that always returns nothing is
+  /// a promise the product cannot keep.
   List<OpportunityType> get availableTypes {
     final set = <OpportunityType>{
       for (final o in _items)
-        if (!o.isDismissed) o.type,
+        if (!o.isDismissed && o.type.isVisible) o.type,
     };
     final list = set.toList()..sort((a, b) => a.index.compareTo(b.index));
     return list;

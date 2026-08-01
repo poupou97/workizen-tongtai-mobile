@@ -78,6 +78,24 @@ enum OpportunityType {
   crossBorder,
   trend;
 
+  /// Types the rule engine can actually produce from on-device data today
+  /// (WTM-182, Founder Decision 2026-08-01: *"Giữ Domain. Ẩn Capability chưa
+  /// có dữ liệu."*).
+  ///
+  /// `arbitrage` compares prices across two marketplaces and `crossBorder`
+  /// needs foreign pricing — both require data that does not exist on the
+  /// device (they arrive with File Bridge, WTM-181). The rule engine emits
+  /// only `trend` and `seasonal`, so showing the other two gives the seller a
+  /// filter that returns nothing, for ever.
+  ///
+  /// **The enum keeps all four on purpose.** Theme, action plans, `.ttbk`
+  /// codec and sample data all stay intact — only presentation filters. When
+  /// the data source arrives, turning them back on is editing this one list.
+  static const List<OpportunityType> visible = [seasonal, trend];
+
+  /// Whether this type is shown to the seller today. See [visible].
+  bool get isVisible => visible.contains(this);
+
   static OpportunityType fromStorage(String? value) {
     return OpportunityType.values.firstWhere(
       (s) => s.name == value,
