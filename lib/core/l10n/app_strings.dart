@@ -376,6 +376,21 @@ abstract class AppStrings {
   String get moreReplayTutorial;
   String get moreHelp;
   String get moreSendFeedback;
+
+  // Feedback (WTM-175) — kênh phản hồi local-first: không backend, không tài
+  // khoản; báo cáo đi qua share sheet của người dùng.
+  String get feedbackIntro;
+  String get feedbackHint;
+  String get feedbackSend;
+  String get feedbackEmpty;
+  String get feedbackWhatIsSent;
+  String get feedbackNoBusinessData;
+  String get feedbackMessageHeading;
+  String get feedbackDiagnosticsHeading;
+  String get feedbackAppVersionLabel;
+  String get feedbackPlatformLabel;
+  String get feedbackLocaleLabel;
+  String get feedbackSubject;
   String get moreLegalSection;
   String get moreTerms;
   String get morePrivacy;
@@ -1250,6 +1265,34 @@ class AppStringsVi extends AppStrings {
   String get moreHelp => 'Trợ giúp & hỗ trợ';
   @override
   String get moreSendFeedback => 'Gửi phản hồi';
+  @override
+  String get feedbackIntro =>
+      'Có gì sai, thiếu, hay khó dùng? Viết vào đây. Bạn chọn ứng dụng để gửi '
+      '— Zalo, email, hay bất cứ thứ gì bạn đang dùng.';
+  @override
+  String get feedbackHint => 'Viết phản hồi của bạn...';
+  @override
+  String get feedbackSend => 'Gửi phản hồi';
+  @override
+  String get feedbackEmpty => 'Hãy viết vài dòng trước khi gửi.';
+  @override
+  String get feedbackWhatIsSent => 'Những gì được gửi kèm';
+  @override
+  String get feedbackNoBusinessData =>
+      'Không có dữ liệu kinh doanh nào được gửi. Không đơn hàng, không khách '
+      'hàng, không số tiền, không khoá AI.';
+  @override
+  String get feedbackMessageHeading => 'PHẢN HỒI';
+  @override
+  String get feedbackDiagnosticsHeading => 'THÔNG TIN KỸ THUẬT';
+  @override
+  String get feedbackAppVersionLabel => 'Phiên bản';
+  @override
+  String get feedbackPlatformLabel => 'Thiết bị';
+  @override
+  String get feedbackLocaleLabel => 'Ngôn ngữ';
+  @override
+  String get feedbackSubject => 'Phản hồi Tổng Tài';
   @override
   String get moreLegalSection => 'Pháp lý';
   @override
@@ -2384,6 +2427,34 @@ class AppStringsEn extends AppStrings {
   String get moreHelp => 'Help & Support';
   @override
   String get moreSendFeedback => 'Send Feedback';
+  @override
+  String get feedbackIntro =>
+      'Something wrong, missing, or hard to use? Write it here. You pick the '
+      'app to send it with — Zalo, email, whatever you already use.';
+  @override
+  String get feedbackHint => 'Write your feedback...';
+  @override
+  String get feedbackSend => 'Send feedback';
+  @override
+  String get feedbackEmpty => 'Write a few lines before sending.';
+  @override
+  String get feedbackWhatIsSent => 'What gets attached';
+  @override
+  String get feedbackNoBusinessData =>
+      'No business data is sent. No orders, no customers, no amounts, no AI '
+      'keys.';
+  @override
+  String get feedbackMessageHeading => 'FEEDBACK';
+  @override
+  String get feedbackDiagnosticsHeading => 'TECHNICAL INFO';
+  @override
+  String get feedbackAppVersionLabel => 'Version';
+  @override
+  String get feedbackPlatformLabel => 'Device';
+  @override
+  String get feedbackLocaleLabel => 'Language';
+  @override
+  String get feedbackSubject => 'Tổng Tài feedback';
   @override
   String get moreLegalSection => 'Legal';
   @override
