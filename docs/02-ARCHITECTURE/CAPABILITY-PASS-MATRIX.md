@@ -6,7 +6,7 @@
 > Backlog **không** ưu tiên theo Story ID, ngày tạo, sprint hay Jira Priority.
 > Mỗi vòng lặp tính lại điểm theo Capability Value.
 
-**Cập nhật lần cuối:** 2026-08-01 · sau WTM-197/198/203/204
+**Cập nhật lần cuối:** 2026-08-01 · sau WTM-205 + audit toàn bộ ô `?`
 
 ---
 
@@ -61,11 +61,11 @@ không làm CI đỏ.
 |---|---|---|---|---|---|---|---|---|
 | **Business Journey** | ✅ | ✅ | ✅ | ⚠️ contained | ✅ | ✅ | ✅ | ✅ |
 | **Opportunity** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Finance** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `?` | ✅ |
-| **Consumer** | ✅ | ✅ | ✅ | ⚠️ contained | ✅ | `?` | `?` | ✅ |
-| **Reports** | ✅ | ✅ | ✅ | ✅ | `?` | `?` | ✅ | ✅ |
-| **Inventory** | ✅ | ✅ | ⚠️ | ⚠️ contained | ✅ | `?` | `?` | ✅ |
-| **Producer** | ✅ | ❌ | `?` | ✅ | ✅ | `?` | `?` | ✅ |
+| **Finance** | ✅ | ✅ | ✅ | ✅ | ❌ WTM-206 | ✅ | ✅ | ✅ |
+| **Consumer** | ✅ | ✅ | ✅ | ⚠️ contained | ✅ | ✅ | ✅ | ✅ |
+| **Reports** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Inventory** | ✅ | ✅ | ⚠️ | ⚠️ contained | ✅ | ✅ | ✅ | ✅ |
+| **Producer** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 | **AI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Settings / More** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 
@@ -87,15 +87,16 @@ Phản ứng sống sót qua lần đóng app (WTM-190) · nối được vào h
 `insufficient` chứ không phải 0 (ADR-TON-022) · tab hạng nhất (WTM-192) ·
 "khách im lặng" dùng luật của Consumer (WTM-200).
 
-### Finance — ❌ **Data FAIL**
+### Finance — ❌ IA (WTM-206)
 
-- ✅ Doanh thu bán hàng đã vào Finance và **khớp Home/Reports** (WTM-196).
-- ❌ **WTM-197 (P1 SSoT-ish, +80)** — `category` chi phí là **chuỗi tiếng Việt
-  tự do**, ghi nguyên văn vào `.ttbk`. Đúng khuyết tật WTM-164 đã sửa cho enum
-  v1 nhưng **sống sót vào v2** vì category không phải enum. Gõ khác hoa thường
-  ⇒ hai nhóm; đổi ngôn ngữ ⇒ nhóm cũ kẹt lại.
-- `?` **AI** — chưa audit khả năng AI của Finance (Concept đòi dự báo dòng
-  tiền, cảnh báo tiền mặt < 15 ngày chi phí, ước tính thuế).
+- ✅ Data: doanh thu khớp Home/Reports (WTM-196) · category là mã canonical
+  (WTM-197) · cảnh báo dòng tiền dùng chung số học với dashboard (WTM-205).
+- ✅ AI: `negativeCashflow` Rule Twin nay nhìn thấy doanh thu — audit ô `?` này
+  chính là thứ tìm ra WTM-205.
+- ❌ **IA (WTM-206, +60)**: Finance chỉ tới được qua More — ba chạm vào kho
+  công cụ — trong khi hành trình vừa bảo *"ghi 5 khoản chi đầu tiên"* (WTM-198)
+  và Home hiển thị doanh thu ngay hàng KPI. Bảo người ta làm một việc rồi giấu
+  cánh cửa.
 
 ### Consumer — ✅ Data/SSoT (WTM-201 đã sửa)
 
@@ -122,12 +123,15 @@ nay. Không phải FAIL; ghi lại để ai bật sàn đó biết đây là ch�
 chưa audit giá vốn (thiếu `costPrice` là lý do ROI không tính được — xem
 ADR-TON-022).
 
-### Producer — ❌ **Data FAIL đã biết**
+### Producer — ❌ **Data FAIL đã biết, có chủ đích**
 
 Danh bạ nhà cung cấp là `SupplierSearchService.sample()` — **dữ liệu mẫu**.
 Founder đã quyết: **không rút capability khỏi Concept**, đánh dấu **Future
-Capability**. Vì vậy đây là FAIL *có chủ đích và đã được chấp nhận*, không phải
-việc cần sửa ngay — nhưng nó là lý do `supplierQuality` không chấm điểm được.
+Capability**. FAIL *được chấp nhận*, không phải việc cần sửa ngay — nhưng là lý
+do `supplierQuality` không chấm điểm được. Các ô còn lại đã audit: SSoT ✅
+(favorites store thật + cơ hội từ một `generatedOpportunitiesProvider`), UI ✅
+(suite a11y/stable-ID phủ `producer`), AI **—** (chấm điểm nhà cung cấp là
+Future Capability — không áp dụng ở Phase 2 chứ không phải chưa kiểm).
 
 ### AI — ✅
 
