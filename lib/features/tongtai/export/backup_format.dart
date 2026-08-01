@@ -104,6 +104,14 @@ class BackupDatasets {
   /// AI Business Profile (WTM-177). **Optional on purpose** — see [optional].
   static const String businessProfile = 'businessProfile';
 
+  /// What the seller decided about each opportunity (WTM-190).
+  /// **Optional on purpose** — see [optional].
+  ///
+  /// The opportunities themselves are *not* backed up: they are derived data,
+  /// regenerated from the restored business. Only the judgement is a fact
+  /// about the seller, and only facts belong in a snapshot.
+  static const String opportunityReactions = 'opportunityReactions';
+
   /// Every dataset a v2 backup must carry. A file missing any of these is
   /// **not** a complete snapshot and is rejected rather than partially applied.
   ///
@@ -127,7 +135,11 @@ class BackupDatasets {
   ///
   /// This is ADR-TON-018 amendment 1 applied to datasets rather than to
   /// manifest keys: *"vắng mặt ⇒ mặc định (file v2 cũ vẫn restore được)"*.
-  static const List<String> optional = [businessProfile, journeys];
+  static const List<String> optional = [
+    businessProfile,
+    journeys,
+    opportunityReactions,
+  ];
 }
 
 /// What a package is **for**.

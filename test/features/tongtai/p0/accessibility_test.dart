@@ -1,3 +1,4 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,6 +53,7 @@ import 'package:tongtai/features/tongtai/producer/supplier_search_service.dart'
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_create_order_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_history_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart';
+import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_onboarding_conversation_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart';
@@ -80,6 +82,21 @@ void main() {
   late InMemoryOrderRepository orderRepo;
   late InMemoryBusinessGoalRepository goalRepo;
   late InMemoryFinanceRepository financeRepo;
+  AppDatabase? sharedDb;
+
+  /// One in-memory database per test.
+  ///
+  /// The opportunity feed reads the seller's stored reactions now (WTM-190), so
+  /// it needs a database. Without this override the harness reaches for the
+  /// real one and dies on `path_provider` — which is the harness failing, not
+  /// the screen.
+  AppDatabase memoryDb() =>
+      sharedDb ??= AppDatabase.forExecutor(NativeDatabase.memory());
+
+  tearDown(() async {
+    await sharedDb?.close();
+    sharedDb = null;
+  });
 
   setUp(() {
     customerRepo = InMemoryCustomerRepository();
@@ -111,6 +128,7 @@ void main() {
       tongtaiSearchFavoritesStoreProvider.overrideWithValue(
         InMemorySupplierFavoritesStore(),
       ),
+      tongtaiDatabaseProvider.overrideWithValue(memoryDb()),
     ],
     child: MaterialApp(
       locale: Locale(locale),

@@ -10,6 +10,7 @@ import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_reaction_repository.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
@@ -153,8 +154,68 @@ void main() {
       tester.view.physicalSize = const Size(500, 3400);
     }
 
-    Widget host(OpportunityFeedController controller) =>
-        MaterialApp(home: TongtaiOpportunityFeedScreen(controller: controller));
+    /// One database per test, created lazily.
+    ///
+    /// Shared rather than rebuilt on every `pumpWidget`, because constructing
+    /// `AppDatabase` twice over one executor is the race condition drift warns
+    /// about — and a warning nobody reads is how real corruption ships.
+    AppDatabase? sharedDb;
+    AppDatabase memoryDb() =>
+        sharedDb ??= AppDatabase.forExecutor(NativeDatabase.memory());
+    tearDown(() async {
+      await sharedDb?.close();
+      sharedDb = null;
+    });
+
+    /// The screen persists every reaction now (WTM-190), so it needs a real
+    /// provider scope even when the feed itself is injected — a harness that
+    /// cannot supply one is not hosting the screen users get.
+    Widget scoped(Widget child) => ProviderScope(
+      overrides: [tongtaiDatabaseProvider.overrideWithValue(memoryDb())],
+      child: child,
+    );
+
+    Widget host(OpportunityFeedController controller) => scoped(
+      MaterialApp(home: TongtaiOpportunityFeedScreen(controller: controller)),
+    );
+
+    testWidgets('WTM-190: tapping save writes it to the database', (
+      tester,
+    ) async {
+      // The defect this closes: the button worked on screen and changed
+      // nothing on disk, so every save was gone by the next launch.
+      useTallViewport(tester);
+      final controller = OpportunityFeedController([make('a')]);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(host(controller));
+
+      await tester.tap(find.byKey(const Key('opportunity-save-a')));
+      await tester.pumpAndSettle();
+
+      expect(await OpportunityReactionRepository(memoryDb()).loadAll(), {
+        'a': OpportunityReaction.saved,
+      });
+    });
+
+    testWidgets('WTM-190: un-saving removes it from the database', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      final controller = OpportunityFeedController([make('a')]);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(host(controller));
+
+      await tester.tap(find.byKey(const Key('opportunity-save-a')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('opportunity-save-a')));
+      await tester.pumpAndSettle();
+
+      expect(
+        await OpportunityReactionRepository(memoryDb()).loadAll(),
+        isEmpty,
+        reason: 'the stored decision must follow the toggle, not lag it',
+      );
+    });
 
     testWidgets('AC1: cards show title, description and expected impact', (
       tester,
@@ -185,10 +246,12 @@ void main() {
         ),
       ]);
       await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiOpportunityFeedScreen(
-            controller: controller,
-            clock: () => DateTime(2026, 7, 25),
+        scoped(
+          MaterialApp(
+            home: TongtaiOpportunityFeedScreen(
+              controller: controller,
+              clock: () => DateTime(2026, 7, 25),
+            ),
           ),
         ),
       );
@@ -217,10 +280,12 @@ void main() {
         make('old', roi: 2.5, at: DateTime(2026, 7, 1)), // 24 days old
       ]);
       await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiOpportunityFeedScreen(
-            controller: controller,
-            clock: () => DateTime(2026, 7, 25),
+        scoped(
+          MaterialApp(
+            home: TongtaiOpportunityFeedScreen(
+              controller: controller,
+              clock: () => DateTime(2026, 7, 25),
+            ),
           ),
         ),
       );
@@ -432,6 +497,7 @@ void main() {
               businessGoalRepositoryProvider.overrideWithValue(
                 InMemoryBusinessGoalRepository(),
               ),
+              tongtaiDatabaseProvider.overrideWithValue(memoryDb()),
             ],
             child: const MaterialApp(home: TongtaiOpportunityFeedScreen()),
           ),
@@ -439,6 +505,13 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.textContaining('Nhập lại Quạt mini'), findsOneWidget);
+
+        // Tear the first tree down before building the second. Swapping one
+        // ProviderScope for another in place makes Riverpod invalidate the
+        // database-backed providers *during* the new build — an artifact of
+        // this harness, not of the app, which never replaces its root scope.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
 
         // A brand-new business (empty repositories) → empty state.
         await tester.pumpWidget(
@@ -456,6 +529,7 @@ void main() {
               businessGoalRepositoryProvider.overrideWithValue(
                 InMemoryBusinessGoalRepository(),
               ),
+              tongtaiDatabaseProvider.overrideWithValue(memoryDb()),
             ],
             child: const MaterialApp(
               // A distinct key forces a fresh State (initState re-runs).

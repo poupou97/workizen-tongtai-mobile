@@ -41,7 +41,11 @@ void main() {
     //               business_journey_nodes_table, business_journey_plans_table
     //               (ADR-TON-021). Note journeys_table is NOT one of these; it
     //               stores BusinessGoal and has since WTM-124.
-    expect(db.schemaVersion, 9);
+    // v10 (WTM-190): added opportunity_reactions_table and DROPPED the unused
+    //                opportunities_table — nothing had ever written a row to
+    //                it, and its presence made the app look like it stored
+    //                opportunities, which are derived data.
+    expect(db.schemaVersion, 10);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });
@@ -55,7 +59,9 @@ void main() {
     expect(await db.select(db.customersTable).get(), isEmpty);
     expect(await db.select(db.ordersTable).get(), isEmpty);
     expect(await db.select(db.channelsTable).get(), isEmpty);
-    expect(await db.select(db.opportunitiesTable).get(), isEmpty);
+    // `opportunitiesTable` was dropped in schema v10 (WTM-190) — it never held
+    // a row; opportunities are derived data. See opportunity_reactions.dart.
+    expect(await db.select(db.opportunityReactionsTable).get(), isEmpty);
     expect(await db.select(db.journeysTable).get(), isEmpty);
     expect(await db.select(db.journeyStepsTable).get(), isEmpty);
     expect(await db.select(db.transactionsTable).get(), isEmpty);

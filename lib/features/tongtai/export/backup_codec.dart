@@ -1,5 +1,6 @@
 library;
 
+import '../opportunity/opportunity.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_history.dart';
 import '../core/tongtai_enums.dart';
@@ -541,5 +542,32 @@ class BackupCodec {
       return null;
     }
     return SupplierFavorite(supplierId: supplierId, addedAt: addedAt);
+  }
+
+  // ── opportunity reactions (WTM-190) ───────────────────────────────────────
+
+  /// Encodes one decision. The reaction is written as its **canonical code**
+  /// (`OpportunityReaction.name`), never a display label — ADR-TON-018.
+  static Map<String, Object?> encodeOpportunityReaction(
+    String opportunityId,
+    OpportunityReaction reaction,
+  ) => {'opportunityId': opportunityId, 'reaction': reaction.name};
+
+  /// Decodes one decision, or `null` if the row is malformed or carries a
+  /// reaction this build does not know.
+  ///
+  /// Dropping beats defaulting here: a wrong default would either resurrect an
+  /// opportunity the seller dismissed or hide one they saved, and the seller
+  /// has no way to tell it happened.
+  static MapEntry<String, OpportunityReaction>? decodeOpportunityReaction(
+    Map<String, Object?> json,
+  ) {
+    final id = json['opportunityId'];
+    final code = json['reaction'];
+    if (id is! String || id.isEmpty || code is! String) return null;
+    for (final value in OpportunityReaction.values) {
+      if (value.name == code) return MapEntry(id, value);
+    }
+    return null;
   }
 }

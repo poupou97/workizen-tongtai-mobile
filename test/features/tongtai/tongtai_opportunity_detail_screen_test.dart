@@ -1,7 +1,11 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
+    show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
@@ -93,7 +97,17 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(home: TongtaiOpportunityFeedScreen(controller: controller)),
+      // WTM-190: the feed writes reactions, so it needs a provider scope.
+      ProviderScope(
+        overrides: [
+          tongtaiDatabaseProvider.overrideWithValue(
+            AppDatabase.forExecutor(NativeDatabase.memory()),
+          ),
+        ],
+        child: MaterialApp(
+          home: TongtaiOpportunityFeedScreen(controller: controller),
+        ),
+      ),
     );
 
     // The highest AI-scored sample opportunity sits at the top of the feed

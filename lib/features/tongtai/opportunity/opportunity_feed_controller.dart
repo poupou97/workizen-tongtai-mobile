@@ -59,7 +59,7 @@ class OpportunityQuery {
 
 /// Mutable, in-memory opportunity feed (WTM-91) — same ChangeNotifier
 /// pattern as the other module controllers. Local-first; a Drift-backed
-/// source over `OpportunitiesTable` can replace the in-memory list without
+/// source over the rule engine can replace the in-memory list without
 /// touching callers. Reactions (save/interested/dismiss) live here so every
 /// view reflects them immediately.
 class OpportunityFeedController extends ChangeNotifier {
@@ -118,6 +118,16 @@ class OpportunityFeedController extends ChangeNotifier {
     };
     final list = set.toList()..sort((a, b) => a.index.compareTo(b.index));
     return list;
+  }
+
+  /// The seller's current reaction to [id], or [OpportunityReaction.none] if
+  /// they have not reacted (or the opportunity is no longer in the feed).
+  ///
+  /// Callers persist what this returns rather than re-deriving it, so the
+  /// stored reaction cannot disagree with the one on screen (WTM-190).
+  OpportunityReaction reactionOf(String id) {
+    final index = _items.indexWhere((o) => o.id == id);
+    return index < 0 ? OpportunityReaction.none : _items[index].reaction;
   }
 
   void _react(String id, OpportunityReaction reaction) {
