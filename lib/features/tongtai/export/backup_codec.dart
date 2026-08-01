@@ -1,5 +1,6 @@
 library;
 
+import '../finance/finance_category.dart';
 import '../opportunity/opportunity.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_history.dart';
@@ -421,7 +422,7 @@ class BackupCodec {
   static Map<String, Object?> encodeTransaction(FinanceTransaction t) => {
     'id': t.id,
     'type': t.type.name,
-    'category': t.category,
+    'category': t.category.code,
     'amount': t.amount,
     'date': _iso(t.date),
     'description': t.description,
@@ -449,7 +450,11 @@ class BackupCodec {
     return FinanceTransaction(
       id: id,
       type: type,
-      category: category,
+      // WTM-197: a `.ttbk` written before the codes existed carries Vietnamese
+      // labels. Mapped, never dropped — losing a category silently moves money
+      // between groups in the seller's own expense breakdown.
+      category: FinanceCategory.fromStorage(category),
+      categoryNote: FinanceCategory.noteFor(category),
       amount: amount,
       date: date,
       description: description,

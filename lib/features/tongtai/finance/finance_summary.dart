@@ -243,10 +243,13 @@ class FinanceService {
 
   /// Per-category YTD expense totals, highest first (income excluded).
   List<CategoryAmount> _expenseByCategory(List<FinanceTransaction> ytd) {
+    // WTM-197: grouped by **code**, not by the display string. Grouping by
+    // string made 'Nhập hàng' and 'nhập hàng' two separate rows in the seller's
+    // expense breakdown.
     final byCategory = <String, double>{};
     for (final t in ytd.where((t) => t.isExpense)) {
       byCategory.update(
-        t.category,
+        t.category.code,
         (running) => running + t.amount,
         ifAbsent: () => t.amount,
       );

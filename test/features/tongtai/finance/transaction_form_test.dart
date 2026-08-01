@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/transaction_form.dart';
 
@@ -52,7 +53,7 @@ void main() {
       expect(txn.id, 't1');
       expect(txn.type, TransactionType.income);
       expect(txn.amount, 2000000);
-      expect(txn.category, 'Bán hàng');
+      expect(txn.category, FinanceCategory.sales);
       expect(txn.description, 'Bán sỉ');
       expect(txn.date, DateTime(2026, 7, 24));
     });

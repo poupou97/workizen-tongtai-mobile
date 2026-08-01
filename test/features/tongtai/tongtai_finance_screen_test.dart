@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_controller.dart';
 import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
@@ -66,12 +67,16 @@ void main() {
   testWidgets('lists the expense categories, largest first', (tester) async {
     await pump(tester);
 
+    // WTM-197: this used to look for the Vietnamese string 'Nhập hàng' on a
+    // screen running in **English** — and it passed, because the raw stored
+    // label was printed whatever the locale. That was the defect. The category
+    // is a code now, so the screen shows a translated label.
     await tester.scrollUntilVisible(
-      find.text('Nhập hàng'),
+      find.text('Product cost'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Nhập hàng'), findsOneWidget);
+    expect(find.text('Product cost'), findsOneWidget);
     expect(find.textContaining('12.900.000 ₫'), findsOneWidget);
   });
 
@@ -133,7 +138,7 @@ void main() {
       FinanceTransaction(
         id: 'x1',
         type: TransactionType.income,
-        category: 'Bán hàng',
+        category: FinanceCategory.sales,
         amount: 3000000,
         date: DateTime(2026, 7, 10),
       ),

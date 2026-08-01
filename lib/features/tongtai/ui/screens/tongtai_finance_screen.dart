@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../finance/finance_category.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
@@ -502,7 +503,9 @@ class _ExpenseBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              category.category,
+              // WTM-197: the breakdown groups by **code**; the seller must
+              // still read a label. Codes are for storage, never for eyes.
+              financeCategoryCodeLabel(category.category, context.l10n),
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
                 fontWeight: FontWeight.w600,
@@ -586,7 +589,7 @@ class _RecentRow extends StatelessWidget {
               children: [
                 Text(
                   transaction.description.isEmpty
-                      ? transaction.category
+                      ? financeCategoryLabel(transaction, context.l10n)
                       : transaction.description,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

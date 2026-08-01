@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
@@ -484,17 +485,17 @@ void main() {
         };
         expect(
           expenseCategories,
-          containsAll(<String>[
-            'Nhập hàng',
-            'Thuê mặt bằng',
-            'Quảng cáo',
-            'Lương nhân viên',
+          containsAll(<FinanceCategory>[
+            FinanceCategory.productCost,
+            FinanceCategory.rent,
+            FinanceCategory.marketing,
+            FinanceCategory.staff,
           ]),
         );
         for (final month in data.monthKeys) {
           final rent = data.transactions.where(
             (t) =>
-                t.category == 'Thuê mặt bằng' &&
+                t.category == FinanceCategory.rent &&
                 t.date.year == month.year &&
                 t.date.month == month.month,
           );
@@ -502,7 +503,7 @@ void main() {
         }
         // Rent is a FIXED cost — the same amount all window long.
         final rents = data.transactions
-            .where((t) => t.category == 'Thuê mặt bằng')
+            .where((t) => t.category == FinanceCategory.rent)
             .map((t) => t.amount)
             .toSet();
         expect(rents, hasLength(1));

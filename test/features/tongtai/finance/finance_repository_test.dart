@@ -1,5 +1,6 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/core/local_workspace.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
@@ -20,7 +21,7 @@ void main() {
   }) => FinanceTransaction(
     id: id,
     type: type,
-    category: 'Bán hàng',
+    category: FinanceCategory.sales,
     amount: amount,
     date: DateTime(2026, 7, 10),
     description: 'ghi chú',
@@ -58,7 +59,7 @@ void main() {
       final t1 = all.firstWhere((t) => t.id == 't1');
       expect(t1.amount, 3000000);
       expect(t1.type, TransactionType.income);
-      expect(t1.category, 'Bán hàng');
+      expect(t1.category, FinanceCategory.sales);
       expect(t1.description, 'ghi chú');
     });
 

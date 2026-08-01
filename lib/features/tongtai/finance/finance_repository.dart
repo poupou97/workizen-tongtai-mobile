@@ -1,3 +1,4 @@
+import 'finance_category.dart';
 import 'package:drift/drift.dart';
 
 import '../../../database/database.dart';
@@ -88,7 +89,7 @@ class DriftFinanceRepository implements FinanceRepository {
     type: t.type.name,
     amount: t.amount,
     date: t.date,
-    category: Value(t.category),
+    category: Value(t.category.code),
     description: Value(t.description),
     paymentMethod: Value(t.paymentMethod),
   );
@@ -97,7 +98,11 @@ class DriftFinanceRepository implements FinanceRepository {
       FinanceTransaction(
         id: row.id,
         type: TransactionType.fromStorage(row.type),
-        category: row.category ?? '',
+        // WTM-197: legacy Vietnamese labels are mapped here rather than
+        // rewritten by a migration — reading is where the ambiguity actually
+        // has to be resolved, and the seller's ledger is not ours to rewrite.
+        category: FinanceCategory.fromStorage(row.category),
+        categoryNote: FinanceCategory.noteFor(row.category),
         amount: row.amount,
         date: row.date,
         description: row.description ?? '',

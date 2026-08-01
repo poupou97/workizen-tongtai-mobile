@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
@@ -45,7 +46,7 @@ void main() {
     required double amount,
     required TransactionType type,
     required DateTime date,
-    String category = 'Nhập hàng',
+    FinanceCategory category = FinanceCategory.productCost,
   }) => FinanceTransaction(
     id: id,
     type: type,
@@ -116,7 +117,7 @@ void main() {
           amount: 500000,
           type: TransactionType.income,
           date: DateTime(2026, 8, 1),
-          category: 'Thu khác',
+          category: FinanceCategory.other,
         ),
       ],
       orders: [order('o1', amount: 3000000, date: DateTime(2026, 8, 1))],

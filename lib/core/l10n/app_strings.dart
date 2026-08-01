@@ -47,6 +47,16 @@ abstract class AppStrings {
   String get kpiAov;
   String get kpiIncome;
 
+  /// WTM-197 — nhãn hiển thị cho `FinanceCategory`; mã lưu là canonical code.
+  String get finCatProductCost;
+  String get finCatPlatformFee;
+  String get finCatShipping;
+  String get finCatStaff;
+  String get finCatMarketing;
+  String get finCatRent;
+  String get finCatSales;
+  String get finCatOther;
+
   /// WTM-196 — how much of income the app worked out from orders.
   String financeFromSales(String amount);
   String get kpiExpense;
@@ -760,6 +770,22 @@ class AppStringsVi extends AppStrings {
   String get kpiAov => 'Giá trị đơn TB';
   @override
   String get kpiIncome => 'Doanh thu';
+  @override
+  String get finCatProductCost => 'Nhập hàng';
+  @override
+  String get finCatPlatformFee => 'Phí sàn';
+  @override
+  String get finCatShipping => 'Vận chuyển';
+  @override
+  String get finCatStaff => 'Lương nhân viên';
+  @override
+  String get finCatMarketing => 'Quảng cáo';
+  @override
+  String get finCatRent => 'Thuê mặt bằng';
+  @override
+  String get finCatSales => 'Bán hàng';
+  @override
+  String get finCatOther => 'Khác';
   @override
   String financeFromSales(String amount) => 'trong đó $amount từ bán hàng';
   @override
@@ -2113,6 +2139,22 @@ class AppStringsEn extends AppStrings {
   String get kpiAov => 'Avg. order value';
   @override
   String get kpiIncome => 'Income';
+  @override
+  String get finCatProductCost => 'Product cost';
+  @override
+  String get finCatPlatformFee => 'Platform fee';
+  @override
+  String get finCatShipping => 'Shipping';
+  @override
+  String get finCatStaff => 'Staff';
+  @override
+  String get finCatMarketing => 'Marketing';
+  @override
+  String get finCatRent => 'Rent';
+  @override
+  String get finCatSales => 'Sales';
+  @override
+  String get finCatOther => 'Other';
   @override
   String financeFromSales(String amount) => 'incl. $amount from sales';
   @override

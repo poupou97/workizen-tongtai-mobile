@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_history.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
@@ -190,7 +191,7 @@ void main() {
     final txn = FinanceTransaction(
       id: 't1',
       type: TransactionType.income,
-      category: 'Bán hàng',
+      category: FinanceCategory.sales,
       amount: 2500000.75,
       date: DateTime(2026, 7, 26),
       description: 'Đơn lẻ',

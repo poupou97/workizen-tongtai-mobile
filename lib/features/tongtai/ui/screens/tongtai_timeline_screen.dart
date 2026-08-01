@@ -72,6 +72,9 @@ class _TongtaiTimelineScreenState extends ConsumerState<TongtaiTimelineScreen> {
     // Injected service (tests/preview) short-circuits the repositories.
     final injected = widget.service;
     if (injected != null) return injected;
+    // Read the strings **before** the awaits: using `context` after an async
+    // gap is how a disposed widget's context gets touched.
+    final l10n = context.l10n;
     // One source (WTM-144): finance/orders/goals from the live repositories +
     // the Rule Engine's generated opportunities — mirrors TimelineContext.
     final finance = await ref.read(financeRepositoryProvider).loadAll();
@@ -79,7 +82,7 @@ class _TongtaiTimelineScreenState extends ConsumerState<TongtaiTimelineScreen> {
     final goals = await ref.read(businessGoalRepositoryProvider).loadAll();
     final opportunities = await ref.read(generatedOpportunitiesProvider.future);
     return TimelineService([
-      FinanceEventSource(finance),
+      FinanceEventSource(finance, l10n: l10n),
       OrderEventSource(orders),
       JourneyEventSource(goals),
       OpportunityEventSource(opportunities),

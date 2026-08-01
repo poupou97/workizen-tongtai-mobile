@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_summary.dart';
 import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
@@ -12,7 +13,7 @@ void main() {
   FinanceTransaction txn(
     String id,
     TransactionType type,
-    String category,
+    FinanceCategory category,
     double amount,
     DateTime date,
   ) => FinanceTransaction(
@@ -48,12 +49,14 @@ void main() {
 
     test('expense-by-category is ordered high→low and excludes income', () {
       final cats = summary.expenseByCategory;
+      // Codes, not labels (WTM-197): grouping by the display string made two
+      // spellings of one idea into two rows.
       expect(cats.map((c) => c.category), [
-        'Nhập hàng',
-        'Thuê mặt bằng',
-        'Quảng cáo',
-        'Vận chuyển',
-        'Phí sàn',
+        FinanceCategory.productCost.code,
+        FinanceCategory.rent.code,
+        FinanceCategory.marketing.code,
+        FinanceCategory.shipping.code,
+        FinanceCategory.platformFee.code,
       ]);
       expect(cats.map((c) => c.amount), [
         12900000,
@@ -63,7 +66,10 @@ void main() {
         300000,
       ]);
       // No income category ("Bán hàng") leaks into the expense breakdown.
-      expect(cats.any((c) => c.category == 'Bán hàng'), isFalse);
+      expect(
+        cats.any((c) => c.category == FinanceCategory.sales.code),
+        isFalse,
+      );
       // Category totals reconcile with total YTD expense.
       expect(cats.fold<double>(0, (s, c) => s + c.amount), summary.expenseYtd);
     });
@@ -120,21 +126,21 @@ void main() {
         txn(
           'a',
           TransactionType.income,
-          'Bán hàng',
+          FinanceCategory.sales,
           1000000,
           DateTime(2025, 12, 10),
         ),
         txn(
           'b',
           TransactionType.income,
-          'Bán hàng',
+          FinanceCategory.sales,
           2000000,
           DateTime(2026, 1, 9),
         ),
         txn(
           'c',
           TransactionType.expense,
-          'Nhập hàng',
+          FinanceCategory.productCost,
           800000,
           DateTime(2026, 1, 12),
         ),
