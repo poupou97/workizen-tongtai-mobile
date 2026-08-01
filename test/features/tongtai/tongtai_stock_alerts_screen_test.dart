@@ -176,16 +176,21 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Banner text summarises both states.
-    expect(find.textContaining('1 out of stock'), findsOneWidget);
+    // WTM-215: the WTM-70 text banner became the concept-1 low-stock strip;
+    // the affordance keeps the banner's stable ID (found by Key, not display
+    // text — the lesson the repo learned three times on 2026-07-31).
+    expect(find.byKey(const Key('inventory-lowstock-low')), findsOneWidget);
+    expect(find.byKey(const Key('inventory-lowstock-out')), findsOneWidget);
 
-    await tester.tap(find.text('View'));
+    await tester.tap(find.byKey(const Key('inventory-open-stock-alerts')));
     await tester.pumpAndSettle();
 
     expect(find.byType(TongtaiStockAlertsScreen), findsOneWidget);
   });
 
-  testWidgets('no banner when the catalog has no alerts', (tester) async {
+  testWidgets('no low-stock strip when the catalog has no alerts', (
+    tester,
+  ) async {
     useTallViewport(tester);
     final catalog = ProductCatalogController.inMemory([
       product(id: 'ok', name: 'Healthy Item', quantity: 500),
@@ -203,8 +208,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('View'), findsNothing);
-    expect(find.textContaining('Stock alerts:'), findsNothing);
+    expect(find.byKey(const Key('inventory-open-stock-alerts')), findsNothing);
+    expect(find.byKey(const Key('inventory-lowstock-ok')), findsNothing);
   });
 
   test('tongtaiStockAlertColor maps each level to its token', () {

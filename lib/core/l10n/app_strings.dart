@@ -402,6 +402,13 @@ abstract class AppStrings {
   /// Tappable stock banner. Was hardcoded English until WTM-169 — the
   /// Vietnamese build showed "Stock alerts: 4 out of stock • 2 low".
   String invStockAlerts(String parts);
+
+  /// Concept-1 inventory overview card (WTM-215).
+  String get invOverviewTitle;
+  String get invOverviewProducts;
+  String get invOverviewValue;
+  String get invLowStockSection;
+  String get invViewAll;
   String supplierReviewCount(int count);
   String supplierProductCount(int count);
   String supplierCatalogSummary(int products, int categories);
@@ -1404,6 +1411,16 @@ class AppStringsVi extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Cảnh báo tồn kho: $parts';
+  @override
+  String get invOverviewTitle => 'Tổng quan tồn kho';
+  @override
+  String get invOverviewProducts => 'Tổng sản phẩm';
+  @override
+  String get invOverviewValue => 'Giá trị tồn kho';
+  @override
+  String get invLowStockSection => 'Sản phẩm sắp hết hàng';
+  @override
+  String get invViewAll => 'Xem tất cả';
   @override
   String supplierReviewCount(int count) => '($count đánh giá)';
   @override
@@ -2789,6 +2806,16 @@ class AppStringsEn extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Stock alerts: $parts';
+  @override
+  String get invOverviewTitle => 'Inventory overview';
+  @override
+  String get invOverviewProducts => 'Products';
+  @override
+  String get invOverviewValue => 'Stock value';
+  @override
+  String get invLowStockSection => 'Products running low';
+  @override
+  String get invViewAll => 'View all';
   @override
   String supplierReviewCount(int count) => '($count reviews)';
   @override

@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../inventory/inventory_context.dart';
 import '../../inventory/product.dart';
 import '../../inventory/product_catalog_controller.dart';
 import '../../inventory/product_image_source.dart';
 import '../../inventory/product_inventory_service.dart';
+import '../../inventory/stock_alert.dart';
 import '../../inventory/stock_alert_service.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_inventory_provider.dart';
@@ -207,11 +209,22 @@ class _TongtaiInventoryScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Concept-1 (WTM-215): overview donut + low-stock strip
+                      // replace the WTM-70 text banner. Both read the SAME
+                      // owners the rest of the app uses — InventorySummary
+                      // for the counts, StockAlertService for the alert set —
+                      // so this chrome cannot tell a different story than the
+                      // list rows below it.
+                      if (_catalog.products.isNotEmpty)
+                        _OverviewCard(
+                          summary: InventorySummary.from(_catalog.products),
+                        ),
                       if (alerts.hasAlerts)
-                        _AlertBanner(
-                          outOfStock: alerts.outOfStockCount,
-                          lowStock: alerts.lowStockCount,
-                          onTap: () => _openAlerts(context),
+                        _LowStockStrip(
+                          alerts: alerts.alerts,
+                          onViewAll: () => _openAlerts(context),
+                          onOpen: (product) =>
+                              _openForm(context, product: product),
                         ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
@@ -304,30 +317,26 @@ class _TongtaiInventoryScreenState
   }
 }
 
-/// Tappable low-stock summary banner (WTM-70) shown above the search field when
-/// any product is at or below its threshold; opens the Stock Alerts screen.
-class _AlertBanner extends StatelessWidget {
-  const _AlertBanner({
-    required this.outOfStock,
-    required this.lowStock,
-    required this.onTap,
-  });
+/// Concept-1 overview card (WTM-215): donut of stock health + two KPIs.
+///
+/// Every number comes from [InventorySummary.from] — the same producer that
+/// fills the BusinessContext slice (WTM-131) — and the segment colors are the
+/// list rows' own [tongtaiStockStatusColor]. The card computes nothing of its
+/// own, so it cannot disagree with the rows below it or with Home.
+class _OverviewCard extends StatelessWidget {
+  const _OverviewCard({required this.summary});
 
-  final int outOfStock;
-  final int lowStock;
-  final VoidCallback onTap;
+  final InventorySummary summary;
 
   @override
   Widget build(BuildContext context) {
-    // Out-of-stock is the more urgent state, so the banner leans on its red when
-    // anything is fully out; otherwise the low-stock amber.
-    final color = outOfStock > 0
-        ? TongtaiDesignTokens.error
-        : TongtaiDesignTokens.warning;
     final l10n = context.l10n;
-    final parts = <String>[
-      if (outOfStock > 0) l10n.invOutOfStockCount(outOfStock),
-      if (lowStock > 0) l10n.invLowStockCount(lowStock),
+    final inStock =
+        summary.productCount - summary.lowStockCount - summary.outOfStockCount;
+    final segments = <(StockStatus, int)>[
+      (StockStatus.inStock, inStock),
+      (StockStatus.lowStock, summary.lowStockCount),
+      (StockStatus.outOfStock, summary.outOfStockCount),
     ];
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -336,52 +345,333 @@ class _AlertBanner extends StatelessWidget {
         TongtaiDesignTokens.spacing4,
         0,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: const Key('inventory-open-stock-alerts'),
-          onTap: onTap,
+      child: Container(
+        key: const Key('inventory-overview'),
+        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        decoration: BoxDecoration(
+          color: TongtaiDesignTokens.lightBackground,
           borderRadius: BorderRadius.circular(
             TongtaiDesignTokens.cardBorderRadius,
           ),
-          child: Container(
-            // A tappable banner is a tap target: 12 dp padding around a 22 dp
-            // row came to 46, and Android asks for 48 (WTM-169).
-            constraints: const BoxConstraints(
-              minHeight: TongtaiDesignTokens.buttonHeight,
-            ),
-            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.cardBorderRadius,
+          border: Border.all(color: TongtaiDesignTokens.lightBorder),
+          boxShadow: TongtaiDesignTokens.elevation1,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.invOverviewTitle,
+              style: TongtaiDesignTokens.smallStyle.copyWith(
+                color: TongtaiDesignTokens.lightTextSecondary,
+                fontWeight: FontWeight.w600,
               ),
-              border: Border.all(color: color.withValues(alpha: 0.4)),
             ),
-            child: Row(
+            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: color, size: 20),
-                const SizedBox(width: TongtaiDesignTokens.spacing2),
                 Expanded(
-                  child: Text(
-                    l10n.invStockAlerts(parts.join(' • ')),
-                    key: const Key('inventory-summary-alerts'),
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
-                      fontWeight: FontWeight.w600,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _OverviewKpi(
+                        keyId: 'inventory-overview-count',
+                        value: '${summary.productCount}',
+                        label: l10n.invOverviewProducts,
+                      ),
+                      const SizedBox(height: TongtaiDesignTokens.spacing3),
+                      _OverviewKpi(
+                        keyId: 'inventory-overview-value',
+                        value: TongtaiFormatters.vndShort(summary.stockValue),
+                        label: l10n.invOverviewValue,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: TongtaiDesignTokens.spacing3),
+                SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: CustomPaint(
+                    key: const Key('inventory-overview-donut'),
+                    painter: _DonutPainter(
+                      segments: [
+                        for (final (status, count) in segments)
+                          if (count > 0)
+                            (tongtaiStockStatusColor(status), count),
+                      ],
+                      trackColor: TongtaiDesignTokens.lightBorder,
                     ),
                   ),
                 ),
-                Text(
-                  context.l10n.invView,
+              ],
+            ),
+            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            // Wrap, not Row: at a 2.0× system font three legend entries do not
+            // fit one line on a small phone (the WTM-169 overflow class).
+            Wrap(
+              spacing: TongtaiDesignTokens.spacing3,
+              runSpacing: TongtaiDesignTokens.spacing1,
+              children: [
+                for (final (status, count) in segments)
+                  _LegendEntry(
+                    color: tongtaiStockStatusColor(status),
+                    label: status.label(l10n.languageCode),
+                    percent: summary.productCount == 0
+                        ? 0
+                        : (count * 100 / summary.productCount).round(),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OverviewKpi extends StatelessWidget {
+  const _OverviewKpi({
+    required this.keyId,
+    required this.value,
+    required this.label,
+  });
+
+  final String keyId;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      key: Key(keyId),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: TongtaiDesignTokens.heading3Style.copyWith(
+            color: TongtaiDesignTokens.lightTextPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          label,
+          style: TongtaiDesignTokens.captionStyle.copyWith(
+            color: TongtaiDesignTokens.lightTextSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LegendEntry extends StatelessWidget {
+  const _LegendEntry({
+    required this.color,
+    required this.label,
+    required this.percent,
+  });
+
+  final Color color;
+  final String label;
+  final int percent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: TongtaiDesignTokens.spacing1),
+        // Flexible, or the min-size Row overflows its Wrap slot by the width
+        // of whatever the label grew to — measured 12px at vi/1.3× on 320px.
+        Flexible(
+          child: Text(
+            '$label $percent%',
+            style: TongtaiDesignTokens.captionStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Stroke-style donut; segment sweep is proportional to its count. Pure
+/// painting — the counts arrive already computed by [InventorySummary].
+class _DonutPainter extends CustomPainter {
+  const _DonutPainter({required this.segments, required this.trackColor});
+
+  final List<(Color, int)> segments;
+  final Color trackColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const stroke = 14.0;
+    final rect = Offset.zero & size;
+    final arcRect = rect.deflate(stroke / 2);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke;
+
+    final total = segments.fold<int>(0, (sum, s) => sum + s.$2);
+    if (total == 0) {
+      canvas.drawArc(arcRect, 0, 6.283185, false, paint..color = trackColor);
+      return;
+    }
+    var start = -1.570796; // 12 o'clock
+    for (final (color, count) in segments) {
+      final sweep = count * 6.283185 / total;
+      canvas.drawArc(arcRect, start, sweep, false, paint..color = color);
+      start += sweep;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DonutPainter old) {
+    if (old.trackColor != trackColor ||
+        old.segments.length != segments.length) {
+      return true;
+    }
+    for (var i = 0; i < segments.length; i++) {
+      if (old.segments[i] != segments[i]) return true;
+    }
+    return false;
+  }
+}
+
+/// Concept-1 low-stock strip (WTM-215): the WTM-70 text banner, grown into the
+/// concept's horizontally scrolling cards. The card set IS
+/// [StockAlertService.alerts] — the one owner of "sắp hết hàng" since WTM-213
+/// — already sorted most-urgent first.
+class _LowStockStrip extends StatelessWidget {
+  const _LowStockStrip({
+    required this.alerts,
+    required this.onViewAll,
+    required this.onOpen,
+  });
+
+  final List<StockAlert> alerts;
+  final VoidCallback onViewAll;
+  final ValueChanged<Product> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TongtaiDesignTokens.spacing4,
+            TongtaiDesignTokens.spacing3,
+            TongtaiDesignTokens.spacing4,
+            0,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.invLowStockSection,
                   style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: color,
+                    color: TongtaiDesignTokens.lightTextPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Icon(Icons.chevron_right, color: color, size: 20),
-              ],
+              ),
+              // Same stable ID the old banner carried — the affordance that
+              // opens the Stock Alerts screen keeps its identity.
+              TextButton(
+                key: const Key('inventory-open-stock-alerts'),
+                onPressed: onViewAll,
+                child: Text(l10n.invViewAll),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          // The cards are text; a height that ignores the system font scale
+          // overflows 30px per card at 2.0× (the WTM-169 class).
+          height: MediaQuery.textScalerOf(context).scale(96),
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(
+              horizontal: TongtaiDesignTokens.spacing4,
             ),
+            scrollDirection: Axis.horizontal,
+            itemCount: alerts.length,
+            separatorBuilder: (_, _) =>
+                const SizedBox(width: TongtaiDesignTokens.spacing2),
+            itemBuilder: (context, index) {
+              final alert = alerts[index];
+              return _LowStockCard(alert: alert, onOpen: onOpen);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LowStockCard extends StatelessWidget {
+  const _LowStockCard({required this.alert, required this.onOpen});
+
+  final StockAlert alert;
+  final ValueChanged<Product> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = tongtaiStockStatusColor(switch (alert.level) {
+      StockAlertLevel.outOfStock => StockStatus.outOfStock,
+      StockAlertLevel.lowStock => StockStatus.lowStock,
+    });
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: Key('inventory-lowstock-${alert.product.id}'),
+        onTap: () => onOpen(alert.product),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
+        child: Container(
+          width: 168,
+          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(
+              TongtaiDesignTokens.cardBorderRadius,
+            ),
+            border: Border.all(color: color.withValues(alpha: 0.4)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  alert.product.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: TongtaiDesignTokens.spacing1),
+              Text(
+                context.l10n.stockQtyOfThreshold(
+                  alert.quantity,
+                  alert.threshold,
+                ),
+                style: TongtaiDesignTokens.captionStyle.copyWith(
+                  color: TongtaiDesignTokens.readableText(color),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ),
       ),

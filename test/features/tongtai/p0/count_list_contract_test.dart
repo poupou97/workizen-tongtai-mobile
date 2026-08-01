@@ -317,6 +317,19 @@ void main() {
           .first;
       await tester.enterText(invSearch, 'Quạt mini');
       await tester.pumpAndSettle();
+      // WTM-215 put overview + low-stock chrome above the list; at this 800px
+      // viewport the row starts below the fold, so reach it the way a user
+      // does — by scrolling the inventory scroll view.
+      await tester.scrollUntilVisible(
+        find.text('Quạt mini cầm tay'),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byType(TongtaiInventoryScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
       expect(find.text('Quạt mini cầm tay'), findsWidgets);
       await tester.enterText(invSearch, '');
       await tester.pumpAndSettle();
