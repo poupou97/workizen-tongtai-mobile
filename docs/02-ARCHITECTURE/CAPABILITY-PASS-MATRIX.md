@@ -6,7 +6,7 @@
 > Backlog **không** ưu tiên theo Story ID, ngày tạo, sprint hay Jira Priority.
 > Mỗi vòng lặp tính lại điểm theo Capability Value.
 
-**Cập nhật lần cuối:** 2026-08-01 · sau WTM-202 (Derived Data Audit)
+**Cập nhật lần cuối:** 2026-08-01 · sau WTM-197/198/203/204
 
 ---
 
@@ -47,18 +47,24 @@ thứ chưa nhìn là cách tái tạo đúng tình huống đó trong một b�
 ## Ma trận
 
 **Điều kiện PASS bổ sung (Founder Directive 2026-08-01):** một capability
-**không** PASS khi còn **Derived Truth Violation** — cột dẫn xuất nằm trong
-database mà không có benchmark hay lý do nghiệp vụ. Xem
+**không** PASS khi còn **Derived Truth Violation**. Xem
 [DERIVED-DATA-AUDIT.md](DERIVED-DATA-AUDIT.md). Cột `DTV` bên dưới.
+
+**`⚠️ contained` (sau WTM-203):** cột dẫn xuất **vẫn được ghi** (hợp đồng
+`.ttbk` lossless — ADR-TON-018 không cho gỡ lẻ tẻ) nhưng **mọi đường đọc bị
+`p0/derived_data_governance_test.dart` chặn**, đã xác minh bắt được vi phạm
+thật. Bước chặn lỗi đã xong; gỡ cột là dọn dẹp chờ phiên bản `.ttbk` kế tiếp.
+Không ghi ✅ vì cột còn nằm đó, không ghi ❌ vì lỗi thứ tư không thể xảy ra mà
+không làm CI đỏ.
 
 | Capability | Domain | Data | SSoT | **DTV** | IA | UI | AI | Test |
 |---|---|---|---|---|---|---|---|---|
-| **Business Journey** | ✅ | ✅ | ✅ | ❌ 5 cột | ✅ | ✅ | ✅ | ✅ |
+| **Business Journey** | ✅ | ✅ | ✅ | ⚠️ contained | ✅ | ✅ | ✅ | ✅ |
 | **Opportunity** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Finance** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | `?` | ✅ |
-| **Consumer** | ✅ | ✅ | ✅ | ❌ 6 cột | ✅ | `?` | `?` | ✅ |
+| **Finance** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | `?` | ✅ |
+| **Consumer** | ✅ | ✅ | ✅ | ⚠️ contained | ✅ | `?` | `?` | ✅ |
 | **Reports** | ✅ | ✅ | ✅ | ✅ | `?` | `?` | ✅ | ✅ |
-| **Inventory** | ✅ | `?` | ⚠️ | ❌ 2 cột | ✅ | `?` | `?` | ✅ |
+| **Inventory** | ✅ | ✅ | ⚠️ | ⚠️ contained | ✅ | `?` | `?` | ✅ |
 | **Producer** | ✅ | ❌ | `?` | ✅ | ✅ | `?` | `?` | ✅ |
 | **AI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Settings / More** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
