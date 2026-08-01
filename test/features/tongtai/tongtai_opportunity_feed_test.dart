@@ -65,9 +65,13 @@ void main() {
     });
 
     test('type filter narrows the feed (AC2)', () {
+      // WTM-182: the fixture used `arbitrage`, which the rule engine cannot
+      // produce and which is now hidden from the feed. AC2 is unchanged — the
+      // filter still has to narrow — so the fixture moved to two types that
+      // can actually exist.
       final controller = OpportunityFeedController([
         make('a', type: OpportunityType.seasonal),
-        make('b', type: OpportunityType.arbitrage),
+        make('b', type: OpportunityType.trend),
       ]);
       expect(
         controller
@@ -76,8 +80,8 @@ void main() {
         ['a'],
       );
       expect(controller.availableTypes, [
-        OpportunityType.arbitrage,
         OpportunityType.seasonal,
+        OpportunityType.trend,
       ]);
     });
 
@@ -231,7 +235,7 @@ void main() {
       useTallViewport(tester);
       final controller = OpportunityFeedController([
         make('a', type: OpportunityType.seasonal, score: 50, roi: 3.0),
-        make('b', type: OpportunityType.arbitrage, score: 90, roi: 1.0),
+        make('b', type: OpportunityType.trend, score: 90, roi: 1.0),
       ]);
       await tester.pumpWidget(host(controller));
 
