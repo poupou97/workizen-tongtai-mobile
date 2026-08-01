@@ -48,7 +48,11 @@ void main() {
     // v11 (WTM-191): opportunity → journey. Additive: one nullable column on
     //                the node table, so every existing node reads as "not from
     //                an opportunity" — which is what it is.
-    expect(db.schemaVersion, 11);
+    // v12 (WTM-209): orders_table rebuilt without the channel_id FK — it
+    //                pointed at channels_table, a dead v1 table nothing ever
+    //                wrote, so every real channel code failed the constraint.
+    //                channels_table dropped (WTM-190 precedent).
+    expect(db.schemaVersion, 12);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });
@@ -61,7 +65,8 @@ void main() {
     expect(await db.select(db.productsTable).get(), isEmpty);
     expect(await db.select(db.customersTable).get(), isEmpty);
     expect(await db.select(db.ordersTable).get(), isEmpty);
-    expect(await db.select(db.channelsTable).get(), isEmpty);
+    // `channelsTable` was dropped in v12 (WTM-209) — dead since v1; the
+    // channel now lives as a canonical code on the order itself.
     // `opportunitiesTable` was dropped in schema v10 (WTM-190) — it never held
     // a row; opportunities are derived data. See opportunity_reactions.dart.
     expect(await db.select(db.opportunityReactionsTable).get(), isEmpty);

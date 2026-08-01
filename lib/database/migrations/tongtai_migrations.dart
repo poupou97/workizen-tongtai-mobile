@@ -55,7 +55,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 11;
+const int kTongtaiSchemaVersion = 12;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -233,6 +233,20 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 12) {
+        // v12 (WTM-209 — sales channel on orders). `orders_table.channel_id`
+        // was a foreign key into `channels_table`, a dead v1 table nothing
+        // ever wrote — so every real canonical code failed the constraint
+        // (SqliteException 787, caught by the first test that wrote
+        // 'shopee'). The rebuild below re-creates orders_table from its NEW
+        // definition (no FK), copying every row by column name; then the dead
+        // table is dropped, the WTM-190 precedent (`opportunities_table`).
+        final orders = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'orders_table',
+        );
+        await m.alterTable(TableMigration(orders));
+        await db.customStatement('DROP TABLE IF EXISTS channels_table');
       }
       if (from < 11) {
         // v11 (WTM-191 — opportunity → journey). Additive: one nullable column

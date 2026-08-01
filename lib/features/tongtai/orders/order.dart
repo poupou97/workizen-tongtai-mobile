@@ -1,3 +1,4 @@
+import '../profile/business_profile.dart';
 import 'package:flutter/foundation.dart';
 
 import '../core/tongtai_enums.dart';
@@ -112,6 +113,7 @@ class CustomerOrder {
     required this.status,
     required this.items,
     this.paymentStatus,
+    this.channel,
   });
 
   /// Stable identifier.
@@ -142,6 +144,17 @@ class CustomerOrder {
   /// True only when the seller **said** the money has not arrived.
   bool get isUnpaid =>
       paymentStatus == kPaymentUnpaid || paymentStatus == kPaymentPartial;
+
+  /// Where this order was sold (WTM-209) — the same [SalesChannel] vocabulary
+  /// the business profile uses, so an order cannot claim a channel the app
+  /// does not know.
+  ///
+  /// `null` means **not recorded**, never "shop": inventing a default channel
+  /// would fabricate a per-channel breakdown the seller never gave (the
+  /// `null ≠ 0` rule, applied to a label). Self-recorded, local-first — no
+  /// marketplace connection involved (D-5); syncing real storefront data is
+  /// Phase 3 per D-12.
+  final SalesChannel? channel;
 
   /// The purchased lines (AC3). Never empty for a real order.
   final List<OrderItem> items;
