@@ -43,8 +43,12 @@ void main() {
     child: const TongtaiApp(),
   );
 
-  Finder tutorial() => find.byKey(const ValueKey('onboarding-action-skip'));
-  Finder nextButton() => find.byKey(const ValueKey('onboarding-action-next'));
+  // WTM-178: the six-slide tutorial became a conversation. The acceptance
+  // criteria are unchanged — first launch shows onboarding, finishing or
+  // skipping reveals the shell and persists the flag — so these finders were
+  // repointed rather than the tests rewritten.
+  Finder tutorial() => find.byKey(const Key('onboarding-greeting'));
+  Finder skipAll() => find.byKey(const Key('onboarding-skip-all'));
   Finder appShell() => find.byType(TongtaiBottomNav);
 
   testWidgets('AC2: first launch (no flag) boots into the tutorial', (
@@ -65,12 +69,14 @@ void main() {
     await tester.pumpWidget(app(prefs));
     await tester.pumpAndSettle();
 
-    // Walk every page, then tap Get Started on the last one.
-    for (var i = 1; i < kTongtaiOnboardingPages.length; i++) {
-      await tester.tap(nextButton());
+    // Walk the whole conversation, skipping every question, then finish.
+    await tester.tap(find.byKey(const Key('onboarding-start')));
+    await tester.pumpAndSettle();
+    for (var i = 0; i < kOnboardingSteps.length; i++) {
+      await tester.tap(find.byKey(const Key('onboarding-skip')));
       await tester.pumpAndSettle();
     }
-    await tester.tap(nextButton());
+    await tester.tap(find.byKey(const Key('onboarding-done')));
     await tester.pumpAndSettle();
 
     expect(tutorial(), findsNothing);
@@ -85,7 +91,9 @@ void main() {
     await tester.pumpWidget(app(prefs));
     await tester.pumpAndSettle();
 
-    await tester.tap(tutorial());
+    // One tap from the greeting straight into the app — the conversation must
+    // not cost a hurried seller more taps than the slides it replaced.
+    await tester.tap(skipAll());
     await tester.pumpAndSettle();
 
     expect(tutorial(), findsNothing);

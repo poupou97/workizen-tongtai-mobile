@@ -51,7 +51,7 @@ void main() {
     'tongtai_goal_form_screen.dart': 'goal',
     'tongtai_inventory_picker_screen.dart': 'picker',
     'tongtai_key_scan_screen.dart': 'key-scan',
-    'tongtai_onboarding_screen.dart': 'onboarding',
+    'tongtai_onboarding_conversation_screen.dart': 'onboarding',
     'tongtai_product_form_screen.dart': 'product',
     'tongtai_transaction_form_screen.dart': 'transaction',
   };

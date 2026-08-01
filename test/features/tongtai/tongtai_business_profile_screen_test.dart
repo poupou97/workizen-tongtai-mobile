@@ -12,6 +12,8 @@ import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_business_profile_screen.dart';
 
+import '../../support/tap_by_key.dart';
+
 /// WTM-177 — the profile editor, against a real SQLite file.
 void main() {
   late Directory dir;
@@ -41,23 +43,8 @@ void main() {
     ),
   );
 
-  /// Scrolls the key into view before touching it.
-  ///
-  /// On a phone-sized viewport the save button and the privacy note sit below
-  /// the fold — the first version of these tests failed because it tapped
-  /// widgets a real seller would have to scroll to. Scrolling here keeps the
-  /// test honest about what the screen actually looks like.
-  Future<void> reveal(WidgetTester tester, Key key) async {
-    await tester.scrollUntilVisible(
-      find.byKey(key),
-      120,
-      scrollable: find.descendant(
-        of: find.byKey(const Key('profile-list')),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    await tester.pumpAndSettle();
-  }
+  Future<void> tapProfile(WidgetTester tester, String key) =>
+      tester.tapByKey(key, scrollableUnder: 'profile-list');
 
   for (final locale in ['vi', 'en']) {
     testWidgets('[$locale] a seller with no profile sees empty chips', (
@@ -79,16 +66,10 @@ void main() {
       await tester.pumpWidget(host(locale));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('profile-trade-0')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('profile-size-0')));
-      await tester.pumpAndSettle();
-      await reveal(tester, const Key('profile-channel-2'));
-      await tester.tap(find.byKey(const Key('profile-channel-2')));
-      await tester.pumpAndSettle();
-      await reveal(tester, const Key('profile-save'));
-      await tester.tap(find.byKey(const Key('profile-save')));
-      await tester.pumpAndSettle();
+      await tapProfile(tester, 'profile-trade-0');
+      await tapProfile(tester, 'profile-size-0');
+      await tapProfile(tester, 'profile-channel-2');
+      await tapProfile(tester, 'profile-save');
 
       final saved = await BusinessProfileRepository(db).load();
       expect(saved.trade, BusinessTrade.fashion);
@@ -118,7 +99,7 @@ void main() {
           .selected,
       isTrue,
     );
-    await reveal(tester, const Key('profile-channel-5'));
+    await tester.scrollToKey('profile-channel-5', under: 'profile-list');
     expect(
       tester
           .widget<FilterChip>(find.byKey(const Key('profile-channel-5')))
@@ -133,13 +114,9 @@ void main() {
     await tester.pumpWidget(host('vi'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('profile-trade-0')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('profile-trade-0')));
-    await tester.pumpAndSettle();
-    await reveal(tester, const Key('profile-save'));
-    await tester.tap(find.byKey(const Key('profile-save')));
-    await tester.pumpAndSettle();
+    await tapProfile(tester, 'profile-trade-0');
+    await tapProfile(tester, 'profile-trade-0');
+    await tapProfile(tester, 'profile-save');
 
     expect((await BusinessProfileRepository(db).load()).trade, isNull);
   });
@@ -152,9 +129,7 @@ void main() {
     await tester.pumpWidget(host('vi'));
     await tester.pumpAndSettle();
 
-    await reveal(tester, const Key('profile-save'));
-    await tester.tap(find.byKey(const Key('profile-save')));
-    await tester.pumpAndSettle();
+    await tapProfile(tester, 'profile-save');
 
     expect((await BusinessProfileRepository(db).load()).isEmpty, isTrue);
   });
@@ -162,8 +137,7 @@ void main() {
   testWidgets('the screen tells the seller what will be sent', (tester) async {
     await tester.pumpWidget(host('vi'));
     await tester.pumpAndSettle();
-    await reveal(tester, const Key('profile-privacy-note'));
-    expect(find.byKey(const Key('profile-privacy-note')), findsOneWidget);
+    await tester.scrollToKey('profile-privacy-note', under: 'profile-list');
   });
 
   testWidgets('there is no text field anywhere on the screen', (tester) async {

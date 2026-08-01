@@ -86,9 +86,7 @@ abstract class AppStrings {
 
   // ── common actions (P0 §2 full migration) ───────────────────────────────
   String get actionClear;
-  String get actionSkip;
   String get actionNext;
-  String get actionGetStarted;
   String get actionUndo;
   String get filterAll;
   String get dateToday;
@@ -408,6 +406,19 @@ abstract class AppStrings {
   String profileSize(String code);
   String profileChannel(String code);
   String profileSeasonality(String code);
+
+  // AI-first Onboarding (WTM-178) — hội thoại chạy được KHÔNG cần AI.
+  String get obGreeting;
+  String get obGreetingBody;
+  String get obStart;
+  String get obSkip;
+  String get obNext;
+  String get obBack;
+  String get obDone;
+  String get obClosing;
+  String get obClosingEmpty;
+  String get obProgress;
+  String obQuestion(String stepId);
   String get moreLegalSection;
   String get moreTerms;
   String get morePrivacy;
@@ -752,11 +763,7 @@ class AppStringsVi extends AppStrings {
   @override
   String get actionClear => 'Xoá';
   @override
-  String get actionSkip => 'Bỏ qua';
-  @override
   String get actionNext => 'Tiếp tục';
-  @override
-  String get actionGetStarted => 'Bắt đầu';
   @override
   String get actionUndo => 'Hoàn tác';
   @override
@@ -1360,6 +1367,41 @@ class AppStringsVi extends AppStrings {
     'facebook' => 'Facebook',
     'zalo' => 'Zalo',
     _ => 'Bán sỉ',
+  };
+  @override
+  @override
+  String get obGreeting => 'Chào bạn 👋';
+  @override
+  String get obGreetingBody =>
+      'Tôi là Workizen AI. Cho tôi hỏi bốn câu ngắn về việc kinh doanh của bạn, '
+      'để những gợi ý sau này nói đúng chuyện của bạn thay vì nói chung chung. '
+      'Câu nào không muốn trả lời thì bỏ qua.';
+  @override
+  String get obStart => 'Bắt đầu';
+  @override
+  String get obSkip => 'Bỏ qua';
+  @override
+  String get obNext => 'Tiếp';
+  @override
+  String get obBack => 'Quay lại';
+  @override
+  String get obDone => 'Xong, vào ứng dụng';
+  @override
+  String get obClosing =>
+      'Cảm ơn bạn. Từ giờ khi bạn hỏi, tôi đã biết bạn kinh doanh gì — gợi ý sẽ '
+      'sát hơn. Bạn sửa lại bất cứ lúc nào trong Thêm › Thông tin doanh nghiệp.';
+  @override
+  String get obClosingEmpty =>
+      'Không sao, vào dùng thử trước cũng được. Khi nào muốn kể tôi nghe về việc '
+      'kinh doanh của bạn thì vào Thêm › Thông tin doanh nghiệp.';
+  @override
+  String get obProgress => 'Câu';
+  @override
+  String obQuestion(String stepId) => switch (stepId) {
+    'trade' => 'Bạn đang bán gì?',
+    'channels' => 'Bạn bán ở những đâu?',
+    'size' => 'Hiện tại bạn làm ở quy mô nào?',
+    _ => 'Có mùa nào bạn bán chạy hơn hẳn không?',
   };
   @override
   String profileSeasonality(String code) => switch (code) {
@@ -1970,11 +2012,7 @@ class AppStringsEn extends AppStrings {
   @override
   String get actionClear => 'Clear';
   @override
-  String get actionSkip => 'Skip';
-  @override
   String get actionNext => 'Next';
-  @override
-  String get actionGetStarted => 'Get Started';
   @override
   String get actionUndo => 'Undo';
   @override
@@ -2581,6 +2619,41 @@ class AppStringsEn extends AppStrings {
     'facebook' => 'Facebook',
     'zalo' => 'Zalo',
     _ => 'Wholesale',
+  };
+  @override
+  @override
+  String get obGreeting => 'Hello 👋';
+  @override
+  String get obGreetingBody =>
+      'I am Workizen AI. Let me ask four short questions about your business, so '
+      'my advice talks about your shop instead of shops in general. Skip any '
+      'question you would rather not answer.';
+  @override
+  String get obStart => 'Start';
+  @override
+  String get obSkip => 'Skip';
+  @override
+  String get obNext => 'Next';
+  @override
+  String get obBack => 'Back';
+  @override
+  String get obDone => 'Done, open the app';
+  @override
+  String get obClosing =>
+      'Thank you. From now on I know what you sell, so my suggestions will fit '
+      'better. Change any of it under More › Business info.';
+  @override
+  String get obClosingEmpty =>
+      'That is fine — have a look around first. When you want to tell me about '
+      'your business, it is under More › Business info.';
+  @override
+  String get obProgress => 'Question';
+  @override
+  String obQuestion(String stepId) => switch (stepId) {
+    'trade' => 'What do you sell?',
+    'channels' => 'Where do you sell?',
+    'size' => 'How big is it right now?',
+    _ => 'Any season when you sell much more?',
   };
   @override
   String profileSeasonality(String code) => switch (code) {

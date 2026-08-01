@@ -53,7 +53,7 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_create_order_screen.
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_history_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart';
-import 'package:tongtai/features/tongtai/ui/screens/tongtai_onboarding_screen.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_onboarding_conversation_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_supplier_detail_screen.dart';
@@ -156,7 +156,7 @@ void main() {
     'transaction-form': () => const TongtaiTransactionFormScreen(),
     // Screens that need an entity to exist. They are the ones a seller reaches
     // by tapping something, which is most of the app.
-    'onboarding': () => TongtaiOnboardingScreen(onFinished: () {}),
+    'onboarding': () => TongtaiOnboardingConversationScreen(onDone: () {}),
     'supplier-detail': () =>
         TongtaiSupplierDetailScreen.forSupplier(kSampleSuppliers.first),
     'supplier-favorites': () => TongtaiSupplierFavoritesScreen(

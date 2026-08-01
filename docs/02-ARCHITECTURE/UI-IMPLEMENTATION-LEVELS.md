@@ -2,7 +2,7 @@
 
 Chuẩn: [ADR-TON-015](../03-DECISIONS/ADR-TON-015-ui-maturity-and-one-data-path.md).
 Cập nhật **cùng PR** mỗi khi một màn đổi level. Level = sự thật đo được từ
-code, không phải ý định. Audit gần nhất: **2026-08-01** (36 màn + 3 shell — WTM-175 thêm `tongtai_feedback_screen`, WTM-177 thêm `tongtai_business_profile_screen`; cả hai L3).
+code, không phải ý định. Audit gần nhất: **2026-08-01** (37 màn + 3 shell — WTM-175 thêm `tongtai_feedback_screen`, WTM-177 thêm `tongtai_business_profile_screen`, WTM-178 thay onboarding slide bằng `tongtai_onboarding_conversation_screen`; cả ba L3).
 
 ## Cách đọc
 
@@ -60,6 +60,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | `tongtai_customer_history_screen` | orderController thật | `runTongtaiAction` | đơn vừa nhập không thể mất im lặng |
 | `tongtai_business_profile_screen` | `businessProfileProvider` (1 dòng, 4 enum) | `runTongtaiAction` + `showTongtaiFailure` | WTM-177. Đọc một lần, không có đường refresh và không có trạng thái *stale* để giữ ⇒ `ScreenDataController` sẽ là nghi thức thừa. **Không có TextField nào** — có test khoá |
 | `tongtai_feedback_screen` | không đọc dữ liệu (chỉ ghi ra share sheet) | `runTongtaiAction` + `showTongtaiFailure` | WTM-175. Share thất bại có snack lỗi + nút bật lại |
+| `tongtai_onboarding_conversation_screen` | không đọc; ghi `BusinessProfile` khi kết thúc | `runTongtaiAction` + `showTongtaiFailure` | WTM-178, thay 6 slide tĩnh. **Chạy trọn vẹn không cần AI** — kịch bản tất định. Ghi lỗi **không chặn** người dùng mới vào app |
 | `tongtai_supplier_search_screen` | curated catalog + favorites persisted | `runTongtaiAction` (toggle) | |
 | `tongtai_supplier_favorites_screen` | favorites persisted | `runTongtaiAction` (toggle) | |
 | `tongtai_ai_key_screen` | secure storage (BYOK) | `runTongtaiAction` | `TongtaiAiException` nay là `TongtaiClassifiedError` |

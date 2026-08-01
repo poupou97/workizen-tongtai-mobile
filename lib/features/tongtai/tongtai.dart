@@ -9,10 +9,9 @@ export 'ui/tongtai_root_gate.dart';
 export 'navigation/tongtai_design_tokens.dart';
 
 // Onboarding tutorial (WTM-59)
-export 'onboarding/tongtai_onboarding_content.dart';
+export 'onboarding/onboarding_conversation.dart';
 export 'onboarding/tongtai_onboarding_store.dart';
 export 'providers/tongtai_onboarding_provider.dart';
-export 'ui/screens/tongtai_onboarding_screen.dart';
 
 // Deep linking (WTM-57)
 export 'navigation/deeplink/tongtai_deep_link.dart';
