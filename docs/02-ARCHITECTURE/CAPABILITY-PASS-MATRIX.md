@@ -70,7 +70,7 @@ không làm CI đỏ.
 | **Finance** | ✅ | ✅ | ✅ | ✅ | ✅ WTM-206 | ✅ | ✅ | ✅ |
 | **Consumer** | ✅ | ✅ | ✅ | ✅ v13* | ✅ | ✅ | ✅ | ✅ |
 | **Reports** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Inventory** | ✅ | ✅ | ⚠️ | ✅ v13 | ✅ | ✅ | ✅ | ✅ |
+| **Inventory** | ✅ | ✅ | ✅ WTM-213 | ✅ v13 | ✅ | ✅ | ✅ | ✅ |
 | **Producer** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 | **AI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Settings / More** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
@@ -93,16 +93,17 @@ Phản ứng sống sót qua lần đóng app (WTM-190) · nối được vào h
 `insufficient` chứ không phải 0 (ADR-TON-022) · tab hạng nhất (WTM-192) ·
 "khách im lặng" dùng luật của Consumer (WTM-200).
 
-### Finance — ❌ IA (WTM-206)
+### Finance — ✅ hoàn thành
 
 - ✅ Data: doanh thu khớp Home/Reports (WTM-196) · category là mã canonical
-  (WTM-197) · cảnh báo dòng tiền dùng chung số học với dashboard (WTM-205).
+  (WTM-197) · cảnh báo dòng tiền dùng chung số học với dashboard (WTM-205) ·
+  công nợ derive từ `paymentStatus` của đơn, "chưa ghi" ≠ nợ (WTM-211).
 - ✅ AI: `negativeCashflow` Rule Twin nay nhìn thấy doanh thu — audit ô `?` này
   chính là thứ tìm ra WTM-205.
-- ❌ **IA (WTM-206, +60)**: Finance chỉ tới được qua More — ba chạm vào kho
-  công cụ — trong khi hành trình vừa bảo *"ghi 5 khoản chi đầu tiên"* (WTM-198)
-  và Home hiển thị doanh thu ngay hàng KPI. Bảo người ta làm một việc rồi giấu
-  cánh cửa.
+- ✅ **IA (WTM-206)**: Home KPI header mở thẳng Finance (`home-open-finance`) —
+  hành trình bảo *"ghi 5 khoản chi"* thì cánh cửa nằm ngay cạnh lời nhắc,
+  không còn ba chạm qua More. Luật reachability chốt trong
+  `p0/nav_availability_test.dart`.
 
 ### Consumer — ✅ Data/SSoT (WTM-201 đã sửa)
 
@@ -121,13 +122,16 @@ Dùng chung `isBillableOrder` và cùng cách tính `totalAmount` với
 `BusinessMetrics` ⇒ không thể lệch định nghĩa "một lần bán". `?` IA và UI: chưa
 audit vị trí Reports trong IA sau khi 5 tab đã kín (WTM-192).
 
-### Inventory — ⚠️ mối nối tiềm ẩn
+### Inventory — ✅ hoàn thành (WTM-213 đóng mối nối cuối)
 
-`StockAlertService.minimumThreshold` (sàn toàn danh mục) có thể làm lệch khỏi
-`Product.stockStatus`. Production **luôn truyền 0** nên hai bên trùng nhau hôm
-nay. Không phải FAIL; ghi lại để ai bật sàn đó biết đây là chỗ sẽ gãy. `?` Data:
-chưa audit giá vốn (thiếu `costPrice` là lý do ROI không tính được — xem
-ADR-TON-022).
+`StockAlertService.minimumThreshold` (sàn toàn danh mục) từng có thể làm lệch
+khỏi `Product.stockStatus` — hai quy tắc cho một khái niệm "sắp hết hàng",
+dạng P-27, cùng họ `lapsedCustomerDays` (WTM-201). Production luôn truyền 0 và
+không setting nào ghi sàn đó, nên WTM-213 **xoá tham số**:
+`StockAlert.forProduct` nay đọc thẳng `stockStatus` — badge và màn cảnh báo
+không thể lệch nhau vì cùng một dòng code. Sweep chốt trong
+`p0/single_source_of_truth_test.dart`. Data ✅: `costPrice` đã nối (WTM-204),
+ROI tính từ giá vốn thật (WTM-207).
 
 ### Producer — ❌ **Data FAIL đã biết, có chủ đích**
 

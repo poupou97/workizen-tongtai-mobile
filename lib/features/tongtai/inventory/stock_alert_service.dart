@@ -9,17 +9,10 @@ import 'stock_alert.dart';
 /// counts and ordering compute synchronously and are trivially unit-testable. A
 /// Drift/remote-backed data source can later feed the same engine unchanged.
 class StockAlertService {
-  StockAlertService(Iterable<Product> products, {this.minimumThreshold = 0})
-    : assert(minimumThreshold >= 0, 'minimumThreshold cannot be negative'),
-      _products = List.unmodifiable(products);
+  StockAlertService(Iterable<Product> products)
+    : _products = List.unmodifiable(products);
 
   final List<Product> _products;
-
-  /// Catalog-wide low-stock threshold floor (WTM-70: "set low-stock threshold").
-  /// A product alerts when its quantity is at or below the larger of its own
-  /// [Product.reorderLevel] and this value. Default 0 = per-product thresholds
-  /// only, matching [Product.stockStatus].
-  final int minimumThreshold;
 
   List<StockAlert>? _cache;
 
@@ -32,8 +25,7 @@ class StockAlertService {
 
   List<StockAlert> _compute() {
     final list = <StockAlert>[
-      for (final p in _products)
-        ?StockAlert.forProduct(p, minimumThreshold: minimumThreshold),
+      for (final p in _products) ?StockAlert.forProduct(p),
     ];
     list.sort(_compare);
     return List.unmodifiable(list);

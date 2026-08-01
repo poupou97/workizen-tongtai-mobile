@@ -40,7 +40,6 @@ class TongtaiInventoryScreen extends ConsumerStatefulWidget {
     this.service,
     this.catalog,
     this.imageSource,
-    this.minimumThreshold = 0,
   });
 
   /// Seed catalog for tests; when [catalog] is omitted a mutable controller is
@@ -53,10 +52,6 @@ class TongtaiInventoryScreen extends ConsumerStatefulWidget {
 
   /// Image source handed to the Add/Edit form; defaults to the real picker.
   final ProductImageSource? imageSource;
-
-  /// Catalog-wide low-stock threshold floor for the alert banner (WTM-70),
-  /// forwarded to [StockAlertService]. Default 0 = per-product thresholds only.
-  final int minimumThreshold;
 
   @override
   ConsumerState<TongtaiInventoryScreen> createState() =>
@@ -159,10 +154,7 @@ class _TongtaiInventoryScreenState
       builder: (context, _) {
         final service = _catalog.service;
         final page = service.page(_query);
-        final alerts = StockAlertService(
-          _catalog.products,
-          minimumThreshold: widget.minimumThreshold,
-        );
+        final alerts = StockAlertService(_catalog.products);
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
           appBar: AppBar(
@@ -306,7 +298,6 @@ class _TongtaiInventoryScreenState
         builder: (_) => TongtaiStockAlertsScreen(
           catalog: _catalog,
           imageSource: widget.imageSource,
-          minimumThreshold: widget.minimumThreshold,
         ),
       ),
     );

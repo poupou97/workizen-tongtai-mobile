@@ -27,18 +27,13 @@ enum StockAlertLevel {
 }
 
 /// A raised stock-level alert for a single product (WTM-70): the product is at
-/// or below its effective low-stock threshold, so the user should be notified to
-/// restock.
+/// or below its low-stock threshold, so the user should be notified to restock.
 ///
 /// Pure, immutable domain model — no Flutter/UI or persistence concerns — so the
 /// alert engine, screens and (later) a notification scheduler can all reuse it.
 @immutable
 class StockAlert {
-  const StockAlert({
-    required this.product,
-    required this.level,
-    required this.threshold,
-  });
+  const StockAlert({required this.product, required this.level});
 
   /// The product that triggered the alert.
   final Product product;
@@ -46,10 +41,10 @@ class StockAlert {
   /// How urgent the alert is (out of stock vs. merely low).
   final StockAlertLevel level;
 
-  /// The effective low-stock threshold this alert was raised against, i.e. the
-  /// larger of the product's own [Product.reorderLevel] and any catalog-wide
-  /// minimum threshold (WTM-70: "set low-stock threshold").
-  final int threshold;
+  /// The threshold this alert was raised against — the product's own
+  /// [Product.reorderLevel], forwarded. There is no other threshold: "sắp hết
+  /// hàng" has exactly one owner, [Product.stockStatus] (WTM-213).
+  int get threshold => product.reorderLevel;
 
   /// On-hand quantity, forwarded from [product] for convenience.
   int get quantity => product.quantity;
@@ -61,45 +56,38 @@ class StockAlert {
     return gap > 0 ? gap : 0;
   }
 
-  /// Builds an alert for [product] when its on-hand quantity is at or below the
-  /// effective threshold — the larger of the product's own [Product.reorderLevel]
-  /// and [minimumThreshold] — otherwise returns `null` (healthy stock).
+  /// Builds an alert for [product], or `null` for healthy stock.
   ///
-  /// [minimumThreshold] is a catalog-wide floor (default 0, i.e. per-product
-  /// thresholds only): raising it makes every product alert earlier, which is how
-  /// WTM-70 lets the user set a single low-stock threshold across the catalog.
-  static StockAlert? forProduct(Product product, {int minimumThreshold = 0}) {
-    assert(minimumThreshold >= 0, 'minimumThreshold cannot be negative');
-    final threshold = product.reorderLevel > minimumThreshold
-        ? product.reorderLevel
-        : minimumThreshold;
-    if (product.quantity <= 0) {
-      return StockAlert(
-        product: product,
-        level: StockAlertLevel.outOfStock,
-        threshold: threshold,
-      );
-    }
-    if (product.quantity <= threshold) {
-      return StockAlert(
-        product: product,
-        level: StockAlertLevel.lowStock,
-        threshold: threshold,
-      );
-    }
-    return null;
-  }
+  /// Reads [Product.stockStatus] — the ONE rule for "low stock" — rather than
+  /// re-implementing the comparison. WTM-213 removed the `minimumThreshold`
+  /// catalog floor that used to live here: it was a second, internally
+  /// consistent rule for a concept that already had an owner (the P-27 shape,
+  /// same family as `lapsedCustomerDays`), so with any floor > 0 the list
+  /// badge and the alerts screen would have told two different truths. No
+  /// production caller ever passed it and no setting ever wrote it; WTM-70's
+  /// "set low-stock threshold" is the per-product reorder level on the form.
+  static StockAlert? forProduct(Product product) =>
+      switch (product.stockStatus) {
+        StockStatus.outOfStock => StockAlert(
+          product: product,
+          level: StockAlertLevel.outOfStock,
+        ),
+        StockStatus.lowStock => StockAlert(
+          product: product,
+          level: StockAlertLevel.lowStock,
+        ),
+        StockStatus.inStock => null,
+      };
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is StockAlert &&
           other.product.id == product.id &&
-          other.level == level &&
-          other.threshold == threshold);
+          other.level == level);
 
   @override
-  int get hashCode => Object.hash(product.id, level, threshold);
+  int get hashCode => Object.hash(product.id, level);
 
   @override
   String toString() =>
