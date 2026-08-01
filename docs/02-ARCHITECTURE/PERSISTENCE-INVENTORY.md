@@ -75,8 +75,8 @@ goal-type filtering/reporting arrives.
 
 v1 initial · v2 supplier_favorites · v3 products.description + FTS5 · v4
 chat_messages · v5 products.domain_snapshot (WTM-121) · v6 customers.domain_snapshot
-(WTM-123) · v7 journeys.domain_snapshot (WTM-124) · **v8 business_profiles**
-(WTM-177). Bump by exactly one + an additive `onUpgrade` step per change
+(WTM-123) · v7 journeys.domain_snapshot (WTM-124) · v8 business_profiles (WTM-177) ·
+**v9 Business Journey tree** (WTM-185). Bump by exactly one + an additive `onUpgrade` step per change
 (`tongtai_migrations.dart`).
 
 ## AI Business Profile (v8, WTM-177)
@@ -106,3 +106,43 @@ remainder to carry.
 
 Restore is Replace: the incoming business's profile wins, and a package without
 one leaves the profile empty rather than keeping the previous owner's trade.
+
+
+## Business Journey tree (v9, WTM-185 · ADR-TON-021)
+
+Ba bảng mới, **không đụng bảng nào đang có**:
+
+| Bảng | Nội dung |
+|---|---|
+| `business_journeys_table` | root — trỏ `goalId` sang `journeys_table.id` · `JourneyState` 5 giá trị · `activePlanVersion` |
+| `business_journey_nodes_table` | cây đệ quy: `kind` · `parentId` · `orderIndex` · **`origin`** · `completion` · `state` |
+| `business_journey_plans_table` | kế hoạch theo version, **append-only** |
+
+### ⚠️ Một cái tên đã bị chiếm
+
+`journeys_table` **không** lưu journey — nó lưu `BusinessGoal`, từ WTM-124. Tên
+này có trước từ vựng Concept và đang chịu lực ở schema v1–v8, nên đổi tên là
+migration phá vỡ mà người dùng không được lợi gì. Mọi thứ mới do đó mang tiền tố
+`business_journey`.
+
+Tìm **mục tiêu** → `journeys_table`. Tìm **kế hoạch** → `business_journey*`.
+
+### Bốn điều không hiển nhiên từ schema
+
+1. **`origin` là cột khiến ADR-TON-016 kiểm được.** Không có nó thì sáu tháng
+   nữa không ai phân biệt được bước nào do luật sinh và bước nào do model nói.
+   Hai bất biến (`ai` không được `done`, `ai` không được là root) khoá **hai
+   lớp**: assert lúc dev, và `fromJson`/repository lúc đọc — vì assert bị biên
+   dịch bỏ trong bản release.
+
+2. **`goalId` cố ý KHÔNG phải khoá ngoại.** Restore thay goal và journey như hai
+   dataset riêng; FK cứng sẽ biến thứ tự ghi dataset thành một phần của hợp đồng
+   restore — đúng cái bẫy đã tạo ra `SqliteException 787`. Repository kiểm liên
+   kết sau khi ghi, giống cách restore đã kiểm `order.customerId`.
+
+3. **`.ttbk`: `BackupDatasets.optional`, KHÔNG vào `all`.** Thêm vào `all` sẽ
+   khiến **mọi file backup viết trước v9 không khôi phục được**.
+
+4. **Một journey = một bản ghi trong backup**, cả cây lồng bên trong. Tách thành
+   ba dataset thì một restore dở dang có thể để lại kế hoạch không có bước — tệ
+   hơn không có kế hoạch, vì nó trông như đã đủ.

@@ -25,6 +25,7 @@ import 'tables/sync_queue_items.dart';
 import 'tables/supplier_favorites.dart';
 import 'tables/chat_messages.dart';
 import 'tables/business_profiles.dart';
+import 'tables/business_journeys.dart';
 
 import 'migrations/tongtai_migrations.dart';
 
@@ -79,6 +80,9 @@ part 'database.g.dart';
     SyncQueueItemsTable,
     SupplierFavoritesTable,
     BusinessProfilesTable,
+    BusinessJourneysTable,
+    BusinessJourneyNodesTable,
+    BusinessJourneyPlansTable,
     ChatMessagesTable,
   ],
 )
