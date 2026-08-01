@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../finance/finance_summary.dart';
 import '../ai/predictive_ai.dart';
 import '../analytics/cashflow_series.dart';
 import '../predictive/business_alerts_rule.dart';
@@ -7,6 +8,7 @@ import '../predictive/customer_risk_rule.dart';
 import '../predictive/revenue_forecast_rule.dart';
 import '../predictive/rule_twin.dart';
 import 'tongtai_ai_provider.dart';
+import 'tongtai_orders_provider.dart';
 import 'tongtai_capability_provider.dart';
 import 'tongtai_finance_provider.dart';
 import 'tongtai_inventory_provider.dart';
@@ -65,15 +67,20 @@ final businessAlertsProvider =
       final customers = await ref.watch(customerCapabilityProvider.future);
       final transactions = await ref.watch(financeRepositoryProvider).loadAll();
       final products = await ref.watch(productRepositoryProvider).loadAll();
+      // WTM-205: the alert's cashflow comes from the SAME arithmetic Finance
+      // shows — sales income included. `fromTransactions` counted only
+      // hand-entered rows, so a seller with ten real orders was told their
+      // cashflow was in deficit, and the Rule Twin would have had AI explain a
+      // hole that did not exist.
+      final orders = await ref.watch(orderRepositoryProvider).loadAll();
 
       return const BusinessAlertsRule().evaluate(
         revenue: revenue,
         customers: customers,
-        cashflow: CashflowSeries.fromTransactions(
+        cashflow: FinanceService(
           transactions,
-          now: revenue.generatedAt,
-          months: revenue.windowMonths,
-        ),
+          orders: orders,
+        ).cashflowAsOf(revenue.generatedAt, months: revenue.windowMonths),
         products: products,
       );
     });

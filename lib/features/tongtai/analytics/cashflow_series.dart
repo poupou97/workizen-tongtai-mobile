@@ -91,6 +91,13 @@ class CashflowSeries {
   /// Buckets [transactions] into the [months] calendar months ending at [now],
   /// oldest → newest.
   ///
+  /// ⚠️ **Hand-entered rows only — this cannot see sales revenue.** Feeding it
+  /// to the negative-cashflow alert told a seller with ten real orders that
+  /// their cashflow was in deficit (WTM-205). Anything judging the business's
+  /// money must use `FinanceService.cashflowAsOf`, the same arithmetic the
+  /// Finance dashboard shows. This factory remains for series that are
+  /// genuinely about the hand-kept ledger alone.
+  ///
   /// Same rules as `RevenueSeries.fromOrders`: every month in the window emits
   /// a point (empty ones as zeros), [excludeCurrentMonth] (default `true`)
   /// drops the incomplete running month, transactions outside the window are
