@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/analytics/cashflow_series.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
@@ -15,7 +16,9 @@ void main() {
     return FinanceTransaction(
       id: 't$nextId',
       type: type,
-      category: type == TransactionType.income ? 'Bán hàng' : 'Nhập hàng',
+      category: type == TransactionType.income
+          ? FinanceCategory.sales
+          : FinanceCategory.productCost,
       amount: amount,
       date: date,
     );

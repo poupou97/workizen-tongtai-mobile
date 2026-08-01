@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../finance/finance_category.dart';
 import '../consumer/customer.dart';
 import '../core/tongtai_enums.dart';
 import '../finance/finance_transaction.dart';
@@ -998,7 +999,7 @@ class HistoricalDataGenerator {
       drafts.add(
         _TransactionDraft(
           type: TransactionType.income,
-          category: 'Bán hàng',
+          category: FinanceCategory.sales,
           amount: o.totalAmount,
           date: o.date,
           description: 'Doanh thu đơn ${o.orderNumber}',
@@ -1012,7 +1013,12 @@ class HistoricalDataGenerator {
       final month = months[i];
       final revenue = revenueByMonth[i] ?? 0;
       final lastDay = _daysInMonth(month);
-      void expense(String category, double amount, int day, String note) {
+      void expense(
+        FinanceCategory category,
+        double amount,
+        int day,
+        String note,
+      ) {
         if (amount <= 0) return;
         drafts.add(
           _TransactionDraft(
@@ -1021,7 +1027,7 @@ class HistoricalDataGenerator {
             amount: _floorTo(amount, 1000),
             date: DateTime(month.year, month.month, min(day, lastDay)),
             description: note,
-            paymentMethod: category == 'Thuê mặt bằng'
+            paymentMethod: category == FinanceCategory.rent
                 ? 'cash'
                 : 'bankTransfer',
             rank: 1,
@@ -1030,25 +1036,25 @@ class HistoricalDataGenerator {
       }
 
       expense(
-        'Thuê mặt bằng',
+        FinanceCategory.rent,
         rent,
         1,
         'Tiền thuê mặt bằng tháng ${month.month}',
       );
       expense(
-        'Nhập hàng',
+        FinanceCategory.productCost,
         revenue * traits.cogsRatio,
         5,
         'Nhập hàng cho tháng ${month.month}',
       );
       expense(
-        'Quảng cáo',
+        FinanceCategory.marketing,
         revenue * traits.marketingRatio,
         12,
         'Chi phí marketing tháng ${month.month}',
       );
       expense(
-        'Lương nhân viên',
+        FinanceCategory.staff,
         payroll,
         28,
         'Lương nhân viên tháng ${month.month}',
@@ -1197,7 +1203,7 @@ class _TransactionDraft {
   });
 
   final TransactionType type;
-  final String category;
+  final FinanceCategory category;
   final double amount;
   final DateTime date;
   final String description;

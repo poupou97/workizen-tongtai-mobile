@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/analytics/cashflow_series.dart';
 import 'package:tongtai/features/tongtai/capability/customer_capability.dart';
 import 'package:tongtai/features/tongtai/capability/revenue_capability.dart';
@@ -48,7 +49,7 @@ void main() {
         items: [
           OrderItem(
             productName: 'Khăn lụa',
-            category: 'Fashion',
+            category: 'Home',
             quantity: 1,
             unitPrice: each,
           ),
@@ -97,7 +98,7 @@ void main() {
         items: [
           OrderItem(
             productName: 'Khăn lụa',
-            category: 'Fashion',
+            category: 'Home',
             quantity: 1,
             unitPrice: total,
           ),
@@ -136,7 +137,7 @@ void main() {
         id: id,
         sku: 'SKU-$id',
         name: 'Quạt mini $id',
-        category: 'Electronics',
+        category: 'Home',
         quantity: quantity,
         pricePerUnit: 250000,
         reorderLevel: reorderLevel,
@@ -151,7 +152,9 @@ void main() {
   }) => FinanceTransaction(
     id: id,
     type: type,
-    category: type == TransactionType.income ? 'Bán hàng' : 'Nhập hàng',
+    category: type == TransactionType.income
+        ? FinanceCategory.sales
+        : FinanceCategory.productCost,
     amount: amount,
     date: date,
   );

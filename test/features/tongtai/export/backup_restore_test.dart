@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_history.dart';
@@ -181,7 +182,7 @@ void main() {
   FinanceTransaction txn(String id) => FinanceTransaction(
     id: id,
     type: TransactionType.expense,
-    category: 'Nhập hàng',
+    category: FinanceCategory.productCost,
     amount: 2500000.75,
     date: DateTime(2026, 7, 26),
     description: 'Nhập 20kg cà phê',

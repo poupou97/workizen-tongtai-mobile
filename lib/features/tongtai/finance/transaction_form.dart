@@ -1,3 +1,4 @@
+import 'finance_category.dart';
 import 'package:flutter/foundation.dart';
 
 import '../core/tongtai_enums.dart';
@@ -88,7 +89,8 @@ class TransactionFormData {
     return FinanceTransaction(
       id: id,
       type: type,
-      category: category.trim(),
+      category: FinanceCategory.fromStorage(category.trim()),
+      categoryNote: FinanceCategory.noteFor(category.trim()),
       amount: parsedAmount!,
       date: date ?? fallbackDate,
       description: description.trim(),

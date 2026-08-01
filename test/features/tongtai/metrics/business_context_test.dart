@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_context.dart';
@@ -104,7 +105,7 @@ void main() {
   }) => FinanceTransaction(
     id: id,
     type: type,
-    category: 'Sales',
+    category: FinanceCategory.other,
     amount: amount,
     date: date ?? DateTime(2026, 7, 10),
   );

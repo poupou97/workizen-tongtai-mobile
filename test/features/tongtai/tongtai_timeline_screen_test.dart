@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/core/l10n/app_strings.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
@@ -16,11 +18,14 @@ void main() {
 
   /// A small, fully on-screen feed: one finance income + one delivered order.
   TimelineService smallService() => TimelineService([
-    FinanceEventSource([
+    // WTM-197: the source needs the strings to turn a stored **code** into a
+    // label. Without them it falls back to the code, which is honest but not
+    // something a seller should ever read.
+    FinanceEventSource(l10n: const AppStringsVi(), [
       FinanceTransaction(
         id: 'i',
         type: TransactionType.income,
-        category: 'Bán hàng',
+        category: FinanceCategory.sales,
         amount: 3000000,
         date: DateTime(2026, 7, 20),
       ),
@@ -35,7 +40,7 @@ void main() {
         items: const [
           OrderItem(
             productName: 'Quạt',
-            category: 'Electronics',
+            category: 'Home',
             quantity: 1,
             unitPrice: 500000,
           ),

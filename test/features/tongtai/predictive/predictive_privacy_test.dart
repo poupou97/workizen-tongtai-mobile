@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/ai/predictive_ai.dart';
 import 'package:tongtai/features/tongtai/analytics/cashflow_series.dart';
 import 'package:tongtai/features/tongtai/capability/customer_capability.dart';
@@ -230,14 +231,14 @@ void main() {
       FinanceTransaction(
         id: 'in-$back',
         type: TransactionType.income,
-        category: 'Bán hàng',
+        category: FinanceCategory.sales,
         amount: 9000000,
         date: DateTime(2026, 6 - back, 28),
       ),
       FinanceTransaction(
         id: 'out-$back',
         type: TransactionType.expense,
-        category: 'Nhập hàng',
+        category: FinanceCategory.productCost,
         amount: 11000000,
         date: DateTime(2026, 6 - back, 29),
         description: fixtureLedgerNote,

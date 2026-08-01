@@ -1,3 +1,5 @@
+import '../../../core/l10n/app_strings.dart';
+import '../finance/finance_category.dart';
 import '../consumer/customer_order.dart';
 import '../core/tongtai_enums.dart';
 import '../finance/finance_transaction.dart';
@@ -8,9 +10,17 @@ import 'business_event.dart';
 /// Emits a [BusinessEvent] per finance transaction (WTM-114). Income is a
 /// positive amount, expense negative.
 class FinanceEventSource implements BusinessEventSource {
-  const FinanceEventSource(this._transactions);
+  const FinanceEventSource(this._transactions, {this.l10n});
 
   final List<FinanceTransaction> _transactions;
+
+  /// Labels for the category code (WTM-197).
+  ///
+  /// Without it the title interpolated the enum and the seller read
+  /// *"Thu: FinanceCategory.sales"*. Nullable so existing call sites compile;
+  /// `null` falls back to the code, which is at least honest about being
+  /// storage rather than pretending to be a sentence.
+  final AppStrings? l10n;
 
   @override
   List<BusinessEvent> events() => [
@@ -18,13 +28,18 @@ class FinanceEventSource implements BusinessEventSource {
       BusinessEvent(
         id: 'evt-fin-${t.id}',
         type: BusinessEventType.finance,
-        title: '${t.type.labelVi}: ${t.category}',
+        title: '${t.type.labelVi}: ${_category(t)}',
         subtitle: t.description,
         timestamp: t.date,
         amount: t.isIncome ? t.amount : -t.amount,
         refId: t.id,
       ),
   ];
+
+  String _category(FinanceTransaction t) {
+    final strings = l10n;
+    return strings == null ? t.category.code : financeCategoryLabel(t, strings);
+  }
 }
 
 /// Emits a [BusinessEvent] per customer order (WTM-114).

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/finance/finance_category.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
@@ -18,14 +19,14 @@ void main() {
         FinanceTransaction(
           id: 'i',
           type: TransactionType.income,
-          category: 'Bán hàng',
+          category: FinanceCategory.sales,
           amount: 3000000,
           date: DateTime(2026, 7, 10),
         ),
         FinanceTransaction(
           id: 'e',
           type: TransactionType.expense,
-          category: 'Nhập hàng',
+          category: FinanceCategory.productCost,
           amount: 1800000,
           date: DateTime(2026, 7, 9),
         ),
