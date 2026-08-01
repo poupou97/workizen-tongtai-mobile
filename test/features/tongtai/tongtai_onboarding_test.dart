@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,63 +17,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // ── AC2: content model (headline + illustration + bilingual body) ─────────
-  group('TongtaiOnboardingPage content (AC2)', () {
-    test('has 5-6 screens (satisfies the "5-6 screens" requirement)', () {
-      expect(kTongtaiOnboardingPages.length, inInclusiveRange(5, 6));
-    });
-
-    test('covers welcome + the five core features', () {
-      final ids = kTongtaiOnboardingPages.map((p) => p.id).toList();
-      expect(
-        ids,
-        containsAll(<String>[
-          'welcome',
-          'suppliers', // scanning suppliers
-          'inventory', // managing inventory
-          'customers', // tracking customers
-          'ai_chat', // using AI chat
-          'journeys', // creating business journeys
-        ]),
-      );
-    });
-
-    test('page ids are unique', () {
-      final ids = kTongtaiOnboardingPages.map((p) => p.id).toList();
-      expect(ids.toSet().length, ids.length);
-    });
-
-    test('every page has a non-empty headline + body in EN and VI', () {
-      for (final page in kTongtaiOnboardingPages) {
-        expect(
-          page.headlineEn.trim(),
-          isNotEmpty,
-          reason: '${page.id} headlineEn',
-        );
-        expect(
-          page.headlineVi.trim(),
-          isNotEmpty,
-          reason: '${page.id} headlineVi',
-        );
-        expect(page.bodyEn.trim(), isNotEmpty, reason: '${page.id} bodyEn');
-        expect(page.bodyVi.trim(), isNotEmpty, reason: '${page.id} bodyVi');
-      }
-    });
-
-    test('VI copy actually differs from EN (real translation, not a copy)', () {
-      for (final page in kTongtaiOnboardingPages) {
-        expect(page.headlineVi, isNot(page.headlineEn), reason: page.id);
-        expect(page.bodyVi, isNot(page.bodyEn), reason: page.id);
-      }
-    });
-
-    test('headlineFor/bodyFor resolve vi vs everything-else', () {
-      final page = kTongtaiOnboardingPages.first;
-      expect(page.headlineFor('vi'), page.headlineVi);
-      expect(page.bodyFor('vi'), page.bodyVi);
-      expect(page.headlineFor('en'), page.headlineEn);
-      expect(page.bodyFor('fr'), page.bodyEn); // unknown → English
-    });
-  });
+  // AC2 used to assert the six slide pages carried real EN+VI copy. WTM-178
+  // deleted the slides; the equivalent guard now lives in
+  // `tongtai_onboarding_conversation_test.dart`, which checks every option
+  // code maps to a real enum value and every enum value has a chip.
 
   // ── AC4: local persistence store ──────────────────────────────────────────
   group('InMemoryTongtaiOnboardingStore', () {
@@ -173,131 +119,11 @@ void main() {
     );
   });
 
-  // ── AC1 + AC3: the onboarding screen widget ───────────────────────────────
-  group('TongtaiOnboardingScreen widget', () {
-    Widget host(VoidCallback onFinished, {Locale? locale}) {
-      return MaterialApp(
-        locale: locale,
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [Locale('en'), Locale('vi')],
-        home: TongtaiOnboardingScreen(onFinished: onFinished),
-      );
-    }
-
-    Finder skipButton() => find.byKey(const ValueKey('onboarding-action-skip'));
-    Finder primaryButton() =>
-        find.byKey(const ValueKey('onboarding-action-next'));
-
-    testWidgets('shows the first screen: illustration + headline + body', (
-      tester,
-    ) async {
-      await tester.pumpWidget(host(() {}));
-      await tester.pumpAndSettle();
-
-      // Illustration (icon) present.
-      expect(find.byIcon(kTongtaiOnboardingPages.first.icon), findsOneWidget);
-      // Headline + body present.
-      expect(
-        find.text(kTongtaiOnboardingPages.first.headlineEn),
-        findsOneWidget,
-      );
-      expect(find.text(kTongtaiOnboardingPages.first.bodyEn), findsOneWidget);
-    });
-
-    testWidgets('AC1: Next advances through every screen with animation', (
-      tester,
-    ) async {
-      await tester.pumpWidget(host(() {}));
-      await tester.pumpAndSettle();
-
-      for (var i = 1; i < kTongtaiOnboardingPages.length; i++) {
-        await tester.tap(primaryButton());
-        await tester.pumpAndSettle(); // let the slide/fade transition finish
-        expect(
-          find.text(kTongtaiOnboardingPages[i].headlineEn),
-          findsOneWidget,
-          reason: 'page $i headline should be visible after advancing',
-        );
-      }
-    });
-
-    testWidgets('AC1: page content is wrapped in a fade+slide transition', (
-      tester,
-    ) async {
-      await tester.pumpWidget(host(() {}));
-      await tester.pumpAndSettle();
-      // The transition primitives are present in the tree (Opacity + Transform
-      // driven by the PageController).
-      expect(find.byType(Opacity), findsWidgets);
-      expect(find.byType(Transform), findsWidgets);
-    });
-
-    testWidgets(
-      'AC3: Skip appears on every screen and dismisses the tutorial',
-      (tester) async {
-        var finished = 0;
-        await tester.pumpWidget(host(() => finished++));
-        await tester.pumpAndSettle();
-
-        // Skip is present on each screen as we advance.
-        for (var i = 0; i < kTongtaiOnboardingPages.length; i++) {
-          expect(
-            skipButton(),
-            findsOneWidget,
-            reason: 'skip missing on page $i',
-          );
-          if (i < kTongtaiOnboardingPages.length - 1) {
-            await tester.tap(primaryButton());
-            await tester.pumpAndSettle();
-          }
-        }
-
-        // Tapping Skip fires onFinished.
-        await tester.tap(skipButton());
-        await tester.pump();
-        expect(finished, 1);
-      },
-    );
-
-    testWidgets('the last screen shows Get Started and it finishes', (
-      tester,
-    ) async {
-      var finished = 0;
-      await tester.pumpWidget(host(() => finished++));
-      await tester.pumpAndSettle();
-
-      // Advance to the last screen.
-      for (var i = 1; i < kTongtaiOnboardingPages.length; i++) {
-        await tester.tap(primaryButton());
-        await tester.pumpAndSettle();
-      }
-
-      expect(find.text('Get Started'), findsOneWidget);
-      expect(find.text('Next'), findsNothing);
-
-      await tester.tap(primaryButton());
-      await tester.pump();
-      expect(finished, 1);
-    });
-
-    testWidgets('AC2: renders Vietnamese copy under the vi locale', (
-      tester,
-    ) async {
-      await tester.pumpWidget(host(() {}, locale: const Locale('vi')));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text(kTongtaiOnboardingPages.first.headlineVi),
-        findsOneWidget,
-      );
-      expect(find.text('Bỏ qua'), findsOneWidget); // Skip
-      expect(find.text('Tiếp tục'), findsOneWidget); // Next
-    });
-  });
+  // AC1 + AC3 used to be covered by a six-slide tutorial widget. WTM-178
+  // replaced it with a conversation; those tests now live in
+  // `tongtai_onboarding_conversation_screen_test.dart`, and the slide screen
+  // and its content file were deleted rather than left as dead code someone
+  // could wire back by accident.
 
   // ── AC4 + AC5: root gate shows onboarding once, replayable ────────────────
   group('TongtaiRootGate (AC4/AC5)', () {
@@ -326,7 +152,7 @@ void main() {
       );
     }
 
-    Finder onboarding() => find.byKey(const ValueKey('onboarding-action-skip'));
+    Finder onboarding() => find.byKey(const Key('onboarding-greeting'));
     Finder appShell() => find.byType(TongtaiBottomNav);
 
     testWidgets('AC4: shows the tutorial on first launch (not completed)', (
@@ -361,8 +187,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(onboarding(), findsOneWidget);
 
-        // Tap Skip → gate should flip to the app shell and persist completion.
-        await tester.tap(onboarding());
+        // Tap "skip" on the greeting → gate flips to the shell and persists.
+        await tester.tap(find.byKey(const Key('onboarding-skip-all')));
         await tester.pumpAndSettle();
 
         expect(onboarding(), findsNothing);
