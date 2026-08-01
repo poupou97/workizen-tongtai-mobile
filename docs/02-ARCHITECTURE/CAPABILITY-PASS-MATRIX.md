@@ -6,7 +6,7 @@
 > Backlog **không** ưu tiên theo Story ID, ngày tạo, sprint hay Jira Priority.
 > Mỗi vòng lặp tính lại điểm theo Capability Value.
 
-**Cập nhật lần cuối:** 2026-08-01 · sau WTM-201
+**Cập nhật lần cuối:** 2026-08-01 · sau WTM-202 (Derived Data Audit)
 
 ---
 
@@ -46,17 +46,22 @@ thứ chưa nhìn là cách tái tạo đúng tình huống đó trong một b�
 
 ## Ma trận
 
-| Capability | Domain | Data | SSoT | IA | UI | AI | Test |
-|---|---|---|---|---|---|---|---|
-| **Business Journey** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Opportunity** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Finance** | ✅ | ❌ | ✅ | ✅ | ✅ | `?` | ✅ |
-| **Consumer** | ✅ | ✅ | ✅ | ✅ | `?` | `?` | ✅ |
-| **Reports** | ✅ | ✅ | ✅ | `?` | `?` | ✅ | ✅ |
-| **Inventory** | ✅ | `?` | ⚠️ | ✅ | `?` | `?` | ✅ |
-| **Producer** | ✅ | ❌ | `?` | ✅ | `?` | `?` | ✅ |
-| **AI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Settings / More** | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+**Điều kiện PASS bổ sung (Founder Directive 2026-08-01):** một capability
+**không** PASS khi còn **Derived Truth Violation** — cột dẫn xuất nằm trong
+database mà không có benchmark hay lý do nghiệp vụ. Xem
+[DERIVED-DATA-AUDIT.md](DERIVED-DATA-AUDIT.md). Cột `DTV` bên dưới.
+
+| Capability | Domain | Data | SSoT | **DTV** | IA | UI | AI | Test |
+|---|---|---|---|---|---|---|---|---|
+| **Business Journey** | ✅ | ✅ | ✅ | ❌ 5 cột | ✅ | ✅ | ✅ | ✅ |
+| **Opportunity** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Finance** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | `?` | ✅ |
+| **Consumer** | ✅ | ✅ | ✅ | ❌ 6 cột | ✅ | `?` | `?` | ✅ |
+| **Reports** | ✅ | ✅ | ✅ | ✅ | `?` | `?` | ✅ | ✅ |
+| **Inventory** | ✅ | `?` | ⚠️ | ❌ 2 cột | ✅ | `?` | `?` | ✅ |
+| **Producer** | ✅ | ❌ | `?` | ✅ | ✅ | `?` | `?` | ✅ |
+| **AI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Settings / More** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 
 ---
 
@@ -135,13 +140,18 @@ Rời thanh dưới ở WTM-192 nhưng **một chạm từ mọi tab**, có test
 | Hạng | Việc | Loại | Điểm | Trạng thái |
 |---|---|---|---|---|
 | ~~1~~ | ~~**WTM-201** Consumer đọc counter đã lưu~~ | P1 SSoT | ~~+80~~ | ✅ **xong** |
-| 1 | **WTM-197** category chi phí là chuỗi tự do | P1 (dữ liệu người bán + `.ttbk`) | **+80** | ⏳ tiếp theo |
-| 2 | Audit 5 ô `?` còn lại | rủi ro chưa biết | **~+80** | mở |
+| 1 | **WTM-203** 11 cột dẫn xuất trong DB — `churnRisk` là **luật thứ hai đang chờ được đọc** | Derived Truth Violation | **+100** | ⏳ **tiếp theo** |
+| 2 | **WTM-197** category chi phí là chuỗi tự do | P1 (dữ liệu người bán + `.ttbk`) | **+80** | mở |
+| 3 | Audit 5 ô `?` còn lại | rủi ro chưa biết | **~+80** | mở |
+| 4 | **WTM-204** nối `costPerUnit` vào domain — mở khoá **4** năng lực đang bị chặn | P4 Data Model | **+50** | mở |
 | 4 | **WTM-198** Finance vào Business Journey | P2 logic | **+70** | mở |
 | 5 | IA của Reports/Finance sau khi 5 tab kín | P3 | **+60** | chưa có story |
 
-**Chọn:** WTM-201 — cao điểm nhất, và là lần **thứ ba** cùng một khuyết tật
-(trường đã lưu vs luật dẫn xuất), nên sửa nó cũng là đóng luôn một lớp lỗi.
+**Chọn vòng tới: WTM-203 (+100).** Audit WTM-202 cho thấy ba lỗi SSoT hôm nay
+đều **bắt đầu từ một cột dẫn xuất trong schema**. Sửa từng chỗ đọc là chữa
+triệu chứng; đây là nguồn. Và `churnRisk` là luật thứ hai **nằm trong schema**,
+nơi không ai nghĩ tới khi đi tìm "luật" — khác với WTM-200b, chỗ luật thứ hai
+nằm trong code nên grep ra được.
 
 > ⚠️ Ô `?` không phải PASS. Sáu ô chưa audit là rủi ro chưa biết, và theo kinh
 > nghiệm hôm nay — ba lỗi lớn nhất đều nằm ở vùng "tưởng ổn" — chúng đáng được
