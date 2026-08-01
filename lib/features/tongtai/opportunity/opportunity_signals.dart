@@ -5,6 +5,9 @@ import 'opportunity.dart';
 const double kOpportunityHighValueImpact = 30000000; // ≥ 30M ₫
 
 /// ROI multiple below which an opportunity reads as High Risk (thin return).
+/// Kept for the day `Product` carries a cost price and **High Risk** can mean
+/// something again (WTM-193). Unused today on purpose.
+// ignore: unused_element
 const double kOpportunityHighRiskRoi = 2.0;
 
 /// Age (days) beyond which an untouched opportunity is Stale.
@@ -46,7 +49,8 @@ enum OpportunitySignal {
 /// summary. Rules:
 ///
 /// * **High Value** — expected impact ≥ [kOpportunityHighValueImpact].
-/// * **High Risk** — estimated ROI < [kOpportunityHighRiskRoi] (thin return).
+/// * **High Risk** — **not emitted in Phase 2** (WTM-193): it was derived from
+///   a constant ROI, so it said nothing. Needs a cost price on `Product`.
 /// * **Stale** — surfaced > [kOpportunityStaleDays] days ago and still untouched
 ///   (no seller reaction).
 /// * **Urgent** — not stale, and either a seasonal (closing-window) opportunity
@@ -63,9 +67,12 @@ Set<OpportunitySignal> opportunitySignals(
       opportunity.reaction == OpportunityReaction.none;
 
   if (isHighValue) signals.add(OpportunitySignal.highValue);
-  if (opportunity.estimatedRoi < kOpportunityHighRiskRoi) {
-    signals.add(OpportunitySignal.highRisk);
-  }
+  // WTM-193: the **High Risk** badge is gone. It compared `estimatedRoi`
+  // against a threshold, and `estimatedRoi` was a **constant per rule** — so
+  // the badge only ever restated which rule fired, while reading to the seller
+  // as a judgement about their money. A real risk signal needs a cost price,
+  // which `Product` does not carry. Same rule as the hidden ROI facet: keep the
+  // signal in the domain, stop showing a number nobody computed.
   if (isStale) signals.add(OpportunitySignal.stale);
   if (!isStale &&
       (opportunity.type == OpportunityType.seasonal ||

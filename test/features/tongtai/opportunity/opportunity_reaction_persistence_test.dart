@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
@@ -33,8 +34,7 @@ void main() {
     title: 'Cơ hội $id',
     description: 'mô tả',
     expectedImpact: 1000000,
-    estimatedRoi: 2.4,
-    aiScore: 70,
+    score: OpportunityScore.fixed(70),
     discoveredAt: DateTime(2026, 8, 1),
   );
 

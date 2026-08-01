@@ -702,7 +702,7 @@ class _PipelineCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  '${top.aiScore.round()}',
+                  top.score.value?.round().toString() ?? '—',
                   style: TongtaiDesignTokens.captionStyle.copyWith(
                     color: TongtaiDesignTokens.financePurple,
                     fontWeight: FontWeight.w700,

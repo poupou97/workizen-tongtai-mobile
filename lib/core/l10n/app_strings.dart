@@ -171,7 +171,6 @@ abstract class AppStrings {
   String get oppUnsaveTooltip;
   String get oppEmptySaved;
   String get oppEmptyTab;
-  String get oppRoi;
   String get oppImpact;
   String get oppDetected;
   String get oppWhyWorth;
@@ -981,8 +980,6 @@ class AppStringsVi extends AppStrings {
   String get oppEmptySaved => 'Chưa có cơ hội nào được lưu';
   @override
   String get oppEmptyTab => 'Chưa có cơ hội nào trong mục này';
-  @override
-  String get oppRoi => 'ROI ước tính';
   @override
   String get oppImpact => 'Tác động';
   @override
@@ -2329,8 +2326,6 @@ class AppStringsEn extends AppStrings {
   String get oppEmptySaved => 'No saved opportunities yet';
   @override
   String get oppEmptyTab => 'No opportunities in this tab yet';
-  @override
-  String get oppRoi => 'Est. ROI';
   @override
   String get oppImpact => 'Impact';
   @override

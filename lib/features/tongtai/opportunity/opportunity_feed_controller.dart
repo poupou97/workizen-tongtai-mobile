@@ -5,9 +5,20 @@ import 'opportunity.dart';
 
 /// How the opportunity feed is ordered (WTM-91 AC3).
 enum OpportunitySort {
-  relevance, // aiScore
+  relevance, // score.value
   recency, // discoveredAt
-  roi; // estimatedRoi
+  /// **Hidden in Phase 2** (WTM-193). Computing a real ROI needs a **cost
+  /// price**, and `Product` only carries a selling price. It stays in the
+  /// domain per the Founder's O-1 rule — *keep the domain, hide the capability
+  /// that has no data* — because a facet that sorted by a constant sorted by
+  /// nothing, and looked like it sorted by something.
+  roi;
+
+  /// Sorts a seller can actually choose. [roi] is absent until cost prices
+  /// exist — see its doc comment.
+  static List<OpportunitySort> get visible => const [relevance, recency];
+
+  bool get isVisible => visible.contains(this);
 
   String get labelEn => switch (this) {
     OpportunitySort.relevance => 'Relevance',
@@ -95,9 +106,11 @@ class OpportunityFeedController extends ChangeNotifier {
     ];
     int compare(Opportunity a, Opportunity b) {
       final int c = switch (query.sort) {
-        OpportunitySort.relevance => b.aiScore.compareTo(a.aiScore),
+        // Unscorable last: an opportunity nobody could rank must not float to
+        // the top by accident (WTM-193).
+        OpportunitySort.relevance || OpportunitySort.roi =>
+          (b.score.value ?? -1).compareTo(a.score.value ?? -1),
         OpportunitySort.recency => b.discoveredAt.compareTo(a.discoveredAt),
-        OpportunitySort.roi => b.estimatedRoi.compareTo(a.estimatedRoi),
       };
       return c != 0 ? c : a.id.compareTo(b.id);
     }

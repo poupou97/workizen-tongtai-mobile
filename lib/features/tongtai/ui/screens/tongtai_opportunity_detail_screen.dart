@@ -263,14 +263,6 @@ class _TongtaiOpportunityDetailScreenState
             children: [
               Expanded(
                 child: _StatTile(
-                  label: l10n.oppRoi,
-                  value: '${(_o.estimatedRoi * 100).round()}%',
-                  accent: TongtaiDesignTokens.producerGreen,
-                ),
-              ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
-              Expanded(
-                child: _StatTile(
                   label: l10n.oppImpact,
                   value: '+${TongtaiFormatters.vndShort(_o.expectedImpact)}',
                   accent: TongtaiDesignTokens.financePurple,
@@ -481,7 +473,8 @@ class _TypeBadge extends StatelessWidget {
 class _ScoreBadge extends StatelessWidget {
   const _ScoreBadge({required this.score});
 
-  final double score;
+  /// `null` when nothing could be computed (WTM-193).
+  final double? score;
 
   @override
   Widget build(BuildContext context) {
@@ -503,7 +496,8 @@ class _ScoreBadge extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            '${score.round()}',
+            // A dash reads as "unknown"; a 0 would read as "worthless".
+            score?.round().toString() ?? '—',
             style: TongtaiDesignTokens.heading3Style.copyWith(
               color: TongtaiDesignTokens.financePurple,
               fontWeight: FontWeight.w700,

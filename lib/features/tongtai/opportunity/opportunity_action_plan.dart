@@ -1,3 +1,4 @@
+import '../core/tongtai_formatters.dart';
 import '../core/tongtai_enums.dart';
 import 'opportunity.dart';
 
@@ -20,13 +21,18 @@ class OpportunityActionStep {
 List<OpportunityActionStep> opportunityActionPlan(Opportunity opportunity) {
   final steps = _stepsFor(opportunity.type);
   // Every plan closes on the same decision gate, phrased with this
-  // opportunity's own ROI so the last step reads concretely.
-  final roiPct = (opportunity.estimatedRoi * 100).round();
+  // opportunity's own expected impact.
+  //
+  // It used to quote an ROI percentage — from `estimatedRoi`, which was a
+  // **constant per rule** (WTM-193). The seller read a specific-looking target
+  // that nobody had computed. Expected impact is a real number from their own
+  // data, so the gate is now checkable against something true.
+  final impact = TongtaiFormatters.vnd(opportunity.expectedImpact);
   return [
     ...steps,
     OpportunityActionStep(
       'Quyết định scale',
-      'Nếu lợi nhuận thực đạt kỳ vọng (ROI ~$roiPct%) thì nhân rộng, '
+      'Nếu lợi nhuận thực tiến gần mức kỳ vọng ($impact) thì nhân rộng, '
           'ngược lại dừng và rút kinh nghiệm.',
     ),
   ];

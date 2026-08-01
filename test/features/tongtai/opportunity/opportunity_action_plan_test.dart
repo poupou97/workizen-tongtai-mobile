@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_action_plan.dart';
@@ -11,8 +12,7 @@ void main() {
     title: 't',
     description: 'd',
     expectedImpact: 1000000,
-    estimatedRoi: roi,
-    aiScore: 80,
+    score: OpportunityScore.fixed(80),
     discoveredAt: DateTime(2026, 7, 1),
   );
 
@@ -24,13 +24,19 @@ void main() {
   });
 
   test(
-    'the plan always closes on the scale decision, phrased with the ROI',
+    'the plan closes on the scale decision, phrased with the real impact',
     () {
-      final plan = opportunityActionPlan(
-        opp(OpportunityType.arbitrage, roi: 2.4),
-      );
+      // It used to quote an ROI percentage from `estimatedRoi` — a constant per
+      // rule (WTM-193). The seller read a specific-looking target nobody had
+      // computed. Expected impact comes from their own orders.
+      final plan = opportunityActionPlan(opp(OpportunityType.arbitrage));
       expect(plan.last.titleVi, 'Quyết định scale');
-      expect(plan.last.detailVi, contains('240%'));
+      expect(plan.last.detailVi, contains('1.000.000'));
+      expect(
+        plan.last.detailVi,
+        isNot(contains('%')),
+        reason: 'no percentage nobody computed',
+      );
     },
   );
 

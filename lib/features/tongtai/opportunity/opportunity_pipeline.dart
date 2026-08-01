@@ -36,7 +36,10 @@ OpportunityPipeline opportunityPipeline(List<Opportunity> opportunities) {
   final active = opportunities.where((o) => !o.isDismissed).toList();
   if (active.isEmpty) return OpportunityPipeline.empty;
   final value = active.fold<double>(0, (sum, o) => sum + o.expectedImpact);
-  final top = active.reduce((a, b) => a.aiScore >= b.aiScore ? a : b);
+  // Unscorable never wins the top slot (WTM-193).
+  final top = active.reduce(
+    (a, b) => (a.score.value ?? -1) >= (b.score.value ?? -1) ? a : b,
+  );
   return OpportunityPipeline(
     activeCount: active.length,
     pipelineValue: value,

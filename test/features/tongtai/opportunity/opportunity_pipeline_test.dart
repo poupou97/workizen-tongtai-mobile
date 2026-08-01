@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_pipeline.dart';
@@ -16,18 +17,22 @@ void main() {
     title: 'Cơ hội $id',
     description: 'd',
     expectedImpact: impact,
-    estimatedRoi: 2,
-    aiScore: score,
+    score: OpportunityScore.fixed(score),
     discoveredAt: DateTime(2026, 7, 1),
     reaction: reaction,
   );
 
-  test('sample opportunities: 5 active, 160M pipeline, top score 92', () {
+  test('sample opportunities: 5 active, 160M pipeline, best-scored on top', () {
     final pipeline = opportunityPipeline(kSampleOpportunities);
     expect(pipeline.activeCount, 5);
     expect(pipeline.pipelineValue, 160000000);
-    expect(pipeline.top!.aiScore, 92);
-    expect(pipeline.top!.title, 'Quạt tích điện sắp vào mùa nóng');
+    // WTM-193: no hand-written 92 any more — the top is whichever sample the
+    // real scoring function ranks highest, so this test moves if the formula
+    // moves, which is the point.
+    final best = kSampleOpportunities
+        .map((o) => o.score.value ?? -1)
+        .reduce((a, b) => a >= b ? a : b);
+    expect(pipeline.top!.score.value, best);
     expect(pipeline.hasActive, isTrue);
   });
 

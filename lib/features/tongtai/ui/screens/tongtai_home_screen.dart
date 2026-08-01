@@ -248,8 +248,9 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     // Real mode: the Rule Engine's generated opportunities over persisted data
     // (WTM-144 one-source); injected lists are for tests/previews only.
     final topOpportunities =
-        (widget.opportunities ?? _loadedOpportunities).toList()
-          ..sort((a, b) => b.aiScore.compareTo(a.aiScore));
+        (widget.opportunities ?? _loadedOpportunities).toList()..sort(
+          (a, b) => (b.score.value ?? -1).compareTo(a.score.value ?? -1),
+        );
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -911,7 +912,9 @@ class _OpportunityTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              '${opportunity.aiScore.round()}',
+              // '—' when nothing could be scored: a dash reads as "unknown",
+              // a 0 would read as "worthless" (WTM-193).
+              opportunity.score.value?.round().toString() ?? '—',
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 color: TongtaiDesignTokens.financePurple,
@@ -934,7 +937,9 @@ class _OpportunityTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'ROI ×${opportunity.estimatedRoi.toStringAsFixed(1)}',
+                  // WTM-193: was `ROI ×2.5` from a constant. Expected impact is
+                  // a real number from the seller's own orders.
+                  TongtaiFormatters.vnd(opportunity.expectedImpact),
                   style: const TextStyle(
                     fontSize: 12,
                     color: TongtaiDesignTokens.lightTextSecondary,

@@ -25,8 +25,7 @@ String opportunityPromptBlock(Opportunity o) =>
     '- Tiêu đề: ${o.title}\n'
     '- Mô tả: ${o.description}\n'
     '- Tác động kỳ vọng: ${TongtaiFormatters.vnd(o.expectedImpact)}\n'
-    '- ROI ước tính: ${o.estimatedRoi}\n'
-    '- Điểm rule-based: ${o.aiScore.round()}/100';
+    '- Điểm rule-based: ${_scoreText(o)}';
 
 /// Parses the trailing `ĐIỂM: NN` line of an AI answer; null when absent or
 /// out of range after clamping is impossible (non-numeric).
@@ -67,9 +66,23 @@ class OpportunityAiInsight {
 /// every provider fails. Score = the rule score (the authoritative one).
 String ruleBasedOpportunityInsight(Opportunity o) =>
     '${o.description}\n'
-    'Đánh giá rule-based: điểm ${o.aiScore.round()}/100 · ROI ước tính '
-    '${o.estimatedRoi} · tác động ${TongtaiFormatters.vnd(o.expectedImpact)}.\n'
+    'Đánh giá rule-based: điểm ${_scoreText(o)} · tác động '
+    '${TongtaiFormatters.vnd(o.expectedImpact)}.\n'
     '(Thêm API key trong More → AI Assistant để nhận đánh giá AI sâu hơn.)';
+
+/// The score, with its coverage — never a bare number (WTM-193).
+///
+/// A model told "82/100" will explain it as a complete judgement. Told
+/// "82/100, dựa trên 70% yếu tố", it can only explain what was actually
+/// measured — which is the ADR-TON-016 boundary written into the prompt itself.
+String _scoreText(Opportunity o) {
+  final value = o.score.value;
+  if (value == null) return 'chưa đủ dữ liệu để chấm';
+  final pct = (o.score.coverage * 100).round();
+  return o.score.isPartial
+      ? '${value.round()}/100 (dựa trên $pct% yếu tố — phần còn lại chưa có dữ liệu)'
+      : '${value.round()}/100';
+}
 
 /// WTM-141 service: one [OpportunityAiInsight] per call. Read-only.
 class OpportunityAiService {

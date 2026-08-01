@@ -6,6 +6,7 @@ import '../journey/business_goal.dart';
 import '../journey/journey_progress.dart';
 import '../metrics/business_metrics.dart';
 import 'opportunity.dart';
+import 'opportunity_score.dart';
 
 /// The Opportunity **Rule Engine** (WTM-139, Founder default → ADR-TON-013):
 /// generates real opportunities from the business's own data. The chain is
@@ -36,13 +37,34 @@ class OpportunityRuleEngine {
     required DateTime now,
   }) {
     final billable = orders.billable.toList(growable: false);
-    final result = <Opportunity>[
-      ..._restock(products, billable, now),
-      ..._winBack(customers, billable, now),
-      ..._goalCatchUp(goals, billable, now),
-      ..._categoryMomentum(billable, now),
-    ]..sort((a, b) => b.aiScore.compareTo(a.aiScore));
+    // What the business itself earns in the window. Every profit-potential
+    // score is a ratio against this, because ₫5m means something different to
+    // a ₫10m shop than to a ₫500m one (WTM-193).
+    final baseline = _windowRevenue(billable, now);
+    final result =
+        <Opportunity>[
+          ..._restock(products, billable, now, baseline),
+          ..._winBack(customers, billable, now, baseline),
+          ..._goalCatchUp(goals, billable, now, baseline),
+          ..._categoryMomentum(billable, now, baseline),
+        ]..sort((a, b) {
+          // Unscorable last: an opportunity nobody can rank should not sit at the
+          // top by accident.
+          final c = (b.score.value ?? -1).compareTo(a.score.value ?? -1);
+          return c != 0 ? c : a.id.compareTo(b.id);
+        });
     return result;
+  }
+
+  /// The business's own revenue inside the momentum window — the yardstick
+  /// every profit-potential score is measured against.
+  double _windowRevenue(List<CustomerOrder> billable, DateTime now) {
+    final cutoff = now.subtract(Duration(days: momentumWindowDays));
+    var total = 0.0;
+    for (final o in billable.where((o) => o.date.isAfter(cutoff))) {
+      total += o.totalAmount;
+    }
+    return total;
   }
 
   /// Revenue per product name inside the momentum window.
@@ -70,8 +92,10 @@ class OpportunityRuleEngine {
     List<Product> products,
     List<CustomerOrder> billable,
     DateTime now,
+    double baseline,
   ) sync* {
     final revenue = _productRevenue(billable, now);
+    final cutoff = now.subtract(Duration(days: momentumWindowDays));
     for (final p in products) {
       if (p.quantity > p.reorderLevel) continue;
       final recent = revenue[p.name] ?? 0;
@@ -87,8 +111,19 @@ class OpportunityRuleEngine {
             '(mức đặt lại ${p.reorderLevel}). '
             '${out ? 'Hết hàng là doanh thu bỏ lỡ mỗi ngày.' : 'Nhập thêm trước khi đứt hàng.'}',
         expectedImpact: recent,
-        estimatedRoi: 2.5,
-        aiScore: out ? 85 : 70,
+        score: scoreOpportunity(
+          impact: recent,
+          baseline: baseline,
+          // How many billable orders actually contained this product in the
+          // window — the seller's own demand, not the market's.
+          orders: billable
+              .where(
+                (o) =>
+                    o.date.isAfter(cutoff) &&
+                    o.items.any((i) => i.productName == p.name),
+              )
+              .length,
+        ),
         discoveredAt: now,
       );
     }
@@ -100,6 +135,7 @@ class OpportunityRuleEngine {
     List<Customer> customers,
     List<CustomerOrder> billable,
     DateTime now,
+    double baseline,
   ) sync* {
     final cutoff = now.subtract(Duration(days: lapsedCustomerDays));
     for (final c in customers) {
@@ -122,8 +158,12 @@ class OpportunityRuleEngine {
             'nhưng im lặng hơn $lapsedCustomerDays ngày. Một tin nhắn kèm ưu '
             'đãi quay lại thường rẻ hơn nhiều so với tìm khách mới.',
         expectedImpact: aov,
-        estimatedRoi: 3.0,
-        aiScore: 65,
+        score: scoreOpportunity(
+          impact: aov,
+          baseline: baseline,
+          // Their order history is the demand signal for winning them back.
+          orders: theirOrders.length,
+        ),
         discoveredAt: now,
       );
     }
@@ -134,7 +174,9 @@ class OpportunityRuleEngine {
     List<BusinessGoal> goals,
     List<CustomerOrder> billable,
     DateTime now,
+    double baseline,
   ) sync* {
+    final cutoff = now.subtract(Duration(days: momentumWindowDays));
     for (final g in goals) {
       if (g.targetAmount <= 0) continue;
       final derived = deriveGoalProgress(g, billable, now);
@@ -153,8 +195,13 @@ class OpportunityRuleEngine {
             '${(derived.timelineElapsed(now) * 100).round()}% thời gian). '
             'Cân nhắc khuyến mãi ngắn hoặc mở thêm kênh bán.',
         expectedImpact: gap,
-        estimatedRoi: 2.0,
-        aiScore: 75,
+        score: scoreOpportunity(
+          impact: gap,
+          baseline: baseline,
+          // Trading activity in the window is the demand signal behind a
+          // catch-up push: a shop with no recent orders has no momentum to use.
+          orders: billable.where((o) => o.date.isAfter(cutoff)).length,
+        ),
         discoveredAt: now,
       );
     }
@@ -165,6 +212,7 @@ class OpportunityRuleEngine {
   Iterable<Opportunity> _categoryMomentum(
     List<CustomerOrder> billable,
     DateTime now,
+    double baseline,
   ) sync* {
     final cutoff = now.subtract(Duration(days: momentumWindowDays));
     final recent = billable
@@ -192,8 +240,13 @@ class OpportunityRuleEngine {
           '(${_vnd(top.value)}). Cân nhắc thêm mẫu mới hoặc tăng hiển thị '
           'nhóm này khi đà còn tốt.',
       expectedImpact: top.value,
-      estimatedRoi: 2.2,
-      aiScore: 60,
+      score: scoreOpportunity(
+        impact: top.value,
+        baseline: baseline,
+        orders: recent
+            .where((o) => o.items.any((i) => i.category == top.key))
+            .length,
+      ),
       discoveredAt: now,
     );
   }

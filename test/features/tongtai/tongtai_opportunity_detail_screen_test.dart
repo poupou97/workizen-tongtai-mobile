@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/journey/journey.dart';
@@ -29,14 +30,11 @@ void main() {
     title: 'Quạt tích điện sắp vào mùa nóng',
     description: 'Nhu cầu quạt tích điện tăng mạnh khi vào hè.',
     expectedImpact: 5200000,
-    estimatedRoi: 2.4,
-    aiScore: 92,
+    score: OpportunityScore.fixed(92),
     discoveredAt: DateTime(2026, 7, 18),
   );
 
-  testWidgets('renders title, AI score, ROI and the action plan', (
-    tester,
-  ) async {
+  testWidgets('renders title, score and the action plan', (tester) async {
     await tester.pumpWidget(
       MaterialApp(home: TongtaiOpportunityDetailScreen(opportunity: sample)),
     );
@@ -44,7 +42,8 @@ void main() {
     expect(find.byKey(const Key('opportunity-detail-title')), findsOneWidget);
     expect(find.text('Quạt tích điện sắp vào mùa nóng'), findsOneWidget);
     expect(find.text('92'), findsOneWidget); // AI score badge
-    expect(find.text('240%'), findsOneWidget); // ROI 2.4×
+    // The ROI tile is gone (WTM-193): it displayed a constant.
+    expect(find.textContaining('%'), findsNothing);
     expect(find.text('+5,2tr ₫'), findsOneWidget); // expected impact, compact
     expect(find.byKey(const Key('opportunity-detail-plan')), findsOneWidget);
     // A seasonal plan starts with demand forecasting and ends on the scale gate.

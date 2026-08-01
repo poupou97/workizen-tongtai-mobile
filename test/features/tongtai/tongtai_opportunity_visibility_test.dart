@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_feed_controller.dart';
@@ -15,8 +16,7 @@ void main() {
     title: id,
     description: id,
     expectedImpact: 1000000,
-    estimatedRoi: 1.5,
-    aiScore: 80,
+    score: OpportunityScore.fixed(80),
     discoveredAt: DateTime(2026, 8, 1),
   );
 

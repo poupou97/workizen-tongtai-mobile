@@ -121,7 +121,9 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
     final favorites = data.favorites;
     final opportunities = data.opportunities;
     final topOpportunities =
-        (opportunities.toList()..sort((a, b) => b.aiScore.compareTo(a.aiScore)))
+        (opportunities.toList()..sort(
+              (a, b) => (b.score.value ?? -1).compareTo(a.score.value ?? -1),
+            ))
             .take(3)
             .toList();
 
@@ -221,7 +223,8 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
                       title: Text(o.title),
                       subtitle: Text(
                         '+${TongtaiFormatters.vnd(o.expectedImpact)}'
-                        ' · ${l10n.oppScoreLabel} ${o.aiScore.round()}',
+                        ' · ${l10n.oppScoreLabel} '
+                        '${o.score.value?.round() ?? '—'}',
                       ),
                     ),
                 ],

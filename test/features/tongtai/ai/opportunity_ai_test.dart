@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/ai/business_summary.dart'
     show businessContextPromptText;
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/ai/opportunity_ai.dart';
 import 'package:tongtai/features/tongtai/ai/tongtai_ai_client.dart';
 import 'package:tongtai/features/tongtai/ai/tongtai_ai_key_store.dart';
@@ -72,8 +73,7 @@ void main() {
     title: 'Nhập lại Quạt mini (đã hết hàng)',
     description: 'Bán chạy nhưng đã hết hàng.',
     expectedImpact: 800000,
-    estimatedRoi: 2.5,
-    aiScore: 85,
+    score: OpportunityScore.fixed(85),
     discoveredAt: DateTime(2026, 7, 29),
   );
 
