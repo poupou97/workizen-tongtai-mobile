@@ -59,6 +59,9 @@ void main() {
   testWidgets('a product row shows name, SKU, quantity and price', (
     tester,
   ) async {
+    // WTM-215 put the overview + low-stock chrome above the list, so the rows
+    // start below a default 600px fold — the tall viewport keeps them built.
+    useTallViewport(tester);
     await pumpScreen(tester);
 
     // Isolate a single product by its SKU so the assertion doesn't depend on
@@ -71,7 +74,8 @@ void main() {
     // Exact row text (not the search field's echo of the SKU).
     expect(find.text('SKU-EL-001 • Electronics'), findsOneWidget); // SKU
     expect(find.text('Qty 195'), findsOneWidget); // quantity
-    expect(find.textContaining('₫'), findsOneWidget); // price per unit
+    // Price on the row + the overview card's stock-value KPI (WTM-215).
+    expect(find.textContaining('₫'), findsNWidgets(2));
   });
 
   testWidgets('paginates 28 products into two pages of 20', (tester) async {
@@ -84,7 +88,8 @@ void main() {
           .data,
       'Page 1/2',
     );
-    expect(find.textContaining('₫'), findsNWidgets(20)); // 20 rows on page 1
+    // 20 rows on page 1 + the overview stock-value KPI (WTM-215).
+    expect(find.textContaining('₫'), findsNWidgets(21));
 
     // Advance to page 2.
     await tester.tap(find.byTooltip('Next page'));
@@ -96,7 +101,8 @@ void main() {
           .data,
       'Page 2/2',
     );
-    expect(find.textContaining('₫'), findsNWidgets(8)); // remaining 8 rows
+    // Remaining 8 rows + the overview stock-value KPI (WTM-215).
+    expect(find.textContaining('₫'), findsNWidgets(9));
 
     // ...and back.
     await tester.tap(find.byTooltip('Previous page'));
@@ -147,6 +153,7 @@ void main() {
   testWidgets('shows a color-coded status label for an out-of-stock product', (
     tester,
   ) async {
+    useTallViewport(tester); // rows sit below the WTM-215 chrome
     await pumpScreen(tester);
 
     // "Khăn tắm cotton" is the only match and is out of stock (quantity 0).
@@ -159,6 +166,7 @@ void main() {
   });
 
   testWidgets('sort chips select and the direction toggles', (tester) async {
+    useTallViewport(tester); // the sort bar sits below the WTM-215 chrome
     await pumpScreen(tester);
 
     // Default sort is Name, ascending.
@@ -220,6 +228,7 @@ void main() {
   });
 
   testWidgets('shows the empty state when nothing matches', (tester) async {
+    useTallViewport(tester); // the empty state sits below the WTM-215 chrome
     await pumpScreen(tester);
 
     await tester.enterText(find.byType(TextField), 'zzzznotaproduct');
