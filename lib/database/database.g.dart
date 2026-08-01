@@ -2278,28 +2278,6 @@ class $ProductsTableTable extends ProductsTable
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _currentPriceMeta = const VerificationMeta(
-    'currentPrice',
-  );
-  @override
-  late final GeneratedColumn<double> currentPrice = GeneratedColumn<double>(
-    'current_price',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _profitPerUnitMeta = const VerificationMeta(
-    'profitPerUnit',
-  );
-  @override
-  late final GeneratedColumn<double> profitPerUnit = GeneratedColumn<double>(
-    'profit_per_unit',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _totalStockMeta = const VerificationMeta(
     'totalStock',
   );
@@ -2311,17 +2289,6 @@ class $ProductsTableTable extends ProductsTable
     type: DriftSqlType.double,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _stockByWarehouseMeta = const VerificationMeta(
-    'stockByWarehouse',
-  );
-  @override
-  late final GeneratedColumn<String> stockByWarehouse = GeneratedColumn<String>(
-    'stock_by_warehouse',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
   );
   static const VerificationMeta _stockAlertLevelMeta = const VerificationMeta(
     'stockAlertLevel',
@@ -2419,10 +2386,7 @@ class $ProductsTableTable extends ProductsTable
     category,
     costPerUnit,
     listPrice,
-    currentPrice,
-    profitPerUnit,
     totalStock,
-    stockByWarehouse,
     stockAlertLevel,
     supplierId,
     salesChannels,
@@ -2504,37 +2468,10 @@ class $ProductsTableTable extends ProductsTable
     } else if (isInserting) {
       context.missing(_listPriceMeta);
     }
-    if (data.containsKey('current_price')) {
-      context.handle(
-        _currentPriceMeta,
-        currentPrice.isAcceptableOrUnknown(
-          data['current_price']!,
-          _currentPriceMeta,
-        ),
-      );
-    }
-    if (data.containsKey('profit_per_unit')) {
-      context.handle(
-        _profitPerUnitMeta,
-        profitPerUnit.isAcceptableOrUnknown(
-          data['profit_per_unit']!,
-          _profitPerUnitMeta,
-        ),
-      );
-    }
     if (data.containsKey('total_stock')) {
       context.handle(
         _totalStockMeta,
         totalStock.isAcceptableOrUnknown(data['total_stock']!, _totalStockMeta),
-      );
-    }
-    if (data.containsKey('stock_by_warehouse')) {
-      context.handle(
-        _stockByWarehouseMeta,
-        stockByWarehouse.isAcceptableOrUnknown(
-          data['stock_by_warehouse']!,
-          _stockByWarehouseMeta,
-        ),
       );
     }
     if (data.containsKey('stock_alert_level')) {
@@ -2629,22 +2566,10 @@ class $ProductsTableTable extends ProductsTable
         DriftSqlType.double,
         data['${effectivePrefix}list_price'],
       )!,
-      currentPrice: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}current_price'],
-      ),
-      profitPerUnit: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}profit_per_unit'],
-      ),
       totalStock: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}total_stock'],
       )!,
-      stockByWarehouse: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}stock_by_warehouse'],
-      ),
       stockAlertLevel: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}stock_alert_level'],
@@ -2692,10 +2617,7 @@ class ProductsTableData extends DataClass
   final String? category;
   final double? costPerUnit;
   final double listPrice;
-  final double? currentPrice;
-  final double? profitPerUnit;
   final double totalStock;
-  final String? stockByWarehouse;
   final double? stockAlertLevel;
   final String? supplierId;
   final String? salesChannels;
@@ -2717,10 +2639,7 @@ class ProductsTableData extends DataClass
     this.category,
     this.costPerUnit,
     required this.listPrice,
-    this.currentPrice,
-    this.profitPerUnit,
     required this.totalStock,
-    this.stockByWarehouse,
     this.stockAlertLevel,
     this.supplierId,
     this.salesChannels,
@@ -2746,16 +2665,7 @@ class ProductsTableData extends DataClass
       map['cost_per_unit'] = Variable<double>(costPerUnit);
     }
     map['list_price'] = Variable<double>(listPrice);
-    if (!nullToAbsent || currentPrice != null) {
-      map['current_price'] = Variable<double>(currentPrice);
-    }
-    if (!nullToAbsent || profitPerUnit != null) {
-      map['profit_per_unit'] = Variable<double>(profitPerUnit);
-    }
     map['total_stock'] = Variable<double>(totalStock);
-    if (!nullToAbsent || stockByWarehouse != null) {
-      map['stock_by_warehouse'] = Variable<String>(stockByWarehouse);
-    }
     if (!nullToAbsent || stockAlertLevel != null) {
       map['stock_alert_level'] = Variable<double>(stockAlertLevel);
     }
@@ -2790,16 +2700,7 @@ class ProductsTableData extends DataClass
           ? const Value.absent()
           : Value(costPerUnit),
       listPrice: Value(listPrice),
-      currentPrice: currentPrice == null && nullToAbsent
-          ? const Value.absent()
-          : Value(currentPrice),
-      profitPerUnit: profitPerUnit == null && nullToAbsent
-          ? const Value.absent()
-          : Value(profitPerUnit),
       totalStock: Value(totalStock),
-      stockByWarehouse: stockByWarehouse == null && nullToAbsent
-          ? const Value.absent()
-          : Value(stockByWarehouse),
       stockAlertLevel: stockAlertLevel == null && nullToAbsent
           ? const Value.absent()
           : Value(stockAlertLevel),
@@ -2832,10 +2733,7 @@ class ProductsTableData extends DataClass
       category: serializer.fromJson<String?>(json['category']),
       costPerUnit: serializer.fromJson<double?>(json['costPerUnit']),
       listPrice: serializer.fromJson<double>(json['listPrice']),
-      currentPrice: serializer.fromJson<double?>(json['currentPrice']),
-      profitPerUnit: serializer.fromJson<double?>(json['profitPerUnit']),
       totalStock: serializer.fromJson<double>(json['totalStock']),
-      stockByWarehouse: serializer.fromJson<String?>(json['stockByWarehouse']),
       stockAlertLevel: serializer.fromJson<double?>(json['stockAlertLevel']),
       supplierId: serializer.fromJson<String?>(json['supplierId']),
       salesChannels: serializer.fromJson<String?>(json['salesChannels']),
@@ -2857,10 +2755,7 @@ class ProductsTableData extends DataClass
       'category': serializer.toJson<String?>(category),
       'costPerUnit': serializer.toJson<double?>(costPerUnit),
       'listPrice': serializer.toJson<double>(listPrice),
-      'currentPrice': serializer.toJson<double?>(currentPrice),
-      'profitPerUnit': serializer.toJson<double?>(profitPerUnit),
       'totalStock': serializer.toJson<double>(totalStock),
-      'stockByWarehouse': serializer.toJson<String?>(stockByWarehouse),
       'stockAlertLevel': serializer.toJson<double?>(stockAlertLevel),
       'supplierId': serializer.toJson<String?>(supplierId),
       'salesChannels': serializer.toJson<String?>(salesChannels),
@@ -2880,10 +2775,7 @@ class ProductsTableData extends DataClass
     Value<String?> category = const Value.absent(),
     Value<double?> costPerUnit = const Value.absent(),
     double? listPrice,
-    Value<double?> currentPrice = const Value.absent(),
-    Value<double?> profitPerUnit = const Value.absent(),
     double? totalStock,
-    Value<String?> stockByWarehouse = const Value.absent(),
     Value<double?> stockAlertLevel = const Value.absent(),
     Value<String?> supplierId = const Value.absent(),
     Value<String?> salesChannels = const Value.absent(),
@@ -2900,14 +2792,7 @@ class ProductsTableData extends DataClass
     category: category.present ? category.value : this.category,
     costPerUnit: costPerUnit.present ? costPerUnit.value : this.costPerUnit,
     listPrice: listPrice ?? this.listPrice,
-    currentPrice: currentPrice.present ? currentPrice.value : this.currentPrice,
-    profitPerUnit: profitPerUnit.present
-        ? profitPerUnit.value
-        : this.profitPerUnit,
     totalStock: totalStock ?? this.totalStock,
-    stockByWarehouse: stockByWarehouse.present
-        ? stockByWarehouse.value
-        : this.stockByWarehouse,
     stockAlertLevel: stockAlertLevel.present
         ? stockAlertLevel.value
         : this.stockAlertLevel,
@@ -2938,18 +2823,9 @@ class ProductsTableData extends DataClass
           ? data.costPerUnit.value
           : this.costPerUnit,
       listPrice: data.listPrice.present ? data.listPrice.value : this.listPrice,
-      currentPrice: data.currentPrice.present
-          ? data.currentPrice.value
-          : this.currentPrice,
-      profitPerUnit: data.profitPerUnit.present
-          ? data.profitPerUnit.value
-          : this.profitPerUnit,
       totalStock: data.totalStock.present
           ? data.totalStock.value
           : this.totalStock,
-      stockByWarehouse: data.stockByWarehouse.present
-          ? data.stockByWarehouse.value
-          : this.stockByWarehouse,
       stockAlertLevel: data.stockAlertLevel.present
           ? data.stockAlertLevel.value
           : this.stockAlertLevel,
@@ -2979,10 +2855,7 @@ class ProductsTableData extends DataClass
           ..write('category: $category, ')
           ..write('costPerUnit: $costPerUnit, ')
           ..write('listPrice: $listPrice, ')
-          ..write('currentPrice: $currentPrice, ')
-          ..write('profitPerUnit: $profitPerUnit, ')
           ..write('totalStock: $totalStock, ')
-          ..write('stockByWarehouse: $stockByWarehouse, ')
           ..write('stockAlertLevel: $stockAlertLevel, ')
           ..write('supplierId: $supplierId, ')
           ..write('salesChannels: $salesChannels, ')
@@ -3004,10 +2877,7 @@ class ProductsTableData extends DataClass
     category,
     costPerUnit,
     listPrice,
-    currentPrice,
-    profitPerUnit,
     totalStock,
-    stockByWarehouse,
     stockAlertLevel,
     supplierId,
     salesChannels,
@@ -3028,10 +2898,7 @@ class ProductsTableData extends DataClass
           other.category == this.category &&
           other.costPerUnit == this.costPerUnit &&
           other.listPrice == this.listPrice &&
-          other.currentPrice == this.currentPrice &&
-          other.profitPerUnit == this.profitPerUnit &&
           other.totalStock == this.totalStock &&
-          other.stockByWarehouse == this.stockByWarehouse &&
           other.stockAlertLevel == this.stockAlertLevel &&
           other.supplierId == this.supplierId &&
           other.salesChannels == this.salesChannels &&
@@ -3050,10 +2917,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
   final Value<String?> category;
   final Value<double?> costPerUnit;
   final Value<double> listPrice;
-  final Value<double?> currentPrice;
-  final Value<double?> profitPerUnit;
   final Value<double> totalStock;
-  final Value<String?> stockByWarehouse;
   final Value<double?> stockAlertLevel;
   final Value<String?> supplierId;
   final Value<String?> salesChannels;
@@ -3071,10 +2935,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     this.category = const Value.absent(),
     this.costPerUnit = const Value.absent(),
     this.listPrice = const Value.absent(),
-    this.currentPrice = const Value.absent(),
-    this.profitPerUnit = const Value.absent(),
     this.totalStock = const Value.absent(),
-    this.stockByWarehouse = const Value.absent(),
     this.stockAlertLevel = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.salesChannels = const Value.absent(),
@@ -3093,10 +2954,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     this.category = const Value.absent(),
     this.costPerUnit = const Value.absent(),
     required double listPrice,
-    this.currentPrice = const Value.absent(),
-    this.profitPerUnit = const Value.absent(),
     this.totalStock = const Value.absent(),
-    this.stockByWarehouse = const Value.absent(),
     this.stockAlertLevel = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.salesChannels = const Value.absent(),
@@ -3119,10 +2977,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     Expression<String>? category,
     Expression<double>? costPerUnit,
     Expression<double>? listPrice,
-    Expression<double>? currentPrice,
-    Expression<double>? profitPerUnit,
     Expression<double>? totalStock,
-    Expression<String>? stockByWarehouse,
     Expression<double>? stockAlertLevel,
     Expression<String>? supplierId,
     Expression<String>? salesChannels,
@@ -3141,10 +2996,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
       if (category != null) 'category': category,
       if (costPerUnit != null) 'cost_per_unit': costPerUnit,
       if (listPrice != null) 'list_price': listPrice,
-      if (currentPrice != null) 'current_price': currentPrice,
-      if (profitPerUnit != null) 'profit_per_unit': profitPerUnit,
       if (totalStock != null) 'total_stock': totalStock,
-      if (stockByWarehouse != null) 'stock_by_warehouse': stockByWarehouse,
       if (stockAlertLevel != null) 'stock_alert_level': stockAlertLevel,
       if (supplierId != null) 'supplier_id': supplierId,
       if (salesChannels != null) 'sales_channels': salesChannels,
@@ -3165,10 +3017,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     Value<String?>? category,
     Value<double?>? costPerUnit,
     Value<double>? listPrice,
-    Value<double?>? currentPrice,
-    Value<double?>? profitPerUnit,
     Value<double>? totalStock,
-    Value<String?>? stockByWarehouse,
     Value<double?>? stockAlertLevel,
     Value<String?>? supplierId,
     Value<String?>? salesChannels,
@@ -3187,10 +3036,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
       category: category ?? this.category,
       costPerUnit: costPerUnit ?? this.costPerUnit,
       listPrice: listPrice ?? this.listPrice,
-      currentPrice: currentPrice ?? this.currentPrice,
-      profitPerUnit: profitPerUnit ?? this.profitPerUnit,
       totalStock: totalStock ?? this.totalStock,
-      stockByWarehouse: stockByWarehouse ?? this.stockByWarehouse,
       stockAlertLevel: stockAlertLevel ?? this.stockAlertLevel,
       supplierId: supplierId ?? this.supplierId,
       salesChannels: salesChannels ?? this.salesChannels,
@@ -3229,17 +3075,8 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     if (listPrice.present) {
       map['list_price'] = Variable<double>(listPrice.value);
     }
-    if (currentPrice.present) {
-      map['current_price'] = Variable<double>(currentPrice.value);
-    }
-    if (profitPerUnit.present) {
-      map['profit_per_unit'] = Variable<double>(profitPerUnit.value);
-    }
     if (totalStock.present) {
       map['total_stock'] = Variable<double>(totalStock.value);
-    }
-    if (stockByWarehouse.present) {
-      map['stock_by_warehouse'] = Variable<String>(stockByWarehouse.value);
     }
     if (stockAlertLevel.present) {
       map['stock_alert_level'] = Variable<double>(stockAlertLevel.value);
@@ -3279,10 +3116,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
           ..write('category: $category, ')
           ..write('costPerUnit: $costPerUnit, ')
           ..write('listPrice: $listPrice, ')
-          ..write('currentPrice: $currentPrice, ')
-          ..write('profitPerUnit: $profitPerUnit, ')
           ..write('totalStock: $totalStock, ')
-          ..write('stockByWarehouse: $stockByWarehouse, ')
           ..write('stockAlertLevel: $stockAlertLevel, ')
           ..write('supplierId: $supplierId, ')
           ..write('salesChannels: $salesChannels, ')
@@ -3416,17 +3250,6 @@ class $CustomersTableTable extends CustomersTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _lifetimeValueMeta = const VerificationMeta(
-    'lifetimeValue',
-  );
-  @override
-  late final GeneratedColumn<double> lifetimeValue = GeneratedColumn<double>(
-    'lifetime_value',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _orderCountMeta = const VerificationMeta(
     'orderCount',
   );
@@ -3449,17 +3272,6 @@ class $CustomersTableTable extends CustomersTable
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _avgOrderValueMeta = const VerificationMeta(
-    'avgOrderValue',
-  );
-  @override
-  late final GeneratedColumn<double> avgOrderValue = GeneratedColumn<double>(
-    'avg_order_value',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _lastOrderDateMeta = const VerificationMeta(
     'lastOrderDate',
   );
@@ -3472,17 +3284,6 @@ class $CustomersTableTable extends CustomersTable
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
-  static const VerificationMeta _churnRiskMeta = const VerificationMeta(
-    'churnRisk',
-  );
-  @override
-  late final GeneratedColumn<double> churnRisk = GeneratedColumn<double>(
-    'churn_risk',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _domainSnapshotMeta = const VerificationMeta(
     'domainSnapshot',
   );
@@ -3531,12 +3332,9 @@ class $CustomersTableTable extends CustomersTable
     city,
     country,
     segments,
-    lifetimeValue,
     orderCount,
     totalSpent,
-    avgOrderValue,
     lastOrderDate,
-    churnRisk,
     domainSnapshot,
     createdAt,
     updatedAt,
@@ -3625,15 +3423,6 @@ class $CustomersTableTable extends CustomersTable
         segments.isAcceptableOrUnknown(data['segments']!, _segmentsMeta),
       );
     }
-    if (data.containsKey('lifetime_value')) {
-      context.handle(
-        _lifetimeValueMeta,
-        lifetimeValue.isAcceptableOrUnknown(
-          data['lifetime_value']!,
-          _lifetimeValueMeta,
-        ),
-      );
-    }
     if (data.containsKey('order_count')) {
       context.handle(
         _orderCountMeta,
@@ -3646,15 +3435,6 @@ class $CustomersTableTable extends CustomersTable
         totalSpent.isAcceptableOrUnknown(data['total_spent']!, _totalSpentMeta),
       );
     }
-    if (data.containsKey('avg_order_value')) {
-      context.handle(
-        _avgOrderValueMeta,
-        avgOrderValue.isAcceptableOrUnknown(
-          data['avg_order_value']!,
-          _avgOrderValueMeta,
-        ),
-      );
-    }
     if (data.containsKey('last_order_date')) {
       context.handle(
         _lastOrderDateMeta,
@@ -3662,12 +3442,6 @@ class $CustomersTableTable extends CustomersTable
           data['last_order_date']!,
           _lastOrderDateMeta,
         ),
-      );
-    }
-    if (data.containsKey('churn_risk')) {
-      context.handle(
-        _churnRiskMeta,
-        churnRisk.isAcceptableOrUnknown(data['churn_risk']!, _churnRiskMeta),
       );
     }
     if (data.containsKey('domain_snapshot')) {
@@ -3744,10 +3518,6 @@ class $CustomersTableTable extends CustomersTable
         DriftSqlType.string,
         data['${effectivePrefix}segments'],
       ),
-      lifetimeValue: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}lifetime_value'],
-      ),
       orderCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}order_count'],
@@ -3756,17 +3526,9 @@ class $CustomersTableTable extends CustomersTable
         DriftSqlType.double,
         data['${effectivePrefix}total_spent'],
       ),
-      avgOrderValue: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}avg_order_value'],
-      ),
       lastOrderDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_order_date'],
-      ),
-      churnRisk: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}churn_risk'],
       ),
       domainSnapshot: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -3802,12 +3564,9 @@ class CustomersTableData extends DataClass
   final String? city;
   final String? country;
   final String? segments;
-  final double? lifetimeValue;
   final int? orderCount;
   final double? totalSpent;
-  final double? avgOrderValue;
   final DateTime? lastOrderDate;
-  final double? churnRisk;
 
   /// Versioned full-domain snapshot (JSON) — WTM-123, ADR-TON-009 (option B).
   /// Structured columns stay the source of truth for promoted fields; this
@@ -3827,12 +3586,9 @@ class CustomersTableData extends DataClass
     this.city,
     this.country,
     this.segments,
-    this.lifetimeValue,
     this.orderCount,
     this.totalSpent,
-    this.avgOrderValue,
     this.lastOrderDate,
-    this.churnRisk,
     this.domainSnapshot,
     required this.createdAt,
     required this.updatedAt,
@@ -3867,23 +3623,14 @@ class CustomersTableData extends DataClass
     if (!nullToAbsent || segments != null) {
       map['segments'] = Variable<String>(segments);
     }
-    if (!nullToAbsent || lifetimeValue != null) {
-      map['lifetime_value'] = Variable<double>(lifetimeValue);
-    }
     if (!nullToAbsent || orderCount != null) {
       map['order_count'] = Variable<int>(orderCount);
     }
     if (!nullToAbsent || totalSpent != null) {
       map['total_spent'] = Variable<double>(totalSpent);
     }
-    if (!nullToAbsent || avgOrderValue != null) {
-      map['avg_order_value'] = Variable<double>(avgOrderValue);
-    }
     if (!nullToAbsent || lastOrderDate != null) {
       map['last_order_date'] = Variable<DateTime>(lastOrderDate);
-    }
-    if (!nullToAbsent || churnRisk != null) {
-      map['churn_risk'] = Variable<double>(churnRisk);
     }
     if (!nullToAbsent || domainSnapshot != null) {
       map['domain_snapshot'] = Variable<String>(domainSnapshot);
@@ -3920,24 +3667,15 @@ class CustomersTableData extends DataClass
       segments: segments == null && nullToAbsent
           ? const Value.absent()
           : Value(segments),
-      lifetimeValue: lifetimeValue == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lifetimeValue),
       orderCount: orderCount == null && nullToAbsent
           ? const Value.absent()
           : Value(orderCount),
       totalSpent: totalSpent == null && nullToAbsent
           ? const Value.absent()
           : Value(totalSpent),
-      avgOrderValue: avgOrderValue == null && nullToAbsent
-          ? const Value.absent()
-          : Value(avgOrderValue),
       lastOrderDate: lastOrderDate == null && nullToAbsent
           ? const Value.absent()
           : Value(lastOrderDate),
-      churnRisk: churnRisk == null && nullToAbsent
-          ? const Value.absent()
-          : Value(churnRisk),
       domainSnapshot: domainSnapshot == null && nullToAbsent
           ? const Value.absent()
           : Value(domainSnapshot),
@@ -3963,12 +3701,9 @@ class CustomersTableData extends DataClass
       city: serializer.fromJson<String?>(json['city']),
       country: serializer.fromJson<String?>(json['country']),
       segments: serializer.fromJson<String?>(json['segments']),
-      lifetimeValue: serializer.fromJson<double?>(json['lifetimeValue']),
       orderCount: serializer.fromJson<int?>(json['orderCount']),
       totalSpent: serializer.fromJson<double?>(json['totalSpent']),
-      avgOrderValue: serializer.fromJson<double?>(json['avgOrderValue']),
       lastOrderDate: serializer.fromJson<DateTime?>(json['lastOrderDate']),
-      churnRisk: serializer.fromJson<double?>(json['churnRisk']),
       domainSnapshot: serializer.fromJson<String?>(json['domainSnapshot']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -3989,12 +3724,9 @@ class CustomersTableData extends DataClass
       'city': serializer.toJson<String?>(city),
       'country': serializer.toJson<String?>(country),
       'segments': serializer.toJson<String?>(segments),
-      'lifetimeValue': serializer.toJson<double?>(lifetimeValue),
       'orderCount': serializer.toJson<int?>(orderCount),
       'totalSpent': serializer.toJson<double?>(totalSpent),
-      'avgOrderValue': serializer.toJson<double?>(avgOrderValue),
       'lastOrderDate': serializer.toJson<DateTime?>(lastOrderDate),
-      'churnRisk': serializer.toJson<double?>(churnRisk),
       'domainSnapshot': serializer.toJson<String?>(domainSnapshot),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -4013,12 +3745,9 @@ class CustomersTableData extends DataClass
     Value<String?> city = const Value.absent(),
     Value<String?> country = const Value.absent(),
     Value<String?> segments = const Value.absent(),
-    Value<double?> lifetimeValue = const Value.absent(),
     Value<int?> orderCount = const Value.absent(),
     Value<double?> totalSpent = const Value.absent(),
-    Value<double?> avgOrderValue = const Value.absent(),
     Value<DateTime?> lastOrderDate = const Value.absent(),
-    Value<double?> churnRisk = const Value.absent(),
     Value<String?> domainSnapshot = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -4036,18 +3765,11 @@ class CustomersTableData extends DataClass
     city: city.present ? city.value : this.city,
     country: country.present ? country.value : this.country,
     segments: segments.present ? segments.value : this.segments,
-    lifetimeValue: lifetimeValue.present
-        ? lifetimeValue.value
-        : this.lifetimeValue,
     orderCount: orderCount.present ? orderCount.value : this.orderCount,
     totalSpent: totalSpent.present ? totalSpent.value : this.totalSpent,
-    avgOrderValue: avgOrderValue.present
-        ? avgOrderValue.value
-        : this.avgOrderValue,
     lastOrderDate: lastOrderDate.present
         ? lastOrderDate.value
         : this.lastOrderDate,
-    churnRisk: churnRisk.present ? churnRisk.value : this.churnRisk,
     domainSnapshot: domainSnapshot.present
         ? domainSnapshot.value
         : this.domainSnapshot,
@@ -4073,22 +3795,15 @@ class CustomersTableData extends DataClass
       city: data.city.present ? data.city.value : this.city,
       country: data.country.present ? data.country.value : this.country,
       segments: data.segments.present ? data.segments.value : this.segments,
-      lifetimeValue: data.lifetimeValue.present
-          ? data.lifetimeValue.value
-          : this.lifetimeValue,
       orderCount: data.orderCount.present
           ? data.orderCount.value
           : this.orderCount,
       totalSpent: data.totalSpent.present
           ? data.totalSpent.value
           : this.totalSpent,
-      avgOrderValue: data.avgOrderValue.present
-          ? data.avgOrderValue.value
-          : this.avgOrderValue,
       lastOrderDate: data.lastOrderDate.present
           ? data.lastOrderDate.value
           : this.lastOrderDate,
-      churnRisk: data.churnRisk.present ? data.churnRisk.value : this.churnRisk,
       domainSnapshot: data.domainSnapshot.present
           ? data.domainSnapshot.value
           : this.domainSnapshot,
@@ -4111,12 +3826,9 @@ class CustomersTableData extends DataClass
           ..write('city: $city, ')
           ..write('country: $country, ')
           ..write('segments: $segments, ')
-          ..write('lifetimeValue: $lifetimeValue, ')
           ..write('orderCount: $orderCount, ')
           ..write('totalSpent: $totalSpent, ')
-          ..write('avgOrderValue: $avgOrderValue, ')
           ..write('lastOrderDate: $lastOrderDate, ')
-          ..write('churnRisk: $churnRisk, ')
           ..write('domainSnapshot: $domainSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -4137,12 +3849,9 @@ class CustomersTableData extends DataClass
     city,
     country,
     segments,
-    lifetimeValue,
     orderCount,
     totalSpent,
-    avgOrderValue,
     lastOrderDate,
-    churnRisk,
     domainSnapshot,
     createdAt,
     updatedAt,
@@ -4162,12 +3871,9 @@ class CustomersTableData extends DataClass
           other.city == this.city &&
           other.country == this.country &&
           other.segments == this.segments &&
-          other.lifetimeValue == this.lifetimeValue &&
           other.orderCount == this.orderCount &&
           other.totalSpent == this.totalSpent &&
-          other.avgOrderValue == this.avgOrderValue &&
           other.lastOrderDate == this.lastOrderDate &&
-          other.churnRisk == this.churnRisk &&
           other.domainSnapshot == this.domainSnapshot &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -4185,12 +3891,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
   final Value<String?> city;
   final Value<String?> country;
   final Value<String?> segments;
-  final Value<double?> lifetimeValue;
   final Value<int?> orderCount;
   final Value<double?> totalSpent;
-  final Value<double?> avgOrderValue;
   final Value<DateTime?> lastOrderDate;
-  final Value<double?> churnRisk;
   final Value<String?> domainSnapshot;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -4207,12 +3910,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     this.city = const Value.absent(),
     this.country = const Value.absent(),
     this.segments = const Value.absent(),
-    this.lifetimeValue = const Value.absent(),
     this.orderCount = const Value.absent(),
     this.totalSpent = const Value.absent(),
-    this.avgOrderValue = const Value.absent(),
     this.lastOrderDate = const Value.absent(),
-    this.churnRisk = const Value.absent(),
     this.domainSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -4230,12 +3930,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     this.city = const Value.absent(),
     this.country = const Value.absent(),
     this.segments = const Value.absent(),
-    this.lifetimeValue = const Value.absent(),
     this.orderCount = const Value.absent(),
     this.totalSpent = const Value.absent(),
-    this.avgOrderValue = const Value.absent(),
     this.lastOrderDate = const Value.absent(),
-    this.churnRisk = const Value.absent(),
     this.domainSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -4255,12 +3952,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     Expression<String>? city,
     Expression<String>? country,
     Expression<String>? segments,
-    Expression<double>? lifetimeValue,
     Expression<int>? orderCount,
     Expression<double>? totalSpent,
-    Expression<double>? avgOrderValue,
     Expression<DateTime>? lastOrderDate,
-    Expression<double>? churnRisk,
     Expression<String>? domainSnapshot,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -4278,12 +3972,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
       if (city != null) 'city': city,
       if (country != null) 'country': country,
       if (segments != null) 'segments': segments,
-      if (lifetimeValue != null) 'lifetime_value': lifetimeValue,
       if (orderCount != null) 'order_count': orderCount,
       if (totalSpent != null) 'total_spent': totalSpent,
-      if (avgOrderValue != null) 'avg_order_value': avgOrderValue,
       if (lastOrderDate != null) 'last_order_date': lastOrderDate,
-      if (churnRisk != null) 'churn_risk': churnRisk,
       if (domainSnapshot != null) 'domain_snapshot': domainSnapshot,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -4303,12 +3994,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     Value<String?>? city,
     Value<String?>? country,
     Value<String?>? segments,
-    Value<double?>? lifetimeValue,
     Value<int?>? orderCount,
     Value<double?>? totalSpent,
-    Value<double?>? avgOrderValue,
     Value<DateTime?>? lastOrderDate,
-    Value<double?>? churnRisk,
     Value<String?>? domainSnapshot,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -4326,12 +4014,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
       city: city ?? this.city,
       country: country ?? this.country,
       segments: segments ?? this.segments,
-      lifetimeValue: lifetimeValue ?? this.lifetimeValue,
       orderCount: orderCount ?? this.orderCount,
       totalSpent: totalSpent ?? this.totalSpent,
-      avgOrderValue: avgOrderValue ?? this.avgOrderValue,
       lastOrderDate: lastOrderDate ?? this.lastOrderDate,
-      churnRisk: churnRisk ?? this.churnRisk,
       domainSnapshot: domainSnapshot ?? this.domainSnapshot,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -4375,23 +4060,14 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     if (segments.present) {
       map['segments'] = Variable<String>(segments.value);
     }
-    if (lifetimeValue.present) {
-      map['lifetime_value'] = Variable<double>(lifetimeValue.value);
-    }
     if (orderCount.present) {
       map['order_count'] = Variable<int>(orderCount.value);
     }
     if (totalSpent.present) {
       map['total_spent'] = Variable<double>(totalSpent.value);
     }
-    if (avgOrderValue.present) {
-      map['avg_order_value'] = Variable<double>(avgOrderValue.value);
-    }
     if (lastOrderDate.present) {
       map['last_order_date'] = Variable<DateTime>(lastOrderDate.value);
-    }
-    if (churnRisk.present) {
-      map['churn_risk'] = Variable<double>(churnRisk.value);
     }
     if (domainSnapshot.present) {
       map['domain_snapshot'] = Variable<String>(domainSnapshot.value);
@@ -4422,12 +4098,9 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
           ..write('city: $city, ')
           ..write('country: $country, ')
           ..write('segments: $segments, ')
-          ..write('lifetimeValue: $lifetimeValue, ')
           ..write('orderCount: $orderCount, ')
           ..write('totalSpent: $totalSpent, ')
-          ..write('avgOrderValue: $avgOrderValue, ')
           ..write('lastOrderDate: $lastOrderDate, ')
-          ..write('churnRisk: $churnRisk, ')
           ..write('domainSnapshot: $domainSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -5473,40 +5146,6 @@ class $JourneysTableTable extends JourneysTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _progressPercentMeta = const VerificationMeta(
-    'progressPercent',
-  );
-  @override
-  late final GeneratedColumn<int> progressPercent = GeneratedColumn<int>(
-    'progress_percent',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _totalStepsMeta = const VerificationMeta(
-    'totalSteps',
-  );
-  @override
-  late final GeneratedColumn<int> totalSteps = GeneratedColumn<int>(
-    'total_steps',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _completedStepsMeta = const VerificationMeta(
-    'completedSteps',
-  );
-  @override
-  late final GeneratedColumn<int> completedSteps = GeneratedColumn<int>(
-    'completed_steps',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
   static const VerificationMeta _budgetMeta = const VerificationMeta('budget');
   @override
   late final GeneratedColumn<double> budget = GeneratedColumn<double>(
@@ -5515,16 +5154,6 @@ class $JourneysTableTable extends JourneysTable
     true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
-  );
-  static const VerificationMeta _spentMeta = const VerificationMeta('spent');
-  @override
-  late final GeneratedColumn<double> spent = GeneratedColumn<double>(
-    'spent',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
   );
   static const VerificationMeta _timelineDaysMeta = const VerificationMeta(
     'timelineDays',
@@ -5600,11 +5229,7 @@ class $JourneysTableTable extends JourneysTable
     businessId,
     goal,
     status,
-    progressPercent,
-    totalSteps,
-    completedSteps,
     budget,
-    spent,
     timelineDays,
     revenueImpact,
     domainSnapshot,
@@ -5653,40 +5278,10 @@ class $JourneysTableTable extends JourneysTable
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
-    if (data.containsKey('progress_percent')) {
-      context.handle(
-        _progressPercentMeta,
-        progressPercent.isAcceptableOrUnknown(
-          data['progress_percent']!,
-          _progressPercentMeta,
-        ),
-      );
-    }
-    if (data.containsKey('total_steps')) {
-      context.handle(
-        _totalStepsMeta,
-        totalSteps.isAcceptableOrUnknown(data['total_steps']!, _totalStepsMeta),
-      );
-    }
-    if (data.containsKey('completed_steps')) {
-      context.handle(
-        _completedStepsMeta,
-        completedSteps.isAcceptableOrUnknown(
-          data['completed_steps']!,
-          _completedStepsMeta,
-        ),
-      );
-    }
     if (data.containsKey('budget')) {
       context.handle(
         _budgetMeta,
         budget.isAcceptableOrUnknown(data['budget']!, _budgetMeta),
-      );
-    }
-    if (data.containsKey('spent')) {
-      context.handle(
-        _spentMeta,
-        spent.isAcceptableOrUnknown(data['spent']!, _spentMeta),
       );
     }
     if (data.containsKey('timeline_days')) {
@@ -5759,26 +5354,10 @@ class $JourneysTableTable extends JourneysTable
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
-      progressPercent: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}progress_percent'],
-      ),
-      totalSteps: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}total_steps'],
-      ),
-      completedSteps: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}completed_steps'],
-      )!,
       budget: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}budget'],
       ),
-      spent: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}spent'],
-      )!,
       timelineDays: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}timeline_days'],
@@ -5818,11 +5397,7 @@ class JourneysTableData extends DataClass
   final String businessId;
   final String goal;
   final String status;
-  final int? progressPercent;
-  final int? totalSteps;
-  final int completedSteps;
   final double? budget;
-  final double spent;
   final int? timelineDays;
   final double? revenueImpact;
 
@@ -5839,11 +5414,7 @@ class JourneysTableData extends DataClass
     required this.businessId,
     required this.goal,
     required this.status,
-    this.progressPercent,
-    this.totalSteps,
-    required this.completedSteps,
     this.budget,
-    required this.spent,
     this.timelineDays,
     this.revenueImpact,
     this.domainSnapshot,
@@ -5858,17 +5429,9 @@ class JourneysTableData extends DataClass
     map['business_id'] = Variable<String>(businessId);
     map['goal'] = Variable<String>(goal);
     map['status'] = Variable<String>(status);
-    if (!nullToAbsent || progressPercent != null) {
-      map['progress_percent'] = Variable<int>(progressPercent);
-    }
-    if (!nullToAbsent || totalSteps != null) {
-      map['total_steps'] = Variable<int>(totalSteps);
-    }
-    map['completed_steps'] = Variable<int>(completedSteps);
     if (!nullToAbsent || budget != null) {
       map['budget'] = Variable<double>(budget);
     }
-    map['spent'] = Variable<double>(spent);
     if (!nullToAbsent || timelineDays != null) {
       map['timeline_days'] = Variable<int>(timelineDays);
     }
@@ -5892,17 +5455,9 @@ class JourneysTableData extends DataClass
       businessId: Value(businessId),
       goal: Value(goal),
       status: Value(status),
-      progressPercent: progressPercent == null && nullToAbsent
-          ? const Value.absent()
-          : Value(progressPercent),
-      totalSteps: totalSteps == null && nullToAbsent
-          ? const Value.absent()
-          : Value(totalSteps),
-      completedSteps: Value(completedSteps),
       budget: budget == null && nullToAbsent
           ? const Value.absent()
           : Value(budget),
-      spent: Value(spent),
       timelineDays: timelineDays == null && nullToAbsent
           ? const Value.absent()
           : Value(timelineDays),
@@ -5930,11 +5485,7 @@ class JourneysTableData extends DataClass
       businessId: serializer.fromJson<String>(json['businessId']),
       goal: serializer.fromJson<String>(json['goal']),
       status: serializer.fromJson<String>(json['status']),
-      progressPercent: serializer.fromJson<int?>(json['progressPercent']),
-      totalSteps: serializer.fromJson<int?>(json['totalSteps']),
-      completedSteps: serializer.fromJson<int>(json['completedSteps']),
       budget: serializer.fromJson<double?>(json['budget']),
-      spent: serializer.fromJson<double>(json['spent']),
       timelineDays: serializer.fromJson<int?>(json['timelineDays']),
       revenueImpact: serializer.fromJson<double?>(json['revenueImpact']),
       domainSnapshot: serializer.fromJson<String?>(json['domainSnapshot']),
@@ -5951,11 +5502,7 @@ class JourneysTableData extends DataClass
       'businessId': serializer.toJson<String>(businessId),
       'goal': serializer.toJson<String>(goal),
       'status': serializer.toJson<String>(status),
-      'progressPercent': serializer.toJson<int?>(progressPercent),
-      'totalSteps': serializer.toJson<int?>(totalSteps),
-      'completedSteps': serializer.toJson<int>(completedSteps),
       'budget': serializer.toJson<double?>(budget),
-      'spent': serializer.toJson<double>(spent),
       'timelineDays': serializer.toJson<int?>(timelineDays),
       'revenueImpact': serializer.toJson<double?>(revenueImpact),
       'domainSnapshot': serializer.toJson<String?>(domainSnapshot),
@@ -5970,11 +5517,7 @@ class JourneysTableData extends DataClass
     String? businessId,
     String? goal,
     String? status,
-    Value<int?> progressPercent = const Value.absent(),
-    Value<int?> totalSteps = const Value.absent(),
-    int? completedSteps,
     Value<double?> budget = const Value.absent(),
-    double? spent,
     Value<int?> timelineDays = const Value.absent(),
     Value<double?> revenueImpact = const Value.absent(),
     Value<String?> domainSnapshot = const Value.absent(),
@@ -5986,13 +5529,7 @@ class JourneysTableData extends DataClass
     businessId: businessId ?? this.businessId,
     goal: goal ?? this.goal,
     status: status ?? this.status,
-    progressPercent: progressPercent.present
-        ? progressPercent.value
-        : this.progressPercent,
-    totalSteps: totalSteps.present ? totalSteps.value : this.totalSteps,
-    completedSteps: completedSteps ?? this.completedSteps,
     budget: budget.present ? budget.value : this.budget,
-    spent: spent ?? this.spent,
     timelineDays: timelineDays.present ? timelineDays.value : this.timelineDays,
     revenueImpact: revenueImpact.present
         ? revenueImpact.value
@@ -6012,17 +5549,7 @@ class JourneysTableData extends DataClass
           : this.businessId,
       goal: data.goal.present ? data.goal.value : this.goal,
       status: data.status.present ? data.status.value : this.status,
-      progressPercent: data.progressPercent.present
-          ? data.progressPercent.value
-          : this.progressPercent,
-      totalSteps: data.totalSteps.present
-          ? data.totalSteps.value
-          : this.totalSteps,
-      completedSteps: data.completedSteps.present
-          ? data.completedSteps.value
-          : this.completedSteps,
       budget: data.budget.present ? data.budget.value : this.budget,
-      spent: data.spent.present ? data.spent.value : this.spent,
       timelineDays: data.timelineDays.present
           ? data.timelineDays.value
           : this.timelineDays,
@@ -6045,11 +5572,7 @@ class JourneysTableData extends DataClass
           ..write('businessId: $businessId, ')
           ..write('goal: $goal, ')
           ..write('status: $status, ')
-          ..write('progressPercent: $progressPercent, ')
-          ..write('totalSteps: $totalSteps, ')
-          ..write('completedSteps: $completedSteps, ')
           ..write('budget: $budget, ')
-          ..write('spent: $spent, ')
           ..write('timelineDays: $timelineDays, ')
           ..write('revenueImpact: $revenueImpact, ')
           ..write('domainSnapshot: $domainSnapshot, ')
@@ -6066,11 +5589,7 @@ class JourneysTableData extends DataClass
     businessId,
     goal,
     status,
-    progressPercent,
-    totalSteps,
-    completedSteps,
     budget,
-    spent,
     timelineDays,
     revenueImpact,
     domainSnapshot,
@@ -6086,11 +5605,7 @@ class JourneysTableData extends DataClass
           other.businessId == this.businessId &&
           other.goal == this.goal &&
           other.status == this.status &&
-          other.progressPercent == this.progressPercent &&
-          other.totalSteps == this.totalSteps &&
-          other.completedSteps == this.completedSteps &&
           other.budget == this.budget &&
-          other.spent == this.spent &&
           other.timelineDays == this.timelineDays &&
           other.revenueImpact == this.revenueImpact &&
           other.domainSnapshot == this.domainSnapshot &&
@@ -6104,11 +5619,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
   final Value<String> businessId;
   final Value<String> goal;
   final Value<String> status;
-  final Value<int?> progressPercent;
-  final Value<int?> totalSteps;
-  final Value<int> completedSteps;
   final Value<double?> budget;
-  final Value<double> spent;
   final Value<int?> timelineDays;
   final Value<double?> revenueImpact;
   final Value<String?> domainSnapshot;
@@ -6121,11 +5632,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     this.businessId = const Value.absent(),
     this.goal = const Value.absent(),
     this.status = const Value.absent(),
-    this.progressPercent = const Value.absent(),
-    this.totalSteps = const Value.absent(),
-    this.completedSteps = const Value.absent(),
     this.budget = const Value.absent(),
-    this.spent = const Value.absent(),
     this.timelineDays = const Value.absent(),
     this.revenueImpact = const Value.absent(),
     this.domainSnapshot = const Value.absent(),
@@ -6139,11 +5646,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     required String businessId,
     required String goal,
     required String status,
-    this.progressPercent = const Value.absent(),
-    this.totalSteps = const Value.absent(),
-    this.completedSteps = const Value.absent(),
     this.budget = const Value.absent(),
-    this.spent = const Value.absent(),
     this.timelineDays = const Value.absent(),
     this.revenueImpact = const Value.absent(),
     this.domainSnapshot = const Value.absent(),
@@ -6160,11 +5663,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     Expression<String>? businessId,
     Expression<String>? goal,
     Expression<String>? status,
-    Expression<int>? progressPercent,
-    Expression<int>? totalSteps,
-    Expression<int>? completedSteps,
     Expression<double>? budget,
-    Expression<double>? spent,
     Expression<int>? timelineDays,
     Expression<double>? revenueImpact,
     Expression<String>? domainSnapshot,
@@ -6178,11 +5677,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
       if (businessId != null) 'business_id': businessId,
       if (goal != null) 'goal': goal,
       if (status != null) 'status': status,
-      if (progressPercent != null) 'progress_percent': progressPercent,
-      if (totalSteps != null) 'total_steps': totalSteps,
-      if (completedSteps != null) 'completed_steps': completedSteps,
       if (budget != null) 'budget': budget,
-      if (spent != null) 'spent': spent,
       if (timelineDays != null) 'timeline_days': timelineDays,
       if (revenueImpact != null) 'revenue_impact': revenueImpact,
       if (domainSnapshot != null) 'domain_snapshot': domainSnapshot,
@@ -6198,11 +5693,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     Value<String>? businessId,
     Value<String>? goal,
     Value<String>? status,
-    Value<int?>? progressPercent,
-    Value<int?>? totalSteps,
-    Value<int>? completedSteps,
     Value<double?>? budget,
-    Value<double>? spent,
     Value<int?>? timelineDays,
     Value<double?>? revenueImpact,
     Value<String?>? domainSnapshot,
@@ -6216,11 +5707,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
       businessId: businessId ?? this.businessId,
       goal: goal ?? this.goal,
       status: status ?? this.status,
-      progressPercent: progressPercent ?? this.progressPercent,
-      totalSteps: totalSteps ?? this.totalSteps,
-      completedSteps: completedSteps ?? this.completedSteps,
       budget: budget ?? this.budget,
-      spent: spent ?? this.spent,
       timelineDays: timelineDays ?? this.timelineDays,
       revenueImpact: revenueImpact ?? this.revenueImpact,
       domainSnapshot: domainSnapshot ?? this.domainSnapshot,
@@ -6246,20 +5733,8 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
-    if (progressPercent.present) {
-      map['progress_percent'] = Variable<int>(progressPercent.value);
-    }
-    if (totalSteps.present) {
-      map['total_steps'] = Variable<int>(totalSteps.value);
-    }
-    if (completedSteps.present) {
-      map['completed_steps'] = Variable<int>(completedSteps.value);
-    }
     if (budget.present) {
       map['budget'] = Variable<double>(budget.value);
-    }
-    if (spent.present) {
-      map['spent'] = Variable<double>(spent.value);
     }
     if (timelineDays.present) {
       map['timeline_days'] = Variable<int>(timelineDays.value);
@@ -6292,11 +5767,7 @@ class JourneysTableCompanion extends UpdateCompanion<JourneysTableData> {
           ..write('businessId: $businessId, ')
           ..write('goal: $goal, ')
           ..write('status: $status, ')
-          ..write('progressPercent: $progressPercent, ')
-          ..write('totalSteps: $totalSteps, ')
-          ..write('completedSteps: $completedSteps, ')
           ..write('budget: $budget, ')
-          ..write('spent: $spent, ')
           ..write('timelineDays: $timelineDays, ')
           ..write('revenueImpact: $revenueImpact, ')
           ..write('domainSnapshot: $domainSnapshot, ')
@@ -17383,10 +16854,7 @@ typedef $$ProductsTableTableCreateCompanionBuilder =
       Value<String?> category,
       Value<double?> costPerUnit,
       required double listPrice,
-      Value<double?> currentPrice,
-      Value<double?> profitPerUnit,
       Value<double> totalStock,
-      Value<String?> stockByWarehouse,
       Value<double?> stockAlertLevel,
       Value<String?> supplierId,
       Value<String?> salesChannels,
@@ -17406,10 +16874,7 @@ typedef $$ProductsTableTableUpdateCompanionBuilder =
       Value<String?> category,
       Value<double?> costPerUnit,
       Value<double> listPrice,
-      Value<double?> currentPrice,
-      Value<double?> profitPerUnit,
       Value<double> totalStock,
-      Value<String?> stockByWarehouse,
       Value<double?> stockAlertLevel,
       Value<String?> supplierId,
       Value<String?> salesChannels,
@@ -17510,23 +16975,8 @@ class $$ProductsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get currentPrice => $composableBuilder(
-    column: $table.currentPrice,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get profitPerUnit => $composableBuilder(
-    column: $table.profitPerUnit,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<double> get totalStock => $composableBuilder(
     column: $table.totalStock,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get stockByWarehouse => $composableBuilder(
-    column: $table.stockByWarehouse,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -17651,23 +17101,8 @@ class $$ProductsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get currentPrice => $composableBuilder(
-    column: $table.currentPrice,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get profitPerUnit => $composableBuilder(
-    column: $table.profitPerUnit,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<double> get totalStock => $composableBuilder(
     column: $table.totalStock,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get stockByWarehouse => $composableBuilder(
-    column: $table.stockByWarehouse,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -17782,23 +17217,8 @@ class $$ProductsTableTableAnnotationComposer
   GeneratedColumn<double> get listPrice =>
       $composableBuilder(column: $table.listPrice, builder: (column) => column);
 
-  GeneratedColumn<double> get currentPrice => $composableBuilder(
-    column: $table.currentPrice,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get profitPerUnit => $composableBuilder(
-    column: $table.profitPerUnit,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<double> get totalStock => $composableBuilder(
     column: $table.totalStock,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get stockByWarehouse => $composableBuilder(
-    column: $table.stockByWarehouse,
     builder: (column) => column,
   );
 
@@ -17909,10 +17329,7 @@ class $$ProductsTableTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<double?> costPerUnit = const Value.absent(),
                 Value<double> listPrice = const Value.absent(),
-                Value<double?> currentPrice = const Value.absent(),
-                Value<double?> profitPerUnit = const Value.absent(),
                 Value<double> totalStock = const Value.absent(),
-                Value<String?> stockByWarehouse = const Value.absent(),
                 Value<double?> stockAlertLevel = const Value.absent(),
                 Value<String?> supplierId = const Value.absent(),
                 Value<String?> salesChannels = const Value.absent(),
@@ -17930,10 +17347,7 @@ class $$ProductsTableTableTableManager
                 category: category,
                 costPerUnit: costPerUnit,
                 listPrice: listPrice,
-                currentPrice: currentPrice,
-                profitPerUnit: profitPerUnit,
                 totalStock: totalStock,
-                stockByWarehouse: stockByWarehouse,
                 stockAlertLevel: stockAlertLevel,
                 supplierId: supplierId,
                 salesChannels: salesChannels,
@@ -17953,10 +17367,7 @@ class $$ProductsTableTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<double?> costPerUnit = const Value.absent(),
                 required double listPrice,
-                Value<double?> currentPrice = const Value.absent(),
-                Value<double?> profitPerUnit = const Value.absent(),
                 Value<double> totalStock = const Value.absent(),
-                Value<String?> stockByWarehouse = const Value.absent(),
                 Value<double?> stockAlertLevel = const Value.absent(),
                 Value<String?> supplierId = const Value.absent(),
                 Value<String?> salesChannels = const Value.absent(),
@@ -17974,10 +17385,7 @@ class $$ProductsTableTableTableManager
                 category: category,
                 costPerUnit: costPerUnit,
                 listPrice: listPrice,
-                currentPrice: currentPrice,
-                profitPerUnit: profitPerUnit,
                 totalStock: totalStock,
-                stockByWarehouse: stockByWarehouse,
                 stockAlertLevel: stockAlertLevel,
                 supplierId: supplierId,
                 salesChannels: salesChannels,
@@ -18080,12 +17488,9 @@ typedef $$CustomersTableTableCreateCompanionBuilder =
       Value<String?> city,
       Value<String?> country,
       Value<String?> segments,
-      Value<double?> lifetimeValue,
       Value<int?> orderCount,
       Value<double?> totalSpent,
-      Value<double?> avgOrderValue,
       Value<DateTime?> lastOrderDate,
-      Value<double?> churnRisk,
       Value<String?> domainSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -18104,12 +17509,9 @@ typedef $$CustomersTableTableUpdateCompanionBuilder =
       Value<String?> city,
       Value<String?> country,
       Value<String?> segments,
-      Value<double?> lifetimeValue,
       Value<int?> orderCount,
       Value<double?> totalSpent,
-      Value<double?> avgOrderValue,
       Value<DateTime?> lastOrderDate,
-      Value<double?> churnRisk,
       Value<String?> domainSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -18225,11 +17627,6 @@ class $$CustomersTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get lifetimeValue => $composableBuilder(
-    column: $table.lifetimeValue,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<int> get orderCount => $composableBuilder(
     column: $table.orderCount,
     builder: (column) => ColumnFilters(column),
@@ -18240,18 +17637,8 @@ class $$CustomersTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get avgOrderValue => $composableBuilder(
-    column: $table.avgOrderValue,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<DateTime> get lastOrderDate => $composableBuilder(
     column: $table.lastOrderDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get churnRisk => $composableBuilder(
-    column: $table.churnRisk,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18378,11 +17765,6 @@ class $$CustomersTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get lifetimeValue => $composableBuilder(
-    column: $table.lifetimeValue,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get orderCount => $composableBuilder(
     column: $table.orderCount,
     builder: (column) => ColumnOrderings(column),
@@ -18393,18 +17775,8 @@ class $$CustomersTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get avgOrderValue => $composableBuilder(
-    column: $table.avgOrderValue,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get lastOrderDate => $composableBuilder(
     column: $table.lastOrderDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get churnRisk => $composableBuilder(
-    column: $table.churnRisk,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -18490,11 +17862,6 @@ class $$CustomersTableTableAnnotationComposer
   GeneratedColumn<String> get segments =>
       $composableBuilder(column: $table.segments, builder: (column) => column);
 
-  GeneratedColumn<double> get lifetimeValue => $composableBuilder(
-    column: $table.lifetimeValue,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<int> get orderCount => $composableBuilder(
     column: $table.orderCount,
     builder: (column) => column,
@@ -18505,18 +17872,10 @@ class $$CustomersTableTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get avgOrderValue => $composableBuilder(
-    column: $table.avgOrderValue,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<DateTime> get lastOrderDate => $composableBuilder(
     column: $table.lastOrderDate,
     builder: (column) => column,
   );
-
-  GeneratedColumn<double> get churnRisk =>
-      $composableBuilder(column: $table.churnRisk, builder: (column) => column);
 
   GeneratedColumn<String> get domainSnapshot => $composableBuilder(
     column: $table.domainSnapshot,
@@ -18619,12 +17978,9 @@ class $$CustomersTableTableTableManager
                 Value<String?> city = const Value.absent(),
                 Value<String?> country = const Value.absent(),
                 Value<String?> segments = const Value.absent(),
-                Value<double?> lifetimeValue = const Value.absent(),
                 Value<int?> orderCount = const Value.absent(),
                 Value<double?> totalSpent = const Value.absent(),
-                Value<double?> avgOrderValue = const Value.absent(),
                 Value<DateTime?> lastOrderDate = const Value.absent(),
-                Value<double?> churnRisk = const Value.absent(),
                 Value<String?> domainSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -18641,12 +17997,9 @@ class $$CustomersTableTableTableManager
                 city: city,
                 country: country,
                 segments: segments,
-                lifetimeValue: lifetimeValue,
                 orderCount: orderCount,
                 totalSpent: totalSpent,
-                avgOrderValue: avgOrderValue,
                 lastOrderDate: lastOrderDate,
-                churnRisk: churnRisk,
                 domainSnapshot: domainSnapshot,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -18665,12 +18018,9 @@ class $$CustomersTableTableTableManager
                 Value<String?> city = const Value.absent(),
                 Value<String?> country = const Value.absent(),
                 Value<String?> segments = const Value.absent(),
-                Value<double?> lifetimeValue = const Value.absent(),
                 Value<int?> orderCount = const Value.absent(),
                 Value<double?> totalSpent = const Value.absent(),
-                Value<double?> avgOrderValue = const Value.absent(),
                 Value<DateTime?> lastOrderDate = const Value.absent(),
-                Value<double?> churnRisk = const Value.absent(),
                 Value<String?> domainSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -18687,12 +18037,9 @@ class $$CustomersTableTableTableManager
                 city: city,
                 country: country,
                 segments: segments,
-                lifetimeValue: lifetimeValue,
                 orderCount: orderCount,
                 totalSpent: totalSpent,
-                avgOrderValue: avgOrderValue,
                 lastOrderDate: lastOrderDate,
-                churnRisk: churnRisk,
                 domainSnapshot: domainSnapshot,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -19559,11 +18906,7 @@ typedef $$JourneysTableTableCreateCompanionBuilder =
       required String businessId,
       required String goal,
       required String status,
-      Value<int?> progressPercent,
-      Value<int?> totalSteps,
-      Value<int> completedSteps,
       Value<double?> budget,
-      Value<double> spent,
       Value<int?> timelineDays,
       Value<double?> revenueImpact,
       Value<String?> domainSnapshot,
@@ -19578,11 +18921,7 @@ typedef $$JourneysTableTableUpdateCompanionBuilder =
       Value<String> businessId,
       Value<String> goal,
       Value<String> status,
-      Value<int?> progressPercent,
-      Value<int?> totalSteps,
-      Value<int> completedSteps,
       Value<double?> budget,
-      Value<double> spent,
       Value<int?> timelineDays,
       Value<double?> revenueImpact,
       Value<String?> domainSnapshot,
@@ -19668,28 +19007,8 @@ class $$JourneysTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get progressPercent => $composableBuilder(
-    column: $table.progressPercent,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get totalSteps => $composableBuilder(
-    column: $table.totalSteps,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get completedSteps => $composableBuilder(
-    column: $table.completedSteps,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<double> get budget => $composableBuilder(
     column: $table.budget,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get spent => $composableBuilder(
-    column: $table.spent,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -19796,28 +19115,8 @@ class $$JourneysTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get progressPercent => $composableBuilder(
-    column: $table.progressPercent,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get totalSteps => $composableBuilder(
-    column: $table.totalSteps,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get completedSteps => $composableBuilder(
-    column: $table.completedSteps,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<double> get budget => $composableBuilder(
     column: $table.budget,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get spent => $composableBuilder(
-    column: $table.spent,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -19893,26 +19192,8 @@ class $$JourneysTableTableAnnotationComposer
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
-  GeneratedColumn<int> get progressPercent => $composableBuilder(
-    column: $table.progressPercent,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get totalSteps => $composableBuilder(
-    column: $table.totalSteps,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get completedSteps => $composableBuilder(
-    column: $table.completedSteps,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<double> get budget =>
       $composableBuilder(column: $table.budget, builder: (column) => column);
-
-  GeneratedColumn<double> get spent =>
-      $composableBuilder(column: $table.spent, builder: (column) => column);
 
   GeneratedColumn<int> get timelineDays => $composableBuilder(
     column: $table.timelineDays,
@@ -20020,11 +19301,7 @@ class $$JourneysTableTableTableManager
                 Value<String> businessId = const Value.absent(),
                 Value<String> goal = const Value.absent(),
                 Value<String> status = const Value.absent(),
-                Value<int?> progressPercent = const Value.absent(),
-                Value<int?> totalSteps = const Value.absent(),
-                Value<int> completedSteps = const Value.absent(),
                 Value<double?> budget = const Value.absent(),
-                Value<double> spent = const Value.absent(),
                 Value<int?> timelineDays = const Value.absent(),
                 Value<double?> revenueImpact = const Value.absent(),
                 Value<String?> domainSnapshot = const Value.absent(),
@@ -20037,11 +19314,7 @@ class $$JourneysTableTableTableManager
                 businessId: businessId,
                 goal: goal,
                 status: status,
-                progressPercent: progressPercent,
-                totalSteps: totalSteps,
-                completedSteps: completedSteps,
                 budget: budget,
-                spent: spent,
                 timelineDays: timelineDays,
                 revenueImpact: revenueImpact,
                 domainSnapshot: domainSnapshot,
@@ -20056,11 +19329,7 @@ class $$JourneysTableTableTableManager
                 required String businessId,
                 required String goal,
                 required String status,
-                Value<int?> progressPercent = const Value.absent(),
-                Value<int?> totalSteps = const Value.absent(),
-                Value<int> completedSteps = const Value.absent(),
                 Value<double?> budget = const Value.absent(),
-                Value<double> spent = const Value.absent(),
                 Value<int?> timelineDays = const Value.absent(),
                 Value<double?> revenueImpact = const Value.absent(),
                 Value<String?> domainSnapshot = const Value.absent(),
@@ -20073,11 +19342,7 @@ class $$JourneysTableTableTableManager
                 businessId: businessId,
                 goal: goal,
                 status: status,
-                progressPercent: progressPercent,
-                totalSteps: totalSteps,
-                completedSteps: completedSteps,
                 budget: budget,
-                spent: spent,
                 timelineDays: timelineDays,
                 revenueImpact: revenueImpact,
                 domainSnapshot: domainSnapshot,

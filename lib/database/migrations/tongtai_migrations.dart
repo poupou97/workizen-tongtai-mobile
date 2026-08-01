@@ -55,7 +55,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 12;
+const int kTongtaiSchemaVersion = 13;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -233,6 +233,26 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 13) {
+        // v13 (WTM-212 — Derived Truth Violation ELIMINATED, not contained).
+        // One sweep drops every fully dead derived column: nothing writes them
+        // (the last live write, journeys.progress_percent, stopped in this
+        // change), nothing reads them (p0/derived_data_governance_test), and
+        // none are in `.ttbk` — the codec encodes domain objects, not raw
+        // columns, which is what makes this drop safe for every existing
+        // backup. TableMigration rebuilds each table from its new definition,
+        // copying the live columns by name.
+        for (final name in [
+          'journeys_table',
+          'customers_table',
+          'products_table',
+        ]) {
+          final table = db.allTables.firstWhere(
+            (t) => t.actualTableName == name,
+          );
+          await m.alterTable(TableMigration(table));
+        }
       }
       if (from < 12) {
         // v12 (WTM-209 — sales channel on orders). `orders_table.channel_id`

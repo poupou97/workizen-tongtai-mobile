@@ -17,12 +17,9 @@ class CustomersTable extends Table {
   TextColumn get city => text().nullable()();
   TextColumn get country => text().nullable()();
   TextColumn get segments => text().nullable()(); // JSON array
-  RealColumn get lifetimeValue => real().nullable()();
   IntColumn get orderCount => integer().nullable()();
   RealColumn get totalSpent => real().nullable()();
-  RealColumn get avgOrderValue => real().nullable()();
   DateTimeColumn get lastOrderDate => dateTime().nullable()();
-  RealColumn get churnRisk => real().nullable()(); // 0-100
 
   /// Versioned full-domain snapshot (JSON) — WTM-123, ADR-TON-009 (option B).
   /// Structured columns stay the source of truth for promoted fields; this

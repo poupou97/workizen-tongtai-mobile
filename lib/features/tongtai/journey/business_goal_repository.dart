@@ -39,7 +39,7 @@ abstract class BusinessGoalRepository {
 /// domain (type/target/achieved/growth/dates/notes). The Repository owns the
 /// mapping. Structured columns are the **source of truth** for the promoted
 /// fields — `goal`←name, `revenueImpact`←targetAmount, `startedAt`←startDate —
-/// with `status`/`progressPercent`/`timelineDays` derived purely for
+/// with `status`/`timelineDays` derived purely for
 /// query/report; the remaining domain fields (type, achievedAmount, growth,
 /// endDate, notes) ride the versioned snapshot losslessly.
 ///
@@ -102,7 +102,6 @@ class DriftBusinessGoalRepository implements BusinessGoalRepository {
         revenueImpact: Value(g.targetAmount),
         startedAt: Value(g.startDate),
         // Derived, query/report only — the domain recomputes these.
-        progressPercent: Value((g.progress * 100).round()),
         timelineDays: Value(g.endDate.difference(g.startDate).inDays),
         createdAt: Value(g.createdAt),
         updatedAt: Value(g.updatedAt),

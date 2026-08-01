@@ -10,11 +10,7 @@ class JourneysTable extends Table {
       text().references(BusinessesTable, #id, onDelete: KeyAction.cascade)();
   TextColumn get goal => text()();
   TextColumn get status => text()();
-  IntColumn get progressPercent => integer().nullable()();
-  IntColumn get totalSteps => integer().nullable()();
-  IntColumn get completedSteps => integer().withDefault(const Constant(0))();
   RealColumn get budget => real().nullable()();
-  RealColumn get spent => real().withDefault(const Constant(0))();
   IntColumn get timelineDays => integer().nullable()();
   RealColumn get revenueImpact => real().nullable()();
 

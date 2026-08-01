@@ -21,10 +21,7 @@ class ProductsTable extends Table {
   TextColumn get category => text().nullable()();
   RealColumn get costPerUnit => real().nullable()();
   RealColumn get listPrice => real()();
-  RealColumn get currentPrice => real().nullable()();
-  RealColumn get profitPerUnit => real().nullable()();
   RealColumn get totalStock => real().withDefault(const Constant(0))();
-  TextColumn get stockByWarehouse => text().nullable()(); // JSON
   RealColumn get stockAlertLevel => real().nullable()();
   // WTM-53: ON DELETE CASCADE so deleting a Producer removes the Products it
   // supplies (no orphaned supplier_id references). Nullable rows (no supplier)
