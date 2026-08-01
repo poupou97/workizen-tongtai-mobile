@@ -6,6 +6,8 @@ import '../inventory/inventory_context.dart';
 import '../journey/journey_context.dart';
 import '../metrics/business_context_service.dart';
 import '../opportunity/opportunity.dart';
+import '../opportunity/opportunity_reaction_repository.dart';
+import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
 import '../opportunity/opportunity_context.dart';
 import '../opportunity/opportunity_rule_engine.dart';
 import '../orders/order_context.dart';
@@ -94,3 +96,27 @@ final businessContextServiceProvider = Provider<BusinessContextService>(
     ref.watch(timelineContextProvider),
   ),
 );
+
+/// Where the seller's opportunity decisions live (WTM-190).
+///
+/// Before this, "save" and "dismiss" existed only in memory: the seller pressed
+/// a button and the app forgot by the next launch.
+final opportunityReactionRepositoryProvider =
+    Provider<OpportunityReactionRepository>(
+      (ref) =>
+          OpportunityReactionRepository(ref.watch(tongtaiDatabaseProvider)),
+    );
+
+/// Generated opportunities with the seller's stored decisions applied.
+///
+/// This is what screens should read — [generatedOpportunitiesProvider] alone
+/// returns a feed that has forgotten everything the seller ever told it.
+final opportunitiesWithReactionsProvider = FutureProvider<List<Opportunity>>((
+  ref,
+) async {
+  final generated = await ref.watch(generatedOpportunitiesProvider.future);
+  final reactions = await ref
+      .watch(opportunityReactionRepositoryProvider)
+      .loadAll();
+  return applyReactions(generated, reactions);
+});

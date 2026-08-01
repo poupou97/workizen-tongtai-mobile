@@ -65,6 +65,11 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // the AI as if it were this seller's. Same shape as the WTM-149 defect.
   journeysProvider,
   activeJourneyProvider,
+  // Opportunity reactions (WTM-190). The generated feed above is invalidated
+  // already, but the reactions layered on top of it is a separate read: without
+  // this, a restore would show the incoming business's opportunities carrying
+  // the PREVIOUS seller's saves and dismissals.
+  opportunitiesWithReactionsProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).

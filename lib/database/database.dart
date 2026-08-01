@@ -13,7 +13,6 @@ import 'tables/products.dart';
 import 'tables/customers.dart';
 import 'tables/orders.dart';
 import 'tables/channels.dart';
-import 'tables/opportunities.dart';
 import 'tables/journeys.dart';
 import 'tables/journey_steps.dart';
 import 'tables/transactions.dart';
@@ -26,6 +25,7 @@ import 'tables/supplier_favorites.dart';
 import 'tables/chat_messages.dart';
 import 'tables/business_profiles.dart';
 import 'tables/business_journeys.dart';
+import 'tables/opportunity_reactions.dart';
 
 import 'migrations/tongtai_migrations.dart';
 
@@ -69,7 +69,6 @@ part 'database.g.dart';
     CustomersTable,
     OrdersTable,
     ChannelsTable,
-    OpportunitiesTable,
     JourneysTable,
     JourneyStepsTable,
     TransactionsTable,
@@ -83,6 +82,7 @@ part 'database.g.dart';
     BusinessJourneysTable,
     BusinessJourneyNodesTable,
     BusinessJourneyPlansTable,
+    OpportunityReactionsTable,
     ChatMessagesTable,
   ],
 )

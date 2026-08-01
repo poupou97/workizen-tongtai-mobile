@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -81,8 +83,11 @@ class _TongtaiOpportunityFeedScreenState
 
   Future<OpportunityFeedController> _read() async {
     if (!_ownsController) return _controller;
+    // WTM-190: read the feed WITH the seller's stored decisions. Reading
+    // `generatedOpportunitiesProvider` directly returns a feed that has
+    // forgotten every save and every dismissal.
     final List<Opportunity> generated = await ref.read(
-      generatedOpportunitiesProvider.future,
+      opportunitiesWithReactionsProvider.future,
     );
     final old = _controller;
     _controller = OpportunityFeedController(generated);
@@ -97,9 +102,28 @@ class _TongtaiOpportunityFeedScreenState
     super.dispose();
   }
 
+  /// Runs a reaction change and writes the result so it survives the next
+  /// launch (WTM-190 — before this, every save and dismissal was lost on close).
+  ///
+  /// The stored value is read back **from the controller** instead of being
+  /// passed in, so toggle logic lives in exactly one place and the database
+  /// cannot disagree with what the seller sees.
+  ///
+  /// The write is not awaited on purpose: a slow disk must not stall the swipe
+  /// the seller already made. The list is the truth for this frame; storage
+  /// catches up.
+  void _react(String id, void Function() change) {
+    change();
+    unawaited(
+      ref
+          .read(opportunityReactionRepositoryProvider)
+          .save(id, _controller.reactionOf(id)),
+    );
+  }
+
   void _onDismissed(Opportunity opportunity) {
     final l10n = context.l10n;
-    _controller.dismiss(opportunity.id);
+    _react(opportunity.id, () => _controller.dismiss(opportunity.id));
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -107,14 +131,17 @@ class _TongtaiOpportunityFeedScreenState
           content: Text(l10n.oppDismissedSnack(opportunity.title)),
           action: SnackBarAction(
             label: l10n.actionUndo,
-            onPressed: () => _controller.restore(opportunity.id),
+            onPressed: () => _react(
+              opportunity.id,
+              () => _controller.restore(opportunity.id),
+            ),
           ),
         ),
       );
   }
 
   void _onInterested(Opportunity opportunity) {
-    _controller.markInterested(opportunity.id);
+    _react(opportunity.id, () => _controller.markInterested(opportunity.id));
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -131,9 +158,16 @@ class _TongtaiOpportunityFeedScreenState
       MaterialPageRoute(
         builder: (_) => TongtaiOpportunityDetailScreen(
           opportunity: opportunity,
-          onToggleSaved: () => _controller.toggleSaved(opportunity.id),
-          onInterested: () => _controller.markInterested(opportunity.id),
-          onDismiss: () => _controller.dismiss(opportunity.id),
+          onToggleSaved: () => _react(
+            opportunity.id,
+            () => _controller.toggleSaved(opportunity.id),
+          ),
+          onInterested: () => _react(
+            opportunity.id,
+            () => _controller.markInterested(opportunity.id),
+          ),
+          onDismiss: () =>
+              _react(opportunity.id, () => _controller.dismiss(opportunity.id)),
         ),
       ),
     );
@@ -293,8 +327,10 @@ class _TongtaiOpportunityFeedScreenState
                               now: _clock(),
                             ),
                             onOpen: () => _openDetail(opportunity),
-                            onToggleSaved: () =>
-                                _controller.toggleSaved(opportunity.id),
+                            onToggleSaved: () => _react(
+                              opportunity.id,
+                              () => _controller.toggleSaved(opportunity.id),
+                            ),
                           ),
                         );
                       },

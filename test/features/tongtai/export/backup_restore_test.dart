@@ -8,6 +8,7 @@ import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_history.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/export/backup_crypto.dart';
 import 'package:tongtai/features/tongtai/export/backup_format.dart';
 import 'package:tongtai/features/tongtai/export/backup_service.dart';
@@ -18,9 +19,12 @@ import 'package:tongtai/features/tongtai/inventory/product_history.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/journey/journey_repository.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_reaction_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 import 'package:tongtai/features/tongtai/producer/supplier_favorites_store.dart';
+import 'package:tongtai/features/tongtai/profile/business_profile_repository.dart';
 
 /// WTM-164 / ADR-TON-018 — `.ttbk` v2 backup and **Replace** restore, on a
 /// real SQLite file.
@@ -44,6 +48,13 @@ void main() {
   /// about what is being tested.
   const fastCrypto = BackupCrypto(iterations: 100);
 
+  /// Mirrors [tongtaiBackupRepositoriesProvider] — **every** slot filled.
+  ///
+  /// It did not, once. The optional slots were left null here, so the whole
+  /// restore suite exercised the "no profile / no journey" path and stayed
+  /// green while production shipped backups that carried neither (WTM-190).
+  /// A test bundle that is smaller than the real one tests a product nobody
+  /// runs.
   TongtaiBackupRepositories reposFor(AppDatabase database) =>
       TongtaiBackupRepositories(
         database: database,
@@ -53,6 +64,9 @@ void main() {
         goals: DriftBusinessGoalRepository(database),
         finance: DriftFinanceRepository(database),
         favourites: DriftSupplierFavoritesStore(database),
+        businessProfile: BusinessProfileRepository(database),
+        journeys: JourneyRepository(database),
+        opportunityReactions: OpportunityReactionRepository(database),
       );
 
   setUp(() async {
@@ -749,6 +763,47 @@ void main() {
   });
 
   // ── privacy ──────────────────────────────────────────────────────────────
+
+  group('opportunity reactions (WTM-190)', () {
+    test('a save and a dismissal survive a full backup → restore', () async {
+      final reactions = OpportunityReactionRepository(db);
+      await reactions.save('opp-keep', OpportunityReaction.saved);
+      await reactions.save('opp-hide', OpportunityReaction.dismissed);
+
+      final document = await service.createBackup();
+      await reactions.deleteAll();
+
+      await service.restore(await service.validate(document));
+
+      expect(await reactions.loadAll(), {
+        'opp-keep': OpportunityReaction.saved,
+        'opp-hide': OpportunityReaction.dismissed,
+      });
+    });
+
+    test('Replace drops the previous business decisions', () async {
+      // ADR-TON-018: the incoming business wins. Keeping the old seller's
+      // dismissals would silently hide opportunities from the new one.
+      final reactions = OpportunityReactionRepository(db);
+      final document = await service.createBackup();
+      await reactions.save('someone-elses', OpportunityReaction.dismissed);
+
+      await service.restore(await service.validate(document));
+
+      expect(await reactions.loadAll(), isEmpty);
+    });
+
+    test('a .ttbk written before reactions existed still restores', () async {
+      // The dataset is optional on purpose. If it were required, every file a
+      // seller made yesterday would stop restoring today.
+      final document = await service.createBackup();
+      expect(document.contains(BackupDatasets.opportunityReactions), isFalse);
+
+      final report = await service.restore(await service.validate(document));
+
+      expect(report.restored, isNotEmpty);
+    });
+  });
 
   group('privacy (negative control)', () {
     test(

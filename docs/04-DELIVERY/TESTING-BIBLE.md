@@ -287,6 +287,53 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-19 · Nút bấm được nhưng **không ghi xuống đĩa**
+
+- **Root cause:** trạng thái người dùng tạo ra chỉ sống trong controller.
+  `OpportunityFeedController` giữ `reaction` hoàn hảo suốt vòng đời tiến trình
+  và mất sạch khi app đóng — mọi lần "Lưu" / "Gạt bỏ" là vô nghĩa. Không có
+  test nào bắt được vì **mọi test đều chạy trong một tiến trình**: state trong
+  RAM luôn đúng khi bạn chưa bao giờ tắt máy.
+- **Regression:** WTM-190 — vòng đời cơ hội trong Concept (`NEW → SAVED →
+  IN_PROGRESS → DONE`) không thể đi quá `SAVED`, vì `SAVED` không sống qua lần
+  mở app kế tiếp.
+- **Test pattern:** dùng **SQLite thật trong file**, ghi → `db.close()` → **mở
+  lại** → đọc. In-memory database *cũng* pass với code hỏng, nên nó không phải
+  bằng chứng. Với UI: bấm đúng nút người dùng bấm rồi đọc thẳng repository —
+  test "controller đã đổi state" chỉ chứng minh lại thứ đã đúng sẵn.
+- **Prevention:** mỗi khi thêm một quyết định của người dùng, hỏi *"cái này ai
+  ghi?"* trước khi hỏi *"cái này hiện thế nào?"*. Và **chỉ lưu thứ không tính
+  lại được**: cơ hội là dữ liệu dẫn xuất (rule engine sinh lại mỗi lần đọc),
+  chỉ *phán đoán của người bán* mới là sự thật cần lưu. Bảng
+  `opportunities_table` rỗng nằm trong schema từ v1 chính là thứ khiến ai đọc
+  schema cũng tưởng cơ hội đã được lưu — v10 **xoá** nó.
+
+---
+
+## P-20 · Slot nullable trong bundle ⇒ quên nối là **không** lỗi biên dịch
+
+- **Root cause:** `TongtaiBackupRepositories` khai các repository mới là
+  nullable "để call site cũ còn biên dịch được". Cái giá: quên điền một slot ở
+  provider production **không** báo lỗi, và **toàn bộ test vẫn xanh** vì test
+  tự dựng bundle của riêng nó — một bundle nhỏ hơn bundle thật.
+- **Regression:** WTM-190 phát hiện điều này đã xảy ra **hai lần**: AI Business
+  Profile (WTM-177) và Business Journey (WTM-185) đều có dataset `.ttbk`, đều
+  có test round-trip xanh, và **cả hai chưa bao giờ được nối vào**
+  `tongtaiBackupRepositoriesProvider`. Trên máy thật: backup không mang theo
+  hồ sơ và hành trình; tệ hơn, restore gọi `businessProfile?.deleteAll()` —
+  repository `null` thì **không xoá gì**, nên doanh nghiệp vừa khôi phục vẫn
+  âm thầm giữ ngành hàng và kênh bán của **chủ cũ**, đúng thứ ADR-TON-018 cấm.
+- **Test pattern:** hai lớp. (1) đọc bundle production qua `ProviderContainer`
+  và `expect(..., isNotNull)` từng slot; (2) **quét source**: mọi field
+  nullable trong bundle phải xuất hiện trong file provider — slot mới thêm mà
+  quên nối sẽ fail ngay hôm viết, không đợi tới ngày người bán khôi phục.
+  Xem `test/features/tongtai/export/backup_wiring_test.dart`.
+- **Prevention:** **harness test phải bằng đúng production.** `reposFor()`
+  trong suite restore nay điền đủ mọi slot. Một bundle test nhỏ hơn bundle thật
+  là đang test một sản phẩm không ai chạy.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:

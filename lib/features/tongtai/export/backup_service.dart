@@ -20,6 +20,8 @@ import '../inventory/product.dart';
 import '../inventory/product_repository.dart';
 import '../journey/business_goal.dart';
 import '../journey/business_goal_repository.dart';
+import '../opportunity/opportunity.dart';
+import '../opportunity/opportunity_reaction_repository.dart';
 import '../orders/order.dart';
 import '../orders/order_repository.dart';
 import '../producer/supplier_favorite.dart';
@@ -61,6 +63,7 @@ class TongtaiBackupRepositories {
     required this.favourites,
     this.businessProfile,
     this.journeys,
+    this.opportunityReactions,
   });
 
   /// Needed for the single transaction that makes Replace atomic — the one
@@ -83,6 +86,10 @@ class TongtaiBackupRepositories {
   /// [businessProfile]: existing call sites keep compiling, and a `null`
   /// repository simply means journeys are neither backed up nor restored.
   final JourneyRepository? journeys;
+
+  /// Opportunity reactions (WTM-190). Nullable for the same reason as
+  /// [journeys]; `null` means reactions are neither backed up nor restored.
+  final OpportunityReactionRepository? opportunityReactions;
 }
 
 /// The decoded, type-checked contents of a backup.
@@ -97,6 +104,7 @@ class BackupContents {
     required this.favourites,
     this.businessProfile,
     this.journeys = const [],
+    this.opportunityReactions = const {},
   });
 
   final List<Customer> customers;
@@ -114,6 +122,11 @@ class BackupContents {
   /// Business Journey tree (WTM-185). Empty means the package carries none —
   /// either it predates the feature or the seller never opened a journey.
   final List<Journey> journeys;
+
+  /// The seller's decisions about opportunities (WTM-190), keyed by
+  /// opportunity id. Empty means the package carries none — either it predates
+  /// the feature or the seller never saved or dismissed anything.
+  final Map<String, OpportunityReaction> opportunityReactions;
 
   Map<String, int> get counts => {
     BackupDatasets.customers: customers.length,
@@ -371,6 +384,11 @@ class TongtaiBackupService {
           BackupDatasets.journeys: [
             for (final j in contents.journeys) BackupCodec.encodeJourney(j),
           ],
+        if (contents.opportunityReactions.isNotEmpty)
+          BackupDatasets.opportunityReactions: [
+            for (final e in contents.opportunityReactions.entries)
+              BackupCodec.encodeOpportunityReaction(e.key, e.value),
+          ],
         BackupDatasets.favourites: [
           for (final f in contents.favourites) BackupCodec.encodeFavourite(f),
         ],
@@ -402,6 +420,8 @@ class TongtaiBackupService {
         if (contents.businessProfile?.isNotEmpty ?? false)
           BackupDatasets.businessProfile,
         if (contents.journeys.isNotEmpty) BackupDatasets.journeys,
+        if (contents.opportunityReactions.isNotEmpty)
+          BackupDatasets.opportunityReactions,
       ],
       redaction: BackupRedaction.none,
     );
@@ -417,6 +437,8 @@ class TongtaiBackupService {
     favourites: await repositories.favourites.loadAll(),
     businessProfile: await repositories.businessProfile?.load(),
     journeys: await repositories.journeys?.loadAll() ?? const [],
+    opportunityReactions:
+        await repositories.opportunityReactions?.loadAll() ?? const {},
   );
 
   // ── validate ─────────────────────────────────────────────────────────────
@@ -636,6 +658,14 @@ class TongtaiBackupService {
       for (final raw in (journeyRows ?? const []))
         ?BackupCodec.decodeJourney(Map<String, Object?>.from(raw)),
     ];
+    // Optional dataset (WTM-190): absent is normal. An unrecognised reaction
+    // code is dropped, not defaulted — defaulting would either resurrect
+    // something the seller dismissed or hide something they saved.
+    final reactionRows = payload.datasets[BackupDatasets.opportunityReactions];
+    final reactions = Map<String, OpportunityReaction>.fromEntries([
+      for (final raw in (reactionRows ?? const []))
+        ?BackupCodec.decodeOpportunityReaction(Map<String, Object?>.from(raw)),
+    ]);
     return BackupContents(
       customers: customers,
       products: products,
@@ -645,6 +675,7 @@ class TongtaiBackupService {
       favourites: favourites,
       businessProfile: profile,
       journeys: journeys,
+      opportunityReactions: reactions,
     );
   }
 
@@ -751,6 +782,7 @@ class TongtaiBackupService {
         // business would carry the old owner's trade and channels.
         await repositories.businessProfile?.deleteAll();
         await repositories.journeys?.deleteAll();
+        await repositories.opportunityReactions?.deleteAll();
 
         // …and back in dependency order: a customer must exist before an order
         // may reference it.
@@ -768,6 +800,9 @@ class TongtaiBackupService {
         for (final journey in contents.journeys) {
           await repositories.journeys?.save(journey);
         }
+        await repositories.opportunityReactions?.replaceAll(
+          contents.opportunityReactions,
+        );
         final profile = contents.businessProfile;
         if (profile != null && profile.isNotEmpty) {
           await repositories.businessProfile?.save(

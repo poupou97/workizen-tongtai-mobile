@@ -27,9 +27,15 @@ enum OpportunityReaction {
 }
 
 /// A surfaced business opportunity (WTM-91) — pure domain model mirroring the
-/// Drift `OpportunitiesTable` shape (type, title, ROI/investment, scores,
-/// discoveredAt), so a Drift-backed source can replace the in-memory feed
-/// without touching callers. Reuses the WTM-60 [OpportunityType] enum.
+/// **Derived data, deliberately not stored** (WTM-190): the rule engine
+/// regenerates the whole feed from products, customers, orders and goals on
+/// every read, so persisting it would create a parallel copy that One Data Path
+/// (ADR-TON-015) forbids and that would drift. The empty `opportunities_table`
+/// that shipped in v1 was dropped in schema v10 for exactly that reason.
+///
+/// What *is* stored is [reaction] — the seller's judgement is the one part of
+/// this object the app cannot recompute. See `OpportunityReactionRepository`.
+/// Reuses the WTM-60 [OpportunityType] enum.
 @immutable
 class Opportunity {
   const Opportunity({

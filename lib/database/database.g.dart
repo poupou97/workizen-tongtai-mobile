@@ -6148,1048 +6148,6 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
   }
 }
 
-class $OpportunitiesTableTable extends OpportunitiesTable
-    with TableInfo<$OpportunitiesTableTable, OpportunitiesTableData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $OpportunitiesTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _businessIdMeta = const VerificationMeta(
-    'businessId',
-  );
-  @override
-  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
-    'business_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES businesses_table (id) ON DELETE CASCADE',
-    ),
-  );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _titleMeta = const VerificationMeta('title');
-  @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-    'title',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _descriptionMeta = const VerificationMeta(
-    'description',
-  );
-  @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-    'description',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _marketMeta = const VerificationMeta('market');
-  @override
-  late final GeneratedColumn<String> market = GeneratedColumn<String>(
-    'market',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _estimatedRoiMeta = const VerificationMeta(
-    'estimatedRoi',
-  );
-  @override
-  late final GeneratedColumn<double> estimatedRoi = GeneratedColumn<double>(
-    'estimated_roi',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _estimatedInvestmentMeta =
-      const VerificationMeta('estimatedInvestment');
-  @override
-  late final GeneratedColumn<double> estimatedInvestment =
-      GeneratedColumn<double>(
-        'estimated_investment',
-        aliasedName,
-        true,
-        type: DriftSqlType.double,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _riskScoreMeta = const VerificationMeta(
-    'riskScore',
-  );
-  @override
-  late final GeneratedColumn<double> riskScore = GeneratedColumn<double>(
-    'risk_score',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _feasibilityScoreMeta = const VerificationMeta(
-    'feasibilityScore',
-  );
-  @override
-  late final GeneratedColumn<double> feasibilityScore = GeneratedColumn<double>(
-    'feasibility_score',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _aiScoreMeta = const VerificationMeta(
-    'aiScore',
-  );
-  @override
-  late final GeneratedColumn<double> aiScore = GeneratedColumn<double>(
-    'ai_score',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
-  @override
-  late final GeneratedColumn<String> status = GeneratedColumn<String>(
-    'status',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _relatedProductsMeta = const VerificationMeta(
-    'relatedProducts',
-  );
-  @override
-  late final GeneratedColumn<String> relatedProducts = GeneratedColumn<String>(
-    'related_products',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _relatedSuppliersMeta = const VerificationMeta(
-    'relatedSuppliers',
-  );
-  @override
-  late final GeneratedColumn<String> relatedSuppliers = GeneratedColumn<String>(
-    'related_suppliers',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _discoveredAtMeta = const VerificationMeta(
-    'discoveredAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> discoveredAt = GeneratedColumn<DateTime>(
-    'discovered_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: Constant(DateTime.now()),
-  );
-  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
-    'expiresAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
-    'expires_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: Constant(DateTime.now()),
-  );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-    'updated_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: Constant(DateTime.now()),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    businessId,
-    type,
-    title,
-    description,
-    market,
-    estimatedRoi,
-    estimatedInvestment,
-    riskScore,
-    feasibilityScore,
-    aiScore,
-    status,
-    relatedProducts,
-    relatedSuppliers,
-    discoveredAt,
-    expiresAt,
-    createdAt,
-    updatedAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'opportunities_table';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<OpportunitiesTableData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('business_id')) {
-      context.handle(
-        _businessIdMeta,
-        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_businessIdMeta);
-    }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
-    if (data.containsKey('title')) {
-      context.handle(
-        _titleMeta,
-        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_titleMeta);
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-        _descriptionMeta,
-        description.isAcceptableOrUnknown(
-          data['description']!,
-          _descriptionMeta,
-        ),
-      );
-    }
-    if (data.containsKey('market')) {
-      context.handle(
-        _marketMeta,
-        market.isAcceptableOrUnknown(data['market']!, _marketMeta),
-      );
-    }
-    if (data.containsKey('estimated_roi')) {
-      context.handle(
-        _estimatedRoiMeta,
-        estimatedRoi.isAcceptableOrUnknown(
-          data['estimated_roi']!,
-          _estimatedRoiMeta,
-        ),
-      );
-    }
-    if (data.containsKey('estimated_investment')) {
-      context.handle(
-        _estimatedInvestmentMeta,
-        estimatedInvestment.isAcceptableOrUnknown(
-          data['estimated_investment']!,
-          _estimatedInvestmentMeta,
-        ),
-      );
-    }
-    if (data.containsKey('risk_score')) {
-      context.handle(
-        _riskScoreMeta,
-        riskScore.isAcceptableOrUnknown(data['risk_score']!, _riskScoreMeta),
-      );
-    }
-    if (data.containsKey('feasibility_score')) {
-      context.handle(
-        _feasibilityScoreMeta,
-        feasibilityScore.isAcceptableOrUnknown(
-          data['feasibility_score']!,
-          _feasibilityScoreMeta,
-        ),
-      );
-    }
-    if (data.containsKey('ai_score')) {
-      context.handle(
-        _aiScoreMeta,
-        aiScore.isAcceptableOrUnknown(data['ai_score']!, _aiScoreMeta),
-      );
-    }
-    if (data.containsKey('status')) {
-      context.handle(
-        _statusMeta,
-        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
-      );
-    }
-    if (data.containsKey('related_products')) {
-      context.handle(
-        _relatedProductsMeta,
-        relatedProducts.isAcceptableOrUnknown(
-          data['related_products']!,
-          _relatedProductsMeta,
-        ),
-      );
-    }
-    if (data.containsKey('related_suppliers')) {
-      context.handle(
-        _relatedSuppliersMeta,
-        relatedSuppliers.isAcceptableOrUnknown(
-          data['related_suppliers']!,
-          _relatedSuppliersMeta,
-        ),
-      );
-    }
-    if (data.containsKey('discovered_at')) {
-      context.handle(
-        _discoveredAtMeta,
-        discoveredAt.isAcceptableOrUnknown(
-          data['discovered_at']!,
-          _discoveredAtMeta,
-        ),
-      );
-    }
-    if (data.containsKey('expires_at')) {
-      context.handle(
-        _expiresAtMeta,
-        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
-      );
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    if (data.containsKey('updated_at')) {
-      context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  OpportunitiesTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return OpportunitiesTableData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      businessId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}business_id'],
-      )!,
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}type'],
-      )!,
-      title: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}title'],
-      )!,
-      description: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}description'],
-      ),
-      market: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}market'],
-      ),
-      estimatedRoi: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}estimated_roi'],
-      ),
-      estimatedInvestment: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}estimated_investment'],
-      ),
-      riskScore: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}risk_score'],
-      ),
-      feasibilityScore: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}feasibility_score'],
-      ),
-      aiScore: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}ai_score'],
-      ),
-      status: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}status'],
-      ),
-      relatedProducts: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}related_products'],
-      ),
-      relatedSuppliers: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}related_suppliers'],
-      ),
-      discoveredAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}discovered_at'],
-      )!,
-      expiresAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}expires_at'],
-      ),
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}updated_at'],
-      )!,
-    );
-  }
-
-  @override
-  $OpportunitiesTableTable createAlias(String alias) {
-    return $OpportunitiesTableTable(attachedDatabase, alias);
-  }
-}
-
-class OpportunitiesTableData extends DataClass
-    implements Insertable<OpportunitiesTableData> {
-  final String id;
-  final String businessId;
-  final String type;
-  final String title;
-  final String? description;
-  final String? market;
-  final double? estimatedRoi;
-  final double? estimatedInvestment;
-  final double? riskScore;
-  final double? feasibilityScore;
-  final double? aiScore;
-  final String? status;
-  final String? relatedProducts;
-  final String? relatedSuppliers;
-  final DateTime discoveredAt;
-  final DateTime? expiresAt;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  const OpportunitiesTableData({
-    required this.id,
-    required this.businessId,
-    required this.type,
-    required this.title,
-    this.description,
-    this.market,
-    this.estimatedRoi,
-    this.estimatedInvestment,
-    this.riskScore,
-    this.feasibilityScore,
-    this.aiScore,
-    this.status,
-    this.relatedProducts,
-    this.relatedSuppliers,
-    required this.discoveredAt,
-    this.expiresAt,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['business_id'] = Variable<String>(businessId);
-    map['type'] = Variable<String>(type);
-    map['title'] = Variable<String>(title);
-    if (!nullToAbsent || description != null) {
-      map['description'] = Variable<String>(description);
-    }
-    if (!nullToAbsent || market != null) {
-      map['market'] = Variable<String>(market);
-    }
-    if (!nullToAbsent || estimatedRoi != null) {
-      map['estimated_roi'] = Variable<double>(estimatedRoi);
-    }
-    if (!nullToAbsent || estimatedInvestment != null) {
-      map['estimated_investment'] = Variable<double>(estimatedInvestment);
-    }
-    if (!nullToAbsent || riskScore != null) {
-      map['risk_score'] = Variable<double>(riskScore);
-    }
-    if (!nullToAbsent || feasibilityScore != null) {
-      map['feasibility_score'] = Variable<double>(feasibilityScore);
-    }
-    if (!nullToAbsent || aiScore != null) {
-      map['ai_score'] = Variable<double>(aiScore);
-    }
-    if (!nullToAbsent || status != null) {
-      map['status'] = Variable<String>(status);
-    }
-    if (!nullToAbsent || relatedProducts != null) {
-      map['related_products'] = Variable<String>(relatedProducts);
-    }
-    if (!nullToAbsent || relatedSuppliers != null) {
-      map['related_suppliers'] = Variable<String>(relatedSuppliers);
-    }
-    map['discovered_at'] = Variable<DateTime>(discoveredAt);
-    if (!nullToAbsent || expiresAt != null) {
-      map['expires_at'] = Variable<DateTime>(expiresAt);
-    }
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
-    return map;
-  }
-
-  OpportunitiesTableCompanion toCompanion(bool nullToAbsent) {
-    return OpportunitiesTableCompanion(
-      id: Value(id),
-      businessId: Value(businessId),
-      type: Value(type),
-      title: Value(title),
-      description: description == null && nullToAbsent
-          ? const Value.absent()
-          : Value(description),
-      market: market == null && nullToAbsent
-          ? const Value.absent()
-          : Value(market),
-      estimatedRoi: estimatedRoi == null && nullToAbsent
-          ? const Value.absent()
-          : Value(estimatedRoi),
-      estimatedInvestment: estimatedInvestment == null && nullToAbsent
-          ? const Value.absent()
-          : Value(estimatedInvestment),
-      riskScore: riskScore == null && nullToAbsent
-          ? const Value.absent()
-          : Value(riskScore),
-      feasibilityScore: feasibilityScore == null && nullToAbsent
-          ? const Value.absent()
-          : Value(feasibilityScore),
-      aiScore: aiScore == null && nullToAbsent
-          ? const Value.absent()
-          : Value(aiScore),
-      status: status == null && nullToAbsent
-          ? const Value.absent()
-          : Value(status),
-      relatedProducts: relatedProducts == null && nullToAbsent
-          ? const Value.absent()
-          : Value(relatedProducts),
-      relatedSuppliers: relatedSuppliers == null && nullToAbsent
-          ? const Value.absent()
-          : Value(relatedSuppliers),
-      discoveredAt: Value(discoveredAt),
-      expiresAt: expiresAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(expiresAt),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-    );
-  }
-
-  factory OpportunitiesTableData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return OpportunitiesTableData(
-      id: serializer.fromJson<String>(json['id']),
-      businessId: serializer.fromJson<String>(json['businessId']),
-      type: serializer.fromJson<String>(json['type']),
-      title: serializer.fromJson<String>(json['title']),
-      description: serializer.fromJson<String?>(json['description']),
-      market: serializer.fromJson<String?>(json['market']),
-      estimatedRoi: serializer.fromJson<double?>(json['estimatedRoi']),
-      estimatedInvestment: serializer.fromJson<double?>(
-        json['estimatedInvestment'],
-      ),
-      riskScore: serializer.fromJson<double?>(json['riskScore']),
-      feasibilityScore: serializer.fromJson<double?>(json['feasibilityScore']),
-      aiScore: serializer.fromJson<double?>(json['aiScore']),
-      status: serializer.fromJson<String?>(json['status']),
-      relatedProducts: serializer.fromJson<String?>(json['relatedProducts']),
-      relatedSuppliers: serializer.fromJson<String?>(json['relatedSuppliers']),
-      discoveredAt: serializer.fromJson<DateTime>(json['discoveredAt']),
-      expiresAt: serializer.fromJson<DateTime?>(json['expiresAt']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'businessId': serializer.toJson<String>(businessId),
-      'type': serializer.toJson<String>(type),
-      'title': serializer.toJson<String>(title),
-      'description': serializer.toJson<String?>(description),
-      'market': serializer.toJson<String?>(market),
-      'estimatedRoi': serializer.toJson<double?>(estimatedRoi),
-      'estimatedInvestment': serializer.toJson<double?>(estimatedInvestment),
-      'riskScore': serializer.toJson<double?>(riskScore),
-      'feasibilityScore': serializer.toJson<double?>(feasibilityScore),
-      'aiScore': serializer.toJson<double?>(aiScore),
-      'status': serializer.toJson<String?>(status),
-      'relatedProducts': serializer.toJson<String?>(relatedProducts),
-      'relatedSuppliers': serializer.toJson<String?>(relatedSuppliers),
-      'discoveredAt': serializer.toJson<DateTime>(discoveredAt),
-      'expiresAt': serializer.toJson<DateTime?>(expiresAt),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
-    };
-  }
-
-  OpportunitiesTableData copyWith({
-    String? id,
-    String? businessId,
-    String? type,
-    String? title,
-    Value<String?> description = const Value.absent(),
-    Value<String?> market = const Value.absent(),
-    Value<double?> estimatedRoi = const Value.absent(),
-    Value<double?> estimatedInvestment = const Value.absent(),
-    Value<double?> riskScore = const Value.absent(),
-    Value<double?> feasibilityScore = const Value.absent(),
-    Value<double?> aiScore = const Value.absent(),
-    Value<String?> status = const Value.absent(),
-    Value<String?> relatedProducts = const Value.absent(),
-    Value<String?> relatedSuppliers = const Value.absent(),
-    DateTime? discoveredAt,
-    Value<DateTime?> expiresAt = const Value.absent(),
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) => OpportunitiesTableData(
-    id: id ?? this.id,
-    businessId: businessId ?? this.businessId,
-    type: type ?? this.type,
-    title: title ?? this.title,
-    description: description.present ? description.value : this.description,
-    market: market.present ? market.value : this.market,
-    estimatedRoi: estimatedRoi.present ? estimatedRoi.value : this.estimatedRoi,
-    estimatedInvestment: estimatedInvestment.present
-        ? estimatedInvestment.value
-        : this.estimatedInvestment,
-    riskScore: riskScore.present ? riskScore.value : this.riskScore,
-    feasibilityScore: feasibilityScore.present
-        ? feasibilityScore.value
-        : this.feasibilityScore,
-    aiScore: aiScore.present ? aiScore.value : this.aiScore,
-    status: status.present ? status.value : this.status,
-    relatedProducts: relatedProducts.present
-        ? relatedProducts.value
-        : this.relatedProducts,
-    relatedSuppliers: relatedSuppliers.present
-        ? relatedSuppliers.value
-        : this.relatedSuppliers,
-    discoveredAt: discoveredAt ?? this.discoveredAt,
-    expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-  );
-  OpportunitiesTableData copyWithCompanion(OpportunitiesTableCompanion data) {
-    return OpportunitiesTableData(
-      id: data.id.present ? data.id.value : this.id,
-      businessId: data.businessId.present
-          ? data.businessId.value
-          : this.businessId,
-      type: data.type.present ? data.type.value : this.type,
-      title: data.title.present ? data.title.value : this.title,
-      description: data.description.present
-          ? data.description.value
-          : this.description,
-      market: data.market.present ? data.market.value : this.market,
-      estimatedRoi: data.estimatedRoi.present
-          ? data.estimatedRoi.value
-          : this.estimatedRoi,
-      estimatedInvestment: data.estimatedInvestment.present
-          ? data.estimatedInvestment.value
-          : this.estimatedInvestment,
-      riskScore: data.riskScore.present ? data.riskScore.value : this.riskScore,
-      feasibilityScore: data.feasibilityScore.present
-          ? data.feasibilityScore.value
-          : this.feasibilityScore,
-      aiScore: data.aiScore.present ? data.aiScore.value : this.aiScore,
-      status: data.status.present ? data.status.value : this.status,
-      relatedProducts: data.relatedProducts.present
-          ? data.relatedProducts.value
-          : this.relatedProducts,
-      relatedSuppliers: data.relatedSuppliers.present
-          ? data.relatedSuppliers.value
-          : this.relatedSuppliers,
-      discoveredAt: data.discoveredAt.present
-          ? data.discoveredAt.value
-          : this.discoveredAt,
-      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('OpportunitiesTableData(')
-          ..write('id: $id, ')
-          ..write('businessId: $businessId, ')
-          ..write('type: $type, ')
-          ..write('title: $title, ')
-          ..write('description: $description, ')
-          ..write('market: $market, ')
-          ..write('estimatedRoi: $estimatedRoi, ')
-          ..write('estimatedInvestment: $estimatedInvestment, ')
-          ..write('riskScore: $riskScore, ')
-          ..write('feasibilityScore: $feasibilityScore, ')
-          ..write('aiScore: $aiScore, ')
-          ..write('status: $status, ')
-          ..write('relatedProducts: $relatedProducts, ')
-          ..write('relatedSuppliers: $relatedSuppliers, ')
-          ..write('discoveredAt: $discoveredAt, ')
-          ..write('expiresAt: $expiresAt, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    businessId,
-    type,
-    title,
-    description,
-    market,
-    estimatedRoi,
-    estimatedInvestment,
-    riskScore,
-    feasibilityScore,
-    aiScore,
-    status,
-    relatedProducts,
-    relatedSuppliers,
-    discoveredAt,
-    expiresAt,
-    createdAt,
-    updatedAt,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is OpportunitiesTableData &&
-          other.id == this.id &&
-          other.businessId == this.businessId &&
-          other.type == this.type &&
-          other.title == this.title &&
-          other.description == this.description &&
-          other.market == this.market &&
-          other.estimatedRoi == this.estimatedRoi &&
-          other.estimatedInvestment == this.estimatedInvestment &&
-          other.riskScore == this.riskScore &&
-          other.feasibilityScore == this.feasibilityScore &&
-          other.aiScore == this.aiScore &&
-          other.status == this.status &&
-          other.relatedProducts == this.relatedProducts &&
-          other.relatedSuppliers == this.relatedSuppliers &&
-          other.discoveredAt == this.discoveredAt &&
-          other.expiresAt == this.expiresAt &&
-          other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
-}
-
-class OpportunitiesTableCompanion
-    extends UpdateCompanion<OpportunitiesTableData> {
-  final Value<String> id;
-  final Value<String> businessId;
-  final Value<String> type;
-  final Value<String> title;
-  final Value<String?> description;
-  final Value<String?> market;
-  final Value<double?> estimatedRoi;
-  final Value<double?> estimatedInvestment;
-  final Value<double?> riskScore;
-  final Value<double?> feasibilityScore;
-  final Value<double?> aiScore;
-  final Value<String?> status;
-  final Value<String?> relatedProducts;
-  final Value<String?> relatedSuppliers;
-  final Value<DateTime> discoveredAt;
-  final Value<DateTime?> expiresAt;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updatedAt;
-  final Value<int> rowid;
-  const OpportunitiesTableCompanion({
-    this.id = const Value.absent(),
-    this.businessId = const Value.absent(),
-    this.type = const Value.absent(),
-    this.title = const Value.absent(),
-    this.description = const Value.absent(),
-    this.market = const Value.absent(),
-    this.estimatedRoi = const Value.absent(),
-    this.estimatedInvestment = const Value.absent(),
-    this.riskScore = const Value.absent(),
-    this.feasibilityScore = const Value.absent(),
-    this.aiScore = const Value.absent(),
-    this.status = const Value.absent(),
-    this.relatedProducts = const Value.absent(),
-    this.relatedSuppliers = const Value.absent(),
-    this.discoveredAt = const Value.absent(),
-    this.expiresAt = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  OpportunitiesTableCompanion.insert({
-    required String id,
-    required String businessId,
-    required String type,
-    required String title,
-    this.description = const Value.absent(),
-    this.market = const Value.absent(),
-    this.estimatedRoi = const Value.absent(),
-    this.estimatedInvestment = const Value.absent(),
-    this.riskScore = const Value.absent(),
-    this.feasibilityScore = const Value.absent(),
-    this.aiScore = const Value.absent(),
-    this.status = const Value.absent(),
-    this.relatedProducts = const Value.absent(),
-    this.relatedSuppliers = const Value.absent(),
-    this.discoveredAt = const Value.absent(),
-    this.expiresAt = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       businessId = Value(businessId),
-       type = Value(type),
-       title = Value(title);
-  static Insertable<OpportunitiesTableData> custom({
-    Expression<String>? id,
-    Expression<String>? businessId,
-    Expression<String>? type,
-    Expression<String>? title,
-    Expression<String>? description,
-    Expression<String>? market,
-    Expression<double>? estimatedRoi,
-    Expression<double>? estimatedInvestment,
-    Expression<double>? riskScore,
-    Expression<double>? feasibilityScore,
-    Expression<double>? aiScore,
-    Expression<String>? status,
-    Expression<String>? relatedProducts,
-    Expression<String>? relatedSuppliers,
-    Expression<DateTime>? discoveredAt,
-    Expression<DateTime>? expiresAt,
-    Expression<DateTime>? createdAt,
-    Expression<DateTime>? updatedAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (businessId != null) 'business_id': businessId,
-      if (type != null) 'type': type,
-      if (title != null) 'title': title,
-      if (description != null) 'description': description,
-      if (market != null) 'market': market,
-      if (estimatedRoi != null) 'estimated_roi': estimatedRoi,
-      if (estimatedInvestment != null)
-        'estimated_investment': estimatedInvestment,
-      if (riskScore != null) 'risk_score': riskScore,
-      if (feasibilityScore != null) 'feasibility_score': feasibilityScore,
-      if (aiScore != null) 'ai_score': aiScore,
-      if (status != null) 'status': status,
-      if (relatedProducts != null) 'related_products': relatedProducts,
-      if (relatedSuppliers != null) 'related_suppliers': relatedSuppliers,
-      if (discoveredAt != null) 'discovered_at': discoveredAt,
-      if (expiresAt != null) 'expires_at': expiresAt,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  OpportunitiesTableCompanion copyWith({
-    Value<String>? id,
-    Value<String>? businessId,
-    Value<String>? type,
-    Value<String>? title,
-    Value<String?>? description,
-    Value<String?>? market,
-    Value<double?>? estimatedRoi,
-    Value<double?>? estimatedInvestment,
-    Value<double?>? riskScore,
-    Value<double?>? feasibilityScore,
-    Value<double?>? aiScore,
-    Value<String?>? status,
-    Value<String?>? relatedProducts,
-    Value<String?>? relatedSuppliers,
-    Value<DateTime>? discoveredAt,
-    Value<DateTime?>? expiresAt,
-    Value<DateTime>? createdAt,
-    Value<DateTime>? updatedAt,
-    Value<int>? rowid,
-  }) {
-    return OpportunitiesTableCompanion(
-      id: id ?? this.id,
-      businessId: businessId ?? this.businessId,
-      type: type ?? this.type,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      market: market ?? this.market,
-      estimatedRoi: estimatedRoi ?? this.estimatedRoi,
-      estimatedInvestment: estimatedInvestment ?? this.estimatedInvestment,
-      riskScore: riskScore ?? this.riskScore,
-      feasibilityScore: feasibilityScore ?? this.feasibilityScore,
-      aiScore: aiScore ?? this.aiScore,
-      status: status ?? this.status,
-      relatedProducts: relatedProducts ?? this.relatedProducts,
-      relatedSuppliers: relatedSuppliers ?? this.relatedSuppliers,
-      discoveredAt: discoveredAt ?? this.discoveredAt,
-      expiresAt: expiresAt ?? this.expiresAt,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (businessId.present) {
-      map['business_id'] = Variable<String>(businessId.value);
-    }
-    if (type.present) {
-      map['type'] = Variable<String>(type.value);
-    }
-    if (title.present) {
-      map['title'] = Variable<String>(title.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (market.present) {
-      map['market'] = Variable<String>(market.value);
-    }
-    if (estimatedRoi.present) {
-      map['estimated_roi'] = Variable<double>(estimatedRoi.value);
-    }
-    if (estimatedInvestment.present) {
-      map['estimated_investment'] = Variable<double>(estimatedInvestment.value);
-    }
-    if (riskScore.present) {
-      map['risk_score'] = Variable<double>(riskScore.value);
-    }
-    if (feasibilityScore.present) {
-      map['feasibility_score'] = Variable<double>(feasibilityScore.value);
-    }
-    if (aiScore.present) {
-      map['ai_score'] = Variable<double>(aiScore.value);
-    }
-    if (status.present) {
-      map['status'] = Variable<String>(status.value);
-    }
-    if (relatedProducts.present) {
-      map['related_products'] = Variable<String>(relatedProducts.value);
-    }
-    if (relatedSuppliers.present) {
-      map['related_suppliers'] = Variable<String>(relatedSuppliers.value);
-    }
-    if (discoveredAt.present) {
-      map['discovered_at'] = Variable<DateTime>(discoveredAt.value);
-    }
-    if (expiresAt.present) {
-      map['expires_at'] = Variable<DateTime>(expiresAt.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('OpportunitiesTableCompanion(')
-          ..write('id: $id, ')
-          ..write('businessId: $businessId, ')
-          ..write('type: $type, ')
-          ..write('title: $title, ')
-          ..write('description: $description, ')
-          ..write('market: $market, ')
-          ..write('estimatedRoi: $estimatedRoi, ')
-          ..write('estimatedInvestment: $estimatedInvestment, ')
-          ..write('riskScore: $riskScore, ')
-          ..write('feasibilityScore: $feasibilityScore, ')
-          ..write('aiScore: $aiScore, ')
-          ..write('status: $status, ')
-          ..write('relatedProducts: $relatedProducts, ')
-          ..write('relatedSuppliers: $relatedSuppliers, ')
-          ..write('discoveredAt: $discoveredAt, ')
-          ..write('expiresAt: $expiresAt, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $JourneysTableTable extends JourneysTable
     with TableInfo<$JourneysTableTable, JourneysTableData> {
   @override
@@ -15251,6 +14209,300 @@ class BusinessJourneyPlansTableCompanion
   }
 }
 
+class $OpportunityReactionsTableTable extends OpportunityReactionsTable
+    with
+        TableInfo<
+          $OpportunityReactionsTableTable,
+          OpportunityReactionsTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OpportunityReactionsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _opportunityIdMeta = const VerificationMeta(
+    'opportunityId',
+  );
+  @override
+  late final GeneratedColumn<String> opportunityId = GeneratedColumn<String>(
+    'opportunity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reactionMeta = const VerificationMeta(
+    'reaction',
+  );
+  @override
+  late final GeneratedColumn<String> reaction = GeneratedColumn<String>(
+    'reaction',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [opportunityId, reaction, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'opportunity_reactions_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OpportunityReactionsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('opportunity_id')) {
+      context.handle(
+        _opportunityIdMeta,
+        opportunityId.isAcceptableOrUnknown(
+          data['opportunity_id']!,
+          _opportunityIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_opportunityIdMeta);
+    }
+    if (data.containsKey('reaction')) {
+      context.handle(
+        _reactionMeta,
+        reaction.isAcceptableOrUnknown(data['reaction']!, _reactionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reactionMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {opportunityId};
+  @override
+  OpportunityReactionsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OpportunityReactionsTableData(
+      opportunityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}opportunity_id'],
+      )!,
+      reaction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reaction'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $OpportunityReactionsTableTable createAlias(String alias) {
+    return $OpportunityReactionsTableTable(attachedDatabase, alias);
+  }
+}
+
+class OpportunityReactionsTableData extends DataClass
+    implements Insertable<OpportunityReactionsTableData> {
+  /// The opportunity's stable id, as produced by the rule engine.
+  ///
+  /// The engine is deterministic, so the same business data yields the same
+  /// ids — which is what makes keying by id safe. If an opportunity stops
+  /// being generated (the underlying data changed), its row simply stops
+  /// matching anything and is ignored on read.
+  final String opportunityId;
+
+  /// `OpportunityReaction.name` — canonical code, never a display label
+  /// (ADR-TON-018).
+  final String reaction;
+  final DateTime updatedAt;
+  const OpportunityReactionsTableData({
+    required this.opportunityId,
+    required this.reaction,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['opportunity_id'] = Variable<String>(opportunityId);
+    map['reaction'] = Variable<String>(reaction);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  OpportunityReactionsTableCompanion toCompanion(bool nullToAbsent) {
+    return OpportunityReactionsTableCompanion(
+      opportunityId: Value(opportunityId),
+      reaction: Value(reaction),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory OpportunityReactionsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OpportunityReactionsTableData(
+      opportunityId: serializer.fromJson<String>(json['opportunityId']),
+      reaction: serializer.fromJson<String>(json['reaction']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'opportunityId': serializer.toJson<String>(opportunityId),
+      'reaction': serializer.toJson<String>(reaction),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  OpportunityReactionsTableData copyWith({
+    String? opportunityId,
+    String? reaction,
+    DateTime? updatedAt,
+  }) => OpportunityReactionsTableData(
+    opportunityId: opportunityId ?? this.opportunityId,
+    reaction: reaction ?? this.reaction,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  OpportunityReactionsTableData copyWithCompanion(
+    OpportunityReactionsTableCompanion data,
+  ) {
+    return OpportunityReactionsTableData(
+      opportunityId: data.opportunityId.present
+          ? data.opportunityId.value
+          : this.opportunityId,
+      reaction: data.reaction.present ? data.reaction.value : this.reaction,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OpportunityReactionsTableData(')
+          ..write('opportunityId: $opportunityId, ')
+          ..write('reaction: $reaction, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(opportunityId, reaction, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OpportunityReactionsTableData &&
+          other.opportunityId == this.opportunityId &&
+          other.reaction == this.reaction &&
+          other.updatedAt == this.updatedAt);
+}
+
+class OpportunityReactionsTableCompanion
+    extends UpdateCompanion<OpportunityReactionsTableData> {
+  final Value<String> opportunityId;
+  final Value<String> reaction;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const OpportunityReactionsTableCompanion({
+    this.opportunityId = const Value.absent(),
+    this.reaction = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  OpportunityReactionsTableCompanion.insert({
+    required String opportunityId,
+    required String reaction,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : opportunityId = Value(opportunityId),
+       reaction = Value(reaction),
+       updatedAt = Value(updatedAt);
+  static Insertable<OpportunityReactionsTableData> custom({
+    Expression<String>? opportunityId,
+    Expression<String>? reaction,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (opportunityId != null) 'opportunity_id': opportunityId,
+      if (reaction != null) 'reaction': reaction,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OpportunityReactionsTableCompanion copyWith({
+    Value<String>? opportunityId,
+    Value<String>? reaction,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return OpportunityReactionsTableCompanion(
+      opportunityId: opportunityId ?? this.opportunityId,
+      reaction: reaction ?? this.reaction,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (opportunityId.present) {
+      map['opportunity_id'] = Variable<String>(opportunityId.value);
+    }
+    if (reaction.present) {
+      map['reaction'] = Variable<String>(reaction.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OpportunityReactionsTableCompanion(')
+          ..write('opportunityId: $opportunityId, ')
+          ..write('reaction: $reaction, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ChatMessagesTableTable extends ChatMessagesTable
     with TableInfo<$ChatMessagesTableTable, ChatMessagesTableData> {
   @override
@@ -15802,8 +15054,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CustomersTableTable customersTable = $CustomersTableTable(this);
   late final $ChannelsTableTable channelsTable = $ChannelsTableTable(this);
   late final $OrdersTableTable ordersTable = $OrdersTableTable(this);
-  late final $OpportunitiesTableTable opportunitiesTable =
-      $OpportunitiesTableTable(this);
   late final $JourneysTableTable journeysTable = $JourneysTableTable(this);
   late final $JourneyStepsTableTable journeyStepsTable =
       $JourneyStepsTableTable(this);
@@ -15826,6 +15076,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $BusinessJourneyNodesTableTable(this);
   late final $BusinessJourneyPlansTableTable businessJourneyPlansTable =
       $BusinessJourneyPlansTableTable(this);
+  late final $OpportunityReactionsTableTable opportunityReactionsTable =
+      $OpportunityReactionsTableTable(this);
   late final $ChatMessagesTableTable chatMessagesTable =
       $ChatMessagesTableTable(this);
   late final Index producersBusinessId = Index(
@@ -15864,10 +15116,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'orders_order_date',
     'CREATE INDEX orders_order_date ON orders_table (order_date)',
   );
-  late final Index opportunitiesBusinessId = Index(
-    'opportunities_business_id',
-    'CREATE INDEX opportunities_business_id ON opportunities_table (business_id)',
-  );
   late final Index journeysBusinessId = Index(
     'journeys_business_id',
     'CREATE INDEX journeys_business_id ON journeys_table (business_id)',
@@ -15904,7 +15152,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     customersTable,
     channelsTable,
     ordersTable,
-    opportunitiesTable,
     journeysTable,
     journeyStepsTable,
     transactionsTable,
@@ -15918,6 +15165,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     businessJourneysTable,
     businessJourneyNodesTable,
     businessJourneyPlansTable,
+    opportunityReactionsTable,
     chatMessagesTable,
     producersBusinessId,
     productsBusinessId,
@@ -15928,7 +15176,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ordersBusinessId,
     ordersCustomerId,
     ordersOrderDate,
-    opportunitiesBusinessId,
     journeysBusinessId,
     transactionsBusinessId,
     transactionsDate,
@@ -15979,13 +15226,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('orders_table', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'businesses_table',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('opportunities_table', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -16221,30 +15461,6 @@ final class $$BusinessesTableTableReferences
     ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_ordersTableRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<
-    $OpportunitiesTableTable,
-    List<OpportunitiesTableData>
-  >
-  _opportunitiesTableRefsTable(_$AppDatabase db) =>
-      MultiTypedResultKey.fromTable(
-        db.opportunitiesTable,
-        aliasName: 'businesses_table__id__opportunities_table__business_id',
-      );
-
-  $$OpportunitiesTableTableProcessedTableManager get opportunitiesTableRefs {
-    final manager = $$OpportunitiesTableTableTableManager(
-      $_db,
-      $_db.opportunitiesTable,
-    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(
-      _opportunitiesTableRefsTable($_db),
-    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -16594,31 +15810,6 @@ class $$BusinessesTableTableFilterComposer
           }) => $$OrdersTableTableFilterComposer(
             $db: $db,
             $table: $db.ordersTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> opportunitiesTableRefs(
-    Expression<bool> Function($$OpportunitiesTableTableFilterComposer f) f,
-  ) {
-    final $$OpportunitiesTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.opportunitiesTable,
-      getReferencedColumn: (t) => t.businessId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$OpportunitiesTableTableFilterComposer(
-            $db: $db,
-            $table: $db.opportunitiesTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -17078,32 +16269,6 @@ class $$BusinessesTableTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> opportunitiesTableRefs<T extends Object>(
-    Expression<T> Function($$OpportunitiesTableTableAnnotationComposer a) f,
-  ) {
-    final $$OpportunitiesTableTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.id,
-          referencedTable: $db.opportunitiesTable,
-          getReferencedColumn: (t) => t.businessId,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$OpportunitiesTableTableAnnotationComposer(
-                $db: $db,
-                $table: $db.opportunitiesTable,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
-    return f(composer);
-  }
-
   Expression<T> journeysTableRefs<T extends Object>(
     Expression<T> Function($$JourneysTableTableAnnotationComposer a) f,
   ) {
@@ -17278,7 +16443,6 @@ class $$BusinessesTableTableTableManager
             bool customersTableRefs,
             bool channelsTableRefs,
             bool ordersTableRefs,
-            bool opportunitiesTableRefs,
             bool journeysTableRefs,
             bool transactionsTableRefs,
             bool documentsTableRefs,
@@ -17373,7 +16537,6 @@ class $$BusinessesTableTableTableManager
                 customersTableRefs = false,
                 channelsTableRefs = false,
                 ordersTableRefs = false,
-                opportunitiesTableRefs = false,
                 journeysTableRefs = false,
                 transactionsTableRefs = false,
                 documentsTableRefs = false,
@@ -17390,7 +16553,6 @@ class $$BusinessesTableTableTableManager
                     if (customersTableRefs) db.customersTable,
                     if (channelsTableRefs) db.channelsTable,
                     if (ordersTableRefs) db.ordersTable,
-                    if (opportunitiesTableRefs) db.opportunitiesTable,
                     if (journeysTableRefs) db.journeysTable,
                     if (transactionsTableRefs) db.transactionsTable,
                     if (documentsTableRefs) db.documentsTable,
@@ -17560,27 +16722,6 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
-                      if (opportunitiesTableRefs)
-                        await $_getPrefetchedData<
-                          BusinessesTableData,
-                          $BusinessesTableTable,
-                          OpportunitiesTableData
-                        >(
-                          currentTable: table,
-                          referencedTable: $$BusinessesTableTableReferences
-                              ._opportunitiesTableRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$BusinessesTableTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).opportunitiesTableRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.businessId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
                       if (journeysTableRefs)
                         await $_getPrefetchedData<
                           BusinessesTableData,
@@ -17735,7 +16876,6 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool customersTableRefs,
         bool channelsTableRefs,
         bool ordersTableRefs,
-        bool opportunitiesTableRefs,
         bool journeysTableRefs,
         bool transactionsTableRefs,
         bool documentsTableRefs,
@@ -21817,601 +20957,6 @@ typedef $$OrdersTableTableProcessedTableManager =
         bool channelId,
         bool transactionsTableRefs,
       })
-    >;
-typedef $$OpportunitiesTableTableCreateCompanionBuilder =
-    OpportunitiesTableCompanion Function({
-      required String id,
-      required String businessId,
-      required String type,
-      required String title,
-      Value<String?> description,
-      Value<String?> market,
-      Value<double?> estimatedRoi,
-      Value<double?> estimatedInvestment,
-      Value<double?> riskScore,
-      Value<double?> feasibilityScore,
-      Value<double?> aiScore,
-      Value<String?> status,
-      Value<String?> relatedProducts,
-      Value<String?> relatedSuppliers,
-      Value<DateTime> discoveredAt,
-      Value<DateTime?> expiresAt,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
-      Value<int> rowid,
-    });
-typedef $$OpportunitiesTableTableUpdateCompanionBuilder =
-    OpportunitiesTableCompanion Function({
-      Value<String> id,
-      Value<String> businessId,
-      Value<String> type,
-      Value<String> title,
-      Value<String?> description,
-      Value<String?> market,
-      Value<double?> estimatedRoi,
-      Value<double?> estimatedInvestment,
-      Value<double?> riskScore,
-      Value<double?> feasibilityScore,
-      Value<double?> aiScore,
-      Value<String?> status,
-      Value<String?> relatedProducts,
-      Value<String?> relatedSuppliers,
-      Value<DateTime> discoveredAt,
-      Value<DateTime?> expiresAt,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
-      Value<int> rowid,
-    });
-
-final class $$OpportunitiesTableTableReferences
-    extends
-        BaseReferences<
-          _$AppDatabase,
-          $OpportunitiesTableTable,
-          OpportunitiesTableData
-        > {
-  $$OpportunitiesTableTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
-      .businessesTable
-      .createAlias('opportunities_table__business_id__businesses_table__id');
-
-  $$BusinessesTableTableProcessedTableManager get businessId {
-    final $_column = $_itemColumn<String>('business_id')!;
-
-    final manager = $$BusinessesTableTableTableManager(
-      $_db,
-      $_db.businessesTable,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
-class $$OpportunitiesTableTableFilterComposer
-    extends Composer<_$AppDatabase, $OpportunitiesTableTable> {
-  $$OpportunitiesTableTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get market => $composableBuilder(
-    column: $table.market,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get estimatedRoi => $composableBuilder(
-    column: $table.estimatedRoi,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get estimatedInvestment => $composableBuilder(
-    column: $table.estimatedInvestment,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get riskScore => $composableBuilder(
-    column: $table.riskScore,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get feasibilityScore => $composableBuilder(
-    column: $table.feasibilityScore,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get aiScore => $composableBuilder(
-    column: $table.aiScore,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get status => $composableBuilder(
-    column: $table.status,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get relatedProducts => $composableBuilder(
-    column: $table.relatedProducts,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get relatedSuppliers => $composableBuilder(
-    column: $table.relatedSuppliers,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get discoveredAt => $composableBuilder(
-    column: $table.discoveredAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
-    column: $table.expiresAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $$BusinessesTableTableFilterComposer get businessId {
-    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.businessId,
-      referencedTable: $db.businessesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BusinessesTableTableFilterComposer(
-            $db: $db,
-            $table: $db.businessesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$OpportunitiesTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $OpportunitiesTableTable> {
-  $$OpportunitiesTableTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get market => $composableBuilder(
-    column: $table.market,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get estimatedRoi => $composableBuilder(
-    column: $table.estimatedRoi,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get estimatedInvestment => $composableBuilder(
-    column: $table.estimatedInvestment,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get riskScore => $composableBuilder(
-    column: $table.riskScore,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get feasibilityScore => $composableBuilder(
-    column: $table.feasibilityScore,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get aiScore => $composableBuilder(
-    column: $table.aiScore,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get status => $composableBuilder(
-    column: $table.status,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get relatedProducts => $composableBuilder(
-    column: $table.relatedProducts,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get relatedSuppliers => $composableBuilder(
-    column: $table.relatedSuppliers,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get discoveredAt => $composableBuilder(
-    column: $table.discoveredAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
-    column: $table.expiresAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $$BusinessesTableTableOrderingComposer get businessId {
-    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.businessId,
-      referencedTable: $db.businessesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BusinessesTableTableOrderingComposer(
-            $db: $db,
-            $table: $db.businessesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$OpportunitiesTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $OpportunitiesTableTable> {
-  $$OpportunitiesTableTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
-
-  GeneratedColumn<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => column);
-
-  GeneratedColumn<String> get description => $composableBuilder(
-    column: $table.description,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get market =>
-      $composableBuilder(column: $table.market, builder: (column) => column);
-
-  GeneratedColumn<double> get estimatedRoi => $composableBuilder(
-    column: $table.estimatedRoi,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get estimatedInvestment => $composableBuilder(
-    column: $table.estimatedInvestment,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get riskScore =>
-      $composableBuilder(column: $table.riskScore, builder: (column) => column);
-
-  GeneratedColumn<double> get feasibilityScore => $composableBuilder(
-    column: $table.feasibilityScore,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get aiScore =>
-      $composableBuilder(column: $table.aiScore, builder: (column) => column);
-
-  GeneratedColumn<String> get status =>
-      $composableBuilder(column: $table.status, builder: (column) => column);
-
-  GeneratedColumn<String> get relatedProducts => $composableBuilder(
-    column: $table.relatedProducts,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get relatedSuppliers => $composableBuilder(
-    column: $table.relatedSuppliers,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get discoveredAt => $composableBuilder(
-    column: $table.discoveredAt,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get expiresAt =>
-      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$BusinessesTableTableAnnotationComposer get businessId {
-    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.businessId,
-      referencedTable: $db.businessesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BusinessesTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.businessesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$OpportunitiesTableTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $OpportunitiesTableTable,
-          OpportunitiesTableData,
-          $$OpportunitiesTableTableFilterComposer,
-          $$OpportunitiesTableTableOrderingComposer,
-          $$OpportunitiesTableTableAnnotationComposer,
-          $$OpportunitiesTableTableCreateCompanionBuilder,
-          $$OpportunitiesTableTableUpdateCompanionBuilder,
-          (OpportunitiesTableData, $$OpportunitiesTableTableReferences),
-          OpportunitiesTableData,
-          PrefetchHooks Function({bool businessId})
-        > {
-  $$OpportunitiesTableTableTableManager(
-    _$AppDatabase db,
-    $OpportunitiesTableTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$OpportunitiesTableTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$OpportunitiesTableTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$OpportunitiesTableTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> businessId = const Value.absent(),
-                Value<String> type = const Value.absent(),
-                Value<String> title = const Value.absent(),
-                Value<String?> description = const Value.absent(),
-                Value<String?> market = const Value.absent(),
-                Value<double?> estimatedRoi = const Value.absent(),
-                Value<double?> estimatedInvestment = const Value.absent(),
-                Value<double?> riskScore = const Value.absent(),
-                Value<double?> feasibilityScore = const Value.absent(),
-                Value<double?> aiScore = const Value.absent(),
-                Value<String?> status = const Value.absent(),
-                Value<String?> relatedProducts = const Value.absent(),
-                Value<String?> relatedSuppliers = const Value.absent(),
-                Value<DateTime> discoveredAt = const Value.absent(),
-                Value<DateTime?> expiresAt = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => OpportunitiesTableCompanion(
-                id: id,
-                businessId: businessId,
-                type: type,
-                title: title,
-                description: description,
-                market: market,
-                estimatedRoi: estimatedRoi,
-                estimatedInvestment: estimatedInvestment,
-                riskScore: riskScore,
-                feasibilityScore: feasibilityScore,
-                aiScore: aiScore,
-                status: status,
-                relatedProducts: relatedProducts,
-                relatedSuppliers: relatedSuppliers,
-                discoveredAt: discoveredAt,
-                expiresAt: expiresAt,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                required String businessId,
-                required String type,
-                required String title,
-                Value<String?> description = const Value.absent(),
-                Value<String?> market = const Value.absent(),
-                Value<double?> estimatedRoi = const Value.absent(),
-                Value<double?> estimatedInvestment = const Value.absent(),
-                Value<double?> riskScore = const Value.absent(),
-                Value<double?> feasibilityScore = const Value.absent(),
-                Value<double?> aiScore = const Value.absent(),
-                Value<String?> status = const Value.absent(),
-                Value<String?> relatedProducts = const Value.absent(),
-                Value<String?> relatedSuppliers = const Value.absent(),
-                Value<DateTime> discoveredAt = const Value.absent(),
-                Value<DateTime?> expiresAt = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => OpportunitiesTableCompanion.insert(
-                id: id,
-                businessId: businessId,
-                type: type,
-                title: title,
-                description: description,
-                market: market,
-                estimatedRoi: estimatedRoi,
-                estimatedInvestment: estimatedInvestment,
-                riskScore: riskScore,
-                feasibilityScore: feasibilityScore,
-                aiScore: aiScore,
-                status: status,
-                relatedProducts: relatedProducts,
-                relatedSuppliers: relatedSuppliers,
-                discoveredAt: discoveredAt,
-                expiresAt: expiresAt,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$OpportunitiesTableTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: ({businessId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (businessId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.businessId,
-                                referencedTable:
-                                    $$OpportunitiesTableTableReferences
-                                        ._businessIdTable(db),
-                                referencedColumn:
-                                    $$OpportunitiesTableTableReferences
-                                        ._businessIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
-        ),
-      );
-}
-
-typedef $$OpportunitiesTableTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $OpportunitiesTableTable,
-      OpportunitiesTableData,
-      $$OpportunitiesTableTableFilterComposer,
-      $$OpportunitiesTableTableOrderingComposer,
-      $$OpportunitiesTableTableAnnotationComposer,
-      $$OpportunitiesTableTableCreateCompanionBuilder,
-      $$OpportunitiesTableTableUpdateCompanionBuilder,
-      (OpportunitiesTableData, $$OpportunitiesTableTableReferences),
-      OpportunitiesTableData,
-      PrefetchHooks Function({bool businessId})
     >;
 typedef $$JourneysTableTableCreateCompanionBuilder =
     JourneysTableCompanion Function({
@@ -28012,6 +26557,189 @@ typedef $$BusinessJourneyPlansTableTableProcessedTableManager =
       BusinessJourneyPlansTableData,
       PrefetchHooks Function({bool journeyId})
     >;
+typedef $$OpportunityReactionsTableTableCreateCompanionBuilder =
+    OpportunityReactionsTableCompanion Function({
+      required String opportunityId,
+      required String reaction,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$OpportunityReactionsTableTableUpdateCompanionBuilder =
+    OpportunityReactionsTableCompanion Function({
+      Value<String> opportunityId,
+      Value<String> reaction,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$OpportunityReactionsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $OpportunityReactionsTableTable> {
+  $$OpportunityReactionsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get opportunityId => $composableBuilder(
+    column: $table.opportunityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reaction => $composableBuilder(
+    column: $table.reaction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OpportunityReactionsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $OpportunityReactionsTableTable> {
+  $$OpportunityReactionsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get opportunityId => $composableBuilder(
+    column: $table.opportunityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reaction => $composableBuilder(
+    column: $table.reaction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OpportunityReactionsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OpportunityReactionsTableTable> {
+  $$OpportunityReactionsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get opportunityId => $composableBuilder(
+    column: $table.opportunityId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reaction =>
+      $composableBuilder(column: $table.reaction, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$OpportunityReactionsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OpportunityReactionsTableTable,
+          OpportunityReactionsTableData,
+          $$OpportunityReactionsTableTableFilterComposer,
+          $$OpportunityReactionsTableTableOrderingComposer,
+          $$OpportunityReactionsTableTableAnnotationComposer,
+          $$OpportunityReactionsTableTableCreateCompanionBuilder,
+          $$OpportunityReactionsTableTableUpdateCompanionBuilder,
+          (
+            OpportunityReactionsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $OpportunityReactionsTableTable,
+              OpportunityReactionsTableData
+            >,
+          ),
+          OpportunityReactionsTableData,
+          PrefetchHooks Function()
+        > {
+  $$OpportunityReactionsTableTableTableManager(
+    _$AppDatabase db,
+    $OpportunityReactionsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OpportunityReactionsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$OpportunityReactionsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$OpportunityReactionsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> opportunityId = const Value.absent(),
+                Value<String> reaction = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OpportunityReactionsTableCompanion(
+                opportunityId: opportunityId,
+                reaction: reaction,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String opportunityId,
+                required String reaction,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => OpportunityReactionsTableCompanion.insert(
+                opportunityId: opportunityId,
+                reaction: reaction,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OpportunityReactionsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OpportunityReactionsTableTable,
+      OpportunityReactionsTableData,
+      $$OpportunityReactionsTableTableFilterComposer,
+      $$OpportunityReactionsTableTableOrderingComposer,
+      $$OpportunityReactionsTableTableAnnotationComposer,
+      $$OpportunityReactionsTableTableCreateCompanionBuilder,
+      $$OpportunityReactionsTableTableUpdateCompanionBuilder,
+      (
+        OpportunityReactionsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $OpportunityReactionsTableTable,
+          OpportunityReactionsTableData
+        >,
+      ),
+      OpportunityReactionsTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$ChatMessagesTableTableCreateCompanionBuilder =
     ChatMessagesTableCompanion Function({
       required String id,
@@ -28306,8 +27034,6 @@ class $AppDatabaseManager {
       $$ChannelsTableTableTableManager(_db, _db.channelsTable);
   $$OrdersTableTableTableManager get ordersTable =>
       $$OrdersTableTableTableManager(_db, _db.ordersTable);
-  $$OpportunitiesTableTableTableManager get opportunitiesTable =>
-      $$OpportunitiesTableTableTableManager(_db, _db.opportunitiesTable);
   $$JourneysTableTableTableManager get journeysTable =>
       $$JourneysTableTableTableManager(_db, _db.journeysTable);
   $$JourneyStepsTableTableTableManager get journeyStepsTable =>
@@ -28342,6 +27068,11 @@ class $AppDatabaseManager {
       $$BusinessJourneyPlansTableTableTableManager(
         _db,
         _db.businessJourneyPlansTable,
+      );
+  $$OpportunityReactionsTableTableTableManager get opportunityReactionsTable =>
+      $$OpportunityReactionsTableTableTableManager(
+        _db,
+        _db.opportunityReactionsTable,
       );
   $$ChatMessagesTableTableTableManager get chatMessagesTable =>
       $$ChatMessagesTableTableTableManager(_db, _db.chatMessagesTable);
