@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../profile/business_profile.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_directory_service.dart';
 import '../consumer/customer_order.dart';
@@ -193,6 +194,36 @@ enum ReportPeriod {
 }
 
 /// The sales breakdown over a chosen [ReportPeriod] (WTM-115) — the period-scoped
+/// Revenue booked through one sales channel (WTM-209).
+///
+/// Derived at read time from the orders' own channel codes — self-recorded by
+/// the seller, no marketplace connection (D-5). Orders with no recorded
+/// channel are **not in this list**: inventing a bucket for them would
+/// fabricate a breakdown the seller never gave.
+@immutable
+class ChannelRevenue {
+  const ChannelRevenue({
+    required this.channel,
+    required this.revenue,
+    required this.orders,
+  });
+
+  final SalesChannel channel;
+  final double revenue;
+  final int orders;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChannelRevenue &&
+          other.channel == channel &&
+          other.revenue == revenue &&
+          other.orders == orders);
+
+  @override
+  int get hashCode => Object.hash(channel, revenue, orders);
+}
+
 /// half of the dashboard, alongside the all-business headline KPIs.
 @immutable
 class PeriodBreakdown {
@@ -202,6 +233,7 @@ class PeriodBreakdown {
     required this.topCategories,
     required this.topProducts,
     required this.topCustomers,
+    this.channelRevenue = const [],
   });
 
   static const PeriodBreakdown empty = PeriodBreakdown(
@@ -221,6 +253,11 @@ class PeriodBreakdown {
   final List<CategoryRevenue> topCategories;
   final List<ProductRevenue> topProducts;
   final List<CustomerSpend> topCustomers;
+
+  /// Per-channel revenue, highest first — only channels that actually appear
+  /// on orders. Empty until the seller records a channel on at least one
+  /// order, and the screen hides the section then (WTM-182).
+  final List<ChannelRevenue> channelRevenue;
 
   bool get hasSales => orders > 0;
 }
@@ -378,7 +415,39 @@ class ReportsService {
       topCategories: _categorySeries(inRange),
       topProducts: _productSeries(inRange),
       topCustomers: _customerSeries(inRange),
+      channelRevenue: _channelSeries(inRange),
     );
+  }
+
+  /// Revenue per recorded channel, highest first (WTM-209).
+  List<ChannelRevenue> _channelSeries(List<CustomerOrder> inRange) {
+    final revenue = <SalesChannel, double>{};
+    final counts = <SalesChannel, int>{};
+    for (final o in inRange) {
+      final channel = o.channel;
+      if (channel == null) continue; // not recorded is not a channel
+      revenue.update(
+        channel,
+        (r) => r + o.totalAmount,
+        ifAbsent: () => o.totalAmount,
+      );
+      counts.update(channel, (c) => c + 1, ifAbsent: () => 1);
+    }
+    final list =
+        [
+          for (final e in revenue.entries)
+            ChannelRevenue(
+              channel: e.key,
+              revenue: e.value,
+              orders: counts[e.key]!,
+            ),
+        ]..sort((a, b) {
+          final byRevenue = b.revenue.compareTo(a.revenue);
+          return byRevenue != 0
+              ? byRevenue
+              : a.channel.index.compareTo(b.channel.index);
+        });
+    return list;
   }
 
   double _sum(Iterable<CustomerOrder> orders) =>

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../profile/business_profile.dart';
 import '../../../database/database.dart';
 import '../core/local_workspace.dart';
 import '../core/tongtai_enums.dart';
@@ -139,6 +140,7 @@ class DriftOrderRepository implements OrderRepository {
         totalQuantity: o.totalQuantity,
         subtotal: o.totalAmount,
         paymentStatus: Value(o.paymentStatus),
+        channelId: Value(o.channel?.code),
         totalAmount: o.totalAmount,
         status: o.status.name,
         // Full line detail as a tolerant JSON array.
@@ -153,6 +155,9 @@ class DriftOrderRepository implements OrderRepository {
     date: row.orderDate,
     status: OrderStatus.fromStorage(row.status),
     paymentStatus: row.paymentStatus,
+    // Unknown code ⇒ null, never a guessed channel (a .ttbk from a newer
+    // build may know channels this build does not).
+    channel: SalesChannel.fromCode(row.channelId),
     items: decodeOrderItems(row.items),
   );
   @override

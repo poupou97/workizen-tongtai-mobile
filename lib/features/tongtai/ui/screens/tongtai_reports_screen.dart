@@ -413,6 +413,61 @@ class _ReportBody extends StatelessWidget {
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
         // ── Top customers (WTM-97, period-scoped WTM-115) ───────────────
+        // ── Revenue by channel (WTM-209) — only when recorded ──────────
+        // Self-recorded by the seller on each order; no marketplace sync
+        // (D-5). Hidden until at least one order carries a channel: an empty
+        // breakdown is a promise with nothing behind it (WTM-182).
+        if (breakdown.channelRevenue.isNotEmpty) ...[
+          _SectionTitle(context.l10n.sectionRevenueByChannel),
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          Container(
+            key: const Key('reports-channel-revenue'),
+            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(
+                TongtaiDesignTokens.cardBorderRadius,
+              ),
+              border: Border.all(color: TongtaiDesignTokens.lightBorder),
+            ),
+            child: Column(
+              children: [
+                for (final c in breakdown.channelRevenue) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.profileChannel(c.channel.code),
+                          style: TongtaiDesignTokens.bodyStyle.copyWith(
+                            color: TongtaiDesignTokens.lightTextPrimary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        context.l10n.reportChannelOrders(c.orders),
+                        style: TongtaiDesignTokens.captionStyle.copyWith(
+                          color: TongtaiDesignTokens.lightTextSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: TongtaiDesignTokens.spacing3),
+                      Text(
+                        TongtaiFormatters.vnd(c.revenue),
+                        style: TongtaiDesignTokens.bodyStyle.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: TongtaiDesignTokens.lightTextPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (c != breakdown.channelRevenue.last)
+                    const Divider(height: TongtaiDesignTokens.spacing4),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing6),
+        ],
+
         _SectionTitle(context.l10n.sectionTopCustomers),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _TopCustomersCard(customers: breakdown.topCustomers),

@@ -12,7 +12,6 @@ import 'tables/producers.dart';
 import 'tables/products.dart';
 import 'tables/customers.dart';
 import 'tables/orders.dart';
-import 'tables/channels.dart';
 import 'tables/journeys.dart';
 import 'tables/journey_steps.dart';
 import 'tables/transactions.dart';
@@ -68,7 +67,6 @@ part 'database.g.dart';
     ProductsTable,
     CustomersTable,
     OrdersTable,
-    ChannelsTable,
     JourneysTable,
     JourneyStepsTable,
     TransactionsTable,

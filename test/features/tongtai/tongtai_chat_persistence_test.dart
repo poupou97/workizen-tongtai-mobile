@@ -104,8 +104,12 @@ void main() {
     });
 
     test('schema version constant advanced in lock-step', () {
-      expect(kTongtaiSchemaVersion, 11);
-      expect(db.schemaVersion, 11);
+      expect(kTongtaiSchemaVersion, 12);
+      // v12 (WTM-209): orders_table rebuilt without the channel_id FK — it
+      //                pointed at channels_table, a dead v1 table nothing ever
+      //                wrote, so every real channel code failed the constraint.
+      //                channels_table dropped (WTM-190 precedent).
+      expect(db.schemaVersion, 12);
     });
   });
 

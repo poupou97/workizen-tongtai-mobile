@@ -75,6 +75,10 @@ abstract class AppStrings {
   String get sectionTopCustomers;
   String get sectionBreakdownByPeriod;
   String get sectionPipeline;
+
+  /// WTM-209 — revenue per recorded sales channel.
+  String get sectionRevenueByChannel;
+  String reportChannelOrders(int count);
   String get sectionCashflow;
   String get sectionExpensesByCategory;
   String get sectionRecent;
@@ -321,6 +325,7 @@ abstract class AppStrings {
   String get actionNextPage;
   String get labelSort;
   String get labelStatus;
+  String get labelChannel;
   String get labelTotal;
   String get labelType;
   String get labelLocation;
@@ -823,6 +828,10 @@ class AppStringsVi extends AppStrings {
   @override
   String get sectionPipeline => 'Cơ hội đang mở';
   @override
+  String get sectionRevenueByChannel => 'Doanh thu theo kênh';
+  @override
+  String reportChannelOrders(int count) => '$count đơn';
+  @override
   String get sectionCashflow => 'Dòng tiền';
   @override
   String get sectionExpensesByCategory => 'Chi phí theo nhóm';
@@ -1268,6 +1277,8 @@ class AppStringsVi extends AppStrings {
   String get labelSort => 'Sắp xếp';
   @override
   String get labelStatus => 'Trạng thái';
+  @override
+  String get labelChannel => 'Kênh';
   @override
   String get labelTotal => 'Tổng';
   @override
@@ -2202,6 +2213,11 @@ class AppStringsEn extends AppStrings {
   @override
   String get sectionPipeline => 'Open pipeline';
   @override
+  String get sectionRevenueByChannel => 'Revenue by channel';
+  @override
+  String reportChannelOrders(int count) =>
+      count == 1 ? '1 order' : '$count orders';
+  @override
   String get sectionCashflow => 'Cashflow';
   @override
   String get sectionExpensesByCategory => 'Expenses by category';
@@ -2644,6 +2660,8 @@ class AppStringsEn extends AppStrings {
   String get labelSort => 'Sort';
   @override
   String get labelStatus => 'Status';
+  @override
+  String get labelChannel => 'Channel';
   @override
   String get labelTotal => 'Total';
   @override

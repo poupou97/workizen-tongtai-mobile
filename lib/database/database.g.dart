@@ -4437,736 +4437,6 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
   }
 }
 
-class $ChannelsTableTable extends ChannelsTable
-    with TableInfo<$ChannelsTableTable, ChannelsTableData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $ChannelsTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _businessIdMeta = const VerificationMeta(
-    'businessId',
-  );
-  @override
-  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
-    'business_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES businesses_table (id) ON DELETE CASCADE',
-    ),
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-    'name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _typeMeta = const VerificationMeta('type');
-  @override
-  late final GeneratedColumn<String> type = GeneratedColumn<String>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _platformIdMeta = const VerificationMeta(
-    'platformId',
-  );
-  @override
-  late final GeneratedColumn<String> platformId = GeneratedColumn<String>(
-    'platform_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
-  @override
-  late final GeneratedColumn<String> status = GeneratedColumn<String>(
-    'status',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _isConnectedMeta = const VerificationMeta(
-    'isConnected',
-  );
-  @override
-  late final GeneratedColumn<bool> isConnected = GeneratedColumn<bool>(
-    'is_connected',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_connected" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _credentialsEncryptedMeta =
-      const VerificationMeta('credentialsEncrypted');
-  @override
-  late final GeneratedColumn<String> credentialsEncrypted =
-      GeneratedColumn<String>(
-        'credentials_encrypted',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _metricsMeta = const VerificationMeta(
-    'metrics',
-  );
-  @override
-  late final GeneratedColumn<String> metrics = GeneratedColumn<String>(
-    'metrics',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _lastSyncDateMeta = const VerificationMeta(
-    'lastSyncDate',
-  );
-  @override
-  late final GeneratedColumn<DateTime> lastSyncDate = GeneratedColumn<DateTime>(
-    'last_sync_date',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: Constant(DateTime.now()),
-  );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-    'updated_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: Constant(DateTime.now()),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    businessId,
-    name,
-    type,
-    platformId,
-    status,
-    isConnected,
-    credentialsEncrypted,
-    metrics,
-    lastSyncDate,
-    createdAt,
-    updatedAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'channels_table';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<ChannelsTableData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('business_id')) {
-      context.handle(
-        _businessIdMeta,
-        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_businessIdMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-        _nameMeta,
-        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('type')) {
-      context.handle(
-        _typeMeta,
-        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
-    if (data.containsKey('platform_id')) {
-      context.handle(
-        _platformIdMeta,
-        platformId.isAcceptableOrUnknown(data['platform_id']!, _platformIdMeta),
-      );
-    }
-    if (data.containsKey('status')) {
-      context.handle(
-        _statusMeta,
-        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
-      );
-    }
-    if (data.containsKey('is_connected')) {
-      context.handle(
-        _isConnectedMeta,
-        isConnected.isAcceptableOrUnknown(
-          data['is_connected']!,
-          _isConnectedMeta,
-        ),
-      );
-    }
-    if (data.containsKey('credentials_encrypted')) {
-      context.handle(
-        _credentialsEncryptedMeta,
-        credentialsEncrypted.isAcceptableOrUnknown(
-          data['credentials_encrypted']!,
-          _credentialsEncryptedMeta,
-        ),
-      );
-    }
-    if (data.containsKey('metrics')) {
-      context.handle(
-        _metricsMeta,
-        metrics.isAcceptableOrUnknown(data['metrics']!, _metricsMeta),
-      );
-    }
-    if (data.containsKey('last_sync_date')) {
-      context.handle(
-        _lastSyncDateMeta,
-        lastSyncDate.isAcceptableOrUnknown(
-          data['last_sync_date']!,
-          _lastSyncDateMeta,
-        ),
-      );
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    if (data.containsKey('updated_at')) {
-      context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  ChannelsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ChannelsTableData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      businessId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}business_id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}type'],
-      )!,
-      platformId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}platform_id'],
-      ),
-      status: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}status'],
-      ),
-      isConnected: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_connected'],
-      )!,
-      credentialsEncrypted: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}credentials_encrypted'],
-      ),
-      metrics: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}metrics'],
-      ),
-      lastSyncDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}last_sync_date'],
-      ),
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}updated_at'],
-      )!,
-    );
-  }
-
-  @override
-  $ChannelsTableTable createAlias(String alias) {
-    return $ChannelsTableTable(attachedDatabase, alias);
-  }
-}
-
-class ChannelsTableData extends DataClass
-    implements Insertable<ChannelsTableData> {
-  final String id;
-  final String businessId;
-  final String name;
-  final String type;
-  final String? platformId;
-  final String? status;
-  final bool isConnected;
-  final String? credentialsEncrypted;
-  final String? metrics;
-  final DateTime? lastSyncDate;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  const ChannelsTableData({
-    required this.id,
-    required this.businessId,
-    required this.name,
-    required this.type,
-    this.platformId,
-    this.status,
-    required this.isConnected,
-    this.credentialsEncrypted,
-    this.metrics,
-    this.lastSyncDate,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['business_id'] = Variable<String>(businessId);
-    map['name'] = Variable<String>(name);
-    map['type'] = Variable<String>(type);
-    if (!nullToAbsent || platformId != null) {
-      map['platform_id'] = Variable<String>(platformId);
-    }
-    if (!nullToAbsent || status != null) {
-      map['status'] = Variable<String>(status);
-    }
-    map['is_connected'] = Variable<bool>(isConnected);
-    if (!nullToAbsent || credentialsEncrypted != null) {
-      map['credentials_encrypted'] = Variable<String>(credentialsEncrypted);
-    }
-    if (!nullToAbsent || metrics != null) {
-      map['metrics'] = Variable<String>(metrics);
-    }
-    if (!nullToAbsent || lastSyncDate != null) {
-      map['last_sync_date'] = Variable<DateTime>(lastSyncDate);
-    }
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
-    return map;
-  }
-
-  ChannelsTableCompanion toCompanion(bool nullToAbsent) {
-    return ChannelsTableCompanion(
-      id: Value(id),
-      businessId: Value(businessId),
-      name: Value(name),
-      type: Value(type),
-      platformId: platformId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(platformId),
-      status: status == null && nullToAbsent
-          ? const Value.absent()
-          : Value(status),
-      isConnected: Value(isConnected),
-      credentialsEncrypted: credentialsEncrypted == null && nullToAbsent
-          ? const Value.absent()
-          : Value(credentialsEncrypted),
-      metrics: metrics == null && nullToAbsent
-          ? const Value.absent()
-          : Value(metrics),
-      lastSyncDate: lastSyncDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastSyncDate),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-    );
-  }
-
-  factory ChannelsTableData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ChannelsTableData(
-      id: serializer.fromJson<String>(json['id']),
-      businessId: serializer.fromJson<String>(json['businessId']),
-      name: serializer.fromJson<String>(json['name']),
-      type: serializer.fromJson<String>(json['type']),
-      platformId: serializer.fromJson<String?>(json['platformId']),
-      status: serializer.fromJson<String?>(json['status']),
-      isConnected: serializer.fromJson<bool>(json['isConnected']),
-      credentialsEncrypted: serializer.fromJson<String?>(
-        json['credentialsEncrypted'],
-      ),
-      metrics: serializer.fromJson<String?>(json['metrics']),
-      lastSyncDate: serializer.fromJson<DateTime?>(json['lastSyncDate']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'businessId': serializer.toJson<String>(businessId),
-      'name': serializer.toJson<String>(name),
-      'type': serializer.toJson<String>(type),
-      'platformId': serializer.toJson<String?>(platformId),
-      'status': serializer.toJson<String?>(status),
-      'isConnected': serializer.toJson<bool>(isConnected),
-      'credentialsEncrypted': serializer.toJson<String?>(credentialsEncrypted),
-      'metrics': serializer.toJson<String?>(metrics),
-      'lastSyncDate': serializer.toJson<DateTime?>(lastSyncDate),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
-    };
-  }
-
-  ChannelsTableData copyWith({
-    String? id,
-    String? businessId,
-    String? name,
-    String? type,
-    Value<String?> platformId = const Value.absent(),
-    Value<String?> status = const Value.absent(),
-    bool? isConnected,
-    Value<String?> credentialsEncrypted = const Value.absent(),
-    Value<String?> metrics = const Value.absent(),
-    Value<DateTime?> lastSyncDate = const Value.absent(),
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) => ChannelsTableData(
-    id: id ?? this.id,
-    businessId: businessId ?? this.businessId,
-    name: name ?? this.name,
-    type: type ?? this.type,
-    platformId: platformId.present ? platformId.value : this.platformId,
-    status: status.present ? status.value : this.status,
-    isConnected: isConnected ?? this.isConnected,
-    credentialsEncrypted: credentialsEncrypted.present
-        ? credentialsEncrypted.value
-        : this.credentialsEncrypted,
-    metrics: metrics.present ? metrics.value : this.metrics,
-    lastSyncDate: lastSyncDate.present ? lastSyncDate.value : this.lastSyncDate,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-  );
-  ChannelsTableData copyWithCompanion(ChannelsTableCompanion data) {
-    return ChannelsTableData(
-      id: data.id.present ? data.id.value : this.id,
-      businessId: data.businessId.present
-          ? data.businessId.value
-          : this.businessId,
-      name: data.name.present ? data.name.value : this.name,
-      type: data.type.present ? data.type.value : this.type,
-      platformId: data.platformId.present
-          ? data.platformId.value
-          : this.platformId,
-      status: data.status.present ? data.status.value : this.status,
-      isConnected: data.isConnected.present
-          ? data.isConnected.value
-          : this.isConnected,
-      credentialsEncrypted: data.credentialsEncrypted.present
-          ? data.credentialsEncrypted.value
-          : this.credentialsEncrypted,
-      metrics: data.metrics.present ? data.metrics.value : this.metrics,
-      lastSyncDate: data.lastSyncDate.present
-          ? data.lastSyncDate.value
-          : this.lastSyncDate,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ChannelsTableData(')
-          ..write('id: $id, ')
-          ..write('businessId: $businessId, ')
-          ..write('name: $name, ')
-          ..write('type: $type, ')
-          ..write('platformId: $platformId, ')
-          ..write('status: $status, ')
-          ..write('isConnected: $isConnected, ')
-          ..write('credentialsEncrypted: $credentialsEncrypted, ')
-          ..write('metrics: $metrics, ')
-          ..write('lastSyncDate: $lastSyncDate, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    businessId,
-    name,
-    type,
-    platformId,
-    status,
-    isConnected,
-    credentialsEncrypted,
-    metrics,
-    lastSyncDate,
-    createdAt,
-    updatedAt,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ChannelsTableData &&
-          other.id == this.id &&
-          other.businessId == this.businessId &&
-          other.name == this.name &&
-          other.type == this.type &&
-          other.platformId == this.platformId &&
-          other.status == this.status &&
-          other.isConnected == this.isConnected &&
-          other.credentialsEncrypted == this.credentialsEncrypted &&
-          other.metrics == this.metrics &&
-          other.lastSyncDate == this.lastSyncDate &&
-          other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
-}
-
-class ChannelsTableCompanion extends UpdateCompanion<ChannelsTableData> {
-  final Value<String> id;
-  final Value<String> businessId;
-  final Value<String> name;
-  final Value<String> type;
-  final Value<String?> platformId;
-  final Value<String?> status;
-  final Value<bool> isConnected;
-  final Value<String?> credentialsEncrypted;
-  final Value<String?> metrics;
-  final Value<DateTime?> lastSyncDate;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updatedAt;
-  final Value<int> rowid;
-  const ChannelsTableCompanion({
-    this.id = const Value.absent(),
-    this.businessId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.type = const Value.absent(),
-    this.platformId = const Value.absent(),
-    this.status = const Value.absent(),
-    this.isConnected = const Value.absent(),
-    this.credentialsEncrypted = const Value.absent(),
-    this.metrics = const Value.absent(),
-    this.lastSyncDate = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  ChannelsTableCompanion.insert({
-    required String id,
-    required String businessId,
-    required String name,
-    required String type,
-    this.platformId = const Value.absent(),
-    this.status = const Value.absent(),
-    this.isConnected = const Value.absent(),
-    this.credentialsEncrypted = const Value.absent(),
-    this.metrics = const Value.absent(),
-    this.lastSyncDate = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       businessId = Value(businessId),
-       name = Value(name),
-       type = Value(type);
-  static Insertable<ChannelsTableData> custom({
-    Expression<String>? id,
-    Expression<String>? businessId,
-    Expression<String>? name,
-    Expression<String>? type,
-    Expression<String>? platformId,
-    Expression<String>? status,
-    Expression<bool>? isConnected,
-    Expression<String>? credentialsEncrypted,
-    Expression<String>? metrics,
-    Expression<DateTime>? lastSyncDate,
-    Expression<DateTime>? createdAt,
-    Expression<DateTime>? updatedAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (businessId != null) 'business_id': businessId,
-      if (name != null) 'name': name,
-      if (type != null) 'type': type,
-      if (platformId != null) 'platform_id': platformId,
-      if (status != null) 'status': status,
-      if (isConnected != null) 'is_connected': isConnected,
-      if (credentialsEncrypted != null)
-        'credentials_encrypted': credentialsEncrypted,
-      if (metrics != null) 'metrics': metrics,
-      if (lastSyncDate != null) 'last_sync_date': lastSyncDate,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  ChannelsTableCompanion copyWith({
-    Value<String>? id,
-    Value<String>? businessId,
-    Value<String>? name,
-    Value<String>? type,
-    Value<String?>? platformId,
-    Value<String?>? status,
-    Value<bool>? isConnected,
-    Value<String?>? credentialsEncrypted,
-    Value<String?>? metrics,
-    Value<DateTime?>? lastSyncDate,
-    Value<DateTime>? createdAt,
-    Value<DateTime>? updatedAt,
-    Value<int>? rowid,
-  }) {
-    return ChannelsTableCompanion(
-      id: id ?? this.id,
-      businessId: businessId ?? this.businessId,
-      name: name ?? this.name,
-      type: type ?? this.type,
-      platformId: platformId ?? this.platformId,
-      status: status ?? this.status,
-      isConnected: isConnected ?? this.isConnected,
-      credentialsEncrypted: credentialsEncrypted ?? this.credentialsEncrypted,
-      metrics: metrics ?? this.metrics,
-      lastSyncDate: lastSyncDate ?? this.lastSyncDate,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (businessId.present) {
-      map['business_id'] = Variable<String>(businessId.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (type.present) {
-      map['type'] = Variable<String>(type.value);
-    }
-    if (platformId.present) {
-      map['platform_id'] = Variable<String>(platformId.value);
-    }
-    if (status.present) {
-      map['status'] = Variable<String>(status.value);
-    }
-    if (isConnected.present) {
-      map['is_connected'] = Variable<bool>(isConnected.value);
-    }
-    if (credentialsEncrypted.present) {
-      map['credentials_encrypted'] = Variable<String>(
-        credentialsEncrypted.value,
-      );
-    }
-    if (metrics.present) {
-      map['metrics'] = Variable<String>(metrics.value);
-    }
-    if (lastSyncDate.present) {
-      map['last_sync_date'] = Variable<DateTime>(lastSyncDate.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ChannelsTableCompanion(')
-          ..write('id: $id, ')
-          ..write('businessId: $businessId, ')
-          ..write('name: $name, ')
-          ..write('type: $type, ')
-          ..write('platformId: $platformId, ')
-          ..write('status: $status, ')
-          ..write('isConnected: $isConnected, ')
-          ..write('credentialsEncrypted: $credentialsEncrypted, ')
-          ..write('metrics: $metrics, ')
-          ..write('lastSyncDate: $lastSyncDate, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $OrdersTableTable extends OrdersTable
     with TableInfo<$OrdersTableTable, OrdersTableData> {
   @override
@@ -5220,9 +4490,6 @@ class $OrdersTableTable extends OrdersTable
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES channels_table (id)',
-    ),
   );
   static const VerificationMeta _orderNumberMeta = const VerificationMeta(
     'orderNumber',
@@ -5620,6 +4887,17 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
   final String id;
   final String businessId;
   final String customerId;
+
+  /// Canonical `SalesChannel` code (WTM-209) — **not** a foreign key.
+  ///
+  /// It was one, pointing at `channels_table`: a dead v1 table nothing ever
+  /// wrote, so every real code failed the constraint (SqliteException 787 —
+  /// found the moment the first test wrote 'shopee'). The channel is a code
+  /// from a closed vocabulary, not a reference to a row, and an FK here would
+  /// also make dataset write-order part of the restore contract — the same
+  /// trap `sourceOpportunityId` (WTM-191) deliberately avoided. FK dropped in
+  /// schema v12; `channels_table` dropped with it (the WTM-190 precedent:
+  /// an empty table that lies about the design is worth more gone).
   final String? channelId;
   final String? orderNumber;
   final DateTime orderDate;
@@ -15122,7 +14400,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProducersTableTable producersTable = $ProducersTableTable(this);
   late final $ProductsTableTable productsTable = $ProductsTableTable(this);
   late final $CustomersTableTable customersTable = $CustomersTableTable(this);
-  late final $ChannelsTableTable channelsTable = $ChannelsTableTable(this);
   late final $OrdersTableTable ordersTable = $OrdersTableTable(this);
   late final $JourneysTableTable journeysTable = $JourneysTableTable(this);
   late final $JourneyStepsTableTable journeyStepsTable =
@@ -15220,7 +14497,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     producersTable,
     productsTable,
     customersTable,
-    channelsTable,
     ordersTable,
     journeysTable,
     journeyStepsTable,
@@ -15282,13 +14558,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('customers_table', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'businesses_table',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('channels_table', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -15495,24 +14764,6 @@ final class $$BusinessesTableTableReferences
     ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_customersTableRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$ChannelsTableTable, List<ChannelsTableData>>
-  _channelsTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.channelsTable,
-    aliasName: 'businesses_table__id__channels_table__business_id',
-  );
-
-  $$ChannelsTableTableProcessedTableManager get channelsTableRefs {
-    final manager = $$ChannelsTableTableTableManager(
-      $_db,
-      $_db.channelsTable,
-    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_channelsTableRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -15830,31 +15081,6 @@ class $$BusinessesTableTableFilterComposer
           }) => $$CustomersTableTableFilterComposer(
             $db: $db,
             $table: $db.customersTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> channelsTableRefs(
-    Expression<bool> Function($$ChannelsTableTableFilterComposer f) f,
-  ) {
-    final $$ChannelsTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.channelsTable,
-      getReferencedColumn: (t) => t.businessId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ChannelsTableTableFilterComposer(
-            $db: $db,
-            $table: $db.channelsTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -16289,31 +15515,6 @@ class $$BusinessesTableTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> channelsTableRefs<T extends Object>(
-    Expression<T> Function($$ChannelsTableTableAnnotationComposer a) f,
-  ) {
-    final $$ChannelsTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.channelsTable,
-      getReferencedColumn: (t) => t.businessId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ChannelsTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.channelsTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
   Expression<T> ordersTableRefs<T extends Object>(
     Expression<T> Function($$OrdersTableTableAnnotationComposer a) f,
   ) {
@@ -16511,7 +15712,6 @@ class $$BusinessesTableTableTableManager
             bool producersTableRefs,
             bool productsTableRefs,
             bool customersTableRefs,
-            bool channelsTableRefs,
             bool ordersTableRefs,
             bool journeysTableRefs,
             bool transactionsTableRefs,
@@ -16605,7 +15805,6 @@ class $$BusinessesTableTableTableManager
                 producersTableRefs = false,
                 productsTableRefs = false,
                 customersTableRefs = false,
-                channelsTableRefs = false,
                 ordersTableRefs = false,
                 journeysTableRefs = false,
                 transactionsTableRefs = false,
@@ -16621,7 +15820,6 @@ class $$BusinessesTableTableTableManager
                     if (producersTableRefs) db.producersTable,
                     if (productsTableRefs) db.productsTable,
                     if (customersTableRefs) db.customersTable,
-                    if (channelsTableRefs) db.channelsTable,
                     if (ordersTableRefs) db.ordersTable,
                     if (journeysTableRefs) db.journeysTable,
                     if (transactionsTableRefs) db.transactionsTable,
@@ -16744,27 +15942,6 @@ class $$BusinessesTableTableTableManager
                                 table,
                                 p0,
                               ).customersTableRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.businessId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (channelsTableRefs)
-                        await $_getPrefetchedData<
-                          BusinessesTableData,
-                          $BusinessesTableTable,
-                          ChannelsTableData
-                        >(
-                          currentTable: table,
-                          referencedTable: $$BusinessesTableTableReferences
-                              ._channelsTableRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$BusinessesTableTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).channelsTableRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.businessId == item.id,
@@ -16944,7 +16121,6 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool producersTableRefs,
         bool productsTableRefs,
         bool customersTableRefs,
-        bool channelsTableRefs,
         bool ordersTableRefs,
         bool journeysTableRefs,
         bool transactionsTableRefs,
@@ -19616,565 +18792,6 @@ typedef $$CustomersTableTableProcessedTableManager =
       CustomersTableData,
       PrefetchHooks Function({bool businessId, bool ordersTableRefs})
     >;
-typedef $$ChannelsTableTableCreateCompanionBuilder =
-    ChannelsTableCompanion Function({
-      required String id,
-      required String businessId,
-      required String name,
-      required String type,
-      Value<String?> platformId,
-      Value<String?> status,
-      Value<bool> isConnected,
-      Value<String?> credentialsEncrypted,
-      Value<String?> metrics,
-      Value<DateTime?> lastSyncDate,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
-      Value<int> rowid,
-    });
-typedef $$ChannelsTableTableUpdateCompanionBuilder =
-    ChannelsTableCompanion Function({
-      Value<String> id,
-      Value<String> businessId,
-      Value<String> name,
-      Value<String> type,
-      Value<String?> platformId,
-      Value<String?> status,
-      Value<bool> isConnected,
-      Value<String?> credentialsEncrypted,
-      Value<String?> metrics,
-      Value<DateTime?> lastSyncDate,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
-      Value<int> rowid,
-    });
-
-final class $$ChannelsTableTableReferences
-    extends
-        BaseReferences<_$AppDatabase, $ChannelsTableTable, ChannelsTableData> {
-  $$ChannelsTableTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
-      .businessesTable
-      .createAlias('channels_table__business_id__businesses_table__id');
-
-  $$BusinessesTableTableProcessedTableManager get businessId {
-    final $_column = $_itemColumn<String>('business_id')!;
-
-    final manager = $$BusinessesTableTableTableManager(
-      $_db,
-      $_db.businessesTable,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static MultiTypedResultKey<$OrdersTableTable, List<OrdersTableData>>
-  _ordersTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.ordersTable,
-    aliasName: 'channels_table__id__orders_table__channel_id',
-  );
-
-  $$OrdersTableTableProcessedTableManager get ordersTableRefs {
-    final manager = $$OrdersTableTableTableManager(
-      $_db,
-      $_db.ordersTable,
-    ).filter((f) => f.channelId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_ordersTableRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
-class $$ChannelsTableTableFilterComposer
-    extends Composer<_$AppDatabase, $ChannelsTableTable> {
-  $$ChannelsTableTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get platformId => $composableBuilder(
-    column: $table.platformId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get status => $composableBuilder(
-    column: $table.status,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isConnected => $composableBuilder(
-    column: $table.isConnected,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get credentialsEncrypted => $composableBuilder(
-    column: $table.credentialsEncrypted,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get metrics => $composableBuilder(
-    column: $table.metrics,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get lastSyncDate => $composableBuilder(
-    column: $table.lastSyncDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $$BusinessesTableTableFilterComposer get businessId {
-    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.businessId,
-      referencedTable: $db.businessesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BusinessesTableTableFilterComposer(
-            $db: $db,
-            $table: $db.businessesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<bool> ordersTableRefs(
-    Expression<bool> Function($$OrdersTableTableFilterComposer f) f,
-  ) {
-    final $$OrdersTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.ordersTable,
-      getReferencedColumn: (t) => t.channelId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$OrdersTableTableFilterComposer(
-            $db: $db,
-            $table: $db.ordersTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$ChannelsTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $ChannelsTableTable> {
-  $$ChannelsTableTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get type => $composableBuilder(
-    column: $table.type,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get platformId => $composableBuilder(
-    column: $table.platformId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get status => $composableBuilder(
-    column: $table.status,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get isConnected => $composableBuilder(
-    column: $table.isConnected,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get credentialsEncrypted => $composableBuilder(
-    column: $table.credentialsEncrypted,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get metrics => $composableBuilder(
-    column: $table.metrics,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get lastSyncDate => $composableBuilder(
-    column: $table.lastSyncDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $$BusinessesTableTableOrderingComposer get businessId {
-    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.businessId,
-      referencedTable: $db.businessesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BusinessesTableTableOrderingComposer(
-            $db: $db,
-            $table: $db.businessesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $$ChannelsTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ChannelsTableTable> {
-  $$ChannelsTableTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
-
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
-
-  GeneratedColumn<String> get platformId => $composableBuilder(
-    column: $table.platformId,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get status =>
-      $composableBuilder(column: $table.status, builder: (column) => column);
-
-  GeneratedColumn<bool> get isConnected => $composableBuilder(
-    column: $table.isConnected,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get credentialsEncrypted => $composableBuilder(
-    column: $table.credentialsEncrypted,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get metrics =>
-      $composableBuilder(column: $table.metrics, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get lastSyncDate => $composableBuilder(
-    column: $table.lastSyncDate,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  $$BusinessesTableTableAnnotationComposer get businessId {
-    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.businessId,
-      referencedTable: $db.businessesTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BusinessesTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.businessesTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<T> ordersTableRefs<T extends Object>(
-    Expression<T> Function($$OrdersTableTableAnnotationComposer a) f,
-  ) {
-    final $$OrdersTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.ordersTable,
-      getReferencedColumn: (t) => t.channelId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$OrdersTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.ordersTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$ChannelsTableTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $ChannelsTableTable,
-          ChannelsTableData,
-          $$ChannelsTableTableFilterComposer,
-          $$ChannelsTableTableOrderingComposer,
-          $$ChannelsTableTableAnnotationComposer,
-          $$ChannelsTableTableCreateCompanionBuilder,
-          $$ChannelsTableTableUpdateCompanionBuilder,
-          (ChannelsTableData, $$ChannelsTableTableReferences),
-          ChannelsTableData,
-          PrefetchHooks Function({bool businessId, bool ordersTableRefs})
-        > {
-  $$ChannelsTableTableTableManager(_$AppDatabase db, $ChannelsTableTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$ChannelsTableTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ChannelsTableTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ChannelsTableTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String> businessId = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<String> type = const Value.absent(),
-                Value<String?> platformId = const Value.absent(),
-                Value<String?> status = const Value.absent(),
-                Value<bool> isConnected = const Value.absent(),
-                Value<String?> credentialsEncrypted = const Value.absent(),
-                Value<String?> metrics = const Value.absent(),
-                Value<DateTime?> lastSyncDate = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => ChannelsTableCompanion(
-                id: id,
-                businessId: businessId,
-                name: name,
-                type: type,
-                platformId: platformId,
-                status: status,
-                isConnected: isConnected,
-                credentialsEncrypted: credentialsEncrypted,
-                metrics: metrics,
-                lastSyncDate: lastSyncDate,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                required String businessId,
-                required String name,
-                required String type,
-                Value<String?> platformId = const Value.absent(),
-                Value<String?> status = const Value.absent(),
-                Value<bool> isConnected = const Value.absent(),
-                Value<String?> credentialsEncrypted = const Value.absent(),
-                Value<String?> metrics = const Value.absent(),
-                Value<DateTime?> lastSyncDate = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => ChannelsTableCompanion.insert(
-                id: id,
-                businessId: businessId,
-                name: name,
-                type: type,
-                platformId: platformId,
-                status: status,
-                isConnected: isConnected,
-                credentialsEncrypted: credentialsEncrypted,
-                metrics: metrics,
-                lastSyncDate: lastSyncDate,
-                createdAt: createdAt,
-                updatedAt: updatedAt,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$ChannelsTableTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback:
-              ({businessId = false, ordersTableRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (ordersTableRefs) db.ordersTable,
-                  ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (businessId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.businessId,
-                                    referencedTable:
-                                        $$ChannelsTableTableReferences
-                                            ._businessIdTable(db),
-                                    referencedColumn:
-                                        $$ChannelsTableTableReferences
-                                            ._businessIdTable(db)
-                                            .id,
-                                  )
-                                  as T;
-                        }
-
-                        return state;
-                      },
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (ordersTableRefs)
-                        await $_getPrefetchedData<
-                          ChannelsTableData,
-                          $ChannelsTableTable,
-                          OrdersTableData
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ChannelsTableTableReferences
-                              ._ordersTableRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ChannelsTableTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).ordersTableRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.channelId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
-        ),
-      );
-}
-
-typedef $$ChannelsTableTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $ChannelsTableTable,
-      ChannelsTableData,
-      $$ChannelsTableTableFilterComposer,
-      $$ChannelsTableTableOrderingComposer,
-      $$ChannelsTableTableAnnotationComposer,
-      $$ChannelsTableTableCreateCompanionBuilder,
-      $$ChannelsTableTableUpdateCompanionBuilder,
-      (ChannelsTableData, $$ChannelsTableTableReferences),
-      ChannelsTableData,
-      PrefetchHooks Function({bool businessId, bool ordersTableRefs})
-    >;
 typedef $$OrdersTableTableCreateCompanionBuilder =
     OrdersTableCompanion Function({
       required String id,
@@ -20258,24 +18875,6 @@ final class $$OrdersTableTableReferences
     );
   }
 
-  static $ChannelsTableTable _channelIdTable(_$AppDatabase db) => db
-      .channelsTable
-      .createAlias('orders_table__channel_id__channels_table__id');
-
-  $$ChannelsTableTableProcessedTableManager? get channelId {
-    final $_column = $_itemColumn<String>('channel_id');
-    if ($_column == null) return null;
-    final manager = $$ChannelsTableTableTableManager(
-      $_db,
-      $_db.channelsTable,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_channelIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
   static MultiTypedResultKey<
     $TransactionsTableTable,
     List<TransactionsTableData>
@@ -20312,6 +18911,11 @@ class $$OrdersTableTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get channelId => $composableBuilder(
+    column: $table.channelId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -20426,29 +19030,6 @@ class $$OrdersTableTableFilterComposer
     return composer;
   }
 
-  $$ChannelsTableTableFilterComposer get channelId {
-    final $$ChannelsTableTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.channelId,
-      referencedTable: $db.channelsTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ChannelsTableTableFilterComposer(
-            $db: $db,
-            $table: $db.channelsTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
   Expression<bool> transactionsTableRefs(
     Expression<bool> Function($$TransactionsTableTableFilterComposer f) f,
   ) {
@@ -20486,6 +19067,11 @@ class $$OrdersTableTableOrderingComposer
   });
   ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get channelId => $composableBuilder(
+    column: $table.channelId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -20599,29 +19185,6 @@ class $$OrdersTableTableOrderingComposer
     );
     return composer;
   }
-
-  $$ChannelsTableTableOrderingComposer get channelId {
-    final $$ChannelsTableTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.channelId,
-      referencedTable: $db.channelsTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ChannelsTableTableOrderingComposer(
-            $db: $db,
-            $table: $db.channelsTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$OrdersTableTableAnnotationComposer
@@ -20635,6 +19198,9 @@ class $$OrdersTableTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get channelId =>
+      $composableBuilder(column: $table.channelId, builder: (column) => column);
 
   GeneratedColumn<String> get orderNumber => $composableBuilder(
     column: $table.orderNumber,
@@ -20733,29 +19299,6 @@ class $$OrdersTableTableAnnotationComposer
     return composer;
   }
 
-  $$ChannelsTableTableAnnotationComposer get channelId {
-    final $$ChannelsTableTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.channelId,
-      referencedTable: $db.channelsTable,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ChannelsTableTableAnnotationComposer(
-            $db: $db,
-            $table: $db.channelsTable,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
   Expression<T> transactionsTableRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableTableAnnotationComposer a) f,
   ) {
@@ -20799,7 +19342,6 @@ class $$OrdersTableTableTableManager
           PrefetchHooks Function({
             bool businessId,
             bool customerId,
-            bool channelId,
             bool transactionsTableRefs,
           })
         > {
@@ -20906,7 +19448,6 @@ class $$OrdersTableTableTableManager
               ({
                 businessId = false,
                 customerId = false,
-                channelId = false,
                 transactionsTableRefs = false,
               }) {
                 return PrefetchHooks(
@@ -20960,21 +19501,6 @@ class $$OrdersTableTableTableManager
                                   )
                                   as T;
                         }
-                        if (channelId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.channelId,
-                                    referencedTable:
-                                        $$OrdersTableTableReferences
-                                            ._channelIdTable(db),
-                                    referencedColumn:
-                                        $$OrdersTableTableReferences
-                                            ._channelIdTable(db)
-                                            .id,
-                                  )
-                                  as T;
-                        }
 
                         return state;
                       },
@@ -21024,7 +19550,6 @@ typedef $$OrdersTableTableProcessedTableManager =
       PrefetchHooks Function({
         bool businessId,
         bool customerId,
-        bool channelId,
         bool transactionsTableRefs,
       })
     >;
@@ -27121,8 +25646,6 @@ class $AppDatabaseManager {
       $$ProductsTableTableTableManager(_db, _db.productsTable);
   $$CustomersTableTableTableManager get customersTable =>
       $$CustomersTableTableTableManager(_db, _db.customersTable);
-  $$ChannelsTableTableTableManager get channelsTable =>
-      $$ChannelsTableTableTableManager(_db, _db.channelsTable);
   $$OrdersTableTableTableManager get ordersTable =>
       $$OrdersTableTableTableManager(_db, _db.ordersTable);
   $$JourneysTableTableTableManager get journeysTable =>

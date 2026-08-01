@@ -11,6 +11,7 @@ import '../inventory/product_history.dart';
 import '../journey/business_goal.dart';
 import '../journey/journey.dart';
 import '../journey/journey_node.dart';
+import '../profile/business_profile.dart';
 import '../orders/order.dart';
 import '../producer/supplier_favorite.dart';
 
@@ -290,6 +291,12 @@ class BackupCodec {
     'orderNumber': o.orderNumber,
     'date': _iso(o.date),
     'status': o.status.name,
+    // WTM-209/211 — nullable, absent on files from older builds. Found while
+    // wiring `channel`: WTM-211 shipped `paymentStatus` into the domain but
+    // NOT into this codec, so a backup → restore would have silently erased
+    // the seller's receivables. The wiring test now walks every domain field.
+    'paymentStatus': o.paymentStatus,
+    'channel': o.channel?.code,
     'items': [
       for (final item in o.items)
         {
@@ -358,6 +365,8 @@ class BackupCodec {
       orderNumber: orderNumber,
       date: date,
       status: status,
+      paymentStatus: _str(json['paymentStatus']),
+      channel: SalesChannel.fromCode(_str(json['channel'])),
       items: items,
     );
   }

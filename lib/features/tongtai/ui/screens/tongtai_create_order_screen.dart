@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../profile/business_profile.dart';
 import '../../consumer/customer.dart';
 import '../../core/tongtai_enums.dart';
 import '../../core/tongtai_formatters.dart';
@@ -55,6 +56,9 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
   final List<OrderItem> _items = [];
   late final DateTime Function() _clock;
   OrderStatus _status = OrderStatus.pending;
+
+  /// Optional (WTM-209): null = not recorded, never a guessed channel.
+  SalesChannel? _channel;
 
   @override
   void initState() {
@@ -154,6 +158,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
       orderNumber: orderNumber,
       date: now,
       status: _status,
+      channel: _channel,
       items: List.unmodifiable(_items),
     );
     if (widget.onSubmit != null) {
@@ -192,18 +197,45 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
-              child: Text(
-                context.l10n.orderForCustomer(widget.customer.name),
-                style: TongtaiDesignTokens.bodyStyle.copyWith(
-                  fontWeight: FontWeight.w600,
+            // The header rows scroll as one unit: at a 2.0× system font the
+            // fixed header (customer + status + channel) is taller than half a
+            // small screen, and a rigid Column overflowed by 16 px the moment
+            // the channel row was added (caught by p0/accessibility_test —
+            // P-26's cousin: adding a ROW is also a layout change).
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(
+                        TongtaiDesignTokens.spacing4,
+                      ),
+                      child: Text(
+                        context.l10n.orderForCustomer(widget.customer.name),
+                        style: TongtaiDesignTokens.bodyStyle.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    _StatusRow(
+                      status: _status,
+                      onSelected: (s) => setState(() => _status = s),
+                    ),
+                    // WTM-209: which channel this sale came through —
+                    // optional, and a second tap on the selected chip clears
+                    // it back to "not recorded". Self-recorded, no marketplace
+                    // sync (D-5).
+                    _ChannelRow(
+                      channel: _channel,
+                      onSelected: (c) =>
+                          setState(() => _channel = _channel == c ? null : c),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            _StatusRow(
-              status: _status,
-              onSelected: (s) => setState(() => _status = s),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -325,6 +357,60 @@ class _StatusRow extends StatelessWidget {
                         label: Text(s.label(context.l10n.languageCode)),
                         selected: status == s,
                         onSelected: (_) => onSelected(s),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Optional sales-channel picker (WTM-209) — same chip pattern as the status
+/// row, but deselectable: "not recorded" is a legitimate final answer.
+class _ChannelRow extends StatelessWidget {
+  const _ChannelRow({required this.channel, required this.onSelected});
+
+  final SalesChannel? channel;
+  final ValueChanged<SalesChannel> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TongtaiDesignTokens.spacing4,
+        vertical: TongtaiDesignTokens.spacing1,
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 68,
+            child: Text(
+              context.l10n.labelChannel,
+              style: TongtaiDesignTokens.smallStyle.copyWith(
+                color: TongtaiDesignTokens.lightTextSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final c in SalesChannel.values)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        right: TongtaiDesignTokens.spacing2,
+                      ),
+                      child: ChoiceChip(
+                        key: Key('create-order-channel-${c.code}'),
+                        label: Text(context.l10n.profileChannel(c.code)),
+                        selected: channel == c,
+                        onSelected: (_) => onSelected(c),
                       ),
                     ),
                 ],

@@ -6,7 +6,7 @@
 > Backlog **không** ưu tiên theo Story ID, ngày tạo, sprint hay Jira Priority.
 > Mỗi vòng lặp tính lại điểm theo Capability Value.
 
-**Cập nhật lần cuối:** 2026-08-01 · sau WTM-205 + audit toàn bộ ô `?`
+**Cập nhật lần cuối:** 2026-08-01 (đêm) · nhóm A concept-1 hoàn tất (WTM-209/210/211), schema v12
 
 ---
 
@@ -163,11 +163,12 @@ Rời thanh dưới ở WTM-192 nhưng **một chạm từ mọi tab**, có test
 | 4 | **WTM-198** Finance vào Business Journey | P2 logic | **+70** | mở |
 | 5 | IA của Reports/Finance sau khi 5 tab kín | P3 | **+60** | chưa có story |
 
-**Chọn vòng tới: WTM-203 (+100).** Audit WTM-202 cho thấy ba lỗi SSoT hôm nay
-đều **bắt đầu từ một cột dẫn xuất trong schema**. Sửa từng chỗ đọc là chữa
-triệu chứng; đây là nguồn. Và `churnRisk` là luật thứ hai **nằm trong schema**,
-nơi không ai nghĩ tới khi đi tìm "luật" — khác với WTM-200b, chỗ luật thứ hai
-nằm trong code nên grep ra được.
+**Trạng thái sau vòng 2026-08-01:** mọi capability PASS hoặc ở trạng thái được
+chấp nhận có chủ đích (Producer Data = Future Capability theo Founder; DTV
+`contained` = đường đọc bị CI chặn, cột chờ phiên bản `.ttbk` mới). Việc còn
+lại trên bàn đều là P5↓ hoặc chờ quyết định sản phẩm — đúng điểm Directive
+nói: *không mở tính năng mới cho tới khi mọi capability P0 PASS*, và giờ chúng
+PASS.
 
 > ⚠️ Ô `?` không phải PASS. Sáu ô chưa audit là rủi ro chưa biết, và theo kinh
 > nghiệm hôm nay — ba lỗi lớn nhất đều nằm ở vùng "tưởng ổn" — chúng đáng được
