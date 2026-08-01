@@ -68,9 +68,25 @@ Design Bible. **Thay vì** store metadata · giấy tờ phát hành · phân ph
 
 ## Where we are
 
+- **⭐ 2026-08-01 (khuya) — CAPABILITY COMPLETION MODE: matrix hết ô `?`/⚠️.**
+  Founder directive: đo tiến độ CHỈ bằng Capability PASS
+  (`docs/02-ARCHITECTURE/CAPABILITY-PASS-MATRIX.md`); thứ tự Journey → Finance
+  → Consumer → Inventory → Opportunity → Producer; D-11 Journey là trung tâm.
+  Kết quả chuỗi WTM-190→214 (~20 PR):
+  · **5/6 capability PASS**; Producer = **Future Capability** theo Founder
+  (*"Không cố xây AI bằng dữ liệu giả"*).
+  · **DTV ELIMINATED** (WTM-212, schema v13): dừng dòng ghi derived cuối +
+  quét 10 cột chết; chuỗi 4 lỗi "cột lưu vs luật derive" (WTM-196/200a/201/205)
+  đóng bằng one-owner + cross-check + governance.
+  · Concept-1 nhóm A: kênh bán (WTM-209, schema v12 gỡ FK chết) · công nợ
+  derive từ `paymentStatus` (WTM-211) · Home missions đọc Journey (WTM-210).
+  · Seam `minimumThreshold` xoá (WTM-213) — "sắp hết hàng" một chủ:
+  `Product.stockStatus`.
+  · Còn trên bàn: Group B concept-1 (chờ Founder framing) · Group C (P8) ·
+  Business Context Builder (PROPOSED — điều kiện *all P0 PASS* đã đạt).
 - **Phase 1 (Product Design Bible):** ✅ DONE + Founder-approved. 60 docs.
 - **Phase 2 (build):** 🔄 IN PROGRESS — developed autonomously by the
-  Evidence-Driven Runtime. `flutter analyze` clean; **~966 tests passing (P0 §1 suites added)**.
+  Evidence-Driven Runtime. `flutter analyze` clean; **~1.692 tests passing**.
 - **This repo:** split from the Hub on 2026-07-22 (`split-baseline` tag);
   app runs standalone.
 - **Data Foundation — persistence arc COMPLETE for user-authored capabilities**
