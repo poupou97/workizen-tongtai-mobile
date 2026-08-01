@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
+import '../../finance/finance_summary.dart';
 import '../../journey/journey.dart';
 import '../../journey/journey_controller.dart';
 import '../../journey/journey_node.dart';
@@ -279,6 +280,12 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     final goal = _goals.first;
     final profile = await ref.read(businessProfileProvider.future);
     final expenses = await ref.read(financeRepositoryProvider).loadAll();
+    // WTM-211: the planner sees the receivables, from the same owner Finance
+    // shows — a journey planned here knows about money stuck in unpaid orders.
+    final summary = FinanceService(
+      expenses,
+      orders: await ref.read(orderRepositoryProvider).loadAll(),
+    ).summaryAsOf(DateTime.now());
     if (!mounted) return;
     final failure = await runTongtaiAction(
       () async {
@@ -293,6 +300,8 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                 customerCount: _d.consumer,
                 orderCount: _metrics.ordersCount,
                 expenseCount: expenses.length,
+                receivables: summary.receivables,
+                debtorCount: summary.debtorCount,
               ),
               journeyId: 'journey-${goal.id}',
             );

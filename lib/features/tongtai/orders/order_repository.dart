@@ -138,6 +138,7 @@ class DriftOrderRepository implements OrderRepository {
         // Structured revenue columns (SoT for query/report aggregation).
         totalQuantity: o.totalQuantity,
         subtotal: o.totalAmount,
+        paymentStatus: Value(o.paymentStatus),
         totalAmount: o.totalAmount,
         status: o.status.name,
         // Full line detail as a tolerant JSON array.
@@ -151,6 +152,7 @@ class DriftOrderRepository implements OrderRepository {
     orderNumber: row.orderNumber ?? '',
     date: row.orderDate,
     status: OrderStatus.fromStorage(row.status),
+    paymentStatus: row.paymentStatus,
     items: decodeOrderItems(row.items),
   );
   @override

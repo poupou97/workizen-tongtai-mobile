@@ -85,6 +85,8 @@ class FinanceSummary {
     required this.monthly,
     this.salesIncomeMtd = 0,
     this.salesIncomeYtd = 0,
+    this.receivables = 0,
+    this.debtorCount = 0,
   });
 
   final double incomeMtd;
@@ -110,6 +112,19 @@ class FinanceSummary {
   /// order (a refund, a side job, an owner top-up).
   double get manualIncomeMtd => incomeMtd - salesIncomeMtd;
   double get manualIncomeYtd => incomeYtd - salesIncomeYtd;
+
+  /// Money the seller has earned but not yet received (WTM-211).
+  ///
+  /// **Derived, never stored** — the Derived Data Audit's rule applied from
+  /// birth this time: receivables are a way of reading orders whose
+  /// `paymentStatus` says the money has not arrived. Only orders the seller
+  /// explicitly marked unpaid count; `null` (not recorded) is **not** debt —
+  /// declaring old orders unpaid because a feature shipped later would invent
+  /// receivables out of thin air.
+  final double receivables;
+
+  /// How many customers still owe money.
+  final int debtorCount;
 
   /// Expense categories, highest first (income excluded).
   final List<CategoryAmount> expenseByCategory;
@@ -197,8 +212,11 @@ class FinanceService {
 
     final salesMtd = salesIn(year: now.year, month: now.month);
     final salesYtd = salesIn(year: now.year);
+    final unpaid = _sales.where((o) => o.isUnpaid).toList(growable: false);
 
     return FinanceSummary(
+      receivables: unpaid.fold(0.0, (s, o) => s + o.totalAmount),
+      debtorCount: unpaid.map((o) => o.customerId).toSet().length,
       incomeMtd: _sum(mtd, TransactionType.income) + salesMtd,
       incomeYtd: _sum(ytd, TransactionType.income) + salesYtd,
       salesIncomeMtd: salesMtd,

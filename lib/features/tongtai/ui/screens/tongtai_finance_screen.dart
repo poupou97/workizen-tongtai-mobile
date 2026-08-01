@@ -217,6 +217,62 @@ class _FinanceBody extends StatelessWidget {
 
         const SizedBox(height: TongtaiDesignTokens.spacing6),
 
+        // ── Receivables (WTM-211) — only when money is actually stuck ───
+        // Derived from orders the seller marked unpaid; never stored, and an
+        // empty block would be a promise with nothing behind it (WTM-182).
+        if (summary.receivables > 0) ...[
+          Container(
+            key: const Key('finance-receivables'),
+            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+            decoration: BoxDecoration(
+              color: TongtaiDesignTokens.inventoryOrange.withValues(
+                alpha: 0.08,
+              ),
+              borderRadius: BorderRadius.circular(
+                TongtaiDesignTokens.cardBorderRadius,
+              ),
+              border: Border.all(
+                color: TongtaiDesignTokens.inventoryOrange.withValues(
+                  alpha: 0.3,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.hourglass_bottom,
+                  color: TongtaiDesignTokens.inventoryOrangeText,
+                ),
+                const SizedBox(width: TongtaiDesignTokens.spacing3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.financeReceivablesTitle,
+                        style: TongtaiDesignTokens.bodyStyle.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: TongtaiDesignTokens.lightTextPrimary,
+                        ),
+                      ),
+                      Text(
+                        context.l10n.financeReceivablesBody(
+                          TongtaiFormatters.vnd(summary.receivables),
+                          summary.debtorCount,
+                        ),
+                        style: TongtaiDesignTokens.smallStyle.copyWith(
+                          color: TongtaiDesignTokens.lightTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing6),
+        ],
+
         // ── Expense breakdown ───────────────────────────────────────────
         _SectionTitle(context.l10n.sectionExpensesByCategory),
         const SizedBox(height: TongtaiDesignTokens.spacing3),

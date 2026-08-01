@@ -111,6 +111,7 @@ class CustomerOrder {
     required this.date,
     required this.status,
     required this.items,
+    this.paymentStatus,
   });
 
   /// Stable identifier.
@@ -127,6 +128,20 @@ class CustomerOrder {
 
   /// Fulfilment status (AC2) — the shared WTM-60 [OrderStatus] enum (EN/VI).
   final OrderStatus status;
+
+  /// Whether the money for this order has arrived (WTM-211).
+  ///
+  /// The column has been in the schema since v1 — the third field behind
+  /// `costPrice` (WTM-204) and `channelId` (WTM-209) that had a home nobody
+  /// wired. Canonical codes: `paid` · `unpaid` · `partial`. **`null` means
+  /// "not recorded"**, and it is treated as paid-unknown, never as debt —
+  /// declaring a seller's old orders unpaid because a feature shipped later
+  /// would invent receivables out of thin air.
+  final String? paymentStatus;
+
+  /// True only when the seller **said** the money has not arrived.
+  bool get isUnpaid =>
+      paymentStatus == kPaymentUnpaid || paymentStatus == kPaymentPartial;
 
   /// The purchased lines (AC3). Never empty for a real order.
   final List<OrderItem> items;
@@ -304,3 +319,8 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     ],
   ),
 ];
+
+/// Canonical payment codes (WTM-211) — stored, never display labels.
+const String kPaymentPaid = 'paid';
+const String kPaymentUnpaid = 'unpaid';
+const String kPaymentPartial = 'partial';

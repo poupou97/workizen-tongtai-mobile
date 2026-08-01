@@ -34,6 +34,8 @@ class JourneyPlanInput {
     this.customerCount = 0,
     this.orderCount = 0,
     this.expenseCount = 0,
+    this.receivables = 0,
+    this.debtorCount = 0,
   });
 
   final BusinessGoal goal;
@@ -41,6 +43,16 @@ class JourneyPlanInput {
   final int productCount;
   final int customerCount;
   final int orderCount;
+
+  /// Money earned but not received, in đồng (WTM-211).
+  ///
+  /// Feeds the "collect the debt" step — the second money step after WTM-198,
+  /// and the reason the receivables view exists at all (D-11: Finance does not
+  /// get stronger, the Journey gets smarter).
+  final double receivables;
+
+  /// How many customers still owe money.
+  final int debtorCount;
 
   /// How many expense rows the seller has recorded (WTM-198).
   ///
@@ -78,6 +90,9 @@ abstract final class JourneyReason {
   /// Not produced by any rule — it records a decision, which is why the node
   /// carrying it survives a re-plan.
   static const String fromOpportunity = 'source.opportunity';
+
+  /// The seller has material money stuck in unpaid orders (WTM-211).
+  static const String dataReceivables = 'data.receivables';
 }
 
 /// The outcome of planning: either a plan, or an honest refusal.
@@ -234,6 +249,27 @@ List<_Milestone> _revenuePlan(JourneyPlanInput input) {
       ),
       const _Step('Gợi ý sản phẩm mua kèm cho đơn tiếp theo'),
     ]),
+    // WTM-211 (D-11): money the seller already earned is the cheapest revenue
+    // there is — collecting it beats finding new sales. The step is measured:
+    // it completes when the receivables actually shrink, not when a box is
+    // ticked. Only when the debt is material (> 10% of the target), so a shop
+    // with one small unpaid order is not nagged.
+    if (input.receivables > target * 0.1 && input.debtorCount > 0)
+      _Milestone(
+        'Thu tiền đang bị kẹt',
+        [
+          _Step(
+            'Thu nợ ${input.debtorCount} khách đang thiếu tiền',
+            metric: 'receivables',
+            // Completion = the outstanding amount drops to under half of what
+            // it is today. refreshDerived only moves forward, so a new debt
+            // later does not un-finish the work.
+            target: input.receivables / 2,
+            reasonCodes: const [JourneyReason.dataReceivables],
+          ),
+        ],
+        reasonCodes: const [JourneyReason.dataReceivables],
+      ),
     _Milestone('Chạm mốc doanh thu', [
       _Step(
         'Đạt ${_money(target)} doanh thu',
