@@ -46,6 +46,9 @@ abstract class AppStrings {
   String get kpiCustomers;
   String get kpiAov;
   String get kpiIncome;
+
+  /// WTM-196 — how much of income the app worked out from orders.
+  String financeFromSales(String amount);
   String get kpiExpense;
   String get kpiProfit;
   String get kpiMargin;
@@ -757,6 +760,8 @@ class AppStringsVi extends AppStrings {
   String get kpiAov => 'Giá trị đơn TB';
   @override
   String get kpiIncome => 'Doanh thu';
+  @override
+  String financeFromSales(String amount) => 'trong đó $amount từ bán hàng';
   @override
   String get kpiExpense => 'Chi phí';
   @override
@@ -2108,6 +2113,8 @@ class AppStringsEn extends AppStrings {
   String get kpiAov => 'Avg. order value';
   @override
   String get kpiIncome => 'Income';
+  @override
+  String financeFromSales(String amount) => 'incl. $amount from sales';
   @override
   String get kpiExpense => 'Expense';
   @override

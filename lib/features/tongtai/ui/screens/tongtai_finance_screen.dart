@@ -155,6 +155,15 @@ class _FinanceBody extends StatelessWidget {
                 cardKey: const Key('finance-kpi-income'),
                 label: context.l10n.kpiIncome,
                 value: TongtaiFormatters.vnd(summary.incomeYtd),
+                // WTM-196: say how much of this the app worked out from orders.
+                // Income used to count only hand-entered rows, so a seller with
+                // real orders read ₫0 here; now that sales are included, they
+                // should be able to see which part they did not type in.
+                note: summary.salesIncomeYtd > 0
+                    ? context.l10n.financeFromSales(
+                        TongtaiFormatters.vndShort(summary.salesIncomeYtd),
+                      )
+                    : null,
                 accent: TongtaiFinanceScreen._income,
                 icon: Icons.south_west,
               ),
@@ -233,6 +242,7 @@ class _KpiCard extends StatelessWidget {
     required this.value,
     required this.accent,
     required this.icon,
+    this.note,
   });
 
   final Key cardKey;
@@ -240,6 +250,9 @@ class _KpiCard extends StatelessWidget {
   final String value;
   final Color accent;
   final IconData icon;
+
+  /// Optional second line under the label — where a figure came from.
+  final String? note;
 
   @override
   Widget build(BuildContext context) {
@@ -274,6 +287,16 @@ class _KpiCard extends StatelessWidget {
               color: TongtaiDesignTokens.lightTextSecondary,
             ),
           ),
+          if (note case final note?) ...[
+            const SizedBox(height: 2),
+            Text(
+              note,
+              key: const Key('finance-kpi-income-note'),
+              style: TongtaiDesignTokens.captionStyle.copyWith(
+                color: TongtaiDesignTokens.lightTextSecondary,
+              ),
+            ),
+          ],
         ],
       ),
     );

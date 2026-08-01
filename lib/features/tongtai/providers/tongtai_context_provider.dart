@@ -65,7 +65,12 @@ final journeyContextProvider = Provider<JourneyContextProvider>(
   ),
 );
 final financeContextProvider = Provider<FinanceContextProvider>(
-  (ref) => FinanceContextProvider(ref.watch(financeRepositoryProvider)),
+  (ref) => FinanceContextProvider(
+    ref.watch(financeRepositoryProvider),
+    // WTM-196: without this, Finance reads ₫0 income for a seller who has
+    // recorded orders — while Home and Reports show real revenue.
+    orders: ref.watch(orderRepositoryProvider),
+  ),
 );
 
 /// Timeline is a **derived projection** (WTM-134) — no repository of its own; it
