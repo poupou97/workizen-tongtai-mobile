@@ -59,6 +59,10 @@ abstract class AppStrings {
 
   /// WTM-196 — how much of income the app worked out from orders.
   String financeFromSales(String amount);
+
+  /// WTM-211 — money earned but not yet received.
+  String get financeReceivablesTitle;
+  String financeReceivablesBody(String amount, int debtors);
   String get kpiExpense;
   String get kpiProfit;
   String get kpiMargin;
@@ -792,6 +796,11 @@ class AppStringsVi extends AppStrings {
   String get finCatOther => 'Khác';
   @override
   String financeFromSales(String amount) => 'trong đó $amount từ bán hàng';
+  @override
+  String get financeReceivablesTitle => 'Công nợ';
+  @override
+  String financeReceivablesBody(String amount, int debtors) =>
+      '$amount đang kẹt ở $debtors khách';
   @override
   String get kpiExpense => 'Chi phí';
   @override
@@ -2166,6 +2175,11 @@ class AppStringsEn extends AppStrings {
   String get finCatOther => 'Other';
   @override
   String financeFromSales(String amount) => 'incl. $amount from sales';
+  @override
+  String get financeReceivablesTitle => 'Receivables';
+  @override
+  String financeReceivablesBody(String amount, int debtors) =>
+      '$amount stuck across $debtors customers';
   @override
   String get kpiExpense => 'Expense';
   @override
