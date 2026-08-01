@@ -67,16 +67,30 @@ Không thuộc ba nhóm trên ⇒ **vi phạm**.
 | `id` · `goal` · `status` · `budget` · `timelineDays` · `startedAt` | **Source** | |
 | **`progressPercent`** | **Derived** | ❌ **VI PHẠM** — `deriveGoalsProgress` là luật thật (WTM-138/200a). Cột này chính là `achievedAmount` dưới một cái tên khác |
 | **`completedSteps`** · **`totalSteps`** | **Derived** | ❌ đếm từ cây `JourneyNode` (ADR-TON-021) |
-| **`spent`** · **`revenueImpact`** | **Derived** | ❌ suy từ giao dịch/đơn hàng |
+| **`spent`** | **Derived** | ❌ suy từ giao dịch |
+| `revenueImpact` | **Source** | ✅ **Sửa lại phân loại lần hai.** Bất chấp cái tên, cột này lưu `BusinessGoal.targetAmount` — **mục tiêu do người bán đặt** (`business_goal_repository` dòng 102/136). Không phải dẫn xuất |
 
 ### `products_table`
 
 | Cột | Loại | Kết luận |
 |---|---|---|
 | `id` · `sku` · `name` · `description` · `category` · `costPerUnit` · `listPrice` · `supplierId` · `isActive` | **Source** | |
-| **`profitPerUnit`** | **Derived** | ❌ `listPrice − costPerUnit` |
-| **`totalStock`** | **Derived** | ❌ tổng của `stockByWarehouse` |
-| **`currentPrice`** | ? | chưa rõ là giá đang bán (Source) hay dẫn xuất từ khuyến mãi |
+| **`profitPerUnit`** | **Derived** | ❌ `listPrice − costPerUnit`; không ai ghi, không ai đọc — **cột chết** |
+| `totalStock` | **Source** | ✅ **Sửa lại phân loại.** Đọc kỹ `product_repository` (dòng 94/109): đây **chính là chỗ lưu `Product.quantity`**, chỉ mang cái tên của một thiết kế nhiều kho chưa bao giờ tồn tại. Search đọc nó (`tongtai_search_models` dòng 124) là đọc **đúng nguồn**, không phải bản sao. Tên gây hiểu nhầm ⇒ P8 Polish, không phải vi phạm |
+| `stockByWarehouse` | — | ❌ **cột chết**: không ai ghi, không ai đọc |
+| **`currentPrice`** | — | ⚠️ **cột chết mà một màn ĐANG ĐỌC**: `product_repository` chỉ ghi `listPrice`, nhưng search đọc `currentPrice ?? listPrice`. Hôm nay luôn `null` nên hai bên trùng; **ngày ai đó ghi `currentPrice`, Search và Inventory sẽ hiện hai giá khác nhau**. Cùng loại mối nối với `minimumThreshold` |
+
+⚠️ **Hai lần tôi phân loại sai, cùng một nguyên nhân: tin vào tên cột.**
+
+- `totalStock` — nghe như tổng của `stockByWarehouse`; thực ra là chỗ lưu
+  `Product.quantity`. `stockByWarehouse` **không ai dùng**.
+- `revenueImpact` — nghe như tác động doanh thu tính ra được; thực ra lưu
+  `BusinessGoal.targetAmount`, tức **mục tiêu người bán đặt**.
+
+**Bài học cho ai audit tiếp: schema này ra đời trước domain, nên tên cột không
+đáng tin. Phải đọc repository ghi/đọc gì.** Ghi lại chỗ sai thay vì lặng lẽ đổi
+— một audit phân loại sai còn tệ hơn không có audit, vì nó sinh ra story sai và
+người sau sẽ tin nó.
 
 ⚠️ **Phát hiện kèm:** bảng có `costPerUnit`, nhưng **domain `Product` không có
 giá vốn** — đó chính là lý do ROI cơ hội không tính được (ADR-TON-022) và bước
@@ -93,9 +107,12 @@ Không có cột dẫn xuất. ✅
 
 | Mức | Số cột |
 |---|---|
-| ❌ Vi phạm rõ (dẫn xuất, không lý do) | **11** |
+| ❌ Vi phạm rõ (dẫn xuất, không lý do) | **9** |
 | ⚠️ Bản sao ghi-một-chiều (chưa lệch, sẽ lệch) | **3** |
+| ⚠️ **Cột chết mà một màn đang đọc** (`currentPrice`) | **1** |
+| ❌ Cột chết hoàn toàn (`lifetimeValue` · `stockByWarehouse` · `profitPerUnit`) | **3** |
 | ✅ Dẫn xuất **có** lý do (`domainSnapshot`) | 1 |
+| ✅ Bị nghi oan, hoá ra là Source (`totalStock` · `revenueImpact`) | **2** |
 
 **Không cột nào trong nhóm ❌ có benchmark hay lý do nghiệp vụ.** Chúng tồn tại
 vì schema được dựng trước khi các luật dẫn xuất ra đời, và không ai quay lại gỡ.
@@ -107,7 +124,7 @@ vì schema được dựng trước khi các luật dẫn xuất ra đời, và 
 | 1 | Gỡ / vô hiệu hoá 6 cột dẫn xuất của `customers_table` — **`churnRisk` trước tiên**, vì nó là luật thứ hai đang chờ được đọc | Derived Truth Violation | **+100** |
 | 2 | 5 cột dẫn xuất của `journeys_table` (`progressPercent` là `achievedAmount` đổi tên) | Derived Truth Violation | **+100** |
 | 3 | `orders_table`: `subtotal` đang ghi bằng `totalAmount` — sửa hoặc gỡ | Derived Truth Violation | **+90** |
-| 4 | `products_table`: `profitPerUnit` · `totalStock` | Derived Truth Violation | **+80** |
+| 4 | `products_table`: `profitPerUnit` (chết) · `currentPrice` (chết nhưng search đọc) | Derived Truth Violation | **+80** |
 | 5 | Nối `costPerUnit` vào domain `Product` ⇒ mở khoá ROI thật + High Risk | P4 Data Model | **+50** |
 
 ### Ràng buộc khi gỡ
