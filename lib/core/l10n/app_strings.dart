@@ -407,6 +407,16 @@ abstract class AppStrings {
   String profileChannel(String code);
   String profileSeasonality(String code);
 
+  // Business Journey (WTM-187) — hành trình có bậc.
+  String get journeyTitle;
+  String get journeyEmptyTitle;
+  String get journeyEmptyBody;
+  String get journeyInsufficientTitle;
+  String get journeyInsufficientBody;
+  String get journeyProgress;
+  String get journeyFromRule;
+  String get journeyMeasured;
+
   // AI-first Onboarding (WTM-178) — hội thoại chạy được KHÔNG cần AI.
   String get obGreeting;
   String get obGreetingBody;
@@ -1403,6 +1413,26 @@ class AppStringsVi extends AppStrings {
     'size' => 'Hiện tại bạn làm ở quy mô nào?',
     _ => 'Có mùa nào bạn bán chạy hơn hẳn không?',
   };
+  @override
+  String get journeyTitle => 'Hành trình';
+  @override
+  String get journeyEmptyTitle => 'Chưa có hành trình nào';
+  @override
+  String get journeyEmptyBody =>
+      'Đặt một mục tiêu rồi bắt đầu hành trình, tôi sẽ chia nó thành các bước '
+      'cụ thể dựa trên việc kinh doanh của bạn.';
+  @override
+  String get journeyInsufficientTitle => 'Chưa đủ dữ liệu để lập kế hoạch';
+  @override
+  String get journeyInsufficientBody =>
+      'Thêm vài sản phẩm hoặc khách hàng trước đã. Tôi không muốn đưa cho bạn '
+      'một kế hoạch chung chung không dính gì tới việc bạn đang làm.';
+  @override
+  String get journeyProgress => 'Tiến độ';
+  @override
+  String get journeyFromRule => 'Hệ thống đề xuất';
+  @override
+  String get journeyMeasured => 'Tự tính từ dữ liệu';
   @override
   String profileSeasonality(String code) => switch (code) {
     'none' => 'Bán đều quanh năm',
@@ -2655,6 +2685,26 @@ class AppStringsEn extends AppStrings {
     'size' => 'How big is it right now?',
     _ => 'Any season when you sell much more?',
   };
+  @override
+  String get journeyTitle => 'Journey';
+  @override
+  String get journeyEmptyTitle => 'No journey yet';
+  @override
+  String get journeyEmptyBody =>
+      'Set a goal and start a journey — I will break it into concrete steps '
+      'based on how your business actually works.';
+  @override
+  String get journeyInsufficientTitle => 'Not enough data to plan yet';
+  @override
+  String get journeyInsufficientBody =>
+      'Add a few products or customers first. I would rather not hand you a '
+      'generic plan that has nothing to do with what you are doing.';
+  @override
+  String get journeyProgress => 'Progress';
+  @override
+  String get journeyFromRule => 'Suggested by the system';
+  @override
+  String get journeyMeasured => 'Counted from your data';
   @override
   String profileSeasonality(String code) => switch (code) {
     'none' => 'Steady all year',
