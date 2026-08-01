@@ -24,6 +24,31 @@
   `BusinessHealth` model (WTM-132), **Phase 2 Journey + Finance slices
   (WTM-133)**, **Phase 3 Timeline projection (WTM-134)** — the **non-AI Business
   Snapshot is now complete**. AI reads **only** BusinessContext, never a repository.
+- **⭐ 2026-08-01 — KIỂM CHỨNG RESTORE TRÊN THIẾT BỊ + 2 việc dọn nền:**
+  · **Bước apply của restore CHẠY ĐƯỢC trên máy thật lần đầu** (Nokia 6.1).
+  WTM-164 chưa bao giờ chạy được bước này vì lúc đó không có đường lùi; WTM-173
+  mở đường nên giờ thử được an toàn. Tránh share sheet bằng cách `adb push` file
+  `.ttbk` sinh sẵn thay vì tạo backup trong app. Kết quả: preview đúng số, thay
+  thế đúng, **hoàn tác đưa lại đúng 49 khách · 18 SP · 524 đơn · 538 thu chi**
+  — và bản an toàn quay về dưới dạng **preview**, vẫn phải xác nhận lần nữa.
+  · **WTM-174 — lỗi thật tìm được nhờ chạy trên máy:** sau khi khôi phục, các
+  tab **vẫn hiện doanh nghiệp đã bị thay thế** cho tới khi khởi động lại app.
+  DB đúng suốt; chỉ màn hình nói dối — tệ hơn báo lỗi, vì người bán đọc "42" sau
+  khi khôi phục sẽ tưởng khôi phục hỏng. Nguyên nhân nằm ngay trong tài liệu của
+  hàm invalidate: *"Home looked right only because it re-reads its repositories
+  in initState"* — **đúng lúc WTM-149, và bị WTM-148 làm sai** khi chuyển sang
+  `ScreenDataController` + `IndexedStack` giữ tab sống. Sửa ở seam:
+  `businessDataRevisionProvider`. Ảnh hưởng rộng hơn restore (cả nạp/xoá mẫu).
+  merged `15d89c1`, **1419 tests**.
+  · **Số hydration TRÊN THIẾT BỊ ở 12 tháng** (câu hỏi treo của Epic WTM-167):
+  Nokia 6.1, DB rỗng `home-data 330ms · first-frame 430ms · tổng 778ms`;
+  12 tháng `home-data 695ms · first-frame 828ms · tổng 1.348ms`. Hydration
+  **40ms → 405ms**. Kết luận WTM-166 **vẫn đúng** (Home có dữ liệu trước khung
+  hình đầu), nhưng hydration nay chiếm **gần nửa** thời gian trước first-frame.
+  · **Audit backlog Jira:** 62 issue mở → **10**; 51 đóng có bằng chứng, WTM-85
+  gộp vào Epic WTM-167 (AC của nó **mâu thuẫn** ràng buộc "không cache toàn
+  cục"), WTM-86 thu hẹp. ROADMAP thêm bảng đối chiếu thực tế — dự án ở **cuối
+  Phase 3**, không phải giữa Phase 1B. `docs/06-GOVERNANCE/JIRA-BACKLOG-AUDIT-2026-08-01.md`
 - **⭐ ĐÊM 2026-07-31 — SĂN LỖI SẢN PHẨM (Founder Autonomous Overnight Mode).**
   Bốn lỗi thật, mỗi lỗi tìm ra bằng cách **quét có hệ thống** chứ không phải đọc lướt:
   · **WTM-169 — 11 nút bấm không ra gì ở màn Cài đặt**, gồm **"Đăng xuất" trong
