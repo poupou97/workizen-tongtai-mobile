@@ -44,6 +44,7 @@ class Product {
     required this.pricePerUnit,
     required this.reorderLevel,
     required this.updatedAt,
+    this.costPrice,
     this.description = '',
     this.imagePaths = const [],
     this.history = const [],
@@ -97,6 +98,7 @@ class Product {
     double? pricePerUnit,
     int? reorderLevel,
     DateTime? updatedAt,
+    double? costPrice,
     String? description,
     List<String>? imagePaths,
     List<ProductRevision>? history,
@@ -110,6 +112,7 @@ class Product {
       pricePerUnit: pricePerUnit ?? this.pricePerUnit,
       reorderLevel: reorderLevel ?? this.reorderLevel,
       updatedAt: updatedAt ?? this.updatedAt,
+      costPrice: costPrice ?? this.costPrice,
       description: description ?? this.description,
       imagePaths: imagePaths ?? this.imagePaths,
       history: history ?? this.history,
@@ -122,6 +125,30 @@ class Product {
     if (quantity <= 0) return StockStatus.outOfStock;
     if (quantity <= reorderLevel) return StockStatus.lowStock;
     return StockStatus.inStock;
+  }
+
+  /// What one unit costs the seller, in đồng — or `null` when they have not
+  /// entered it (WTM-204).
+  ///
+  /// `null`, **not 0**: zero says *"this is free stock"*, null says *"nobody
+  /// has said"*, and treating the second as the first would print a 100%
+  /// margin nobody computed (the ADR-TON-022 rule, applied to a field).
+  ///
+  /// The column (`costPerUnit`) has been in the schema since v1 — the domain
+  /// simply never carried it, which is the single missing field behind four
+  /// blocked capabilities: real opportunity ROI, the High Risk badge, per-
+  /// product margin, and the journey's "record your cost price" step.
+  final double? costPrice;
+
+  /// Profit for one unit, or `null` when the cost price is unknown.
+  ///
+  /// Never a guess: `insufficient` is an answer (ADR-TON-017), a made-up
+  /// margin is not. Computed here rather than stored — the schema's
+  /// `profitPerUnit` column is a derived-data violation (WTM-202) and stays
+  /// unread.
+  double? get profitPerUnit {
+    final cost = costPrice;
+    return cost == null ? null : pricePerUnit - cost;
   }
 
   /// Total on-hand value = unit price × quantity (in đồng).
@@ -148,6 +175,7 @@ class Product {
     pricePerUnit: pricePerUnit,
     reorderLevel: reorderLevel,
     updatedAt: updatedAt,
+    costPrice: costPrice,
     description: description,
     imagePaths: imagePaths,
     history: history,

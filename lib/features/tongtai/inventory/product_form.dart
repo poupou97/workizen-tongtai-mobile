@@ -17,6 +17,7 @@ class ProductFormData {
     this.category = '',
     this.description = '',
     this.priceText = '',
+    this.costPriceText = '',
     this.quantityText = '',
     this.reorderLevelText = '',
     this.imagePaths = const [],
@@ -29,6 +30,9 @@ class ProductFormData {
     category: product.category,
     description: product.description,
     priceText: _numberText(product.pricePerUnit),
+    costPriceText: product.costPrice == null
+        ? ''
+        : _numberText(product.costPrice!),
     quantityText: product.quantity.toString(),
     reorderLevelText: product.reorderLevel.toString(),
     imagePaths: List.of(product.imagePaths),
@@ -39,6 +43,11 @@ class ProductFormData {
   final String category;
   final String description;
   final String priceText;
+
+  /// Optional (WTM-204): empty means the seller has not entered a cost, and
+  /// the product carries `costPrice = null` — never 0, which would claim the
+  /// stock is free and print a 100% margin nobody computed.
+  final String costPriceText;
   final String quantityText;
   final String reorderLevelText;
   final List<String> imagePaths;
@@ -49,6 +58,7 @@ class ProductFormData {
     String? category,
     String? description,
     String? priceText,
+    String? costPriceText,
     String? quantityText,
     String? reorderLevelText,
     List<String>? imagePaths,
@@ -59,6 +69,7 @@ class ProductFormData {
       category: category ?? this.category,
       description: description ?? this.description,
       priceText: priceText ?? this.priceText,
+      costPriceText: costPriceText ?? this.costPriceText,
       quantityText: quantityText ?? this.quantityText,
       reorderLevelText: reorderLevelText ?? this.reorderLevelText,
       imagePaths: imagePaths ?? this.imagePaths,
@@ -104,6 +115,16 @@ class ProductFormData {
       }
     }
 
+    final cost = costPriceText.trim();
+    if (cost.isNotEmpty) {
+      final value = _tryParseNumber(cost);
+      if (value == null) {
+        errors[ProductField.costPrice] = 'Cost price must be a number';
+      } else if (value < 0) {
+        errors[ProductField.costPrice] = 'Cost price cannot be negative';
+      }
+    }
+
     final quantity = quantityText.trim();
     if (quantity.isEmpty) {
       errors[ProductField.quantity] = 'Quantity is required';
@@ -144,6 +165,10 @@ class ProductFormData {
       category: category.trim(),
       quantity: _tryParseInt(quantityText) ?? 0,
       pricePerUnit: _tryParseNumber(priceText) ?? 0,
+      // Empty stays null — "not entered" is not the same fact as "free".
+      costPrice: costPriceText.trim().isEmpty
+          ? null
+          : _tryParseNumber(costPriceText),
       reorderLevel: parsedReorderLevel,
       description: description.trim(),
       imagePaths: List.unmodifiable(imagePaths),
@@ -204,6 +229,13 @@ abstract final class ProductEditor {
       ProductField.unitPrice,
       _numberText(before.pricePerUnit),
       _numberText(after.pricePerUnit),
+    );
+    compare(
+      // WTM-204: a changed cost price belongs in the audit trail — margins move
+      // with it, and "why did my profit change" should have an answer.
+      ProductField.costPrice,
+      before.costPrice == null ? '' : _numberText(before.costPrice!),
+      after.costPrice == null ? '' : _numberText(after.costPrice!),
     );
     compare(
       ProductField.quantity,
