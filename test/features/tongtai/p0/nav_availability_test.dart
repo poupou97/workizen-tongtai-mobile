@@ -138,6 +138,41 @@ void main() {
     expect(find.byType(TongtaiHomeScreen), findsOneWidget);
   });
 
+  testWidgets('every core capability is reachable from Home or the tab bar', (
+    tester,
+  ) async {
+    // WTM-206 — the rule, not the one-screen patch. Finance was reachable only
+    // through More: three taps into the toolbox for the "money management
+    // hub", while the journey asked the seller to record expenses (WTM-198)
+    // and Home showed their revenue on the KPI row. The Concept's core
+    // capabilities live on the tab bar or one tap off Home; More is the full
+    // directory, not the only door.
+    await pumpShell(tester);
+
+    // On the tab bar (WTM-192): Producer, Inventory, Consumer, Opportunity.
+    for (var tab = TongtaiTabs.home; tab <= TongtaiTabs.opportunity; tab++) {
+      expect(
+        find.byKey(Key('nav-tab-$tab')),
+        findsOneWidget,
+        reason: 'tab $tab',
+      );
+    }
+
+    // One tap off Home: Reports, Finance, Journey (WTM-187), Chat (AI).
+    for (final key in const [
+      'home-open-reports',
+      'home-open-finance',
+      'home-open-journey',
+      'home-open-chat',
+    ]) {
+      expect(
+        find.byKey(Key(key)),
+        findsOneWidget,
+        reason: '$key missing — that capability is buried in the More toolbox',
+      );
+    }
+  });
+
   testWidgets('More menu exposes the full entry list in EVERY data state', (
     tester,
   ) async {

@@ -23,6 +23,7 @@ import 'tongtai_customer_list_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_journey_screen.dart';
 import 'tongtai_inventory_screen.dart';
+import 'tongtai_finance_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_unified_search_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -422,6 +423,15 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             actionKey: const Key('home-open-reports'),
             actionLabel: context.l10n.homeViewReports,
             onAction: () => _push(context, const TongtaiReportsScreen()),
+            // WTM-206: Finance was reachable only through More — three taps
+            // into the toolbox — while this very row shows the revenue and the
+            // journey now asks the seller to record expenses (WTM-198).
+            // Telling someone to do a thing and hiding the door is a design
+            // arguing with itself.
+            secondaryActionKey: const Key('home-open-finance'),
+            secondaryActionLabel: context.l10n.titleFinance,
+            onSecondaryAction: () =>
+                _push(context, const TongtaiFinanceScreen()),
           ),
           const SizedBox(height: 12),
           _KpiRow(metrics: _metrics),
@@ -677,12 +687,21 @@ class _SectionHeader extends StatelessWidget {
     required this.actionKey,
     required this.actionLabel,
     required this.onAction,
+    this.secondaryActionKey,
+    this.secondaryActionLabel,
+    this.onSecondaryAction,
   });
 
   final String title;
   final Key actionKey;
   final String actionLabel;
   final VoidCallback onAction;
+
+  /// Optional second action (WTM-206). The KPI header shows the money, so it
+  /// carries the two doors money leads to: Reports and Finance.
+  final Key? secondaryActionKey;
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
 
   @override
   Widget build(BuildContext context) {
@@ -693,6 +712,19 @@ class _SectionHeader extends StatelessWidget {
         ),
         // Flexible + FittedBox: at large text scales the action label must
         // shrink rather than push the Row past its bounds (P0 §3).
+        // Flexible + FittedBox: at large text scales the action labels must
+        // shrink rather than push the Row past its bounds (P0 §3).
+        if (secondaryActionLabel case final label?)
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: TextButton(
+                key: secondaryActionKey,
+                onPressed: onSecondaryAction,
+                child: Text(label),
+              ),
+            ),
+          ),
         Flexible(
           child: FittedBox(
             fit: BoxFit.scaleDown,
