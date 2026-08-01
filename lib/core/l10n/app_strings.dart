@@ -409,13 +409,11 @@ abstract class AppStrings {
 
   // Business Journey (WTM-187) — hành trình có bậc.
   String get journeyTitle;
-  String get journeyStart;
   String get journeyEmptyTitle;
   String get journeyEmptyBody;
   String get journeyInsufficientTitle;
   String get journeyInsufficientBody;
   String get journeyProgress;
-  String get journeyStepDone;
   String get journeyFromRule;
   String get journeyMeasured;
 
@@ -1418,8 +1416,6 @@ class AppStringsVi extends AppStrings {
   @override
   String get journeyTitle => 'Hành trình';
   @override
-  String get journeyStart => 'Bắt đầu hành trình';
-  @override
   String get journeyEmptyTitle => 'Chưa có hành trình nào';
   @override
   String get journeyEmptyBody =>
@@ -1433,8 +1429,6 @@ class AppStringsVi extends AppStrings {
       'một kế hoạch chung chung không dính gì tới việc bạn đang làm.';
   @override
   String get journeyProgress => 'Tiến độ';
-  @override
-  String get journeyStepDone => 'Đã xong';
   @override
   String get journeyFromRule => 'Hệ thống đề xuất';
   @override
@@ -2694,8 +2688,6 @@ class AppStringsEn extends AppStrings {
   @override
   String get journeyTitle => 'Journey';
   @override
-  String get journeyStart => 'Start the journey';
-  @override
   String get journeyEmptyTitle => 'No journey yet';
   @override
   String get journeyEmptyBody =>
@@ -2709,8 +2701,6 @@ class AppStringsEn extends AppStrings {
       'generic plan that has nothing to do with what you are doing.';
   @override
   String get journeyProgress => 'Progress';
-  @override
-  String get journeyStepDone => 'Done';
   @override
   String get journeyFromRule => 'Suggested by the system';
   @override

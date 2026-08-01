@@ -17,6 +17,7 @@ import '../../providers/tongtai_search_provider.dart';
 import 'tongtai_chat_screen.dart';
 import 'tongtai_customer_list_screen.dart';
 import 'tongtai_goals_screen.dart';
+import 'tongtai_journey_screen.dart';
 import 'tongtai_inventory_screen.dart';
 import 'tongtai_opportunity_feed_screen.dart';
 import 'tongtai_reports_screen.dart';
@@ -428,10 +429,26 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                 .map((o) => _OpportunityTile(opportunity: o)),
           const SizedBox(height: 24),
 
-          // ── Today's missions = active goals ───────────────────────
-          Text(
-            context.l10n.homeTodaysMissions,
-            style: Theme.of(context).textTheme.titleLarge,
+          // ── Today's missions ──────────────────────────────────────
+          //
+          // WTM-187: the section header now opens the Journey. Business
+          // Journey is a P0 capability in the Concept and was reachable only
+          // from a row inside the settings list — a capability nobody finds is
+          // a capability that does not exist for most sellers.
+          //
+          // The tiles still show goals. Rewiring them to journey tasks needs
+          // Home's data path to load journeys too, which is a separate change
+          // to `_HomeData`; the entry point is the part that unblocks people
+          // today.
+          _SectionHeader(
+            title: context.l10n.homeTodaysMissions,
+            actionKey: const Key('home-open-journey'),
+            actionLabel: context.l10n.journeyTitle,
+            onAction: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const TongtaiJourneyScreen(),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           if (_goals.isEmpty)
