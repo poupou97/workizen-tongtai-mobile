@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+import '../consumer/customer_order.dart';
 import '../core/tongtai_enums.dart';
+import '../metrics/business_metrics.dart' show BillableOrders;
 import 'finance_transaction.dart';
 
 /// Income vs. expense booked in one calendar month — a column pair in the
@@ -79,12 +81,33 @@ class FinanceSummary {
     required this.expenseYtd,
     required this.expenseByCategory,
     required this.monthly,
+    this.salesIncomeMtd = 0,
+    this.salesIncomeYtd = 0,
   });
 
   final double incomeMtd;
   final double incomeYtd;
   final double expenseMtd;
   final double expenseYtd;
+
+  /// The part of [incomeMtd] / [incomeYtd] that comes from **orders** rather
+  /// than hand-entered rows (WTM-196).
+  ///
+  /// Before this, Finance counted only what the seller typed in, so a shop with
+  /// ten recorded orders opened Finance and read **₫0 income** while Home and
+  /// Reports showed real revenue — two authoritative-looking answers to *"how
+  /// much did I make"*.
+  ///
+  /// Kept as its own figure rather than folded in silently: the seller should
+  /// be able to see which part of their income the app worked out and which
+  /// part they told it.
+  final double salesIncomeMtd;
+  final double salesIncomeYtd;
+
+  /// Income the seller entered by hand — everything that did not come from an
+  /// order (a refund, a side job, an owner top-up).
+  double get manualIncomeMtd => incomeMtd - salesIncomeMtd;
+  double get manualIncomeYtd => incomeYtd - salesIncomeYtd;
 
   /// Expense categories, highest first (income excluded).
   final List<CategoryAmount> expenseByCategory;
@@ -110,6 +133,8 @@ class FinanceSummary {
   bool get hasActivity => incomeYtd > 0 || expenseYtd > 0;
 
   static const FinanceSummary empty = FinanceSummary(
+    salesIncomeMtd: 0,
+    salesIncomeYtd: 0,
     incomeMtd: 0,
     incomeYtd: 0,
     expenseMtd: 0,
@@ -125,15 +150,29 @@ class FinanceSummary {
 /// clock of its own (the caller passes `now`) — so every figure is
 /// deterministically unit-testable, mirroring [ReportsService].
 class FinanceService {
-  FinanceService(List<FinanceTransaction> transactions, {this.monthsBack = 6})
-    : assert(monthsBack > 0, 'monthsBack must be positive'),
-      _txns = List.unmodifiable(transactions);
+  FinanceService(
+    List<FinanceTransaction> transactions, {
+    List<CustomerOrder> orders = const [],
+    this.monthsBack = 6,
+  }) : assert(monthsBack > 0, 'monthsBack must be positive'),
+       _txns = List.unmodifiable(transactions),
+       // Billable only — the same shared rule Home and Reports use, so the two
+       // sides cannot drift apart on what counts as a sale (WTM-196).
+       _sales = List.unmodifiable(orders.billable);
 
   /// Seeded with the built-in sample transactions.
   factory FinanceService.sample({int monthsBack = 6}) =>
       FinanceService(kSampleTransactions, monthsBack: monthsBack);
 
   final List<FinanceTransaction> _txns;
+
+  /// Billable orders. **Read, never written**: sales revenue is derived from
+  /// orders on every read rather than copied into a `FinanceTransaction`.
+  ///
+  /// Copying would be the parallel record One Data Path (ADR-TON-015) forbids —
+  /// edit the order and the money row drifts, delete it and the money row is
+  /// orphaned, and `.ttbk` would carry the same fact twice.
+  final List<CustomerOrder> _sales;
 
   /// How many trailing months the cashflow chart spans (inclusive of `now`).
   final int monthsBack;
@@ -154,15 +193,27 @@ class FinanceService {
         .where((t) => t.date.year == now.year)
         .toList(growable: false);
 
+    final salesMtd = _salesIn(year: now.year, month: now.month);
+    final salesYtd = _salesIn(year: now.year);
+
     return FinanceSummary(
-      incomeMtd: _sum(mtd, TransactionType.income),
-      incomeYtd: _sum(ytd, TransactionType.income),
+      incomeMtd: _sum(mtd, TransactionType.income) + salesMtd,
+      incomeYtd: _sum(ytd, TransactionType.income) + salesYtd,
+      salesIncomeMtd: salesMtd,
+      salesIncomeYtd: salesYtd,
       expenseMtd: _sum(mtd, TransactionType.expense),
       expenseYtd: _sum(ytd, TransactionType.expense),
       expenseByCategory: _expenseByCategory(ytd),
       monthly: _monthlySeries(now),
     );
   }
+
+  /// Revenue from billable orders in a year, or in one month of it.
+  double _salesIn({required int year, int? month}) => _sales
+      .where(
+        (o) => o.date.year == year && (month == null || o.date.month == month),
+      )
+      .fold(0.0, (total, o) => total + o.totalAmount);
 
   double _sum(Iterable<FinanceTransaction> txns, TransactionType type) =>
       txns.where((t) => t.type == type).fold(0, (total, t) => total + t.amount);
@@ -181,7 +232,9 @@ class FinanceService {
           return MonthlyCashflow(
             year: anchor.year,
             month: anchor.month,
-            income: _sum(inMonth, TransactionType.income),
+            income:
+                _sum(inMonth, TransactionType.income) +
+                _salesIn(year: anchor.year, month: anchor.month),
             expense: _sum(inMonth, TransactionType.expense),
           );
         }(),

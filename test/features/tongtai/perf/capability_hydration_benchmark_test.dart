@@ -46,7 +46,12 @@ void main() {
   const baselineReads = {
     'customers': 4,
     'products': 3,
-    'orders': 5,
+    // WTM-196 moved this from 5 to 6: Finance derives sales revenue from orders
+    // instead of counting only hand-entered rows, so it reads a table it never
+    // used to. That is the **point** of the fix — Finance was showing ₫0 income
+    // to a seller with real orders — and the sixth read is the honest cost of
+    // one truth instead of two.
+    'orders': 6,
     'goals': 4,
     'finance': 2,
   };
