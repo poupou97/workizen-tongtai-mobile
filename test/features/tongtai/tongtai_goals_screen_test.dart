@@ -154,7 +154,9 @@ void main() {
         await tester.pumpAndSettle();
 
         // Step 1: template picker (AC2).
-        expect(find.text('New Business Goal'), findsOneWidget);
+        // Key, not copy: a behaviour test that reads the label breaks the
+        // moment the label is translated (WTM-194).
+        expect(find.byKey(const Key('goal-form-title-new')), findsOneWidget);
         await tester.tap(find.byKey(const Key('goal-template-revenue')));
         await tester.pumpAndSettle();
 
@@ -172,7 +174,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Step 3: review shows the recommendation seam and saves.
-        expect(find.text('Create Goal'), findsOneWidget);
+        expect(find.byKey(const Key('goal-save')), findsOneWidget);
         await tester.tap(find.byKey(const Key('goal-save')));
         await tester.pumpAndSettle();
 
@@ -247,7 +249,7 @@ void main() {
         await tester.tap(find.byKey(const Key('goal-detail-edit')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Edit Goal'), findsOneWidget);
+        expect(find.byKey(const Key('goal-form-title-edit')), findsOneWidget);
         // Founder default: revenue achieved derives from orders — the manual
         // field is replaced by the derived note…
         expect(find.byKey(const Key('goal-achieved-field')), findsNothing);

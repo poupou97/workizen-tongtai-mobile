@@ -302,7 +302,7 @@ void main() {
       );
       await openForm(tester);
 
-      expect(find.text('Edit Customer'), findsOneWidget);
+      expect(find.byKey(const Key('customer-form-title-edit')), findsOneWidget);
       expect(find.text('Phương Nguyễn'), findsOneWidget);
       expect(find.text('+84912345678'), findsOneWidget);
 
@@ -395,7 +395,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TongtaiCustomerFormScreen), findsOneWidget);
-      expect(find.text('Add Customer'), findsOneWidget);
+      // Key, not copy — see WTM-194.
+      expect(find.byKey(const Key('customer-form-title-add')), findsOneWidget);
     });
 
     testWidgets('adding a customer through the form lands it in the list', (
@@ -452,7 +453,7 @@ void main() {
 
       await tester.tap(find.text('Phương Nguyễn'));
       await tester.pumpAndSettle();
-      expect(find.text('Edit Customer'), findsOneWidget);
+      expect(find.byKey(const Key('customer-form-title-edit')), findsOneWidget);
 
       await tester.enterText(
         find.byKey(const Key('customer-name-field')),

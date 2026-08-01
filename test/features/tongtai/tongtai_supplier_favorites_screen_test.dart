@@ -180,7 +180,11 @@ void main() {
         await tester.tap(find.widgetWithText(FilterChip, 'Favorites'));
         await tester.pumpAndSettle();
 
-        expect(find.text('No favorite suppliers match'), findsOneWidget);
+        // Key, not copy — see WTM-194.
+        expect(
+          find.byKey(const Key('supplier-empty-favorites')),
+          findsOneWidget,
+        );
         expect(find.text(byId('s1').name), findsNothing);
       },
     );

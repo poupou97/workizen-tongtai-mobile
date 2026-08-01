@@ -151,7 +151,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     final errors = Map<ProductField, String>.from(data.validate());
     if (!errors.containsKey(ProductField.sku)) {
       final taken = widget.isSkuTaken?.call(data.sku.trim()) ?? false;
-      if (taken) errors[ProductField.sku] = 'SKU already exists';
+      if (taken) errors[ProductField.sku] = context.l10n.productSkuExists;
     }
     return errors;
   }
@@ -229,7 +229,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
               key: const Key('product-name-field'),
               controller: _name,
               field: ProductField.name,
-              hint: 'e.g. Handheld mini fan',
+              hint: context.l10n.productNameHint,
             ),
             _field(
               key: const Key('product-sku-field'),
@@ -242,7 +242,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
               key: const Key('product-category-field'),
               controller: _category,
               field: ProductField.category,
-              hint: 'e.g. Electronics',
+              hint: context.l10n.productCategoryHint,
             ),
             _CategorySuggestions(
               categories: widget.categories,

@@ -189,7 +189,7 @@ class _TongtaiOpportunityFeedScreenState
             actions: [
               IconButton(
                 key: const Key('opportunity-saved-toggle'),
-                tooltip: _query.savedOnly ? 'All opportunities' : 'Saved',
+                tooltip: _query.savedOnly ? context.l10n.oppFilterAll : 'Saved',
                 icon: Icon(
                   _query.savedOnly ? Icons.bookmark : Icons.bookmark_outline,
                   color: _query.savedOnly
@@ -555,7 +555,9 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: TongtaiDesignTokens.spacing1),
             Text(
-              savedOnly ? 'Nothing saved yet.' : 'No opportunities here yet.',
+              savedOnly
+                  ? context.l10n.oppEmptySaved
+                  : context.l10n.oppEmptyFeed,
               textAlign: TextAlign.center,
               style: TongtaiDesignTokens.smallStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextSecondary,

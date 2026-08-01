@@ -817,9 +817,16 @@ class _EmptyState extends StatelessWidget {
                   ),
                   const SizedBox(height: TongtaiDesignTokens.spacing3),
                   Text(
+                    // Key carries which empty state this is — behaviour tests
+                    // must not assert on copy (WTM-194).
+                    key: Key(
+                      favoritesOnly
+                          ? 'supplier-empty-favorites'
+                          : 'supplier-empty-search',
+                    ),
                     favoritesOnly
-                        ? 'No favorite suppliers match'
-                        : 'No suppliers match your search',
+                        ? context.l10n.supplierNoFavoritesMatch
+                        : context.l10n.supplierNoSearchMatch,
                     textAlign: TextAlign.center,
                     style: TongtaiDesignTokens.bodyStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextPrimary,
@@ -829,8 +836,8 @@ class _EmptyState extends StatelessWidget {
                   const SizedBox(height: TongtaiDesignTokens.spacing1),
                   Text(
                     favoritesOnly
-                        ? 'Tap the heart on a supplier to add it to your favorites.'
-                        : 'Try a different keyword or adjust your filters.',
+                        ? context.l10n.supplierFavoritesHint
+                        : context.l10n.supplierSearchHint,
                     textAlign: TextAlign.center,
                     style: TongtaiDesignTokens.smallStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextSecondary,

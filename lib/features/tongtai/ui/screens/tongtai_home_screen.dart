@@ -422,7 +422,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           ),
           const SizedBox(height: 12),
           if (topOpportunities.isEmpty)
-            const _EmptyBox('No opportunities available')
+            _EmptyBox(context.l10n.homeNoOpportunities)
           else
             ...topOpportunities
                 .take(3)
@@ -452,7 +452,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           ),
           const SizedBox(height: 12),
           if (_goals.isEmpty)
-            const _EmptyBox('No missions yet')
+            _EmptyBox(context.l10n.homeNoMissions)
           else
             ..._goals.take(3).map((g) => _MissionTile(goal: g)),
         ],

@@ -159,6 +159,67 @@ void main() {
         );
       });
 
+      test('no English hard-coded literal remains under ui/ (WTM-194)', () {
+        // The sibling test above looks for *Vietnamese* letters, because it was
+        // written after WTM-145 to clean up Vietnamese literals. That makes it
+        // blind to English ones — and this product is Vietnamese-first (D-8),
+        // so an English literal is the version a real seller actually sees.
+        //
+        // WTM-194 found ~35 of them across 12 real screens: the goal form, the
+        // customer form, the opportunity feed's empty state, Home's empty
+        // states. Exactly the WTM-173 defect ("badge on Home shows English in
+        // the Vietnamese build"), 35 times over, with nothing failing.
+        final uiDir = Directory('lib/features/tongtai/ui');
+        final offenders = <String>[];
+        final literal = RegExp("'([^'\\\\]|\\\\.)*'");
+        // Two or more words of plain Latin text — the shape of a sentence a
+        // seller reads, not of a key, a path, or a format pattern.
+        final prose = RegExp(r"^[A-Za-z][A-Za-z ,.'’!?%-]*$");
+
+        // Allowed on purpose, each for a reason that survives review:
+        // - `Workizen AI` is the **brand** users interact with (ADR-TON-006);
+        //   translating it would break the one name the product promises.
+        const allowedPhrases = ['Workizen AI'];
+        // - the showcase is a developer screen, never shipped in a menu.
+        const allowedFiles = ['tongtai_component_showcase_screen.dart'];
+
+        for (final f
+            in uiDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          if (allowedFiles.any(f.path.endsWith)) continue;
+          // Blank out `assert(...)` bodies first: an assertion message is
+          // developer text that never reaches a seller, and it is written in
+          // English on purpose.
+          final lines = _withoutAsserts(f.readAsStringSync()).split('\n');
+          for (var i = 0; i < lines.length; i++) {
+            final trimmed = lines[i].trimLeft();
+            if (trimmed.startsWith('//')) continue;
+            // An `expect(..., reason: '...')`-style string is developer text.
+            if (trimmed.startsWith('reason:')) continue;
+            for (final m in literal.allMatches(lines[i])) {
+              var value = m.group(0)!;
+              value = value.substring(1, value.length - 1);
+              for (final ok in allowedPhrases) {
+                value = value.replaceAll(ok, '');
+              }
+              if (value.trim().split(RegExp(r'\s+')).length < 2) continue;
+              if (!prose.hasMatch(value)) continue;
+              offenders.add('${f.path}:${i + 1}: ${m.group(0)!}');
+            }
+          }
+        }
+        expect(
+          offenders,
+          isEmpty,
+          reason:
+              'Chuỗi tiếng Anh hard-code trong ui/ bị cấm — sản phẩm lấy tiếng '
+              'Việt làm chính (D-8), nên chuỗi này là thứ người bán thật nhìn '
+              'thấy. Dùng context.l10n.<key>:\n${offenders.join('\n')}',
+        );
+      });
+
       test('ui/ never reads labelVi/labelEn directly — label(locale) only', () {
         // Domain enums keep labelVi/labelEn, but a widget picking one side
         // hard-wires a language and breaks runtime switching (P0 §2).
@@ -332,4 +393,33 @@ void main() {
       },
     );
   });
+}
+
+/// Replaces the contents of every `assert(...)` with spaces, preserving line
+/// structure so reported line numbers stay correct.
+///
+/// Assertion messages are for whoever breaks the invariant, not for the seller,
+/// so the English-literal scan must not read them as UI copy.
+String _withoutAsserts(String source) {
+  final out = source.split('');
+  var i = 0;
+  while (true) {
+    final start = source.indexOf('assert(', i);
+    if (start < 0) break;
+    var depth = 0;
+    var j = start + 'assert'.length;
+    for (; j < source.length; j++) {
+      final c = source[j];
+      if (c == '(') depth++;
+      if (c == ')') {
+        depth--;
+        if (depth == 0) break;
+      }
+    }
+    for (var k = start; k <= j && k < source.length; k++) {
+      if (out[k] != '\n') out[k] = ' ';
+    }
+    i = j + 1;
+  }
+  return out.join();
 }

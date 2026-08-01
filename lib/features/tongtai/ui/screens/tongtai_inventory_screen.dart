@@ -498,7 +498,9 @@ class _SortBar extends StatelessWidget {
       label: context.l10n.labelSort,
       trailing: IconButton(
         icon: Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward),
-        tooltip: ascending ? 'Sort ascending' : 'Sort descending',
+        tooltip: ascending
+            ? context.l10n.sortAscending
+            : context.l10n.sortDescending,
         onPressed: onToggleDirection,
       ),
       children: [

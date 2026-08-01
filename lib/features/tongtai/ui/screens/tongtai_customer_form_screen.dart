@@ -231,7 +231,17 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Customer' : 'Add Customer'),
+        // Stable test ID carries the *mode* — see the note on the goal form.
+        title: Text(
+          key: Key(
+            widget.isEditing
+                ? 'customer-form-title-edit'
+                : 'customer-form-title-add',
+          ),
+          widget.isEditing
+              ? context.l10n.customerEditTitle
+              : context.l10n.customerAddTitle,
+        ),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -326,7 +336,9 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
         ),
       ),
       bottomNavigationBar: _SaveCancelBar(
-        saveLabel: widget.isEditing ? 'Save Changes' : 'Save Customer',
+        saveLabel: widget.isEditing
+            ? context.l10n.actionSaveChanges
+            : context.l10n.customerSave,
         onSave: _save,
         onCancel: _cancel,
       ),
@@ -407,7 +419,7 @@ class _DuplicateWarning extends StatelessWidget {
               Expanded(
                 child: Text(
                   duplicates.length == 1
-                      ? 'Possible duplicate customer'
+                      ? context.l10n.customerPossibleDuplicate
                       : 'Possible duplicate customers (${duplicates.length})',
                   style: TongtaiDesignTokens.smallStyle.copyWith(
                     fontWeight: FontWeight.w700,
