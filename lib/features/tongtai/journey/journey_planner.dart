@@ -33,6 +33,7 @@ class JourneyPlanInput {
     this.productCount = 0,
     this.customerCount = 0,
     this.orderCount = 0,
+    this.expenseCount = 0,
   });
 
   final BusinessGoal goal;
@@ -40,6 +41,14 @@ class JourneyPlanInput {
   final int productCount;
   final int customerCount;
   final int orderCount;
+
+  /// How many expense rows the seller has recorded (WTM-198).
+  ///
+  /// Decides what the money milestone asks for: a ledger with nothing in it
+  /// gets *"record your first expenses"* as a **measured** step, while a
+  /// seller already recording gets the profit-reading steps. A plan that told
+  /// everyone the same thing about money was a plan that had not looked.
+  final int expenseCount;
 }
 
 /// Why a plan, or a step in it, looks the way it does.
@@ -61,6 +70,7 @@ abstract final class JourneyReason {
   static const String profileNoStock = 'profile.no_stock';
 
   static const String dataEmptyCatalog = 'data.empty_catalog';
+  static const String dataEmptyExpenses = 'data.empty_expenses';
   static const String dataEmptyCustomers = 'data.empty_customers';
   static const String dataHasHistory = 'data.has_history';
 
@@ -195,10 +205,26 @@ List<_Milestone> _blueprintFor(JourneyPlanInput input) =>
 List<_Milestone> _revenuePlan(JourneyPlanInput input) {
   final target = input.goal.targetAmount;
   return [
-    _Milestone('Biết tiền đang đi đâu', [
-      const _Step('Ghi đủ chi phí tháng này'),
-      const _Step('Xem lãi lỗ theo nhóm hàng'),
-    ]),
+    // WTM-198: what the money milestone asks depends on where the seller is.
+    // An empty ledger gets a **measured** first step — five recorded expenses
+    // is an observation, not a checkbox (ADR-TON-021: progress is measured,
+    // not declared). A seller already recording is past that, and gets the
+    // profit-reading steps instead. Before this, everyone got the same two
+    // manual ticks regardless of their data.
+    if (input.expenseCount == 0)
+      const _Milestone('Biết tiền đang đi đâu', [
+        _Step(
+          'Ghi 5 khoản chi đầu tiên',
+          metric: 'expenses',
+          target: 5,
+          reasonCodes: [JourneyReason.dataEmptyExpenses],
+        ),
+      ])
+    else
+      const _Milestone('Biết tiền đang đi đâu', [
+        _Step('Ghi đủ chi phí tháng này'),
+        _Step('Xem lãi lỗ theo nhóm hàng'),
+      ]),
     _Milestone('Bán được nhiều hơn cho khách đang có', [
       _Step(
         'Liên hệ lại 10 khách mua gần nhất',
@@ -266,6 +292,20 @@ List<_Milestone> _customerGrowthPlan(JourneyPlanInput input) {
           reasonCodes: [JourneyReason.profileOffline],
         ),
       const _Step('Nhờ khách cũ giới thiệu'),
+      // WTM-198: acquiring customers costs money (ads, ưu đãi, quà giới
+      // thiệu), and a plan that never asks what that costs cannot answer
+      // whether the growth was worth it. An empty ledger gets the measured
+      // first-expenses step; a seller already recording is asked to book the
+      // acquisition costs specifically.
+      if (input.expenseCount == 0)
+        const _Step(
+          'Ghi 5 khoản chi đầu tiên',
+          metric: 'expenses',
+          target: 5,
+          reasonCodes: [JourneyReason.dataEmptyExpenses],
+        )
+      else
+        const _Step('Ghi chi phí tìm khách (quảng cáo, ưu đãi) vào sổ chi'),
     ]),
     _Milestone('Chạm mốc số khách', [
       _Step(
