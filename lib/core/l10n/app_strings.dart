@@ -212,6 +212,7 @@ abstract class AppStrings {
   String get homeNoOpportunities;
   String get homeNoMissions;
   String get oppFilterAll;
+  String get oppFilterSaved;
   String get oppEmptyFeed;
   String get productSkuExists;
   String get productNameHint;
@@ -286,6 +287,9 @@ abstract class AppStrings {
   String get navInventory;
   String get navConsumer;
   String get navMore;
+
+  /// WTM-192 — Opportunity Hub took the fifth bottom-bar slot from More.
+  String get navOpportunity;
 
   // ── common actions/labels (WTM-146 §3 EN-literal sweep) ─────────────────
   String get actionAdd;
@@ -1062,6 +1066,8 @@ class AppStringsVi extends AppStrings {
   @override
   String get oppFilterAll => 'Tất cả cơ hội';
   @override
+  String get oppFilterSaved => 'Đã lưu';
+  @override
   String get oppEmptyFeed => 'Chưa có cơ hội nào ở đây.';
   @override
   String get productSkuExists => 'SKU đã tồn tại';
@@ -1194,6 +1200,8 @@ class AppStringsVi extends AppStrings {
   String get navConsumer => 'Khách hàng';
   @override
   String get navMore => 'Thêm';
+  @override
+  String get navOpportunity => 'Cơ hội';
 
   @override
   String get actionAdd => 'Thêm';
@@ -2407,6 +2415,8 @@ class AppStringsEn extends AppStrings {
   @override
   String get oppFilterAll => 'All opportunities';
   @override
+  String get oppFilterSaved => 'Saved';
+  @override
   String get oppEmptyFeed => 'No opportunities here yet.';
   @override
   String get productSkuExists => 'SKU already exists';
@@ -2538,6 +2548,8 @@ class AppStringsEn extends AppStrings {
   String get navConsumer => 'Consumer';
   @override
   String get navMore => 'More';
+  @override
+  String get navOpportunity => 'Opportunity';
 
   @override
   String get actionAdd => 'Add';

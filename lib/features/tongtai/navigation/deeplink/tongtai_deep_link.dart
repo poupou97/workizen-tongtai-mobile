@@ -54,9 +54,9 @@ enum TongtaiRouteKind {
     TongtaiRouteKind.productDetail => TongtaiTabs.inventory,
     TongtaiRouteKind.customerList => TongtaiTabs.consumer,
     TongtaiRouteKind.customerDetail => TongtaiTabs.consumer,
-    TongtaiRouteKind.reports => TongtaiTabs.more,
-    TongtaiRouteKind.financeAccounts => TongtaiTabs.more,
-    TongtaiRouteKind.chat => TongtaiTabs.more,
+    TongtaiRouteKind.reports => TongtaiTabs.home,
+    TongtaiRouteKind.financeAccounts => TongtaiTabs.home,
+    TongtaiRouteKind.chat => TongtaiTabs.home,
   };
 
   /// Whether this destination is a specific record that needs an id

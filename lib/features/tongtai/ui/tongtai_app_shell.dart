@@ -6,12 +6,19 @@ import '../providers/tongtai_navigation_provider.dart';
 import 'screens/tongtai_consumer_screen.dart';
 import 'screens/tongtai_home_screen.dart';
 import 'screens/tongtai_inventory_screen.dart';
-import 'screens/tongtai_more_screen.dart';
+import 'screens/tongtai_opportunity_feed_screen.dart';
 import 'screens/tongtai_producer_screen.dart';
 import 'tongtai_bottom_nav.dart';
 
 /// Root app shell for Tổng Tài product.
-/// Manages navigation between the 5 main tabs (Home, Producer, Inventory, Consumer, More).
+/// Manages navigation between the 5 main tabs (Home, Producer, Inventory,
+/// Consumer, **Opportunity**).
+///
+/// WTM-192 (Founder decision 2026-08-01): Opportunity Hub took the fifth slot
+/// from **More**. Opportunity is one of the Concept's eight capabilities and a
+/// daily read; More is a toolbox reached occasionally, and it now lives in
+/// every screen's AppBar — see `TongtaiMoreAction`, which keeps it **one tap
+/// from every tab** so nothing got further away.
 /// Uses Riverpod for state management and persists tab selection.
 ///
 /// Also the single place deep-link failures (WTM-57) are surfaced: an
@@ -55,7 +62,7 @@ class TongtaiAppShell extends ConsumerWidget {
           TongtaiProducerScreen(),
           TongtaiInventoryScreen(),
           TongtaiConsumerScreen(),
-          TongtaiMoreScreen(),
+          TongtaiOpportunityFeedScreen(),
         ],
       ),
       bottomNavigationBar: TongtaiBottomNav(

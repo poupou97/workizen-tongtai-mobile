@@ -12,6 +12,7 @@ import '../../opportunity/opportunity_signals.dart';
 import '../../opportunity/opportunity_theme.dart';
 import '../../providers/tongtai_context_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_more_action.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 import 'tongtai_opportunity_detail_screen.dart';
@@ -189,7 +190,9 @@ class _TongtaiOpportunityFeedScreenState
             actions: [
               IconButton(
                 key: const Key('opportunity-saved-toggle'),
-                tooltip: _query.savedOnly ? context.l10n.oppFilterAll : 'Saved',
+                tooltip: _query.savedOnly
+                    ? context.l10n.oppFilterAll
+                    : context.l10n.oppFilterSaved,
                 icon: Icon(
                   _query.savedOnly ? Icons.bookmark : Icons.bookmark_outline,
                   color: _query.savedOnly
@@ -200,6 +203,9 @@ class _TongtaiOpportunityFeedScreenState
                   () => _query = _query.copyWith(savedOnly: !_query.savedOnly),
                 ),
               ),
+              // WTM-192: this screen is a tab now, so it carries the same More
+              // entry point as every other tab.
+              const TongtaiMoreAction(),
             ],
           ),
           body: SafeArea(

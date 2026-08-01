@@ -29,12 +29,16 @@ void main() {
         ),
       );
 
-      // Verify all tab labels are present
-      expect(find.text('Home'), findsOneWidget);
-      expect(find.text('Producer'), findsOneWidget);
-      expect(find.text('Inventory'), findsOneWidget);
-      expect(find.text('Consumer'), findsOneWidget);
-      expect(find.text('More'), findsOneWidget);
+      // Every tab is present, found by **key**: the labels are localized, and
+      // WTM-192 renamed the fifth one — a test reading labels checks the
+      // translation, not the navigation.
+      for (var tab = TongtaiTabs.home; tab <= TongtaiTabs.opportunity; tab++) {
+        expect(
+          find.byKey(Key('nav-tab-$tab')),
+          findsOneWidget,
+          reason: 'tab $tab',
+        );
+      }
     });
 
     testWidgets('BottomNav tab selection callback works', (
@@ -67,12 +71,12 @@ void main() {
       expect(selectedTab, equals(2));
 
       // Tap Consumer tab (index 3)
-      await tester.tap(find.text('Consumer'));
-      expect(selectedTab, equals(3));
+      await tester.tap(find.byKey(const Key('nav-tab-3')));
+      expect(selectedTab, equals(TongtaiTabs.consumer));
 
-      // Tap More tab (index 4)
-      await tester.tap(find.text('More'));
-      expect(selectedTab, equals(4));
+      // Slot 4 is Opportunity now (WTM-192).
+      await tester.tap(find.byKey(const Key('nav-tab-4')));
+      expect(selectedTab, equals(TongtaiTabs.opportunity));
     });
 
     testWidgets('All 5 screens render without errors', (
@@ -173,7 +177,7 @@ void main() {
       expect(getTabName(TongtaiTabs.producer), equals('Producer'));
       expect(getTabName(TongtaiTabs.inventory), equals('Inventory'));
       expect(getTabName(TongtaiTabs.consumer), equals('Consumer'));
-      expect(getTabName(TongtaiTabs.more), equals('More'));
+      expect(getTabName(TongtaiTabs.opportunity), equals('Opportunity'));
 
       // Verify tab colors
       final producerColor = getTabColor(TongtaiTabs.producer);
@@ -184,6 +188,13 @@ void main() {
 
       final consumerColor = getTabColor(TongtaiTabs.consumer);
       expect(consumerColor, equals(TongtaiDesignTokens.consumerBlue));
+
+      // WTM-192: Opportunity took the fifth slot and carries its own colour —
+      // a tab with the neutral grey reads as a leftover, not a capability.
+      expect(
+        getTabColor(TongtaiTabs.opportunity),
+        equals(TongtaiDesignTokens.copilotViolet),
+      );
     });
 
     test('Tab indices are correctly defined', () {
@@ -192,7 +203,10 @@ void main() {
       expect(TongtaiTabs.producer, equals(1));
       expect(TongtaiTabs.inventory, equals(2));
       expect(TongtaiTabs.consumer, equals(3));
-      expect(TongtaiTabs.more, equals(4));
+      // WTM-192: slot 4 is Opportunity now. The index is **reused**, so a
+      // seller with tab 4 persisted lands on a real tab instead of an
+      // out-of-range index.
+      expect(TongtaiTabs.opportunity, equals(4));
     });
   });
 }

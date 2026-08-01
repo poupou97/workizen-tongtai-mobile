@@ -218,7 +218,10 @@ class TongtaiMoreScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
+      // Stable test ID on the scroller so `tapByKey` can reach rows below the
+      // fold without the silent tap-miss (TESTING-BIBLE P-21).
       body: SingleChildScrollView(
+        key: const Key('more-scroll'),
         child: Column(
           children: [
             // App settings section
@@ -381,10 +384,18 @@ class TongtaiMoreScreen extends ConsumerWidget {
               title: context.l10n.moreSupportSection,
               items: [
                 _SettingsItem(
+                  key: const Key('more-replay-tutorial'),
                   icon: Icons.school_outlined,
                   label: context.l10n.moreReplayTutorial,
-                  onTap: () =>
-                      ref.read(tongtaiOnboardingProvider.notifier).reset(),
+                  // Close More first (WTM-192). It used to be a tab, so
+                  // resetting swapped the shell's content underneath. Now it is
+                  // a pushed route: without popping, the tutorial replays
+                  // **behind** this screen and the seller sees nothing happen.
+                  onTap: () {
+                    final navigator = Navigator.of(context);
+                    ref.read(tongtaiOnboardingProvider.notifier).reset();
+                    if (navigator.canPop()) navigator.pop();
+                  },
                 ),
                 _SettingsItem(
                   icon: Icons.help_outline,

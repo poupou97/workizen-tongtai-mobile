@@ -49,7 +49,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | `tongtai_goals_screen` | goal repo + orders | `ScreenDataController` + guarded upsert | |
 | `tongtai_finance_screen` | financeRepository | `ScreenDataController` + guarded add | |
 | `tongtai_timeline_screen` | 4 repo (derived projection) | `ScreenDataController` | |
-| `tongtai_opportunity_feed_screen` | generated opportunities **+ phản ứng đã lưu** | `ScreenDataController` | WTM-190: lưu/gạt bỏ sống sót qua lần đóng app |
+| `tongtai_opportunity_feed_screen` | generated opportunities **+ phản ứng đã lưu** | `ScreenDataController` | WTM-190: lưu/gạt bỏ sống sót qua lần đóng app. **WTM-192: là TAB thứ 5** (Founder chọn phương án B) — Home/Reports **chuyển tab** chứ không push bản sao |
 | `tongtai_forecast_screen` | RevenueCapabilityContext + Rule Twin | `TongtaiAsyncScreenData` | `insufficient` ≠ `failed` ≠ `empty` |
 | `tongtai_customer_risk_screen` | CustomerCapabilityContext + Rule Twin + customer repo | `TongtaiAsyncScreenData` | khách rỗng = **empty**, không phải từ chối |
 | `tongtai_export_screen` | 3 repo + history store | `ScreenDataController` + guarded export | sửa `try/finally` **không có catch** |

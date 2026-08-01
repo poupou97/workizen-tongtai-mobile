@@ -9,6 +9,7 @@ import '../../core/tongtai_formatters.dart';
 import '../../providers/tongtai_consumer_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_more_action.dart';
 import 'tongtai_customer_list_screen.dart';
 
 /// Consumer/Customer Intelligence tab for Tổng Tài (WTM-26).
@@ -86,6 +87,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        actions: const [TongtaiMoreAction()],
       ),
       body: ListenableBuilder(
         listenable: _data,

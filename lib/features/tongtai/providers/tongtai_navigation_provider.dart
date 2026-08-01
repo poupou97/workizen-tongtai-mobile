@@ -24,7 +24,7 @@ class TongtaiSelectedTabNotifier extends Notifier<int> {
   /// Select a tab by index and persist the selection
   Future<void> select(int tabIndex) async {
     assert(
-      tabIndex >= TongtaiTabs.home && tabIndex <= TongtaiTabs.more,
+      tabIndex >= TongtaiTabs.home && tabIndex <= TongtaiTabs.opportunity,
       'Invalid tab index: $tabIndex',
     );
     state = tabIndex;

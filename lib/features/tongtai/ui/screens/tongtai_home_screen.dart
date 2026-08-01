@@ -7,7 +7,9 @@ import '../../metrics/business_health.dart';
 import '../../metrics/business_metrics.dart';
 import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_navigation_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_more_action.dart';
 import '../../opportunity/opportunity.dart';
 import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
@@ -19,7 +21,6 @@ import 'tongtai_customer_list_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_journey_screen.dart';
 import 'tongtai_inventory_screen.dart';
-import 'tongtai_opportunity_feed_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_unified_search_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -230,6 +231,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             icon: const Icon(Icons.chat_bubble_outline),
             onPressed: () => _openChat(context),
           ),
+          const TongtaiMoreAction(),
         ],
       ),
       body: ListenableBuilder(
@@ -418,8 +420,13 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             title: context.l10n.sectionTopOpportunities,
             actionKey: const Key('home-open-opportunities'),
             actionLabel: context.l10n.actionViewAll,
-            onAction: () =>
-                _push(context, const TongtaiOpportunityFeedScreen()),
+            // WTM-192: **switch to the tab**, don't push a copy. Opportunity is
+            // a tab now, and pushing would give the seller two instances of the
+            // same screen with independent filter/sort state — the parallel
+            // state One Data Path (ADR-TON-015) exists to prevent.
+            onAction: () => ref
+                .read(tongtaiSelectedTabProvider.notifier)
+                .select(TongtaiTabs.opportunity),
           ),
           const SizedBox(height: 12),
           if (topOpportunities.isEmpty)

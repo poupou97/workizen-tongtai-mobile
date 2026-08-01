@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/core/prefs.dart';
+import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
@@ -17,6 +18,8 @@ import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_search_provider.dart';
 import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
+import 'package:tongtai/features/tongtai/ui/widgets/tongtai_more_action.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/tongtai_app_shell.dart';
@@ -91,8 +94,17 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> tapNav(WidgetTester tester, String label) async {
-    await tester.tap(find.text(label).last);
+  /// Selects a tab by **index**, not by its translated label (WTM-192).
+  Future<void> tapNav(WidgetTester tester, int tab) async {
+    await tester.tap(find.byKey(Key('nav-tab-$tab')));
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens More from whatever tab is showing. It left the bottom bar in
+  /// WTM-192 and now lives in every screen's AppBar; this suite exists to prove
+  /// that move cost the seller nothing.
+  Future<void> openMore(WidgetTester tester) async {
+    await tester.tap(find.byKey(TongtaiMoreAction.actionKey));
     await tester.pumpAndSettle();
   }
 
@@ -101,17 +113,28 @@ void main() {
   ) async {
     await pumpShell(tester);
 
-    // Tab bar itself (EN test locale).
-    for (final label in ['Home', 'Producer', 'Inventory', 'Consumer', 'More']) {
-      expect(find.text(label), findsWidgets, reason: 'nav tab $label');
+    // Every tab is present, found by key so the assertion survives
+    // translation (WTM-192 — the labels are localized now).
+    for (var tab = TongtaiTabs.home; tab <= TongtaiTabs.opportunity; tab++) {
+      expect(
+        find.byKey(Key('nav-tab-$tab')),
+        findsOneWidget,
+        reason: 'tab $tab',
+      );
     }
 
     // Switching tabs actually swaps the visible screen.
-    await tapNav(tester, 'More');
+    await tapNav(tester, TongtaiTabs.opportunity);
+    expect(find.byType(TongtaiOpportunityFeedScreen), findsOneWidget);
+
+    // …and More is still one tap away, from the AppBar.
+    await openMore(tester);
     expect(find.byType(TongtaiMoreScreen), findsOneWidget);
     expect(find.byKey(const Key('more-demo-mode')), findsOneWidget);
 
-    await tapNav(tester, 'Home');
+    Navigator.of(tester.element(find.byType(TongtaiMoreScreen))).pop();
+    await tester.pumpAndSettle();
+    await tapNav(tester, TongtaiTabs.home);
     expect(find.byType(TongtaiHomeScreen), findsOneWidget);
   });
 
@@ -147,7 +170,7 @@ void main() {
 
     // Empty business.
     await pumpShell(tester);
-    await tapNav(tester, 'More');
+    await openMore(tester);
     await expectMoreEntries(tester);
 
     // Seeded business — same entries, plus remove-samples appears.
@@ -155,7 +178,7 @@ void main() {
     await tester.pumpWidget(const SizedBox(key: Key('reset')));
     await tester.pumpWidget(await shell());
     await tester.pumpAndSettle();
-    await tapNav(tester, 'More');
+    await openMore(tester);
     await expectMoreEntries(tester);
     final remove = find.byKey(const Key('more-remove-sample'));
     await tester.scrollUntilVisible(
