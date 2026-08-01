@@ -65,12 +65,12 @@ không làm CI đỏ.
 
 | Capability | Domain | Data | SSoT | **DTV** | IA | UI | AI | Test |
 |---|---|---|---|---|---|---|---|---|
-| **Business Journey** | ✅ | ✅ | ✅ | ⚠️ contained | ✅ | ✅ | ✅ | ✅ |
+| **Business Journey** | ✅ | ✅ | ✅ | ✅ v13 | ✅ | ✅ | ✅ | ✅ |
 | **Opportunity** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Finance** | ✅ | ✅ | ✅ | ✅ | ❌ WTM-206 | ✅ | ✅ | ✅ |
-| **Consumer** | ✅ | ✅ | ✅ | ⚠️ contained | ✅ | ✅ | ✅ | ✅ |
+| **Finance** | ✅ | ✅ | ✅ | ✅ | ✅ WTM-206 | ✅ | ✅ | ✅ |
+| **Consumer** | ✅ | ✅ | ✅ | ✅ v13* | ✅ | ✅ | ✅ | ✅ |
 | **Reports** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Inventory** | ✅ | ✅ | ⚠️ | ⚠️ contained | ✅ | ✅ | ✅ | ✅ |
+| **Inventory** | ✅ | ✅ | ⚠️ | ✅ v13 | ✅ | ✅ | ✅ | ✅ |
 | **Producer** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 | **AI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Settings / More** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ |

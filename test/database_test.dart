@@ -52,7 +52,10 @@ void main() {
     //                pointed at channels_table, a dead v1 table nothing ever
     //                wrote, so every real channel code failed the constraint.
     //                channels_table dropped (WTM-190 precedent).
-    expect(db.schemaVersion, 12);
+    // v13 (WTM-212): DTV eliminated — mọi cột dẫn xuất chết bị xoá trong một
+    //                lần quét; an toàn cho mọi .ttbk vì codec mã hoá domain
+    //                object, không mã hoá cột thô.
+    expect(db.schemaVersion, 13);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

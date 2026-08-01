@@ -4,7 +4,7 @@
 > *"Derived Data không được trở thành Single Source of Truth. Single Source of
 > Truth phải luôn là dữ liệu gốc."*
 
-**Cập nhật:** 2026-08-01 · WTM-202
+**Cập nhật:** 2026-08-01 (đêm) · WTM-212 — **DTV eliminated**: schema v13 xoá mọi cột dẫn xuất chết; dòng ghi sống cuối (`progressPercent`) đã dừng; counter customers reclassify **justified** (nằm trong `.ttbk` qua `encodeCustomer` — tiêu chí #3). ⚠️ Sửa một nhận định của audit: rationale "giữ cột vì backup" chỉ đúng cho customers — codec mã hoá **domain object**, không mã hoá cột thô, nên cột dẫn xuất của journeys/products chưa bao giờ nằm trong `.ttbk` và xoá được an toàn cho mọi file cũ.
 
 ---
 

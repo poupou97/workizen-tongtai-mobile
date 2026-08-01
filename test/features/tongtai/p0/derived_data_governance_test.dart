@@ -28,34 +28,33 @@ void main() {
   ///
   /// Listed here rather than in someone's memory, because the whole failure
   /// mode is *nobody remembered this was derived*.
+  // WTM-212: churnRisk · avgOrderValue · lifetimeValue · progressPercent ·
+  // completedSteps · totalSteps · spent · profitPerUnit · currentPrice ·
+  // stockByWarehouse were DROPPED in schema v13 — the evidence this suite's
+  // own rule demands for removing an entry: the columns no longer exist, so
+  // there is nothing left to read. What remains here is derived data that is
+  // still stored for a reason and must still never be read for display.
   const derivedColumns = <String, String>{
-    // customers_table
-    'churnRisk':
-        'customerLifecycleStage() owns churn risk, judged against the '
-        'customer\'s own buying rhythm (WTM-200b)',
-    'avgOrderValue':
-        'totalSpent / orderCount — derived from two derived things',
-    'lifetimeValue': 'CustomerRfm.monetary owns lifetime spend',
-    // journeys_table (stores BusinessGoal)
-    'progressPercent':
-        'deriveGoalsProgress owns goal progress — this is achievedAmount '
-        'under another name (WTM-200a)',
-    'completedSteps': 'counted from the JourneyNode tree (ADR-TON-021)',
     // NOT `revenueImpact`: despite the name it stores `BusinessGoal
     // .targetAmount` (`business_goal_repository` line 102), which the seller
     // sets. **Source data wearing a derived-sounding name** — the second such
     // trap in this schema after `totalStock`, which is really `quantity`.
     // Judge by what the repository does, never by the column name.
-    // products_table
-    'profitPerUnit': 'listPrice - costPerUnit',
     // orders_table — written for a future SQL aggregation, never read. The
     // domain rebuilds every order from `items`, and `CustomerOrder.totalAmount`
     // is a getter over them (WTM-203). Dormant while nobody reads it.
     'totalQuantity': 'summed from the order items, which are the real source',
-    // products_table — nothing writes it, and Search used to read
-    // `currentPrice ?? listPrice`, so the fallback always won and the two
-    // agreed by accident (WTM-203).
-    'currentPrice': 'nothing writes it; listPrice is the price the app stores',
+    // customers_table — storage for the Customer domain fields, carried by
+    // `.ttbk` (encodeCustomer), which is the audit's criterion #3: a
+    // legitimate reason to persist. Display must still derive at read time
+    // (deriveCustomerCounters, WTM-201) — reading these for UI re-creates the
+    // "0 đơn · ₫0" defect.
+    'orderCount':
+        'CustomerRfmService owns the count; the column exists for the '
+        'backup contract, display derives at read (WTM-201)',
+    'totalSpent':
+        'CustomerRfm.monetary owns lifetime spend; column kept for the '
+        'backup contract only',
   };
 
   /// Where a derived column may legitimately appear.
@@ -64,7 +63,14 @@ void main() {
   /// - the generated Drift code mirrors the table;
   /// - a repository may **write** one to satisfy the backup contract, but the
   ///   read path must not feed it into the domain.
-  const allowedDirs = ['lib/database/'];
+  const allowedDirs = [
+    'lib/database/',
+    // The storage boundary for the customer counters: the repository maps
+    // column ↔ domain field, and the domain field is what `.ttbk` carries.
+    // The rule targets UI/business-logic reads — display goes through
+    // deriveCustomerCounters (WTM-201), and the SSoT suite proves it.
+    'lib/features/tongtai/consumer/customer_repository.dart',
+  ];
 
   Iterable<File> dartFilesUnder(String dir) => Directory(dir)
       .listSync(recursive: true)
@@ -111,10 +117,10 @@ void main() {
     expect(derivedColumns, isNotEmpty);
     expect(
       derivedColumns.keys,
-      containsAll(['churnRisk', 'progressPercent', 'currentPrice']),
+      containsAll(['orderCount', 'totalSpent']),
       reason:
-          'churnRisk and progressPercent are the two that already caused real '
-          'defects — removing them from this list needs a very good reason',
+          'the customer counters already caused WTM-201 — they stay listed '
+          'as long as the columns exist for the backup contract',
     );
   });
 
