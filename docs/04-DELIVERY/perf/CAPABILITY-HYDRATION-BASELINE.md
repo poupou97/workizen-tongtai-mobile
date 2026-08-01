@@ -63,6 +63,39 @@ giảm số lần đọc sẽ chạm được nhiều nhất ~20% của vấn đ
 chọn hướng thay Founder — hướng 4 (Drift query optimization) vẫn có thể thắng
 nếu nó khiến mỗi lần đọc **rẻ đi** thay vì **ít lần đi**.
 
+## Đã đo trên THIẾT BỊ — 2026-08-01 (Nokia 6.1, bản release)
+
+Câu hỏi treo ở phần dưới ("chưa có số trên thiết bị") nay đã có, ít nhất cho
+mốc 12 tháng. Máy: **Nokia 6.1** (Android 10, Snapdragon 630) — máy tầm thấp,
+gần với người bán mục tiêu hơn là máy đầu bảng.
+
+| | DB rỗng | **12 tháng** (49 khách · 524 đơn · 538 thu chi) |
+|---|---|---|
+| `db-open` | 290ms | 290ms |
+| `inventory-data` | 315ms | 380ms |
+| `consumer-data` | 320ms | 385ms |
+| `producer-data` | 325ms | 473ms |
+| **`home-data`** | **330ms** | **695ms** |
+| **`first-frame`** | **430ms** | **828ms** |
+| tổng (Android tự báo) | 778ms | **1.348ms** |
+
+**Hydration** (từ `db-open` tới `home-data`) đi từ **~40ms** lên **~405ms** khi
+doanh nghiệp có một năm dữ liệu. Tổng cold start tăng **73%**.
+
+Hai điều rút ra:
+
+1. **Kết luận của WTM-166 vẫn đúng:** `home-data` (695ms) vẫn **trước**
+   `first-frame` (828ms), nên người dùng vẫn không nhìn thấy trạng thái loading
+   của Home — kể cả trên máy yếu với một năm dữ liệu.
+2. **Nhưng hydration đã chiếm gần một nửa** thời gian trước khung hình đầu
+   (405/828ms), và nó **lớn theo dữ liệu**. Đây là con số neo cho Epic WTM-167:
+   không còn phải nói "3.0× trên máy tính", mà nói được "405ms trên máy thật của
+   người bán, ở một năm buôn bán".
+
+**Vẫn chưa đo:** 24 và 60 tháng **trên thiết bị** — giao diện chỉ có nút nạp 12
+tháng, nên hai mốc kia cần một đường seed riêng. **Không nhân tỉ lệ host lên để
+suy ra** (Testing Bible P-16).
+
 ## Điều chưa đo — và không được đoán
 
 Chưa có số **trên thiết bị** ở 24 và 60 tháng. Baseline host cho thấy hydration
