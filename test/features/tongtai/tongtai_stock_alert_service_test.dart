@@ -4,8 +4,8 @@ import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dar
 import 'package:tongtai/features/tongtai/inventory/stock_alert_service.dart';
 
 /// Unit tests for the WTM-70 [StockAlertService] engine: which products alert,
-/// the counts, the most-urgent-first ordering, the minimum-threshold floor, and
-/// the empty case.
+/// the counts, the most-urgent-first ordering, and the empty case. WTM-213:
+/// the alert set is defined by [Product.stockStatus] — one owner, no floor.
 void main() {
   Product product({
     required String id,
@@ -87,26 +87,26 @@ void main() {
     ]);
   });
 
-  test(
-    'the minimumThreshold floor pulls extra products into the alert set',
-    () {
-      final products = [
-        product(id: 'a', quantity: 8, reorderLevel: 5), // healthy at floor 0
-        product(id: 'b', quantity: 30, reorderLevel: 5), // healthy at floor 0
-      ];
-      expect(StockAlertService(products).hasAlerts, isFalse);
+  test('the alert set is exactly the products whose badge is not in-stock '
+      '(WTM-213: one owner, no catalog floor)', () {
+    // The `minimumThreshold` floor that used to be tested here was a second
+    // rule for a concept owned by `Product.stockStatus`: with any floor > 0
+    // the product list said "còn hàng" while this engine said "sắp hết".
+    // Nothing in production ever set it. Now the engine reads the status.
+    final products = [
+      product(id: 'a', quantity: 8, reorderLevel: 5), // healthy
+      product(id: 'b', quantity: 4, reorderLevel: 5), // low
+      product(id: 'c', quantity: 0, reorderLevel: 5), // out
+    ];
+    final service = StockAlertService(products);
 
-      final raised = StockAlertService(products, minimumThreshold: 10);
-      expect(raised.lowStockCount, 1); // only 'a' (qty 8) falls under floor 10
-      expect(raised.alerts.single.product.id, 'a');
-      expect(raised.alerts.single.threshold, 10);
-    },
-  );
-
-  test('a negative minimumThreshold is rejected by assertion', () {
     expect(
-      () => StockAlertService(const [], minimumThreshold: -5),
-      throwsA(isA<AssertionError>()),
+      service.alerts.map((a) => a.product.id).toSet(),
+      products
+          .where((p) => p.stockStatus != StockStatus.inStock)
+          .map((p) => p.id)
+          .toSet(),
+      reason: 'Inventory badge and Stock Alerts must tell one truth',
     );
   });
 

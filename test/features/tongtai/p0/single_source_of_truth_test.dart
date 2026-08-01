@@ -3,6 +3,8 @@ import 'package:tongtai/features/tongtai/analytics/customer_rfm.dart';
 import 'package:tongtai/features/tongtai/capability/customer_capability.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/inventory/product.dart';
+import 'package:tongtai/features/tongtai/inventory/stock_alert_service.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal.dart';
 import 'package:tongtai/features/tongtai/journey/journey_progress.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_rule_engine.dart';
@@ -325,6 +327,43 @@ void main() {
 
       expect(derived.orderCount, 1);
       expect(derived.totalSpent, 400000);
+    });
+  });
+
+  group('"sắp hết hàng" has one owner (WTM-213)', () {
+    // Product.stockStatus colors the Inventory list badge; StockAlertService
+    // fills the alert banner + Stock Alerts screen. Until WTM-213 the service
+    // accepted a `minimumThreshold` catalog floor — a second rule that, at any
+    // value > 0, made the two surfaces disagree about the same shelf. The
+    // engine now derives FROM stockStatus; this sweep pins the agreement.
+    Product product(int quantity, int reorderLevel) => Product(
+      id: 'p-$quantity-$reorderLevel',
+      sku: 'SKU',
+      name: 'SP',
+      category: 'Home',
+      quantity: quantity,
+      pricePerUnit: 1000,
+      reorderLevel: reorderLevel,
+      updatedAt: DateTime(2026, 1, 1),
+    );
+
+    test('badge and alert set agree across the quantity × threshold plane', () {
+      for (var reorder = 0; reorder <= 10; reorder += 5) {
+        for (var qty = 0; qty <= 12; qty++) {
+          final p = product(qty, reorder);
+          final alerted = StockAlertService([
+            p,
+          ]).alerts.map((a) => a.product.id);
+
+          expect(
+            alerted.contains(p.id),
+            p.stockStatus != StockStatus.inStock,
+            reason:
+                'qty=$qty reorder=$reorder: the list badge and the alerts '
+                'screen describe the same shelf differently',
+          );
+        }
+      }
     });
   });
 }

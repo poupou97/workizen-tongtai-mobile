@@ -30,7 +30,6 @@ class TongtaiStockAlertsScreen extends StatelessWidget {
     super.key,
     required this.catalog,
     this.imageSource,
-    this.minimumThreshold = 0,
   });
 
   /// The shared catalog whose products are checked against their thresholds. Not
@@ -39,10 +38,6 @@ class TongtaiStockAlertsScreen extends StatelessWidget {
 
   /// Image source handed to the Add/Edit form; defaults to the real picker.
   final ProductImageSource? imageSource;
-
-  /// Catalog-wide low-stock threshold floor forwarded to [StockAlertService]
-  /// (WTM-70). Default 0 = per-product thresholds only.
-  final int minimumThreshold;
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +53,7 @@ class TongtaiStockAlertsScreen extends StatelessWidget {
         child: ListenableBuilder(
           listenable: catalog,
           builder: (context, _) {
-            final service = StockAlertService(
-              catalog.products,
-              minimumThreshold: minimumThreshold,
-            );
+            final service = StockAlertService(catalog.products);
             if (!service.hasAlerts) return const _HealthyState();
             final alerts = service.alerts;
             return Column(

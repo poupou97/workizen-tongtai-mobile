@@ -3,8 +3,12 @@ import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/stock_alert.dart';
 
 /// Unit tests for the WTM-70 [StockAlert] domain model: level derivation from
-/// quantity vs. threshold, the catalog-wide minimum-threshold floor, shortfall
-/// math, labels and equality.
+/// quantity vs. threshold, shortfall math, labels and equality.
+///
+/// WTM-213 removed the `minimumThreshold` catalog floor — a second rule for a
+/// concept whose one owner is [Product.stockStatus] (P-27). The floor tests
+/// were replaced by the agreement group at the bottom: the alert now IS the
+/// status, so they cannot drift.
 void main() {
   Product product({
     String id = 'p1',
@@ -63,37 +67,39 @@ void main() {
     });
   });
 
-  group('minimumThreshold floor (WTM-70 set-threshold)', () {
-    test(
-      'raising the floor turns a healthy product into a low-stock alert',
-      () {
-        final p = product(quantity: 8, reorderLevel: 5);
-        expect(StockAlert.forProduct(p), isNull);
+  group('one owner: the alert agrees with Product.stockStatus (WTM-213)', () {
+    test('an alert exists exactly when the badge is not in-stock', () {
+      // Sweep quantity × reorderLevel: if the list badge and the alert set
+      // ever disagree, two screens describe one shelf with two truths — the
+      // WTM-196/200/201/205 defect class, caught here at the source.
+      for (var reorder = 0; reorder <= 6; reorder += 3) {
+        for (var qty = 0; qty <= 8; qty++) {
+          final p = product(quantity: qty, reorderLevel: reorder);
+          final alert = StockAlert.forProduct(p);
 
-        final alert = StockAlert.forProduct(p, minimumThreshold: 10);
-        expect(alert, isNotNull);
-        expect(alert!.level, StockAlertLevel.lowStock);
-        // Effective threshold is the larger of reorderLevel and the floor.
-        expect(alert.threshold, 10);
-      },
-    );
+          expect(
+            alert != null,
+            p.stockStatus != StockStatus.inStock,
+            reason: 'qty=$qty reorder=$reorder: badge and alert disagree',
+          );
+          if (alert != null) {
+            expect(
+              alert.level == StockAlertLevel.outOfStock,
+              p.stockStatus == StockStatus.outOfStock,
+              reason: 'qty=$qty reorder=$reorder: urgency does not match',
+            );
+          }
+        }
+      }
+    });
 
-    test(
-      'the per-product reorderLevel wins when it is higher than the floor',
-      () {
-        final alert = StockAlert.forProduct(
-          product(quantity: 40, reorderLevel: 50),
-          minimumThreshold: 10,
-        );
-        expect(alert!.threshold, 50);
-      },
-    );
-
-    test('a negative floor is rejected by assertion', () {
-      expect(
-        () => StockAlert.forProduct(product(), minimumThreshold: -1),
-        throwsA(isA<AssertionError>()),
+    test('the threshold shown is the product\'s own reorder level', () {
+      // No catalog floor exists any more — the "SL x / y" line on the alerts
+      // screen shows the number the seller typed on the product form.
+      final alert = StockAlert.forProduct(
+        product(quantity: 2, reorderLevel: 5),
       );
+      expect(alert!.threshold, 5);
     });
   });
 
