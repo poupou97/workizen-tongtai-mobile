@@ -56,7 +56,7 @@ Không thuộc ba nhóm trên ⇒ **vi phạm**.
 |---|---|---|
 | `id` · `customerId` · `orderNumber` · `orderDate` · `status` · `paymentStatus` · `items` | **Source** | `items` là gốc thật của đơn |
 | **`totalAmount`** | **Derived** | ⚠️ `CustomerOrder.totalAmount` là **getter tính từ `items`**. Cột được **ghi** nhưng khi đọc thì domain **dựng lại từ `items`** ⇒ hôm nay chưa lệch, nhưng là **bản sao ghi-một-chiều**: bất kỳ truy vấn SQL nào sắp xếp/lọc theo cột này sẽ đọc một sự thật thứ hai |
-| **`subtotal`** | **Derived** | ⚠️ tệ hơn: đang được ghi bằng **chính `totalAmount`** (dòng 121) — hai cột khác tên, cùng giá trị, không cột nào là subtotal thật |
+| `subtotal` | **Derived, đúng** | ✅ **Sửa lại đánh giá lần ba.** Ghi bằng `totalAmount` là **đúng hôm nay**: domain chưa có giảm giá và phí ship, nên tổng dòng hàng **chính là** tổng đơn. Nhận định đầu *"cột nói dối tên của nó"* là nặng tay. Nó chỉ sai vào ngày `discount`/`shippingCost` được nối vào domain — khi đó `subtotal` phải giữ là tổng dòng hàng còn `totalAmount` cộng thêm điều chỉnh |
 | **`totalQuantity`** | **Derived** | ⚠️ tổng `quantity` của `items` |
 | `discount` · `shippingCost` | **Source** | người bán nhập |
 
@@ -87,8 +87,13 @@ Không thuộc ba nhóm trên ⇒ **vi phạm**.
 - `revenueImpact` — nghe như tác động doanh thu tính ra được; thực ra lưu
   `BusinessGoal.targetAmount`, tức **mục tiêu người bán đặt**.
 
+- `subtotal` — nghe như một bản sao thừa của `totalAmount`; thực ra bằng nhau
+  **vì domain chưa có giảm giá/phí ship**, nên nó đúng, chỉ là chưa khác.
+
 **Bài học cho ai audit tiếp: schema này ra đời trước domain, nên tên cột không
-đáng tin. Phải đọc repository ghi/đọc gì.** Ghi lại chỗ sai thay vì lặng lẽ đổi
+đáng tin. Phải đọc repository ghi/đọc gì.** Và ba lần tôi đánh giá nặng tay đều
+theo cùng một hướng — vội gọi là vi phạm. Một audit hay dọa nạt cũng mất tin cậy
+như một audit bỏ sót. Ghi lại chỗ sai thay vì lặng lẽ đổi
 — một audit phân loại sai còn tệ hơn không có audit, vì nó sinh ra story sai và
 người sau sẽ tin nó.
 
@@ -107,12 +112,12 @@ Không có cột dẫn xuất. ✅
 
 | Mức | Số cột |
 |---|---|
-| ❌ Vi phạm rõ (dẫn xuất, không lý do) | **9** |
+| ❌ Vi phạm rõ (dẫn xuất, không lý do) | **8** |
 | ⚠️ Bản sao ghi-một-chiều (chưa lệch, sẽ lệch) | **3** |
 | ⚠️ **Cột chết mà một màn đang đọc** (`currentPrice`) | **1** |
 | ❌ Cột chết hoàn toàn (`lifetimeValue` · `stockByWarehouse` · `profitPerUnit`) | **3** |
 | ✅ Dẫn xuất **có** lý do (`domainSnapshot`) | 1 |
-| ✅ Bị nghi oan, hoá ra là Source (`totalStock` · `revenueImpact`) | **2** |
+| ✅ Bị nghi oan (`totalStock` · `revenueImpact` · `subtotal`) | **3** |
 
 **Không cột nào trong nhóm ❌ có benchmark hay lý do nghiệp vụ.** Chúng tồn tại
 vì schema được dựng trước khi các luật dẫn xuất ra đời, và không ai quay lại gỡ.
@@ -123,7 +128,7 @@ vì schema được dựng trước khi các luật dẫn xuất ra đời, và 
 |---|---|---|---|
 | 1 | Gỡ / vô hiệu hoá 6 cột dẫn xuất của `customers_table` — **`churnRisk` trước tiên**, vì nó là luật thứ hai đang chờ được đọc | Derived Truth Violation | **+100** |
 | 2 | 5 cột dẫn xuất của `journeys_table` (`progressPercent` là `achievedAmount` đổi tên) | Derived Truth Violation | **+100** |
-| 3 | `orders_table`: `subtotal` đang ghi bằng `totalAmount` — sửa hoặc gỡ | Derived Truth Violation | **+90** |
+| ~~3~~ | ~~`orders_table`: `subtotal`~~ — **không phải vi phạm**, xem trên | — | — |
 | 4 | `products_table`: `profitPerUnit` (chết) · `currentPrice` (chết nhưng search đọc) | Derived Truth Violation | **+80** |
 | 5 | Nối `costPerUnit` vào domain `Product` ⇒ mở khoá ROI thật + High Risk | P4 Data Model | **+50** |
 

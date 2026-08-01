@@ -48,6 +48,14 @@ void main() {
     // Judge by what the repository does, never by the column name.
     // products_table
     'profitPerUnit': 'listPrice - costPerUnit',
+    // orders_table — written for a future SQL aggregation, never read. The
+    // domain rebuilds every order from `items`, and `CustomerOrder.totalAmount`
+    // is a getter over them (WTM-203). Dormant while nobody reads it.
+    'totalQuantity': 'summed from the order items, which are the real source',
+    // products_table — nothing writes it, and Search used to read
+    // `currentPrice ?? listPrice`, so the fallback always won and the two
+    // agreed by accident (WTM-203).
+    'currentPrice': 'nothing writes it; listPrice is the price the app stores',
   };
 
   /// Where a derived column may legitimately appear.
@@ -103,7 +111,7 @@ void main() {
     expect(derivedColumns, isNotEmpty);
     expect(
       derivedColumns.keys,
-      containsAll(['churnRisk', 'progressPercent']),
+      containsAll(['churnRisk', 'progressPercent', 'currentPrice']),
       reason:
           'churnRisk and progressPercent are the two that already caused real '
           'defects — removing them from this list needs a very good reason',
