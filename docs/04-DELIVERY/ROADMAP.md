@@ -1,5 +1,27 @@
 > ⚠️ **HISTORICAL PLANNING SNAPSHOT (2026-07-13, Phase 1B)** — trạng thái thật xem `docs/00-START-HERE/CURRENT-STATUS.md` (SOURCE-OF-TRUTH rule).
 
+---
+
+## 📍 Đối chiếu thực tế — 2026-08-01
+
+Kế hoạch dưới đây **đã bị thực tế vượt qua**. Ghi lại để không ai đọc nhầm:
+
+| Kế hoạch nói | Thực tế 2026-08-01 |
+|---|---|
+| *Phase 1B — IN PROGRESS, Aug 1-28* | ✅ **XONG** — 144 doc, 19 ADR, 14 screen spec |
+| *Phase 1C — Go/No-Go, Aug 22-28* | ✅ **XONG** — Founder duyệt, đã chuyển sang thực thi |
+| *Phase 2 Build — Sep 1 → Oct 15* | ✅ **ĐÃ THỰC THI XONG** — 8/8 capability, **1418 test**, CI xanh, chạy được trên máy thật |
+| *Phase 3 — AI nâng cao, forecasting* | ✅ **PHẦN LỚN XONG** — AI tier G-3A→D (ADR-TON-013), dự báo doanh thu + rủi ro khách (ADR-TON-016), export/backup/restore |
+| *Phase 4 — tích hợp Shopee/1688* | ⏳ **CHƯA** — WTM-67, WTM-79 (chặn bởi API/đối tác bên ngoài) |
+
+**Nói ngắn gọn:** dự án đang ở **cuối Phase 3** chứ không phải giữa Phase 1B.
+Việc còn lại để phát hành không phải là code mà là **nội dung pháp lý** (địa chỉ
+liên hệ, điều khoản dịch vụ) và **ký iOS**.
+
+Backlog thật còn **10 issue** — xem `docs/06-GOVERNANCE/JIRA-BACKLOG-AUDIT-2026-08-01.md`.
+
+---
+
 # Tổng Tài — Product Roadmap (4-Phase)
 
 ## English
