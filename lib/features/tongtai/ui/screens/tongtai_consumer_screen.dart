@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/tongtai_orders_provider.dart';
+import '../../analytics/customer_rfm.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../consumer/customer.dart';
@@ -46,7 +48,15 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
     super.initState();
     _clock = widget.clock ?? DateTime.now;
     _data = ScreenDataController<List<Customer>>(
-      () => ref.read(customerRepositoryProvider).loadAll(),
+      // WTM-201: counters derived from real orders. Reading the stored
+      // `orderCount`/`totalSpent` showed "0 đơn · ₫0" for a customer who had
+      // just bought something — nothing writes those fields when an order is
+      // recorded, while RFM, Reports and the lifecycle ladder all count it.
+      () async => deriveCustomerCounters(
+        await ref.read(customerRepositoryProvider).loadAll(),
+        await ref.read(orderRepositoryProvider).loadAll(),
+        now: _clock(),
+      ),
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'consumer',
     )..load();

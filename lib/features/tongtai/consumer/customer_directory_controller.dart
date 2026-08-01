@@ -1,3 +1,5 @@
+import '../analytics/customer_rfm.dart';
+import '../orders/order_repository.dart';
 import 'package:flutter/foundation.dart';
 
 import 'customer.dart';
@@ -15,7 +17,23 @@ import 'customer_repository.dart';
 /// UI never knows the source — same pattern as `ProductCatalogController`
 /// (WTM-121).
 class CustomerDirectoryController extends ChangeNotifier {
-  CustomerDirectoryController(this._repository);
+  CustomerDirectoryController(this._repository, {this.orders, this.clock});
+
+  /// Where the counters come from (WTM-201).
+  ///
+  /// `Customer.orderCount`/`totalSpent`/`lastPurchaseDate` are stored fields
+  /// that **nothing updates when the seller records an order**, so a customer
+  /// who just bought something still read *"0 đơn · ₫0"* while RFM, Reports and
+  /// the lifecycle ladder all counted the order. Derived here — in the one
+  /// place every screen goes through — rather than in each screen, so the next
+  /// screen cannot forget.
+  ///
+  /// Nullable so existing call sites compile; `null` means the stored values are
+  /// shown as-is, which is only correct for fixtures that set them by hand.
+  final OrderRepository? orders;
+
+  /// Injectable clock for the derivation window.
+  final DateTime Function()? clock;
 
   /// Demo/preview directory (read-only sample data). Not persisted.
   factory CustomerDirectoryController.sample() =>
@@ -59,9 +77,18 @@ class CustomerDirectoryController extends ChangeNotifier {
   /// Loads the directory from the repository (call once when the screen mounts).
   Future<void> hydrate() async {
     final loaded = await _repository.loadAll();
+    final source = orders;
     _customers
       ..clear()
-      ..addAll(loaded);
+      ..addAll(
+        source == null
+            ? loaded
+            : deriveCustomerCounters(
+                loaded,
+                await source.loadAll(),
+                now: (clock ?? DateTime.now)(),
+              ),
+      );
     _hydrated = true;
     notifyListeners();
   }
