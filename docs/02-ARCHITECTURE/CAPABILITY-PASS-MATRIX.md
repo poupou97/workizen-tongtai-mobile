@@ -6,7 +6,7 @@
 > Backlog **không** ưu tiên theo Story ID, ngày tạo, sprint hay Jira Priority.
 > Mỗi vòng lặp tính lại điểm theo Capability Value.
 
-**Cập nhật lần cuối:** 2026-08-01 (đêm) · nhóm A concept-1 hoàn tất (WTM-209/210/211), schema v12
+**Cập nhật lần cuối:** 2026-08-01 (khuya) · WTM-212 DTV eliminated (v13) · WTM-213 hết ô ⚠️ · WTM-214 hết ô `?`
 
 ---
 
@@ -110,17 +110,30 @@ Phản ứng sống sót qua lần đóng app (WTM-190) · nối được vào h
 `Customer.orderCount`/`totalSpent`/`lastPurchaseDate` từng là **trường đã lưu**
 mà **không có gì cập nhật khi tạo đơn** — người bán ghi đơn xong khách vẫn hiện
 *"0 đơn · ₫0"*, KPI *"khách quay lại"* không nhúc nhích, trong khi RFM/Reports
-đếm đúng. Nay dẫn xuất bằng `deriveCustomerCounters` **trong
-`CustomerDirectoryController`** — một chỗ mọi màn đi qua, nên màn tiếp theo
-không thể quên. Trường đã lưu **không bị ghi đè**, giống `deriveGoalsProgress`.
+đếm đúng. Nay dẫn xuất bằng `deriveCustomerCounters` — màn Consumer và
+`CustomerDirectoryController` cùng gọi **một hàm**, cross-check chốt trong
+`p0/single_source_of_truth_test.dart`. Trường đã lưu **không bị ghi đè**,
+giống `deriveGoalsProgress`.
 
-`?` UI và AI: chưa audit.
+- ✅ UI (audit WTM-214): `ScreenDataController` seam (ADR-TON-017, screen
+  `'consumer'`) · L3 trong ma trận levels (WTM-26/75) · suite a11y + overflow
+  phủ `consumer` · suite hành vi riêng của bug gốc.
+- ✅ AI (audit WTM-214): `CustomerCapabilityContext` versioned (ADR-TON-016)
+  → `customer_risk_rule` trả `RuleTwinResult` + `business_alerts_rule`
+  (`customerRisk`) — Rule Twin authoritative, thang lifecycle có ngưỡng ghi
+  lý do bằng nhịp mua của chính khách.
 
-### Reports — ✅ Data/SSoT
+### Reports — ✅ hoàn thành
 
 Dùng chung `isBillableOrder` và cùng cách tính `totalAmount` với
-`BusinessMetrics` ⇒ không thể lệch định nghĩa "một lần bán". `?` IA và UI: chưa
-audit vị trí Reports trong IA sau khi 5 tab đã kín (WTM-192).
+`BusinessMetrics` ⇒ không thể lệch định nghĩa "một lần bán". Doanh thu theo
+kênh: đơn chưa ghi kênh nằm trong tổng, ngoài breakdown (WTM-209).
+
+- ✅ IA (audit WTM-214): sau khi 5 tab kín (WTM-192), Reports mở từ KPI header
+  Home (`home-open-reports`) — luật reachability chốt trong
+  `p0/nav_availability_test.dart` + widget test mở màn thật.
+- ✅ UI (audit WTM-214): L4 (WTM-95/96/97) · seam ADR-TON-017 · ~20 stable
+  `reports-*` IDs · suite a11y + overflow phủ `reports`.
 
 ### Inventory — ✅ hoàn thành (WTM-213 đóng mối nối cuối)
 
@@ -155,25 +168,23 @@ Rời thanh dưới ở WTM-192 nhưng **một chạm từ mọi tab**, có test
 
 ---
 
-## Backlog đã tính điểm (vòng hiện tại)
+## Backlog đã tính điểm (vòng hiện tại — sau WTM-214)
+
+Các mục vòng trước đã đóng hết: WTM-203 (DTV contained → **eliminated** ở
+WTM-212, schema v13) · WTM-197 (category canonical) · WTM-204 (`costPrice` nối
+domain, mở khoá ROI WTM-207) · WTM-198 (hành trình có bước tiền + công nợ
+WTM-211) · IA Finance (WTM-206) · audit ô `?` (WTM-214, bảng này).
 
 | Hạng | Việc | Loại | Điểm | Trạng thái |
 |---|---|---|---|---|
-| ~~1~~ | ~~**WTM-201** Consumer đọc counter đã lưu~~ | P1 SSoT | ~~+80~~ | ✅ **xong** |
-| 1 | **WTM-203** 11 cột dẫn xuất trong DB — `churnRisk` là **luật thứ hai đang chờ được đọc** | Derived Truth Violation | **+100** | ⏳ **tiếp theo** |
-| 2 | **WTM-197** category chi phí là chuỗi tự do | P1 (dữ liệu người bán + `.ttbk`) | **+80** | mở |
-| 3 | Audit 5 ô `?` còn lại | rủi ro chưa biết | **~+80** | mở |
-| 4 | **WTM-204** nối `costPerUnit` vào domain — mở khoá **4** năng lực đang bị chặn | P4 Data Model | **+50** | mở |
-| 4 | **WTM-198** Finance vào Business Journey | P2 logic | **+70** | mở |
-| 5 | IA của Reports/Finance sau khi 5 tab kín | P3 | **+60** | chưa có story |
+| 1 | **Producer Data** — danh bạ NCC là sample | P0 nhưng **Future Capability theo Founder** — *"Không cố xây AI bằng dữ liệu giả"* | (+100) treo | chờ nguồn dữ liệu thật |
+| 2 | Group B concept-1 (6 mục scope sản phẩm) | P5 UI lệch Concept | +40 | **chờ Founder framing** |
+| 3 | Group C concept-1 (cosmetic còn lại) | P8 polish | +10 | mở |
+| 4 | Business Context Builder | kiến trúc | — | PROPOSED, điều kiện *all P0 PASS* đã đạt — chờ Founder duyệt ADR |
 
-**Trạng thái sau vòng 2026-08-01:** mọi capability PASS hoặc ở trạng thái được
-chấp nhận có chủ đích (Producer Data = Future Capability theo Founder; DTV
-`contained` = đường đọc bị CI chặn, cột chờ phiên bản `.ttbk` mới). Việc còn
-lại trên bàn đều là P5↓ hoặc chờ quyết định sản phẩm — đúng điểm Directive
-nói: *không mở tính năng mới cho tới khi mọi capability P0 PASS*, và giờ chúng
-PASS.
-
-> ⚠️ Ô `?` không phải PASS. Sáu ô chưa audit là rủi ro chưa biết, và theo kinh
-> nghiệm hôm nay — ba lỗi lớn nhất đều nằm ở vùng "tưởng ổn" — chúng đáng được
-> audit trước khi thêm bất kỳ tính năng mới nào.
+**Trạng thái sau vòng 2026-08-01 (WTM-213/214):** bảng chính **hết ô `?` và
+hết ô ⚠️** — mọi ô hoặc ✅ có bằng chứng, hoặc ❌/— có chủ đích được Founder
+quyết (Producer Data, AI Producer). Theo thứ tự capability của Founder
+(Journey → Finance → Consumer → Inventory → Opportunity → Producer): 5/6 PASS,
+Producer là Future Capability. Việc còn lại trên bàn đều P5↓ hoặc chờ quyết
+định sản phẩm.
