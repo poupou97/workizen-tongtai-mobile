@@ -5,6 +5,8 @@ import '../inventory/product.dart';
 import '../journey/business_goal.dart';
 import '../journey/journey_progress.dart';
 import '../metrics/business_metrics.dart';
+import '../analytics/customer_rfm.dart';
+import '../capability/customer_capability.dart';
 import 'opportunity.dart';
 import 'opportunity_score.dart';
 
@@ -17,13 +19,7 @@ import 'opportunity_score.dart';
 /// opportunities, same ids (`gen-…`), so reactions can be keyed against them.
 /// **User Data First:** an empty business generates nothing. No AI, no network.
 class OpportunityRuleEngine {
-  const OpportunityRuleEngine({
-    this.lapsedCustomerDays = 30,
-    this.momentumWindowDays = 60,
-  });
-
-  /// A repeat customer counts as lapsed after this many days without an order.
-  final int lapsedCustomerDays;
+  const OpportunityRuleEngine({this.momentumWindowDays = 60});
 
   /// Trailing window for product/category momentum.
   final int momentumWindowDays;
@@ -131,22 +127,40 @@ class OpportunityRuleEngine {
 
   /// Repeat customers who have gone quiet → a win-back nudge. Impact = their
   /// average order value (one comeback order).
+  ///
+  /// **Who counts as "quiet" is not decided here** (WTM-200). This used to use a
+  /// flat 30 days, while `customerLifecycleStage()` judged silence against the
+  /// customer's **own** buying rhythm. Two screens then described one idea and
+  /// disagreed: a quarterly buyer silent 35 days read as *active* in Consumer
+  /// and as *win them back* here, while a weekly buyer silent 25 days — three
+  /// and a half of their own cycles — raised nothing at all.
+  ///
+  /// The flat rule was wrong at both ends, so it is gone rather than retuned.
   Iterable<Opportunity> _winBack(
     List<Customer> customers,
     List<CustomerOrder> billable,
     DateTime now,
     double baseline,
   ) sync* {
-    final cutoff = now.subtract(Duration(days: lapsedCustomerDays));
+    // One profile per customer, built by the same service Consumer uses.
+    final profiles = {
+      for (final p in CustomerRfmService.compute(customers, billable, now: now))
+        p.customerId: p,
+    };
     for (final c in customers) {
       final theirOrders = billable
           .where((o) => o.customerId == c.id)
           .toList(growable: false);
       if (theirOrders.length < 2) continue; // repeat customers only
-      final last = theirOrders
-          .map((o) => o.date)
-          .reduce((a, b) => a.isAfter(b) ? a : b);
-      if (last.isAfter(cutoff)) continue; // still active
+      final stage = customerLifecycleStage(
+        profiles[c.id] ?? CustomerRfm.noOrders(c.id),
+      );
+      // Only the two stages where a win-back is still worth the seller's time.
+      // `cooling` is one missed cycle — nudging there is noise.
+      if (stage != CustomerLifecycleStage.atRisk &&
+          stage != CustomerLifecycleStage.churned) {
+        continue;
+      }
       final spend = theirOrders.fold<double>(0, (s, o) => s + o.totalAmount);
       final aov = spend / theirOrders.length;
       yield Opportunity(
@@ -155,8 +169,8 @@ class OpportunityRuleEngine {
         title: 'Chăm sóc lại ${c.name}',
         description:
             '${c.name} đã mua ${theirOrders.length} đơn (AOV ${_vnd(aov)}) '
-            'nhưng im lặng hơn $lapsedCustomerDays ngày. Một tin nhắn kèm ưu '
-            'đãi quay lại thường rẻ hơn nhiều so với tìm khách mới.',
+            'nhưng đã im lặng lâu hơn nhịp mua thường thấy của họ. Một tin nhắn '
+            'kèm ưu đãi quay lại thường rẻ hơn nhiều so với tìm khách mới.',
         expectedImpact: aov,
         score: scoreOpportunity(
           impact: aov,

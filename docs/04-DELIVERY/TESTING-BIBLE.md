@@ -449,6 +449,31 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-27 · Hai bên cùng tự nhất quán vẫn nói hai sự thật — test từng bên **không bao giờ** thấy
+
+- **Root cause:** một khái niệm được tính ở hai nơi bằng hai luật. Mỗi nơi có
+  test riêng, mỗi nơi đều **đúng với chính nó**, và không ai hỏi câu duy nhất
+  quan trọng: *hai bên có nói cùng một điều không?*
+- **Regression:** ba lần trong một ngày.
+  · **WTM-196** doanh thu: Home đếm **đơn hàng**, Finance đếm **giao dịch nhập
+  tay** ⇒ người bán có 10 đơn mở Finance thấy **₫0**.
+  · **WTM-200a** tiến độ mục tiêu: Goals **tính lại từ đơn**, Home đọc
+  **`achievedAmount` đã lưu** ⇒ 60% và 40% cho cùng một mục tiêu cùng một ngày.
+  · **WTM-200b** "khách im lặng": Consumer xét theo **nhịp mua riêng** của khách,
+  Opportunity dùng **phẳng 30 ngày** ⇒ báo động giả với khách mua thưa và bỏ sót
+  khách mua dày.
+- **Test pattern:** một suite riêng **so hai bên với nhau**, không kiểm từng bên.
+  Xem `p0/single_source_of_truth_test.dart`. Với luật có tham số (nhịp mua),
+  quét **một dải** giá trị chứ đừng chọn hai ca đẹp — hai ca đẹp là cách bỏ sót
+  chỗ hai bên bắt đầu lệch.
+- **Prevention:** khi thêm một khái niệm nghiệp vụ, hỏi **ai sở hữu nó**. Nếu
+  câu trả lời là *"chỗ nào cần thì tự tính"*, đó là hai sự thật đang được tạo ra.
+  Một hằng số cấu hình được (`lapsedCustomerDays = 30`) cho một khái niệm **đã
+  có chủ** là dấu hiệu sớm nhất — nó trông như một tuỳ chọn, thực chất là một
+  luật thứ hai.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:
