@@ -51,7 +51,8 @@ void main() {
       expect(
         delivery.calls,
         0,
-        reason: 'an empty report wastes the seller\'s send and tells us nothing',
+        reason:
+            'an empty report wastes the seller\'s send and tells us nothing',
       );
     });
 
