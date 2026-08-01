@@ -119,8 +119,11 @@ class TongtaiProductResult {
     name: row.name,
     description: row.description,
     category: row.category,
-    // Prefer the live selling price when set, else the list price.
-    price: row.currentPrice ?? row.listPrice,
+    // WTM-203: reads `listPrice` only. It used to prefer `currentPrice`, a
+    // column **nothing writes** — so today the fallback always won and the two
+    // agreed by accident. The day anything set `currentPrice`, Search would
+    // show one price and Inventory another, for the same product.
+    price: row.listPrice,
     stock: row.totalStock,
     // Products carry no rating/reviews column; the WTM-74 ranker scores a
     // null rating as neutral, so products rank on text/recency/personalization.

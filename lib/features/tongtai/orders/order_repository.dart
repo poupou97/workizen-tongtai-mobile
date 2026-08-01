@@ -46,11 +46,30 @@ abstract class OrderRepository {
 
 /// Real, persistent sales orders for the local business (WTM-125).
 ///
-/// Maps `CustomerOrder` onto the existing `orders_table`. Structured columns are
-/// the source of truth for the fields Reports/Home aggregate without decoding
-/// JSON — `orderDate`, `status`, `totalQuantity`, `subtotal`, `totalAmount` —
-/// while the full line detail rides the tolerant `items` JSON array. Revenue is
-/// owned here, not recomputed by downstream consumers.
+/// Maps `CustomerOrder` onto the existing `orders_table`. The **line items are
+/// the source of truth**: `items` carries them as JSON, and `CustomerOrder
+/// .totalAmount` is a getter that sums them on every read.
+///
+/// ⚠️ **Corrected 2026-08-01 (WTM-203).** This comment used to claim the
+/// structured columns were *"the source of truth for the fields Reports/Home
+/// aggregate"* and that *"revenue is owned here, not recomputed by downstream
+/// consumers"*. Neither was true: the read path rebuilds every order from
+/// `items`, and `BusinessMetrics` sums the getter. `totalQuantity` and
+/// `totalAmount` are **written and never read** — a denormalisation kept for a
+/// future SQL aggregation that has not arrived.
+///
+/// They stay written, and `p0/derived_data_governance_test.dart` fails if
+/// anything starts reading them: a duplicate nobody reads is dormant, a
+/// duplicate somebody reads is a second truth (WTM-196/200/201).
+///
+/// `subtotal` is written as `totalAmount`, and that is **correct today**: the
+/// domain has no discounts and no shipping, so the sum of the lines *is* the
+/// total. The audit's first reading — *"a column lying about its name"* — was
+/// too harsh.
+///
+/// It becomes wrong the moment `discount`/`shippingCost` are wired into the
+/// domain: then `subtotal` must stay the sum of the lines while `totalAmount`
+/// adds the adjustments. Whoever wires them owns this line.
 ///
 /// **User Data First** (Founder): nothing is seeded — a new user has no orders.
 /// Rows are scoped to [LocalWorkspace]'s business.
