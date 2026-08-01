@@ -79,3 +79,37 @@ Capability chỉ **DONE** khi đủ tầng: **UI → Repository → Persistence 
 Report/Dashboard → BusinessContext → AI-Ready** — và **không downstream nào còn
 xài Sample**. Không đánh Done nếu Reports/Home… vẫn đọc dữ liệu mẫu. (Chi tiết:
 ADR-TON-010.)
+
+## PROPOSED (Founder, 2026-08-01) — Business Context Builder
+
+**Nguồn:** Founder gửi giữa phiên audit SSoT/Derived Data. **Không phải việc
+của sprint này** — ghi lại để một ADR tương lai giải quyết.
+
+**Ý tưởng.** Hôm nay mỗi chỉ số nghiệp vụ có đúng một nguồn (Revenue, Profit,
+Cashflow, Customer…). Bước tiếp theo: một **Business Context Builder** — trách
+nhiệm **không phải tính lại** chỉ số nào, mà **gom đầu ra của mọi capability**
+thành một ảnh chụp doanh nghiệp duy nhất: Finance · Inventory · Customer ·
+Opportunity · Journey progress · Goals · đầu ra AI capability · tín hiệu thị
+trường ngoài · supplier intelligence · Documents/Memory. **AI Copilot suy luận
+từ ảnh chụp này** thay vì tự truy vấn từng module — SSoT còn nguyên, AI có
+toàn cảnh SME.
+
+**Căng thẳng phải giải khi viết ADR** (ghi trước để người viết không né):
+
+1. **ADR-TON-016 cấm God Object** — BusinessContext hiện tại *chỉ giữ summary
+   nhẹ*, phân tích sâu là Capability Context tải on-demand. "Gom tất cả" và
+   "cấm God Object" chỉ sống chung được nếu Builder **gom summary + tham chiếu**,
+   không gom dữ liệu thô — ADR sẽ phải vẽ ranh giới đó bằng kiểu, không bằng
+   lời hứa.
+2. **Builder không được thành nơi tính thứ hai.** Toàn bộ chuỗi
+   WTM-196→205 là bốn lần một khái niệm bị tính hai chỗ. Builder chỉ được
+   **gọi** các owner (FinanceService, CustomerRfmService, RuleTwin…), và
+   governance suite hiện có (P-27, derived-data) phải phủ luôn nó.
+3. **Tín hiệu ngoài / supplier intelligence** là Future Capability (D-5 chưa
+   backend) — chỗ trong ảnh chụp nên khai `insufficient` như ADR-TON-022, không
+   để trống im lặng.
+4. Điểm chạm hiện có: `workizen_ai_context.dart` đã là phôi thai của ý này
+   (gom counts cho prompt) — ADR nên nói rõ Builder thay thế hay bọc nó.
+
+**Điều kiện bắt đầu:** mọi capability P0 PASS trong Capability PASS Matrix
+(điều kiện Founder đặt cho việc mở tính năng mới).
