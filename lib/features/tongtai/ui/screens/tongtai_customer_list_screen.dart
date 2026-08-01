@@ -408,7 +408,9 @@ class _SortBar extends StatelessWidget {
       label: context.l10n.labelSort,
       trailing: IconButton(
         icon: Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward),
-        tooltip: ascending ? 'Sort ascending' : 'Sort descending',
+        tooltip: ascending
+            ? context.l10n.sortAscending
+            : context.l10n.sortDescending,
         onPressed: onToggleDirection,
       ),
       children: [
@@ -600,9 +602,12 @@ class _CustomerRow extends StatelessWidget {
                   const SizedBox(height: TongtaiDesignTokens.spacing1),
                   Text(
                     customer.lastPurchaseDate == null
-                        ? 'No purchases yet'
-                        : 'Last purchase '
-                              '${TongtaiFormatters.isoDate(customer.lastPurchaseDate!)}',
+                        ? context.l10n.customerNoPurchases
+                        : context.l10n.customerLastPurchase(
+                            TongtaiFormatters.isoDate(
+                              customer.lastPurchaseDate!,
+                            ),
+                          ),
                     style: TongtaiDesignTokens.captionStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextSecondary,
                     ),

@@ -190,6 +190,39 @@ abstract class AppStrings {
   String oppAddedToJourneySnack(String title);
   String get oppAlreadyInJourney;
   String get oppNoActiveJourney;
+  // ── WTM-194: chuỗi từng bị hard-code bằng tiếng Anh ────────────────────
+  String get actionSaveChanges;
+  String get sortAscending;
+  String get sortDescending;
+  String get customerAddTitle;
+  String get customerEditTitle;
+  String get customerSave;
+  String get customerPossibleDuplicate;
+  String get customerNoPurchases;
+  String customerLastPurchase(String date);
+  String get goalFormNewTitle;
+  String get goalFormEditTitle;
+  String get goalFormCreate;
+  String get goalReviewRevenueTarget;
+  String get goalReviewMetricTarget;
+  String get goalStartDate;
+  String get goalEndDate;
+  String get goalReviewType;
+  String get goalReviewTimeline;
+  String get goalReviewNotes;
+  String get homeNoOpportunities;
+  String get homeNoMissions;
+  String get oppFilterAll;
+  String get oppEmptyFeed;
+  String get productSkuExists;
+  String get productNameHint;
+  String get productCategoryHint;
+  String get stockRestockNeeded;
+  String stockRestockBy(int quantity);
+  String get supplierNoFavoritesMatch;
+  String get supplierNoSearchMatch;
+  String get supplierFavoritesHint;
+  String get supplierSearchHint;
 
   // ── Journey / goals (WTM-87/89) ─────────────────────────────────────────
   String get goalEdit;
@@ -987,6 +1020,73 @@ class AppStringsVi extends AppStrings {
   String get oppNoActiveJourney =>
       'Chưa có hành trình nào đang chạy. Hãy mở một mục tiêu và bắt đầu hành '
       'trình trước.';
+  @override
+  String get actionSaveChanges => 'Lưu thay đổi';
+  @override
+  String get sortAscending => 'Sắp xếp tăng dần';
+  @override
+  String get sortDescending => 'Sắp xếp giảm dần';
+  @override
+  String get customerAddTitle => 'Thêm khách hàng';
+  @override
+  String get customerEditTitle => 'Sửa khách hàng';
+  @override
+  String get customerSave => 'Lưu khách hàng';
+  @override
+  String get customerPossibleDuplicate => 'Có thể trùng với khách đã có';
+  @override
+  String get customerNoPurchases => 'Chưa mua lần nào';
+  @override
+  String customerLastPurchase(String date) => 'Mua gần nhất $date';
+  @override
+  String get goalFormNewTitle => 'Mục tiêu kinh doanh mới';
+  @override
+  String get goalFormEditTitle => 'Sửa mục tiêu';
+  @override
+  String get goalFormCreate => 'Tạo mục tiêu';
+  @override
+  String get goalReviewRevenueTarget => 'Mục tiêu doanh thu';
+  @override
+  String get goalReviewMetricTarget => 'Mục tiêu chỉ số';
+  @override
+  String get goalStartDate => 'Ngày bắt đầu';
+  @override
+  String get goalEndDate => 'Ngày kết thúc';
+  @override
+  String get goalReviewType => 'Loại';
+  @override
+  String get goalReviewTimeline => 'Thời gian';
+  @override
+  String get goalReviewNotes => 'Ghi chú';
+  @override
+  String get homeNoOpportunities => 'Chưa có cơ hội nào';
+  @override
+  String get homeNoMissions => 'Chưa có nhiệm vụ nào';
+  @override
+  String get oppFilterAll => 'Tất cả cơ hội';
+  @override
+  String get oppEmptyFeed => 'Chưa có cơ hội nào ở đây.';
+  @override
+  String get productSkuExists => 'SKU đã tồn tại';
+  @override
+  String get productNameHint => 'ví dụ: Quạt mini cầm tay';
+  @override
+  String get productCategoryHint => 'ví dụ: Điện tử';
+  @override
+  String get stockRestockNeeded => 'Cần nhập thêm';
+  @override
+  String stockRestockBy(int quantity) => 'Nhập thêm ít nhất $quantity';
+  @override
+  String get supplierNoFavoritesMatch =>
+      'Không có nhà cung cấp yêu thích nào khớp';
+  @override
+  String get supplierNoSearchMatch =>
+      'Không tìm thấy nhà cung cấp nào khớp với tìm kiếm của bạn';
+  @override
+  String get supplierFavoritesHint =>
+      'Chạm hình trái tim trên một nhà cung cấp để thêm vào yêu thích.';
+  @override
+  String get supplierSearchHint => 'Thử từ khoá khác hoặc chỉnh lại bộ lọc.';
 
   @override
   String get goalEdit => 'Sửa mục tiêu';
@@ -2267,6 +2367,72 @@ class AppStringsEn extends AppStrings {
   @override
   String get oppNoActiveJourney =>
       'No journey is running yet. Open a goal and start a journey first.';
+  @override
+  String get actionSaveChanges => 'Save changes';
+  @override
+  String get sortAscending => 'Sort ascending';
+  @override
+  String get sortDescending => 'Sort descending';
+  @override
+  String get customerAddTitle => 'Add customer';
+  @override
+  String get customerEditTitle => 'Edit customer';
+  @override
+  String get customerSave => 'Save customer';
+  @override
+  String get customerPossibleDuplicate => 'Possible duplicate customer';
+  @override
+  String get customerNoPurchases => 'No purchases yet';
+  @override
+  String customerLastPurchase(String date) => 'Last purchase $date';
+  @override
+  String get goalFormNewTitle => 'New business goal';
+  @override
+  String get goalFormEditTitle => 'Edit goal';
+  @override
+  String get goalFormCreate => 'Create goal';
+  @override
+  String get goalReviewRevenueTarget => 'Revenue target';
+  @override
+  String get goalReviewMetricTarget => 'Metric target';
+  @override
+  String get goalStartDate => 'Start date';
+  @override
+  String get goalEndDate => 'End date';
+  @override
+  String get goalReviewType => 'Type';
+  @override
+  String get goalReviewTimeline => 'Timeline';
+  @override
+  String get goalReviewNotes => 'Notes';
+  @override
+  String get homeNoOpportunities => 'No opportunities yet';
+  @override
+  String get homeNoMissions => 'No missions yet';
+  @override
+  String get oppFilterAll => 'All opportunities';
+  @override
+  String get oppEmptyFeed => 'No opportunities here yet.';
+  @override
+  String get productSkuExists => 'SKU already exists';
+  @override
+  String get productNameHint => 'e.g. Handheld mini fan';
+  @override
+  String get productCategoryHint => 'e.g. Electronics';
+  @override
+  String get stockRestockNeeded => 'Restock needed';
+  @override
+  String stockRestockBy(int quantity) => 'Restock $quantity+ to clear';
+  @override
+  String get supplierNoFavoritesMatch => 'No favourite suppliers match';
+  @override
+  String get supplierNoSearchMatch => 'No suppliers match your search';
+  @override
+  String get supplierFavoritesHint =>
+      'Tap the heart on a supplier to add it to your favourites.';
+  @override
+  String get supplierSearchHint =>
+      'Try a different keyword or adjust your filters.';
 
   @override
   String get goalEdit => 'Edit goal';

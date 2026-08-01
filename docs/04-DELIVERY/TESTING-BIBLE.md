@@ -368,6 +368,31 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   không chỉ assert dữ liệu không nhân đôi.
 - **Prevention:** mọi thông báo phản hồi một hành động phải
   `hideCurrentSnackBar()` trước `showSnackBar()` — như màn feed đã làm từ đầu.
+## P-23 · Suite governance viết cho một ngôn ngữ ⇒ mù với ngôn ngữ kia
+
+- **Root cause:** `p0/localization_test.dart` quét **dấu tiếng Việt** vì nó
+  được viết sau WTM-145 để dọn chuỗi Việt cứng. Một chuỗi **tiếng Anh** cứng
+  trượt qua sạch sẽ — trong khi sản phẩm lấy **tiếng Việt làm chính** (D-8),
+  nên chuỗi tiếng Anh mới đúng là thứ người bán thật nhìn thấy.
+- **Regression:** WTM-194 — **~35 chuỗi trên 12 màn thật**: form mục tiêu, form
+  khách hàng, form sản phẩm, trạng thái rỗng của Home và của feed cơ hội, tooltip
+  sắp xếp. Đúng lỗi WTM-173 đã sửa, rộng gấp 35 lần, và **không có gì đỏ**.
+- **Test pattern:** quét literal có **≥2 từ Latin** dưới `ui/`, **cộng thêm**
+  các nhãn một từ đi thẳng vào `Text(...)`/nhãn hàng. Loại trừ phải **liệt kê
+  tường minh và giải thích được**: `Workizen AI` là tên thương hiệu
+  (ADR-TON-006), màn showcase là màn dev, và **nội dung `assert(...)` bị xoá
+  trắng trước khi quét** — thông điệp assert là chữ cho lập trình viên.
+- **Hệ quả bắt được luôn:** 6 test đang assert bằng **chữ hiển thị**
+  (`find.text('Edit Goal')`) — đúng thứ quy ước repo cấm — và chúng đỏ ngay khi
+  chuỗi được dịch. Sửa bằng cách **đổi sang Key mang theo *mode***
+  (`goal-form-title-edit` / `goal-form-title-new`), không phải bằng cách cập
+  nhật chữ trong test. Một test đọc nhãn sẽ hỏng mỗi lần nhãn đổi, và nó không
+  kiểm tra hành vi — nó kiểm tra bản dịch.
+- **Prevention:** hai điểm mù còn lại, biết trước còn hơn bị bất ngờ:
+  **(1)** chuỗi có nội suy (`'Restock $n+ to clear'`) không khớp regex prose —
+  WTM-194 phải tìm bằng tay; **(2)** nhãn **một từ** chỉ bị bắt khi đi thẳng
+  vào `Text(`. Khi thêm chuỗi mới, hỏi *"cái này người bán đọc chứ?"* trước khi
+  tin vào việc CI xanh.
 
 ---
 

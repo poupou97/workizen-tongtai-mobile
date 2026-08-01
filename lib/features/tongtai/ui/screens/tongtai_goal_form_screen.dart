@@ -199,7 +199,15 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Goal' : 'New Business Goal'),
+        // Stable test ID carries the *mode*, so behaviour tests never assert
+        // on displayed copy — a test that reads the label breaks the moment
+        // the label is translated, which is exactly how WTM-194 surfaced.
+        title: Text(
+          key: Key(_isEditing ? 'goal-form-title-edit' : 'goal-form-title-new'),
+          _isEditing
+              ? context.l10n.goalFormEditTitle
+              : context.l10n.goalFormNewTitle,
+        ),
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
@@ -358,20 +366,27 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                 ),
               ),
               const SizedBox(height: TongtaiDesignTokens.spacing3),
-              _reviewRow('Type', preview.type.label(context.l10n.languageCode)),
+              _reviewRow(
+                context.l10n.goalReviewType,
+                preview.type.label(context.l10n.languageCode),
+              ),
               if (preview.targetAmount > 0)
                 _reviewRow(
-                  'Revenue target',
+                  context.l10n.goalReviewRevenueTarget,
                   TongtaiFormatters.vnd(preview.targetAmount),
                 ),
               if (preview.growthTarget > 0)
-                _reviewRow('Metric target', '${preview.growthTarget}'),
+                _reviewRow(
+                  context.l10n.goalReviewMetricTarget,
+                  '${preview.growthTarget}',
+                ),
               _reviewRow(
-                'Timeline',
+                context.l10n.goalReviewTimeline,
                 '${TongtaiFormatters.isoDate(preview.startDate)} → '
-                    '${TongtaiFormatters.isoDate(preview.endDate)}',
+                '${TongtaiFormatters.isoDate(preview.endDate)}',
               ),
-              if (preview.notes.isNotEmpty) _reviewRow('Notes', preview.notes),
+              if (preview.notes.isNotEmpty)
+                _reviewRow(context.l10n.goalReviewNotes, preview.notes),
               const SizedBox(height: TongtaiDesignTokens.spacing4),
               Container(
                 padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
@@ -395,7 +410,9 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
           ),
         ),
         _BottomBar(
-          primaryLabel: _isEditing ? 'Save Changes' : 'Create Goal',
+          primaryLabel: _isEditing
+              ? context.l10n.actionSaveChanges
+              : context.l10n.goalFormCreate,
           primaryKey: const Key('goal-save'),
           onPrimary: _save,
           secondaryLabel: 'Back',
@@ -616,7 +633,7 @@ class _TimelineRow extends StatelessWidget {
                 icon: const Icon(Icons.calendar_today_outlined, size: 16),
                 label: Text(
                   start == null
-                      ? 'Start date'
+                      ? context.l10n.goalStartDate
                       : TongtaiFormatters.isoDate(start!),
                 ),
               ),
@@ -628,7 +645,9 @@ class _TimelineRow extends StatelessWidget {
                 onPressed: onPickEnd,
                 icon: const Icon(Icons.event_outlined, size: 16),
                 label: Text(
-                  end == null ? 'End date' : TongtaiFormatters.isoDate(end!),
+                  end == null
+                      ? context.l10n.goalEndDate
+                      : TongtaiFormatters.isoDate(end!),
                 ),
               ),
             ),

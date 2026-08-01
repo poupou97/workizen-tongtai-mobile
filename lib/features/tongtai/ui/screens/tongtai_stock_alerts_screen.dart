@@ -274,7 +274,7 @@ class _AlertRow extends StatelessWidget {
                     ),
                     const SizedBox(height: TongtaiDesignTokens.spacing1),
                     Text(
-                      _restockHint(alert),
+                      _restockHint(alert, context.l10n),
                       style: TongtaiDesignTokens.captionStyle.copyWith(
                         color: color,
                         fontWeight: FontWeight.w600,
@@ -309,9 +309,14 @@ class _AlertRow extends StatelessWidget {
 
   /// Human hint for how much to restock. Falls back to a generic prompt when the
   /// threshold is zero (nothing meaningful to count toward).
-  static String _restockHint(StockAlert alert) => alert.shortfall > 0
-      ? 'Restock ${alert.shortfall}+ to clear'
-      : 'Restock needed';
+  ///
+  /// Takes [l10n] rather than reading `context`: both branches were hard-coded
+  /// English (WTM-194), and the interpolated one was invisible to the literal
+  /// scan — a string built from a number is still a string a seller reads.
+  static String _restockHint(StockAlert alert, AppStrings l10n) =>
+      alert.shortfall > 0
+      ? l10n.stockRestockBy(alert.shortfall)
+      : l10n.stockRestockNeeded;
 }
 
 class _LevelChip extends StatelessWidget {
