@@ -15,18 +15,51 @@ Release → Local-first → File Bridge → Validate với người dùng thật
   **không còn là backlog** — đề xuất còn lại chỉ hiện thực hoá qua Epic/ADR mới.
 - **Không tạo thêm Product Reset / Audit / Governance** nếu không có chỉ đạo Founder.
 
+### ⚠️⚠️ SHIFT PRIORITY — Founder 2026-08-01 (mới nhất, ghi đè thứ tự trong ADR-TON-020)
+
+> *"Hiện tại **KHÔNG ưu tiên phát hành Store**. Privacy, Terms, Store metadata,
+> Data Safety, iOS signing… chỉ cần **duy trì ở trạng thái đúng và không bị
+> hỏng**. Không lấy Release Readiness làm mục tiêu chính."*
+
+**Thứ tự mới:**
+
+1. Hoàn thiện **Business Journey**
+2. Hoàn thiện **Capability**
+3. Hoàn thiện **UI/UX theo Product Concept đã chốt**
+4. **Loại bỏ** mọi màn hình / luồng / trải nghiệm chưa nhất quán với Concept
+5. **Dogfood** bằng Workizen Internal Digital Company
+6. Chỉ quay lại Release Track **sau khi** sản phẩm đạt đúng Concept
+
+**Definition of Done đổi câu hỏi.** Không còn *"code chạy chưa?"* mà là
+**"đã đúng trải nghiệm người dùng trong Concept chưa?"** Chưa đúng ⇒ **sửa UX
+trước**.
+
+**Autonomous loop ưu tiên phát hiện:** UX chưa thống nhất · Business Journey
+đứt đoạn · Capability chưa hoàn chỉnh · **data chưa xuyên suốt** · UI chưa đúng
+Design Bible. **Thay vì** store metadata · giấy tờ phát hành · phân phối.
+
+> **Mục tiêu giai đoạn:** một sản phẩm **Founder sẵn sàng dùng hằng ngày**.
+> Store là bước sau, không phải đích đến hiện tại.
+
+**Concept nằm ở đâu (đã xác minh, không suy đoán):**
+`docs/01-PRODUCT/UI-UX-CONCEPT-INVENTORY.md` — 25 ảnh concept, bản đồ màn hình,
+4 IA pattern, và một mục *"Missing or Gaps"* do chính tài liệu tự khai ·
+`BUSINESS-JOURNEY-BIBLE.md` · `USER-JOURNEYS.md` · `SCREEN-INVENTORY.md` ·
+ảnh gốc `docs/01-PRODUCT/concepts/sc-*.png`.
+
 ### Thứ tự delivery đang chạy
 
 | | Epic | Jira | Trạng thái |
 |---|---|---|---|
-| 1 | Release Readiness | WTM-175 | 🔄 |
-| 2 | Local AI Verification | WTM-176 | ⏳ |
-| 3 | AI Business Profile | WTM-177 | ⏳ |
-| 4 | AI-first Onboarding | WTM-178 | ⏳ |
-| 5 | AI Weekly Review | WTM-179 | ⏳ |
-| 6 | Opportunity Layer 1 | WTM-180 | ⏳ |
-| 7 | Capability Context Performance | WTM-167 | ⏳ |
-| 8 | File Bridge | WTM-181 | ⏳ |
+| 1 | **AI-first Onboarding** | WTM-178 | 🔄 Code Review |
+| 2 | AI Weekly Review | WTM-179 | ⏳ |
+| 3 | Opportunity Layer 1 | WTM-180 | ⏳ |
+| 4 | **UI/UX đúng Concept + Journey + Capability** (Shift Priority) | — | ⏳ |
+| 5 | Capability Context Performance | WTM-167 | ⏳ |
+| 6 | File Bridge | WTM-181 | ⏳ |
+| ✅ | AI Business Profile | WTM-177 | Done |
+| ⏸ | Local AI / LAN AI | WTM-176 | nghiên cứu xong, chờ implement |
+| ⏸ | Release Readiness | WTM-175 | **chỉ duy trì, không phải mục tiêu** |
 
 **Chặn cứng ngoài tay đội phát triển:** nội dung pháp lý (địa chỉ liên hệ +
 Điều khoản dịch vụ) — Founder; tài khoản Apple Developer — bên thứ ba.
