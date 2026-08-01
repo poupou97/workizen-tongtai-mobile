@@ -13139,6 +13139,17 @@ class $BusinessJourneyNodesTableTable extends BusinessJourneyNodesTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _sourceOpportunityIdMeta =
+      const VerificationMeta('sourceOpportunityId');
+  @override
+  late final GeneratedColumn<String> sourceOpportunityId =
+      GeneratedColumn<String>(
+        'source_opportunity_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -13154,6 +13165,7 @@ class $BusinessJourneyNodesTableTable extends BusinessJourneyNodesTable
     derivedTarget,
     reasonCodes,
     completedAt,
+    sourceOpportunityId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -13268,6 +13280,15 @@ class $BusinessJourneyNodesTableTable extends BusinessJourneyNodesTable
         ),
       );
     }
+    if (data.containsKey('source_opportunity_id')) {
+      context.handle(
+        _sourceOpportunityIdMeta,
+        sourceOpportunityId.isAcceptableOrUnknown(
+          data['source_opportunity_id']!,
+          _sourceOpportunityIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -13332,6 +13353,10 @@ class $BusinessJourneyNodesTableTable extends BusinessJourneyNodesTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}completed_at'],
       ),
+      sourceOpportunityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_opportunity_id'],
+      ),
     );
   }
 
@@ -13381,6 +13406,16 @@ class BusinessJourneyNodesTableData extends DataClass
   /// real query needs otherwise (ADR-TON-009).
   final String? reasonCodes;
   final DateTime? completedAt;
+
+  /// The opportunity this node came from (WTM-191), or null for everything the
+  /// planner produced.
+  ///
+  /// Deliberately **not** a foreign key: opportunities are derived data with no
+  /// table of their own, and an FK would make write order part of the restore
+  /// contract — the SqliteException 787 trap that ADR-TON-018 exists to avoid.
+  /// A dangling id is harmless: it means the rule engine no longer generates
+  /// that opportunity, and the work the seller committed to stays regardless.
+  final String? sourceOpportunityId;
   const BusinessJourneyNodesTableData({
     required this.id,
     required this.journeyId,
@@ -13395,6 +13430,7 @@ class BusinessJourneyNodesTableData extends DataClass
     this.derivedTarget,
     this.reasonCodes,
     this.completedAt,
+    this.sourceOpportunityId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -13421,6 +13457,9 @@ class BusinessJourneyNodesTableData extends DataClass
     }
     if (!nullToAbsent || completedAt != null) {
       map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    if (!nullToAbsent || sourceOpportunityId != null) {
+      map['source_opportunity_id'] = Variable<String>(sourceOpportunityId);
     }
     return map;
   }
@@ -13450,6 +13489,9 @@ class BusinessJourneyNodesTableData extends DataClass
       completedAt: completedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(completedAt),
+      sourceOpportunityId: sourceOpportunityId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceOpportunityId),
     );
   }
 
@@ -13472,6 +13514,9 @@ class BusinessJourneyNodesTableData extends DataClass
       derivedTarget: serializer.fromJson<double?>(json['derivedTarget']),
       reasonCodes: serializer.fromJson<String?>(json['reasonCodes']),
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      sourceOpportunityId: serializer.fromJson<String?>(
+        json['sourceOpportunityId'],
+      ),
     );
   }
   @override
@@ -13491,6 +13536,7 @@ class BusinessJourneyNodesTableData extends DataClass
       'derivedTarget': serializer.toJson<double?>(derivedTarget),
       'reasonCodes': serializer.toJson<String?>(reasonCodes),
       'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'sourceOpportunityId': serializer.toJson<String?>(sourceOpportunityId),
     };
   }
 
@@ -13508,6 +13554,7 @@ class BusinessJourneyNodesTableData extends DataClass
     Value<double?> derivedTarget = const Value.absent(),
     Value<String?> reasonCodes = const Value.absent(),
     Value<DateTime?> completedAt = const Value.absent(),
+    Value<String?> sourceOpportunityId = const Value.absent(),
   }) => BusinessJourneyNodesTableData(
     id: id ?? this.id,
     journeyId: journeyId ?? this.journeyId,
@@ -13526,6 +13573,9 @@ class BusinessJourneyNodesTableData extends DataClass
         : this.derivedTarget,
     reasonCodes: reasonCodes.present ? reasonCodes.value : this.reasonCodes,
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    sourceOpportunityId: sourceOpportunityId.present
+        ? sourceOpportunityId.value
+        : this.sourceOpportunityId,
   );
   BusinessJourneyNodesTableData copyWithCompanion(
     BusinessJourneyNodesTableCompanion data,
@@ -13556,6 +13606,9 @@ class BusinessJourneyNodesTableData extends DataClass
       completedAt: data.completedAt.present
           ? data.completedAt.value
           : this.completedAt,
+      sourceOpportunityId: data.sourceOpportunityId.present
+          ? data.sourceOpportunityId.value
+          : this.sourceOpportunityId,
     );
   }
 
@@ -13574,7 +13627,8 @@ class BusinessJourneyNodesTableData extends DataClass
           ..write('derivedMetric: $derivedMetric, ')
           ..write('derivedTarget: $derivedTarget, ')
           ..write('reasonCodes: $reasonCodes, ')
-          ..write('completedAt: $completedAt')
+          ..write('completedAt: $completedAt, ')
+          ..write('sourceOpportunityId: $sourceOpportunityId')
           ..write(')'))
         .toString();
   }
@@ -13594,6 +13648,7 @@ class BusinessJourneyNodesTableData extends DataClass
     derivedTarget,
     reasonCodes,
     completedAt,
+    sourceOpportunityId,
   );
   @override
   bool operator ==(Object other) =>
@@ -13611,7 +13666,8 @@ class BusinessJourneyNodesTableData extends DataClass
           other.derivedMetric == this.derivedMetric &&
           other.derivedTarget == this.derivedTarget &&
           other.reasonCodes == this.reasonCodes &&
-          other.completedAt == this.completedAt);
+          other.completedAt == this.completedAt &&
+          other.sourceOpportunityId == this.sourceOpportunityId);
 }
 
 class BusinessJourneyNodesTableCompanion
@@ -13629,6 +13685,7 @@ class BusinessJourneyNodesTableCompanion
   final Value<double?> derivedTarget;
   final Value<String?> reasonCodes;
   final Value<DateTime?> completedAt;
+  final Value<String?> sourceOpportunityId;
   final Value<int> rowid;
   const BusinessJourneyNodesTableCompanion({
     this.id = const Value.absent(),
@@ -13644,6 +13701,7 @@ class BusinessJourneyNodesTableCompanion
     this.derivedTarget = const Value.absent(),
     this.reasonCodes = const Value.absent(),
     this.completedAt = const Value.absent(),
+    this.sourceOpportunityId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BusinessJourneyNodesTableCompanion.insert({
@@ -13660,6 +13718,7 @@ class BusinessJourneyNodesTableCompanion
     this.derivedTarget = const Value.absent(),
     this.reasonCodes = const Value.absent(),
     this.completedAt = const Value.absent(),
+    this.sourceOpportunityId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        journeyId = Value(journeyId),
@@ -13682,6 +13741,7 @@ class BusinessJourneyNodesTableCompanion
     Expression<double>? derivedTarget,
     Expression<String>? reasonCodes,
     Expression<DateTime>? completedAt,
+    Expression<String>? sourceOpportunityId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -13698,6 +13758,8 @@ class BusinessJourneyNodesTableCompanion
       if (derivedTarget != null) 'derived_target': derivedTarget,
       if (reasonCodes != null) 'reason_codes': reasonCodes,
       if (completedAt != null) 'completed_at': completedAt,
+      if (sourceOpportunityId != null)
+        'source_opportunity_id': sourceOpportunityId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -13716,6 +13778,7 @@ class BusinessJourneyNodesTableCompanion
     Value<double?>? derivedTarget,
     Value<String?>? reasonCodes,
     Value<DateTime?>? completedAt,
+    Value<String?>? sourceOpportunityId,
     Value<int>? rowid,
   }) {
     return BusinessJourneyNodesTableCompanion(
@@ -13732,6 +13795,7 @@ class BusinessJourneyNodesTableCompanion
       derivedTarget: derivedTarget ?? this.derivedTarget,
       reasonCodes: reasonCodes ?? this.reasonCodes,
       completedAt: completedAt ?? this.completedAt,
+      sourceOpportunityId: sourceOpportunityId ?? this.sourceOpportunityId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -13778,6 +13842,11 @@ class BusinessJourneyNodesTableCompanion
     if (completedAt.present) {
       map['completed_at'] = Variable<DateTime>(completedAt.value);
     }
+    if (sourceOpportunityId.present) {
+      map['source_opportunity_id'] = Variable<String>(
+        sourceOpportunityId.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -13800,6 +13869,7 @@ class BusinessJourneyNodesTableCompanion
           ..write('derivedTarget: $derivedTarget, ')
           ..write('reasonCodes: $reasonCodes, ')
           ..write('completedAt: $completedAt, ')
+          ..write('sourceOpportunityId: $sourceOpportunityId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -25702,6 +25772,7 @@ typedef $$BusinessJourneyNodesTableTableCreateCompanionBuilder =
       Value<double?> derivedTarget,
       Value<String?> reasonCodes,
       Value<DateTime?> completedAt,
+      Value<String?> sourceOpportunityId,
       Value<int> rowid,
     });
 typedef $$BusinessJourneyNodesTableTableUpdateCompanionBuilder =
@@ -25719,6 +25790,7 @@ typedef $$BusinessJourneyNodesTableTableUpdateCompanionBuilder =
       Value<double?> derivedTarget,
       Value<String?> reasonCodes,
       Value<DateTime?> completedAt,
+      Value<String?> sourceOpportunityId,
       Value<int> rowid,
     });
 
@@ -25824,6 +25896,11 @@ class $$BusinessJourneyNodesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get sourceOpportunityId => $composableBuilder(
+    column: $table.sourceOpportunityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$BusinessJourneysTableTableFilterComposer get journeyId {
     final $$BusinessJourneysTableTableFilterComposer composer =
         $composerBuilder(
@@ -25918,6 +25995,11 @@ class $$BusinessJourneyNodesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get sourceOpportunityId => $composableBuilder(
+    column: $table.sourceOpportunityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$BusinessJourneysTableTableOrderingComposer get journeyId {
     final $$BusinessJourneysTableTableOrderingComposer composer =
         $composerBuilder(
@@ -25997,6 +26079,11 @@ class $$BusinessJourneyNodesTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get completedAt => $composableBuilder(
     column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceOpportunityId => $composableBuilder(
+    column: $table.sourceOpportunityId,
     builder: (column) => column,
   );
 
@@ -26080,6 +26167,7 @@ class $$BusinessJourneyNodesTableTableTableManager
                 Value<double?> derivedTarget = const Value.absent(),
                 Value<String?> reasonCodes = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
+                Value<String?> sourceOpportunityId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BusinessJourneyNodesTableCompanion(
                 id: id,
@@ -26095,6 +26183,7 @@ class $$BusinessJourneyNodesTableTableTableManager
                 derivedTarget: derivedTarget,
                 reasonCodes: reasonCodes,
                 completedAt: completedAt,
+                sourceOpportunityId: sourceOpportunityId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -26112,6 +26201,7 @@ class $$BusinessJourneyNodesTableTableTableManager
                 Value<double?> derivedTarget = const Value.absent(),
                 Value<String?> reasonCodes = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
+                Value<String?> sourceOpportunityId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BusinessJourneyNodesTableCompanion.insert(
                 id: id,
@@ -26127,6 +26217,7 @@ class $$BusinessJourneyNodesTableTableTableManager
                 derivedTarget: derivedTarget,
                 reasonCodes: reasonCodes,
                 completedAt: completedAt,
+                sourceOpportunityId: sourceOpportunityId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

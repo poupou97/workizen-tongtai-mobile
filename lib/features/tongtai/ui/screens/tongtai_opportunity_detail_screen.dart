@@ -10,6 +10,7 @@ import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_action_plan.dart';
 import '../../opportunity/opportunity_signals.dart';
 import '../../journey/business_goal.dart';
+import '../../journey/journey_controller.dart';
 import '../../opportunity/opportunity_theme.dart';
 import '../../providers/tongtai_ai_provider.dart';
 import '../../providers/tongtai_journey_provider.dart';
@@ -110,6 +111,61 @@ class _TongtaiOpportunityDetailScreenState
     ).showSnackBar(SnackBar(content: Text(l10n.oppGoalCreatedSnack(_o.title))));
   }
 
+  /// Shows [message], replacing whatever is on screen.
+  ///
+  /// SnackBars queue by default, so a second tap's answer would sit behind the
+  /// first one's — the seller taps, reads a stale message, and concludes
+  /// nothing happened.
+  void _say(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// WTM-191 — turn this opportunity into work inside the active journey.
+  ///
+  /// Complements [_createGoal] (WTM-94) rather than replacing it: a goal is
+  /// the *target*, a journey node is the *work*. Before this, deciding to
+  /// pursue an opportunity was a dead end — the app recorded the decision and
+  /// nothing downstream ever used it.
+  Future<void> _addToJourney() async {
+    final l10n = context.l10n;
+    final journey = await ref.read(activeJourneyProvider.future);
+    if (!mounted) return;
+    if (journey == null) {
+      // An honest refusal beats inventing a journey the seller never asked
+      // for: a journey belongs to a goal, and only the seller sets goals.
+      _say(l10n.oppNoActiveJourney);
+      return;
+    }
+    if (journey.nodes.any((n) => n.sourceOpportunityId == _o.id)) {
+      _say(l10n.oppAlreadyInJourney);
+      return;
+    }
+    final failure = await runTongtaiAction(
+      () =>
+          JourneyController(
+            ref.read(journeyRepositoryProvider),
+            clock: widget.clock ?? DateTime.now,
+          ).addFromOpportunity(
+            journey,
+            opportunityId: _o.id,
+            title: _o.title,
+            nodeId: 'node-from-${_o.id}',
+          ),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'opportunity',
+    );
+    if (!mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(context, failure, onRetry: _addToJourney);
+      return;
+    }
+    ref.invalidate(activeJourneyProvider);
+    ref.invalidate(journeysProvider);
+    _say(l10n.oppAddedToJourneySnack(_o.title));
+  }
+
   void _toggleSaved() {
     setState(() => _saved = !_saved);
     widget.onToggleSaved?.call();
@@ -159,7 +215,11 @@ class _TongtaiOpportunityDetailScreenState
           ),
         ],
       ),
+      // Stable test ID on the scroller so `tapByKey` can reach a control below
+      // the fold. Without it `tester.tap` computes an off-screen offset, only
+      // warns, and every later assertion runs on a screen nobody touched.
       body: ListView(
+        key: const Key('opportunity-detail-list'),
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
         children: [
           // ── Type + AI score + title ──────────────────────────────────
@@ -335,6 +395,16 @@ class _TongtaiOpportunityDetailScreenState
             onPressed: _createGoal,
             icon: const Icon(Icons.flag_outlined),
             label: Text(context.l10n.opportunityCreateGoal),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          OutlinedButton.icon(
+            key: const Key('opportunity-detail-add-to-journey'),
+            onPressed: _addToJourney,
+            icon: const Icon(Icons.route_outlined),
+            label: Text(l10n.oppAddToJourney),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing3),
 

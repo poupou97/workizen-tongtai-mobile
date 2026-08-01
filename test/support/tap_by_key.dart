@@ -57,6 +57,18 @@ extension TongtaiTapExtensions on WidgetTester {
               'child is never built, so this is "not rendered", not "missed".',
     );
 
+    // `scrollUntilVisible` stops the moment the finder matches, which happens
+    // as soon as the child is *built* — a lazy list builds a little beyond the
+    // viewport, so the target can be found and still be below the fold. Then
+    // the tap lands on nothing. `ensureVisible` finishes the job.
+    //
+    // Guarded: a screen with no scrollable has nothing to ensure, and
+    // `ensureVisible` would throw rather than no-op.
+    if (any(find.ancestor(of: finder, matching: find.byType(Scrollable)))) {
+      await ensureVisible(finder);
+      await pumpAndSettle();
+    }
+
     // warnIfMissed stays on: the warning text names the obstructing widget,
     // which is the useful part. The assertion below is what makes it fatal.
     await tap(finder);

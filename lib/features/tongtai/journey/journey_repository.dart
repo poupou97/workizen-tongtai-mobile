@@ -106,6 +106,7 @@ class JourneyRepository {
                 derivedTarget: Value(n.derivedTarget),
                 reasonCodes: Value(_joinCodes(n.reasonCodes)),
                 completedAt: Value(n.completedAt),
+                sourceOpportunityId: Value(n.sourceOpportunityId),
               ),
             );
       }
@@ -168,6 +169,7 @@ class JourneyRepository {
       derivedTarget: n.derivedTarget,
       reasonCodes: _splitCodes(n.reasonCodes),
       completedAt: n.completedAt,
+      sourceOpportunityId: n.sourceOpportunityId,
     );
   }
 

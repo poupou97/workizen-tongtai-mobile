@@ -159,12 +159,25 @@ class _MilestoneTile extends StatelessWidget {
             ),
             const SizedBox(width: TongtaiDesignTokens.spacing3),
             Expanded(
-              child: Text(
-                milestone.title,
-                style: TongtaiDesignTokens.bodyStyle.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    milestone.title,
+                    style: TongtaiDesignTokens.bodyStyle.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: TongtaiDesignTokens.lightTextPrimary,
+                    ),
+                  ),
+                  // WTM-191: say where this came from. A commitment the seller
+                  // made from an opportunity sits beside the rules' own
+                  // milestones, and without this it reads as one of theirs.
+                  if (milestone.isFromOpportunity)
+                    _Tag(
+                      key: Key('journey-milestone-source-${milestone.id}'),
+                      label: context.l10n.journeyFromOpportunity,
+                    ),
+                ],
               ),
             ),
           ],

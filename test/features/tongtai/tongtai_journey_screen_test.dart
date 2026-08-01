@@ -192,4 +192,34 @@ void main() {
     final expected = (journey.completion! * 100).round();
     expect(label, contains('$expected%'));
   });
+
+  testWidgets('WTM-191: a commitment from an opportunity says so', (
+    tester,
+  ) async {
+    // Without the label it reads as one of the rules' own milestones, and the
+    // seller loses the one thing that makes ADR-TON-016 visible: who decided.
+    final journey = await seedRealJourney();
+    final controller = JourneyController(
+      repo,
+      clock: () => DateTime(2026, 8, 2),
+    );
+    await controller.addFromOpportunity(
+      journey,
+      opportunityId: 'opp-1',
+      title: 'Nhập lại quạt mini',
+      nodeId: 'n-opp-1',
+    );
+
+    await tester.pumpWidget(host('vi'));
+    await tester.pumpAndSettle();
+
+    await tester.scrollToKey(
+      'journey-milestone-source-n-opp-1',
+      under: 'journey-list',
+    );
+    expect(
+      find.byKey(const Key('journey-milestone-source-n-opp-1')),
+      findsOneWidget,
+    );
+  });
 }

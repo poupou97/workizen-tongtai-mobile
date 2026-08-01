@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
+import 'package:tongtai/features/tongtai/journey/journey.dart';
+import 'package:tongtai/features/tongtai/journey/journey_node.dart';
+import 'package:tongtai/features/tongtai/journey/journey_repository.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
@@ -12,6 +17,8 @@ import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_feed_controller.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
+
+import '../../support/tap_by_key.dart';
 
 /// WTM-92 — the Opportunity detail screen shows the full opportunity with its
 /// AI score, key numbers and action plan, and its reactions call back.
@@ -160,4 +167,118 @@ void main() {
       expect(await repo.loadAll(), hasLength(1));
     },
   );
+
+  group('WTM-191 · đưa cơ hội vào hành trình', () {
+    late Directory dir;
+    late AppDatabase db;
+    late JourneyRepository journeys;
+
+    setUp(() async {
+      dir = await Directory.systemTemp.createTemp('tongtai_opp_to_journey');
+      db = AppDatabase.forExecutor(
+        NativeDatabase(File('${dir.path}/t.sqlite')),
+      );
+      journeys = JourneyRepository(db);
+    });
+
+    tearDown(() async {
+      await db.close();
+      await dir.delete(recursive: true);
+    });
+
+    /// A viewport tall enough that every control is on screen.
+    ///
+    /// The same pattern the feed suite uses: this test is about what the tap
+    /// *does*, and reachability on a small screen is what
+    /// `p0/accessibility_test.dart` measures.
+    void useTallViewport(WidgetTester tester) {
+      addTearDown(tester.view.reset);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(500, 2400);
+    }
+
+    Widget host() => ProviderScope(
+      overrides: [tongtaiDatabaseProvider.overrideWithValue(db)],
+      child: MaterialApp(
+        home: TongtaiOpportunityDetailScreen(
+          opportunity: sample,
+          clock: () => DateTime(2026, 8, 1),
+        ),
+      ),
+    );
+
+    Future<void> seedActiveJourney() => journeys.save(
+      Journey(
+        id: 'j1',
+        goalId: 'g1',
+        state: JourneyState.active,
+        createdAt: DateTime(2026, 8, 1),
+        updatedAt: DateTime(2026, 8, 1),
+        nodes: [
+          JourneyNode(
+            id: 'root',
+            journeyId: 'j1',
+            kind: JourneyNodeKind.milestone,
+            title: 'Mốc đầu',
+            origin: JourneyNodeOrigin.ruleTwin,
+          ),
+        ],
+      ),
+    );
+
+    /// `tapByKey`, not `tester.tap`: a miss only warns, and a test that keeps
+    /// running after a missed tap asserts against a screen nobody touched.
+    Future<void> tapAdd(WidgetTester tester) => tester.tapByKey(
+      'opportunity-detail-add-to-journey',
+      scrollableUnder: 'opportunity-detail-list',
+    );
+
+    testWidgets('creates a seller-authored node in the active journey', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      await seedActiveJourney();
+      await tester.pumpWidget(host());
+
+      await tapAdd(tester);
+
+      final node = (await journeys.loadAll()).single.nodes.firstWhere(
+        (n) => n.sourceOpportunityId == 'o1',
+      );
+      expect(node.title, 'Quạt tích điện sắp vào mùa nóng');
+      expect(node.origin, JourneyNodeOrigin.user);
+      expect(node.state, JourneyNodeState.pending);
+    });
+
+    testWidgets('says what to do first when no journey is running', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      // An honest refusal beats inventing a journey the seller never asked
+      // for — a journey belongs to a goal, and only the seller sets goals.
+      await tester.pumpWidget(host());
+
+      await tapAdd(tester);
+
+      expect(await journeys.loadAll(), isEmpty);
+      expect(find.textContaining('No journey is running'), findsOneWidget);
+    });
+
+    testWidgets('tapping twice does not duplicate the commitment', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      await seedActiveJourney();
+      await tester.pumpWidget(host());
+
+      await tapAdd(tester);
+      await tapAdd(tester);
+
+      final nodes = (await journeys.loadAll()).single.nodes.where(
+        (n) => n.sourceOpportunityId == 'o1',
+      );
+      expect(nodes, hasLength(1));
+      expect(find.textContaining('Already in the journey'), findsOneWidget);
+    });
+  });
 }

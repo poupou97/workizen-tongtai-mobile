@@ -185,6 +185,12 @@ abstract class AppStrings {
   String oppGoalCreatedSnack(String title);
   String oppCreatedFromNote(String description);
 
+  /// WTM-191 — turn an opportunity into work inside the active journey.
+  String get oppAddToJourney;
+  String oppAddedToJourneySnack(String title);
+  String get oppAlreadyInJourney;
+  String get oppNoActiveJourney;
+
   // ── Journey / goals (WTM-87/89) ─────────────────────────────────────────
   String get goalEdit;
   String get goalDaysLeftLabel;
@@ -415,6 +421,9 @@ abstract class AppStrings {
   String get journeyInsufficientBody;
   String get journeyProgress;
   String get journeyFromRule;
+
+  /// WTM-191 — this piece of work came from an opportunity the seller chose.
+  String get journeyFromOpportunity;
   String get journeyMeasured;
 
   // AI-first Onboarding (WTM-178) — hội thoại chạy được KHÔNG cần AI.
@@ -967,6 +976,17 @@ class AppStringsVi extends AppStrings {
   @override
   String oppCreatedFromNote(String description) =>
       'Tạo từ cơ hội: $description';
+  @override
+  String get oppAddToJourney => 'Đưa vào hành trình';
+  @override
+  String oppAddedToJourneySnack(String title) =>
+      'Đã đưa "$title" vào hành trình';
+  @override
+  String get oppAlreadyInJourney => 'Đã có trong hành trình';
+  @override
+  String get oppNoActiveJourney =>
+      'Chưa có hành trình nào đang chạy. Hãy mở một mục tiêu và bắt đầu hành '
+      'trình trước.';
 
   @override
   String get goalEdit => 'Sửa mục tiêu';
@@ -1431,6 +1451,8 @@ class AppStringsVi extends AppStrings {
   String get journeyProgress => 'Tiến độ';
   @override
   String get journeyFromRule => 'Hệ thống đề xuất';
+  @override
+  String get journeyFromOpportunity => 'Từ cơ hội bạn đã chọn';
   @override
   String get journeyMeasured => 'Tự tính từ dữ liệu';
   @override
@@ -2235,6 +2257,16 @@ class AppStringsEn extends AppStrings {
   @override
   String oppCreatedFromNote(String description) =>
       'Created from opportunity: $description';
+  @override
+  String get oppAddToJourney => 'Add to journey';
+  @override
+  String oppAddedToJourneySnack(String title) =>
+      'Added "$title" to the journey';
+  @override
+  String get oppAlreadyInJourney => 'Already in the journey';
+  @override
+  String get oppNoActiveJourney =>
+      'No journey is running yet. Open a goal and start a journey first.';
 
   @override
   String get goalEdit => 'Edit goal';
@@ -2703,6 +2735,8 @@ class AppStringsEn extends AppStrings {
   String get journeyProgress => 'Progress';
   @override
   String get journeyFromRule => 'Suggested by the system';
+  @override
+  String get journeyFromOpportunity => 'From an opportunity you chose';
   @override
   String get journeyMeasured => 'Counted from your data';
   @override

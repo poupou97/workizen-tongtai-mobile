@@ -35,7 +35,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | Màn | Data | CRUD | Keys | Err | Ghi chú |
 |---|---|---|---|---|---|
 | `tongtai_reports_screen` | BusinessContext + BusinessMetrics + orders repo | – | ✅ 19 | ✅ seam | AI G-3A→D đã ship, mỗi tính năng có rule twin |
-| `tongtai_opportunity_detail_screen` | generated opportunities + goal repo | tạo goal (guarded) | ✅ 9 | ✅ seam | AI insight (WTM-141) + rule score authoritative |
+| `tongtai_opportunity_detail_screen` | generated opportunities + goal repo + journey repo | tạo goal · **đưa vào hành trình** (cả hai guarded) | ✅ 11 | ✅ seam | AI insight (WTM-141) + rule score authoritative · WTM-191: cơ hội → node `origin = user`, chưa có hành trình thì **nói phải làm gì trước** |
 
 ### L3 — Interactive (đủ CRUD + error handling)
 
@@ -49,7 +49,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | `tongtai_goals_screen` | goal repo + orders | `ScreenDataController` + guarded upsert | |
 | `tongtai_finance_screen` | financeRepository | `ScreenDataController` + guarded add | |
 | `tongtai_timeline_screen` | 4 repo (derived projection) | `ScreenDataController` | |
-| `tongtai_opportunity_feed_screen` | generated opportunities | `ScreenDataController` | |
+| `tongtai_opportunity_feed_screen` | generated opportunities **+ phản ứng đã lưu** | `ScreenDataController` | WTM-190: lưu/gạt bỏ sống sót qua lần đóng app |
 | `tongtai_forecast_screen` | RevenueCapabilityContext + Rule Twin | `TongtaiAsyncScreenData` | `insufficient` ≠ `failed` ≠ `empty` |
 | `tongtai_customer_risk_screen` | CustomerCapabilityContext + Rule Twin + customer repo | `TongtaiAsyncScreenData` | khách rỗng = **empty**, không phải từ chối |
 | `tongtai_export_screen` | 3 repo + history store | `ScreenDataController` + guarded export | sửa `try/finally` **không có catch** |
@@ -60,7 +60,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | `tongtai_customer_history_screen` | orderController thật | `runTongtaiAction` | đơn vừa nhập không thể mất im lặng |
 | `tongtai_business_profile_screen` | `businessProfileProvider` (1 dòng, 4 enum) | `runTongtaiAction` + `showTongtaiFailure` | WTM-177. Đọc một lần, không có đường refresh và không có trạng thái *stale* để giữ ⇒ `ScreenDataController` sẽ là nghi thức thừa. **Không có TextField nào** — có test khoá |
 | `tongtai_feedback_screen` | không đọc dữ liệu (chỉ ghi ra share sheet) | `runTongtaiAction` + `showTongtaiFailure` | WTM-175. Share thất bại có snack lỗi + nút bật lại |
-| `tongtai_journey_screen` | `journeysProvider` (cây node + plan version) | `TongtaiAsyncScreenData` | WTM-187. Ba trạng thái **phân biệt rõ**: `empty` (chưa có hành trình) ≠ `insufficient` (có hành trình nhưng chưa lập được kế hoạch) ≠ `failed`. Mỗi bước hiện **nguồn gốc** (`ruleTwin`) và **cách đo** (`derived`) — không có nhãn đó thì ranh giới ADR-TON-016 vô hình đúng chỗ quan trọng nhất |
+| `tongtai_journey_screen` | `journeysProvider` (cây node + plan version) | `TongtaiAsyncScreenData` | WTM-187. Ba trạng thái **phân biệt rõ**: `empty` (chưa có hành trình) ≠ `insufficient` (có hành trình nhưng chưa lập được kế hoạch) ≠ `failed`. Mỗi bước hiện **nguồn gốc** (`ruleTwin`) và **cách đo** (`derived`) — không có nhãn đó thì ranh giới ADR-TON-016 vô hình đúng chỗ quan trọng nhất. WTM-191: node đến từ cơ hội có nhãn riêng, nếu không nó đọc như một milestone do rule nghĩ ra |
 | `tongtai_onboarding_conversation_screen` | không đọc; ghi `BusinessProfile` khi kết thúc | `runTongtaiAction` + `showTongtaiFailure` | WTM-178, thay 6 slide tĩnh. **Chạy trọn vẹn không cần AI** — kịch bản tất định. Ghi lỗi **không chặn** người dùng mới vào app |
 | `tongtai_supplier_search_screen` | curated catalog + favorites persisted | `runTongtaiAction` (toggle) | |
 | `tongtai_supplier_favorites_screen` | favorites persisted | `runTongtaiAction` (toggle) | |

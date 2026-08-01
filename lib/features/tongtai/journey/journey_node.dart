@@ -153,6 +153,7 @@ class JourneyNode {
     this.derivedTarget,
     this.reasonCodes = const [],
     this.completedAt,
+    this.sourceOpportunityId,
   }) : assert(
          !(origin == JourneyNodeOrigin.ai && state == JourneyNodeState.done),
          'ADR-TON-016: AI proposes, a person completes. An AI-authored node '
@@ -191,7 +192,19 @@ class JourneyNode {
 
   final DateTime? completedAt;
 
+  /// The opportunity this node came from, if the seller created it from one
+  /// (WTM-191). `null` for everything the planner produced.
+  ///
+  /// Provenance is one-directional on purpose: the node records its source,
+  /// and the opportunity side is derived by looking for it. A second index
+  /// pointing the other way would be a parallel copy that can disagree with
+  /// this one — and the two would drift the first time a journey is restored.
+  final String? sourceOpportunityId;
+
   bool get isRoot => parentId == null;
+
+  /// True when the seller turned an opportunity into this piece of work.
+  bool get isFromOpportunity => sourceOpportunityId != null;
   bool get isDone => state == JourneyNodeState.done;
 
   JourneyNode copyWith({
@@ -206,6 +219,7 @@ class JourneyNode {
     double? derivedTarget,
     List<String>? reasonCodes,
     DateTime? completedAt,
+    String? sourceOpportunityId,
   }) => JourneyNode(
     id: id,
     journeyId: journeyId,
@@ -220,6 +234,7 @@ class JourneyNode {
     derivedTarget: derivedTarget ?? this.derivedTarget,
     reasonCodes: reasonCodes ?? this.reasonCodes,
     completedAt: completedAt ?? this.completedAt,
+    sourceOpportunityId: sourceOpportunityId ?? this.sourceOpportunityId,
   );
 
   Map<String, dynamic> toJson() => {
@@ -236,6 +251,7 @@ class JourneyNode {
     'derivedTarget': derivedTarget,
     'reasonCodes': reasonCodes,
     'completedAt': completedAt?.toIso8601String(),
+    'sourceOpportunityId': sourceOpportunityId,
   };
 
   /// Returns `null` for a row this build cannot understand.
@@ -287,6 +303,10 @@ class JourneyNode {
       completedAt: json['completedAt'] is String
           ? DateTime.tryParse(json['completedAt'] as String)
           : null,
+      // Absent in every `.ttbk` written before WTM-191, and absent on every
+      // node the planner produced. Both read as "not from an opportunity",
+      // which is the truth in both cases.
+      sourceOpportunityId: json['sourceOpportunityId'] as String?,
     );
   }
 }

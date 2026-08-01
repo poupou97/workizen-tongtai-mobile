@@ -53,6 +53,50 @@ class JourneyController {
     return journey;
   }
 
+  /// Turns an opportunity into a piece of work in [journey] (WTM-191).
+  ///
+  /// Before this, deciding to pursue an opportunity was a dead end: the feed
+  /// recorded the seller's interest and nothing downstream ever used it. The
+  /// Concept treats an opportunity as an *input to the journey*, and this is
+  /// the edge that makes that true.
+  ///
+  /// The node is authored by the **seller**, not the AI: a model may describe
+  /// an opportunity, but only a person decides to chase one (ADR-TON-016). It
+  /// starts `pending` — committing to work is not doing it.
+  ///
+  /// Returns the journey unchanged if [opportunityId] is already linked, so
+  /// tapping twice cannot produce two copies of the same commitment.
+  Future<Journey> addFromOpportunity(
+    Journey journey, {
+    required String opportunityId,
+    required String title,
+    required String nodeId,
+  }) async {
+    if (journey.nodes.any((n) => n.sourceOpportunityId == opportunityId)) {
+      return journey;
+    }
+    final now = _clock();
+    final node = JourneyNode(
+      id: nodeId,
+      journeyId: journey.id,
+      // A root: the seller's own commitment sits beside the planned
+      // milestones rather than buried inside one the rules invented. Allowed
+      // because `origin == user` — only AI-authored nodes may not be roots.
+      kind: JourneyNodeKind.mission,
+      title: title,
+      origin: JourneyNodeOrigin.user,
+      orderIndex: _nextRootOrder(journey),
+      reasonCodes: const [JourneyReason.fromOpportunity],
+      sourceOpportunityId: opportunityId,
+    );
+    final updated = journey.copyWith(
+      updatedAt: now,
+      nodes: [...journey.nodes, node],
+    );
+    await _repository.save(updated);
+    return updated;
+  }
+
   /// Re-plans [journey] and stores the result as a **new version**.
   ///
   /// The old version stays. The Concept requires the plan to adapt when
@@ -74,6 +118,11 @@ class JourneyController {
       for (final n in journey.nodes)
         if (n.isDone) n.title,
     };
+    // What the seller put there is not the planner's to remove (WTM-191).
+    // The rules own the plan; a commitment the seller made — an opportunity
+    // they chose to chase — is a decision, and re-planning is not a licence to
+    // delete decisions. Kept whole, including its state.
+    final retainedIds = _sellerSubtreeIds(journey);
     final now = _clock();
     final updated = journey.copyWith(
       activePlanVersion: version,
@@ -83,6 +132,8 @@ class JourneyController {
           doneTitles.contains(n.title)
               ? n.copyWith(state: JourneyNodeState.done, completedAt: now)
               : n,
+        for (final n in journey.nodes)
+          if (retainedIds.contains(n.id)) n,
       ],
       plans: [
         ...journey.plans,
@@ -150,6 +201,46 @@ class JourneyController {
     final updated = journey.copyWith(nodes: nodes, updatedAt: now);
     await _repository.save(updated);
     return updated;
+  }
+
+  /// The next free order index among roots, so a new commitment lands after
+  /// what is already there rather than jumping the queue.
+  static int _nextRootOrder(Journey journey) {
+    var max = -1;
+    for (final n in journey.nodes) {
+      if (n.isRoot && n.orderIndex > max) max = n.orderIndex;
+    }
+    return max + 1;
+  }
+
+  /// Every seller-authored node **and everything hanging beneath it**, to any
+  /// depth.
+  ///
+  /// One set rather than two lists: a node can be both seller-authored and the
+  /// child of another seller-authored node, and emitting it from two places
+  /// produced a duplicate id — caught by the table's unique constraint, which
+  /// is exactly the kind of thing that constraint is for.
+  ///
+  /// Keeping a commitment while dropping its children would leave the header
+  /// standing and quietly delete the work underneath it.
+  static Set<String> _sellerSubtreeIds(Journey journey) {
+    final keep = {
+      for (final n in journey.nodes)
+        if (n.origin == JourneyNodeOrigin.user) n.id,
+    };
+    var frontier = keep.toSet();
+    while (frontier.isNotEmpty) {
+      final next = <String>{};
+      for (final n in journey.nodes) {
+        if (n.parentId != null &&
+            frontier.contains(n.parentId) &&
+            keep.add(n.id)) {
+          next.add(n.id);
+        }
+      }
+      frontier = next;
+    }
+    return keep;
   }
 
   static int _nextVersion(Journey journey) {

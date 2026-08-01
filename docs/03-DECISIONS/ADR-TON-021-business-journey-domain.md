@@ -244,3 +244,42 @@ Dấu hiệu cụ thể cần theo dõi khi Workizen tự vận hành bằng T�
 - người dùng muốn nhiều hành trình chạy song song ⇒ bỏ quy tắc *One Active*
 
 Bốn dấu hiệu đó **đo được từ dữ liệu thật**, không cần tranh luận.
+
+---
+
+## Amendment 1 (WTM-191, 2026-08-01) — Cơ hội là **đầu vào** của hành trình
+
+**Vấn đề.** Audit WTM-189 cho thấy `interested` là ngõ cụt: người bán quyết
+định theo đuổi một cơ hội, app ghi nhận, và không có gì phía sau dùng tới.
+Concept coi cơ hội là đầu vào của hành trình; bản ADR gốc mô hình hoá cái cây
+nhưng không nói cạnh nối này tồn tại ở đâu.
+
+**Quyết định.**
+
+1. `JourneyNode.sourceOpportunityId` (nullable) — **provenance một chiều**.
+   Node biết nó đến từ cơ hội nào; chiều ngược lại **suy ra** bằng cách tìm.
+   Một chỉ mục ngược sẽ là bản sao song song có thể bất đồng với bản này, và
+   hai bên sẽ lệch ngay lần restore đầu tiên.
+2. Node sinh từ cơ hội mang `origin = user`, **không phải `ai`**: mô hình có
+   thể mô tả một cơ hội, chỉ con người mới quyết định đuổi theo (ADR-TON-016).
+   Node bắt đầu ở `pending` — cam kết làm không phải là đã làm.
+3. Nó là **root** kind `mission`, đứng cạnh các milestone do rule sinh, chứ
+   không chôn bên trong một milestone mà rule tự nghĩ ra. Hợp lệ vì chỉ node
+   `origin = ai` mới bị cấm làm root.
+4. **`replan` KHÔNG được xoá node do người bán tạo — kể cả cây con bên dưới.**
+   Rule sở hữu *kế hoạch*; cam kết của người bán là *quyết định*, và lập lại kế
+   hoạch không phải giấy phép xoá quyết định. Đây là ràng buộc mạnh nhất trong
+   amendment này, vì vi phạm nó sẽ im lặng: kế hoạch mới trông vẫn hợp lý.
+5. Cột **không** phải foreign key. Cơ hội là dữ liệu dẫn xuất, không có bảng
+   riêng (WTM-190 đã xoá bảng chết). FK sẽ biến thứ tự ghi thành một phần của
+   hợp đồng restore — cái bẫy SqliteException 787. Id treo là vô hại: nghĩa là
+   rule engine không còn sinh cơ hội đó nữa, còn việc người bán đã cam kết thì
+   vẫn còn.
+
+**Migration.** Cộng thêm, schema v10 → v11: một cột nullable trên
+`business_journey_nodes_table`. Mọi node đang có đọc ra "không đến từ cơ hội" —
+đúng bản chất của chúng. `.ttbk` không cần dataset mới: node đã đi kèm hành
+trình, và `toJson`/`fromJson` mang thêm một khoá vắng-mặt-là-null.
+
+**Cái amendment này không quyết.** Vị trí của Opportunity Hub trong IA
+(WTM-192) và công thức chấm điểm 5 yếu tố (WTM-193) vẫn để mở.
