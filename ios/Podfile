@@ -1,5 +1,6 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '13.0'
+# firebase_core requires iOS 15.0 minimum (WTM-175: lần build iOS đầu tiên
+# thất bại ở đây). Giữ khớp với IPHONEOS_DEPLOYMENT_TARGET trong Runner.xcodeproj.
+platform :ios, '15.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
