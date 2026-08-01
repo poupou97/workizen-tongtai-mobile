@@ -393,6 +393,25 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   WTM-194 phải tìm bằng tay; **(2)** nhãn **một từ** chỉ bị bắt khi đi thẳng
   vào `Text(`. Khi thêm chuỗi mới, hỏi *"cái này người bán đọc chứ?"* trước khi
   tin vào việc CI xanh.
+## P-24 · Test ghim một **hằng số bịa** thì nó bảo vệ chính chỗ hỏng
+
+- **Root cause:** `expect(restock.aiScore, 85)` · `expect(pipeline.top!.aiScore,
+  92)` · `expect(plan.last.detailVi, contains('240%'))` · `High Risk when ROI <
+  2.0`. Bốn test **xanh suốt nhiều tháng**, và cả bốn đều ghim một con số mà
+  **không ai tính** — `aiScore` và `estimatedRoi` là hằng số theo loại luật.
+  Test không phát hiện được khuyết tật vì nó **là** bản sao của khuyết tật.
+- **Regression:** WTM-193 — hai trong ba kiểu sắp xếp của feed cho ra **cùng
+  một thứ tự**, nhãn "High Risk" chỉ nói lại luật nào bắn, và bước cuối của
+  action plan trích một tỉ lệ ROI cụ thể mà không ai tính.
+- **Test pattern:** với số **dẫn xuất**, đừng ghim giá trị — ghim **quan hệ**:
+  *hai cơ hội khác nhau phải cho điểm khác nhau* (fail nếu công thức trả hằng
+  số) · *thiếu dữ liệu ⇒ `insufficient`, không phải 0* · *top của pipeline là
+  cái được **hàm thật** chấm cao nhất*, tính ngay trong test thay vì viết tay.
+  Test kiểu này **di chuyển theo công thức**, đó mới là điều mình muốn.
+- **Prevention:** khi viết `expect(x, <một con số>)`, hỏi **ai tính ra con số
+  đó**. Nếu câu trả lời là *"nó nằm sẵn trong code"*, test đang chép lại code
+  chứ không kiểm tra code. Fixture cần một số cố định thì dùng constructor gắn
+  **`@visibleForTesting`**, để cùng lối tắt đó không lọt vào `lib/`.
 
 ---
 

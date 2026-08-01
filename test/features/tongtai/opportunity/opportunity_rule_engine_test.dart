@@ -80,7 +80,11 @@ void main() {
     final restock = result.singleWhere((o) => o.id == 'gen-restock-p1');
     expect(restock.title, contains('đã hết hàng'));
     expect(restock.expectedImpact, 800000); // recent revenue of that product
-    expect(restock.aiScore, 85);
+    // WTM-193: the score is computed, not a constant. What matters is that it
+    // rests on the two factors this device can actually measure — and says so.
+    expect(restock.score.value, isNotNull);
+    expect(restock.score.coverage, closeTo(0.7, 1e-9));
+    expect(restock.score.isPartial, isTrue);
     // A stocked product or one with no sales generates nothing.
     expect(
       engine
@@ -149,7 +153,7 @@ void main() {
     );
     final catchUp = result.singleWhere((o) => o.id == 'gen-goal-g1');
     expect(catchUp.expectedImpact, greaterThan(0));
-    expect(catchUp.aiScore, 75);
+    expect(catchUp.score.value, isNotNull);
     expect(catchUp.description, contains('chậm'));
   });
 

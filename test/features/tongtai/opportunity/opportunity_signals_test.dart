@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_signals.dart';
@@ -19,8 +20,7 @@ void main() {
     title: 't',
     description: 'd',
     expectedImpact: impact,
-    estimatedRoi: roi,
-    aiScore: 50,
+    score: OpportunityScore.fixed(50),
     discoveredAt: discoveredAt ?? DateTime(2026, 7, 24),
     reaction: reaction,
   );
@@ -36,13 +36,13 @@ void main() {
     );
   });
 
-  test('High Risk when ROI < 2.0', () {
+  test('High Risk is never emitted — it was derived from a constant', () {
+    // WTM-193: the badge compared `estimatedRoi` against a threshold, and
+    // `estimatedRoi` was a constant per rule. So it only ever restated which
+    // rule fired, while reading to the seller as a judgement about their money.
+    // A real risk signal needs a cost price, which `Product` does not carry.
     expect(
-      opportunitySignals(opp(roi: 1.9), now: now),
-      contains(OpportunitySignal.highRisk),
-    );
-    expect(
-      opportunitySignals(opp(roi: 2.0), now: now),
+      opportunitySignals(opp(), now: now),
       isNot(contains(OpportunitySignal.highRisk)),
     );
   });

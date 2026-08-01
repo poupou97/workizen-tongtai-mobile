@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_context.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
@@ -190,19 +191,16 @@ void main() {
             title: 't',
             description: 'd',
             expectedImpact: 40000000,
-            estimatedRoi: 2.5,
-            aiScore: 50,
+            score: OpportunityScore.fixed(50),
             discoveredAt: DateTime(2026, 7, 24),
           ),
-          // low ROI → highRisk
           Opportunity(
             id: 'b',
             type: OpportunityType.trend,
             title: 't',
             description: 'd',
             expectedImpact: 5000000,
-            estimatedRoi: 1.5,
-            aiScore: 50,
+            score: OpportunityScore.fixed(50),
             discoveredAt: DateTime(2026, 7, 24),
           ),
           // dismissed → excluded from the active total + counts
@@ -212,8 +210,7 @@ void main() {
             title: 't',
             description: 'd',
             expectedImpact: 90000000,
-            estimatedRoi: 1.0,
-            aiScore: 50,
+            score: OpportunityScore.fixed(50),
             discoveredAt: DateTime(2026, 7, 24),
             reaction: OpportunityReaction.dismissed,
           ),
@@ -222,7 +219,9 @@ void main() {
         expect(s.total, 2); // dismissed excluded
         expect(s.signal(OpportunitySignal.highValue), 1);
         expect(s.signal(OpportunitySignal.urgent), 1);
-        expect(s.signal(OpportunitySignal.highRisk), 1);
+        // WTM-193: High Risk is no longer emitted — it came from a constant
+        // ROI, so it only restated which rule fired.
+        expect(s.signal(OpportunitySignal.highRisk), 0);
       },
     );
 
@@ -283,8 +282,7 @@ void main() {
             title: 't',
             description: 'd',
             expectedImpact: 40000000,
-            estimatedRoi: 2.5,
-            aiScore: 50,
+            score: OpportunityScore.fixed(50),
             discoveredAt: DateTime(2026, 7, 24),
           ),
         ],

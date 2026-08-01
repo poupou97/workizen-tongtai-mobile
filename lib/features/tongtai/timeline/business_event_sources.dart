@@ -62,7 +62,9 @@ class OpportunityEventSource implements BusinessEventSource {
         id: 'evt-opp-${o.id}',
         type: BusinessEventType.opportunity,
         title: 'Cơ hội: ${o.title}',
-        subtitle: 'Điểm AI ${o.aiScore.round()} · ${o.type.labelVi}',
+        subtitle: o.score.value == null
+            ? o.type.labelVi
+            : 'Điểm ${o.score.value!.round()} · ${o.type.labelVi}',
         timestamp: o.discoveredAt,
         refId: o.id,
       ),

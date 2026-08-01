@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/tongtai_enums.dart';
+import 'opportunity_score.dart';
 
 /// The seller's reaction to a surfaced opportunity (WTM-91 AC4/AC5).
 enum OpportunityReaction {
@@ -44,8 +45,7 @@ class Opportunity {
     required this.title,
     required this.description,
     required this.expectedImpact,
-    required this.estimatedRoi,
-    required this.aiScore,
+    required this.score,
     required this.discoveredAt,
     this.reaction = OpportunityReaction.none,
   });
@@ -65,12 +65,22 @@ class Opportunity {
   /// Expected impact in đồng of additional revenue (AC1).
   final double expectedImpact;
 
-  /// Estimated ROI multiple, e.g. 2.4 = 240% return (AC3 sort key).
-  final double estimatedRoi;
+  /// How this opportunity scored, and which factors had no data (WTM-193).
+  ///
+  /// Replaces the old `aiScore` + `estimatedRoi` pair, both of which were
+  /// **constants per rule** — so "sort by relevance" and "sort by ROI" produced
+  /// the same order, the order of the rules.
+  ///
+  /// ROI is gone rather than faked: computing it needs a **cost price**, and
+  /// `Product` has only a selling price. Per the Founder's O-1 rule — *keep the
+  /// domain, hide the capability that has no data* — the sort facet is hidden
+  /// (`OpportunitySort.roi` stays in the enum), because a facet that sorts by a
+  /// constant is a promise the product cannot keep.
+  final OpportunityScore score;
 
-  /// Relevance score 0–100 (AC3 sort key). Deterministic/seeded today; the
-  /// AI scorer arrives with WTM-93.
-  final double aiScore;
+  /// Convenience for widgets that just want a number, or `null` when nothing
+  /// could be scored.
+  double? get aiScore => score.value;
 
   /// When the opportunity was surfaced (AC3 recency sort key).
   final DateTime discoveredAt;
@@ -87,8 +97,7 @@ class Opportunity {
     title: title,
     description: description,
     expectedImpact: expectedImpact,
-    estimatedRoi: estimatedRoi,
-    aiScore: aiScore,
+    score: score,
     discoveredAt: discoveredAt,
     reaction: reaction ?? this.reaction,
   );
@@ -105,8 +114,13 @@ class Opportunity {
   String toString() => 'Opportunity($id, ${type.name}, ${reaction.name})';
 }
 
-/// Deterministic sample opportunities so the feed has real data to exercise
-/// until WTM-93's AI scorer lands — same convention as `kSampleCustomers`.
+/// Deterministic sample opportunities so the feed has real data to exercise —
+/// same convention as `kSampleCustomers`.
+///
+/// Their scores go through [scoreOpportunity], the **same** function the rule
+/// engine uses, rather than being hand-written numbers. A sample that scored by
+/// a different route would let the real path break without any sample noticing.
+const double _sampleBaseline = 120000000;
 final List<Opportunity> kSampleOpportunities = [
   Opportunity(
     id: 'o01',
@@ -116,8 +130,11 @@ final List<Opportunity> kSampleOpportunities = [
         'Tìm kiếm "quạt tích điện" tăng mạnh trước hè; tồn kho của bạn còn '
         'thấp so với nhịp bán tháng trước.',
     expectedImpact: 45000000,
-    estimatedRoi: 2.4,
-    aiScore: 92,
+    score: scoreOpportunity(
+      impact: 45000000,
+      baseline: _sampleBaseline,
+      orders: 9,
+    ),
     discoveredAt: DateTime(2026, 7, 21),
   ),
   Opportunity(
@@ -128,8 +145,11 @@ final List<Opportunity> kSampleOpportunities = [
         'Nguồn Quảng Châu đang rẻ hơn nguồn hiện tại ~18% cho cùng phân khúc '
         '500ml.',
     expectedImpact: 12000000,
-    estimatedRoi: 1.8,
-    aiScore: 74,
+    score: scoreOpportunity(
+      impact: 12000000,
+      baseline: _sampleBaseline,
+      orders: 3,
+    ),
     discoveredAt: DateTime(2026, 7, 20),
   ),
   Opportunity(
@@ -140,8 +160,11 @@ final List<Opportunity> kSampleOpportunities = [
         'Xu hướng nội dung "căn hộ nhỏ" kéo nhu cầu đồ gia dụng cỡ nhỏ; phù '
         'hợp danh mục Home hiện có.',
     expectedImpact: 28000000,
-    estimatedRoi: 2.1,
-    aiScore: 81,
+    score: scoreOpportunity(
+      impact: 28000000,
+      baseline: _sampleBaseline,
+      orders: 6,
+    ),
     discoveredAt: DateTime(2026, 7, 22),
   ),
   Opportunity(
@@ -152,8 +175,11 @@ final List<Opportunity> kSampleOpportunities = [
         'Nhóm khách SG hỏi mua khăn lụa qua kênh chat; chưa có kênh giao '
         'xuyên biên giới.',
     expectedImpact: 15000000,
-    estimatedRoi: 1.5,
-    aiScore: 58,
+    score: scoreOpportunity(
+      impact: 15000000,
+      baseline: _sampleBaseline,
+      orders: 2,
+    ),
     discoveredAt: DateTime(2026, 7, 18),
   ),
   Opportunity(
@@ -164,8 +190,11 @@ final List<Opportunity> kSampleOpportunities = [
         'Khách sỉ bắt đầu gom đơn quà Trung thu sớm; biên tốt khi chốt trước '
         'tháng 8.',
     expectedImpact: 60000000,
-    estimatedRoi: 2.9,
-    aiScore: 88,
+    score: scoreOpportunity(
+      impact: 60000000,
+      baseline: _sampleBaseline,
+      orders: 8,
+    ),
     discoveredAt: DateTime(2026, 7, 19),
   ),
 ];

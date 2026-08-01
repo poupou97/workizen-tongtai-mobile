@@ -166,7 +166,13 @@ void main() {
     );
     expect(find.descendant(of: card, matching: find.text('5')), findsOneWidget);
     expect(find.text('160tr ₫'), findsOneWidget);
-    expect(find.text('Quạt tích điện sắp vào mùa nóng'), findsOneWidget);
+    // WTM-193: the headline is whichever opportunity the **real** scoring
+    // function ranks highest, computed here rather than written by hand — a
+    // test that pins a title pins the old constant score behind it.
+    final top = kSampleOpportunities.reduce(
+      (a, b) => (a.score.value ?? -1) >= (b.score.value ?? -1) ? a : b,
+    );
+    expect(find.text(top.title), findsOneWidget);
   });
 
   testWidgets('the period selector scopes the breakdown sections (WTM-115)', (

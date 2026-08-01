@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
@@ -69,8 +70,7 @@ void main() {
           title: 'Đồ gia dụng mini',
           description: 'd',
           expectedImpact: 1000000,
-          estimatedRoi: 2,
-          aiScore: 81,
+          score: OpportunityScore.fixed(81),
           discoveredAt: DateTime(2026, 6, 20),
         ),
       ]).events();

@@ -242,7 +242,11 @@ class _TongtaiOpportunityFeedScreenState
                 _ChipsRow(
                   label: context.l10n.labelSort,
                   children: [
-                    for (final sort in OpportunitySort.values)
+                    // `visible`, not `values`: the ROI facet sorted by a
+                    // constant, so it looked like a choice and wasn't
+                    // (WTM-193). Same rule as WTM-182 hiding facets the engine
+                    // cannot produce.
+                    for (final sort in OpportunitySort.visible)
                       Padding(
                         padding: const EdgeInsets.only(
                           right: TongtaiDesignTokens.spacing2,
@@ -461,9 +465,12 @@ class _OpportunityCard extends StatelessWidget {
             const SizedBox(height: TongtaiDesignTokens.spacing2),
             Text(
               '${context.l10n.oppEstimatePrefix} '
+              // ROI dropped (WTM-193): it came from a constant. The score
+              // shows a dash when nothing could be computed — a dash reads as
+              // "unknown", a 0 would read as "worthless".
               '+${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
-              ' • ROI ${(opportunity.estimatedRoi * 100).round()}%'
-              ' • ${context.l10n.oppScoreLabel} ${opportunity.aiScore.round()}',
+              ' • ${context.l10n.oppScoreLabel} '
+              '${opportunity.score.value?.round() ?? '—'}',
               style: TongtaiDesignTokens.captionStyle.copyWith(
                 color: TongtaiDesignTokens.lightTextPrimary,
                 fontWeight: FontWeight.w600,

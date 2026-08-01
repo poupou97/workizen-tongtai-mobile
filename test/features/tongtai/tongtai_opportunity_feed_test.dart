@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/core/prefs.dart';
 
 import '../../support/pump_until.dart';
@@ -43,8 +44,7 @@ void main() {
     title: 'Cơ hội $id',
     description: 'Mô tả $id',
     expectedImpact: 10000000,
-    estimatedRoi: roi,
-    aiScore: score,
+    score: OpportunityScore.fixed(score),
     discoveredAt: at ?? DateTime(2026, 7, 20),
     reaction: reaction,
   );
@@ -86,7 +86,7 @@ void main() {
       ]);
     });
 
-    test('sorting by relevance, recency and ROI, descending (AC3)', () {
+    test('sorting by relevance and recency, descending (AC3)', () {
       final controller = OpportunityFeedController([
         make('a', score: 50, roi: 3.0, at: DateTime(2026, 7, 22)),
         make('b', score: 90, roi: 1.2, at: DateTime(2026, 7, 20)),
@@ -104,11 +104,13 @@ void main() {
             .map((o) => o.id),
         ['a', 'c', 'b'],
       );
+      // WTM-193: the ROI facet is hidden and falls back to relevance — it
+      // sorted by a constant, so it never sorted by ROI in the first place.
       expect(
         controller
             .feed(const OpportunityQuery(sort: OpportunitySort.roi))
             .map((o) => o.id),
-        ['a', 'c', 'b'],
+        ['b', 'c', 'a'],
       );
     });
 
@@ -260,12 +262,13 @@ void main() {
         find.byKey(const Key('opportunity-signal-urgent')),
         findsOneWidget,
       );
+      // WTM-193: High Risk is no longer emitted — it compared a constant ROI
+      // against a threshold, so it only restated which rule fired.
       expect(
         find.byKey(const Key('opportunity-signal-highRisk')),
-        findsOneWidget,
+        findsNothing,
       );
       expect(find.text('Urgent'), findsOneWidget);
-      expect(find.text('High risk'), findsOneWidget);
       expect(
         find.byKey(const Key('opportunity-signal-highValue')),
         findsNothing,
@@ -311,8 +314,10 @@ void main() {
           .toList();
       expect(orderBefore, ['Cơ hội b', 'Cơ hội a']);
 
-      // ROI sort → a (3.0) first.
-      await tester.tap(find.byKey(const Key('opportunity-sort-roi')));
+      // WTM-193: the ROI chip is gone — it sorted by a constant. What is left
+      // must still be offered, and must still re-order.
+      expect(find.byKey(const Key('opportunity-sort-roi')), findsNothing);
+      await tester.tap(find.byKey(const Key('opportunity-sort-recency')));
       await tester.pumpAndSettle();
       final orderAfter = tester
           .widgetList<Text>(find.textContaining('Cơ hội '))
