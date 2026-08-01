@@ -4,7 +4,6 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal.dart';
-import 'package:tongtai/features/tongtai/journey/journey.dart';
 import 'package:tongtai/features/tongtai/journey/journey_controller.dart';
 import 'package:tongtai/features/tongtai/journey/journey_node.dart';
 import 'package:tongtai/features/tongtai/journey/journey_planner.dart';
