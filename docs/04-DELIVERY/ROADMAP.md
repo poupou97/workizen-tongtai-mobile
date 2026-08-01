@@ -12,13 +12,38 @@ Kế hoạch dưới đây **đã bị thực tế vượt qua**. Ghi lại đ�
 | *Phase 1C — Go/No-Go, Aug 22-28* | ✅ **XONG** — Founder duyệt, đã chuyển sang thực thi |
 | *Phase 2 Build — Sep 1 → Oct 15* | ✅ **ĐÃ THỰC THI XONG** — 8/8 capability, **1418 test**, CI xanh, chạy được trên máy thật |
 | *Phase 3 — AI nâng cao, forecasting* | ✅ **PHẦN LỚN XONG** — AI tier G-3A→D (ADR-TON-013), dự báo doanh thu + rủi ro khách (ADR-TON-016), export/backup/restore |
-| *Phase 4 — tích hợp Shopee/1688* | ⏳ **CHƯA** — WTM-67, WTM-79 (chặn bởi API/đối tác bên ngoài) |
+| *Phase 4 — tích hợp Shopee/1688* | 🔀 **ĐỔI HƯỚNG** — Founder chốt **File Bridge** thay OAuth (ADR-TON-020). WTM-67/WTM-79 giữ `blocked-on-decision` |
 
 **Nói ngắn gọn:** dự án đang ở **cuối Phase 3** chứ không phải giữa Phase 1B.
 Việc còn lại để phát hành không phải là code mà là **nội dung pháp lý** (địa chỉ
 liên hệ, điều khoản dịch vụ) và **ký iOS**.
 
 Backlog thật còn **10 issue** — xem `docs/06-GOVERNANCE/JIRA-BACKLOG-AUDIT-2026-08-01.md`.
+
+## 🧭 Hướng đã chốt — Founder 2026-08-01 (ADR-TON-020)
+
+```
+Release → Local-first → File Bridge → Validate với người dùng thật
+                                       └→ Managed Platform CHỈ KHI đủ bằng chứng
+```
+
+**Không xây backend hoặc OAuth trước nhu cầu thực tế.** D-4 + D-5 giữ nguyên.
+**File Bridge = capability chính thức**, không phải giải pháp tạm thời.
+
+Thứ tự delivery đang chạy:
+
+| | Epic | Jira |
+|---|---|---|
+| 1 | Release Readiness | WTM-175 |
+| 2 | Local AI Verification | WTM-176 |
+| 3 | AI Business Profile | WTM-177 |
+| 4 | AI-first Onboarding | WTM-178 |
+| 5 | AI Weekly Review | WTM-179 |
+| 6 | Opportunity Layer 1 | WTM-180 |
+| 7 | Capability Context Performance | WTM-167 |
+| 8 | **File Bridge** | WTM-181 |
+
+Phân tích đầy đủ dẫn tới quyết định: `docs/07-PRODUCT-RESET/`.
 
 ---
 
