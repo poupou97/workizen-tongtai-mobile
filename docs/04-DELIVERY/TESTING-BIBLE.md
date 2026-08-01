@@ -415,6 +415,40 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-25 · `GestureDetector` mặc định `deferToChild` ⇒ giữa nút là vùng chết
+
+- **Root cause:** tab dưới cùng là `Icon` trên `Text` có khoảng cách ở giữa.
+  `GestureDetector` mặc định `HitTestBehavior.deferToChild`, nên khoảng trống
+  đó — **kể cả tâm của tab** — không nhận chạm. Người bán nhắm vào giữa tab thì
+  bấm trúng hư không.
+- **Regression:** WTM-192 — lộ ra khi test bấm tab bằng Key: `tester.tap` tính
+  ra tâm widget, và tâm chính là chỗ chết. Suốt thời gian trước đó không ai
+  thấy, vì người thật hay bấm trúng icon.
+- **Test pattern:** bấm bằng **Key** (tức bấm vào **tâm**) chứ đừng bấm vào
+  `find.text(...)` của nhãn — bấm nhãn luôn trúng, nên nó **giấu** vùng chết đi.
+- **Prevention:** mọi vùng chạm ghép từ nhiều widget rời phải khai
+  `behavior: HitTestBehavior.opaque`. Cùng họ với P-17: thứ không nằm trong
+  suite thì không phải thứ đã pass.
+
+---
+
+## P-26 · Đổi nhãn dài hơn làm vỡ layout mà không ai đổi layout
+
+- **Root cause:** 5 tab trong một `Row` **không có `Expanded`**, mỗi tab tự lấy
+  kích thước tự nhiên. Đổi `More` → `Cơ hội`/`Opportunity` là **tràn 50 px**
+  trên máy hẹp. Không dòng layout nào bị sửa; chỉ một chuỗi dài hơn.
+- **Regression:** WTM-192. `p0/nav_availability_test.dart` bắt được vì nó dựng
+  shell ở **kích thước máy thật**, không phải viewport mặc định 800×600 của
+  test.
+- **Test pattern:** governance suite phải dựng ở **kích thước thiết bị thật**
+  (và ở cỡ chữ 2.0×). Viewport mặc định của `flutter_test` rộng hơn điện thoại
+  nên nó **giấu** tràn ngang.
+- **Prevention:** hàng ngang chia đều thì phải `Expanded`; nhãn trong ô hẹp
+  phải `maxLines: 1` + `TextOverflow.ellipsis`. Và: **đổi chuỗi cũng là đổi
+  layout** — l10n không phải thao tác an toàn.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:

@@ -13,6 +13,7 @@ import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_search_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_more_action.dart';
 import 'tongtai_supplier_favorites_screen.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 
@@ -103,6 +104,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        actions: const [TongtaiMoreAction()],
       ),
       body: ListenableBuilder(
         listenable: _data,

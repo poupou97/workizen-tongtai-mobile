@@ -247,7 +247,15 @@ abstract final class TongtaiTabs {
   static const int producer = 1;
   static const int inventory = 2;
   static const int consumer = 3;
-  static const int more = 4;
+
+  /// Slot 4, formerly `more` (WTM-192, Founder decision 2026-08-01).
+  ///
+  /// The index is **reused rather than appended** on purpose: a seller with
+  /// tab 4 already persisted lands on Opportunity instead of an out-of-range
+  /// index, and the bar stays at five — six tabs is cramped on a small phone,
+  /// and the Concept has eight capabilities, so tabs were never going to
+  /// represent all of them anyway.
+  static const int opportunity = 4;
 }
 
 /// Get color for a specific tab
@@ -259,8 +267,9 @@ Color getTabColor(int tabIndex) {
       return TongtaiDesignTokens.inventoryOrange;
     case TongtaiTabs.consumer:
       return TongtaiDesignTokens.consumerBlue;
+    case TongtaiTabs.opportunity:
+      return TongtaiDesignTokens.copilotViolet;
     case TongtaiTabs.home:
-    case TongtaiTabs.more:
     default:
       return TongtaiDesignTokens.neutral;
   }
@@ -277,8 +286,8 @@ String getTabName(int tabIndex) {
       return 'Inventory';
     case TongtaiTabs.consumer:
       return 'Consumer';
-    case TongtaiTabs.more:
-      return 'More';
+    case TongtaiTabs.opportunity:
+      return 'Opportunity';
     default:
       return 'Unknown';
   }

@@ -75,12 +75,12 @@ class TongtaiBottomNav extends ConsumerWidget {
                 onTap: onTabSelected,
               ),
               _NavTab(
-                index: TongtaiTabs.more,
+                index: TongtaiTabs.opportunity,
                 selectedIndex: selectedIndex,
-                icon: Icons.menu_outlined,
-                selectedIcon: Icons.menu,
-                label: context.l10n.navMore,
-                color: TongtaiDesignTokens.setupGray,
+                icon: Icons.lightbulb_outline,
+                selectedIcon: Icons.lightbulb,
+                label: context.l10n.navOpportunity,
+                color: TongtaiDesignTokens.copilotViolet,
                 onTap: onTabSelected,
               ),
             ],
@@ -118,42 +118,61 @@ class _NavTab extends StatelessWidget {
     final tabColor = color ?? TongtaiDesignTokens.neutral;
     final isActive = isSelected;
 
-    return GestureDetector(
-      onTap: () => onTap(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isActive ? selectedIcon : icon,
-            size: TongtaiDesignTokens.navBarIconSize,
-            color: isActive ? tabColor : TongtaiDesignTokens.lightTextSecondary,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+    // `Expanded`: five tabs share the width evenly instead of each taking its
+    // natural size. Without it the bar overflowed by 50 px on a narrow phone
+    // the moment "More" became "Cơ hội"/"Opportunity" (WTM-192) — a label a
+    // few characters longer is all it takes when nothing is flexible.
+    return Expanded(
+      child: GestureDetector(
+        // Stable test ID (`<screen>-<role>`): behaviour tests select a tab by
+        // index, never by its translated label (WTM-192).
+        key: Key('nav-tab-$index'),
+        // `opaque`, not the default `deferToChild`: the tab is an icon above a
+        // label with a gap between them, and `deferToChild` makes that gap —
+        // including the tab's own centre — **dead to touch**. A seller aiming at
+        // the middle of a tab would hit nothing (WTM-192).
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onTap(index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isActive ? selectedIcon : icon,
+              size: TongtaiDesignTokens.navBarIconSize,
               color: isActive
                   ? tabColor
                   : TongtaiDesignTokens.lightTextSecondary,
             ),
-          ),
-          const SizedBox(height: 4),
-          // Active indicator: colored underline
-          if (isActive)
-            Container(
-              width: 4,
-              height: 4,
-              decoration: BoxDecoration(
-                color: tabColor,
-                shape: BoxShape.circle,
+            const SizedBox(height: 4),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                color: isActive
+                    ? tabColor
+                    : TongtaiDesignTokens.lightTextSecondary,
               ),
-            )
-          else
-            const SizedBox(width: 4, height: 4),
-        ],
+            ),
+            const SizedBox(height: 4),
+            // Active indicator: colored underline
+            if (isActive)
+              Container(
+                width: 4,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: tabColor,
+                  shape: BoxShape.circle,
+                ),
+              )
+            else
+              const SizedBox(width: 4, height: 4),
+          ],
+        ),
       ),
     );
   }

@@ -9,6 +9,7 @@ import '../../core/tongtai_formatters.dart';
 import '../../metrics/business_metrics.dart';
 import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../providers/tongtai_navigation_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../opportunity/opportunity.dart' show Opportunity;
 import '../../opportunity/opportunity_pipeline.dart';
@@ -18,7 +19,6 @@ import '../../providers/tongtai_metrics_provider.dart';
 import '../../providers/tongtai_orders_provider.dart';
 import '../../reports/business_report.dart';
 import '../widgets/tongtai_fox_mascot.dart';
-import 'tongtai_opportunity_feed_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 
@@ -423,11 +423,18 @@ class _ReportBody extends StatelessWidget {
         _SectionHeader(
           title: context.l10n.sectionPipeline,
           actionKey: const Key('reports-open-opportunities'),
-          onAction: () => Navigator.of(context).push<void>(
-            MaterialPageRoute(
-              builder: (_) => const TongtaiOpportunityFeedScreen(),
-            ),
-          ),
+          // WTM-192: switch to the tab rather than pushing a second copy —
+          // see the note on Home's "view all".
+          onAction: () {
+            // `_ReportBody` is a plain StatelessWidget, so reach the notifier
+            // through a ProviderScope container rather than widening the whole
+            // widget to a Consumer for one tap.
+            ProviderScope.containerOf(context, listen: false)
+                .read(tongtaiSelectedTabProvider.notifier)
+                .select(TongtaiTabs.opportunity);
+            // Reports itself is a pushed route; leave it so the tab is visible.
+            if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+          },
         ),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         _PipelineCard(pipeline: pipeline),

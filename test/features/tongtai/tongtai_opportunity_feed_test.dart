@@ -25,7 +25,7 @@ import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
-import 'package:tongtai/features/tongtai/ui/screens/tongtai_home_screen.dart';
+import 'package:tongtai/features/tongtai/ui/tongtai_app_shell.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
 
 /// WTM-91 — Opportunity Feed: controller unit tests (filter/sort/reactions)
@@ -417,40 +417,38 @@ void main() {
       );
     });
 
-    testWidgets('Home "View all" opens the feed', (tester) async {
+    testWidgets('Home "View all" switches to the Opportunity tab', (
+      tester,
+    ) async {
       useTallViewport(tester);
-      // Home loads its KPIs/counts from the repositories (WTM-128); keep it off
-      // the real Drift database with an in-memory override.
+      // WTM-192: Opportunity is a tab now, so "view all" **selects** it rather
+      // than pushing a copy — two instances of the same screen would each keep
+      // their own filter and sort, the parallel state ADR-TON-015 forbids.
+      // Hosted in the real shell, because "switches tab" is only meaningful
+      // when there is a tab to switch to.
       SharedPreferences.setMockInitialValues({});
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            tongtaiDatabaseProvider.overrideWithValue(
-              AppDatabase.forExecutor(NativeDatabase.memory()),
-            ),
+            tongtaiDatabaseProvider.overrideWithValue(memoryDb()),
             sharedPreferencesProvider.overrideWithValue(
               await SharedPreferences.getInstance(),
             ),
           ],
-          child: const MaterialApp(home: TongtaiHomeScreen()),
+          child: const MaterialApp(home: TongtaiAppShell()),
         ),
       );
-      // Home now has a real loading state (WTM-148); wait for the dashboard
-      // rather than assuming it painted on frame one.
-      // Home now has a real loading state AND a real failure state (WTM-148),
-      // so this must wait for the dashboard rather than assuming it painted on
-      // frame one. Before the seam, the SharedPreferences plugin missing from
-      // this test threw INSIDE `_load()` and Home simply stayed at zeros —
-      // which is precisely the silent-empty class this story removes.
       await pumpUntilFound(
         tester,
         find.byKey(const Key('home-open-opportunities')),
       );
+
       await tester.tap(find.byKey(const Key('home-open-opportunities')));
       await tester.pumpAndSettle();
 
       expect(find.byType(TongtaiOpportunityFeedScreen), findsOneWidget);
-      expect(find.text('Opportunities'), findsOneWidget);
+      // …and it is the tab, not a pushed route: nothing to pop back from.
+      expect(find.byType(BackButton), findsNothing);
     });
 
     testWidgets(

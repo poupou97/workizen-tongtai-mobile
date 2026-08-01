@@ -5,10 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/core/prefs.dart' show sharedPreferencesProvider;
 import 'package:tongtai/database/database.dart';
+import 'package:tongtai/features/tongtai/ui/widgets/tongtai_more_action.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/tongtai.dart';
 import 'package:tongtai/main.dart' show TongtaiApp;
+
+import '../../support/tap_by_key.dart';
 
 /// App-level boot tests (WTM-105).
 ///
@@ -120,14 +123,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(appShell(), findsOneWidget);
 
-    // Navigate to the More tab and trigger the replay action that was a
-    // no-op for users while the gate was unwired.
-    await tester.tap(find.text('More'));
+    // Open More — it left the bottom bar in WTM-192 and now lives in the
+    // AppBar — then trigger the replay action that was a no-op for users while
+    // the gate was unwired.
+    await tester.tap(find.byKey(TongtaiMoreAction.actionKey));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Replay Tutorial'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Replay Tutorial'));
-    await tester.pumpAndSettle();
+    await tester.tapByKey(
+      'more-replay-tutorial',
+      scrollableUnder: 'more-scroll',
+    );
 
     expect(tutorial(), findsOneWidget);
     expect(appShell(), findsNothing);

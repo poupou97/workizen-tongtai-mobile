@@ -89,15 +89,19 @@ void main() {
           kind: TongtaiRouteKind.customerList,
           tab: TongtaiTabs.consumer,
         ),
+        // WTM-192: these three used to land on the More tab, which no longer
+        // exists in the bar. They land on Home and push their own screen —
+        // Home is the only tab that hosts none of them, so it never leaves the
+        // seller on a tab that contradicts what they opened.
         'tongtai://reports': (
           kind: TongtaiRouteKind.reports,
-          tab: TongtaiTabs.more,
+          tab: TongtaiTabs.home,
         ),
         'tongtai://finance/accounts': (
           kind: TongtaiRouteKind.financeAccounts,
-          tab: TongtaiTabs.more,
+          tab: TongtaiTabs.home,
         ),
-        'tongtai://chat': (kind: TongtaiRouteKind.chat, tab: TongtaiTabs.more),
+        'tongtai://chat': (kind: TongtaiRouteKind.chat, tab: TongtaiTabs.home),
       };
       cases.forEach((link, expected) {
         final route = parser.parse(link).routeOrNull;
@@ -300,7 +304,7 @@ void main() {
       for (final kind in TongtaiRouteKind.values) {
         expect(
           kind.tabIndex,
-          inInclusiveRange(TongtaiTabs.home, TongtaiTabs.more),
+          inInclusiveRange(TongtaiTabs.home, TongtaiTabs.opportunity),
           reason: kind.name,
         );
       }

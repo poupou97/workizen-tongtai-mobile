@@ -1,3 +1,4 @@
+import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -46,6 +47,17 @@ import '../../../support/count_list_contract.dart';
 /// No per-screen mocks: every screen reads the same Riverpod providers the
 /// app ships, backed by Drift repositories over one .db file.
 void main() {
+  // One in-memory database per test — shared rather than rebuilt, because
+  // constructing `AppDatabase` twice over one executor is the race drift warns
+  // about (WTM-192).
+  AppDatabase? sharedDb;
+  AppDatabase memoryDb() =>
+      sharedDb ??= AppDatabase.forExecutor(NativeDatabase.memory());
+  tearDown(() async {
+    await sharedDb?.close();
+    sharedDb = null;
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late Directory tempDir;
@@ -102,6 +114,10 @@ void main() {
         businessGoalRepositoryProvider.overrideWithValue(goals),
         financeRepositoryProvider.overrideWithValue(finance),
         tongtaiSearchFavoritesStoreProvider.overrideWithValue(favorites),
+        // WTM-192: the Opportunity tab is part of the shell now, and it reads
+        // stored reactions — without a database the harness dies on
+        // `path_provider`, which is the harness failing, not the screen.
+        tongtaiDatabaseProvider.overrideWithValue(memoryDb()),
       ],
       child: const MaterialApp(
         localizationsDelegates: [
@@ -173,8 +189,9 @@ void main() {
     return int.parse(numeric.single);
   }
 
-  Future<void> tapNav(WidgetTester tester, String label) async {
-    await tester.tap(find.text(label).last);
+  /// Selects a tab by **index**, not by its translated label (WTM-192).
+  Future<void> tapNav(WidgetTester tester, int tab) async {
+    await tester.tap(find.byKey(Key('nav-tab-$tab')));
     await tester.pumpAndSettle();
   }
 
@@ -213,7 +230,7 @@ void main() {
       required Widget app,
     }) async {
       await pumpApp(tester, app);
-      await tapNav(tester, 'Home');
+      await tapNav(tester, TongtaiTabs.home);
 
       // Home tile counts against the repositories (single source).
       expect(tileCount(tester, 'home-tile-consumer'), expectedCustomers);
@@ -229,7 +246,7 @@ void main() {
       );
 
       // ── Consumer pair (the Founder repro) ─────────────────────────────
-      await tapNav(tester, 'Consumer');
+      await tapNav(tester, TongtaiTabs.consumer);
       final badge = tester.widget<Text>(
         find.byKey(const Key('consumer-count-badge')),
       );
@@ -265,7 +282,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // ── Producer pair ─────────────────────────────────────────────────
-      await tapNav(tester, 'Producer');
+      await tapNav(tester, TongtaiTabs.producer);
       final favCount = tester.widget<Text>(
         find.byKey(const Key('producer-fav-count')),
       );
@@ -290,7 +307,7 @@ void main() {
       expect(summary.data, contains('${generated.length} '));
 
       // ── Inventory pair: sample product findable in the domain list ────
-      await tapNav(tester, 'Inventory');
+      await tapNav(tester, TongtaiTabs.inventory);
       final invSearch = find
           .descendant(
             of: find.byType(TongtaiInventoryScreen),
@@ -382,7 +399,7 @@ void main() {
       ),
     );
     await pumpApp(tester, s.app);
-    await tapNav(tester, 'Home');
+    await tapNav(tester, TongtaiTabs.home);
 
     final contracts = <CountListContract>[
       CountListContract(
@@ -390,7 +407,7 @@ void main() {
         summaryKey: const Key('home-tile-consumer'),
         repositoryCount: () async => (await s.customers.loadAll()).length,
         openDomain: (t) async {
-          await tapNav(t, 'Consumer');
+          await tapNav(t, TongtaiTabs.consumer);
           await t.tap(find.byKey(const Key('consumer-view-all')));
           await t.pumpAndSettle();
         },
@@ -417,9 +434,9 @@ void main() {
         openSummary: (t) async {
           await t.pageBack();
           await t.pumpAndSettle();
-          await tapNav(t, 'Home');
+          await tapNav(t, TongtaiTabs.home);
         },
-        openDomain: (t) async => tapNav(t, 'Inventory'),
+        openDomain: (t) async => tapNav(t, TongtaiTabs.inventory),
         itemKeyPrefix: 'inventory-item-',
       ),
     ];

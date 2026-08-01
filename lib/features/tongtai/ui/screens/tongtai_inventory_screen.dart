@@ -13,6 +13,7 @@ import '../../providers/tongtai_inventory_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import 'tongtai_product_form_screen.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_more_action.dart';
 import 'tongtai_stock_alerts_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
@@ -169,6 +170,7 @@ class _TongtaiInventoryScreenState
             elevation: 0,
             backgroundColor: TongtaiDesignTokens.lightBackground,
             foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+            actions: const [TongtaiMoreAction()],
           ),
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('inventory-action-add'),
