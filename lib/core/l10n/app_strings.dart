@@ -224,6 +224,10 @@ abstract class AppStrings {
   String get goalReviewNotes;
   String get homeNoOpportunities;
   String get homeNoMissions;
+
+  /// WTM-210 — start a journey straight from Home's mission block.
+  String get homeStartJourney;
+  String get homeStartJourneyNeedGoal;
   String get oppFilterAll;
   String get oppFilterSaved;
   String get oppEmptyFeed;
@@ -1094,6 +1098,11 @@ class AppStringsVi extends AppStrings {
   String get homeNoOpportunities => 'Chưa có cơ hội nào';
   @override
   String get homeNoMissions => 'Chưa có nhiệm vụ nào';
+  @override
+  String get homeStartJourney => 'Bắt đầu hành trình';
+  @override
+  String get homeStartJourneyNeedGoal =>
+      'Tạo một mục tiêu trước — hành trình là kế hoạch cho một mục tiêu.';
   @override
   String get oppFilterAll => 'Tất cả cơ hội';
   @override
@@ -2461,6 +2470,11 @@ class AppStringsEn extends AppStrings {
   String get homeNoOpportunities => 'No opportunities yet';
   @override
   String get homeNoMissions => 'No missions yet';
+  @override
+  String get homeStartJourney => 'Start a journey';
+  @override
+  String get homeStartJourneyNeedGoal =>
+      'Create a goal first — a journey is the plan for a goal.';
   @override
   String get oppFilterAll => 'All opportunities';
   @override

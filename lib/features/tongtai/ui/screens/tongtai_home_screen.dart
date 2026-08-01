@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tongtai_formatters.dart';
+import '../../journey/journey.dart';
+import '../../journey/journey_controller.dart';
+import '../../journey/journey_node.dart';
+import '../../journey/journey_planner.dart';
+import '../../providers/tongtai_finance_provider.dart';
+import '../../providers/tongtai_profile_provider.dart';
 import '../../journey/business_goal.dart';
 import '../../metrics/business_health.dart';
 import '../../metrics/business_metrics.dart';
@@ -154,6 +160,10 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     );
     final favorites = await favoritesStore.loadAll();
     final List<Opportunity> generated = await opportunitiesFuture;
+    // WTM-210: the mission block reads the journey — one source for "today's
+    // work". The tiles used to render goals wearing a mission label, so Home
+    // and the Journey screen described the same idea from two sources.
+    final journey = await ref.read(journeyRepositoryProvider).loadActive();
     return _HomeData(
       metrics: context.metrics,
       health: context.health,
@@ -163,6 +173,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       producers: favorites.length,
       opportunities: generated,
       hasSamples: await seeder.hasSamples(),
+      journey: journey,
     );
   }
 
@@ -216,6 +227,92 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
 
   void _push(BuildContext context, Widget screen) {
     Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => screen));
+  }
+
+  /// The mission tiles, or the honest state that explains what to do next.
+  List<Widget> _missionBlock(BuildContext context) {
+    final journey = _d.journey;
+    if (journey == null) {
+      // No journey yet. With a goal, one tap starts the plan right here — the
+      // WTM-187 leftover: `startJourney` never had a production caller. With
+      // no goal there is nothing to plan for, and the message says so instead
+      // of dressing goals up as missions.
+      if (_goals.isEmpty) {
+        return [_EmptyBox(context.l10n.homeStartJourneyNeedGoal)];
+      }
+      return [
+        _EmptyBox(context.l10n.homeNoMissions),
+        const SizedBox(height: 8),
+        FilledButton.icon(
+          key: const Key('home-start-journey'),
+          onPressed: _startJourney,
+          icon: const Icon(Icons.route_outlined),
+          label: Text(context.l10n.homeStartJourney),
+        ),
+      ];
+    }
+    // Actionable first: steps and missions the seller can do; milestones only
+    // when nothing finer-grained is pending.
+    final pending = [
+      for (final n in journey.nodes)
+        if (!n.isDone && n.kind != JourneyNodeKind.milestone) n,
+    ];
+    final shown = pending.isNotEmpty
+        ? pending
+        : [
+            for (final n in journey.nodes)
+              if (!n.isDone) n,
+          ];
+    if (shown.isEmpty) return [_EmptyBox(context.l10n.homeNoMissions)];
+    return [
+      for (final node in shown.take(3))
+        _JourneyMissionTile(
+          node: node,
+          onOpen: () => _push(context, const TongtaiJourneyScreen()),
+        ),
+    ];
+  }
+
+  /// Plans and stores a journey for the seller's first goal (WTM-210).
+  Future<void> _startJourney() async {
+    final l10n = context.l10n;
+    final goal = _goals.first;
+    final profile = await ref.read(businessProfileProvider.future);
+    final expenses = await ref.read(financeRepositoryProvider).loadAll();
+    if (!mounted) return;
+    final failure = await runTongtaiAction(
+      () async {
+        final journey =
+            await JourneyController(
+              ref.read(journeyRepositoryProvider),
+            ).startJourney(
+              JourneyPlanInput(
+                goal: goal,
+                profile: profile,
+                productCount: _d.inventory,
+                customerCount: _d.consumer,
+                orderCount: _metrics.ordersCount,
+                expenseCount: expenses.length,
+              ),
+              journeyId: 'journey-${goal.id}',
+            );
+        if (journey == null) {
+          // The planner refused — a brand-new business cannot be planned for,
+          // and an empty plan on screen would be worse than saying so.
+          throw StateError('insufficient');
+        }
+      },
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'home',
+    );
+    if (!mounted) return;
+    if (failure != null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.journeyInsufficientBody)));
+      return;
+    }
+    _data.refresh();
   }
 
   @override
@@ -459,17 +556,13 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                 .map((o) => _OpportunityTile(opportunity: o)),
           const SizedBox(height: 24),
 
-          // ── Today's missions ──────────────────────────────────────
+          // ── Today's missions — from the JOURNEY (WTM-210 · D-11) ──
           //
-          // WTM-187: the section header now opens the Journey. Business
-          // Journey is a P0 capability in the Concept and was reachable only
-          // from a row inside the settings list — a capability nobody finds is
-          // a capability that does not exist for most sellers.
-          //
-          // The tiles still show goals. Rewiring them to journey tasks needs
-          // Home's data path to load journeys too, which is a separate change
-          // to `_HomeData`; the entry point is the part that unblocks people
-          // today.
+          // The tiles used to render goals wearing a mission label, so Home
+          // and the Journey screen described "today's work" from two sources —
+          // the same defect class the SSoT chain fixed all day. D-11 makes the
+          // stakes explicit: the Journey is the product's centre, and Home's
+          // mission block is its front door.
           _SectionHeader(
             title: context.l10n.homeTodaysMissions,
             actionKey: const Key('home-open-journey'),
@@ -481,10 +574,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          if (_goals.isEmpty)
-            _EmptyBox(context.l10n.homeNoMissions)
-          else
-            ..._goals.take(3).map((g) => _MissionTile(goal: g)),
+          ..._missionBlock(context),
         ],
       ),
     );
@@ -507,6 +597,7 @@ class _HomeData {
     required this.producers,
     required this.opportunities,
     required this.hasSamples,
+    this.journey,
   });
 
   static const _HomeData empty = _HomeData(
@@ -519,6 +610,10 @@ class _HomeData {
     opportunities: [],
     hasSamples: false,
   );
+
+  /// The one active journey, or `null` when the seller has not started one
+  /// (WTM-210). What "Nhiệm vụ hôm nay" is actually made of.
+  final Journey? journey;
 
   final BusinessMetrics metrics;
   final BusinessHealth health;
@@ -1006,60 +1101,34 @@ class _OpportunityTile extends StatelessWidget {
 }
 
 /// One active goal shown as a "mission" with its progress.
-class _MissionTile extends StatelessWidget {
-  const _MissionTile({required this.goal});
+/// One journey node on Home (WTM-210) — a real mission, not a goal in a
+/// mission costume.
+class _JourneyMissionTile extends StatelessWidget {
+  const _JourneyMissionTile({required this.node, required this.onOpen});
 
-  final BusinessGoal goal;
+  final JourneyNode node;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
-    final pct = (goal.progress * 100).round();
-    return Container(
+    return Card(
+      key: Key('home-mission-${node.id}'),
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  goal.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: TongtaiDesignTokens.lightTextPrimary,
-                  ),
-                ),
-              ),
-              Text(
-                '$pct%',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: TongtaiDesignTokens.producerGreen,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: goal.progress,
-              minHeight: 6,
-              backgroundColor: TongtaiDesignTokens.lightHover,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                TongtaiDesignTokens.producerGreen,
-              ),
-            ),
-          ),
-        ],
+      child: ListTile(
+        onTap: onOpen,
+        leading: Icon(
+          node.state == JourneyNodeState.inProgress
+              ? Icons.play_circle_outline
+              : Icons.radio_button_unchecked,
+          color: TongtaiDesignTokens.copilotViolet,
+        ),
+        title: Text(node.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+        // Provenance stays visible (WTM-191): a commitment the seller made
+        // from an opportunity must not read as one of the rules' ideas.
+        subtitle: node.isFromOpportunity
+            ? Text(context.l10n.journeyFromOpportunity)
+            : null,
+        trailing: const Icon(Icons.chevron_right, size: 18),
       ),
     );
   }

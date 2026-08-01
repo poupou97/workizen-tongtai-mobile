@@ -37,6 +37,8 @@
 | D-6 Monetization | Phase 2 free; Phase 3 RevenueCat (subscription/credits/premium AI) | Founder 2026-07-23 |
 | D-8 Ngôn ngữ | VI primary, EN secondary | Founder 2026-07-23 |
 | D-10 Export | Phase 2 có CSV export; Reports/BI Phase 3 | Founder 2026-07-23 |
+| **D-11 Journey là trung tâm** | **Business Journey là trung tâm sản phẩm.** Finance · Consumer · Producer · Inventory · Reports **không** phải trung tâm — mọi capability mới phải **phục vụ Journey**. Khi có nhiều lựa chọn, ưu tiên thứ làm **Journey thông minh hơn** thay vì làm module riêng mạnh hơn. Áp vào Priority Matrix: điểm bằng nhau ⇒ việc phục vụ Journey xếp trước | Founder 2026-08-01 |
+| D-12 Concept-1 phân nhóm | Công nợ = **view dẫn xuất** từ `paymentStatus` (làm được ngay) · CDP/CRM = **tiến hoá của Consumer hiện có**, không xây hub mới; Affiliate = Future · doanh thu theo kênh = **tự ghi trên đơn** (WTM-209), đồng bộ sàn = Phase 3 · Thuế / AI Product Discovery / Voice = **Future Capability** theo lộ trình | Founder 2026-08-01 |
 | Model policy | Dev agent: Opus 4.8 mặc định; task khó/retry → Fable 5 | Founder 2026-07-16 |
 | Evidence-Driven Runtime | Verdict từ evidence, không tin agent report; cấm placebo test | Founder 2026-07-14 |
 | Self-planning | Runtime tự lập kế hoạch trong phạm vi feature branch; Founder giữ Vision/Direction/Goals/Architecture/main | Founder 2026-07-16 |

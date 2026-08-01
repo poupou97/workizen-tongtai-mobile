@@ -1,3 +1,5 @@
+import 'package:tongtai/database/database.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +34,14 @@ import 'package:tongtai/features/tongtai/ui/tongtai_app_shell.dart';
 /// was exactly this class: entry points vanishing after onboarding-gating).
 /// Production wiring: real shell, real providers over in-memory repositories.
 void main() {
+  AppDatabase? sharedDb;
+  AppDatabase memoryDb() =>
+      sharedDb ??= AppDatabase.forExecutor(NativeDatabase.memory());
+  tearDown(() async {
+    await sharedDb?.close();
+    sharedDb = null;
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late InMemoryCustomerRepository customerRepo;
@@ -70,6 +80,8 @@ void main() {
       tongtaiSearchFavoritesStoreProvider.overrideWithValue(
         InMemorySupplierFavoritesStore(),
       ),
+      // WTM-210: Home reads the journey repository — needs a database.
+      tongtaiDatabaseProvider.overrideWithValue(memoryDb()),
     ],
     child: const MaterialApp(
       localizationsDelegates: [

@@ -1,3 +1,5 @@
+import 'package:tongtai/database/database.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,8 +53,20 @@ void main() {
     finance: financeRepo,
   );
 
+  // WTM-210: Home reads the journey repository now, which needs a database —
+  // without this the read fails and the whole dashboard shows the failure
+  // state instead of KPIs (the harness failing, not the screen).
+  AppDatabase? sharedDb;
+  AppDatabase memoryDb() =>
+      sharedDb ??= AppDatabase.forExecutor(NativeDatabase.memory());
+  tearDown(() async {
+    await sharedDb?.close();
+    sharedDb = null;
+  });
+
   Widget wrap(Widget home) => ProviderScope(
     overrides: [
+      tongtaiDatabaseProvider.overrideWithValue(memoryDb()),
       customerRepositoryProvider.overrideWithValue(customerRepo),
       productRepositoryProvider.overrideWithValue(productRepo),
       orderRepositoryProvider.overrideWithValue(orderRepo),
@@ -267,7 +281,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text("Today's Missions"), findsOneWidget);
-    expect(find.text('No missions yet'), findsOneWidget);
+    // WTM-210: no goal means there is nothing to plan a journey for, and the
+    // block says exactly that instead of showing goals dressed as missions.
+    expect(find.textContaining('Create a goal first'), findsOneWidget);
   });
 
   testWidgets('the KPI header opens the full Reports dashboard', (
