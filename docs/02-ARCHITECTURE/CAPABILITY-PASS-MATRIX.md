@@ -28,6 +28,12 @@ thứ chưa nhìn là cách tái tạo đúng tình huống đó trong một b�
 | `?` | **Chưa audit** |
 | — | Không áp dụng ở Phase 2 |
 
+## Nguyên tắc xếp hạng (D-11, Founder 2026-08-01)
+
+**Business Journey là trung tâm sản phẩm.** Mọi capability mới phải phục vụ
+Journey; khi điểm bằng nhau, việc làm **Journey thông minh hơn** xếp trước việc
+làm một module riêng mạnh hơn.
+
 ## Thang điểm ưu tiên
 
 | Mức | Điểm | Loại |
