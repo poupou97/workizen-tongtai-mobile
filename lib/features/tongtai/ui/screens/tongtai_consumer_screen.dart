@@ -7,6 +7,7 @@ import '../../consumer/customer.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../providers/tongtai_consumer_provider.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_customer_list_screen.dart';
 
@@ -72,6 +73,11 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The business data can change from another screen (restore a backup, seed
+    // or remove sample data). This screen is kept alive by the shell's
+    // IndexedStack, so its `initState` load never runs again — without this it
+    // would keep rendering a business that no longer exists (WTM-174).
+    ref.listen(businessDataRevisionProvider, (_, _) => _data.refresh());
     final l10n = context.l10n;
     return Scaffold(
       backgroundColor: Colors.white,

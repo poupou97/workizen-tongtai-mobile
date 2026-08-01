@@ -205,6 +205,11 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The business data can change from another screen (restore a backup, seed
+    // or remove sample data). This screen is kept alive by the shell's
+    // IndexedStack, so its `initState` load never runs again — without this it
+    // would keep rendering a business that no longer exists (WTM-174).
+    ref.listen(businessDataRevisionProvider, (_, _) => _data.refresh());
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
