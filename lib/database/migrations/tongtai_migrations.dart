@@ -55,7 +55,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 7;
+const int kTongtaiSchemaVersion = 8;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -66,6 +66,10 @@ const String kChatMessagesTableName = 'chat_messages_table';
 /// the generated [TableInfo] via `db.allTables` without importing `AppDatabase`
 /// (which would create an import cycle back into this migration library).
 const String kSupplierFavoritesTableName = 'supplier_favorites_table';
+
+/// Drift table name of the AI Business Profile table (WTM-177), added in schema
+/// v8. Same allTables-lookup convention as [kSupplierFavoritesTableName].
+const String kBusinessProfilesTableName = 'business_profiles_table';
 
 /// Builds the [MigrationStrategy] used by [AppDatabase].
 ///
@@ -161,6 +165,17 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
           (t) => t.actualTableName == 'journeys_table',
         );
         await m.addColumn(journeys, journeys.columnsByName['domain_snapshot']!);
+      }
+      if (from < 8) {
+        // v8 (WTM-177 — AI Business Profile). Additive: a new table only, no
+        // existing table touched (ADR-TON-009). Upgrading installs land with an
+        // empty profile table, which reads as "not answered" — the same state a
+        // fresh install starts in, so nothing downstream has to special-case an
+        // upgrade.
+        final profiles = db.allTables.firstWhere(
+          (t) => t.actualTableName == kBusinessProfilesTableName,
+        );
+        await m.createTable(profiles);
       }
     },
     beforeOpen: (OpeningDetails details) async {

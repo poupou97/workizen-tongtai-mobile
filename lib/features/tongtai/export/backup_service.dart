@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../database/database.dart';
+import '../profile/business_profile.dart';
+import '../profile/business_profile_repository.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_repository.dart';
 import '../finance/finance_repository.dart';
@@ -55,6 +57,7 @@ class TongtaiBackupRepositories {
     required this.goals,
     required this.finance,
     required this.favourites,
+    this.businessProfile,
   });
 
   /// Needed for the single transaction that makes Replace atomic — the one
@@ -67,6 +70,11 @@ class TongtaiBackupRepositories {
   final BusinessGoalRepository goals;
   final FinanceRepository finance;
   final SupplierFavoritesStore favourites;
+
+  /// AI Business Profile (WTM-177). Nullable so the many existing call sites
+  /// that build this bundle keep compiling; a `null` repository simply means
+  /// no profile is backed up or restored.
+  final BusinessProfileRepository? businessProfile;
 }
 
 /// The decoded, type-checked contents of a backup.
@@ -79,6 +87,7 @@ class BackupContents {
     required this.goals,
     required this.transactions,
     required this.favourites,
+    this.businessProfile,
   });
 
   final List<Customer> customers;
@@ -87,6 +96,11 @@ class BackupContents {
   final List<BusinessGoal> goals;
   final List<FinanceTransaction> transactions;
   final List<SupplierFavorite> favourites;
+
+  /// AI Business Profile (WTM-177). Optional: `null` means the package carries
+  /// no profile — either it predates the feature, or the seller never answered.
+  /// Both read the same way and neither blocks a restore.
+  final BusinessProfile? businessProfile;
 
   Map<String, int> get counts => {
     BackupDatasets.customers: customers.length,
@@ -338,6 +352,8 @@ class TongtaiBackupService {
           for (final t in contents.transactions)
             BackupCodec.encodeTransaction(t),
         ],
+        if (contents.businessProfile?.isNotEmpty ?? false)
+          BackupDatasets.businessProfile: [contents.businessProfile!.toJson()],
         BackupDatasets.favourites: [
           for (final f in contents.favourites) BackupCodec.encodeFavourite(f),
         ],
@@ -364,7 +380,11 @@ class TongtaiBackupService {
       // only writes complete, unredacted backups — but it says so explicitly
       // rather than leaving a future reader to assume it.
       packageKind: PackageKind.backup,
-      datasets: BackupDatasets.all,
+      datasets: [
+        ...BackupDatasets.all,
+        if (contents.businessProfile?.isNotEmpty ?? false)
+          BackupDatasets.businessProfile,
+      ],
       redaction: BackupRedaction.none,
     );
     return encodeBackupDocument(manifest, stored);
@@ -377,6 +397,7 @@ class TongtaiBackupService {
     goals: await repositories.goals.loadAll(),
     transactions: await repositories.finance.loadAll(),
     favourites: await repositories.favourites.loadAll(),
+    businessProfile: await repositories.businessProfile?.load(),
   );
 
   // ── validate ─────────────────────────────────────────────────────────────
@@ -571,6 +592,22 @@ class TongtaiBackupService {
         favourites == null) {
       return null;
     }
+    // Optional dataset (WTM-177): absent is normal — every `.ttbk` written
+    // before the profile existed lacks it, and those files must still restore.
+    // A malformed profile is dropped rather than failing the whole package,
+    // because losing four categorical answers must never cost a seller their
+    // orders.
+    final profileRows = payload.datasets[BackupDatasets.businessProfile];
+    BusinessProfile? profile;
+    if (profileRows != null && profileRows.isNotEmpty) {
+      try {
+        profile = BusinessProfile.fromJson(
+          Map<String, dynamic>.from(profileRows.first),
+        );
+      } on Object {
+        profile = null;
+      }
+    }
     return BackupContents(
       customers: customers,
       products: products,
@@ -578,6 +615,7 @@ class TongtaiBackupService {
       goals: goals,
       transactions: transactions,
       favourites: favourites,
+      businessProfile: profile,
     );
   }
 
@@ -678,6 +716,11 @@ class TongtaiBackupService {
         await repositories.goals.deleteAll();
         await repositories.finance.deleteAll();
         await repositories.favourites.deleteAll();
+        // Replace means replace (ADR-TON-018): the incoming business's profile
+        // wins, and a package without one leaves the profile empty rather than
+        // keeping the previous business's answers — otherwise a restored
+        // business would carry the old owner's trade and channels.
+        await repositories.businessProfile?.deleteAll();
 
         // …and back in dependency order: a customer must exist before an order
         // may reference it.
@@ -690,6 +733,13 @@ class TongtaiBackupService {
           await repositories.favourites.add(
             favourite.supplierId,
             addedAt: favourite.addedAt,
+          );
+        }
+        final profile = contents.businessProfile;
+        if (profile != null && profile.isNotEmpty) {
+          await repositories.businessProfile?.save(
+            profile,
+            now: profile.updatedAt,
           );
         }
 

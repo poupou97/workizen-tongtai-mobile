@@ -24,6 +24,7 @@ import 'tables/integrations.dart';
 import 'tables/sync_queue_items.dart';
 import 'tables/supplier_favorites.dart';
 import 'tables/chat_messages.dart';
+import 'tables/business_profiles.dart';
 
 import 'migrations/tongtai_migrations.dart';
 
@@ -77,6 +78,7 @@ part 'database.g.dart';
     IntegrationsTable,
     SyncQueueItemsTable,
     SupplierFavoritesTable,
+    BusinessProfilesTable,
     ChatMessagesTable,
   ],
 )

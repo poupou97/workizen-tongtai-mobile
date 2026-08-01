@@ -75,5 +75,34 @@ goal-type filtering/reporting arrives.
 
 v1 initial · v2 supplier_favorites · v3 products.description + FTS5 · v4
 chat_messages · v5 products.domain_snapshot (WTM-121) · v6 customers.domain_snapshot
-(WTM-123) · **v7 journeys.domain_snapshot** (WTM-124). Bump by exactly one + an
-additive `onUpgrade` step per change (`tongtai_migrations.dart`).
+(WTM-123) · v7 journeys.domain_snapshot (WTM-124) · **v8 business_profiles**
+(WTM-177). Bump by exactly one + an additive `onUpgrade` step per change
+(`tongtai_migrations.dart`).
+
+## AI Business Profile (v8, WTM-177)
+
+`business_profiles_table` — **at most one row**, pinned to `id = 1` (one device,
+one business per ADR-TON-008). Four nullable code columns + `updatedAt`. No
+snapshot column: the whole model is four enums, so there is no lossless
+remainder to carry.
+
+**Two rules that are not obvious from the schema:**
+
+1. **No column may name a person or a place.** The profile is injected into
+   every AI prompt, so in BYOK mode it leaves the device on every question. It
+   holds categorical facts about the trade and nothing else — no owner name, no
+   phone, no address, and **no free-text column**, which is the field a seller
+   would type a customer's phone number into.
+   Guarded by `tongtai_business_profile_privacy_test.dart`, which reads the
+   source and fails on a forbidden identifier — and which contains a planted
+   violation so it cannot pass vacuously.
+
+2. **`businessProfile` is an OPTIONAL `.ttbk` dataset**
+   (`BackupDatasets.optional`, **not** `BackupDatasets.all`). `BackupService`
+   rejects a package missing any *required* dataset, so putting it in `all`
+   would make **every `.ttbk` file written before v8 unrestorable** — an
+   additive feature producing a data-loss-shaped bug. Absent reads as "no
+   profile" and never blocks a restore (ADR-TON-018 amendment 1).
+
+Restore is Replace: the incoming business's profile wins, and a package without
+one leaves the profile empty rather than keeping the previous owner's trade.

@@ -98,8 +98,18 @@ class BackupDatasets {
   static const String transactions = 'transactions';
   static const String favourites = 'favourites';
 
+  /// AI Business Profile (WTM-177). **Optional on purpose** — see [optional].
+  static const String businessProfile = 'businessProfile';
+
   /// Every dataset a v2 backup must carry. A file missing any of these is
   /// **not** a complete snapshot and is rejected rather than partially applied.
+  ///
+  /// ⚠️ **Adding a name here retroactively invalidates every `.ttbk` file that
+  /// already exists.** `BackupService` rejects a package missing any required
+  /// dataset, so a seller who backed up yesterday would find today's build
+  /// refuses to restore it — a data-loss-shaped bug produced by an additive
+  /// feature. New datasets go in [optional] instead, unless the Founder
+  /// explicitly accepts breaking older files.
   static const List<String> all = [
     customers,
     products,
@@ -108,6 +118,13 @@ class BackupDatasets {
     transactions,
     favourites,
   ];
+
+  /// Datasets a package **may** carry. Written when present; when absent the
+  /// restore proceeds and that part of the app is simply left empty.
+  ///
+  /// This is ADR-TON-018 amendment 1 applied to datasets rather than to
+  /// manifest keys: *"vắng mặt ⇒ mặc định (file v2 cũ vẫn restore được)"*.
+  static const List<String> optional = [businessProfile];
 }
 
 /// What a package is **for**.

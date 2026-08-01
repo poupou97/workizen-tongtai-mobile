@@ -13154,6 +13154,450 @@ class SupplierFavoritesTableCompanion
   }
 }
 
+class $BusinessProfilesTableTable extends BusinessProfilesTable
+    with TableInfo<$BusinessProfilesTableTable, BusinessProfilesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BusinessProfilesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _tradeCodeMeta = const VerificationMeta(
+    'tradeCode',
+  );
+  @override
+  late final GeneratedColumn<String> tradeCode = GeneratedColumn<String>(
+    'trade_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sizeCodeMeta = const VerificationMeta(
+    'sizeCode',
+  );
+  @override
+  late final GeneratedColumn<String> sizeCode = GeneratedColumn<String>(
+    'size_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _channelCodesMeta = const VerificationMeta(
+    'channelCodes',
+  );
+  @override
+  late final GeneratedColumn<String> channelCodes = GeneratedColumn<String>(
+    'channel_codes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seasonalityCodeMeta = const VerificationMeta(
+    'seasonalityCode',
+  );
+  @override
+  late final GeneratedColumn<String> seasonalityCode = GeneratedColumn<String>(
+    'seasonality_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tradeCode,
+    sizeCode,
+    channelCodes,
+    seasonalityCode,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'business_profiles_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BusinessProfilesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('trade_code')) {
+      context.handle(
+        _tradeCodeMeta,
+        tradeCode.isAcceptableOrUnknown(data['trade_code']!, _tradeCodeMeta),
+      );
+    }
+    if (data.containsKey('size_code')) {
+      context.handle(
+        _sizeCodeMeta,
+        sizeCode.isAcceptableOrUnknown(data['size_code']!, _sizeCodeMeta),
+      );
+    }
+    if (data.containsKey('channel_codes')) {
+      context.handle(
+        _channelCodesMeta,
+        channelCodes.isAcceptableOrUnknown(
+          data['channel_codes']!,
+          _channelCodesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seasonality_code')) {
+      context.handle(
+        _seasonalityCodeMeta,
+        seasonalityCode.isAcceptableOrUnknown(
+          data['seasonality_code']!,
+          _seasonalityCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BusinessProfilesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BusinessProfilesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      tradeCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trade_code'],
+      ),
+      sizeCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}size_code'],
+      ),
+      channelCodes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}channel_codes'],
+      ),
+      seasonalityCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seasonality_code'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BusinessProfilesTableTable createAlias(String alias) {
+    return $BusinessProfilesTableTable(attachedDatabase, alias);
+  }
+}
+
+class BusinessProfilesTableData extends DataClass
+    implements Insertable<BusinessProfilesTableData> {
+  /// Always `1`. See the class doc — one device, one business, one row.
+  final int id;
+
+  /// What the business sells, as a canonical code (e.g. `fashion`, `food`).
+  /// Stored as a **code**, never a display label — same rule as `.ttbk` v2
+  /// (ADR-TON-018): labels are localized and would break the moment the seller
+  /// switches language.
+  final String? tradeCode;
+
+  /// Rough size band, canonical code (e.g. `solo`, `small`, `growing`).
+  final String? sizeCode;
+
+  /// Where they sell, canonical codes joined by `,` (e.g. `shop,shopee`).
+  /// A joined list rather than a child table because it is a short fixed
+  /// vocabulary read as a whole — promote it per ADR-TON-009 only if a real
+  /// query needs it.
+  final String? channelCodes;
+
+  /// Whether the trade is seasonal, canonical code (e.g. `none`, `tet`).
+  final String? seasonalityCode;
+
+  /// When the seller last edited the profile. Drives "your profile is stale"
+  /// prompts later; also lets a restore keep the newer of two profiles.
+  final DateTime updatedAt;
+  const BusinessProfilesTableData({
+    required this.id,
+    this.tradeCode,
+    this.sizeCode,
+    this.channelCodes,
+    this.seasonalityCode,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || tradeCode != null) {
+      map['trade_code'] = Variable<String>(tradeCode);
+    }
+    if (!nullToAbsent || sizeCode != null) {
+      map['size_code'] = Variable<String>(sizeCode);
+    }
+    if (!nullToAbsent || channelCodes != null) {
+      map['channel_codes'] = Variable<String>(channelCodes);
+    }
+    if (!nullToAbsent || seasonalityCode != null) {
+      map['seasonality_code'] = Variable<String>(seasonalityCode);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  BusinessProfilesTableCompanion toCompanion(bool nullToAbsent) {
+    return BusinessProfilesTableCompanion(
+      id: Value(id),
+      tradeCode: tradeCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tradeCode),
+      sizeCode: sizeCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sizeCode),
+      channelCodes: channelCodes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channelCodes),
+      seasonalityCode: seasonalityCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seasonalityCode),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory BusinessProfilesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BusinessProfilesTableData(
+      id: serializer.fromJson<int>(json['id']),
+      tradeCode: serializer.fromJson<String?>(json['tradeCode']),
+      sizeCode: serializer.fromJson<String?>(json['sizeCode']),
+      channelCodes: serializer.fromJson<String?>(json['channelCodes']),
+      seasonalityCode: serializer.fromJson<String?>(json['seasonalityCode']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'tradeCode': serializer.toJson<String?>(tradeCode),
+      'sizeCode': serializer.toJson<String?>(sizeCode),
+      'channelCodes': serializer.toJson<String?>(channelCodes),
+      'seasonalityCode': serializer.toJson<String?>(seasonalityCode),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  BusinessProfilesTableData copyWith({
+    int? id,
+    Value<String?> tradeCode = const Value.absent(),
+    Value<String?> sizeCode = const Value.absent(),
+    Value<String?> channelCodes = const Value.absent(),
+    Value<String?> seasonalityCode = const Value.absent(),
+    DateTime? updatedAt,
+  }) => BusinessProfilesTableData(
+    id: id ?? this.id,
+    tradeCode: tradeCode.present ? tradeCode.value : this.tradeCode,
+    sizeCode: sizeCode.present ? sizeCode.value : this.sizeCode,
+    channelCodes: channelCodes.present ? channelCodes.value : this.channelCodes,
+    seasonalityCode: seasonalityCode.present
+        ? seasonalityCode.value
+        : this.seasonalityCode,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  BusinessProfilesTableData copyWithCompanion(
+    BusinessProfilesTableCompanion data,
+  ) {
+    return BusinessProfilesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      tradeCode: data.tradeCode.present ? data.tradeCode.value : this.tradeCode,
+      sizeCode: data.sizeCode.present ? data.sizeCode.value : this.sizeCode,
+      channelCodes: data.channelCodes.present
+          ? data.channelCodes.value
+          : this.channelCodes,
+      seasonalityCode: data.seasonalityCode.present
+          ? data.seasonalityCode.value
+          : this.seasonalityCode,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessProfilesTableData(')
+          ..write('id: $id, ')
+          ..write('tradeCode: $tradeCode, ')
+          ..write('sizeCode: $sizeCode, ')
+          ..write('channelCodes: $channelCodes, ')
+          ..write('seasonalityCode: $seasonalityCode, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tradeCode,
+    sizeCode,
+    channelCodes,
+    seasonalityCode,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BusinessProfilesTableData &&
+          other.id == this.id &&
+          other.tradeCode == this.tradeCode &&
+          other.sizeCode == this.sizeCode &&
+          other.channelCodes == this.channelCodes &&
+          other.seasonalityCode == this.seasonalityCode &&
+          other.updatedAt == this.updatedAt);
+}
+
+class BusinessProfilesTableCompanion
+    extends UpdateCompanion<BusinessProfilesTableData> {
+  final Value<int> id;
+  final Value<String?> tradeCode;
+  final Value<String?> sizeCode;
+  final Value<String?> channelCodes;
+  final Value<String?> seasonalityCode;
+  final Value<DateTime> updatedAt;
+  const BusinessProfilesTableCompanion({
+    this.id = const Value.absent(),
+    this.tradeCode = const Value.absent(),
+    this.sizeCode = const Value.absent(),
+    this.channelCodes = const Value.absent(),
+    this.seasonalityCode = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  BusinessProfilesTableCompanion.insert({
+    this.id = const Value.absent(),
+    this.tradeCode = const Value.absent(),
+    this.sizeCode = const Value.absent(),
+    this.channelCodes = const Value.absent(),
+    this.seasonalityCode = const Value.absent(),
+    required DateTime updatedAt,
+  }) : updatedAt = Value(updatedAt);
+  static Insertable<BusinessProfilesTableData> custom({
+    Expression<int>? id,
+    Expression<String>? tradeCode,
+    Expression<String>? sizeCode,
+    Expression<String>? channelCodes,
+    Expression<String>? seasonalityCode,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tradeCode != null) 'trade_code': tradeCode,
+      if (sizeCode != null) 'size_code': sizeCode,
+      if (channelCodes != null) 'channel_codes': channelCodes,
+      if (seasonalityCode != null) 'seasonality_code': seasonalityCode,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  BusinessProfilesTableCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? tradeCode,
+    Value<String?>? sizeCode,
+    Value<String?>? channelCodes,
+    Value<String?>? seasonalityCode,
+    Value<DateTime>? updatedAt,
+  }) {
+    return BusinessProfilesTableCompanion(
+      id: id ?? this.id,
+      tradeCode: tradeCode ?? this.tradeCode,
+      sizeCode: sizeCode ?? this.sizeCode,
+      channelCodes: channelCodes ?? this.channelCodes,
+      seasonalityCode: seasonalityCode ?? this.seasonalityCode,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (tradeCode.present) {
+      map['trade_code'] = Variable<String>(tradeCode.value);
+    }
+    if (sizeCode.present) {
+      map['size_code'] = Variable<String>(sizeCode.value);
+    }
+    if (channelCodes.present) {
+      map['channel_codes'] = Variable<String>(channelCodes.value);
+    }
+    if (seasonalityCode.present) {
+      map['seasonality_code'] = Variable<String>(seasonalityCode.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessProfilesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('tradeCode: $tradeCode, ')
+          ..write('sizeCode: $sizeCode, ')
+          ..write('channelCodes: $channelCodes, ')
+          ..write('seasonalityCode: $seasonalityCode, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ChatMessagesTableTable extends ChatMessagesTable
     with TableInfo<$ChatMessagesTableTable, ChatMessagesTableData> {
   @override
@@ -13721,6 +14165,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
       $SupplierFavoritesTableTable(this);
+  late final $BusinessProfilesTableTable businessProfilesTable =
+      $BusinessProfilesTableTable(this);
   late final $ChatMessagesTableTable chatMessagesTable =
       $ChatMessagesTableTable(this);
   late final Index producersBusinessId = Index(
@@ -13805,6 +14251,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     integrationsTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
+    businessProfilesTable,
     chatMessagesTable,
     producersBusinessId,
     productsBusinessId,
@@ -24298,6 +24745,242 @@ typedef $$SupplierFavoritesTableTableProcessedTableManager =
       SupplierFavoritesTableData,
       PrefetchHooks Function()
     >;
+typedef $$BusinessProfilesTableTableCreateCompanionBuilder =
+    BusinessProfilesTableCompanion Function({
+      Value<int> id,
+      Value<String?> tradeCode,
+      Value<String?> sizeCode,
+      Value<String?> channelCodes,
+      Value<String?> seasonalityCode,
+      required DateTime updatedAt,
+    });
+typedef $$BusinessProfilesTableTableUpdateCompanionBuilder =
+    BusinessProfilesTableCompanion Function({
+      Value<int> id,
+      Value<String?> tradeCode,
+      Value<String?> sizeCode,
+      Value<String?> channelCodes,
+      Value<String?> seasonalityCode,
+      Value<DateTime> updatedAt,
+    });
+
+class $$BusinessProfilesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $BusinessProfilesTableTable> {
+  $$BusinessProfilesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tradeCode => $composableBuilder(
+    column: $table.tradeCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sizeCode => $composableBuilder(
+    column: $table.sizeCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get channelCodes => $composableBuilder(
+    column: $table.channelCodes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seasonalityCode => $composableBuilder(
+    column: $table.seasonalityCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BusinessProfilesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $BusinessProfilesTableTable> {
+  $$BusinessProfilesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tradeCode => $composableBuilder(
+    column: $table.tradeCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sizeCode => $composableBuilder(
+    column: $table.sizeCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get channelCodes => $composableBuilder(
+    column: $table.channelCodes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seasonalityCode => $composableBuilder(
+    column: $table.seasonalityCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BusinessProfilesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BusinessProfilesTableTable> {
+  $$BusinessProfilesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tradeCode =>
+      $composableBuilder(column: $table.tradeCode, builder: (column) => column);
+
+  GeneratedColumn<String> get sizeCode =>
+      $composableBuilder(column: $table.sizeCode, builder: (column) => column);
+
+  GeneratedColumn<String> get channelCodes => $composableBuilder(
+    column: $table.channelCodes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seasonalityCode => $composableBuilder(
+    column: $table.seasonalityCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$BusinessProfilesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BusinessProfilesTableTable,
+          BusinessProfilesTableData,
+          $$BusinessProfilesTableTableFilterComposer,
+          $$BusinessProfilesTableTableOrderingComposer,
+          $$BusinessProfilesTableTableAnnotationComposer,
+          $$BusinessProfilesTableTableCreateCompanionBuilder,
+          $$BusinessProfilesTableTableUpdateCompanionBuilder,
+          (
+            BusinessProfilesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $BusinessProfilesTableTable,
+              BusinessProfilesTableData
+            >,
+          ),
+          BusinessProfilesTableData,
+          PrefetchHooks Function()
+        > {
+  $$BusinessProfilesTableTableTableManager(
+    _$AppDatabase db,
+    $BusinessProfilesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BusinessProfilesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$BusinessProfilesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$BusinessProfilesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> tradeCode = const Value.absent(),
+                Value<String?> sizeCode = const Value.absent(),
+                Value<String?> channelCodes = const Value.absent(),
+                Value<String?> seasonalityCode = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => BusinessProfilesTableCompanion(
+                id: id,
+                tradeCode: tradeCode,
+                sizeCode: sizeCode,
+                channelCodes: channelCodes,
+                seasonalityCode: seasonalityCode,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> tradeCode = const Value.absent(),
+                Value<String?> sizeCode = const Value.absent(),
+                Value<String?> channelCodes = const Value.absent(),
+                Value<String?> seasonalityCode = const Value.absent(),
+                required DateTime updatedAt,
+              }) => BusinessProfilesTableCompanion.insert(
+                id: id,
+                tradeCode: tradeCode,
+                sizeCode: sizeCode,
+                channelCodes: channelCodes,
+                seasonalityCode: seasonalityCode,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BusinessProfilesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BusinessProfilesTableTable,
+      BusinessProfilesTableData,
+      $$BusinessProfilesTableTableFilterComposer,
+      $$BusinessProfilesTableTableOrderingComposer,
+      $$BusinessProfilesTableTableAnnotationComposer,
+      $$BusinessProfilesTableTableCreateCompanionBuilder,
+      $$BusinessProfilesTableTableUpdateCompanionBuilder,
+      (
+        BusinessProfilesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $BusinessProfilesTableTable,
+          BusinessProfilesTableData
+        >,
+      ),
+      BusinessProfilesTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$ChatMessagesTableTableCreateCompanionBuilder =
     ChatMessagesTableCompanion Function({
       required String id,
@@ -24615,6 +25298,8 @@ class $AppDatabaseManager {
         _db,
         _db.supplierFavoritesTable,
       );
+  $$BusinessProfilesTableTableTableManager get businessProfilesTable =>
+      $$BusinessProfilesTableTableTableManager(_db, _db.businessProfilesTable);
   $$ChatMessagesTableTableTableManager get chatMessagesTable =>
       $$ChatMessagesTableTableTableManager(_db, _db.chatMessagesTable);
 }

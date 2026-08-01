@@ -36,7 +36,8 @@ void main() {
     // v5 (WTM-121): added products.domain_snapshot (ADR-TON-009).
     // v6 (WTM-123): added customers.domain_snapshot (ADR-TON-009).
     // v7 (WTM-124): added journeys.domain_snapshot (ADR-TON-009).
-    expect(db.schemaVersion, 7);
+    // v8 (WTM-177): added business_profiles_table (AI Business Profile).
+    expect(db.schemaVersion, 8);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });
