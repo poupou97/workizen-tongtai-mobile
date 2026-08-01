@@ -134,26 +134,25 @@ void main() {
     expect(find.text('All stock levels healthy'), findsOneWidget);
   });
 
-  testWidgets(
-    'a product above its own reorder level never appears (WTM-213)',
-    (tester) async {
-      // This test used to assert the OPPOSITE: a `minimumThreshold: 10` floor
-      // pulled qty-8/reorder-5 "Border Item" onto this screen while the
-      // Inventory list badge still said in-stock — two truths for one shelf.
-      // WTM-213 removed the floor; the product's own reorder level is the one
-      // rule, so the seller who set 5 is not alarmed at 8.
-      useTallViewport(tester);
-      final catalog = ProductCatalogController.inMemory([
-        product(id: 'a', name: 'Border Item', quantity: 8, reorderLevel: 5),
-      ]);
-      await catalog.hydrate();
-      await tester.pumpWidget(alertsHost(catalog));
-      await tester.pumpAndSettle();
+  testWidgets('a product above its own reorder level never appears (WTM-213)', (
+    tester,
+  ) async {
+    // This test used to assert the OPPOSITE: a `minimumThreshold: 10` floor
+    // pulled qty-8/reorder-5 "Border Item" onto this screen while the
+    // Inventory list badge still said in-stock — two truths for one shelf.
+    // WTM-213 removed the floor; the product's own reorder level is the one
+    // rule, so the seller who set 5 is not alarmed at 8.
+    useTallViewport(tester);
+    final catalog = ProductCatalogController.inMemory([
+      product(id: 'a', name: 'Border Item', quantity: 8, reorderLevel: 5),
+    ]);
+    await catalog.hydrate();
+    await tester.pumpWidget(alertsHost(catalog));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Border Item'), findsNothing);
-      expect(find.text('All stock levels healthy'), findsOneWidget);
-    },
-  );
+    expect(find.text('Border Item'), findsNothing);
+    expect(find.text('All stock levels healthy'), findsOneWidget);
+  });
 
   testWidgets('inventory banner shows counts and opens the alerts screen', (
     tester,
