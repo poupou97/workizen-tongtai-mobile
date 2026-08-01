@@ -334,6 +334,43 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-21 · `scrollUntilVisible` dừng khi widget **được dựng**, không phải khi **nhìn thấy**
+
+- **Root cause:** `scrollUntilVisible` trả về ngay lúc finder khớp. Danh sách
+  lười dựng thêm một khoảng ngoài viewport, nên widget có thể **đã tồn tại mà
+  vẫn nằm dưới mép màn hình**. `tester.tap` sau đó tính ra offset ngoài
+  viewport, **chỉ cảnh báo**, và mọi assert phía sau chạy trên màn không ai
+  chạm vào — đúng cái bẫy `test/support/tap_by_key.dart` sinh ra để chặn, chỉ
+  là ở một nhánh khác.
+- **Regression:** WTM-191 — nút "Đưa vào hành trình" nằm cuối màn chi tiết cơ
+  hội; test bấm hụt, `expect` trên snackbar fail mà nguyên nhân thật lại là cú
+  bấm.
+- **Test pattern:** `tapByKey` nay gọi thêm `ensureVisible` sau
+  `scrollUntilVisible` (có guard: màn không cuộn thì `ensureVisible` ném lỗi
+  chứ không im lặng). Khi nội dung quá cao để cuộn tới trong test, dùng
+  **viewport cao** như suite feed (`tester.view.physicalSize`) — khả năng với
+  tới trên máy nhỏ là việc của `p0/accessibility_test.dart`, không phải của
+  test hành vi.
+- **Prevention:** không bao giờ `tester.tap` trực tiếp cho control có thể nằm
+  ngoài màn. Và khi một test fail ở assert *sau* cú bấm, nghi cú bấm **trước**,
+  đừng sửa assert.
+
+---
+
+## P-22 · SnackBar xếp hàng ⇒ câu trả lời của cú bấm thứ hai bị giấu
+
+- **Root cause:** `showSnackBar` **xếp hàng**. Bấm lần hai, ứng dụng trả lời
+  đúng, nhưng người dùng vẫn đang đọc thông báo của lần một — và kết luận là
+  không có gì xảy ra.
+- **Regression:** WTM-191 — "Đã có trong hành trình" không bao giờ hiện vì
+  "Đã đưa vào hành trình" còn trên màn.
+- **Test pattern:** test hai lần bấm liên tiếp và assert **thông báo thứ hai**,
+  không chỉ assert dữ liệu không nhân đôi.
+- **Prevention:** mọi thông báo phản hồi một hành động phải
+  `hideCurrentSnackBar()` trước `showSnackBar()` — như màn feed đã làm từ đầu.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:

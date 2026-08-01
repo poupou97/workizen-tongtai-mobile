@@ -45,7 +45,10 @@ void main() {
     //                opportunities_table — nothing had ever written a row to
     //                it, and its presence made the app look like it stored
     //                opportunities, which are derived data.
-    expect(db.schemaVersion, 10);
+    // v11 (WTM-191): opportunity → journey. Additive: one nullable column on
+    //                the node table, so every existing node reads as "not from
+    //                an opportunity" — which is what it is.
+    expect(db.schemaVersion, 11);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

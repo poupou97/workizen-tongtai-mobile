@@ -55,7 +55,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 10;
+const int kTongtaiSchemaVersion = 11;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -76,9 +76,13 @@ const String kBusinessProfilesTableName = 'business_profiles_table';
 /// `BusinessGoal` and has since WTM-124; see `tables/business_journeys.dart`.
 const List<String> kBusinessJourneyTableNames = [
   'business_journeys_table',
-  'business_journey_nodes_table',
+  kBusinessJourneyNodesTableName,
   'business_journey_plans_table',
 ];
+
+/// Drift table name of the journey node table. Named separately because the
+/// v11 step (WTM-191) adds a column to this one specifically.
+const String kBusinessJourneyNodesTableName = 'business_journey_nodes_table';
 
 /// Drift table name of the opportunity reaction store (WTM-190), added in
 /// schema v10. See `tables/opportunity_reactions.dart` for why only the
@@ -229,6 +233,15 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 11) {
+        // v11 (WTM-191 — opportunity → journey). Additive: one nullable column
+        // on the node table. Existing nodes read as "not from an opportunity",
+        // which is exactly what they are.
+        final nodes = db.allTables.firstWhere(
+          (t) => t.actualTableName == kBusinessJourneyNodesTableName,
+        );
+        await m.addColumn(nodes, nodes.columnsByName['source_opportunity_id']!);
       }
     },
     beforeOpen: (OpeningDetails details) async {

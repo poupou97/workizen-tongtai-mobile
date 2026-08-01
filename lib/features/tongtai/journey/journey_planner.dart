@@ -63,6 +63,11 @@ abstract final class JourneyReason {
   static const String dataEmptyCatalog = 'data.empty_catalog';
   static const String dataEmptyCustomers = 'data.empty_customers';
   static const String dataHasHistory = 'data.has_history';
+
+  /// The seller turned an opportunity into this piece of work (WTM-191).
+  /// Not produced by any rule — it records a decision, which is why the node
+  /// carrying it survives a re-plan.
+  static const String fromOpportunity = 'source.opportunity';
 }
 
 /// The outcome of planning: either a plan, or an honest refusal.

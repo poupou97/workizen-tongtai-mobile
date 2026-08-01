@@ -101,6 +101,16 @@ class BusinessJourneyNodesTable extends Table {
 
   DateTimeColumn get completedAt => dateTime().nullable()();
 
+  /// The opportunity this node came from (WTM-191), or null for everything the
+  /// planner produced.
+  ///
+  /// Deliberately **not** a foreign key: opportunities are derived data with no
+  /// table of their own, and an FK would make write order part of the restore
+  /// contract — the SqliteException 787 trap that ADR-TON-018 exists to avoid.
+  /// A dangling id is harmless: it means the rule engine no longer generates
+  /// that opportunity, and the work the seller committed to stays regardless.
+  TextColumn get sourceOpportunityId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
