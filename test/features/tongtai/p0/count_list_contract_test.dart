@@ -1,3 +1,4 @@
+import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'dart:io';
 
@@ -335,19 +336,40 @@ void main() {
     'consumer tab derives EVERYTHING from the repository (no static zeros)',
     (tester) async {
       final s = await session();
+      // WTM-201: the counters are **derived from orders** now, so a fixture
+      // that hand-sets `orderCount: 3` is setting a static value — exactly what
+      // this test's own name forbids. Seed real orders instead.
       await s.customers.upsert(
         Customer(
           id: userCustomerId,
           name: userCustomerName,
           phone: '+84900000009',
           location: 'Đà Nẵng',
-          orderCount: 3,
-          totalSpent: 1500000,
-          lastPurchaseDate: DateTime(2026, 7, 20),
+          orderCount: 0,
+          totalSpent: 0,
+          lastPurchaseDate: null,
           email: 'contract@example.com',
           segments: const ['bán sỉ'],
         ),
       );
+      await s.orders.upsertAll([
+        for (var i = 0; i < 3; i++)
+          CustomerOrder(
+            id: 'contract-o$i',
+            customerId: userCustomerId,
+            orderNumber: 'DH-contract-$i',
+            date: DateTime(2026, 7, 20).subtract(Duration(days: i * 5)),
+            status: OrderStatus.delivered,
+            items: [
+              const OrderItem(
+                productName: 'SP',
+                category: 'Home',
+                quantity: 1,
+                unitPrice: 500000,
+              ),
+            ],
+          ),
+      ]);
       await pumpApp(
         tester,
         ProviderScope(
@@ -356,6 +378,7 @@ void main() {
               await SharedPreferences.getInstance(),
             ),
             customerRepositoryProvider.overrideWithValue(s.customers),
+            orderRepositoryProvider.overrideWithValue(s.orders),
           ],
           child: MaterialApp(
             localizationsDelegates: const [

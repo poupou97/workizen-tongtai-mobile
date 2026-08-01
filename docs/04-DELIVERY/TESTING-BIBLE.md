@@ -474,6 +474,26 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-28 · Tên cột trong schema **không đáng tin** — phải đọc repository
+
+- **Root cause:** schema ra đời **trước** domain, nên nhiều cột mang tên của một
+  thiết kế chưa bao giờ tồn tại. Audit theo tên cột ⇒ phân loại sai.
+- **Regression:** WTM-202, tôi phân loại sai **hai lần trong một audit**:
+  · `totalStock` — nghe như tổng của `stockByWarehouse`; thực ra là chỗ lưu
+  `Product.quantity`, còn `stockByWarehouse` **không ai dùng**;
+  · `revenueImpact` — nghe như tác động doanh thu tính ra được; thực ra lưu
+  `BusinessGoal.targetAmount`, tức **mục tiêu do người bán đặt**.
+  Cả hai suýt sinh ra story gỡ nhầm một cột Source.
+- **Test pattern:** governance test liệt kê cột dẫn xuất **kèm lý do nêu tên
+  luật sở hữu nó** (`p0/derived_data_governance_test.dart`), và bản thân danh
+  sách cũng được test — một suite có thể vô hiệu hoá bằng cách xoá một dòng
+  trong danh sách thì không phải governance.
+- **Prevention:** với mỗi cột, đọc **repository ghi gì vào đó và đọc ra làm
+  gì**. `grep 'columnName:'` ở chỗ ghi và `row.columnName` ở chỗ đọc — hai dòng
+  đó nói sự thật, tên cột thì không.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:

@@ -204,4 +204,127 @@ void main() {
       }
     });
   });
+
+  group('customer counters have one owner', () {
+    Customer customer(String id) => Customer(
+      id: id,
+      name: 'Khách $id',
+      phone: '0900000000',
+      location: 'HCM',
+      // Deliberately wrong stored values: nothing writes these when an order is
+      // recorded, so whatever sits here is history (WTM-201).
+      orderCount: 0,
+      totalSpent: 0,
+      lastPurchaseDate: null,
+    );
+
+    test('a recorded order shows up on the customer', () {
+      final orders = [
+        order(
+          'o1',
+          customerId: 'c1',
+          amount: 400000,
+          date: DateTime(2026, 7, 1),
+        ),
+        order(
+          'o2',
+          customerId: 'c1',
+          amount: 600000,
+          date: DateTime(2026, 7, 20),
+        ),
+      ];
+
+      final derived = deriveCustomerCounters(
+        [customer('c1')],
+        orders,
+        now: now,
+      ).single;
+
+      expect(derived.orderCount, 2);
+      expect(derived.totalSpent, 1000000);
+      expect(derived.lastPurchaseDate, DateTime(2026, 7, 20));
+    });
+
+    test('Consumer and RFM agree on how many orders a customer has', () {
+      // The cross-check. Consumer read the stored counter, RFM counted real
+      // orders; both were internally consistent and told the seller different
+      // things — the third time that shape appeared in one day.
+      final orders = [
+        for (var i = 0; i < 5; i++)
+          order(
+            'o$i',
+            customerId: 'c1',
+            amount: 100000,
+            date: DateTime(2026, 7, 1).add(Duration(days: i * 3)),
+          ),
+      ];
+
+      final derived = deriveCustomerCounters(
+        [customer('c1')],
+        orders,
+        now: now,
+      ).single;
+      final profile = CustomerRfmService.compute(
+        [customer('c1')],
+        orders,
+        now: now,
+      ).single;
+
+      expect(derived.orderCount, profile.frequency);
+      expect(derived.totalSpent, profile.monetary);
+    });
+
+    test(
+      'a customer with no orders reads zero, not the stale stored value',
+      () {
+        final stale = customer(
+          'c1',
+        ).copyWith(orderCount: 9, totalSpent: 9000000);
+
+        final derived = deriveCustomerCounters(
+          [stale],
+          const [],
+          now: now,
+        ).single;
+
+        expect(derived.orderCount, 0);
+        expect(derived.totalSpent, 0);
+      },
+    );
+
+    test('a cancelled order counts for neither side', () {
+      final orders = [
+        order(
+          'o1',
+          customerId: 'c1',
+          amount: 400000,
+          date: DateTime(2026, 7, 1),
+        ),
+        CustomerOrder(
+          id: 'x',
+          customerId: 'c1',
+          orderNumber: 'DH-x',
+          date: DateTime(2026, 7, 2),
+          status: OrderStatus.cancelled,
+          items: [
+            OrderItem(
+              productName: 'SP',
+              category: 'Home',
+              quantity: 1,
+              unitPrice: 9000000,
+            ),
+          ],
+        ),
+      ];
+
+      final derived = deriveCustomerCounters(
+        [customer('c1')],
+        orders,
+        now: now,
+      ).single;
+
+      expect(derived.orderCount, 1);
+      expect(derived.totalSpent, 400000);
+    });
+  });
 }

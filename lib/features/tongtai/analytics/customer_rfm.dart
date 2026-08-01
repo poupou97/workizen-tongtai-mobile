@@ -271,3 +271,42 @@ abstract final class CustomerRfmService {
     ]);
   }
 }
+
+/// Fills each customer's **counters** from their real orders (WTM-201).
+///
+/// `Customer.orderCount`, `totalSpent` and `lastPurchaseDate` are stored fields,
+/// and **nothing updates them when the seller records an order** — so a customer
+/// who has just bought something still read *"0 đơn · ₫0"*, while Reports, RFM
+/// and the lifecycle ladder all counted the order perfectly well.
+///
+/// This is the same shape as `deriveGoalsProgress` (WTM-138/200): a stored field
+/// that used to be the truth, a derived rule that took over, and nobody removed
+/// the old field. The fix is the same too — **derive at read time**, never write
+/// a second copy. Updating the counters on every order would be the parallel
+/// record One Data Path (ADR-TON-015) forbids: edit or delete an order and the
+/// counters drift, with nothing to notice.
+///
+/// The persisted values are left untouched, exactly as `deriveGoalsProgress`
+/// leaves the stored goals alone.
+List<Customer> deriveCustomerCounters(
+  List<Customer> customers,
+  List<CustomerOrder> orders, {
+  required DateTime now,
+}) {
+  final profiles = {
+    for (final p in CustomerRfmService.compute(customers, orders, now: now))
+      p.customerId: p,
+  };
+  return [
+    for (final c in customers)
+      () {
+        final p = profiles[c.id];
+        if (p == null) return c;
+        return c.copyWith(
+          orderCount: p.frequency,
+          totalSpent: p.monetary,
+          lastPurchaseDate: p.lastOrderAt,
+        );
+      }(),
+  ];
+}

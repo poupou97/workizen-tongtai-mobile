@@ -98,6 +98,8 @@ class _TongtaiCustomerListScreenState
       // Real app: persistent Drift directory (WTM-123), empty for new users.
       _directory = CustomerDirectoryController(
         ref.read(customerRepositoryProvider),
+        // WTM-201: counters derived from real orders, not the stored fields.
+        orders: ref.read(orderRepositoryProvider),
       );
       _ownsDirectory = true;
       // Real order source for Create Order (WTM-126).
