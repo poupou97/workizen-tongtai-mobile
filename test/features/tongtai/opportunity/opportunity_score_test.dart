@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_feed_controller.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 
@@ -154,17 +156,42 @@ void main() {
     });
   });
 
-  group('the ROI facet (WTM-193)', () {
-    test('stays in the domain but is not offered to the seller', () {
-      // The Founder's O-1 rule: keep the domain, hide the capability with no
-      // data. Computing a real ROI needs a cost price, and `Product` carries
-      // only a selling price — so a facet sorting by `estimatedRoi` sorted by a
-      // constant while looking like a choice.
-      expect(OpportunitySort.values, contains(OpportunitySort.roi));
-      expect(OpportunitySort.visible, isNot(contains(OpportunitySort.roi)));
-      expect(OpportunitySort.roi.isVisible, isFalse);
-      expect(OpportunitySort.relevance.isVisible, isTrue);
-      expect(OpportunitySort.recency.isVisible, isTrue);
+  group('the ROI facet (WTM-193 → WTM-207)', () {
+    test('appears only when at least one opportunity has a real return', () {
+      // WTM-193 hid it while `estimatedRoi` was a constant; WTM-207 shows it
+      // again, but only over data — the WTM-182 empty-facet rule.
+      final none = [
+        Opportunity(
+          id: 'a',
+          type: OpportunityType.trend,
+          title: 't',
+          description: 'd',
+          expectedImpact: 1,
+          score: OpportunityScore.fixed(50),
+          discoveredAt: DateTime(2026, 8, 1),
+        ),
+      ];
+      final one = [
+        none.first,
+        ...[
+          Opportunity(
+            id: 'b',
+            type: OpportunityType.trend,
+            title: 't',
+            description: 'd',
+            expectedImpact: 1,
+            roi: 1.4,
+            score: OpportunityScore.fixed(50),
+            discoveredAt: DateTime(2026, 8, 1),
+          ),
+        ],
+      ];
+
+      expect(
+        OpportunitySort.visibleFor(none),
+        isNot(contains(OpportunitySort.roi)),
+      );
+      expect(OpportunitySort.visibleFor(one), contains(OpportunitySort.roi));
     });
   });
 }

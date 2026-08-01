@@ -104,13 +104,14 @@ void main() {
             .map((o) => o.id),
         ['a', 'c', 'b'],
       );
-      // WTM-193: the ROI facet is hidden and falls back to relevance — it
-      // sorted by a constant, so it never sorted by ROI in the first place.
+      // WTM-207: ROI is real again (or absent). These fixtures carry no
+      // cost data, so every ROI is null — all tied, stable id order. The
+      // interesting orderings live in opportunity_roi_test.dart.
       expect(
         controller
             .feed(const OpportunityQuery(sort: OpportunitySort.roi))
             .map((o) => o.id),
-        ['b', 'c', 'a'],
+        ['a', 'b', 'c'],
       );
     });
 

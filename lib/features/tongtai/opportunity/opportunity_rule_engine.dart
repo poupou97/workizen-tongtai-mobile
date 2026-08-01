@@ -97,6 +97,14 @@ class OpportunityRuleEngine {
       final recent = revenue[p.name] ?? 0;
       if (recent <= 0) continue; // no demand signal → no opportunity
       final out = p.quantity == 0;
+      // WTM-207: a real return multiple, or an honest null. Restocking is the
+      // one opportunity with a knowable cost side — the product's own cost
+      // price (WTM-204). profit/investment per unit; no cost entered ⇒ null,
+      // never a constant (that constant is exactly what ADR-TON-022 removed).
+      final cost = p.costPrice;
+      final roi = (cost != null && cost > 0)
+          ? (p.pricePerUnit - cost) / cost
+          : null;
       yield Opportunity(
         id: 'gen-restock-${p.id}',
         type: OpportunityType.trend,
@@ -107,6 +115,7 @@ class OpportunityRuleEngine {
             '(mức đặt lại ${p.reorderLevel}). '
             '${out ? 'Hết hàng là doanh thu bỏ lỡ mỗi ngày.' : 'Nhập thêm trước khi đứt hàng.'}',
         expectedImpact: recent,
+        roi: roi,
         score: scoreOpportunity(
           impact: recent,
           baseline: baseline,

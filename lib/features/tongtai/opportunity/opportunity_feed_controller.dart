@@ -7,18 +7,20 @@ import 'opportunity.dart';
 enum OpportunitySort {
   relevance, // score.value
   recency, // discoveredAt
-  /// **Hidden in Phase 2** (WTM-193). Computing a real ROI needs a **cost
-  /// price**, and `Product` only carries a selling price. It stays in the
-  /// domain per the Founder's O-1 rule — *keep the domain, hide the capability
-  /// that has no data* — because a facet that sorted by a constant sorted by
-  /// nothing, and looked like it sorted by something.
+  /// Was hidden by ADR-TON-022 while `estimatedRoi` was a constant; WTM-204
+  /// gave products a real cost price and WTM-207 computes a real multiple from
+  /// it. Shown **only when at least one opportunity actually has an ROI**
+  /// (the WTM-182 empty-facet rule) — see [visibleFor].
   roi;
 
-  /// Sorts a seller can actually choose. [roi] is absent until cost prices
-  /// exist — see its doc comment.
-  static List<OpportunitySort> get visible => const [relevance, recency];
-
-  bool get isVisible => visible.contains(this);
+  /// Sorts a seller can choose for [items]. [roi] appears only when at least
+  /// one opportunity carries a real return — a facet that could only ever
+  /// produce the fallback order is a promise the product cannot keep.
+  static List<OpportunitySort> visibleFor(Iterable<Opportunity> items) => [
+    relevance,
+    recency,
+    if (items.any((o) => o.roi != null)) roi,
+  ];
 
   String get labelEn => switch (this) {
     OpportunitySort.relevance => 'Relevance',
@@ -108,8 +110,14 @@ class OpportunityFeedController extends ChangeNotifier {
       final int c = switch (query.sort) {
         // Unscorable last: an opportunity nobody could rank must not float to
         // the top by accident (WTM-193).
-        OpportunitySort.relevance || OpportunitySort.roi =>
-          (b.score.value ?? -1).compareTo(a.score.value ?? -1),
+        OpportunitySort.relevance => (b.score.value ?? -1).compareTo(
+          a.score.value ?? -1,
+        ),
+        // Real multiples first, unknowns last (WTM-207): null is "nobody
+        // knows", and it must not beat a known-poor return.
+        OpportunitySort.roi => (b.roi ?? double.negativeInfinity).compareTo(
+          a.roi ?? double.negativeInfinity,
+        ),
         OpportunitySort.recency => b.discoveredAt.compareTo(a.discoveredAt),
       };
       return c != 0 ? c : a.id.compareTo(b.id);

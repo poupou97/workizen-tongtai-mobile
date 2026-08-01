@@ -248,11 +248,14 @@ class _TongtaiOpportunityFeedScreenState
                 _ChipsRow(
                   label: context.l10n.labelSort,
                   children: [
-                    // `visible`, not `values`: the ROI facet sorted by a
-                    // constant, so it looked like a choice and wasn't
-                    // (WTM-193). Same rule as WTM-182 hiding facets the engine
-                    // cannot produce.
-                    for (final sort in OpportunitySort.visible)
+                    // `visibleFor`, not `values`: the ROI chip appears only
+                    // when at least one opportunity carries a real return
+                    // (WTM-207) — the WTM-182 empty-facet rule. A chip that
+                    // could only ever produce the fallback order is a promise
+                    // the product cannot keep.
+                    for (final sort in OpportunitySort.visibleFor(
+                      _controller.all,
+                    ))
                       Padding(
                         padding: const EdgeInsets.only(
                           right: TongtaiDesignTokens.spacing2,

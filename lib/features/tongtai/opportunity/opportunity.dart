@@ -46,6 +46,7 @@ class Opportunity {
     required this.description,
     required this.expectedImpact,
     required this.score,
+    this.roi,
     required this.discoveredAt,
     this.reaction = OpportunityReaction.none,
   });
@@ -82,6 +83,17 @@ class Opportunity {
   /// could be scored.
   double? get aiScore => score.value;
 
+  /// Return multiple on the money at stake — profit over investment — or
+  /// `null` when the cost side is unknown (WTM-207).
+  ///
+  /// ADR-TON-022 removed the old `estimatedRoi` because it was a constant per
+  /// rule; the ROI facet and the High Risk badge went with it, with "needs a
+  /// cost price" recorded as the condition for their return. WTM-204 supplied
+  /// the field; this is the return. `null` keeps the ADR's rule: it means
+  /// *nobody knows*, never *zero return* — a win-back or goal catch-up has no
+  /// cost side to compute, and pretending otherwise is the defect coming back.
+  final double? roi;
+
   /// When the opportunity was surfaced (AC3 recency sort key).
   final DateTime discoveredAt;
 
@@ -98,6 +110,7 @@ class Opportunity {
     description: description,
     expectedImpact: expectedImpact,
     score: score,
+    roi: roi,
     discoveredAt: discoveredAt,
     reaction: reaction ?? this.reaction,
   );

@@ -5,9 +5,11 @@ import 'opportunity.dart';
 const double kOpportunityHighValueImpact = 30000000; // ≥ 30M ₫
 
 /// ROI multiple below which an opportunity reads as High Risk (thin return).
-/// Kept for the day `Product` carries a cost price and **High Risk** can mean
-/// something again (WTM-193). Unused today on purpose.
-// ignore: unused_element
+/// The return multiple below which a restock reads as thin (WTM-207).
+///
+/// Profit/investment: 2.0 means the seller doubles the money they put in.
+/// Kept through WTM-193 (when High Risk was removed for judging a constant)
+/// exactly for the day the ROI became real — that day is WTM-204 + WTM-207.
 const double kOpportunityHighRiskRoi = 2.0;
 
 /// Age (days) beyond which an untouched opportunity is Stale.
@@ -49,8 +51,8 @@ enum OpportunitySignal {
 /// summary. Rules:
 ///
 /// * **High Value** — expected impact ≥ [kOpportunityHighValueImpact].
-/// * **High Risk** — **not emitted in Phase 2** (WTM-193): it was derived from
-///   a constant ROI, so it said nothing. Needs a cost price on `Product`.
+/// * **High Risk** — real return under [kOpportunityHighRiskRoi]× (WTM-207).
+///   Emitted **only** from a computed ROI; a null ROI raises nothing.
 /// * **Stale** — surfaced > [kOpportunityStaleDays] days ago and still untouched
 ///   (no seller reaction).
 /// * **Urgent** — not stale, and either a seasonal (closing-window) opportunity
@@ -67,12 +69,14 @@ Set<OpportunitySignal> opportunitySignals(
       opportunity.reaction == OpportunityReaction.none;
 
   if (isHighValue) signals.add(OpportunitySignal.highValue);
-  // WTM-193: the **High Risk** badge is gone. It compared `estimatedRoi`
-  // against a threshold, and `estimatedRoi` was a **constant per rule** — so
-  // the badge only ever restated which rule fired, while reading to the seller
-  // as a judgement about their money. A real risk signal needs a cost price,
-  // which `Product` does not carry. Same rule as the hidden ROI facet: keep the
-  // signal in the domain, stop showing a number nobody computed.
+  // High Risk is back (WTM-207) — on **real** returns only. WTM-193 removed it
+  // because `estimatedRoi` was a constant per rule; WTM-204 gave products a
+  // cost price and the rule engine now computes profit/investment from it.
+  // A null ROI raises nothing: "nobody knows" is not "risky", and alarming on
+  // the unknown would re-teach sellers to ignore the badge.
+  if (opportunity.roi case final roi? when roi < kOpportunityHighRiskRoi) {
+    signals.add(OpportunitySignal.highRisk);
+  }
   if (isStale) signals.add(OpportunitySignal.stale);
   if (!isStale &&
       (opportunity.type == OpportunityType.seasonal ||
