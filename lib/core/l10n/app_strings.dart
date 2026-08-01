@@ -391,6 +391,23 @@ abstract class AppStrings {
   String get feedbackPlatformLabel;
   String get feedbackLocaleLabel;
   String get feedbackSubject;
+
+  // AI Business Profile (WTM-177) — bốn câu hỏi phân loại về ngành nghề.
+  // KHÔNG có trường tự do: xem tongtai_business_profile_privacy_test.dart.
+  String get profileTitle;
+  String get profileIntro;
+  String get profilePrivacyNote;
+  String get profileTradeLabel;
+  String get profileSizeLabel;
+  String get profileChannelsLabel;
+  String get profileSeasonalityLabel;
+  String get profileSave;
+  String get profileSaved;
+  String get profileSkipHint;
+  String profileTrade(String code);
+  String profileSize(String code);
+  String profileChannel(String code);
+  String profileSeasonality(String code);
   String get moreLegalSection;
   String get moreTerms;
   String get morePrivacy;
@@ -1293,6 +1310,65 @@ class AppStringsVi extends AppStrings {
   String get feedbackLocaleLabel => 'Ngôn ngữ';
   @override
   String get feedbackSubject => 'Phản hồi Tổng Tài';
+  @override
+  String get profileTitle => 'Thông tin doanh nghiệp';
+  @override
+  String get profileIntro =>
+      'Cho Workizen AI biết bạn kinh doanh gì, để lời khuyên bớt chung chung. '
+      'Bỏ qua câu nào cũng được.';
+  @override
+  String get profilePrivacyNote =>
+      'Chỉ bốn thông tin phân loại này được gửi kèm khi bạn hỏi AI. Không có '
+      'tên, số điện thoại, địa chỉ, hay con số kinh doanh nào.';
+  @override
+  String get profileTradeLabel => 'Bạn bán gì?';
+  @override
+  String get profileSizeLabel => 'Quy mô hiện tại';
+  @override
+  String get profileChannelsLabel => 'Bán qua kênh nào?';
+  @override
+  String get profileSeasonalityLabel => 'Mùa cao điểm';
+  @override
+  String get profileSave => 'Lưu';
+  @override
+  String get profileSaved => 'Đã lưu thông tin doanh nghiệp';
+  @override
+  String get profileSkipHint => 'Có thể sửa lại bất cứ lúc nào.';
+  @override
+  String profileTrade(String code) => switch (code) {
+    'fashion' => 'Thời trang',
+    'food' => 'Thực phẩm, đồ ăn',
+    'cosmetics' => 'Mỹ phẩm',
+    'electronics' => 'Điện tử',
+    'home_goods' => 'Đồ gia dụng',
+    'services' => 'Dịch vụ',
+    _ => 'Ngành khác',
+  };
+  @override
+  String profileSize(String code) => switch (code) {
+    'solo' => 'Tự làm một mình',
+    'small' => 'Nhỏ, vài người',
+    'growing' => 'Đang mở rộng',
+    _ => 'Đã ổn định',
+  };
+  @override
+  String profileChannel(String code) => switch (code) {
+    'shop' => 'Cửa hàng',
+    'market' => 'Chợ, sạp',
+    'shopee' => 'Shopee',
+    'tiktok' => 'TikTok Shop',
+    'facebook' => 'Facebook',
+    'zalo' => 'Zalo',
+    _ => 'Bán sỉ',
+  };
+  @override
+  String profileSeasonality(String code) => switch (code) {
+    'none' => 'Bán đều quanh năm',
+    'tet' => 'Cao điểm dịp Tết',
+    'school_year' => 'Cao điểm mùa tựu trường',
+    'summer' => 'Cao điểm mùa hè',
+    _ => 'Cao điểm cuối năm',
+  };
   @override
   String get moreLegalSection => 'Pháp lý';
   @override
@@ -2455,6 +2531,65 @@ class AppStringsEn extends AppStrings {
   String get feedbackLocaleLabel => 'Language';
   @override
   String get feedbackSubject => 'Tổng Tài feedback';
+  @override
+  String get profileTitle => 'Business info';
+  @override
+  String get profileIntro =>
+      'Tell Workizen AI what you sell, so its advice stops being generic. '
+      'Skip anything you would rather not answer.';
+  @override
+  String get profilePrivacyNote =>
+      'Only these four categorical facts are sent along when you ask the AI. '
+      'No names, phone numbers, addresses or business figures.';
+  @override
+  String get profileTradeLabel => 'What do you sell?';
+  @override
+  String get profileSizeLabel => 'Current size';
+  @override
+  String get profileChannelsLabel => 'Where do you sell?';
+  @override
+  String get profileSeasonalityLabel => 'Busiest season';
+  @override
+  String get profileSave => 'Save';
+  @override
+  String get profileSaved => 'Business info saved';
+  @override
+  String get profileSkipHint => 'You can change this any time.';
+  @override
+  String profileTrade(String code) => switch (code) {
+    'fashion' => 'Fashion',
+    'food' => 'Food and drink',
+    'cosmetics' => 'Cosmetics',
+    'electronics' => 'Electronics',
+    'home_goods' => 'Home goods',
+    'services' => 'Services',
+    _ => 'Something else',
+  };
+  @override
+  String profileSize(String code) => switch (code) {
+    'solo' => 'Just me',
+    'small' => 'Small, a few people',
+    'growing' => 'Growing',
+    _ => 'Established',
+  };
+  @override
+  String profileChannel(String code) => switch (code) {
+    'shop' => 'Shop',
+    'market' => 'Market stall',
+    'shopee' => 'Shopee',
+    'tiktok' => 'TikTok Shop',
+    'facebook' => 'Facebook',
+    'zalo' => 'Zalo',
+    _ => 'Wholesale',
+  };
+  @override
+  String profileSeasonality(String code) => switch (code) {
+    'none' => 'Steady all year',
+    'tet' => 'Peaks at Tet',
+    'school_year' => 'Peaks at back-to-school',
+    'summer' => 'Peaks in summer',
+    _ => 'Peaks at year end',
+  };
   @override
   String get moreLegalSection => 'Legal';
   @override

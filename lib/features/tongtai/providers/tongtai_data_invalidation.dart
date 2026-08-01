@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
 import 'tongtai_capability_provider.dart';
+import 'tongtai_profile_provider.dart';
 import 'tongtai_context_provider.dart';
 import 'tongtai_predictive_provider.dart';
 
@@ -52,6 +53,12 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // The Opportunity Rule Engine's output — read by Home, Reports, Timeline,
   // Producer and the Opportunity feed.
   generatedOpportunitiesProvider,
+  // AI Business Profile (WTM-177). Restore replaces it in the database, so a
+  // cached read here would keep feeding the PREVIOUS business's trade and
+  // channels into every AI prompt until the app restarted — the same shape as
+  // the WTM-149 device defect, and invisible because the answer would still
+  // look plausible.
+  businessProfileProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).
