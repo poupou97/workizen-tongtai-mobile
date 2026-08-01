@@ -122,5 +122,48 @@ Fable 5 for hard tasks/retries.
 - **Bug mới ⇒ thêm Pattern vào `docs/04-DELIVERY/TESTING-BIBLE.md`**
   (Root-Cause · Regression · Test Pattern · Prevention Rule), không chỉ thêm
   test case. Đọc file này trước khi viết test cho lỗi tương tự.
+## ⛔ Jira visibility — luật bắt buộc cho MỌI agent (Founder 2026-08-01)
+
+Founder đã phải hỏi **bốn lần** *"sao không thấy task thay đổi trên Jira"*. Mỗi lần nguyên
+nhân một khác, nên đây là **cả bốn**, không phải một lời nhắc chung chung.
+
+### Bốn cổng, làm đủ cả bốn
+
+**1. Việc đang chạy phải có một STORY, không phải Epic.**
+Bảng Kanban WTM **chỉ hiện Story/Task thành thẻ**. Epic là vùng chứa và **không bao giờ hiện
+thành thẻ** — tạo Epic rồi tưởng xong là Founder vẫn nhìn thấy bảng trống.
+
+**2. Tạo issue + transition TRƯỚC KHI bắt đầu hiểu vấn đề, không phải trước khi code.**
+`START` = lúc issue **rời `Ideas`** sang **bất kỳ cột làm việc nào** (`ANALYSIS` · `Ready` ·
+`In Progress`). **Audit, nghiên cứu, đối chiếu Concept đều tính giờ.** Trigger "trước khi
+code" là sai vì audit không giống code nên trigger không bao giờ chạy.
+`END` = lúc chuyển **`Done`**.
+
+**3. Mỗi mục todo đại diện cho việc thật phải mang một mã WTM.**
+Mục nào không có mã ⇒ chưa tạo issue ⇒ dừng lại tạo trước. Todo list được cập nhật vài phút
+một lần trong lúc làm — đó là chỗ duy nhất có nhịp đủ dày để làm cổng chặn. Memory và file
+tài liệu chỉ được đọc lúc mở phiên nên **không** chặn được gì.
+
+**4. Kiểm chứng bằng thứ Founder NHÌN THẤY, không bằng phản hồi API.**
+`{"success": true}` không có nghĩa là bảng đã đổi. Cùng họ với bài học *suite test xanh không
+thay thế được mắt nhìn trên thiết bị*.
+
+### Vì sao viết rule mạnh hơn không sửa được
+
+Mọi việc agent làm đều đặn đều có **cổng cơ học**: CI đỏ khi merge code hỏng · analyzer đỏ khi
+commit sai · test governance đỏ khi đổi schema. **Board Jira đứng im thì KHÔNG có gì thất
+bại** — người phát hiện duy nhất là Founder. Đó là lý do cổng phải nằm ở todo list (mục 3),
+chứ không nằm ở một đoạn văn hay hơn.
+
+### Kèm theo mỗi story
+
+`addWorklogToJiraIssue` (`timeSpent` + `started` = mốc START) trước khi chuyển `Done`.
+Transition ID dự án WTM: `4`=ANALYSIS · `2`=Ready · `21`=In Progress · `31`=Code Review ·
+`3`=QA · `41`=Done.
+
+⚠️ **Sửa file này xong thì COMMIT NGAY.** Bản trước của luật này bị mất vì sửa trên nhánh
+feature rồi `git reset --hard` lúc đổi nhánh — nên suốt nhiều giờ không agent nào đọc được nó,
+trong khi tôi đã báo với Founder là "đã ghi rồi".
+
 - **Story chạm native/gradle/Firebase**: bắt buộc smoke-launch bản **release**
   trên máy thật (`adb logcat -b crash` rỗng) trước khi coi là xong.
