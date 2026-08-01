@@ -66,10 +66,37 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
 /// await ref.read(sampleDataSeederProvider).removeAll();
 /// invalidateBusinessDataProviders(ref);
 /// ```
+/// Bumped every time the business data changes underneath the app.
+///
+/// Invalidating the providers above is **not enough** for a screen that is
+/// already built. The four shell tabs hold their rows in a
+/// `ScreenDataController` created in `initState`, and the shell keeps them
+/// alive in an `IndexedStack` — so `initState` runs once per app launch and a
+/// provider invalidation never reaches them.
+///
+/// Found on device (WTM-174): restore a backup of 7 customers over a business
+/// of 42, and the success card says 7 while Home keeps showing **42** until the
+/// app is killed. The database was correct the whole time; only the screen
+/// lied. A seller seeing that concludes the restore failed.
+///
+/// The doc above this list still said *"Home looked right only because it
+/// re-reads its repositories in initState"* — true when WTM-149 wrote it, and
+/// made false by the WTM-148 seam migration without anyone noticing.
+class BusinessDataRevision extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void bump() => state++;
+}
+
+final businessDataRevisionProvider =
+    NotifierProvider<BusinessDataRevision, int>(BusinessDataRevision.new);
+
 void invalidateBusinessDataProviders(WidgetRef ref) {
   for (final provider in kBusinessDataProviders) {
     ref.invalidate(provider);
   }
+  ref.read(businessDataRevisionProvider.notifier).bump();
 }
 
 /// [invalidateBusinessDataProviders] for a bare [ProviderContainer].
@@ -82,4 +109,5 @@ void invalidateBusinessDataProvidersIn(ProviderContainer container) {
   for (final provider in kBusinessDataProviders) {
     container.invalidate(provider);
   }
+  container.read(businessDataRevisionProvider.notifier).bump();
 }

@@ -10,6 +10,7 @@ import '../../inventory/product_inventory_service.dart';
 import '../../inventory/stock_alert_service.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_inventory_provider.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 import 'tongtai_product_form_screen.dart';
 import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_stock_alerts_screen.dart';
@@ -147,6 +148,11 @@ class _TongtaiInventoryScreenState
 
   @override
   Widget build(BuildContext context) {
+    // The business data can change from another screen (restore a backup, seed
+    // or remove sample data). This screen is kept alive by the shell's
+    // IndexedStack, so its `initState` load never runs again — without this it
+    // would keep rendering a business that no longer exists (WTM-174).
+    ref.listen(businessDataRevisionProvider, (_, _) => _data.refresh());
     return ListenableBuilder(
       listenable: Listenable.merge([_catalog, _data]),
       builder: (context, _) {

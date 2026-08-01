@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_catalog_controller.dart';
 import 'package:tongtai/features/tongtai/inventory/product_image_source.dart';
@@ -166,10 +167,12 @@ void main() {
     ]);
     await catalog.hydrate();
     await tester.pumpWidget(
-      MaterialApp(
-        home: TongtaiInventoryScreen(
-          catalog: catalog,
-          imageSource: _NoopImageSource(),
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiInventoryScreen(
+            catalog: catalog,
+            imageSource: _NoopImageSource(),
+          ),
         ),
       ),
     );
@@ -191,10 +194,12 @@ void main() {
     ]);
     await catalog.hydrate();
     await tester.pumpWidget(
-      MaterialApp(
-        home: TongtaiInventoryScreen(
-          catalog: catalog,
-          imageSource: _NoopImageSource(),
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiInventoryScreen(
+            catalog: catalog,
+            imageSource: _NoopImageSource(),
+          ),
         ),
       ),
     );
