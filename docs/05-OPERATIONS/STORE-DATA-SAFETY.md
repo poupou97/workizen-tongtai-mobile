@@ -99,7 +99,9 @@ không phải sơ suất giấy tờ.
 - [ ] Bản khai này khớp `PRIVACY-POLICY.md` §3
 - [ ] Bản khai này khớp `AppStrings.privacyTelemetryBody` (VI **và** EN)
 - [ ] Bản nộp **có** hay **không có** file cấu hình Firebase — chọn đúng bảng
-- [ ] **URL chính sách riêng tư công khai** — ⚠️ **Founder gate**: chưa có, và
-      cả hai cửa hàng đều **bắt buộc**
-- [ ] **Địa chỉ liên hệ nhà phát triển** — ⚠️ **Founder gate**: chưa có
+- [ ] **URL chính sách riêng tư công khai** — `https://www.workizen.net/privacy`
+      (Founder chốt 2026-08-01). ⚠️ **Public + HTTPS đạt, nội dung CHƯA đủ cho
+      Tổng Tài** — trang không nhắc telemetry/crash reporting mà app có dùng.
+      Nội dung bổ sung soạn sẵn: `PRIVACY-POLICY-WEB-CONTENT.md`
+- [x] **Địa chỉ liên hệ nhà phát triển** — `privacy@workizen.net` ✅
 - [ ] Điều khoản dịch vụ — ⚠️ **Founder gate**: `moreTerms` vẫn *coming soon*
