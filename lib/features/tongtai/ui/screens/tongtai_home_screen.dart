@@ -7,7 +7,9 @@ import '../../metrics/business_health.dart';
 import '../../metrics/business_metrics.dart';
 import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../journey/journey_progress.dart';
 import '../../providers/tongtai_navigation_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_more_action.dart';
 import '../../opportunity/opportunity.dart';
@@ -138,7 +140,17 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     final seeder = ref.read(sampleDataSeederProvider);
     final opportunitiesFuture = ref.read(generatedOpportunitiesProvider.future);
     final context = await contextService.load();
-    final goals = await goalRepo.loadAll();
+    // WTM-200: derive goal progress from real orders, exactly as the Goals
+    // screen does. Reading the persisted `achievedAmount` gave Home a second,
+    // staler answer — the seller added an order and saw 60% on Goals while Home
+    // still said 40%, for the same goal on the same day. WTM-138's own note
+    // says "the persisted goals stay untouched", i.e. the stored field was
+    // designed to stop being the truth; Home was still reading it.
+    final goals = deriveGoalsProgress(
+      await goalRepo.loadAll(),
+      await ref.read(orderRepositoryProvider).loadAll(),
+      DateTime.now(),
+    );
     final favorites = await favoritesStore.loadAll();
     final List<Opportunity> generated = await opportunitiesFuture;
     return _HomeData(

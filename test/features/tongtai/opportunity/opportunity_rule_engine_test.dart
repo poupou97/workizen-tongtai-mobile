@@ -100,16 +100,24 @@ void main() {
     );
   });
 
-  test('win-back: lapsed repeat customer → AOV-sized opportunity', () {
+  test('win-back: a customer silent well past their own rhythm', () {
+    // WTM-200: "quiet" is judged against the customer's **own** buying rhythm,
+    // by the same rule Consumer uses — not a flat 30 days. These two orders are
+    // 10 days apart and the last one is ~4 months old: roughly twelve of their
+    // own cycles, which is `atRisk` on anybody's reading.
+    //
+    // The previous fixture (40-day rhythm, 49 days silent) is only 10% late.
+    // Under the owning rule that is `cooling` — *worth noticing, not worth
+    // panicking* — so it correctly raises nothing now.
     final result = engine.generate(
       products: [],
       customers: [customer('c1', 'Thu Hà')],
       orders: [
-        order('a', date: DateTime(2026, 5, 1), amount: 400000),
-        order('b', date: DateTime(2026, 6, 10), amount: 600000),
+        order('a', date: DateTime(2026, 3, 20), amount: 400000),
+        order('b', date: DateTime(2026, 3, 30), amount: 600000),
       ],
       goals: [],
-      now: now, // last order Jun 10 → >30 days quiet
+      now: now,
     );
     final winback = result.singleWhere((o) => o.id == 'gen-winback-c1');
     expect(winback.title, contains('Thu Hà'));
