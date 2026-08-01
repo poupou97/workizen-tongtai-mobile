@@ -46,26 +46,23 @@ void main() {
       expect(text, contains('Ngôn ngữ: vi'));
     });
 
-    test(
-      'contains nothing beyond the message and the diagnostic block',
-      () {
-        // The whole privacy claim in one assertion: strip the message and the
-        // four declared facts, and there must be nothing left but headings.
-        //
-        // If someone later appends "and by the way, here are the seller's
-        // revenue totals", this test is what fails.
-        final text = report('MESSAGE_SENTINEL');
-        final remaining = text
-            .replaceAll('MESSAGE_SENTINEL', '')
-            .replaceAll('PHẢN HỒI', '')
-            .replaceAll('THÔNG TIN KỸ THUẬT', '')
-            .replaceAll('Phiên bản: 1.2.3', '')
-            .replaceAll('Thiết bị: android Android 9 (SDK 28)', '')
-            .replaceAll('Ngôn ngữ: vi', '')
-            .trim();
-        expect(remaining, isEmpty);
-      },
-    );
+    test('contains nothing beyond the message and the diagnostic block', () {
+      // The whole privacy claim in one assertion: strip the message and the
+      // four declared facts, and there must be nothing left but headings.
+      //
+      // If someone later appends "and by the way, here are the seller's
+      // revenue totals", this test is what fails.
+      final text = report('MESSAGE_SENTINEL');
+      final remaining = text
+          .replaceAll('MESSAGE_SENTINEL', '')
+          .replaceAll('PHẢN HỒI', '')
+          .replaceAll('THÔNG TIN KỸ THUẬT', '')
+          .replaceAll('Phiên bản: 1.2.3', '')
+          .replaceAll('Thiết bị: android Android 9 (SDK 28)', '')
+          .replaceAll('Ngôn ngữ: vi', '')
+          .trim();
+      expect(remaining, isEmpty);
+    });
 
     test('an empty message still produces a well-formed report', () {
       // The screen blocks empty sends; the builder must not crash if it is
