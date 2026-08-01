@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../analytics/cashflow_series.dart';
+import '../analytics/month_bucket.dart';
 import '../consumer/customer_order.dart';
 import '../core/tongtai_enums.dart';
 import '../metrics/business_metrics.dart' show BillableOrders;
@@ -193,8 +195,8 @@ class FinanceService {
         .where((t) => t.date.year == now.year)
         .toList(growable: false);
 
-    final salesMtd = _salesIn(year: now.year, month: now.month);
-    final salesYtd = _salesIn(year: now.year);
+    final salesMtd = salesIn(year: now.year, month: now.month);
+    final salesYtd = salesIn(year: now.year);
 
     return FinanceSummary(
       incomeMtd: _sum(mtd, TransactionType.income) + salesMtd,
@@ -209,11 +211,24 @@ class FinanceService {
   }
 
   /// Revenue from billable orders in a year, or in one month of it.
-  double _salesIn({required int year, int? month}) => _sales
+  double salesIn({required int year, int? month}) => _sales
       .where(
         (o) => o.date.year == year && (month == null || o.date.month == month),
       )
       .fold(0.0, (total, o) => total + o.totalAmount);
+
+  /// Billable orders in one month — the activity count the cashflow series
+  /// reports alongside the money (WTM-205).
+  int salesCountIn({required int year, required int month}) =>
+      _sales.where((o) => o.date.year == year && o.date.month == month).length;
+
+  /// Hand-entered rows in one month.
+  List<FinanceTransaction> transactionsIn({
+    required int year,
+    required int month,
+  }) => _txns
+      .where((t) => t.date.year == year && t.date.month == month)
+      .toList(growable: false);
 
   double _sum(Iterable<FinanceTransaction> txns, TransactionType type) =>
       txns.where((t) => t.type == type).fold(0, (total, t) => total + t.amount);
@@ -234,7 +249,7 @@ class FinanceService {
             month: anchor.month,
             income:
                 _sum(inMonth, TransactionType.income) +
-                _salesIn(year: anchor.year, month: anchor.month),
+                salesIn(year: anchor.year, month: anchor.month),
             expense: _sum(inMonth, TransactionType.expense),
           );
         }(),
@@ -258,5 +273,60 @@ class FinanceService {
         .map((e) => CategoryAmount(category: e.key, amount: e.value))
         .toList()
       ..sort((a, b) => b.amount.compareTo(a.amount));
+  }
+}
+
+/// Builds the alert-facing cashflow series from the **same** arithmetic the
+/// Finance dashboard uses (WTM-205).
+///
+/// The fourth appearance of the WTM-196 defect: `CashflowSeries
+/// .fromTransactions` counted only hand-entered rows, so after sales revenue
+/// joined Finance income the *negativeCashflow* alert kept seeing ₫0 income —
+/// a seller with ten real orders and a few expenses was told their cashflow
+/// was in deficit, and the Rule Twin would have had AI explain a hole that did
+/// not exist.
+///
+/// Lives here, as an extension on [FinanceService], because the fix is not
+/// "also add orders over there" — that would be a **second** implementation of
+/// "sales in month X". One owner, one truth; any future change to how Finance
+/// counts a month reaches the alert for free.
+extension FinanceCashflow on FinanceService {
+  /// One point per calendar month, oldest → newest, sales income included.
+  ///
+  /// [excludeCurrentMonth] defaults `true`, matching the old series: alerting
+  /// on a half-finished month reads as a deficit every month until payday.
+  CashflowSeries cashflowAsOf(
+    DateTime now, {
+    int? months,
+    bool excludeCurrentMonth = true,
+  }) {
+    final window = monthWindow(
+      now: now,
+      months: months ?? monthsBack,
+      excludeCurrentMonth: excludeCurrentMonth,
+    );
+    return CashflowSeries(
+      points: List.unmodifiable([
+        for (final key in window)
+          () {
+            final txns = transactionsIn(year: key.year, month: key.month);
+            return MonthlyCashflowPoint(
+              year: key.year,
+              month: key.month,
+              income:
+                  txns
+                      .where((t) => t.isIncome)
+                      .fold(0.0, (s, t) => s + t.amount) +
+                  salesIn(year: key.year, month: key.month),
+              expense: txns
+                  .where((t) => t.isExpense)
+                  .fold(0.0, (s, t) => s + t.amount),
+              transactionCount:
+                  txns.length + salesCountIn(year: key.year, month: key.month),
+            );
+          }(),
+      ]),
+      currentMonthExcluded: excludeCurrentMonth,
+    );
   }
 }
