@@ -1,4 +1,6 @@
 import '../core/tongtai_formatters.dart';
+import '../profile/business_profile.dart';
+import 'business_profile_prompt.dart';
 import '../metrics/business_context.dart';
 import '../metrics/business_context_service.dart';
 import 'business_ai_engine.dart';
@@ -18,8 +20,24 @@ import 'tongtai_ai_service.dart';
 
 /// Serializes the [BusinessContext] into the compact bilingual data block the
 /// AI is allowed to see (its ENTIRE world). Pure — same context, same text.
-String businessContextPromptText(BusinessContext ctx) {
-  final b = StringBuffer()
+///
+/// [profile] (WTM-177) prepends *what kind of business this is* — trade, size,
+/// channels, seasonality. It is an **optional named parameter** rather than a
+/// field on [BusinessContext] deliberately: ADR-TON-016 forbids growing
+/// BusinessContext into a God Object, and the profile is not a measurement of
+/// the business, it is a description of it. Omitted or empty ⇒ no block at all.
+String businessContextPromptText(
+  BusinessContext ctx, {
+  BusinessProfile? profile,
+}) {
+  final profileBlock = businessProfilePromptText(profile);
+  final b = StringBuffer();
+  if (profileBlock != null) {
+    b
+      ..writeln(profileBlock)
+      ..writeln();
+  }
+  b
     ..writeln('# Business Snapshot (v${ctx.version})')
     ..writeln(
       '- Doanh thu (billable): ${TongtaiFormatters.vnd(ctx.metrics.revenue)}',

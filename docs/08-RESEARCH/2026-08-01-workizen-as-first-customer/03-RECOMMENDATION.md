@@ -145,3 +145,62 @@ anh mở đúng cái business mà sản phẩm phục vụ, và đó là câu h�
 Người bán hàng thật, có 6 tháng dữ liệu Shopee và một file xuất trong máy, vẫn
 là khách hàng đầu tiên đáng giá hơn. Và họ đang ở cách chúng ta **hai hạng mục
 nội dung**.
+
+---
+
+## Founder trả lời — 2026-08-01
+
+Bốn câu hỏi ở trên đã được trả lời. Ghi lại ngay đây vì báo cáo mà không ghi
+câu trả lời thì lần sau người đọc lại hỏi đúng những câu này.
+
+### Câu 1 — "Anh có vốn dĩ muốn làm business nhập khẩu không?"
+
+> **Founder:** *"Business nhập khẩu chỉ là một **Business Journey để kiểm chứng
+> sản phẩm**. Đó **không phải** định hướng kinh doanh của Workizen."*
+
+**Điều này chốt lại phần đánh giá phương án B.** Trong báo cáo tôi viết rằng nếu
+Founder vốn dĩ đã muốn làm business nhập khẩu thì chi phí lớn nhất của B bằng 0
+và nó thành lựa chọn tốt nhất trong năm. **Điều kiện đó không xảy ra.**
+
+⇒ **Phương án B (Cross-border trước) chính thức bị loại** như một hướng
+dogfooding. Không thể dogfood một business sẽ không ai vận hành.
+
+Nhưng phần **còn giá trị** của Journey 2 vẫn nguyên: nó là **hình dạng người
+dùng mục tiêu** (mua → nhập → kho → bán → lãi). Nó tiếp tục hữu ích như một
+**kịch bản kiểm thử** — dữ liệu mẫu, ca kiểm thử, câu hỏi để đối chiếu sản phẩm
+— chứ không phải như một hoạt động kinh doanh thật.
+
+### Câu 3 — "Workizen Compute là gì?"
+
+> **Founder:** *"Workizen Compute không phải blocker của WTM-178. Hiện tại coi
+> Compute là **LAN AI Runtime** và **Capability Host** trong hệ sinh thái. Chưa
+> cần mở thêm Product Reset hay Epic mới."*
+
+Đủ để tiếp tục. Nghiên cứu LAN AI (`../2026-08-01-lan-ai-endpoint-discovery/`)
+giả định Compute có thể hợp tác — hiện QR, quảng bá mDNS. Định nghĩa *LAN AI
+Runtime + Capability Host* **khớp với giả định đó**, nên phương án P2/P3 vẫn
+đứng vững.
+
+**Vẫn còn chưa biết, và tôi không đoán:** Compute chạy trên phần cứng nào, ai
+cài nó, và nó đã tồn tại hay chưa. Ba câu đó chỉ cần trả lời **khi** LAN AI
+được đưa vào implementation, không phải bây giờ.
+
+### Câu 2 và 4 — định vị AI và thứ tự roadmap
+
+Không được trả lời tường minh trong vòng này, và **không chặn việc gì**: thứ tự
+delivery WTM-175 → 176 → 177 → 178 → 179 → 180 → 167 đang chạy đúng như
+ADR-TON-020 đã chốt.
+
+Câu hỏi định vị *"AI-First"* vẫn mở, và kiểm chứng WTM-176 đã thu hẹp nó: Local
+AI **có** đường đi (LAN), nên lựa chọn *"làm AI dùng được không cần khoá"* chưa
+bị loại như tôi từng kết luận nhầm.
+
+---
+
+## Trạng thái nghiên cứu này
+
+**ĐÓNG.** Founder đã chấp nhận kết quả và trả lời câu hỏi quyết định. Không mở
+Epic, không tạo backlog từ vòng này (đúng chỉ thị gốc).
+
+Phần còn sống của nó là **một dòng duy nhất**: business nhập khẩu là *kịch bản
+kiểm chứng*, không phải *hướng kinh doanh*.

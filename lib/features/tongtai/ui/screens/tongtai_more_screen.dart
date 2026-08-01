@@ -13,6 +13,7 @@ import '../../sample/historical_data_generator.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
 import 'tongtai_customer_risk_screen.dart';
+import 'tongtai_business_profile_screen.dart';
 import 'tongtai_feedback_screen.dart';
 import 'tongtai_backup_screen.dart';
 import 'tongtai_export_screen.dart';
@@ -365,8 +366,13 @@ class TongtaiMoreScreen extends ConsumerWidget {
                 ),
                 _SettingsItem(
                   icon: Icons.business_outlined,
+                  key: const Key('more-business-profile'),
                   label: context.l10n.moreBusinessInfo,
-                  comingSoon: true,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const TongtaiBusinessProfileScreen(),
+                    ),
+                  ),
                 ),
               ],
             ),
