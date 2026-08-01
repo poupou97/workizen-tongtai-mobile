@@ -1,4 +1,37 @@
-# Current Status — 2026-07-25
+# Current Status — 2026-08-01
+
+## 🧭 Hướng sản phẩm đã chốt (Founder 2026-08-01 · ADR-TON-020)
+
+```
+Release → Local-first → File Bridge → Validate với người dùng thật
+                                       └→ Managed Platform CHỈ KHI đủ bằng chứng
+```
+
+- **Không xây backend hoặc OAuth trước nhu cầu thực tế.** D-4 + D-5 giữ nguyên.
+- **File Bridge = capability chính thức**, không phải giải pháp tạm thời (WTM-181).
+- **Mục tiêu lớn nhất: đưa sản phẩm đến người dùng thật càng sớm càng tốt.**
+  Ưu tiên giá trị sản phẩm hơn mở rộng tài liệu hoặc quy trình.
+- **Product Reset 2026-08 đã hoàn tất** (`docs/07-PRODUCT-RESET/`, 24 báo cáo) và
+  **không còn là backlog** — đề xuất còn lại chỉ hiện thực hoá qua Epic/ADR mới.
+- **Không tạo thêm Product Reset / Audit / Governance** nếu không có chỉ đạo Founder.
+
+### Thứ tự delivery đang chạy
+
+| | Epic | Jira | Trạng thái |
+|---|---|---|---|
+| 1 | Release Readiness | WTM-175 | 🔄 |
+| 2 | Local AI Verification | WTM-176 | ⏳ |
+| 3 | AI Business Profile | WTM-177 | ⏳ |
+| 4 | AI-first Onboarding | WTM-178 | ⏳ |
+| 5 | AI Weekly Review | WTM-179 | ⏳ |
+| 6 | Opportunity Layer 1 | WTM-180 | ⏳ |
+| 7 | Capability Context Performance | WTM-167 | ⏳ |
+| 8 | File Bridge | WTM-181 | ⏳ |
+
+**Chặn cứng ngoài tay đội phát triển:** nội dung pháp lý (địa chỉ liên hệ +
+Điều khoản dịch vụ) — Founder; tài khoản Apple Developer — bên thứ ba.
+
+---
 
 ## Where we are
 
