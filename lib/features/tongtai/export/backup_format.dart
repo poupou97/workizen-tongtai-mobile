@@ -98,6 +98,9 @@ class BackupDatasets {
   static const String transactions = 'transactions';
   static const String favourites = 'favourites';
 
+  /// Business Journey tree (WTM-185). **Optional on purpose** — see [optional].
+  static const String journeys = 'journeys';
+
   /// AI Business Profile (WTM-177). **Optional on purpose** — see [optional].
   static const String businessProfile = 'businessProfile';
 
@@ -124,7 +127,7 @@ class BackupDatasets {
   ///
   /// This is ADR-TON-018 amendment 1 applied to datasets rather than to
   /// manifest keys: *"vắng mặt ⇒ mặc định (file v2 cũ vẫn restore được)"*.
-  static const List<String> optional = [businessProfile];
+  static const List<String> optional = [businessProfile, journeys];
 }
 
 /// What a package is **for**.

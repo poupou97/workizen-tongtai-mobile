@@ -55,7 +55,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 8;
+const int kTongtaiSchemaVersion = 9;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -70,6 +70,15 @@ const String kSupplierFavoritesTableName = 'supplier_favorites_table';
 /// Drift table name of the AI Business Profile table (WTM-177), added in schema
 /// v8. Same allTables-lookup convention as [kSupplierFavoritesTableName].
 const String kBusinessProfilesTableName = 'business_profiles_table';
+
+/// Drift table names of the Business Journey tree (WTM-185, ADR-TON-021), added
+/// in schema v9. Note `journeys_table` is NOT one of these — it stores
+/// `BusinessGoal` and has since WTM-124; see `tables/business_journeys.dart`.
+const List<String> kBusinessJourneyTableNames = [
+  'business_journeys_table',
+  'business_journey_nodes_table',
+  'business_journey_plans_table',
+];
 
 /// Builds the [MigrationStrategy] used by [AppDatabase].
 ///
@@ -176,6 +185,19 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
           (t) => t.actualTableName == kBusinessProfilesTableName,
         );
         await m.createTable(profiles);
+      }
+      if (from < 9) {
+        // v9 (WTM-185 — Business Journey tree, ADR-TON-021). Additive: three
+        // new tables, nothing existing touched. `BusinessGoal` (journeys_table)
+        // is deliberately left alone, so a seller who already has goals keeps
+        // every one of them and needs no backfill — they simply have no journey
+        // until they open one.
+        for (final name in kBusinessJourneyTableNames) {
+          final table = db.allTables.firstWhere(
+            (t) => t.actualTableName == name,
+          );
+          await m.createTable(table);
+        }
       }
     },
     beforeOpen: (OpeningDetails details) async {

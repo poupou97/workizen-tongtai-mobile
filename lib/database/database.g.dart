@@ -13598,6 +13598,1659 @@ class BusinessProfilesTableCompanion
   }
 }
 
+class $BusinessJourneysTableTable extends BusinessJourneysTable
+    with TableInfo<$BusinessJourneysTableTable, BusinessJourneysTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BusinessJourneysTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _goalIdMeta = const VerificationMeta('goalId');
+  @override
+  late final GeneratedColumn<String> goalId = GeneratedColumn<String>(
+    'goal_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _activePlanVersionMeta = const VerificationMeta(
+    'activePlanVersion',
+  );
+  @override
+  late final GeneratedColumn<int> activePlanVersion = GeneratedColumn<int>(
+    'active_plan_version',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    goalId,
+    state,
+    activePlanVersion,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'business_journeys_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BusinessJourneysTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('goal_id')) {
+      context.handle(
+        _goalIdMeta,
+        goalId.isAcceptableOrUnknown(data['goal_id']!, _goalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_goalIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('active_plan_version')) {
+      context.handle(
+        _activePlanVersionMeta,
+        activePlanVersion.isAcceptableOrUnknown(
+          data['active_plan_version']!,
+          _activePlanVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BusinessJourneysTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BusinessJourneysTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      goalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}goal_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      activePlanVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}active_plan_version'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BusinessJourneysTableTable createAlias(String alias) {
+    return $BusinessJourneysTableTable(attachedDatabase, alias);
+  }
+}
+
+class BusinessJourneysTableData extends DataClass
+    implements Insertable<BusinessJourneysTableData> {
+  final String id;
+
+  /// The `BusinessGoal` this journey pursues (`journeys_table.id`).
+  ///
+  /// **Deliberately not a foreign key.** Restore replaces goals and journeys as
+  /// separate datasets, and a hard FK would make dataset write-order part of
+  /// the restore contract — the same trap that produced SqliteException 787
+  /// when orders were deleted before customers. The repository verifies the
+  /// link after writing instead, exactly as `.ttbk` restore already verifies
+  /// `order.customerId`.
+  final String goalId;
+
+  /// `JourneyState.code` — `draft`/`active`/`paused`/`completed`/`archived`.
+  /// Canonical code, never a display label (ADR-TON-018).
+  final String state;
+
+  /// Which plan version is in force. `null` while the journey is a draft with
+  /// no plan yet.
+  final int? activePlanVersion;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const BusinessJourneysTableData({
+    required this.id,
+    required this.goalId,
+    required this.state,
+    this.activePlanVersion,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['goal_id'] = Variable<String>(goalId);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || activePlanVersion != null) {
+      map['active_plan_version'] = Variable<int>(activePlanVersion);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  BusinessJourneysTableCompanion toCompanion(bool nullToAbsent) {
+    return BusinessJourneysTableCompanion(
+      id: Value(id),
+      goalId: Value(goalId),
+      state: Value(state),
+      activePlanVersion: activePlanVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(activePlanVersion),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory BusinessJourneysTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BusinessJourneysTableData(
+      id: serializer.fromJson<String>(json['id']),
+      goalId: serializer.fromJson<String>(json['goalId']),
+      state: serializer.fromJson<String>(json['state']),
+      activePlanVersion: serializer.fromJson<int?>(json['activePlanVersion']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'goalId': serializer.toJson<String>(goalId),
+      'state': serializer.toJson<String>(state),
+      'activePlanVersion': serializer.toJson<int?>(activePlanVersion),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  BusinessJourneysTableData copyWith({
+    String? id,
+    String? goalId,
+    String? state,
+    Value<int?> activePlanVersion = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => BusinessJourneysTableData(
+    id: id ?? this.id,
+    goalId: goalId ?? this.goalId,
+    state: state ?? this.state,
+    activePlanVersion: activePlanVersion.present
+        ? activePlanVersion.value
+        : this.activePlanVersion,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  BusinessJourneysTableData copyWithCompanion(
+    BusinessJourneysTableCompanion data,
+  ) {
+    return BusinessJourneysTableData(
+      id: data.id.present ? data.id.value : this.id,
+      goalId: data.goalId.present ? data.goalId.value : this.goalId,
+      state: data.state.present ? data.state.value : this.state,
+      activePlanVersion: data.activePlanVersion.present
+          ? data.activePlanVersion.value
+          : this.activePlanVersion,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessJourneysTableData(')
+          ..write('id: $id, ')
+          ..write('goalId: $goalId, ')
+          ..write('state: $state, ')
+          ..write('activePlanVersion: $activePlanVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, goalId, state, activePlanVersion, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BusinessJourneysTableData &&
+          other.id == this.id &&
+          other.goalId == this.goalId &&
+          other.state == this.state &&
+          other.activePlanVersion == this.activePlanVersion &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class BusinessJourneysTableCompanion
+    extends UpdateCompanion<BusinessJourneysTableData> {
+  final Value<String> id;
+  final Value<String> goalId;
+  final Value<String> state;
+  final Value<int?> activePlanVersion;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const BusinessJourneysTableCompanion({
+    this.id = const Value.absent(),
+    this.goalId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.activePlanVersion = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BusinessJourneysTableCompanion.insert({
+    required String id,
+    required String goalId,
+    required String state,
+    this.activePlanVersion = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       goalId = Value(goalId),
+       state = Value(state),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<BusinessJourneysTableData> custom({
+    Expression<String>? id,
+    Expression<String>? goalId,
+    Expression<String>? state,
+    Expression<int>? activePlanVersion,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (goalId != null) 'goal_id': goalId,
+      if (state != null) 'state': state,
+      if (activePlanVersion != null) 'active_plan_version': activePlanVersion,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BusinessJourneysTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? goalId,
+    Value<String>? state,
+    Value<int?>? activePlanVersion,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return BusinessJourneysTableCompanion(
+      id: id ?? this.id,
+      goalId: goalId ?? this.goalId,
+      state: state ?? this.state,
+      activePlanVersion: activePlanVersion ?? this.activePlanVersion,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (goalId.present) {
+      map['goal_id'] = Variable<String>(goalId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (activePlanVersion.present) {
+      map['active_plan_version'] = Variable<int>(activePlanVersion.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessJourneysTableCompanion(')
+          ..write('id: $id, ')
+          ..write('goalId: $goalId, ')
+          ..write('state: $state, ')
+          ..write('activePlanVersion: $activePlanVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BusinessJourneyNodesTableTable extends BusinessJourneyNodesTable
+    with
+        TableInfo<
+          $BusinessJourneyNodesTableTable,
+          BusinessJourneyNodesTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BusinessJourneyNodesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _journeyIdMeta = const VerificationMeta(
+    'journeyId',
+  );
+  @override
+  late final GeneratedColumn<String> journeyId = GeneratedColumn<String>(
+    'journey_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES business_journeys_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _parentIdMeta = const VerificationMeta(
+    'parentId',
+  );
+  @override
+  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
+    'parent_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+    'origin',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderIndexMeta = const VerificationMeta(
+    'orderIndex',
+  );
+  @override
+  late final GeneratedColumn<int> orderIndex = GeneratedColumn<int>(
+    'order_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _completionMeta = const VerificationMeta(
+    'completion',
+  );
+  @override
+  late final GeneratedColumn<String> completion = GeneratedColumn<String>(
+    'completion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _derivedMetricMeta = const VerificationMeta(
+    'derivedMetric',
+  );
+  @override
+  late final GeneratedColumn<String> derivedMetric = GeneratedColumn<String>(
+    'derived_metric',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _derivedTargetMeta = const VerificationMeta(
+    'derivedTarget',
+  );
+  @override
+  late final GeneratedColumn<double> derivedTarget = GeneratedColumn<double>(
+    'derived_target',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reasonCodesMeta = const VerificationMeta(
+    'reasonCodes',
+  );
+  @override
+  late final GeneratedColumn<String> reasonCodes = GeneratedColumn<String>(
+    'reason_codes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    journeyId,
+    parentId,
+    kind,
+    title,
+    origin,
+    orderIndex,
+    state,
+    completion,
+    derivedMetric,
+    derivedTarget,
+    reasonCodes,
+    completedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'business_journey_nodes_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BusinessJourneyNodesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('journey_id')) {
+      context.handle(
+        _journeyIdMeta,
+        journeyId.isAcceptableOrUnknown(data['journey_id']!, _journeyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_journeyIdMeta);
+    }
+    if (data.containsKey('parent_id')) {
+      context.handle(
+        _parentIdMeta,
+        parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('origin')) {
+      context.handle(
+        _originMeta,
+        origin.isAcceptableOrUnknown(data['origin']!, _originMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_originMeta);
+    }
+    if (data.containsKey('order_index')) {
+      context.handle(
+        _orderIndexMeta,
+        orderIndex.isAcceptableOrUnknown(data['order_index']!, _orderIndexMeta),
+      );
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('completion')) {
+      context.handle(
+        _completionMeta,
+        completion.isAcceptableOrUnknown(data['completion']!, _completionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_completionMeta);
+    }
+    if (data.containsKey('derived_metric')) {
+      context.handle(
+        _derivedMetricMeta,
+        derivedMetric.isAcceptableOrUnknown(
+          data['derived_metric']!,
+          _derivedMetricMeta,
+        ),
+      );
+    }
+    if (data.containsKey('derived_target')) {
+      context.handle(
+        _derivedTargetMeta,
+        derivedTarget.isAcceptableOrUnknown(
+          data['derived_target']!,
+          _derivedTargetMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reason_codes')) {
+      context.handle(
+        _reasonCodesMeta,
+        reasonCodes.isAcceptableOrUnknown(
+          data['reason_codes']!,
+          _reasonCodesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BusinessJourneyNodesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BusinessJourneyNodesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      journeyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}journey_id'],
+      )!,
+      parentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_id'],
+      ),
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin'],
+      )!,
+      orderIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_index'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      completion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}completion'],
+      )!,
+      derivedMetric: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}derived_metric'],
+      ),
+      derivedTarget: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}derived_target'],
+      ),
+      reasonCodes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason_codes'],
+      ),
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      ),
+    );
+  }
+
+  @override
+  $BusinessJourneyNodesTableTable createAlias(String alias) {
+    return $BusinessJourneyNodesTableTable(attachedDatabase, alias);
+  }
+}
+
+class BusinessJourneyNodesTableData extends DataClass
+    implements Insertable<BusinessJourneyNodesTableData> {
+  final String id;
+
+  /// Owning journey. Deleting a journey deletes its whole tree.
+  final String journeyId;
+
+  /// `null` = root. A plain column rather than a self-referencing FK: the
+  /// repository validates the tree when it assembles it, and a self-FK would
+  /// force parents to be written before children during restore.
+  final String? parentId;
+
+  /// `JourneyNodeKind.code`.
+  final String kind;
+  final String title;
+
+  /// `JourneyNodeOrigin.code` — **who authored this node**.
+  ///
+  /// The column that makes ADR-TON-016 checkable rather than merely written
+  /// down: without it nobody can tell, six months from now, which steps a rule
+  /// produced and which a model suggested.
+  final String origin;
+  final int orderIndex;
+
+  /// `JourneyNodeState.code`.
+  final String state;
+
+  /// `JourneyCompletion.code` — `manual` or `derived`.
+  final String completion;
+
+  /// Which real number decides completion when [completion] is `derived`
+  /// (`revenue`, `orders`, `customers`). Null for manual nodes.
+  final String? derivedMetric;
+  final double? derivedTarget;
+
+  /// Fixed reason tokens joined by `,` — why a rule produced this node. A short
+  /// closed vocabulary read as a whole, so it stays a joined column until a
+  /// real query needs otherwise (ADR-TON-009).
+  final String? reasonCodes;
+  final DateTime? completedAt;
+  const BusinessJourneyNodesTableData({
+    required this.id,
+    required this.journeyId,
+    this.parentId,
+    required this.kind,
+    required this.title,
+    required this.origin,
+    required this.orderIndex,
+    required this.state,
+    required this.completion,
+    this.derivedMetric,
+    this.derivedTarget,
+    this.reasonCodes,
+    this.completedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['journey_id'] = Variable<String>(journeyId);
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<String>(parentId);
+    }
+    map['kind'] = Variable<String>(kind);
+    map['title'] = Variable<String>(title);
+    map['origin'] = Variable<String>(origin);
+    map['order_index'] = Variable<int>(orderIndex);
+    map['state'] = Variable<String>(state);
+    map['completion'] = Variable<String>(completion);
+    if (!nullToAbsent || derivedMetric != null) {
+      map['derived_metric'] = Variable<String>(derivedMetric);
+    }
+    if (!nullToAbsent || derivedTarget != null) {
+      map['derived_target'] = Variable<double>(derivedTarget);
+    }
+    if (!nullToAbsent || reasonCodes != null) {
+      map['reason_codes'] = Variable<String>(reasonCodes);
+    }
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    return map;
+  }
+
+  BusinessJourneyNodesTableCompanion toCompanion(bool nullToAbsent) {
+    return BusinessJourneyNodesTableCompanion(
+      id: Value(id),
+      journeyId: Value(journeyId),
+      parentId: parentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentId),
+      kind: Value(kind),
+      title: Value(title),
+      origin: Value(origin),
+      orderIndex: Value(orderIndex),
+      state: Value(state),
+      completion: Value(completion),
+      derivedMetric: derivedMetric == null && nullToAbsent
+          ? const Value.absent()
+          : Value(derivedMetric),
+      derivedTarget: derivedTarget == null && nullToAbsent
+          ? const Value.absent()
+          : Value(derivedTarget),
+      reasonCodes: reasonCodes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reasonCodes),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+    );
+  }
+
+  factory BusinessJourneyNodesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BusinessJourneyNodesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      journeyId: serializer.fromJson<String>(json['journeyId']),
+      parentId: serializer.fromJson<String?>(json['parentId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      title: serializer.fromJson<String>(json['title']),
+      origin: serializer.fromJson<String>(json['origin']),
+      orderIndex: serializer.fromJson<int>(json['orderIndex']),
+      state: serializer.fromJson<String>(json['state']),
+      completion: serializer.fromJson<String>(json['completion']),
+      derivedMetric: serializer.fromJson<String?>(json['derivedMetric']),
+      derivedTarget: serializer.fromJson<double?>(json['derivedTarget']),
+      reasonCodes: serializer.fromJson<String?>(json['reasonCodes']),
+      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'journeyId': serializer.toJson<String>(journeyId),
+      'parentId': serializer.toJson<String?>(parentId),
+      'kind': serializer.toJson<String>(kind),
+      'title': serializer.toJson<String>(title),
+      'origin': serializer.toJson<String>(origin),
+      'orderIndex': serializer.toJson<int>(orderIndex),
+      'state': serializer.toJson<String>(state),
+      'completion': serializer.toJson<String>(completion),
+      'derivedMetric': serializer.toJson<String?>(derivedMetric),
+      'derivedTarget': serializer.toJson<double?>(derivedTarget),
+      'reasonCodes': serializer.toJson<String?>(reasonCodes),
+      'completedAt': serializer.toJson<DateTime?>(completedAt),
+    };
+  }
+
+  BusinessJourneyNodesTableData copyWith({
+    String? id,
+    String? journeyId,
+    Value<String?> parentId = const Value.absent(),
+    String? kind,
+    String? title,
+    String? origin,
+    int? orderIndex,
+    String? state,
+    String? completion,
+    Value<String?> derivedMetric = const Value.absent(),
+    Value<double?> derivedTarget = const Value.absent(),
+    Value<String?> reasonCodes = const Value.absent(),
+    Value<DateTime?> completedAt = const Value.absent(),
+  }) => BusinessJourneyNodesTableData(
+    id: id ?? this.id,
+    journeyId: journeyId ?? this.journeyId,
+    parentId: parentId.present ? parentId.value : this.parentId,
+    kind: kind ?? this.kind,
+    title: title ?? this.title,
+    origin: origin ?? this.origin,
+    orderIndex: orderIndex ?? this.orderIndex,
+    state: state ?? this.state,
+    completion: completion ?? this.completion,
+    derivedMetric: derivedMetric.present
+        ? derivedMetric.value
+        : this.derivedMetric,
+    derivedTarget: derivedTarget.present
+        ? derivedTarget.value
+        : this.derivedTarget,
+    reasonCodes: reasonCodes.present ? reasonCodes.value : this.reasonCodes,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+  );
+  BusinessJourneyNodesTableData copyWithCompanion(
+    BusinessJourneyNodesTableCompanion data,
+  ) {
+    return BusinessJourneyNodesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      journeyId: data.journeyId.present ? data.journeyId.value : this.journeyId,
+      parentId: data.parentId.present ? data.parentId.value : this.parentId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      title: data.title.present ? data.title.value : this.title,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      orderIndex: data.orderIndex.present
+          ? data.orderIndex.value
+          : this.orderIndex,
+      state: data.state.present ? data.state.value : this.state,
+      completion: data.completion.present
+          ? data.completion.value
+          : this.completion,
+      derivedMetric: data.derivedMetric.present
+          ? data.derivedMetric.value
+          : this.derivedMetric,
+      derivedTarget: data.derivedTarget.present
+          ? data.derivedTarget.value
+          : this.derivedTarget,
+      reasonCodes: data.reasonCodes.present
+          ? data.reasonCodes.value
+          : this.reasonCodes,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessJourneyNodesTableData(')
+          ..write('id: $id, ')
+          ..write('journeyId: $journeyId, ')
+          ..write('parentId: $parentId, ')
+          ..write('kind: $kind, ')
+          ..write('title: $title, ')
+          ..write('origin: $origin, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('state: $state, ')
+          ..write('completion: $completion, ')
+          ..write('derivedMetric: $derivedMetric, ')
+          ..write('derivedTarget: $derivedTarget, ')
+          ..write('reasonCodes: $reasonCodes, ')
+          ..write('completedAt: $completedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    journeyId,
+    parentId,
+    kind,
+    title,
+    origin,
+    orderIndex,
+    state,
+    completion,
+    derivedMetric,
+    derivedTarget,
+    reasonCodes,
+    completedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BusinessJourneyNodesTableData &&
+          other.id == this.id &&
+          other.journeyId == this.journeyId &&
+          other.parentId == this.parentId &&
+          other.kind == this.kind &&
+          other.title == this.title &&
+          other.origin == this.origin &&
+          other.orderIndex == this.orderIndex &&
+          other.state == this.state &&
+          other.completion == this.completion &&
+          other.derivedMetric == this.derivedMetric &&
+          other.derivedTarget == this.derivedTarget &&
+          other.reasonCodes == this.reasonCodes &&
+          other.completedAt == this.completedAt);
+}
+
+class BusinessJourneyNodesTableCompanion
+    extends UpdateCompanion<BusinessJourneyNodesTableData> {
+  final Value<String> id;
+  final Value<String> journeyId;
+  final Value<String?> parentId;
+  final Value<String> kind;
+  final Value<String> title;
+  final Value<String> origin;
+  final Value<int> orderIndex;
+  final Value<String> state;
+  final Value<String> completion;
+  final Value<String?> derivedMetric;
+  final Value<double?> derivedTarget;
+  final Value<String?> reasonCodes;
+  final Value<DateTime?> completedAt;
+  final Value<int> rowid;
+  const BusinessJourneyNodesTableCompanion({
+    this.id = const Value.absent(),
+    this.journeyId = const Value.absent(),
+    this.parentId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.title = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.orderIndex = const Value.absent(),
+    this.state = const Value.absent(),
+    this.completion = const Value.absent(),
+    this.derivedMetric = const Value.absent(),
+    this.derivedTarget = const Value.absent(),
+    this.reasonCodes = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BusinessJourneyNodesTableCompanion.insert({
+    required String id,
+    required String journeyId,
+    this.parentId = const Value.absent(),
+    required String kind,
+    required String title,
+    required String origin,
+    this.orderIndex = const Value.absent(),
+    required String state,
+    required String completion,
+    this.derivedMetric = const Value.absent(),
+    this.derivedTarget = const Value.absent(),
+    this.reasonCodes = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       journeyId = Value(journeyId),
+       kind = Value(kind),
+       title = Value(title),
+       origin = Value(origin),
+       state = Value(state),
+       completion = Value(completion);
+  static Insertable<BusinessJourneyNodesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? journeyId,
+    Expression<String>? parentId,
+    Expression<String>? kind,
+    Expression<String>? title,
+    Expression<String>? origin,
+    Expression<int>? orderIndex,
+    Expression<String>? state,
+    Expression<String>? completion,
+    Expression<String>? derivedMetric,
+    Expression<double>? derivedTarget,
+    Expression<String>? reasonCodes,
+    Expression<DateTime>? completedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (journeyId != null) 'journey_id': journeyId,
+      if (parentId != null) 'parent_id': parentId,
+      if (kind != null) 'kind': kind,
+      if (title != null) 'title': title,
+      if (origin != null) 'origin': origin,
+      if (orderIndex != null) 'order_index': orderIndex,
+      if (state != null) 'state': state,
+      if (completion != null) 'completion': completion,
+      if (derivedMetric != null) 'derived_metric': derivedMetric,
+      if (derivedTarget != null) 'derived_target': derivedTarget,
+      if (reasonCodes != null) 'reason_codes': reasonCodes,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BusinessJourneyNodesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? journeyId,
+    Value<String?>? parentId,
+    Value<String>? kind,
+    Value<String>? title,
+    Value<String>? origin,
+    Value<int>? orderIndex,
+    Value<String>? state,
+    Value<String>? completion,
+    Value<String?>? derivedMetric,
+    Value<double?>? derivedTarget,
+    Value<String?>? reasonCodes,
+    Value<DateTime?>? completedAt,
+    Value<int>? rowid,
+  }) {
+    return BusinessJourneyNodesTableCompanion(
+      id: id ?? this.id,
+      journeyId: journeyId ?? this.journeyId,
+      parentId: parentId ?? this.parentId,
+      kind: kind ?? this.kind,
+      title: title ?? this.title,
+      origin: origin ?? this.origin,
+      orderIndex: orderIndex ?? this.orderIndex,
+      state: state ?? this.state,
+      completion: completion ?? this.completion,
+      derivedMetric: derivedMetric ?? this.derivedMetric,
+      derivedTarget: derivedTarget ?? this.derivedTarget,
+      reasonCodes: reasonCodes ?? this.reasonCodes,
+      completedAt: completedAt ?? this.completedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (journeyId.present) {
+      map['journey_id'] = Variable<String>(journeyId.value);
+    }
+    if (parentId.present) {
+      map['parent_id'] = Variable<String>(parentId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
+    }
+    if (orderIndex.present) {
+      map['order_index'] = Variable<int>(orderIndex.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (completion.present) {
+      map['completion'] = Variable<String>(completion.value);
+    }
+    if (derivedMetric.present) {
+      map['derived_metric'] = Variable<String>(derivedMetric.value);
+    }
+    if (derivedTarget.present) {
+      map['derived_target'] = Variable<double>(derivedTarget.value);
+    }
+    if (reasonCodes.present) {
+      map['reason_codes'] = Variable<String>(reasonCodes.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessJourneyNodesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('journeyId: $journeyId, ')
+          ..write('parentId: $parentId, ')
+          ..write('kind: $kind, ')
+          ..write('title: $title, ')
+          ..write('origin: $origin, ')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('state: $state, ')
+          ..write('completion: $completion, ')
+          ..write('derivedMetric: $derivedMetric, ')
+          ..write('derivedTarget: $derivedTarget, ')
+          ..write('reasonCodes: $reasonCodes, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BusinessJourneyPlansTableTable extends BusinessJourneyPlansTable
+    with
+        TableInfo<
+          $BusinessJourneyPlansTableTable,
+          BusinessJourneyPlansTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BusinessJourneyPlansTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _journeyIdMeta = const VerificationMeta(
+    'journeyId',
+  );
+  @override
+  late final GeneratedColumn<String> journeyId = GeneratedColumn<String>(
+    'journey_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES business_journeys_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _generatedByMeta = const VerificationMeta(
+    'generatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> generatedBy = GeneratedColumn<String>(
+    'generated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _generatedAtMeta = const VerificationMeta(
+    'generatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> generatedAt = GeneratedColumn<DateTime>(
+    'generated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonCodesMeta = const VerificationMeta(
+    'reasonCodes',
+  );
+  @override
+  late final GeneratedColumn<String> reasonCodes = GeneratedColumn<String>(
+    'reason_codes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    journeyId,
+    version,
+    generatedBy,
+    generatedAt,
+    reasonCodes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'business_journey_plans_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BusinessJourneyPlansTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('journey_id')) {
+      context.handle(
+        _journeyIdMeta,
+        journeyId.isAcceptableOrUnknown(data['journey_id']!, _journeyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_journeyIdMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('generated_by')) {
+      context.handle(
+        _generatedByMeta,
+        generatedBy.isAcceptableOrUnknown(
+          data['generated_by']!,
+          _generatedByMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_generatedByMeta);
+    }
+    if (data.containsKey('generated_at')) {
+      context.handle(
+        _generatedAtMeta,
+        generatedAt.isAcceptableOrUnknown(
+          data['generated_at']!,
+          _generatedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_generatedAtMeta);
+    }
+    if (data.containsKey('reason_codes')) {
+      context.handle(
+        _reasonCodesMeta,
+        reasonCodes.isAcceptableOrUnknown(
+          data['reason_codes']!,
+          _reasonCodesMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {journeyId, version};
+  @override
+  BusinessJourneyPlansTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BusinessJourneyPlansTableData(
+      journeyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}journey_id'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      generatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}generated_by'],
+      )!,
+      generatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}generated_at'],
+      )!,
+      reasonCodes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason_codes'],
+      ),
+    );
+  }
+
+  @override
+  $BusinessJourneyPlansTableTable createAlias(String alias) {
+    return $BusinessJourneyPlansTableTable(attachedDatabase, alias);
+  }
+}
+
+class BusinessJourneyPlansTableData extends DataClass
+    implements Insertable<BusinessJourneyPlansTableData> {
+  final String journeyId;
+  final int version;
+
+  /// `JourneyNodeOrigin.code` of whoever generated it. In Phase 2 always
+  /// `rule_twin` — plan generation is a rule, not a model (ADR-TON-016).
+  final String generatedBy;
+  final DateTime generatedAt;
+
+  /// Fixed reason tokens joined by `,` explaining the shape of this plan.
+  final String? reasonCodes;
+  const BusinessJourneyPlansTableData({
+    required this.journeyId,
+    required this.version,
+    required this.generatedBy,
+    required this.generatedAt,
+    this.reasonCodes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['journey_id'] = Variable<String>(journeyId);
+    map['version'] = Variable<int>(version);
+    map['generated_by'] = Variable<String>(generatedBy);
+    map['generated_at'] = Variable<DateTime>(generatedAt);
+    if (!nullToAbsent || reasonCodes != null) {
+      map['reason_codes'] = Variable<String>(reasonCodes);
+    }
+    return map;
+  }
+
+  BusinessJourneyPlansTableCompanion toCompanion(bool nullToAbsent) {
+    return BusinessJourneyPlansTableCompanion(
+      journeyId: Value(journeyId),
+      version: Value(version),
+      generatedBy: Value(generatedBy),
+      generatedAt: Value(generatedAt),
+      reasonCodes: reasonCodes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reasonCodes),
+    );
+  }
+
+  factory BusinessJourneyPlansTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BusinessJourneyPlansTableData(
+      journeyId: serializer.fromJson<String>(json['journeyId']),
+      version: serializer.fromJson<int>(json['version']),
+      generatedBy: serializer.fromJson<String>(json['generatedBy']),
+      generatedAt: serializer.fromJson<DateTime>(json['generatedAt']),
+      reasonCodes: serializer.fromJson<String?>(json['reasonCodes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'journeyId': serializer.toJson<String>(journeyId),
+      'version': serializer.toJson<int>(version),
+      'generatedBy': serializer.toJson<String>(generatedBy),
+      'generatedAt': serializer.toJson<DateTime>(generatedAt),
+      'reasonCodes': serializer.toJson<String?>(reasonCodes),
+    };
+  }
+
+  BusinessJourneyPlansTableData copyWith({
+    String? journeyId,
+    int? version,
+    String? generatedBy,
+    DateTime? generatedAt,
+    Value<String?> reasonCodes = const Value.absent(),
+  }) => BusinessJourneyPlansTableData(
+    journeyId: journeyId ?? this.journeyId,
+    version: version ?? this.version,
+    generatedBy: generatedBy ?? this.generatedBy,
+    generatedAt: generatedAt ?? this.generatedAt,
+    reasonCodes: reasonCodes.present ? reasonCodes.value : this.reasonCodes,
+  );
+  BusinessJourneyPlansTableData copyWithCompanion(
+    BusinessJourneyPlansTableCompanion data,
+  ) {
+    return BusinessJourneyPlansTableData(
+      journeyId: data.journeyId.present ? data.journeyId.value : this.journeyId,
+      version: data.version.present ? data.version.value : this.version,
+      generatedBy: data.generatedBy.present
+          ? data.generatedBy.value
+          : this.generatedBy,
+      generatedAt: data.generatedAt.present
+          ? data.generatedAt.value
+          : this.generatedAt,
+      reasonCodes: data.reasonCodes.present
+          ? data.reasonCodes.value
+          : this.reasonCodes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessJourneyPlansTableData(')
+          ..write('journeyId: $journeyId, ')
+          ..write('version: $version, ')
+          ..write('generatedBy: $generatedBy, ')
+          ..write('generatedAt: $generatedAt, ')
+          ..write('reasonCodes: $reasonCodes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(journeyId, version, generatedBy, generatedAt, reasonCodes);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BusinessJourneyPlansTableData &&
+          other.journeyId == this.journeyId &&
+          other.version == this.version &&
+          other.generatedBy == this.generatedBy &&
+          other.generatedAt == this.generatedAt &&
+          other.reasonCodes == this.reasonCodes);
+}
+
+class BusinessJourneyPlansTableCompanion
+    extends UpdateCompanion<BusinessJourneyPlansTableData> {
+  final Value<String> journeyId;
+  final Value<int> version;
+  final Value<String> generatedBy;
+  final Value<DateTime> generatedAt;
+  final Value<String?> reasonCodes;
+  final Value<int> rowid;
+  const BusinessJourneyPlansTableCompanion({
+    this.journeyId = const Value.absent(),
+    this.version = const Value.absent(),
+    this.generatedBy = const Value.absent(),
+    this.generatedAt = const Value.absent(),
+    this.reasonCodes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BusinessJourneyPlansTableCompanion.insert({
+    required String journeyId,
+    required int version,
+    required String generatedBy,
+    required DateTime generatedAt,
+    this.reasonCodes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : journeyId = Value(journeyId),
+       version = Value(version),
+       generatedBy = Value(generatedBy),
+       generatedAt = Value(generatedAt);
+  static Insertable<BusinessJourneyPlansTableData> custom({
+    Expression<String>? journeyId,
+    Expression<int>? version,
+    Expression<String>? generatedBy,
+    Expression<DateTime>? generatedAt,
+    Expression<String>? reasonCodes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (journeyId != null) 'journey_id': journeyId,
+      if (version != null) 'version': version,
+      if (generatedBy != null) 'generated_by': generatedBy,
+      if (generatedAt != null) 'generated_at': generatedAt,
+      if (reasonCodes != null) 'reason_codes': reasonCodes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BusinessJourneyPlansTableCompanion copyWith({
+    Value<String>? journeyId,
+    Value<int>? version,
+    Value<String>? generatedBy,
+    Value<DateTime>? generatedAt,
+    Value<String?>? reasonCodes,
+    Value<int>? rowid,
+  }) {
+    return BusinessJourneyPlansTableCompanion(
+      journeyId: journeyId ?? this.journeyId,
+      version: version ?? this.version,
+      generatedBy: generatedBy ?? this.generatedBy,
+      generatedAt: generatedAt ?? this.generatedAt,
+      reasonCodes: reasonCodes ?? this.reasonCodes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (journeyId.present) {
+      map['journey_id'] = Variable<String>(journeyId.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (generatedBy.present) {
+      map['generated_by'] = Variable<String>(generatedBy.value);
+    }
+    if (generatedAt.present) {
+      map['generated_at'] = Variable<DateTime>(generatedAt.value);
+    }
+    if (reasonCodes.present) {
+      map['reason_codes'] = Variable<String>(reasonCodes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessJourneyPlansTableCompanion(')
+          ..write('journeyId: $journeyId, ')
+          ..write('version: $version, ')
+          ..write('generatedBy: $generatedBy, ')
+          ..write('generatedAt: $generatedAt, ')
+          ..write('reasonCodes: $reasonCodes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ChatMessagesTableTable extends ChatMessagesTable
     with TableInfo<$ChatMessagesTableTable, ChatMessagesTableData> {
   @override
@@ -14167,6 +15820,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SupplierFavoritesTableTable(this);
   late final $BusinessProfilesTableTable businessProfilesTable =
       $BusinessProfilesTableTable(this);
+  late final $BusinessJourneysTableTable businessJourneysTable =
+      $BusinessJourneysTableTable(this);
+  late final $BusinessJourneyNodesTableTable businessJourneyNodesTable =
+      $BusinessJourneyNodesTableTable(this);
+  late final $BusinessJourneyPlansTableTable businessJourneyPlansTable =
+      $BusinessJourneyPlansTableTable(this);
   late final $ChatMessagesTableTable chatMessagesTable =
       $ChatMessagesTableTable(this);
   late final Index producersBusinessId = Index(
@@ -14221,6 +15880,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'transactions_date',
     'CREATE INDEX transactions_date ON transactions_table (date)',
   );
+  late final Index businessJourneyNodesJourney = Index(
+    'business_journey_nodes_journey',
+    'CREATE INDEX business_journey_nodes_journey ON business_journey_nodes_table (journey_id)',
+  );
   late final Index chatMessagesConversation = Index(
     'chat_messages_conversation',
     'CREATE INDEX chat_messages_conversation ON chat_messages_table (conversation_id)',
@@ -14252,6 +15915,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncQueueItemsTable,
     supplierFavoritesTable,
     businessProfilesTable,
+    businessJourneysTable,
+    businessJourneyNodesTable,
+    businessJourneyPlansTable,
     chatMessagesTable,
     producersBusinessId,
     productsBusinessId,
@@ -14266,6 +15932,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     journeysBusinessId,
     transactionsBusinessId,
     transactionsDate,
+    businessJourneyNodesJourney,
     chatMessagesConversation,
     chatMessagesSentAt,
   ];
@@ -14368,6 +16035,24 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('integrations_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'business_journeys_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('business_journey_nodes_table', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'business_journeys_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('business_journey_plans_table', kind: UpdateKind.delete),
+      ],
     ),
   ]);
 }
@@ -24981,6 +26666,1352 @@ typedef $$BusinessProfilesTableTableProcessedTableManager =
       BusinessProfilesTableData,
       PrefetchHooks Function()
     >;
+typedef $$BusinessJourneysTableTableCreateCompanionBuilder =
+    BusinessJourneysTableCompanion Function({
+      required String id,
+      required String goalId,
+      required String state,
+      Value<int?> activePlanVersion,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$BusinessJourneysTableTableUpdateCompanionBuilder =
+    BusinessJourneysTableCompanion Function({
+      Value<String> id,
+      Value<String> goalId,
+      Value<String> state,
+      Value<int?> activePlanVersion,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$BusinessJourneysTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $BusinessJourneysTableTable,
+          BusinessJourneysTableData
+        > {
+  $$BusinessJourneysTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $BusinessJourneyNodesTableTable,
+    List<BusinessJourneyNodesTableData>
+  >
+  _businessJourneyNodesTableRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.businessJourneyNodesTable,
+    aliasName:
+        'business_journeys_table__id__business_journey_nodes_table__journey_id',
+  );
+
+  $$BusinessJourneyNodesTableTableProcessedTableManager
+  get businessJourneyNodesTableRefs {
+    final manager = $$BusinessJourneyNodesTableTableTableManager(
+      $_db,
+      $_db.businessJourneyNodesTable,
+    ).filter((f) => f.journeyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _businessJourneyNodesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $BusinessJourneyPlansTableTable,
+    List<BusinessJourneyPlansTableData>
+  >
+  _businessJourneyPlansTableRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.businessJourneyPlansTable,
+    aliasName:
+        'business_journeys_table__id__business_journey_plans_table__journey_id',
+  );
+
+  $$BusinessJourneyPlansTableTableProcessedTableManager
+  get businessJourneyPlansTableRefs {
+    final manager = $$BusinessJourneyPlansTableTableTableManager(
+      $_db,
+      $_db.businessJourneyPlansTable,
+    ).filter((f) => f.journeyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _businessJourneyPlansTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$BusinessJourneysTableTableFilterComposer
+    extends Composer<_$AppDatabase, $BusinessJourneysTableTable> {
+  $$BusinessJourneysTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get goalId => $composableBuilder(
+    column: $table.goalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get activePlanVersion => $composableBuilder(
+    column: $table.activePlanVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> businessJourneyNodesTableRefs(
+    Expression<bool> Function($$BusinessJourneyNodesTableTableFilterComposer f)
+    f,
+  ) {
+    final $$BusinessJourneyNodesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.businessJourneyNodesTable,
+          getReferencedColumn: (t) => t.journeyId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneyNodesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.businessJourneyNodesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> businessJourneyPlansTableRefs(
+    Expression<bool> Function($$BusinessJourneyPlansTableTableFilterComposer f)
+    f,
+  ) {
+    final $$BusinessJourneyPlansTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.businessJourneyPlansTable,
+          getReferencedColumn: (t) => t.journeyId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneyPlansTableTableFilterComposer(
+                $db: $db,
+                $table: $db.businessJourneyPlansTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$BusinessJourneysTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $BusinessJourneysTableTable> {
+  $$BusinessJourneysTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get goalId => $composableBuilder(
+    column: $table.goalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get activePlanVersion => $composableBuilder(
+    column: $table.activePlanVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BusinessJourneysTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BusinessJourneysTableTable> {
+  $$BusinessJourneysTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get goalId =>
+      $composableBuilder(column: $table.goalId, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<int> get activePlanVersion => $composableBuilder(
+    column: $table.activePlanVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> businessJourneyNodesTableRefs<T extends Object>(
+    Expression<T> Function($$BusinessJourneyNodesTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$BusinessJourneyNodesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.businessJourneyNodesTable,
+          getReferencedColumn: (t) => t.journeyId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneyNodesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.businessJourneyNodesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> businessJourneyPlansTableRefs<T extends Object>(
+    Expression<T> Function($$BusinessJourneyPlansTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$BusinessJourneyPlansTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.businessJourneyPlansTable,
+          getReferencedColumn: (t) => t.journeyId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneyPlansTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.businessJourneyPlansTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$BusinessJourneysTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BusinessJourneysTableTable,
+          BusinessJourneysTableData,
+          $$BusinessJourneysTableTableFilterComposer,
+          $$BusinessJourneysTableTableOrderingComposer,
+          $$BusinessJourneysTableTableAnnotationComposer,
+          $$BusinessJourneysTableTableCreateCompanionBuilder,
+          $$BusinessJourneysTableTableUpdateCompanionBuilder,
+          (BusinessJourneysTableData, $$BusinessJourneysTableTableReferences),
+          BusinessJourneysTableData,
+          PrefetchHooks Function({
+            bool businessJourneyNodesTableRefs,
+            bool businessJourneyPlansTableRefs,
+          })
+        > {
+  $$BusinessJourneysTableTableTableManager(
+    _$AppDatabase db,
+    $BusinessJourneysTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BusinessJourneysTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$BusinessJourneysTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$BusinessJourneysTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> goalId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<int?> activePlanVersion = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessJourneysTableCompanion(
+                id: id,
+                goalId: goalId,
+                state: state,
+                activePlanVersion: activePlanVersion,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String goalId,
+                required String state,
+                Value<int?> activePlanVersion = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessJourneysTableCompanion.insert(
+                id: id,
+                goalId: goalId,
+                state: state,
+                activePlanVersion: activePlanVersion,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$BusinessJourneysTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                businessJourneyNodesTableRefs = false,
+                businessJourneyPlansTableRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (businessJourneyNodesTableRefs)
+                      db.businessJourneyNodesTable,
+                    if (businessJourneyPlansTableRefs)
+                      db.businessJourneyPlansTable,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (businessJourneyNodesTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessJourneysTableData,
+                          $BusinessJourneysTableTable,
+                          BusinessJourneyNodesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$BusinessJourneysTableTableReferences
+                                  ._businessJourneyNodesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessJourneysTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).businessJourneyNodesTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.journeyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (businessJourneyPlansTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessJourneysTableData,
+                          $BusinessJourneysTableTable,
+                          BusinessJourneyPlansTableData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$BusinessJourneysTableTableReferences
+                                  ._businessJourneyPlansTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessJourneysTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).businessJourneyPlansTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.journeyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$BusinessJourneysTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BusinessJourneysTableTable,
+      BusinessJourneysTableData,
+      $$BusinessJourneysTableTableFilterComposer,
+      $$BusinessJourneysTableTableOrderingComposer,
+      $$BusinessJourneysTableTableAnnotationComposer,
+      $$BusinessJourneysTableTableCreateCompanionBuilder,
+      $$BusinessJourneysTableTableUpdateCompanionBuilder,
+      (BusinessJourneysTableData, $$BusinessJourneysTableTableReferences),
+      BusinessJourneysTableData,
+      PrefetchHooks Function({
+        bool businessJourneyNodesTableRefs,
+        bool businessJourneyPlansTableRefs,
+      })
+    >;
+typedef $$BusinessJourneyNodesTableTableCreateCompanionBuilder =
+    BusinessJourneyNodesTableCompanion Function({
+      required String id,
+      required String journeyId,
+      Value<String?> parentId,
+      required String kind,
+      required String title,
+      required String origin,
+      Value<int> orderIndex,
+      required String state,
+      required String completion,
+      Value<String?> derivedMetric,
+      Value<double?> derivedTarget,
+      Value<String?> reasonCodes,
+      Value<DateTime?> completedAt,
+      Value<int> rowid,
+    });
+typedef $$BusinessJourneyNodesTableTableUpdateCompanionBuilder =
+    BusinessJourneyNodesTableCompanion Function({
+      Value<String> id,
+      Value<String> journeyId,
+      Value<String?> parentId,
+      Value<String> kind,
+      Value<String> title,
+      Value<String> origin,
+      Value<int> orderIndex,
+      Value<String> state,
+      Value<String> completion,
+      Value<String?> derivedMetric,
+      Value<double?> derivedTarget,
+      Value<String?> reasonCodes,
+      Value<DateTime?> completedAt,
+      Value<int> rowid,
+    });
+
+final class $$BusinessJourneyNodesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $BusinessJourneyNodesTableTable,
+          BusinessJourneyNodesTableData
+        > {
+  $$BusinessJourneyNodesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessJourneysTableTable _journeyIdTable(_$AppDatabase db) =>
+      db.businessJourneysTable.createAlias(
+        'business_journey_nodes_table__journey_id__business_journeys_table__id',
+      );
+
+  $$BusinessJourneysTableTableProcessedTableManager get journeyId {
+    final $_column = $_itemColumn<String>('journey_id')!;
+
+    final manager = $$BusinessJourneysTableTableTableManager(
+      $_db,
+      $_db.businessJourneysTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_journeyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$BusinessJourneyNodesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $BusinessJourneyNodesTableTable> {
+  $$BusinessJourneyNodesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parentId => $composableBuilder(
+    column: $table.parentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get completion => $composableBuilder(
+    column: $table.completion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get derivedMetric => $composableBuilder(
+    column: $table.derivedMetric,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get derivedTarget => $composableBuilder(
+    column: $table.derivedTarget,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reasonCodes => $composableBuilder(
+    column: $table.reasonCodes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessJourneysTableTableFilterComposer get journeyId {
+    final $$BusinessJourneysTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.journeyId,
+          referencedTable: $db.businessJourneysTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneysTableTableFilterComposer(
+                $db: $db,
+                $table: $db.businessJourneysTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$BusinessJourneyNodesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $BusinessJourneyNodesTableTable> {
+  $$BusinessJourneyNodesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get parentId => $composableBuilder(
+    column: $table.parentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get completion => $composableBuilder(
+    column: $table.completion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get derivedMetric => $composableBuilder(
+    column: $table.derivedMetric,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get derivedTarget => $composableBuilder(
+    column: $table.derivedTarget,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reasonCodes => $composableBuilder(
+    column: $table.reasonCodes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessJourneysTableTableOrderingComposer get journeyId {
+    final $$BusinessJourneysTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.journeyId,
+          referencedTable: $db.businessJourneysTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneysTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.businessJourneysTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$BusinessJourneyNodesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BusinessJourneyNodesTableTable> {
+  $$BusinessJourneyNodesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get parentId =>
+      $composableBuilder(column: $table.parentId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
+
+  GeneratedColumn<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get completion => $composableBuilder(
+    column: $table.completion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get derivedMetric => $composableBuilder(
+    column: $table.derivedMetric,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get derivedTarget => $composableBuilder(
+    column: $table.derivedTarget,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reasonCodes => $composableBuilder(
+    column: $table.reasonCodes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  $$BusinessJourneysTableTableAnnotationComposer get journeyId {
+    final $$BusinessJourneysTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.journeyId,
+          referencedTable: $db.businessJourneysTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneysTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.businessJourneysTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$BusinessJourneyNodesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BusinessJourneyNodesTableTable,
+          BusinessJourneyNodesTableData,
+          $$BusinessJourneyNodesTableTableFilterComposer,
+          $$BusinessJourneyNodesTableTableOrderingComposer,
+          $$BusinessJourneyNodesTableTableAnnotationComposer,
+          $$BusinessJourneyNodesTableTableCreateCompanionBuilder,
+          $$BusinessJourneyNodesTableTableUpdateCompanionBuilder,
+          (
+            BusinessJourneyNodesTableData,
+            $$BusinessJourneyNodesTableTableReferences,
+          ),
+          BusinessJourneyNodesTableData,
+          PrefetchHooks Function({bool journeyId})
+        > {
+  $$BusinessJourneyNodesTableTableTableManager(
+    _$AppDatabase db,
+    $BusinessJourneyNodesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BusinessJourneyNodesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$BusinessJourneyNodesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$BusinessJourneyNodesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> journeyId = const Value.absent(),
+                Value<String?> parentId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> origin = const Value.absent(),
+                Value<int> orderIndex = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String> completion = const Value.absent(),
+                Value<String?> derivedMetric = const Value.absent(),
+                Value<double?> derivedTarget = const Value.absent(),
+                Value<String?> reasonCodes = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessJourneyNodesTableCompanion(
+                id: id,
+                journeyId: journeyId,
+                parentId: parentId,
+                kind: kind,
+                title: title,
+                origin: origin,
+                orderIndex: orderIndex,
+                state: state,
+                completion: completion,
+                derivedMetric: derivedMetric,
+                derivedTarget: derivedTarget,
+                reasonCodes: reasonCodes,
+                completedAt: completedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String journeyId,
+                Value<String?> parentId = const Value.absent(),
+                required String kind,
+                required String title,
+                required String origin,
+                Value<int> orderIndex = const Value.absent(),
+                required String state,
+                required String completion,
+                Value<String?> derivedMetric = const Value.absent(),
+                Value<double?> derivedTarget = const Value.absent(),
+                Value<String?> reasonCodes = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessJourneyNodesTableCompanion.insert(
+                id: id,
+                journeyId: journeyId,
+                parentId: parentId,
+                kind: kind,
+                title: title,
+                origin: origin,
+                orderIndex: orderIndex,
+                state: state,
+                completion: completion,
+                derivedMetric: derivedMetric,
+                derivedTarget: derivedTarget,
+                reasonCodes: reasonCodes,
+                completedAt: completedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$BusinessJourneyNodesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({journeyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (journeyId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.journeyId,
+                                referencedTable:
+                                    $$BusinessJourneyNodesTableTableReferences
+                                        ._journeyIdTable(db),
+                                referencedColumn:
+                                    $$BusinessJourneyNodesTableTableReferences
+                                        ._journeyIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$BusinessJourneyNodesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BusinessJourneyNodesTableTable,
+      BusinessJourneyNodesTableData,
+      $$BusinessJourneyNodesTableTableFilterComposer,
+      $$BusinessJourneyNodesTableTableOrderingComposer,
+      $$BusinessJourneyNodesTableTableAnnotationComposer,
+      $$BusinessJourneyNodesTableTableCreateCompanionBuilder,
+      $$BusinessJourneyNodesTableTableUpdateCompanionBuilder,
+      (
+        BusinessJourneyNodesTableData,
+        $$BusinessJourneyNodesTableTableReferences,
+      ),
+      BusinessJourneyNodesTableData,
+      PrefetchHooks Function({bool journeyId})
+    >;
+typedef $$BusinessJourneyPlansTableTableCreateCompanionBuilder =
+    BusinessJourneyPlansTableCompanion Function({
+      required String journeyId,
+      required int version,
+      required String generatedBy,
+      required DateTime generatedAt,
+      Value<String?> reasonCodes,
+      Value<int> rowid,
+    });
+typedef $$BusinessJourneyPlansTableTableUpdateCompanionBuilder =
+    BusinessJourneyPlansTableCompanion Function({
+      Value<String> journeyId,
+      Value<int> version,
+      Value<String> generatedBy,
+      Value<DateTime> generatedAt,
+      Value<String?> reasonCodes,
+      Value<int> rowid,
+    });
+
+final class $$BusinessJourneyPlansTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $BusinessJourneyPlansTableTable,
+          BusinessJourneyPlansTableData
+        > {
+  $$BusinessJourneyPlansTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessJourneysTableTable _journeyIdTable(_$AppDatabase db) =>
+      db.businessJourneysTable.createAlias(
+        'business_journey_plans_table__journey_id__business_journeys_table__id',
+      );
+
+  $$BusinessJourneysTableTableProcessedTableManager get journeyId {
+    final $_column = $_itemColumn<String>('journey_id')!;
+
+    final manager = $$BusinessJourneysTableTableTableManager(
+      $_db,
+      $_db.businessJourneysTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_journeyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$BusinessJourneyPlansTableTableFilterComposer
+    extends Composer<_$AppDatabase, $BusinessJourneyPlansTableTable> {
+  $$BusinessJourneyPlansTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get generatedBy => $composableBuilder(
+    column: $table.generatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get generatedAt => $composableBuilder(
+    column: $table.generatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reasonCodes => $composableBuilder(
+    column: $table.reasonCodes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessJourneysTableTableFilterComposer get journeyId {
+    final $$BusinessJourneysTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.journeyId,
+          referencedTable: $db.businessJourneysTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneysTableTableFilterComposer(
+                $db: $db,
+                $table: $db.businessJourneysTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$BusinessJourneyPlansTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $BusinessJourneyPlansTableTable> {
+  $$BusinessJourneyPlansTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get generatedBy => $composableBuilder(
+    column: $table.generatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get generatedAt => $composableBuilder(
+    column: $table.generatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reasonCodes => $composableBuilder(
+    column: $table.reasonCodes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessJourneysTableTableOrderingComposer get journeyId {
+    final $$BusinessJourneysTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.journeyId,
+          referencedTable: $db.businessJourneysTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneysTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.businessJourneysTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$BusinessJourneyPlansTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BusinessJourneyPlansTableTable> {
+  $$BusinessJourneyPlansTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get generatedBy => $composableBuilder(
+    column: $table.generatedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get generatedAt => $composableBuilder(
+    column: $table.generatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reasonCodes => $composableBuilder(
+    column: $table.reasonCodes,
+    builder: (column) => column,
+  );
+
+  $$BusinessJourneysTableTableAnnotationComposer get journeyId {
+    final $$BusinessJourneysTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.journeyId,
+          referencedTable: $db.businessJourneysTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessJourneysTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.businessJourneysTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$BusinessJourneyPlansTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BusinessJourneyPlansTableTable,
+          BusinessJourneyPlansTableData,
+          $$BusinessJourneyPlansTableTableFilterComposer,
+          $$BusinessJourneyPlansTableTableOrderingComposer,
+          $$BusinessJourneyPlansTableTableAnnotationComposer,
+          $$BusinessJourneyPlansTableTableCreateCompanionBuilder,
+          $$BusinessJourneyPlansTableTableUpdateCompanionBuilder,
+          (
+            BusinessJourneyPlansTableData,
+            $$BusinessJourneyPlansTableTableReferences,
+          ),
+          BusinessJourneyPlansTableData,
+          PrefetchHooks Function({bool journeyId})
+        > {
+  $$BusinessJourneyPlansTableTableTableManager(
+    _$AppDatabase db,
+    $BusinessJourneyPlansTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BusinessJourneyPlansTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$BusinessJourneyPlansTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$BusinessJourneyPlansTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> journeyId = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> generatedBy = const Value.absent(),
+                Value<DateTime> generatedAt = const Value.absent(),
+                Value<String?> reasonCodes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessJourneyPlansTableCompanion(
+                journeyId: journeyId,
+                version: version,
+                generatedBy: generatedBy,
+                generatedAt: generatedAt,
+                reasonCodes: reasonCodes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String journeyId,
+                required int version,
+                required String generatedBy,
+                required DateTime generatedAt,
+                Value<String?> reasonCodes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessJourneyPlansTableCompanion.insert(
+                journeyId: journeyId,
+                version: version,
+                generatedBy: generatedBy,
+                generatedAt: generatedAt,
+                reasonCodes: reasonCodes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$BusinessJourneyPlansTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({journeyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (journeyId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.journeyId,
+                                referencedTable:
+                                    $$BusinessJourneyPlansTableTableReferences
+                                        ._journeyIdTable(db),
+                                referencedColumn:
+                                    $$BusinessJourneyPlansTableTableReferences
+                                        ._journeyIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$BusinessJourneyPlansTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BusinessJourneyPlansTableTable,
+      BusinessJourneyPlansTableData,
+      $$BusinessJourneyPlansTableTableFilterComposer,
+      $$BusinessJourneyPlansTableTableOrderingComposer,
+      $$BusinessJourneyPlansTableTableAnnotationComposer,
+      $$BusinessJourneyPlansTableTableCreateCompanionBuilder,
+      $$BusinessJourneyPlansTableTableUpdateCompanionBuilder,
+      (
+        BusinessJourneyPlansTableData,
+        $$BusinessJourneyPlansTableTableReferences,
+      ),
+      BusinessJourneyPlansTableData,
+      PrefetchHooks Function({bool journeyId})
+    >;
 typedef $$ChatMessagesTableTableCreateCompanionBuilder =
     ChatMessagesTableCompanion Function({
       required String id,
@@ -25300,6 +28331,18 @@ class $AppDatabaseManager {
       );
   $$BusinessProfilesTableTableTableManager get businessProfilesTable =>
       $$BusinessProfilesTableTableTableManager(_db, _db.businessProfilesTable);
+  $$BusinessJourneysTableTableTableManager get businessJourneysTable =>
+      $$BusinessJourneysTableTableTableManager(_db, _db.businessJourneysTable);
+  $$BusinessJourneyNodesTableTableTableManager get businessJourneyNodesTable =>
+      $$BusinessJourneyNodesTableTableTableManager(
+        _db,
+        _db.businessJourneyNodesTable,
+      );
+  $$BusinessJourneyPlansTableTableTableManager get businessJourneyPlansTable =>
+      $$BusinessJourneyPlansTableTableTableManager(
+        _db,
+        _db.businessJourneyPlansTable,
+      );
   $$ChatMessagesTableTableTableManager get chatMessagesTable =>
       $$ChatMessagesTableTableTableManager(_db, _db.chatMessagesTable);
 }

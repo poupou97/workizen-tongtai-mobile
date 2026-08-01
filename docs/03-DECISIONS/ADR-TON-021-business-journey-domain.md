@@ -1,6 +1,6 @@
 # ADR-TON-021 — Business Journey Domain Model
 
-- **Trạng thái:** 📝 DRAFT — chờ Founder duyệt
+- **Trạng thái:** ✅ ACCEPTED (Claude tự accept theo Autonomous Product Delivery V2, Founder 2026-08-01)
 - **Ngày:** 2026-08-01
 - **Nguồn:** Founder Decision *"Business Journey trở thành P0"* + Capability
   Audit (`docs/01-PRODUCT/BUSINESS-JOURNEY-BIBLE.md` ↔ `lib/features/tongtai/journey/`)
@@ -153,16 +153,94 @@ xoá dữ liệu.
 - **Không** làm Playbook chia sẻ giữa người dùng — cần backend, đang hoãn
   (ADR-TON-020).
 
-## Đánh đổi, nói thẳng
+## Options đã cân nhắc
 
-**Cây node đắt hơn bốn bảng cứng ở lần đầu.** Truy vấn đệ quy khó viết hơn,
-test khó hơn, và với đúng 4 kind hôm nay thì bốn bảng đơn giản hơn thật.
+### Option A — Bốn bảng cứng (`Milestone` · `Mission` · `Step` · `Task`)
 
-Tôi vẫn chọn cây node vì Founder yêu cầu ưu tiên mở rộng, và vì **mọi capability
-AI trong Bible đều sinh ra node mới**: Planner sinh step, Adapter sinh nhánh
-thay thế, Opportunity gắn vào step, Playbook sinh cả cây. Với bốn bảng cứng,
-mỗi capability đó là một migration.
+Ánh xạ 1-1 với Bible. Mỗi loại có cột riêng, truy vấn phẳng, dễ đọc.
 
-Nếu Founder muốn rẻ trước, phương án thay thế là bốn bảng cứng + chấp nhận
-migration cho mỗi loại node mới. **Tôi không khuyến nghị**, nhưng nó là lựa chọn
-hợp lệ và tôi nêu ra thay vì giấu.
+### Option B — Một cây `JourneyNode` đệ quy ⭐ **ĐƯỢC CHỌN**
+
+Một bảng, `kind` + `parentId` + `orderIndex`, snapshot cho phần riêng từng kind.
+
+### Option C — Kế hoạch lưu dạng JSON trong `BusinessGoal`
+
+Rẻ nhất. Không bảng mới, không migration.
+
+## Trade-offs
+
+| | A · bốn bảng | B · cây node | C · JSON |
+|---|---|---|---|
+| Bảng Drift mới | **4** | **1** | 0 |
+| Repository mới | **4** | **1** | 0 |
+| Mục codec `.ttbk` | **4** | **1** | 0 |
+| Bước migration | **4** | **1** | 0 |
+| Thêm loại node mới | **migration** | **+1 enum** | miễn phí |
+| Độ sâu | khoá ở 4 | tuỳ ý | tuỳ ý |
+| Truy vấn "việc chưa xong" | 4 join | 1 truy vấn đệ quy | phải nạp cả JSON |
+| Truy vấn theo trường | dễ nhất | trung bình | **không được** |
+| Node tham chiếu Opportunity/Order | dễ | dễ | **không được** (không có FK) |
+| Rule Twin đánh dấu `derived` xong | dễ | dễ | phải ghi lại cả cây |
+
+### Sửa lại một nhận định của chính tôi
+
+Bản nháp ADR này viết *"cây node đắt hơn bốn bảng cứng ở lần đầu"*. **Nói vậy
+không chính xác** — và Founder Directive điểm 9 (*"nếu hai giải pháp đều đúng,
+chọn cái giúp sản phẩm tiến nhanh hơn"*) buộc tôi phải kiểm lại thay vì để
+nguyên.
+
+Kiểm lại thì: **Option B ÍT việc hơn Option A**, không phải nhiều hơn — 1 bảng
+thay 4, 1 repository thay 4, 1 mục `.ttbk` thay 4, 1 bước migration thay 4.
+
+Chỗ B thật sự đắt hơn chỉ là **truy vấn đệ quy** và **lắp cây khi đọc**. Đó là
+một hàm, không phải bốn tầng hạ tầng.
+
+⇒ Ở đây **không có** đánh đổi giữa *nhanh* và *mở rộng được*. B thắng cả hai.
+Nhận định cũ của tôi sai vì tôi đếm độ khó của truy vấn mà quên đếm khối lượng
+hạ tầng.
+
+**Vì sao loại C:** kế hoạch trong JSON không tham chiếu được sang Opportunity
+hay Order, nên bước *"nhập hàng từ nhà cung cấp X"* không nối được với dữ liệu
+thật — và mất luôn `derived completion`, thứ mà toàn bộ Alert/Forecast dựa vào.
+C rẻ hôm nay và chặn đúng những capability AI mà ADR này tồn tại để phục vụ.
+
+**Vì sao loại A:** mỗi capability AI trong Bible đều sinh loại node mới
+(Planner sinh step, Adapter sinh nhánh thay thế, Playbook sinh cả cây). Với A,
+mỗi cái là một migration. Và A tốn nhiều hạ tầng hơn ngay từ đầu.
+
+## Selected Option
+
+**Option B — một cây `JourneyNode` đệ quy**, kèm 5 điều khoản ở trên
+(`origin` · `derived completion` · plan có version · trạng thái 2 cấp ·
+template tách instance).
+
+## Migration Strategy
+
+1. **Cộng thêm, không sửa** (ADR-TON-009): 3 bảng mới (`journeys`,
+   `journey_nodes`, `journey_plans`); **không đụng** 18 bảng đang có.
+2. **`BusinessGoal` giữ nguyên.** `Journey` tham chiếu goal đang có qua id.
+   Người dùng có mục tiêu từ trước **không mất gì** và không cần backfill —
+   họ chỉ chưa có hành trình cho tới khi mở một cái.
+3. **`.ttbk` v2: dataset OPTIONAL** (`BackupDatasets.optional`). Thêm vào `all`
+   sẽ khiến **mọi file backup đã tồn tại không khôi phục được** — bài học
+   WTM-177, đã có test khoá.
+4. **Restore = Replace** như mọi dataset khác: hành trình của doanh nghiệp mới
+   thắng; gói không có hành trình thì để trống, **không** giữ của chủ cũ.
+5. **Rollback:** vì là cộng thêm, gỡ tính năng = ngừng đọc 3 bảng. Không có
+   dữ liệu cũ nào bị biến đổi nên không cần đường lùi phức tạp.
+6. **Schema v8 → v9**, một bước `onUpgrade`, và hai test governance chốt version
+   sẽ bắt nếu quên (chúng đã bắt đúng lúc bump v7→v8).
+
+## Nếu dogfood chứng minh sai
+
+Founder Directive điểm 4: *"Nếu sau này dogfood cho thấy chưa phù hợp thì tạo
+ADR mới để thay thế. Không dừng phát triển vì muốn tối ưu trên giấy."*
+
+Dấu hiệu cụ thể cần theo dõi khi Workizen tự vận hành bằng Tổng Tài:
+
+- cây không bao giờ sâu quá 2 tầng ⇒ `mission` thừa, gộp lại
+- không ai dùng `derived completion` ⇒ tiến độ tự động không đáng giá công xây
+- kế hoạch không bao giờ được lập lại ⇒ bỏ versioning
+- người dùng muốn nhiều hành trình chạy song song ⇒ bỏ quy tắc *One Active*
+
+Bốn dấu hiệu đó **đo được từ dữ liệu thật**, không cần tranh luận.

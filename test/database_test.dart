@@ -37,7 +37,11 @@ void main() {
     // v6 (WTM-123): added customers.domain_snapshot (ADR-TON-009).
     // v7 (WTM-124): added journeys.domain_snapshot (ADR-TON-009).
     // v8 (WTM-177): added business_profiles_table (AI Business Profile).
-    expect(db.schemaVersion, 8);
+    // v9 (WTM-185): added the Business Journey tree — business_journeys_table,
+    //               business_journey_nodes_table, business_journey_plans_table
+    //               (ADR-TON-021). Note journeys_table is NOT one of these; it
+    //               stores BusinessGoal and has since WTM-124.
+    expect(db.schemaVersion, 9);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

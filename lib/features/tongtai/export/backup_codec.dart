@@ -7,6 +7,8 @@ import '../finance/finance_transaction.dart';
 import '../inventory/product.dart';
 import '../inventory/product_history.dart';
 import '../journey/business_goal.dart';
+import '../journey/journey.dart';
+import '../journey/journey_node.dart';
 import '../orders/order.dart';
 import '../producer/supplier_favorite.dart';
 
@@ -455,6 +457,77 @@ class BackupCodec {
   }
 
   // ── supplier favourites ──────────────────────────────────────────────────
+
+  /// A journey and its whole tree, as one record (WTM-185).
+  ///
+  /// Nested rather than three flat datasets: a tree split across datasets can
+  /// be restored half-way, and a plan missing its steps is worse than no plan.
+  /// One record per journey means it arrives whole or not at all.
+  static Map<String, Object?> encodeJourney(Journey j) => {
+    'id': j.id,
+    'goalId': j.goalId,
+    'state': j.state.code,
+    'activePlanVersion': j.activePlanVersion,
+    'createdAt': j.createdAt.toIso8601String(),
+    'updatedAt': j.updatedAt.toIso8601String(),
+    'nodes': [for (final n in j.nodes) n.toJson()],
+    'plans': [
+      for (final p in j.plans)
+        {
+          'version': p.version,
+          'generatedBy': p.generatedBy.code,
+          'generatedAt': p.generatedAt.toIso8601String(),
+          'reasonCodes': p.reasonCodes,
+        },
+    ],
+  };
+
+  /// Returns `null` for a record this build cannot understand — the whole
+  /// journey is dropped rather than restored with an unreadable state, the
+  /// same rule ADR-TON-018 sets for any unknown enum.
+  static Journey? decodeJourney(Map<String, Object?> json) {
+    final id = json['id'];
+    final goalId = json['goalId'];
+    final state = JourneyState.fromCode(json['state'] as String?);
+    final createdAt = DateTime.tryParse(json['createdAt'] as String? ?? '');
+    final updatedAt = DateTime.tryParse(json['updatedAt'] as String? ?? '');
+    if (id is! String ||
+        goalId is! String ||
+        state == null ||
+        createdAt == null ||
+        updatedAt == null) {
+      return null;
+    }
+    return Journey(
+      id: id,
+      goalId: goalId,
+      state: state,
+      activePlanVersion: (json['activePlanVersion'] as num?)?.toInt(),
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      nodes: [
+        for (final raw in (json['nodes'] as List? ?? const []))
+          if (raw is Map) ?JourneyNode.fromJson(Map<String, dynamic>.from(raw)),
+      ],
+      plans: [
+        for (final raw in (json['plans'] as List? ?? const []))
+          if (raw is Map)
+            if (JourneyNodeOrigin.fromCode(raw['generatedBy'] as String?)
+                case final by?)
+              if (DateTime.tryParse(raw['generatedAt'] as String? ?? '')
+                  case final at?)
+                JourneyPlan(
+                  version: (raw['version'] as num?)?.toInt() ?? 1,
+                  generatedBy: by,
+                  generatedAt: at,
+                  reasonCodes: [
+                    for (final c in (raw['reasonCodes'] as List? ?? const []))
+                      if (c is String) c,
+                  ],
+                ),
+      ],
+    );
+  }
 
   static Map<String, Object?> encodeFavourite(SupplierFavorite f) => {
     'supplierId': f.supplierId,

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
 import 'tongtai_capability_provider.dart';
 import 'tongtai_profile_provider.dart';
+import 'tongtai_journey_provider.dart';
 import 'tongtai_context_provider.dart';
 import 'tongtai_predictive_provider.dart';
 
@@ -59,6 +60,11 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // the WTM-149 device defect, and invisible because the answer would still
   // look plausible.
   businessProfileProvider,
+  // Business Journey (WTM-185). Restore replaces the tree, so a cached read
+  // would keep showing the PREVIOUS business's plan — and worse, feed it to
+  // the AI as if it were this seller's. Same shape as the WTM-149 defect.
+  journeysProvider,
+  activeJourneyProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).

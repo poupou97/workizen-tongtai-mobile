@@ -10,6 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import '../../../database/database.dart';
 import '../profile/business_profile.dart';
 import '../profile/business_profile_repository.dart';
+import '../journey/journey.dart';
+import '../journey/journey_repository.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_repository.dart';
 import '../finance/finance_repository.dart';
@@ -58,6 +60,7 @@ class TongtaiBackupRepositories {
     required this.finance,
     required this.favourites,
     this.businessProfile,
+    this.journeys,
   });
 
   /// Needed for the single transaction that makes Replace atomic — the one
@@ -75,6 +78,11 @@ class TongtaiBackupRepositories {
   /// that build this bundle keep compiling; a `null` repository simply means
   /// no profile is backed up or restored.
   final BusinessProfileRepository? businessProfile;
+
+  /// Business Journey tree (WTM-185). Nullable for the same reason as
+  /// [businessProfile]: existing call sites keep compiling, and a `null`
+  /// repository simply means journeys are neither backed up nor restored.
+  final JourneyRepository? journeys;
 }
 
 /// The decoded, type-checked contents of a backup.
@@ -88,6 +96,7 @@ class BackupContents {
     required this.transactions,
     required this.favourites,
     this.businessProfile,
+    this.journeys = const [],
   });
 
   final List<Customer> customers;
@@ -101,6 +110,10 @@ class BackupContents {
   /// no profile — either it predates the feature, or the seller never answered.
   /// Both read the same way and neither blocks a restore.
   final BusinessProfile? businessProfile;
+
+  /// Business Journey tree (WTM-185). Empty means the package carries none —
+  /// either it predates the feature or the seller never opened a journey.
+  final List<Journey> journeys;
 
   Map<String, int> get counts => {
     BackupDatasets.customers: customers.length,
@@ -354,6 +367,10 @@ class TongtaiBackupService {
         ],
         if (contents.businessProfile?.isNotEmpty ?? false)
           BackupDatasets.businessProfile: [contents.businessProfile!.toJson()],
+        if (contents.journeys.isNotEmpty)
+          BackupDatasets.journeys: [
+            for (final j in contents.journeys) BackupCodec.encodeJourney(j),
+          ],
         BackupDatasets.favourites: [
           for (final f in contents.favourites) BackupCodec.encodeFavourite(f),
         ],
@@ -384,6 +401,7 @@ class TongtaiBackupService {
         ...BackupDatasets.all,
         if (contents.businessProfile?.isNotEmpty ?? false)
           BackupDatasets.businessProfile,
+        if (contents.journeys.isNotEmpty) BackupDatasets.journeys,
       ],
       redaction: BackupRedaction.none,
     );
@@ -398,6 +416,7 @@ class TongtaiBackupService {
     transactions: await repositories.finance.loadAll(),
     favourites: await repositories.favourites.loadAll(),
     businessProfile: await repositories.businessProfile?.load(),
+    journeys: await repositories.journeys?.loadAll() ?? const [],
   );
 
   // ── validate ─────────────────────────────────────────────────────────────
@@ -608,6 +627,15 @@ class TongtaiBackupService {
         profile = null;
       }
     }
+    // Optional dataset (WTM-185): absent is normal — every `.ttbk` written
+    // before journeys existed lacks it, and those files must still restore.
+    // A malformed journey is dropped rather than failing the package: losing a
+    // plan must never cost a seller their orders.
+    final journeyRows = payload.datasets[BackupDatasets.journeys];
+    final journeys = <Journey>[
+      for (final raw in (journeyRows ?? const []))
+        ?BackupCodec.decodeJourney(Map<String, Object?>.from(raw)),
+    ];
     return BackupContents(
       customers: customers,
       products: products,
@@ -616,6 +644,7 @@ class TongtaiBackupService {
       transactions: transactions,
       favourites: favourites,
       businessProfile: profile,
+      journeys: journeys,
     );
   }
 
@@ -721,6 +750,7 @@ class TongtaiBackupService {
         // keeping the previous business's answers — otherwise a restored
         // business would carry the old owner's trade and channels.
         await repositories.businessProfile?.deleteAll();
+        await repositories.journeys?.deleteAll();
 
         // …and back in dependency order: a customer must exist before an order
         // may reference it.
@@ -734,6 +764,9 @@ class TongtaiBackupService {
             favourite.supplierId,
             addedAt: favourite.addedAt,
           );
+        }
+        for (final journey in contents.journeys) {
+          await repositories.journeys?.save(journey);
         }
         final profile = contents.businessProfile;
         if (profile != null && profile.isNotEmpty) {
