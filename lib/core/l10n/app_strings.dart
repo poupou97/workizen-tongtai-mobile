@@ -435,6 +435,9 @@ abstract class AppStrings {
 
   /// Concept-1 inventory overview card (WTM-215).
   /// CTA nối nơi thấy vấn đề tới cơ hội engine đã sinh (WTM-225).
+  /// Nhãn chi phí cho sản phẩm KHÔNG phải hàng vật lý (WTM-231).
+  String get productVariableCostLabel;
+
   String get stockSeeOpportunity;
   String get customerSeeOpportunity;
 
@@ -1485,6 +1488,8 @@ class AppStringsVi extends AppStrings {
   String get subtitleFinance => 'Quản lý tài chính doanh nghiệp';
   @override
   String get subtitleReports => 'Báo cáo & phân tích kinh doanh';
+  @override
+  String get productVariableCostLabel => 'Chi phí mỗi lượt bán';
   @override
   String get stockSeeOpportunity => 'Xem cơ hội nhập hàng';
   @override
@@ -2924,6 +2929,8 @@ class AppStringsEn extends AppStrings {
   String get subtitleFinance => 'Business finances';
   @override
   String get subtitleReports => 'Business reports and analytics';
+  @override
+  String get productVariableCostLabel => 'Cost per sale';
   @override
   String get stockSeeOpportunity => 'See the restock opportunity';
   @override

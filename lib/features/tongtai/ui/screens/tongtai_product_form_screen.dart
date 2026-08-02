@@ -69,6 +69,11 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
   late final TextEditingController _category;
   late final TextEditingController _price;
   late final TextEditingController _costPrice;
+
+  /// Loại sản phẩm đang sửa (ADR-TON-023). Sản phẩm mới mặc định `physical` —
+  /// đó là loại hình phổ biến nhất của người dùng hôm nay, và người bán đổi
+  /// được. Chọn loại là việc của story giao diện Product Type.
+  ProductKind get _kind => widget.product?.kind ?? ProductKind.physical;
   late final TextEditingController _quantity;
   late final TextEditingController _reorder;
   late final TextEditingController _description;
@@ -276,6 +281,13 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
               key: const Key('product-cost-price-field'),
               controller: _costPrice,
               field: ProductField.costPrice,
+              // WTM-231: cùng một con số, khác cách gọi. Người bán hàng vật lý
+              // nghĩ "giá nhập"; người bán sản phẩm số nghĩ "chi phí mỗi lượt
+              // bán" (token AI, phí cổng thanh toán). Ý nghĩa và phép tính
+              // KHÔNG đổi — chỉ nhãn đổi, nên vẫn là một trường, một chủ.
+              labelOverride: _kind == ProductKind.physical
+                  ? null
+                  : context.l10n.productVariableCostLabel,
               hint: '0',
               suffixText: '₫',
               keyboardType: const TextInputType.numberWithOptions(
@@ -356,6 +368,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     required Key key,
     required TextEditingController controller,
     required ProductField field,
+    String? labelOverride,
     String? hint,
     String? suffixText,
     bool optional = false,
@@ -364,11 +377,12 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     List<TextInputFormatter>? inputFormatters,
   }) {
     final code = context.l10n.languageCode;
+    final base = labelOverride ?? field.label(code);
     final label = optional
-        ? '${field.label(code)} ${context.l10n.labelOptionalSuffix}'
+        ? '$base ${context.l10n.labelOptionalSuffix}'
         : field.isRequired
-        ? '${field.label(code)} *'
-        : field.label(code);
+        ? '$base *'
+        : base;
     return Padding(
       padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
       child: TextField(

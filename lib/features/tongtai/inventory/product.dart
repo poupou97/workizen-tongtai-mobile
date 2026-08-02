@@ -181,8 +181,12 @@ class Product {
     return StockStatus.inStock;
   }
 
-  /// What one unit costs the seller, in đồng — or `null` when they have not
-  /// entered it (WTM-204).
+  /// **Chi phí biến đổi mỗi đơn vị bán** (WTM-204, đặt lại tên ở WTM-231) —
+  /// hoặc `null` khi người bán chưa nhập.
+  ///
+  /// Tên trường nói "cost price" vì lịch sử, nhưng khái niệm rộng hơn "giá
+  /// nhập": với sản phẩm số nó là token AI / phí giao dịch mỗi lượt bán. Nhãn
+  /// hiển thị đổi theo [ProductKind]; **ý nghĩa và phép tính thì không**.
   ///
   /// `null`, **not 0**: zero says *"this is free stock"*, null says *"nobody
   /// has said"*, and treating the second as the first would print a 100%
@@ -206,6 +210,37 @@ class Product {
   }
 
   /// Total on-hand value = unit price × quantity (in đồng).
+  /// Lãi trên **một đơn vị bán ra**, hoặc `null` khi chưa nhập chi phí.
+  ///
+  /// Dogfood đặt câu hỏi này: *"lợi nhuận của một sản phẩm số tính bằng gì khi
+  /// không có giá nhập kho?"* Hoá ra khái niệm đã có sẵn và chỉ đang mang tên
+  /// sai. [costPrice] không phải *"giá nhập"* — nó là **chi phí biến đổi mỗi
+  /// đơn vị bán**, và cả hai loại hình đều có nó:
+  ///
+  /// * hàng vật lý: tiền nhập một đơn vị;
+  /// * sản phẩm số: token AI, phí cổng thanh toán, băng thông.
+  ///
+  /// Cùng một con số, cùng một phép tính, khác cách gọi — nên đây **không**
+  /// phải trường mới. Thêm một trường riêng cho sản phẩm số sẽ là hai sự thật
+  /// cho một câu hỏi, đúng họ lỗi repo này đã dọn bốn lần.
+  ///
+  /// `null` chứ không phải 0: chưa nhập chi phí mà trả 0 nghĩa là app khẳng
+  /// định **lãi 100%** — con số dễ chịu nhất và sai nhất có thể in ra.
+  double? get unitMargin {
+    final cost = costPrice;
+    return cost == null ? null : pricePerUnit - cost;
+  }
+
+  /// Biên lợi nhuận (0..1), hoặc `null` khi chưa đủ dữ liệu.
+  ///
+  /// Giá bán 0 cũng trả `null`: chia cho 0 không phải một biên lợi nhuận, và
+  /// một món tặng kèm không có biên nào để nói.
+  double? get marginRatio {
+    final margin = unitMargin;
+    if (margin == null || pricePerUnit <= 0) return null;
+    return margin / pricePerUnit;
+  }
+
   /// Hàng này cần nhập thêm hay không — **một chủ sở hữu** cho câu hỏi đó.
   ///
   /// WTM-213 chốt `stockStatus` là chủ của khái niệm "sắp hết hàng", nhưng ba
