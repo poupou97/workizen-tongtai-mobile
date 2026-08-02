@@ -196,6 +196,61 @@ void main() {
     });
   });
 
+  group('biên lợi nhuận mỗi đơn vị bán (WTM-231)', () {
+    test('sản phẩm số tính được biên dù KHÔNG có tồn kho', () {
+      // Câu trả lời của dogfood: lợi nhuận một sản phẩm số không cần giá nhập
+      // kho — nó cần chi phí biến đổi mỗi lượt bán (token AI, phí giao dịch).
+      final software = Product(
+        id: 'p1',
+        sku: 'SKU',
+        name: 'Tổng Tài',
+        category: 'Phần mềm',
+        pricePerUnit: 199000,
+        kind: ProductKind.digital,
+        costPrice: 49000,
+        updatedAt: DateTime(2026, 8, 2),
+      );
+
+      expect(software.quantity, isNull);
+      expect(software.unitMargin, 150000);
+      expect(software.marginRatio, closeTo(0.7538, 0.001));
+    });
+
+    test('chưa nhập chi phí ⇒ null, KHÔNG phải lãi 100%', () {
+      // 0 ở đây in ra con số dễ chịu nhất và sai nhất có thể.
+      final unknown = product(kind: ProductKind.digital);
+      expect(unknown.unitMargin, isNull);
+      expect(unknown.marginRatio, isNull);
+    });
+
+    test('giá bán 0 không có biên nào để nói', () {
+      final freebie = Product(
+        id: 'p2',
+        sku: 'SKU',
+        name: 'Quà tặng',
+        category: 'Khác',
+        pricePerUnit: 0,
+        kind: ProductKind.digital,
+        costPrice: 1000,
+        updatedAt: DateTime(2026, 8, 2),
+      );
+
+      expect(freebie.marginRatio, isNull, reason: 'chia cho 0 không phải biên');
+      expect(freebie.unitMargin, -1000, reason: 'lỗ thì vẫn phải nói là lỗ');
+    });
+
+    test('hàng vật lý dùng ĐÚNG phép tính đó — một khái niệm, một chủ', () {
+      final goods = product(
+        kind: ProductKind.physical,
+        quantity: 10,
+        reorderLevel: 2,
+      );
+      final withCost = goods.copyWith(costPrice: 60000);
+
+      expect(withCost.unitMargin, 199000 - 60000);
+    });
+  });
+
   test('an unknown kind code reads as physical, never as a guess', () {
     // A `.ttbk` from a newer build may name a kind this one has never heard
     // of. Every row that predates ADR-TON-023 WAS physical, so that is the
