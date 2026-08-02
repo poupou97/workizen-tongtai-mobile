@@ -72,6 +72,7 @@ void main() {
     'tongtai_onboarding_conversation_screen.dart': 3,
     'tongtai_supplier_search_screen.dart': 3,
     'tongtai_supplier_favorites_screen.dart': 3,
+    'tongtai_business_inputs_screen.dart': 3,
     'tongtai_ai_key_screen.dart': 3,
     'tongtai_key_scan_screen.dart': 3,
     'tongtai_backup_screen.dart': 3,
@@ -87,6 +88,7 @@ void main() {
     'tongtai_inventory_picker_screen.dart': 2,
     'tongtai_stock_alerts_screen.dart': 2,
     'tongtai_supplier_detail_screen.dart': 2,
+    'tongtai_business_input_form_screen.dart': 2,
   };
 
   /// Bỏ comment trước khi tìm cạnh.

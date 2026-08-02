@@ -449,6 +449,42 @@ abstract class AppStrings {
   /// giống một lỗi hiển thị.
   String get productKindNoStockNote;
 
+  /// Nguồn đầu vào của doanh nghiệp (WTM-234 / ADR-TON-023).
+  String get titleBusinessInputs;
+  String get inputsCommitmentLabel;
+  String get inputsAllCounted;
+
+  /// Bao nhiêu nguồn KHÔNG góp vào tổng. Bắt buộc hiện cạnh tổng: một tổng
+  /// không tự khai mình thiếu gì sẽ được đọc như một tổng đầy đủ.
+  String inputsUnknownCount(int count);
+  String get inputsEmpty;
+  String get inputAddTitle;
+  String get inputEditTitle;
+  String get inputDelete;
+  String get inputKindLabel;
+  String get inputNameLabel;
+  String get inputNameHint;
+  String get inputNameRequired;
+  String get inputCadenceLabel;
+  String get inputAmountLabel;
+  String get inputNoteLabel;
+
+  /// Vì sao một số tiền đã nhập vẫn không vào tổng cam kết.
+  String get inputNotCommitmentNote;
+
+  /// Ô "không tính vào cam kết" trên một dòng nguồn — KHÔNG được hiện "0 ₫",
+  /// vì 0 nói nguồn đó miễn phí.
+  String get inputNotCounted;
+
+  /// Nhãn của một mã [BusinessInputKind].
+  String inputKindName(String code);
+
+  /// Nhãn của một mã [InputCadence]; `null` = người bán chưa nói.
+  String inputCadenceName(String? code);
+
+  /// Mục nguồn đầu vào trên tab Producer.
+  String get producerInputsSection;
+
   String get stockSeeOpportunity;
   String get customerSeeOpportunity;
 
@@ -1512,6 +1548,63 @@ class AppStringsVi extends AppStrings {
   };
   @override
   String get productKindNoStockNote => 'Loại này không có tồn kho để đếm.';
+  @override
+  String get titleBusinessInputs => 'Nguồn đầu vào';
+  @override
+  String get inputsCommitmentLabel => 'Cam kết mỗi tháng';
+  @override
+  String get inputsAllCounted => 'Đã tính đủ mọi nguồn.';
+  @override
+  String inputsUnknownCount(int count) =>
+      'Còn $count nguồn chưa cộng được vào con số này.';
+  @override
+  String get inputsEmpty =>
+      'Chưa có nguồn đầu vào nào. Thêm những thứ bạn trả tiền đều đặn để biết '
+      'mỗi tháng mình cam kết bao nhiêu.';
+  @override
+  String get inputAddTitle => 'Thêm nguồn';
+  @override
+  String get inputEditTitle => 'Sửa nguồn';
+  @override
+  String get inputDelete => 'Xoá nguồn';
+  @override
+  String get inputKindLabel => 'Loại đầu vào';
+  @override
+  String get inputNameLabel => 'Tên nguồn';
+  @override
+  String get inputNameHint => 'VD: nhà cung cấp vải, tiền máy chủ';
+  @override
+  String get inputNameRequired => 'Cần một cái tên để nhận ra nguồn này';
+  @override
+  String get inputCadenceLabel => 'Nhịp trả tiền';
+  @override
+  String get inputAmountLabel => 'Số tiền mỗi nhịp';
+  @override
+  String get inputNoteLabel => 'Ghi chú';
+  @override
+  String get inputNotCommitmentNote =>
+      'Nhịp này không tạo cam kết cố định nên số tiền không cộng vào tổng.';
+  @override
+  String get inputNotCounted => 'Chưa tính';
+  @override
+  String inputKindName(String code) => switch (code) {
+    'supplier' => 'Nhà cung cấp',
+    'provider' => 'Dịch vụ trả theo dùng',
+    'infrastructure' => 'Hạ tầng',
+    'tooling' => 'Công cụ',
+    'people' => 'Người',
+    _ => 'Nguồn khác',
+  };
+  @override
+  String inputCadenceName(String? code) => switch (code) {
+    'one_off' => 'Một lần',
+    'monthly' => 'Hằng tháng',
+    'yearly' => 'Hằng năm',
+    'usage_based' => 'Theo mức dùng',
+    _ => 'Chưa rõ nhịp',
+  };
+  @override
+  String get producerInputsSection => 'Nguồn đầu vào';
   @override
   String get stockSeeOpportunity => 'Xem cơ hội nhập hàng';
   @override
@@ -2972,6 +3065,64 @@ class AppStringsEn extends AppStrings {
   };
   @override
   String get productKindNoStockNote => 'This type has no stock to count.';
+  @override
+  String get titleBusinessInputs => 'Business inputs';
+  @override
+  String get inputsCommitmentLabel => 'Committed each month';
+  @override
+  String get inputsAllCounted => 'Every input is counted.';
+  @override
+  String inputsUnknownCount(int count) =>
+      '$count input(s) are not part of this figure yet.';
+  @override
+  String get inputsEmpty =>
+      'No inputs yet. Add what you pay for regularly to see what you commit to '
+      'each month.';
+  @override
+  String get inputAddTitle => 'Add input';
+  @override
+  String get inputEditTitle => 'Edit input';
+  @override
+  String get inputDelete => 'Delete input';
+  @override
+  String get inputKindLabel => 'Input type';
+  @override
+  String get inputNameLabel => 'Input name';
+  @override
+  String get inputNameHint => 'e.g. fabric supplier, server bill';
+  @override
+  String get inputNameRequired => 'A name is needed to recognise this input';
+  @override
+  String get inputCadenceLabel => 'Payment rhythm';
+  @override
+  String get inputAmountLabel => 'Amount per payment';
+  @override
+  String get inputNoteLabel => 'Note';
+  @override
+  String get inputNotCommitmentNote =>
+      'This rhythm is not a fixed commitment, so the amount stays out of the '
+      'total.';
+  @override
+  String get inputNotCounted => 'Not counted';
+  @override
+  String inputKindName(String code) => switch (code) {
+    'supplier' => 'Supplier',
+    'provider' => 'Usage-based service',
+    'infrastructure' => 'Infrastructure',
+    'tooling' => 'Tooling',
+    'people' => 'People',
+    _ => 'Other input',
+  };
+  @override
+  String inputCadenceName(String? code) => switch (code) {
+    'one_off' => 'One-off',
+    'monthly' => 'Monthly',
+    'yearly' => 'Yearly',
+    'usage_based' => 'Usage-based',
+    _ => 'Rhythm unknown',
+  };
+  @override
+  String get producerInputsSection => 'Business inputs';
   @override
   String get stockSeeOpportunity => 'See the restock opportunity';
   @override

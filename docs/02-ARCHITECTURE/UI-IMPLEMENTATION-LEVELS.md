@@ -78,6 +78,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | `tongtai_onboarding_conversation_screen` | không đọc; ghi `BusinessProfile` khi kết thúc | `runTongtaiAction` + `showTongtaiFailure` | WTM-178, thay 6 slide tĩnh. **Chạy trọn vẹn không cần AI** — kịch bản tất định. Ghi lỗi **không chặn** người dùng mới vào app |
 | `tongtai_supplier_search_screen` | curated catalog + favorites persisted | `runTongtaiAction` (toggle) | |
 | `tongtai_supplier_favorites_screen` | favorites persisted | `runTongtaiAction` (toggle) | |
+| `tongtai_business_inputs_screen` | `businessInputRepositoryProvider` | `ScreenDataController` + `runTongtaiAction` (lưu/xoá) | WTM-234. Tổng cam kết **suy tại chỗ đọc** (`BusinessInputSummary`), không lưu cột tổng — và luôn hiện kèm số nguồn chưa cộng được: một tổng không tự khai mình thiếu gì sẽ được đọc như một tổng đầy đủ |
 | `tongtai_ai_key_screen` | secure storage (BYOK) | `runTongtaiAction` | `TongtaiAiException` nay là `TongtaiClassifiedError` |
 | `tongtai_key_scan_screen` | camera | `errorBuilder` → `TongtaiFailureView` | camera bị từ chối nay có màn lỗi, không phải khung đen |
 
@@ -98,6 +99,7 @@ bảo vệ). Chúng lên L3 khi/nếu tự chạm IO.
 | `tongtai_inventory_picker_screen` | products inject | read-only |
 | `tongtai_stock_alerts_screen` | catalog inject (derived) | catalog chung với `inventory` |
 | `tongtai_supplier_detail_screen` | catalog profile inject | read-only |
+| `tongtai_business_input_form_screen` | form → parent | `business_inputs` ghi (guarded) |
 
 ### L1 — Static UI
 

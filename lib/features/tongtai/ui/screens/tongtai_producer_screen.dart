@@ -14,6 +14,8 @@ import '../../providers/tongtai_search_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_screen_header.dart';
+import '../../producer/business_input.dart';
+import 'tongtai_business_inputs_screen.dart';
 import 'tongtai_supplier_favorites_screen.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 
@@ -64,6 +66,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
     return (
       favorites: await store.loadAll(),
       opportunities: await ref.read(generatedOpportunitiesProvider.future),
+      inputs: await ref.read(businessInputRepositoryProvider).loadAll(),
     );
   }
 
@@ -72,6 +75,15 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
       if (s.id == supplierId) return s.name;
     }
     return supplierId;
+  }
+
+  /// Mở danh sách nguồn đầu vào (WTM-234). Đây là **đường vào duy nhất** của
+  /// capability đó — thiếu nó, màn kia là màn mồ côi thứ ba (P-29/P-30).
+  Future<void> _openInputs() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const TongtaiBusinessInputsScreen()),
+    );
+    if (mounted) await _data.refresh();
   }
 
   Future<void> _openFavorites() async {
@@ -123,6 +135,9 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
     final l10n = context.l10n;
     final favorites = data.favorites;
     final opportunities = data.opportunities;
+    // Suy tại chỗ đọc, không lưu — một cột "tổng cam kết" sẽ là bản sao thứ
+    // hai của thứ các nguồn đã nói (ADR-TON-015).
+    final inputSummary = BusinessInputSummary.from(data.inputs);
     final topOpportunities =
         (opportunities.toList()..sort(
               (a, b) => (b.score.value ?? -1).compareTo(a.score.value ?? -1),
@@ -173,6 +188,49 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
                   ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Nguồn đầu vào (WTM-234) — đứng trước phần chrome vì đây là dữ liệu
+          // thật của người bán. Producer quản lý TOÀN BỘ đầu vào; nhà cung cấp
+          // hàng hoá bên dưới chỉ là một loại (ADR-TON-023).
+          Text(
+            l10n.producerInputsSection,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  key: const Key('producer-inputs-commitment'),
+                  title: Text(l10n.inputsCommitmentLabel),
+                  subtitle: Text(
+                    inputSummary.isComplete
+                        ? l10n.inputsAllCounted
+                        : l10n.inputsUnknownCount(inputSummary.unknownCount),
+                  ),
+                  trailing: Text(
+                    TongtaiFormatters.vnd(inputSummary.monthlyCommitment),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    key: const Key('producer-view-inputs'),
+                    onPressed: _openInputs,
+                    child: Text(l10n.actionViewAll),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 24),
@@ -308,6 +366,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
 typedef _ProducerData = ({
   List<SupplierFavorite> favorites,
   List<Opportunity> opportunities,
+  List<BusinessInput> inputs,
 });
 
 class _CapabilityPill extends StatelessWidget {
