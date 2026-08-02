@@ -152,14 +152,18 @@ void main() {
   });
 
   group('what the profile actually serialises', () {
-    test('a fully answered profile emits exactly five keys', () {
+    test('a fully answered profile emits exactly six keys', () {
       const profile = BusinessProfile(
+        // WTM-228: `type` là khoá thứ sáu, thêm CÓ CHỦ Ý — test này tồn tại để
+        // một trường mới không lặng lẽ đi kèm ra khỏi máy người bán.
+        type: BusinessType.digital,
         trade: BusinessTrade.fashion,
         size: BusinessSize.small,
         channels: [SalesChannel.shopee],
         seasonality: BusinessSeasonality.tet,
       );
       expect(profile.toJson().keys.toSet(), {
+        'type',
         'trade',
         'size',
         'channels',

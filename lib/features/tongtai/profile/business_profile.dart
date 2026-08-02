@@ -111,8 +111,47 @@ enum BusinessSeasonality {
 }
 
 /// The profile itself. Immutable; edits produce a new instance.
+/// Loại hình kinh doanh (ADR-TON-023, ưu tiên #2 của Founder).
+///
+/// **Khác với [BusinessTrade].** Trade là *ngành hàng* (thời trang, thực
+/// phẩm…); type là *cách doanh nghiệp vận hành*. Một xưởng may và một studio
+/// phần mềm đều có thể chọn ngành "khác", trong khi mô hình vận hành của họ
+/// không có điểm chung nào. Gộp hai chiều này lại là mất thông tin, nên đây là
+/// một trường riêng chứ không phải giá trị mới của trade.
+enum BusinessType {
+  /// Bán vật: có nhập, có tồn, có giao.
+  physical('physical'),
+
+  /// Bán thứ sao chép được: phần mềm, khoá học, tệp.
+  digital('digital'),
+
+  /// Bán thời gian và năng lực.
+  service('service'),
+
+  /// Vừa vật vừa số/dịch vụ — phổ biến hơn người ta tưởng.
+  hybrid('hybrid');
+
+  const BusinessType(this.code);
+
+  /// Mã lưu xuống DB và `.ttbk`. **Không bao giờ là nhãn hiển thị.**
+  final String code;
+
+  /// Mã lạ hoặc vắng mặt ⇒ `null` = **chưa khai**.
+  ///
+  /// Cố ý KHÔNG mặc định `physical`: người bán có sẵn chưa từng được hỏi câu
+  /// này, và trả lời hộ họ là bịa dữ liệu — khác hẳn `ProductKind`, nơi mọi
+  /// dòng cũ *thật sự* là hàng vật lý vì mô hình trước đó chỉ có một loại.
+  static BusinessType? fromCode(String? code) {
+    for (final t in BusinessType.values) {
+      if (t.code == code) return t;
+    }
+    return null;
+  }
+}
+
 class BusinessProfile {
   const BusinessProfile({
+    this.type,
     this.trade,
     this.size,
     this.channels = const [],
@@ -122,6 +161,9 @@ class BusinessProfile {
 
   /// The state a device starts in and returns to: nothing answered.
   static const BusinessProfile empty = BusinessProfile();
+
+  /// Loại hình vận hành — `null` khi người bán chưa được hỏi (ADR-TON-023).
+  final BusinessType? type;
 
   final BusinessTrade? trade;
   final BusinessSize? size;
@@ -134,7 +176,11 @@ class BusinessProfile {
   /// True when the seller has told us nothing at all. Callers use this to skip
   /// the prompt block entirely rather than send an empty section.
   bool get isEmpty =>
-      trade == null && size == null && channels.isEmpty && seasonality == null;
+      type == null &&
+      trade == null &&
+      size == null &&
+      channels.isEmpty &&
+      seasonality == null;
 
   bool get isNotEmpty => !isEmpty;
 
@@ -157,12 +203,14 @@ class BusinessProfile {
   }
 
   BusinessProfile copyWith({
+    BusinessType? type,
     BusinessTrade? trade,
     BusinessSize? size,
     List<SalesChannel>? channels,
     BusinessSeasonality? seasonality,
     DateTime? updatedAt,
   }) => BusinessProfile(
+    type: type ?? this.type,
     trade: trade ?? this.trade,
     size: size ?? this.size,
     channels: channels ?? this.channels,
@@ -172,6 +220,7 @@ class BusinessProfile {
 
   /// Serialised for `.ttbk` — codes only, matching ADR-TON-018.
   Map<String, dynamic> toJson() => {
+    'type': type?.code,
     'trade': trade?.code,
     'size': size?.code,
     'channels': channels.map((c) => c.code).toList(),
@@ -180,6 +229,9 @@ class BusinessProfile {
   };
 
   static BusinessProfile fromJson(Map<String, dynamic> json) => BusinessProfile(
+    // Vắng mặt ở mọi file `.ttbk` viết trước ADR-TON-023 ⇒ `null` = chưa khai,
+    // đúng sự thật: người bán chưa từng được hỏi câu này.
+    type: BusinessType.fromCode(json['type'] as String?),
     trade: BusinessTrade.fromCode(json['trade'] as String?),
     size: BusinessSize.fromCode(json['size'] as String?),
     channels:

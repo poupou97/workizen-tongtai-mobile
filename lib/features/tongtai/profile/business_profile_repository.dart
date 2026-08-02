@@ -29,6 +29,7 @@ class BusinessProfileRepository {
     )..where((t) => t.id.equals(_rowId))).getSingleOrNull();
     if (row == null) return BusinessProfile.empty;
     return BusinessProfile(
+      type: BusinessType.fromCode(row.typeCode),
       trade: BusinessTrade.fromCode(row.tradeCode),
       size: BusinessSize.fromCode(row.sizeCode),
       channels: BusinessProfile.channelsFromCodes(row.channelCodes),
@@ -44,6 +45,7 @@ class BusinessProfileRepository {
         .insertOnConflictUpdate(
           BusinessProfilesTableCompanion.insert(
             id: const Value(_rowId),
+            typeCode: Value(profile.type?.code),
             tradeCode: Value(profile.trade?.code),
             sizeCode: Value(profile.size?.code),
             channelCodes: Value(profile.channelCodes),
