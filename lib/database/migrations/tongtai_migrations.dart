@@ -245,10 +245,22 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         //     that 0 is exactly what made Inventory shout "Hết hàng" and the
         //     Rule Engine generate a restock opportunity — for a piece of
         //     software.
-        // TableMigration rebuilds from the new definition, copying live
-        // columns by name; existing quantities survive untouched.
+        // ORDER MATTERS, and getting it wrong shipped a broken upgrade:
+        // `TableMigration` copies every column of the NEW schema out of the
+        // OLD table, so it must not run while a new column is still missing —
+        // the first device install failed with `no such column: "kind"` and
+        // every screen showed "Could not read your data". v13 got away with a
+        // bare rebuild because it only DROPPED columns; adding one is what
+        // breaks. So: add the column first, then rebuild for the nullability
+        // change.
+        // Cột lấy qua `allTables` như các bước khác trong file này — module
+        // migration cố ý KHÔNG import AppDatabase (sẽ tạo vòng import).
         final products = db.allTables.firstWhere(
           (t) => t.actualTableName == 'products_table',
+        );
+        await m.addColumn(
+          products,
+          products.$columns.firstWhere((c) => c.name == 'kind'),
         );
         await m.alterTable(TableMigration(products));
       }
