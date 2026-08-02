@@ -295,6 +295,7 @@ void main() {
         customerCount: 2,
         expenseCount: 5,
         revenue: 1000,
+        countedInputs: 2,
       );
 
       expect(metrics[JourneyMetric.expenses.code], 5);

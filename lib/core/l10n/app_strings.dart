@@ -485,6 +485,10 @@ abstract class AppStrings {
   /// Mục nguồn đầu vào trên tab Producer.
   String get producerInputsSection;
 
+  /// Nhãn khối "bước tiếp theo trong hành trình" trên màn nguồn đầu vào
+  /// (WTM-235) — đọc từ Journey, thường trực, không phải Snackbar.
+  String get inputsJourneyStepTitle;
+
   String get stockSeeOpportunity;
   String get customerSeeOpportunity;
 
@@ -1605,6 +1609,8 @@ class AppStringsVi extends AppStrings {
   };
   @override
   String get producerInputsSection => 'Nguồn đầu vào';
+  @override
+  String get inputsJourneyStepTitle => 'Bước tiếp theo trong hành trình';
   @override
   String get stockSeeOpportunity => 'Xem cơ hội nhập hàng';
   @override
@@ -3123,6 +3129,8 @@ class AppStringsEn extends AppStrings {
   };
   @override
   String get producerInputsSection => 'Business inputs';
+  @override
+  String get inputsJourneyStepTitle => 'Next step in your journey';
   @override
   String get stockSeeOpportunity => 'See the restock opportunity';
   @override

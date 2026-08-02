@@ -37,6 +37,9 @@ class JourneyPlanInput {
     this.expenseCount = 0,
     this.receivables = 0,
     this.debtorCount = 0,
+    this.inputCount = 0,
+    this.countedInputs = 0,
+    this.monthlyCommitment = 0,
   });
 
   final BusinessGoal goal;
@@ -62,6 +65,24 @@ class JourneyPlanInput {
   /// seller already recording gets the profit-reading steps. A plan that told
   /// everyone the same thing about money was a plan that had not looked.
   final int expenseCount;
+
+  /// Bao nhiêu nguồn đầu vào người bán đã khai (WTM-235).
+  final int inputCount;
+
+  /// Bao nhiêu nguồn **đã đủ thông tin để cộng vào cam kết**.
+  ///
+  /// Tách khỏi [inputCount] vì hai con số trả lời hai câu khác nhau: đã khai
+  /// bao nhiêu, và **biết chắc** bao nhiêu. `inputCount > countedInputs` nghĩa
+  /// là [monthlyCommitment] còn thiếu — và một kế hoạch dựng trên con số thiếu
+  /// mà tưởng là đủ sẽ khuyên sai.
+  final int countedInputs;
+
+  /// Tiền cam kết trả mỗi tháng, chỉ gồm các nguồn đã đủ dữ liệu.
+  final double monthlyCommitment;
+
+  /// Tổng cam kết có đang nói hết mọi thứ nó biết hay không.
+  bool get hasCompleteCommitment =>
+      inputCount > 0 && countedInputs == inputCount;
 }
 
 /// Why a plan, or a step in it, looks the way it does.
@@ -94,6 +115,15 @@ abstract final class JourneyReason {
 
   /// The seller has material money stuck in unpaid orders (WTM-211).
   static const String dataReceivables = 'data.receivables';
+
+  /// Chưa khai nguồn đầu vào nào (WTM-235).
+  static const String dataEmptyInputs = 'data.empty_inputs';
+
+  /// Đã khai nhưng còn nguồn thiếu dữ liệu ⇒ tổng cam kết **chưa đủ**.
+  static const String dataInputsIncomplete = 'data.inputs_incomplete';
+
+  /// Cam kết hằng tháng lớn so với mục tiêu, và con số đó **đã đủ**.
+  static const String dataInputCommitment = 'data.input_commitment';
 }
 
 /// The outcome of planning: either a plan, or an honest refusal.
@@ -241,6 +271,57 @@ List<_Milestone> _revenuePlan(JourneyPlanInput input) {
         _Step('Ghi đủ chi phí tháng này'),
         _Step('Xem lãi lỗ theo nhóm hàng'),
       ]),
+    // WTM-235 — nhịp còn thiếu của Business Loop Producer: người bán khai một
+    // nguồn đầu vào xong thì hành trình phải ĐỔI, và họ phải biết việc tiếp
+    // theo. Ba trường hợp, ba câu khác nhau, không câu nào dựng trên số bịa:
+    //
+    //  · chưa khai gì  ⇒ chưa biết mỗi tháng cam kết bao nhiêu;
+    //  · khai dở dang  ⇒ tổng đang THIẾU, và planner KHÔNG được phán xét một
+    //    con số thiếu như thể nó đủ (đúng chỗ dễ nói dối nhất);
+    //  · đủ và nặng    ⇒ mới nói tới chuyện xem lại chi phí.
+    if (input.inputCount == 0)
+      _Milestone(
+        'Biết mỗi tháng mình cam kết bao nhiêu',
+        [
+          _Step(
+            'Khai 3 khoản bạn trả đều đặn',
+            metric: JourneyMetric.inputs.code,
+            target: 3,
+            reasonCodes: const [JourneyReason.dataEmptyInputs],
+          ),
+        ],
+        reasonCodes: const [JourneyReason.dataEmptyInputs],
+      )
+    else if (!input.hasCompleteCommitment)
+      _Milestone(
+        'Biết mỗi tháng mình cam kết bao nhiêu',
+        [
+          _Step(
+            'Điền số tiền cho ${input.inputCount - input.countedInputs} '
+            'nguồn còn thiếu',
+            metric: JourneyMetric.inputs.code,
+            // Xong khi MỌI nguồn hiện có đã đủ dữ liệu.
+            target: input.inputCount.toDouble(),
+            reasonCodes: const [JourneyReason.dataInputsIncomplete],
+          ),
+        ],
+        reasonCodes: const [JourneyReason.dataInputsIncomplete],
+      )
+    else if (input.monthlyCommitment > target * 0.2)
+      _Milestone(
+        'Giảm chi phí cố định',
+        [
+          _Step(
+            'Xem lại ${_money(input.monthlyCommitment)} cam kết mỗi tháng',
+            metric: JourneyMetric.inputCommitment.code,
+            // Đo bằng cam kết GIẢM, nên metric này cố ý không nằm trong
+            // `journeyMetrics` — cùng lý do với "thu nợ" (WTM-211).
+            target: input.monthlyCommitment / 2,
+            reasonCodes: const [JourneyReason.dataInputCommitment],
+          ),
+        ],
+        reasonCodes: const [JourneyReason.dataInputCommitment],
+      ),
     _Milestone('Bán được nhiều hơn cho khách đang có', [
       _Step(
         'Liên hệ lại 10 khách mua gần nhất',

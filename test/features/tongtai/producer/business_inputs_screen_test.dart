@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/journey/journey.dart';
+import 'package:tongtai/features/tongtai/journey/journey_node.dart';
 import 'package:tongtai/features/tongtai/producer/business_input.dart';
 import 'package:tongtai/features/tongtai/producer/business_input_repository.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_business_inputs_screen.dart';
 
 import '../../../support/pump_until.dart';
@@ -29,13 +32,17 @@ void main() {
 
   Future<void> pumpScreen(
     WidgetTester tester,
-    BusinessInputRepository repository,
-  ) async {
+    BusinessInputRepository repository, {
+    Journey? journey,
+  }) async {
     addTearDown(tester.view.reset);
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(500, 2400);
     await tester.pumpWidget(
       ProviderScope(
+        // Hành trình là một nguồn thật của màn này (WTM-235), nên test khai nó
+        // ra chứ không để màn tự rẽ nhánh "đang test thì bỏ qua".
+        overrides: [activeJourneyProvider.overrideWith((ref) async => journey)],
         child: MaterialApp(
           home: TongtaiBusinessInputsScreen(
             repository: repository,
@@ -230,5 +237,72 @@ void main() {
 
     expect(await repository.loadAll(), isEmpty);
     await pumpUntilFound(tester, find.byKey(const Key('inputs-empty')));
+  });
+
+  Journey journeyWith(JourneyNode node) => Journey(
+    id: 'j1',
+    goalId: 'g1',
+    state: JourneyState.active,
+    createdAt: DateTime(2026, 8, 1),
+    updatedAt: DateTime(2026, 8, 1),
+    nodes: [node],
+  );
+
+  JourneyNode inputStep({
+    JourneyNodeState state = JourneyNodeState.pending,
+    String metric = 'inputs',
+  }) => JourneyNode(
+    id: 'n1',
+    journeyId: 'j1',
+    kind: JourneyNodeKind.step,
+    title: 'Khai 3 khoản bạn trả đều đặn',
+    origin: JourneyNodeOrigin.ruleTwin,
+    state: state,
+    derivedMetric: metric,
+  );
+
+  group('nhịp 5 — biết việc tiếp theo NGAY TẠI CHỖ vừa làm việc', () {
+    testWidgets('bước hành trình về đầu vào hiện thường trực trên màn', (
+      tester,
+    ) async {
+      // Đọc từ Journey (SSoT), không phải một trạng thái thứ hai màn tự giữ;
+      // và là khối thường trực, không phải Snackbar (luật Founder).
+      await pumpScreen(
+        tester,
+        InMemoryBusinessInputRepository(),
+        journey: journeyWith(inputStep()),
+      );
+      await pumpUntilFound(
+        tester,
+        find.byKey(const Key('inputs-journey-step')),
+      );
+
+      expect(find.text('Khai 3 khoản bạn trả đều đặn'), findsOneWidget);
+      expect(find.byKey(const Key('inputs-open-journey')), findsOneWidget);
+    });
+
+    testWidgets('bước đã xong thì KHÔNG nhắc nữa', (tester) async {
+      await pumpScreen(
+        tester,
+        InMemoryBusinessInputRepository(),
+        journey: journeyWith(inputStep(state: JourneyNodeState.done)),
+      );
+      await pumpUntilFound(tester, find.byKey(const Key('inputs-empty')));
+
+      expect(find.byKey(const Key('inputs-journey-step')), findsNothing);
+    });
+
+    testWidgets('bước của capability KHÁC không lạc sang đây', (tester) async {
+      // Hành trình luôn có bước về khách hàng/tồn kho; hiện chúng ở màn này
+      // là mời người bán làm sai việc.
+      await pumpScreen(
+        tester,
+        InMemoryBusinessInputRepository(),
+        journey: journeyWith(inputStep(metric: 'customers')),
+      );
+      await pumpUntilFound(tester, find.byKey(const Key('inputs-empty')));
+
+      expect(find.byKey(const Key('inputs-journey-step')), findsNothing);
+    });
   });
 }

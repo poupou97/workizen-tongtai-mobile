@@ -26,7 +26,18 @@ enum JourneyMetric {
   revenue('revenue'),
 
   /// Tiền đang bị khách nợ.
-  receivables('receivables');
+  receivables('receivables'),
+
+  /// Số nguồn đầu vào **đã đủ thông tin để cộng vào cam kết** (WTM-235) —
+  /// KHÔNG phải số dòng đã khai.
+  ///
+  /// Đếm dòng thì một nguồn khai tên rồi bỏ đó cũng tính là xong, trong khi
+  /// nó chính là thứ làm tổng cam kết thiếu. Đếm nguồn đã đủ dữ liệu thì con
+  /// số này chỉ tăng khi người bán thật sự biết thêm về chi phí của mình.
+  inputs('inputs'),
+
+  /// Tiền cam kết trả mỗi tháng cho các nguồn đầu vào (WTM-235).
+  inputCommitment('input_commitment');
 
   const JourneyMetric(this.code);
 
@@ -47,7 +58,7 @@ enum JourneyMetric {
 /// step already declares. A `targetScreen` column would be a second truth able
 /// to disagree with `derivedMetric` — the defect family this repo spent
 /// WTM-196/200/201/205 removing.
-enum JourneyDestination { finance, customers, inventory, opportunity }
+enum JourneyDestination { finance, customers, inventory, opportunity, inputs }
 
 /// The one rule mapping a step to the place its work happens.
 ///
@@ -66,6 +77,10 @@ JourneyDestination? journeyNodeDestination(JourneyNode node) {
     JourneyMetric.receivables => JourneyDestination.finance,
     JourneyMetric.customers => JourneyDestination.customers,
     JourneyMetric.products => JourneyDestination.inventory,
+    // Cả hai việc về đầu vào đều làm ở đúng một chỗ: màn nguồn đầu vào
+    // (WTM-234). Không có đích đến thì "bước tiếp theo" chỉ là một dòng chữ.
+    JourneyMetric.inputs => JourneyDestination.inputs,
+    JourneyMetric.inputCommitment => JourneyDestination.inputs,
     // Revenue moves when a sale is recorded, and a sale is recorded against a
     // customer (the create-order flow launches from a customer's history), so
     // the honest first step is the customer list — not a Reports dashboard,
@@ -87,14 +102,22 @@ JourneyDestination? journeyNodeDestination(JourneyNode node) {
 /// FALLING — a seller owed more money has not finished collecting — and
 /// `refreshDerived` only ever moves steps forward. Feeding it in would mark
 /// "thu nợ" done the moment debt grew. That step stays manual (WTM-211).
+///
+/// **[JourneyMetric.inputCommitment] is absent for the same reason** (WTM-235):
+/// cutting a committed cost makes the number go DOWN. It still has a
+/// destination — the two concerns are separate, and receivables proved it.
 Map<String, double> journeyMetrics({
   required int productCount,
   required int customerCount,
   required int expenseCount,
   required double revenue,
+  required int countedInputs,
 }) => {
   JourneyMetric.products.code: productCount.toDouble(),
   JourneyMetric.customers.code: customerCount.toDouble(),
   JourneyMetric.expenses.code: expenseCount.toDouble(),
   JourneyMetric.revenue.code: revenue,
+  // Nguồn **đã đủ thông tin**, không phải số dòng: xem doc của
+  // [JourneyMetric.inputs].
+  JourneyMetric.inputs.code: countedInputs.toDouble(),
 };

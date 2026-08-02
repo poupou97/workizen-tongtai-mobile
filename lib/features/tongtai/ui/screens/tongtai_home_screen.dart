@@ -39,6 +39,8 @@ import '../../journey/journey_metric.dart';
 import 'tongtai_opportunity_feed_screen.dart';
 import '../../metrics/home_headline.dart';
 import '../widgets/tongtai_fox_mascot.dart';
+import 'tongtai_business_inputs_screen.dart';
+import '../../producer/business_input.dart';
 
 /// Home dashboard for Tổng Tài — the app's front door.
 ///
@@ -307,6 +309,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
         JourneyDestination.customers => const TongtaiCustomerListScreen(),
         JourneyDestination.inventory => const TongtaiInventoryScreen(),
         JourneyDestination.opportunity => const TongtaiOpportunityFeedScreen(),
+        JourneyDestination.inputs => const TongtaiBusinessInputsScreen(),
       };
 
   /// Re-measures the journey after the seller comes back from doing the work,
@@ -331,6 +334,11 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       expenses,
       orders: await ref.read(orderRepositoryProvider).loadAll(),
     ).summaryAsOf(DateTime.now());
+    // WTM-235: kế hoạch phải thấy cả chi phí ĐẦU VÀO, không chỉ tiền đã tiêu
+    // và tiền khách nợ. `unknownCount` đi kèm có chủ đích — planner cần biết
+    // tổng cam kết còn thiếu để không phán xét nó như một con số đủ.
+    final inputs = await ref.read(businessInputRepositoryProvider).loadAll();
+    final inputSummary = BusinessInputSummary.from(inputs);
     if (!mounted) return;
     final failure = await runTongtaiAction(
       () async {
@@ -347,6 +355,9 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                 expenseCount: expenses.length,
                 receivables: summary.receivables,
                 debtorCount: summary.debtorCount,
+                inputCount: inputSummary.total,
+                countedInputs: inputSummary.total - inputSummary.unknownCount,
+                monthlyCommitment: inputSummary.monthlyCommitment,
               ),
               journeyId: 'journey-${goal.id}',
             );
