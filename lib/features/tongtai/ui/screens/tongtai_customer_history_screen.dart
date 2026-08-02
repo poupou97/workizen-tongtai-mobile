@@ -12,6 +12,8 @@ import '../../orders/order.dart';
 import '../../orders/order_controller.dart';
 import 'tongtai_create_order_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 
 /// Color for an [OrderStatus] chip. Pure function so the mapping is directly
 /// unit-testable without pumping a widget (same convention as
@@ -51,7 +53,7 @@ enum OrderHistoryRange {
 /// date-range preset + product-category filter (AC4), and an aggregate header
 /// with average order value and repurchase rate (AC5). Local-first: all data
 /// comes from the in-memory [CustomerOrderHistoryService].
-class TongtaiCustomerHistoryScreen extends StatefulWidget {
+class TongtaiCustomerHistoryScreen extends ConsumerStatefulWidget {
   const TongtaiCustomerHistoryScreen({
     super.key,
     required this.customer,
@@ -81,12 +83,12 @@ class TongtaiCustomerHistoryScreen extends StatefulWidget {
   final List<Product> products;
 
   @override
-  State<TongtaiCustomerHistoryScreen> createState() =>
+  ConsumerState<TongtaiCustomerHistoryScreen> createState() =>
       _TongtaiCustomerHistoryScreenState();
 }
 
 class _TongtaiCustomerHistoryScreenState
-    extends State<TongtaiCustomerHistoryScreen> {
+    extends ConsumerState<TongtaiCustomerHistoryScreen> {
   late final DateTime Function() _clock;
 
   OrderHistoryRange _range = OrderHistoryRange.all;
@@ -132,6 +134,10 @@ class _TongtaiCustomerHistoryScreenState
       showTongtaiFailure(context, failure, onRetry: _createOrder);
       return;
     }
+    // WTM-224 — an order is the single biggest business event in the app;
+    // raising the one "data changed" signal here is what lets Home's revenue,
+    // the Rule Twins and the journey notice it.
+    invalidateBusinessDataProviders(ref);
     setState(() {});
   }
 

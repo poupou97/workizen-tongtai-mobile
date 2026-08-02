@@ -19,6 +19,7 @@ import 'tongtai_customer_form_screen.dart';
 import 'tongtai_customer_history_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 
 /// Color for a [CustomerTier] badge (WTM-75 AC: visual indicators for VIP /
 /// high-value customers). Pulled out as a pure function so the mapping is
@@ -159,6 +160,9 @@ class _TongtaiCustomerListScreenState
       return;
     }
     if (!context.mounted) return;
+    // WTM-224 — the one "business data changed" signal, so a customer added
+    // here reaches Home's counts, the capability contexts and the journey.
+    invalidateBusinessDataProviders(ref);
     setState(() => _query = _query.copyWith(pageIndex: 0));
   }
 

@@ -84,11 +84,16 @@ void main() {
     ),
   ]);
 
-  Widget host() => MaterialApp(
-    home: TongtaiCustomerHistoryScreen(
-      customer: customer,
-      service: service,
-      clock: () => now,
+  // WTM-224: the screen raises the one "business data changed" signal at the
+  // point of the WRITE (an order is the biggest business event in the app), so
+  // it is a Consumer now and needs a scope.
+  Widget host() => ProviderScope(
+    child: MaterialApp(
+      home: TongtaiCustomerHistoryScreen(
+        customer: customer,
+        service: service,
+        clock: () => now,
+      ),
     ),
   );
 
@@ -200,11 +205,13 @@ void main() {
   testWidgets('empty state when filters match nothing', (tester) async {
     useTallViewport(tester);
     await tester.pumpWidget(
-      MaterialApp(
-        home: TongtaiCustomerHistoryScreen(
-          customer: customer.copyWith(name: 'Không Có Đơn'),
-          service: CustomerOrderHistoryService(const []),
-          clock: () => now,
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiCustomerHistoryScreen(
+            customer: customer.copyWith(name: 'Không Có Đơn'),
+            service: CustomerOrderHistoryService(const []),
+            clock: () => now,
+          ),
         ),
       ),
     );
@@ -285,11 +292,13 @@ void main() {
     ) async {
       useTallViewport(tester);
       await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiCustomerHistoryScreen(
-            customer: customer,
-            service: service,
-            clock: () => now,
+        ProviderScope(
+          child: MaterialApp(
+            home: TongtaiCustomerHistoryScreen(
+              customer: customer,
+              service: service,
+              clock: () => now,
+            ),
           ),
         ),
       );
@@ -305,12 +314,14 @@ void main() {
       await orders.hydrate();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: TongtaiCustomerHistoryScreen(
-            customer: customer,
-            orderController: orders,
-            products: products,
-            clock: () => now,
+        ProviderScope(
+          child: MaterialApp(
+            home: TongtaiCustomerHistoryScreen(
+              customer: customer,
+              orderController: orders,
+              products: products,
+              clock: () => now,
+            ),
           ),
         ),
       );

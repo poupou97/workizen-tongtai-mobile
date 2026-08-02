@@ -312,14 +312,9 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
   /// Re-measures the journey after the seller comes back from doing the work,
   /// so Home's mission block reflects it immediately (WTM-220).
   Future<void> _refreshJourneyProgress() async {
-    final journeys = await ref.read(journeysProvider.future);
-    final active = journeys.where((j) => j.state == JourneyState.active);
-    if (active.isNotEmpty) {
-      final metrics = await ref.refresh(journeyMetricsProvider.future);
-      await JourneyController(
-        ref.read(journeyRepositoryProvider),
-      ).refreshDerived(active.first, metrics);
-    }
+    // WTM-224: measuring lives in the read path now — re-read and the journey
+    // arrives already measured, whoever did the work and wherever they were.
+    ref.invalidate(journeyMetricsProvider);
     ref.invalidate(journeysProvider);
     if (mounted) await _data.refresh();
   }
