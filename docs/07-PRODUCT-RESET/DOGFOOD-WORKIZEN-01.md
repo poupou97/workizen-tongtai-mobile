@@ -98,7 +98,35 @@ của Tổng Tài — hôm nay Concept nhắm người bán lẻ SME Việt Nam.
   lần, nên không capability nào trả lời được *"tháng này tôi cam kết trả bao
   nhiêu?"*.
 
-## Việc chưa làm được ở lần dogfood này
+## Lần 2 — trên máy thật (2026-08-02, Nokia 6.1, bản release)
 
-Dùng thật trên thiết bị. Cần bản release + máy thật + `adb`; khi có, phải kiểm
-đúng những thứ chỉ máy mới lộ (bài học WTM-166/172: quét tĩnh có trần).
+Lần 1 chỉ là dogfood **mô hình hoá**; phần này trả nốt.
+
+Máy đang chạy bản cài ngày 2026-08-01, tức schema **trước** v14 — nên lần cài
+đè này chạy trọn chuỗi **v13 → v16** (ProductKind + `quantity` nullable ·
+`typeCode` · `business_inputs_table`) trên **dữ liệu thật của Founder**. Đây là
+thứ 1795 test không kiểm được: trước đó chính thiết bị đã bắt hai lỗi migration
+mà suite xanh không thấy.
+
+**Kết quả:** dữ liệu nguyên vẹn (14 sản phẩm · 66,9tr đ tồn kho · 17 cơ hội) ·
+`logcat -b crash` **rỗng** · không một dòng `SqliteException` / `no such column`
+/ `duplicate column`.
+
+Đi thật, không chỉ mở lên nhìn:
+
+| Việc | Kết quả |
+|---|---|
+| Producer → *Nguồn đầu vào* → thêm **Firebase · Hạ tầng · Hằng tháng · 500.000 đ** | lưu được, danh sách hiện đúng |
+| `force-stop` rồi mở lại | *Cam kết mỗi tháng* vẫn **500.000 đ** — bảng v16 sống qua lần đóng app |
+| Kho → Thêm sản phẩm → chọn **Sản phẩm số** | ô tồn kho + mức đặt lại **biến mất**, hiện *"Loại này không có tồn kho để đếm."*, nhãn giá vốn đổi thành *"Chi phí mỗi lượt bán"* |
+
+Bốn chỗ mô hình từng buộc phải nói dối: **(1)** đã xong (WTM-227/233) ·
+**(3)** đã xong (WTM-232) · **(4)** đã xong (WTM-229/230/234) · **(2)**
+`BusinessTrade` thiếu ngành sản phẩm số — nay thay bằng `BusinessType`
+(WTM-228), là chiều đúng để hỏi.
+
+## Việc chưa làm được
+
+Không còn ở phần thiết bị. Còn lại là món nợ đã ghi trong
+`test/database_upgrade_test.dart`: **chưa test nào tái hiện được lỗi
+migration-replay** — bằng chứng cho bản vá đó vẫn chỉ là thiết bị.
