@@ -403,6 +403,14 @@ abstract class AppStrings {
   /// Vietnamese build showed "Stock alerts: 4 out of stock • 2 low".
   String invStockAlerts(String parts);
 
+  /// Home hero (WTM-221) — Concept mở màn bằng một câu của app, không phải
+  /// một hàng số. Ba câu, ba trạng thái phân biệt.
+  String get homeGreeting;
+  String homeHeadlineOpportunities(int count);
+  String get homeHeadlineNoneToday;
+  String get homeHeadlineNotEnoughData;
+  String get homeAskHint;
+
   /// Nút mở capability nơi một bước hành trình được làm (WTM-220).
   String get journeyDoStep;
 
@@ -1422,6 +1430,20 @@ class AppStringsVi extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Cảnh báo tồn kho: $parts';
+  @override
+  String get homeGreeting => 'Chào bạn 👋';
+  @override
+  String homeHeadlineOpportunities(int count) =>
+      'Hôm nay tôi tìm được $count cơ hội cho bạn.';
+  @override
+  String get homeHeadlineNoneToday =>
+      'Hôm nay chưa có cơ hội nào nổi bật. Cứ ghi việc kinh doanh như thường, '
+      'tôi vẫn đang theo dõi.';
+  @override
+  String get homeHeadlineNotEnoughData =>
+      'Thêm vài dữ liệu đầu tiên để tôi bắt đầu tìm cơ hội cho bạn.';
+  @override
+  String get homeAskHint => 'Hỏi Tổng Tài bất cứ điều gì…';
   @override
   String get journeyDoStep => 'Làm ngay';
   @override
@@ -2831,6 +2853,20 @@ class AppStringsEn extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Stock alerts: $parts';
+  @override
+  String get homeGreeting => 'Hello 👋';
+  @override
+  String homeHeadlineOpportunities(int count) =>
+      'I found $count opportunities for you today.';
+  @override
+  String get homeHeadlineNoneToday =>
+      'Nothing stands out today. Keep recording your business — I am still '
+      'watching.';
+  @override
+  String get homeHeadlineNotEnoughData =>
+      'Add your first few records so I can start finding opportunities.';
+  @override
+  String get homeAskHint => 'Ask Tổng Tài anything…';
   @override
   String get journeyDoStep => 'Do it now';
   @override
