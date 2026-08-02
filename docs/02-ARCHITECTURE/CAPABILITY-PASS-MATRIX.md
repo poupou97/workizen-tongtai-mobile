@@ -28,6 +28,23 @@ thứ chưa nhìn là cách tái tạo đúng tình huống đó trong một b�
 | `?` | **Chưa audit** |
 | — | Không áp dụng ở Phase 2 |
 
+## Điều kiện PASS bắt buộc — Journey Reachability (Founder 2026-08-02)
+
+> *"Đối với mọi Capability L2+, phải chứng minh có ít nhất một User Journey hợp
+> lệ dẫn tới capability đó, hoặc được đánh dấu rõ là **Future Capability /
+> Intentionally Hidden** cùng lý do."*
+
+Một capability **không PASS** khi màn của nó không có đường đi từ điểm vào của
+app. Khoá bằng `p0/journey_reachability_test.dart`: đồ thị điều hướng **suy từ
+code** (bỏ comment trước khi suy — một dòng tài liệu nhắc tên màn từng đủ tạo
+ra *cạnh ma*), BFS từ shell/Home, mọi màn L2+ phải tới được hoặc nằm trong
+danh sách khai báo **kèm nhãn + lý do**; ngoại lệ hết hạn cũng làm CI đỏ.
+
+Lý do luật này tồn tại: WTM-218 — một màn ~600 dòng được **sáu** lượt governance
+đánh bóng mà không ai mở được. Mọi suite đều đo **chất lượng** màn hình; không
+suite nào đo **đường vào**. Chất lượng của một màn không ai tới được bằng 0 dù
+CI xanh.
+
 ## Nguyên tắc xếp hạng (D-11, Founder 2026-08-01)
 
 **Business Journey là trung tâm sản phẩm.** Mọi capability mới phải phục vụ

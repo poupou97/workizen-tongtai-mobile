@@ -518,6 +518,30 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-30 · Tới-được phải chứng minh từ **gốc**, không phải một bước
+
+- **Root cause:** P-29 hỏi *"có file nào import file màn này không?"* — một
+  bước, không có gốc. Hai màn mồ côi import lẫn nhau vẫn qua được, và một màn
+  chỉ tới được qua chuỗi mà không ai đi nổi cũng vậy. Câu hỏi đúng là câu người
+  bán hỏi: **từ chỗ tôi mở app, tôi tới đó bằng cách nào?**
+- **Regression:** luật Founder 2026-08-02 sau WTM-218 — *mọi capability L2+
+  phải chứng minh một User Journey dẫn tới nó, hoặc mang nhãn Future Capability
+  / Intentionally Hidden kèm lý do*.
+- **Test pattern:** `p0/journey_reachability_test.dart` — đồ thị điều hướng
+  **suy từ code**, BFS từ shell/Home. Ba điều đáng nhớ khi viết:
+  · **Bỏ comment trước khi suy cạnh.** Một dòng doc *"mở TongtaiFooScreen."*
+  tạo **cạnh ma** — đồ thị nói tới được, trong khi thứ duy nhất dẫn tới đó là
+  một câu văn. Suite chống nói dối thì phải nhìn code, không nhìn lời kể.
+  · **Loại file barrel** (`tongtai.dart`): nó re-export tất cả, nối mọi thứ
+  với mọi thứ và biến bài kiểm thành vô nghĩa.
+  · **Suy, đừng khai tay.** 37 đường đi khai tay sẽ mục ở lần đổi điều hướng
+  đầu tiên, mà một bảng khai mục **tệ hơn không có** — nó nói dối người đọc
+  sau. Chỉ ngoại lệ mới khai, và ngoại lệ phải có nhãn + lý do đủ dài để hiểu.
+- **Prevention:** màn mới buộc phải khai mức L trong suite ⇒ việc khai buộc
+  phải trả lời "đường vào từ đâu" **trước** khi bàn tới l10n/a11y.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:

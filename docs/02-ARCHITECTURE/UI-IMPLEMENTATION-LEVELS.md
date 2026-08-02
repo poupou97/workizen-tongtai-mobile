@@ -4,6 +4,20 @@ Chuẩn: [ADR-TON-015](../03-DECISIONS/ADR-TON-015-ui-maturity-and-one-data-path
 Cập nhật **cùng PR** mỗi khi một màn đổi level. Level = sự thật đo được từ
 code, không phải ý định. Audit gần nhất: **2026-08-01** (38 màn + 3 shell — WTM-187 thêm `tongtai_journey_screen` (L3) — WTM-175 thêm `tongtai_feedback_screen`, WTM-177 thêm `tongtai_business_profile_screen`, WTM-178 thay onboarding slide bằng `tongtai_onboarding_conversation_screen`; cả ba L3).
 
+## ⛔ Điều kiện đứng trước mọi level — Journey Reachability (Founder 2026-08-02)
+
+**Mọi màn L2+ phải chứng minh được một User Journey dẫn tới nó**, hoặc mang
+nhãn **Future Capability / Intentionally Hidden kèm lý do**. Khoá bằng
+`test/features/tongtai/p0/journey_reachability_test.dart` — mức L khai trong
+suite đó phải khớp bảng dưới đây, và **màn mới không khai mức ⇒ CI đỏ** (việc
+khai buộc phải trả lời "người bán tới đây bằng đường nào" trước khi bàn tới
+l10n/a11y).
+
+Vì sao đứng trước: WTM-218 tìm ra `tongtai_supplier_search_screen` — L3 đầy
+đủ test/a11y/l10n, được **sáu** lượt governance đánh bóng — mà **chưa bao giờ
+có lối vào**. Level đo chất lượng một màn; nó không đo việc màn đó có tồn tại
+với người bán hay không.
+
 ## Cách đọc
 
 - **Data**: nguồn dữ liệu thật (repo/provider) hay nhận qua constructor từ
