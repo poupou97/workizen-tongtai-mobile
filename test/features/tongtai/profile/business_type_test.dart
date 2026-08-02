@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/core/l10n/app_strings.dart';
 import 'package:tongtai/features/tongtai/ai/business_profile_prompt.dart';
+import 'package:tongtai/features/tongtai/onboarding/onboarding_conversation.dart';
 import 'package:tongtai/features/tongtai/profile/business_profile.dart';
 
 /// WTM-228 / ADR-TON-023 — hồ sơ nói được doanh nghiệp vận hành kiểu gì.
@@ -68,6 +70,51 @@ void main() {
 
       expect(restored.type, isNull);
       expect(restored.trade, BusinessTrade.food, reason: 'phần còn lại nguyên');
+    });
+  });
+
+  group('kênh bán cho doanh nghiệp số (WTM-232)', () {
+    test('có kênh thật để ghi, không còn "chưa ghi" vô cớ', () {
+      // Trước đây bảy kênh đều là bán lẻ vật lý, nên một doanh nghiệp số
+      // KHÔNG CÓ Ô NÀO ĐÚNG: mọi đơn thành null và "Doanh thu theo kênh"
+      // trống vĩnh viễn — không phải vì người bán lười ghi.
+      expect(SalesChannel.fromCode('website'), SalesChannel.website);
+      expect(SalesChannel.fromCode('app_store'), SalesChannel.appStore);
+      expect(SalesChannel.fromCode('direct'), SalesChannel.direct);
+    });
+
+    test('mã cũ KHÔNG đổi — đơn đã ghi không được mất kênh', () {
+      // Đổi một mã sẽ làm mọi đơn đã ghi mất kênh khi khôi phục (ADR-TON-018).
+      for (final pair in const [
+        ('shop', SalesChannel.shop),
+        ('market', SalesChannel.market),
+        ('shopee', SalesChannel.shopee),
+        ('tiktok', SalesChannel.tiktok),
+        ('facebook', SalesChannel.facebook),
+        ('zalo', SalesChannel.zalo),
+        ('wholesale', SalesChannel.wholesale),
+      ]) {
+        expect(SalesChannel.fromCode(pair.$1), pair.$2);
+      }
+    });
+
+    test('mã lạ vẫn là "chưa ghi", không mượn tên kênh có thật', () {
+      // Nhánh mặc định cũ (`_ => 'Bán sỉ'`) làm MỌI mã mới hiện thành "Bán sỉ"
+      // — một nhãn sai mà không gì báo.
+      expect(SalesChannel.fromCode('temu'), isNull);
+      expect(AppStringsVi().profileChannel('temu'), 'Kênh khác');
+      expect(AppStringsVi().profileChannel('wholesale'), 'Bán sỉ');
+      expect(AppStringsVi().profileChannel('website'), 'Website của mình');
+    });
+
+    test('onboarding mời ĐỦ mọi kênh mô hình giữ được', () {
+      // Danh sách chép tay trong kịch bản vừa để sót ba kênh mới; nay suy
+      // thẳng từ enum nên không thể lệch lần nữa.
+      final step = kOnboardingSteps.firstWhere((s) => s.id == 'channels');
+      expect(
+        step.optionCodes.toSet(),
+        SalesChannel.values.map((c) => c.code).toSet(),
+      );
     });
   });
 

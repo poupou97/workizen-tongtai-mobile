@@ -58,6 +58,9 @@ String _channelLabel(SalesChannel channel) => switch (channel) {
   SalesChannel.facebook => 'Facebook',
   SalesChannel.zalo => 'Zalo',
   SalesChannel.wholesale => 'bán sỉ',
+  SalesChannel.website => 'website của mình',
+  SalesChannel.appStore => 'chợ ứng dụng',
+  SalesChannel.direct => 'bán trực tiếp / hợp đồng',
 };
 
 String _seasonalityLabel(BusinessSeasonality seasonality) =>

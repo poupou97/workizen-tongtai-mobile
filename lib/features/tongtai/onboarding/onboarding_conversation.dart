@@ -44,7 +44,10 @@ class OnboardingStep {
 /// The script. Order matters: trade first because it is the question a seller
 /// can answer without thinking, and the one that makes every later question
 /// feel relevant.
-const List<OnboardingStep> kOnboardingSteps = [
+/// WTM-232: không còn `const` vì bước "kênh bán" suy thẳng từ `SalesChannel`
+/// thay vì chép tay — danh sách chép tay vừa để sót ba kênh số mới, và người
+/// bán sản phẩm số sẽ đi qua onboarding mà không có ô nào đúng để chọn.
+final List<OnboardingStep> kOnboardingSteps = [
   OnboardingStep(
     id: 'trade',
     optionCodes: [
@@ -59,15 +62,10 @@ const List<OnboardingStep> kOnboardingSteps = [
   ),
   OnboardingStep(
     id: 'channels',
-    optionCodes: [
-      'shop',
-      'market',
-      'shopee',
-      'tiktok',
-      'facebook',
-      'zalo',
-      'wholesale',
-    ],
+    // WTM-232: suy thẳng từ enum thay vì chép tay. Danh sách chép tay này
+    // vừa để sót ba kênh số mới, và người bán sản phẩm số sẽ đi qua onboarding
+    // mà không có ô nào đúng để chọn — đúng vấn đề story đang sửa.
+    optionCodes: [for (final c in SalesChannel.values) c.code],
     multiSelect: true,
   ),
   OnboardingStep(
