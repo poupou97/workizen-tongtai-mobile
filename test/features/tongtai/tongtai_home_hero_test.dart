@@ -165,6 +165,38 @@ void main() {
     );
   });
 
+  group('information hierarchy — Concept order (WTM-222)', () {
+    testWidgets('today\'s missions come first, above KPIs and opportunities', (
+      tester,
+    ) async {
+      // Order on a screen IS a statement about what matters. This block used
+      // to sit at the very BOTTOM of Home: a seller scrolled past revenue and
+      // opportunities to reach the one thing they were meant to do today —
+      // while D-11 says the Journey is the product's centre. The assertion is
+      // on positions, because "the widget exists somewhere" was already true
+      // when the hierarchy was wrong.
+      tallViewport(tester);
+      await seeder().seed();
+      await tester.pumpWidget(await host());
+      await pumpUntilFound(tester, find.byKey(const Key('home-open-journey')));
+      await tester.pumpAndSettle();
+
+      double top(String key) => tester.getTopLeft(find.byKey(Key(key))).dy;
+
+      expect(top('home-hero'), lessThan(top('home-open-journey')));
+      expect(
+        top('home-open-journey'),
+        lessThan(top('home-open-opportunities')),
+        reason: 'việc phải làm hôm nay đứng trước cơ hội',
+      );
+      expect(
+        top('home-open-journey'),
+        lessThan(top('home-open-reports')),
+        reason: 'việc phải làm hôm nay đứng trước hàng KPI',
+      );
+    });
+  });
+
   group('the rule behind the sentence', () {
     test('found something wins over everything else', () {
       expect(

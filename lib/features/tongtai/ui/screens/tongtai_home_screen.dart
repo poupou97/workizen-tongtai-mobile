@@ -440,6 +440,33 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             onAsk: () => _openChat(context),
           ),
           const SizedBox(height: 16),
+
+          // ── Today's missions — from the JOURNEY (WTM-210 · D-11) ──
+          //
+          // FIRST after the hero, as the Concept has it (WTM-222). This block
+          // used to sit at the very bottom, under the KPIs and the
+          // opportunities: a seller had to scroll past two other stories to
+          // reach the one thing they were meant to do today. Order on a screen
+          // IS a statement about what matters, and D-11 already made that
+          // statement — the Journey is the product's centre.
+          //
+          // The tiles read the JOURNEY, not goals wearing a mission label
+          // (WTM-210) — Home and the journey screen describe "today's work"
+          // from one source.
+          _SectionHeader(
+            title: context.l10n.homeTodaysMissions,
+            actionKey: const Key('home-open-journey'),
+            actionLabel: context.l10n.actionViewAll,
+            onAction: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const TongtaiJourneyScreen(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ..._missionBlock(context),
+          const SizedBox(height: 24),
+
           // ── Sample-data banner (WTM-144/ADR-TON-014): when sample rows
           //    are present, every screen shows them as ordinary data — this
           //    banner is the one reminder + pointer to the remover in More. ─
@@ -627,26 +654,6 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                 .take(3)
                 .map((o) => _OpportunityTile(opportunity: o)),
           const SizedBox(height: 24),
-
-          // ── Today's missions — from the JOURNEY (WTM-210 · D-11) ──
-          //
-          // The tiles used to render goals wearing a mission label, so Home
-          // and the Journey screen described "today's work" from two sources —
-          // the same defect class the SSoT chain fixed all day. D-11 makes the
-          // stakes explicit: the Journey is the product's centre, and Home's
-          // mission block is its front door.
-          _SectionHeader(
-            title: context.l10n.homeTodaysMissions,
-            actionKey: const Key('home-open-journey'),
-            actionLabel: context.l10n.journeyTitle,
-            onAction: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const TongtaiJourneyScreen(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          ..._missionBlock(context),
         ],
       ),
     );
