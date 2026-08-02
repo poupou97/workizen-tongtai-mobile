@@ -9,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/core/prefs.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
-import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/journey/journey.dart';
