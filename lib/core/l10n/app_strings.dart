@@ -208,6 +208,11 @@ abstract class AppStrings {
   /// WTM-191 — turn an opportunity into work inside the active journey.
   String get oppAddToJourney;
   String oppAddedToJourneySnack(String title);
+
+  /// Business Loop (WTM-223): kết quả thường trực + đường đi tiếp, thay cho
+  /// một snackbar biến mất sau vài giây.
+  String get oppInJourney;
+  String get oppOpenJourney;
   String get oppAlreadyInJourney;
   String get oppNoActiveJourney;
   // ── WTM-194: chuỗi từng bị hard-code bằng tiếng Anh ────────────────────
@@ -1091,6 +1096,10 @@ class AppStringsVi extends AppStrings {
       'Tạo từ cơ hội: $description';
   @override
   String get oppAddToJourney => 'Đưa vào hành trình';
+  @override
+  String get oppInJourney => 'Cơ hội này đã nằm trong hành trình của bạn.';
+  @override
+  String get oppOpenJourney => 'Mở hành trình';
   @override
   String oppAddedToJourneySnack(String title) =>
       'Đã đưa "$title" vào hành trình';
@@ -2514,6 +2523,10 @@ class AppStringsEn extends AppStrings {
       'Created from opportunity: $description';
   @override
   String get oppAddToJourney => 'Add to journey';
+  @override
+  String get oppInJourney => 'This opportunity is in your journey.';
+  @override
+  String get oppOpenJourney => 'Open the journey';
   @override
   String oppAddedToJourneySnack(String title) =>
       'Added "$title" to the journey';

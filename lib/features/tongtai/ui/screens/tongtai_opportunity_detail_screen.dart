@@ -17,6 +17,7 @@ import '../../providers/tongtai_journey_provider.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
+import 'tongtai_journey_screen.dart';
 
 /// Opportunity Detail & Action Plan (WTM-92).
 ///
@@ -106,9 +107,7 @@ class _TongtaiOpportunityDetailScreenState
       showTongtaiFailure(context, failure, onRetry: _createGoal);
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.oppGoalCreatedSnack(_o.title))));
+    _say(l10n.oppGoalCreatedSnack(_o.title));
   }
 
   /// Shows [message], replacing whatever is on screen.
@@ -193,6 +192,17 @@ class _TongtaiOpportunityDetailScreenState
     final l10n = context.l10n;
     final color = tongtaiOpportunityTypeColor(_o.type);
     final plan = opportunityActionPlan(_o);
+    // Read from the journey itself, not from a local "I tapped it" flag: the
+    // seller may have added this from another screen, or restored a backup.
+    // The node carrying `sourceOpportunityId` IS the record (WTM-191), and a
+    // second copy of that fact could disagree with it.
+    final inJourney =
+        ref
+            .watch(activeJourneyProvider)
+            .value
+            ?.nodes
+            .any((n) => n.sourceOpportunityId == _o.id) ??
+        false;
 
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
@@ -389,15 +399,84 @@ class _TongtaiOpportunityDetailScreenState
             label: Text(context.l10n.opportunityCreateGoal),
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing3),
-          OutlinedButton.icon(
-            key: const Key('opportunity-detail-add-to-journey'),
-            onPressed: _addToJourney,
-            icon: const Icon(Icons.route_outlined),
-            label: Text(l10n.oppAddToJourney),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
+          // ── Business Loop (WTM-223, Founder 2026-08-02) ──────────────
+          //
+          // Beat 3 "thấy kết quả" and beat 4 "biết bước tiếp theo" must
+          // OUTLIVE the action. A snackbar is explicitly not the end of a
+          // business flow: it vanishes in seconds, so a seller who looked away
+          // is left with a decision they made and no trace of where it went.
+          //
+          // Once this opportunity is in the journey the button is replaced by
+          // its RESULT plus the way onward — contextual navigation, never an
+          // automatic screen change: the seller may be working through several
+          // opportunities and keeps the wheel.
+          if (inJourney)
+            Container(
+              key: const Key('opportunity-in-journey'),
+              width: double.infinity,
+              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+              decoration: BoxDecoration(
+                color: TongtaiDesignTokens.producerGreen.withValues(
+                  alpha: 0.10,
+                ),
+                borderRadius: BorderRadius.circular(
+                  TongtaiDesignTokens.cardBorderRadius,
+                ),
+                border: Border.all(
+                  color: TongtaiDesignTokens.producerGreen.withValues(
+                    alpha: 0.4,
+                  ),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_outline,
+                        size: 18,
+                        color: TongtaiDesignTokens.producerGreenText,
+                      ),
+                      const SizedBox(width: TongtaiDesignTokens.spacing2),
+                      Expanded(
+                        child: Text(
+                          l10n.oppInJourney,
+                          style: TongtaiDesignTokens.smallStyle.copyWith(
+                            color: TongtaiDesignTokens.lightTextPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: TongtaiDesignTokens.spacing2),
+                  OutlinedButton.icon(
+                    key: const Key('opportunity-open-journey'),
+                    onPressed: () => Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) => const TongtaiJourneyScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.route_outlined),
+                    label: Text(l10n.oppOpenJourney),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            OutlinedButton.icon(
+              key: const Key('opportunity-detail-add-to-journey'),
+              onPressed: _addToJourney,
+              icon: const Icon(Icons.route_outlined),
+              label: Text(l10n.oppAddToJourney),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
             ),
-          ),
           const SizedBox(height: TongtaiDesignTokens.spacing3),
 
           // ── Reactions ────────────────────────────────────────────────
