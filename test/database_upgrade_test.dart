@@ -18,6 +18,13 @@ import 'package:tongtai/database/migrations/tongtai_migrations.dart';
 /// Lỗi cụ thể đáng nhớ: `TableMigration` sao chép **mọi cột của schema MỚI**
 /// ra khỏi bảng CŨ, nên nó không được chạy khi một cột mới còn chưa tồn tại.
 /// v13 thoát vì nó chỉ **xoá** cột; **thêm** cột mới mới là chỗ vỡ.
+/// ⚠️ Còn thiếu: một test tái hiện được lỗi *thứ hai* máy thật đưa ra
+/// (`duplicate column name: source_opportunity_id` khi chuỗi migration chạy
+/// lại sau một lần hỏng). Tôi đã thử dựng DB nửa vời ở v10 nhưng chuỗi không
+/// ném lỗi trong test, nên **chưa** hiểu đủ để viết một test trung thực. Một
+/// test xanh ở cả hai phía không bảo vệ gì cả (P-24), nên nó bị gỡ thay vì
+/// giữ lại làm màu xanh giả. Bằng chứng hiện tại cho bản sửa idempotent là
+/// **thiết bị thật**, không phải suite này.
 void main() {
   test('v13 có dữ liệu → v14: không mất dòng nào, đọc được ngay', () async {
     final dir = await Directory.systemTemp.createTemp('tongtai_upgrade');
