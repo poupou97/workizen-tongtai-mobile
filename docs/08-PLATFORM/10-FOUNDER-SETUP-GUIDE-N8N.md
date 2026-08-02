@@ -88,6 +88,22 @@ Vì thế backup script đóng gói nó cùng bản dump.
 
 ---
 
+## Cấu hình nằm ở đâu (WTM-259)
+
+Toàn bộ cấu hình n8n **đã có trong git**, không còn chỉ nằm trên máy:
+
+> `poupou97/workforceos-usecases` → `infra/n8n/`
+
+compose · Caddyfile · backup.sh · cron · `.env.example` · README dựng lại từng
+bước. **`.env` thật không nằm trong repo** — giá trị sinh trên máy bằng
+`openssl rand -hex 32`.
+
+⚠️ Trước đó cấu hình chỉ tồn tại trên chính cái máy nó đang chạy, và bản backup
+cũng nằm trên máy đó — nên bảng "dựng lại dưới 10 phút" bên dưới **chỉ đúng từ
+hôm nay trở đi**.
+
+---
+
 ## Thời gian dựng lại nếu mất sạch
 
 | Bước | Thời gian |

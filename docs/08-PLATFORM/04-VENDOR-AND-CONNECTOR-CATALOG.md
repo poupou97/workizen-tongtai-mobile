@@ -115,7 +115,7 @@ Cột **n8n Support** là thứ Wave trước chưa có; nó đổi thứ tự �
 | **TikTok Shop** | partner | ✅ | OAuth2 | ✅ | ⚠️ community | ✅ | như Shopee |
 | **RevenueCat** | ✅ v2 | ✅ | secret key | ❌ | ⚠️ HTTP node | ✅ | **Optional Runtime** |
 | **Stripe** | ✅ | ✅ | secret key | ✅ CSV | ✅ **có sẵn** | ✅ (webhook) | Runtime cho webhook |
-| **GitHub** | ✅ | ✅ | device flow | ❌ | ✅ **có sẵn** | ❌ | Device-direct |
+| **GitHub** ⭐ | ✅ | ✅ | **PAT chỉ-đọc** | ❌ | ⚠️ dùng HTTP node | ❌ | Device-direct — **ĐÃ KIỂM** |
 | **Telegram** | ✅ bot | tuỳ chọn | bot token | ❌ | ✅ **có sẵn** | ❌ (long-poll) | Device-direct |
 | **GA4 / Search Console** | ✅ | ❌ | OAuth2 | ✅ | ✅ **có sẵn** | ❌ | Device-direct |
 | **Facebook Ads** | ✅ | ✅ | OAuth2 | ✅ | ✅ **có sẵn** | ✅ | Runtime |
@@ -123,6 +123,25 @@ Cột **n8n Support** là thứ Wave trước chưa có; nó đổi thứ tự �
 | **Google Play** | ✅ | ❌ | service acct | ✅ CSV (GCS) | ⚠️ HTTP node | ❌ | Hybrid: File Bridge |
 | **GHN / GHTK** | ✅ | ✅ | API key | ⚠️ | ❌ | ⚠️ | chưa đánh giá — chờ use case |
 | **Gmail** | ✅ | ✅ Pub/Sub | OAuth **restricted** | ⚠️ | ✅ có sẵn | ✅ | **từ chối** → Share Sheet |
+
+### ⭐ GitHub — dòng duy nhất trong bảng này đã đi qua thực tế (WTM-268)
+
+Bảng trên vốn dựng từ tài liệu vendor. Sau khi connector GitHub chạy thật, **hai
+ô phải sửa** — và cả hai đều lệch theo hướng "tài liệu lạc quan hơn thực tế":
+
+| Ô | Ghi ban đầu | Thực tế | Vì sao lệch |
+|---|---|---|---|
+| Xác thực | `device flow` | **fine-grained PAT chỉ-đọc** | device flow dành cho app thay mặt *nhiều* người dùng. Ở đây chỉ một chủ sở hữu tự cấp khoá cho chính mình ⇒ PAT phạm vi hẹp hơn **và** đơn giản hơn |
+| n8n node | `✅ có sẵn` | **không dùng** — HTTP Request + Header Auth | node GitHub có sẵn nhưng không phân trang được theo cách cần; 208 commit nằm trên 3 trang, node HTTP có cơ chế phân trang tự động |
+
+⇒ Bài học cho mọi dòng còn lại: **"n8n có node sẵn" không đồng nghĩa "dùng node đó
+là đúng".** Node có sẵn tối ưu cho thao tác đơn lẻ; connector cần *quét theo cửa
+sổ thời gian, có phân trang, biết mình có bị cắt hay không*.
+
+Một cột nữa hoá ra đúng và quan trọng: **Webhook ❌ ⇒ phải poll ⇒
+`freshness.mode = poll`** trong canonical envelope. Đó là lý do trường `freshness`
+có mặt từ đầu — AI đọc lẫn dữ liệu poll cũ với dữ liệu webhook tức thời mà không
+biết thì sẽ nói sai một cách tự tin.
 
 **Điều bảng này nói mà bảng Wave trước không nói:** n8n có node sẵn cho phần lớn
 platform phương Tây, nhưng **Shopee/TikTok Shop chỉ có node cộng đồng** — tức
