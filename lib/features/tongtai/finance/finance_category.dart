@@ -51,6 +51,20 @@ enum FinanceCategory {
   /// shows, and burying it in [other] would hide a major cost.
   rent('rent'),
 
+  /// Hạ tầng chạy nền: máy chủ, lưu trữ, tên miền (WTM-236).
+  ///
+  /// Ba mã dưới đây dùng **đúng mã của `BusinessInputKind`** (ADR-TON-023) chứ
+  /// không đặt tên riêng: một nguồn đầu vào và khoản tiền trả cho nó là hai
+  /// mặt của cùng một sự việc, và hai vựng từ song song sẽ lệch ngay lần đầu
+  /// ai đó thêm loại ở một bên — đúng họ lỗi P-27.
+  infrastructure('infrastructure'),
+
+  /// Phần mềm dùng để làm việc: thuê bao theo chỗ ngồi.
+  tooling('tooling'),
+
+  /// Dịch vụ trả theo mức dùng: token AI, cổng thanh toán, băng thông.
+  provider('provider'),
+
   /// Income the seller entered by hand. Sales revenue itself is **derived from
   /// orders** (WTM-196) and never stored as a transaction.
   sales('sales'),
@@ -123,6 +137,9 @@ String _labelFor(FinanceCategory category, AppStrings l10n) =>
       FinanceCategory.staff => l10n.finCatStaff,
       FinanceCategory.marketing => l10n.finCatMarketing,
       FinanceCategory.rent => l10n.finCatRent,
+      FinanceCategory.infrastructure => l10n.finCatInfrastructure,
+      FinanceCategory.tooling => l10n.finCatTooling,
+      FinanceCategory.provider => l10n.finCatProvider,
       FinanceCategory.sales => l10n.finCatSales,
       FinanceCategory.other => l10n.finCatOther,
     };

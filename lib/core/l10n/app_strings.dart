@@ -48,6 +48,11 @@ abstract class AppStrings {
   String get kpiIncome;
 
   /// WTM-197 — nhãn hiển thị cho `FinanceCategory`; mã lưu là canonical code.
+  /// Nhóm chi phí đầu vào (WTM-236) — hạ tầng · công cụ · trả theo mức dùng.
+  String get finCatInfrastructure;
+  String get finCatTooling;
+  String get finCatProvider;
+
   String get finCatProductCost;
   String get finCatPlatformFee;
   String get finCatShipping;
@@ -878,6 +883,12 @@ class AppStringsVi extends AppStrings {
   String get kpiAov => 'Giá trị đơn TB';
   @override
   String get kpiIncome => 'Doanh thu';
+  @override
+  String get finCatInfrastructure => 'Hạ tầng';
+  @override
+  String get finCatTooling => 'Công cụ';
+  @override
+  String get finCatProvider => 'Dịch vụ trả theo dùng';
   @override
   String get finCatProductCost => 'Nhập hàng';
   @override
@@ -2397,6 +2408,12 @@ class AppStringsEn extends AppStrings {
   String get kpiAov => 'Avg. order value';
   @override
   String get kpiIncome => 'Income';
+  @override
+  String get finCatInfrastructure => 'Infrastructure';
+  @override
+  String get finCatTooling => 'Tooling';
+  @override
+  String get finCatProvider => 'Usage-based service';
   @override
   String get finCatProductCost => 'Product cost';
   @override

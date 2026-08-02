@@ -7,6 +7,7 @@ import '../../core/tongtai_formatters.dart';
 import '../../finance/finance_transaction.dart';
 import '../../finance/transaction_form.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../finance/finance_category.dart';
 
 /// Add Transaction form (WTM-113) — records an income or expense that flows
 /// straight into the Finance dashboard. Pops the created [FinanceTransaction]
@@ -49,9 +50,7 @@ class _TongtaiTransactionFormScreenState
     super.dispose();
   }
 
-  List<String> get _categories => _data.type == TransactionType.income
-      ? kIncomeCategories
-      : kExpenseCategories;
+  List<FinanceCategory> get _categories => transactionCategories(_data.type);
 
   void _update(TransactionFormData next) {
     setState(() {
@@ -157,12 +156,15 @@ class _TongtaiTransactionFormScreenState
           Wrap(
             spacing: TongtaiDesignTokens.spacing2,
             children: [
+              // Lưu **mã**, hiện **nhãn** (ADR-TON-018). Trước đây chip lưu
+              // đúng chuỗi tiếng Việt đang hiện, nên bản tiếng Anh ghi nhãn
+              // tiếng Việt xuống sổ.
               for (final c in _categories)
                 ChoiceChip(
-                  key: Key('transaction-cat-$c'),
-                  label: Text(c),
-                  selected: _data.category == c,
-                  onSelected: (_) => _update(_data.copyWith(category: c)),
+                  key: Key('transaction-cat-${c.code.replaceAll('_', '-')}'),
+                  label: Text(financeCategoryCodeLabel(c.code, l10n)),
+                  selected: _data.category == c.code,
+                  onSelected: (_) => _update(_data.copyWith(category: c.code)),
                 ),
             ],
           ),

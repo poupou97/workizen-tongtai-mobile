@@ -91,12 +91,12 @@ của mô hình vật lý.
 `BusinessTrade` và kênh số vào `SalesChannel` là **mở rộng đối tượng phục vụ**
 của Tổng Tài — hôm nay Concept nhắm người bán lẻ SME Việt Nam. Không tự quyết.
 
-**Tự làm được (Data First, không đụng positioning):**
-* `FinanceCategory` thiếu mã cho **chi phí công cụ / hạ tầng / AI** — đây là
-  vựng từ chi phí, không phải đối tượng phục vụ; và nó đã là bài học WTM-197.
-* Chi phí **định kỳ** chưa biểu diễn được: mọi khoản chi đều là sự kiện một
-  lần, nên không capability nào trả lời được *"tháng này tôi cam kết trả bao
-  nhiêu?"*.
+**Tự làm được (Data First, không đụng positioning) — đã làm cả hai:**
+* ~~`FinanceCategory` thiếu mã cho **chi phí công cụ / hạ tầng / AI**~~ →
+  **WTM-236**: thêm `infrastructure` · `tooling` · `provider`, dùng **đúng mã
+  của `BusinessInputKind`** để hai vựng từ không thể lệch.
+* ~~Chi phí **định kỳ** chưa biểu diễn được~~ → **WTM-229/234**: `InputCadence`
+  + tổng cam kết hằng tháng, và **WTM-235** đưa nó vào hành trình.
 
 ## Lần 2 — trên máy thật (2026-08-02, Nokia 6.1, bản release)
 
