@@ -94,8 +94,11 @@ class DriftProductRepository implements ProductRepository {
         costPerUnit: Value(p.costPrice),
         category: Value(p.category),
         description: Value(p.description),
-        totalStock: Value(p.quantity.toDouble()),
-        stockAlertLevel: Value(p.reorderLevel.toDouble()),
+        // `null` đi thẳng xuống cột: "không áp dụng" phải sống sót qua lần
+        // đóng app, nếu quy về 0 thì mở lại app sản phẩm số sẽ "hết hàng".
+        totalStock: Value(p.quantity?.toDouble()),
+        kind: Value(p.kind.code),
+        stockAlertLevel: Value(p.reorderLevel?.toDouble()),
         domainSnapshot: Value(
           encodeDomainSnapshot({
             'imagePaths': p.imagePaths,
@@ -109,10 +112,11 @@ class DriftProductRepository implements ProductRepository {
     sku: row.sku,
     name: row.name,
     category: row.category ?? '',
-    quantity: row.totalStock.round(),
+    quantity: row.totalStock?.round(),
     pricePerUnit: row.listPrice,
     costPrice: row.costPerUnit,
-    reorderLevel: (row.stockAlertLevel ?? 0).round(),
+    reorderLevel: row.stockAlertLevel?.round(),
+    kind: ProductKind.fromCode(row.kind),
     updatedAt: row.updatedAt,
     description: row.description ?? '',
     imagePaths: snapshotStringList(

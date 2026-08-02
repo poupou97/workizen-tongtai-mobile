@@ -93,7 +93,9 @@ class OpportunityRuleEngine {
     final revenue = _productRevenue(billable, now);
     final cutoff = now.subtract(Duration(days: momentumWindowDays));
     for (final p in products) {
-      if (p.quantity > p.reorderLevel) continue;
+      // Không sinh cơ hội nhập hàng cho thứ không có tồn kho (ADR-TON-023):
+      // `needsRestock` trả false cho sản phẩm số, nên luật này tự đúng.
+      if (!p.needsRestock) continue;
       final recent = revenue[p.name] ?? 0;
       if (recent <= 0) continue; // no demand signal → no opportunity
       final out = p.quantity == 0;

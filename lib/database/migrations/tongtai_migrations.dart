@@ -55,7 +55,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 13;
+const int kTongtaiSchemaVersion = 14;
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -233,6 +233,24 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 14) {
+        // v14 (WTM-227 / ADR-TON-023 — Product Type). Two changes to
+        // `products_table`, both about the app being able to say "this does
+        // not apply" instead of a number that means something else:
+        //   * `kind` — canonical ProductKind code; NULL reads back as
+        //     `physical`, which is the TRUTH about every pre-v14 row: they
+        //     were entered under a physical-only model.
+        //   * `total_stock` becomes nullable. It used to default to 0, and
+        //     that 0 is exactly what made Inventory shout "Hết hàng" and the
+        //     Rule Engine generate a restock opportunity — for a piece of
+        //     software.
+        // TableMigration rebuilds from the new definition, copying live
+        // columns by name; existing quantities survive untouched.
+        final products = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'products_table',
+        );
+        await m.alterTable(TableMigration(products));
       }
       if (from < 13) {
         // v13 (WTM-212 — Derived Truth Violation ELIMINATED, not contained).

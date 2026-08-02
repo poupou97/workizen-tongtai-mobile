@@ -138,7 +138,10 @@ class TongtaiProductResult {
   final String? description;
   final String? category;
   final double price;
-  final double stock;
+
+  /// Tồn kho — `null` khi loại sản phẩm không có tồn kho (ADR-TON-023). Kết
+  /// quả tìm kiếm hiển thị "—" thay vì 0, vì 0 ở đây đọc như "đã bán hết".
+  final double? stock;
 
   /// Product rating 0–5 (WTM-74 AC2 ranking signal); null when unrated (today
   /// products are unrated, so this is null).

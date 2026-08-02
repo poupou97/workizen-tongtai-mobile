@@ -187,7 +187,11 @@ class BackupCodec {
     'name': p.name,
     'category': p.category,
     'description': p.description,
+    // ADR-TON-023: `null` = loại này không có tồn kho. Phải sống sót qua
+    // backup — nếu restore biến nó thành 0 thì mọi sản phẩm số quay về "hết
+    // hàng", đúng lỗ hổng WTM-211 để lại (paymentStatus quên vào codec).
     'quantity': p.quantity,
+    'kind': p.kind.code,
     'pricePerUnit': p.pricePerUnit,
     // WTM-204: nullable on purpose — absent means "not entered", never 0.
     'costPrice': p.costPrice,
@@ -221,15 +225,15 @@ class BackupCodec {
     final reorderLevel = _int(json['reorderLevel']);
     final updatedAt = _date(json['updatedAt']);
     final imagePaths = _strings(json['imagePaths']);
+    // `quantity`/`reorderLevel` KHÔNG còn bắt buộc: vắng mặt nghĩa là loại
+    // sản phẩm này không có tồn kho (ADR-TON-023), không phải bản ghi hỏng.
     if (id == null ||
         id.isEmpty ||
         sku == null ||
         name == null ||
         category == null ||
         description == null ||
-        quantity == null ||
         pricePerUnit == null ||
-        reorderLevel == null ||
         updatedAt == null ||
         imagePaths == null) {
       return null;
@@ -242,6 +246,10 @@ class BackupCodec {
       name: name,
       category: category,
       quantity: quantity,
+      // Mã lạ ⇒ `physical`, và mọi file ghi TRƯỚC ADR-TON-023 đều thiếu khoá
+      // này — chúng thật sự là hàng vật lý, nên đây là sự thật chứ không phải
+      // giá trị mặc định cho tiện.
+      kind: ProductKind.fromCode(_str(json['kind'])),
       pricePerUnit: pricePerUnit,
       // WTM-204: every `.ttbk` written before cost prices existed lacks this
       // key, and those files must restore — the product simply comes back with

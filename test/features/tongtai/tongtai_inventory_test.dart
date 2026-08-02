@@ -216,8 +216,10 @@ void main() {
         const ProductQuery(sort: ProductSort.quantity, ascending: false),
       );
       expect(keys(desc, (p) => p.quantity), orderedByDescending);
+      // Mẫu vẫn là hàng vật lý nên đều có số lượng; `!` ở đây là khẳng định
+      // về dữ liệu của test, không phải giả định về mô hình.
       final max = service.all
-          .map((p) => p.quantity)
+          .map((p) => p.quantity!)
           .reduce((a, b) => a > b ? a : b);
       expect(desc.first.quantity, max);
     });

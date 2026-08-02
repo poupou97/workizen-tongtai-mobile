@@ -21,7 +21,16 @@ class ProductsTable extends Table {
   TextColumn get category => text().nullable()();
   RealColumn get costPerUnit => real().nullable()();
   RealColumn get listPrice => real()();
-  RealColumn get totalStock => real().withDefault(const Constant(0))();
+
+  /// Số lượng tồn — **nullable từ v14** (ADR-TON-023): `NULL` nghĩa là loại
+  /// sản phẩm này không có tồn kho, KHÔNG phải "hết hàng". Trước v14 cột này
+  /// mặc định 0, và chính con số 0 đó là thứ làm Inventory kêu "Hết hàng" cho
+  /// một phần mềm.
+  RealColumn get totalStock => real().nullable()();
+
+  /// Loại sản phẩm bằng **mã canonical** `ProductKind` (v14). Dòng cũ đọc ra
+  /// `physical` — đó là sự thật về chúng, không phải phỏng đoán.
+  TextColumn get kind => text().nullable()();
   RealColumn get stockAlertLevel => real().nullable()();
   // WTM-53: ON DELETE CASCADE so deleting a Producer removes the Products it
   // supplies (no orphaned supplier_id references). Nullable rows (no supplier)

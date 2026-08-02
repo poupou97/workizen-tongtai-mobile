@@ -131,7 +131,7 @@ class TongtaiCsvExporter {
           p.quantity,
           p.pricePerUnit.round(),
           p.reorderLevel,
-          p.quantity <= p.reorderLevel ? 'CAN_NHAP_THEM' : 'DU_HANG',
+          p.needsRestock ? 'CAN_NHAP_THEM' : 'DU_HANG',
           TongtaiFormatters.isoDate(p.updatedAt),
         ],
     ];

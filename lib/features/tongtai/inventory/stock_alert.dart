@@ -44,10 +44,13 @@ class StockAlert {
   /// The threshold this alert was raised against — the product's own
   /// [Product.reorderLevel], forwarded. There is no other threshold: "sắp hết
   /// hàng" has exactly one owner, [Product.stockStatus] (WTM-213).
-  int get threshold => product.reorderLevel;
+  /// An alert only ever exists for a product that tracks stock (a `null`
+  /// [Product.stockStatus] produces no alert at all), so these two are known
+  /// to be present here — the `?? 0` is a total function, not a guess.
+  int get threshold => product.reorderLevel ?? 0;
 
   /// On-hand quantity, forwarded from [product] for convenience.
-  int get quantity => product.quantity;
+  int get quantity => product.quantity ?? 0;
 
   /// Units that must be added to lift the product back above its threshold
   /// (never negative). Zero when the threshold itself is zero.
@@ -68,6 +71,9 @@ class StockAlert {
   /// "set low-stock threshold" is the per-product reorder level on the form.
   static StockAlert? forProduct(Product product) =>
       switch (product.stockStatus) {
+        // ADR-TON-023: `null` = loại này không có tồn kho ⇒ không có cảnh báo.
+        // Sản phẩm số không bao giờ "hết hàng".
+        null => null,
         StockStatus.outOfStock => StockAlert(
           product: product,
           level: StockAlertLevel.outOfStock,

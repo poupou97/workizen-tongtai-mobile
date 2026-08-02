@@ -39,7 +39,11 @@ class InventorySummary {
           low += 1;
         case StockStatus.outOfStock:
           out += 1;
+        // `inStock` và `null` đều không phải cảnh báo. `null` = sản phẩm không
+        // có tồn kho (ADR-TON-023): nó không nằm trong chỉ số kho, và cũng
+        // không bị đếm là "còn hàng" — nó đơn giản không thuộc câu hỏi này.
         case StockStatus.inStock:
+        case null:
           break;
       }
     }

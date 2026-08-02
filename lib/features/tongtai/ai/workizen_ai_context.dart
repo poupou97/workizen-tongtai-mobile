@@ -87,9 +87,7 @@ class WorkizenAiContextBuilder {
     for (final c in _customers) {
       tierCounts[c.tier] = (tierCounts[c.tier] ?? 0) + 1;
     }
-    final lowStock = _products
-        .where((p) => p.quantity <= p.reorderLevel)
-        .length;
+    final lowStock = _products.where((p) => p.needsRestock).length;
     final tierLine = CustomerTier.values
         .map((t) => '${t.labelVi}: ${tierCounts[t] ?? 0}')
         .join(' · ');
@@ -144,7 +142,9 @@ class WorkizenAiContextBuilder {
 
   String _productContext(Product product) =>
       '- SKU ${product.sku} · ${product.category}\n'
-      '- Giá bán: ${TongtaiFormatters.vnd(product.pricePerUnit)} · Tồn kho: '
-      '${product.quantity}'
-      '${product.quantity <= product.reorderLevel ? ' (DƯỚI mức đặt lại ${product.reorderLevel} — cần nhập thêm)' : ''}';
+      '- Giá bán: ${TongtaiFormatters.vnd(product.pricePerUnit)}'
+      // Sản phẩm không có tồn kho thì KHÔNG nhắc tồn kho với AI: một dòng
+      // "Tồn kho: 0" trong prompt là lời nói dối đi thẳng vào mô hình.
+      '${product.quantity == null ? '' : ' · Tồn kho: ${product.quantity}'}'
+      '${product.needsRestock ? ' (DƯỚI mức đặt lại ${product.reorderLevel} — cần nhập thêm)' : ''}';
 }
