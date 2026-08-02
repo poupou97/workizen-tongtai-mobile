@@ -15,6 +15,7 @@ import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_screen_header.dart';
 import 'tongtai_transaction_form_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 
 /// Finance dashboard (WTM-27, WTM-113, WTM-120) — income, expenses, profit and
 /// margin over the transaction ledger, an income-vs-expense cashflow chart, the
@@ -95,7 +96,16 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'finance',
     );
-    if (failure != null && mounted) showTongtaiFailure(context, failure);
+    if (failure != null && mounted) {
+      showTongtaiFailure(context, failure);
+      return;
+    }
+    // WTM-224 — one signal for "the business data changed". Every reader hangs
+    // off it: Home's KPIs, the capability contexts, the Rule Twins, and the
+    // journey's own re-measurement. Without it this expense was visible only
+    // on the screen that recorded it, and the journey step that asked for it
+    // ("Ghi 5 khoản chi đầu tiên") stayed open forever.
+    if (mounted) invalidateBusinessDataProviders(ref);
   }
 
   @override

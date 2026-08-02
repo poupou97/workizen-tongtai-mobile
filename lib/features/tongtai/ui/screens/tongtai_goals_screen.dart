@@ -16,6 +16,7 @@ import '../../providers/tongtai_orders_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_goal_detail_screen.dart';
 import 'tongtai_goal_form_screen.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 
 // The pace→color helper now lives in goal_theme.dart (shared with the detail
 // screen); re-exported so existing importers keep resolving it here.
@@ -127,7 +128,12 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
         failure,
         onRetry: () => _openForm(context, goal: goal),
       );
+      return;
     }
+    // WTM-224 — a goal is what the journey is planned against, and what Home's
+    // journey tile counts. Without the signal the seller sets a target and the
+    // rest of the app keeps planning around the old one.
+    if (context.mounted) invalidateBusinessDataProviders(ref);
   }
 
   /// Opens the goal detail (WTM-88) — progress, pace, action plan and tips —

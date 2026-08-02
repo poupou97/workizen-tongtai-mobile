@@ -299,6 +299,11 @@ class _TongtaiInventoryScreenState
       showTongtaiFailure(context, failure);
       return;
     }
+    // WTM-224: one signal for "the business data changed". Every reader
+    // hangs off it — Home's KPIs, the capability contexts, the Rule
+    // Twins, and the journey's own re-measurement. Without it the write
+    // was visible only on the screen that made it.
+    invalidateBusinessDataProviders(ref);
     setState(() => _query = _query.copyWith(pageIndex: 0));
   }
 

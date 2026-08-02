@@ -6,6 +6,7 @@ import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../profile/business_profile.dart';
 import '../../providers/tongtai_profile_provider.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart'
     show TongtaiAsyncScreenData, showTongtaiFailure;
 
@@ -162,9 +163,12 @@ class _TongtaiBusinessProfileScreenState
       showTongtaiFailure(context, failure, onRetry: () => _save(profile));
       return;
     }
-    // The profile feeds every AI prompt, so a stale read here would keep
-    // sending the old answers until the app restarts.
-    ref.invalidate(businessProfileProvider);
+    // The profile feeds every AI prompt AND the journey planner
+    // (`JourneyPlanInput.profile`), so a stale read here would keep sending
+    // the old answers until the app restarts. WTM-224: raise the one signal
+    // rather than invalidating a single provider by hand — the list of who
+    // cares is `kBusinessDataProviders`, and it grows.
+    invalidateBusinessDataProviders(ref);
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()

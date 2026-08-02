@@ -10,6 +10,8 @@ import 'tongtai_finance_provider.dart';
 import 'tongtai_consumer_provider.dart';
 import '../metrics/business_metrics.dart';
 import '../journey/journey_metric.dart';
+import '../journey/journey_controller.dart';
+import '../journey/journey_node.dart';
 
 /// The real, persistent Business Journey source (WTM-124) — Drift over the local
 /// business's goals. **User Data First**: a new user starts with no goals; the
@@ -32,14 +34,46 @@ final journeyRepositoryProvider = Provider<JourneyRepository>(
 /// Every journey with its tree and plan versions. Registered in
 /// `kBusinessDataProviders` so a restore cannot leave the previous business's
 /// plan on screen — or, worse, feed it to the AI as if it were this seller's.
-final journeysProvider = FutureProvider<List<Journey>>(
-  (ref) => ref.watch(journeyRepositoryProvider).loadAll(),
-);
+/// Measures the active journey against the business's real numbers, then
+/// returns everything (WTM-224).
+///
+/// **In the READ path, not in a navigation gesture.** WTM-220 called
+/// `refreshDerived` when the seller popped back from work they had started on
+/// the journey — which meant a seller who recorded five expenses straight from
+/// the Finance tab, the ordinary path, was never noticed. The journey must
+/// answer *"am I on track"* from the data, whoever changed it and wherever
+/// they were standing.
+///
+/// The write stays: [JourneyController.refreshDerived] only moves steps
+/// FORWARD and records `completedAt`. Deriving completion live instead would
+/// un-finish real work the moment a metric dipped — a refund, a corrected
+/// entry — and "you did this on the 3rd" is a fact, not a derivation.
+Future<List<Journey>> _measured(Ref ref) async {
+  final repository = ref.watch(journeyRepositoryProvider);
+  final metrics = await ref.watch(journeyMetricsProvider.future);
+  final journeys = await repository.loadAll();
+  final active = journeys.where((j) => j.state == JourneyState.active);
+  if (active.isEmpty) return journeys;
+
+  final updated = await JourneyController(
+    repository,
+  ).refreshDerived(active.first, metrics);
+  return [
+    for (final j in journeys)
+      if (j.id == updated.id) updated else j,
+  ];
+}
+
+final journeysProvider = FutureProvider<List<Journey>>(_measured);
 
 /// The one journey being worked on, or `null`.
-final activeJourneyProvider = FutureProvider<Journey?>(
-  (ref) => ref.watch(journeyRepositoryProvider).loadActive(),
-);
+final activeJourneyProvider = FutureProvider<Journey?>((ref) async {
+  // Reads through [journeysProvider] so the measurement happens once and both
+  // views of the journey agree — two loaders would be two answers.
+  final journeys = await ref.watch(journeysProvider.future);
+  final active = journeys.where((j) => j.state == JourneyState.active);
+  return active.isEmpty ? null : active.first;
+});
 
 /// The real numbers the journey measures its steps against (WTM-220).
 ///

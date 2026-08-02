@@ -12,7 +12,6 @@ import 'tongtai_inventory_screen.dart';
 import 'tongtai_finance_screen.dart';
 import 'tongtai_customer_list_screen.dart';
 import '../../journey/journey_metric.dart';
-import '../../journey/journey_controller.dart';
 
 /// The journey, shown as the tiered plan the Concept describes (WTM-187).
 ///
@@ -77,12 +76,12 @@ class TongtaiJourneyScreen extends ConsumerWidget {
   /// the journey they left, which is the third thing the Founder's rule asks
   /// for ("đi tới được · hoàn thành được luồng · **quay lại Journey**").
   ///
-  /// On the way back the journey re-measures itself. `refreshDerived` has
-  /// existed since WTM-187 with **no production caller at all**, so a step tied
-  /// to `expenses >= 5` never actually ticked itself: the journey could only
-  /// ever tell the seller what to do, never notice they had done it. This is
-  /// that missing engine, run at the one moment it matters — the seller just
-  /// came back from doing the work.
+  /// On the way back the journey is re-read, and the read path measures it
+  /// (WTM-224). `refreshDerived` had **no production caller at all** until
+  /// WTM-220, so a step tied to `expenses >= 5` never ticked itself; WTM-220
+  /// then called it here, which only covered sellers who happened to start
+  /// from the journey. The measurement now belongs to reading the journey,
+  /// wherever the work was done.
   Future<void> _openDestination(
     BuildContext context,
     WidgetRef ref,
@@ -100,16 +99,11 @@ class TongtaiJourneyScreen extends ConsumerWidget {
       ),
     );
 
-    final journeys = await ref.read(journeysProvider.future);
-    final active = journeys.where((j) => j.state == JourneyState.active);
-    if (active.isNotEmpty) {
-      final metrics = await ref.refresh(journeyMetricsProvider.future);
-      await JourneyController(
-        ref.read(journeyRepositoryProvider),
-      ).refreshDerived(active.first, metrics);
-    }
-    // Re-read whatever `refreshDerived` may have written, so the seller sees
-    // the step tick the moment they land back here.
+    // WTM-224: the measuring moved INTO the read path, so all this has to do
+    // is re-read. Doing the arithmetic here was the bug — it tied "the journey
+    // notices your work" to a navigation gesture, and a seller who records the
+    // same expenses straight from the Finance tab never made that gesture.
+    ref.invalidate(journeyMetricsProvider);
     ref.invalidate(journeysProvider);
   }
 }
