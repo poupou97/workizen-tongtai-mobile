@@ -163,7 +163,6 @@ export 'ui/screens/tongtai_producer_screen.dart';
 export 'ui/screens/tongtai_inventory_screen.dart';
 export 'ui/screens/tongtai_consumer_screen.dart';
 export 'ui/screens/tongtai_more_screen.dart';
-export 'ui/screens/tongtai_component_showcase_screen.dart';
 export 'ui/screens/tongtai_supplier_search_screen.dart';
 export 'ui/screens/tongtai_supplier_detail_screen.dart';
 export 'ui/screens/tongtai_supplier_favorites_screen.dart';
