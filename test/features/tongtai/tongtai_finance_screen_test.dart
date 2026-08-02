@@ -85,7 +85,15 @@ void main() {
   ) async {
     await pump(tester, controller: FinanceController.inMemory());
 
-    expect(find.byType(TongtaiFoxMascot), findsOneWidget);
+    // Scoped to the empty state: WTM-216 put a second fox in the header, and
+    // "exactly one fox on screen" was never what this test meant.
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('finance-empty')),
+        matching: find.byType(TongtaiFoxMascot),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('No financial transactions yet'), findsOneWidget);
     expect(find.byKey(const Key('finance-kpi-income')), findsNothing);
   });

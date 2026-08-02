@@ -6,7 +6,7 @@
 > Backlog **không** ưu tiên theo Story ID, ngày tạo, sprint hay Jira Priority.
 > Mỗi vòng lặp tính lại điểm theo Capability Value.
 
-**Cập nhật lần cuối:** 2026-08-01 (khuya) · WTM-212 DTV eliminated (v13) · WTM-213 hết ô ⚠️ · WTM-214 hết ô `?`
+**Cập nhật lần cuối:** 2026-08-02 · WTM-212 DTV eliminated (v13) · WTM-213 hết ô ⚠️ · WTM-214 hết ô `?` · WTM-215/216 Group C concept-1 xong
 
 ---
 
@@ -179,12 +179,13 @@ WTM-211) · IA Finance (WTM-206) · audit ô `?` (WTM-214, bảng này).
 |---|---|---|---|---|
 | 1 | **Producer Data** — danh bạ NCC là sample | P0 nhưng **Future Capability theo Founder** — *"Không cố xây AI bằng dữ liệu giả"* | (+100) treo | chờ nguồn dữ liệu thật |
 | 2 | Group B concept-1 (6 mục scope sản phẩm) | P5 UI lệch Concept | +40 | **chờ Founder framing** |
-| 3 | Group C concept-1 (cosmetic còn lại) | P8 polish | +10 | mở |
+| ~~3~~ | ~~Group C concept-1 (donut tồn kho · dải thẻ sắp hết · mascot header)~~ | P8 polish | ~~+10~~ | ✅ **xong** (WTM-215 · WTM-216) |
 | 4 | Business Context Builder | kiến trúc | — | PROPOSED, điều kiện *all P0 PASS* đã đạt — chờ Founder duyệt ADR |
 
-**Trạng thái sau vòng 2026-08-01 (WTM-213/214):** bảng chính **hết ô `?` và
+**Trạng thái sau vòng 2026-08-01/02 (WTM-213→216):** bảng chính **hết ô `?` và
 hết ô ⚠️** — mọi ô hoặc ✅ có bằng chứng, hoặc ❌/— có chủ đích được Founder
 quyết (Producer Data, AI Producer). Theo thứ tự capability của Founder
 (Journey → Finance → Consumer → Inventory → Opportunity → Producer): 5/6 PASS,
-Producer là Future Capability. Việc còn lại trên bàn đều P5↓ hoặc chờ quyết
-định sản phẩm.
+Producer là Future Capability. **Group C concept-1 đã đóng** (WTM-215 donut +
+dải thẻ; WTM-216 header mascot + phụ đề). Việc còn lại trên bàn **đều chờ
+quyết định của Founder** — không còn hạng mục nào thuộc thẩm quyền tự quyết.

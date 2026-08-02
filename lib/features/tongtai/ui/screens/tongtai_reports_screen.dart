@@ -11,6 +11,7 @@ import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_navigation_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_screen_header.dart';
 import '../../opportunity/opportunity.dart' show Opportunity;
 import '../../opportunity/opportunity_pipeline.dart';
 import '../../providers/tongtai_ai_provider.dart';
@@ -243,11 +244,12 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
 
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
-      appBar: AppBar(
-        title: Text(context.l10n.titleReports),
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
-        elevation: 0,
+      appBar: tongtaiScreenHeader(
+        context,
+        screen: 'reports',
+        title: context.l10n.titleReports,
+        subtitle: tongtaiScreenSubtitle(context.l10n, 'reports'),
+        actions: const [],
       ),
       body: ListenableBuilder(
         listenable: _data,
@@ -1208,6 +1210,9 @@ class _ReportsEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+      // See `_FinanceEmptyState`: the `<screen>-empty` stable ID this custom
+      // empty view owes (ADR-TON-015 §3).
+      key: const Key('reports-empty'),
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
         child: Column(

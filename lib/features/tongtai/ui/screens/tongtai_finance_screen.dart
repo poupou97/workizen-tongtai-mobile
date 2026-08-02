@@ -12,6 +12,7 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_finance_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_screen_header.dart';
 import 'tongtai_transaction_form_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 
@@ -104,11 +105,14 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
       builder: (context, _) {
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
-          appBar: AppBar(
-            title: Text(context.l10n.titleFinance),
-            backgroundColor: TongtaiDesignTokens.lightBackground,
-            foregroundColor: TongtaiDesignTokens.lightTextPrimary,
-            elevation: 0,
+          // Finance and Reports are pushed screens, not tabs — they keep the
+          // back arrow and carry no More action (WTM-192 put that on tabs).
+          appBar: tongtaiScreenHeader(
+            context,
+            screen: 'finance',
+            title: context.l10n.titleFinance,
+            subtitle: tongtaiScreenSubtitle(context.l10n, 'finance'),
+            actions: const [],
           ),
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('finance-add'),
@@ -684,6 +688,9 @@ class _FinanceEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+      // The `<screen>-empty` stable ID a custom empty view owes (ADR-TON-015
+      // §3) — timeline and risk already carried it, these two did not.
+      key: const Key('finance-empty'),
       child: Padding(
         padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
         child: Column(

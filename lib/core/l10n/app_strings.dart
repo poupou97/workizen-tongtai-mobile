@@ -403,6 +403,14 @@ abstract class AppStrings {
   /// Vietnamese build showed "Stock alerts: 4 out of stock • 2 low".
   String invStockAlerts(String parts);
 
+  /// Concept-1 screen headers (WTM-216) — one line saying what a screen is for.
+  String get subtitleProducer;
+  String get subtitleInventory;
+  String get subtitleConsumer;
+  String get subtitleOpportunity;
+  String get subtitleFinance;
+  String get subtitleReports;
+
   /// Concept-1 inventory overview card (WTM-215).
   String get invOverviewTitle;
   String get invOverviewProducts;
@@ -1411,6 +1419,18 @@ class AppStringsVi extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Cảnh báo tồn kho: $parts';
+  @override
+  String get subtitleProducer => 'Tìm cơ hội & nguồn hàng';
+  @override
+  String get subtitleInventory => 'Quản lý danh mục & kho';
+  @override
+  String get subtitleConsumer => 'Khách hàng & kênh bán';
+  @override
+  String get subtitleOpportunity => 'Cơ hội kinh doanh hôm nay';
+  @override
+  String get subtitleFinance => 'Quản lý tài chính doanh nghiệp';
+  @override
+  String get subtitleReports => 'Báo cáo & phân tích kinh doanh';
   @override
   String get invOverviewTitle => 'Tổng quan tồn kho';
   @override
@@ -2806,6 +2826,18 @@ class AppStringsEn extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Stock alerts: $parts';
+  @override
+  String get subtitleProducer => 'Find opportunities and suppliers';
+  @override
+  String get subtitleInventory => 'Products and warehouse';
+  @override
+  String get subtitleConsumer => 'Customers and sales channels';
+  @override
+  String get subtitleOpportunity => "Today's business opportunities";
+  @override
+  String get subtitleFinance => 'Business finances';
+  @override
+  String get subtitleReports => 'Business reports and analytics';
   @override
   String get invOverviewTitle => 'Inventory overview';
   @override

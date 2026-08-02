@@ -13,7 +13,7 @@ import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_search_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
-import '../widgets/tongtai_more_action.dart';
+import '../widgets/tongtai_screen_header.dart';
 import 'tongtai_supplier_favorites_screen.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 
@@ -99,12 +99,13 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
     final l10n = context.l10n;
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(l10n.titleProducerHub),
-        elevation: 0,
+      appBar: tongtaiScreenHeader(
+        context,
+        screen: 'producer',
+        title: l10n.titleProducerHub,
+        subtitle: tongtaiScreenSubtitle(context.l10n, 'producer'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        actions: const [TongtaiMoreAction()],
       ),
       body: ListenableBuilder(
         listenable: _data,

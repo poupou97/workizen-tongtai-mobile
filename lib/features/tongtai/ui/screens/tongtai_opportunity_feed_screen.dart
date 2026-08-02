@@ -13,6 +13,7 @@ import '../../opportunity/opportunity_theme.dart';
 import '../../providers/tongtai_context_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_more_action.dart';
+import '../widgets/tongtai_screen_header.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
 import 'tongtai_opportunity_detail_screen.dart';
@@ -182,11 +183,11 @@ class _TongtaiOpportunityFeedScreenState
         final items = _controller.feed(_query);
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
-          appBar: AppBar(
-            title: Text(context.l10n.titleOpportunities),
-            elevation: 0,
-            backgroundColor: TongtaiDesignTokens.lightBackground,
-            foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+          appBar: tongtaiScreenHeader(
+            context,
+            screen: 'opportunity',
+            title: context.l10n.titleOpportunities,
+            subtitle: tongtaiScreenSubtitle(context.l10n, 'opportunity'),
             actions: [
               IconButton(
                 key: const Key('opportunity-saved-toggle'),
