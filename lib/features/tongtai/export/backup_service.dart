@@ -29,6 +29,8 @@ import '../producer/supplier_favorites_store.dart';
 import 'backup_codec.dart';
 import 'backup_crypto.dart';
 import 'backup_format.dart';
+import '../producer/business_input.dart';
+import '../producer/business_input_repository.dart';
 
 /// Creating, validating and **restoring** a `.ttbk` v2 backup (WTM-164,
 /// ADR-TON-018).
@@ -64,6 +66,7 @@ class TongtaiBackupRepositories {
     this.businessProfile,
     this.journeys,
     this.opportunityReactions,
+    this.businessInputs,
   });
 
   /// Needed for the single transaction that makes Replace atomic — the one
@@ -90,6 +93,10 @@ class TongtaiBackupRepositories {
   /// Opportunity reactions (WTM-190). Nullable for the same reason as
   /// [journeys]; `null` means reactions are neither backed up nor restored.
   final OpportunityReactionRepository? opportunityReactions;
+
+  /// Nguồn đầu vào (WTM-229). Nullable như [journeys]: `null` nghĩa là không
+  /// sao lưu và không khôi phục phần này.
+  final BusinessInputRepository? businessInputs;
 }
 
 /// The decoded, type-checked contents of a backup.
@@ -105,6 +112,7 @@ class BackupContents {
     this.businessProfile,
     this.journeys = const [],
     this.opportunityReactions = const {},
+    this.businessInputs = const [],
   });
 
   final List<Customer> customers;
@@ -127,6 +135,10 @@ class BackupContents {
   /// opportunity id. Empty means the package carries none — either it predates
   /// the feature or the seller never saved or dismissed anything.
   final Map<String, OpportunityReaction> opportunityReactions;
+
+  /// Nguồn đầu vào (WTM-229/230). Rỗng nghĩa là gói không mang phần này — hoặc
+  /// nó có trước tính năng, hoặc người bán chưa khai nguồn nào.
+  final List<BusinessInput> businessInputs;
 
   Map<String, int> get counts => {
     BackupDatasets.customers: customers.length,
@@ -389,6 +401,11 @@ class TongtaiBackupService {
             for (final e in contents.opportunityReactions.entries)
               BackupCodec.encodeOpportunityReaction(e.key, e.value),
           ],
+        if (contents.businessInputs.isNotEmpty)
+          BackupDatasets.businessInputs: [
+            for (final i in contents.businessInputs)
+              BackupCodec.encodeBusinessInput(i),
+          ],
         BackupDatasets.favourites: [
           for (final f in contents.favourites) BackupCodec.encodeFavourite(f),
         ],
@@ -422,6 +439,7 @@ class TongtaiBackupService {
         if (contents.journeys.isNotEmpty) BackupDatasets.journeys,
         if (contents.opportunityReactions.isNotEmpty)
           BackupDatasets.opportunityReactions,
+        if (contents.businessInputs.isNotEmpty) BackupDatasets.businessInputs,
       ],
       redaction: BackupRedaction.none,
     );
@@ -439,6 +457,7 @@ class TongtaiBackupService {
     journeys: await repositories.journeys?.loadAll() ?? const [],
     opportunityReactions:
         await repositories.opportunityReactions?.loadAll() ?? const {},
+    businessInputs: await repositories.businessInputs?.loadAll() ?? const [],
   );
 
   // ── validate ─────────────────────────────────────────────────────────────
@@ -666,6 +685,14 @@ class TongtaiBackupService {
       for (final raw in (reactionRows ?? const []))
         ?BackupCodec.decodeOpportunityReaction(Map<String, Object?>.from(raw)),
     ]);
+    // Optional dataset (WTM-230): absent là bình thường — mọi file phát hành
+    // trước tính năng này đều không có. Bản ghi thiếu `kind` bị BỎ chứ không
+    // đoán: đoán hộ sẽ xếp một nhà cung cấp vào chi phí hạ tầng.
+    final inputRows = payload.datasets[BackupDatasets.businessInputs];
+    final businessInputs = [
+      for (final raw in (inputRows ?? const []))
+        ?BackupCodec.decodeBusinessInput(Map<String, Object?>.from(raw)),
+    ];
     return BackupContents(
       customers: customers,
       products: products,
@@ -676,6 +703,7 @@ class TongtaiBackupService {
       businessProfile: profile,
       journeys: journeys,
       opportunityReactions: reactions,
+      businessInputs: businessInputs,
     );
   }
 
@@ -783,6 +811,7 @@ class TongtaiBackupService {
         await repositories.businessProfile?.deleteAll();
         await repositories.journeys?.deleteAll();
         await repositories.opportunityReactions?.deleteAll();
+        await repositories.businessInputs?.deleteAll();
 
         // …and back in dependency order: a customer must exist before an order
         // may reference it.
@@ -800,6 +829,7 @@ class TongtaiBackupService {
         for (final journey in contents.journeys) {
           await repositories.journeys?.save(journey);
         }
+        await repositories.businessInputs?.upsertAll(contents.businessInputs);
         await repositories.opportunityReactions?.replaceAll(
           contents.opportunityReactions,
         );

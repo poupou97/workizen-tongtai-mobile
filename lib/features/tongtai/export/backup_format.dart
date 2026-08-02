@@ -112,6 +112,10 @@ class BackupDatasets {
   /// about the seller, and only facts belong in a snapshot.
   static const String opportunityReactions = 'opportunityReactions';
 
+  /// Nguồn đầu vào của doanh nghiệp (WTM-229/230). **Optional on purpose** —
+  /// xem [optional]: mọi file `.ttbk` đã phát hành đều không có nó.
+  static const String businessInputs = 'businessInputs';
+
   /// Every dataset a v2 backup must carry. A file missing any of these is
   /// **not** a complete snapshot and is rejected rather than partially applied.
   ///
@@ -139,6 +143,7 @@ class BackupDatasets {
     businessProfile,
     journeys,
     opportunityReactions,
+    businessInputs,
   ];
 }
 

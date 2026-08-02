@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
+import 'package:tongtai/features/tongtai/export/backup_codec.dart';
+import 'package:tongtai/features/tongtai/export/backup_format.dart';
 import 'package:tongtai/features/tongtai/producer/business_input_repository.dart';
 import 'package:tongtai/features/tongtai/producer/business_input.dart';
 
@@ -141,6 +143,73 @@ void main() {
       final summary = BusinessInputSummary.from(const []);
       expect(summary.monthlyCommitment, 0);
       expect(summary.isComplete, isTrue);
+    });
+  });
+
+  group('.ttbk mang được nguồn đầu vào (WTM-230)', () {
+    test('round-trip giữ nguyên mã và cả những chỗ "chưa khai"', () {
+      // Lỗ này đã cắn hai lần và cả hai lần đều vì để dành: WTM-211 ship
+      // paymentStatus không kèm codec (restore sẽ XOÁ công nợ), WTM-227 suýt
+      // lặp lại với ProductKind (restore sẽ biến sản phẩm số thành hàng hoá
+      // rồi lập tức "hết hàng").
+      const input = BusinessInput(
+        id: 'grok',
+        name: 'xAI / Grok',
+        kind: BusinessInputKind.provider,
+        cadence: InputCadence.usageBased,
+        expectedAmount: 2000000,
+      );
+
+      final decoded = BackupCodec.decodeBusinessInput(
+        BackupCodec.encodeBusinessInput(input),
+      );
+
+      expect(decoded!.kind, BusinessInputKind.provider);
+      expect(decoded.cadence, InputCadence.usageBased);
+      expect(decoded.expectedAmount, 2000000);
+    });
+
+    test('"chưa khai" quay về vẫn là "chưa khai", không phải 0', () {
+      const blank = BusinessInput(
+        id: 'domain',
+        name: 'Tên miền',
+        kind: BusinessInputKind.infrastructure,
+      );
+
+      final decoded = BackupCodec.decodeBusinessInput(
+        BackupCodec.encodeBusinessInput(blank),
+      );
+
+      expect(decoded!.cadence, isNull);
+      expect(decoded.expectedAmount, isNull);
+      expect(
+        decoded.monthlyCommitment,
+        isNull,
+        reason: 'khôi phục không được dựng lên một cam kết chưa ai nói',
+      );
+    });
+
+    test('bản ghi thiếu kind bị BỎ, không đoán', () {
+      // Đoán hộ sẽ xếp một nhà cung cấp vào chi phí hạ tầng.
+      final json = BackupCodec.encodeBusinessInput(
+        const BusinessInput(
+          id: 'x',
+          name: 'Không rõ',
+          kind: BusinessInputKind.tooling,
+        ),
+      )..remove('kind');
+
+      expect(BackupCodec.decodeBusinessInput(json), isNull);
+    });
+
+    test('dataset nằm ở optional, KHÔNG ở all', () {
+      // Thêm vào `all` sẽ khiến MỌI file .ttbk đã phát hành bị từ chối — một
+      // lỗi hình dạng mất-dữ-liệu sinh ra bởi một tính năng cộng thêm.
+      expect(
+        BackupDatasets.all,
+        isNot(contains(BackupDatasets.businessInputs)),
+      );
+      expect(BackupDatasets.optional, contains(BackupDatasets.businessInputs));
     });
   });
 

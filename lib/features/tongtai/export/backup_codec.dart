@@ -14,6 +14,7 @@ import '../journey/journey_node.dart';
 import '../profile/business_profile.dart';
 import '../orders/order.dart';
 import '../producer/supplier_favorite.dart';
+import '../producer/business_input.dart';
 
 /// Domain ⇄ JSON for the `.ttbk` v2 payload (WTM-164, ADR-TON-018).
 ///
@@ -180,6 +181,40 @@ class BackupCodec {
   }
 
   // ── products ─────────────────────────────────────────────────────────────
+
+  /// Nguồn đầu vào (WTM-230). Mã canonical, không bao giờ là nhãn.
+  ///
+  /// `cadence`/`expectedAmount` giữ nguyên `null`: "chưa khai" là một sự thật
+  /// về nguồn này, và quy nó về 0 khi khôi phục sẽ dựng lên một cam kết người
+  /// bán chưa từng nói.
+  static Map<String, Object?> encodeBusinessInput(BusinessInput input) => {
+    'id': input.id,
+    'name': input.name,
+    'kind': input.kind.code,
+    'cadence': input.cadence?.code,
+    'expectedAmount': input.expectedAmount,
+    'note': input.note,
+    'updatedAt': input.updatedAt == null ? null : _iso(input.updatedAt!),
+  };
+
+  static BusinessInput? decodeBusinessInput(Map<String, Object?> json) {
+    final id = _str(json['id']);
+    final name = _str(json['name']);
+    // `kind` là thứ duy nhất bắt buộc ngoài id/name: không có nó thì bản ghi
+    // không nói được nó là loại đầu vào gì, và đoán hộ sẽ xếp một nhà cung cấp
+    // vào chi phí hạ tầng.
+    final kind = BusinessInputKind.fromCode(_str(json['kind']));
+    if (id == null || id.isEmpty || name == null || kind == null) return null;
+    return BusinessInput(
+      id: id,
+      name: name,
+      kind: kind,
+      cadence: InputCadence.fromCode(_str(json['cadence'])),
+      expectedAmount: _double(json['expectedAmount']),
+      note: _str(json['note']) ?? '',
+      updatedAt: _date(json['updatedAt']),
+    );
+  }
 
   static Map<String, Object?> encodeProduct(Product p) => {
     'id': p.id,

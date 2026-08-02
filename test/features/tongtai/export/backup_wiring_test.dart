@@ -56,6 +56,14 @@ void main() {
       reason: 'WTM-185: without this, a device backup carries no journey tree',
     );
     expect(
+      repos.businessInputs,
+      isNotNull,
+      reason:
+          'WTM-230: nguồn đầu vào phải được nối vào backup — một ô repository '
+          'bỏ trống nghĩa là dữ liệu không vào .ttbk VÀ restore không xoá được '
+          'nguồn của business cũ (null thì không có gì để xoá)',
+    );
+    expect(
       repos.opportunityReactions,
       isNotNull,
       reason: 'WTM-190: without this, saves and dismissals are not backed up',
