@@ -7,7 +7,7 @@
 Ma trận kỹ thuật hỏi *"code có đúng không"*; bảng này hỏi *"người bán có đi hết
 được một vòng kinh doanh không"*. Hai chiều đánh giá, **không gộp**.
 
-**Cập nhật lần cuối:** 2026-08-02 · sau WTM-223/224/225/226 — **Business Loop Foundation đóng**.
+**Cập nhật lần cuối:** 2026-08-02 · sau WTM-234/235 — **vòng Producer (Business Input) khép**.
 
 ---
 
@@ -49,7 +49,7 @@ trạng thái thường trực đọc từ Single Source of Truth · không tạ
 | **Inventory** | ✅ | ✅ | ✅ | ✅ WTM-224 | ✅ WTM-225 | ✅ |
 | **Consumer** | ✅ | ✅ | ✅ | ✅ WTM-224 | ✅ WTM-225 | ✅ |
 | **Reports** | ✅ | — | ✅ | — | ⚠️ | ⚠️ |
-| **Producer** (Business Input) | ✅ WTM-234 | ✅ WTM-234 | ✅ WTM-234 | ❌ | ❌ | ⚠️ |
+| **Producer** (Business Input) | ✅ WTM-234 | ✅ WTM-234 | ✅ WTM-234 | ✅ WTM-235 | ✅ WTM-235 | ✅ |
 | **Producer** (danh bạ NCC) | — | — | — | — | — | Future Capability |
 
 `—` = không áp dụng (Reports không phải nơi hành động; danh bạ nhà cung cấp
@@ -132,15 +132,27 @@ bán tự khai**, nên nó không cần danh bạ bịa nào cả. WTM-234 mở 
 đầu bằng dữ liệu thật 100%: thấy *"tháng này tôi cam kết bao nhiêu"* · thêm/sửa
 nguồn · tổng đổi ngay.
 
-**Hai nhịp cuối vẫn ❌, và nói thẳng là ❌:**
+**Hai nhịp cuối khép bằng WTM-235 — việc NỐI, không phải việc thêm màn:**
 
-* **Journey đổi** — chưa node hay mục tiêu nào đọc `BusinessInput`. Ghi thêm
-  một khoản cam kết 500.000 đ/tháng **không** làm hành trình kinh doanh đổi một
-  chữ nào.
-* **Bước tiếp** — khai xong một nguồn, người bán không được nói gì về việc tiếp
-  theo. Câu hỏi bắt buộc của phương pháp audit (*"sau khi hoàn thành hành động
-  này, họ có biết việc tiếp theo để đạt mục tiêu kinh doanh là gì không?"*) ở
-  đây trả lời là **không**.
+* **Journey đổi** — planner đọc cam kết hằng tháng và sinh bước tương ứng. Ba
+  trường hợp, ba câu khác nhau, không câu nào dựng trên số bịa: chưa khai gì ⇒
+  *"khai 3 khoản bạn trả đều đặn"*; khai dở dang ⇒ *"điền số tiền cho n nguồn
+  còn thiếu"*; đủ và nặng (> 20% mục tiêu) ⇒ *"xem lại X cam kết mỗi tháng"*.
+  Chỗ dễ nói dối nhất là trường hợp giữa: **planner không được phán xét một
+  tổng đang thiếu như thể nó đủ**, nên khi còn nguồn chưa đủ dữ liệu thì bước
+  *"xem lại chi phí"* KHÔNG được sinh ra.
+* **Bước tiếp** — bước đó mở được đúng chỗ làm việc (`JourneyDestination
+  .inputs`), và màn nguồn đầu vào hiện **khối thường trực** đọc từ Journey
+  (SSoT) nói bước tiếp theo là gì. Không Snackbar, không ép điều hướng — chỉ
+  mời.
 
-Đó là vòng Producer kế tiếp — và nó là việc **nối** (chi phí đầu vào vào
-Finance và Journey), không phải việc thêm màn.
+Đo bằng **nguồn đã đủ thông tin**, không phải số dòng: đếm dòng thì một nguồn
+khai mỗi cái tên rồi bỏ đó cũng tính là xong, trong khi nó chính là thứ làm
+tổng cam kết thiếu. Và `input_commitment` **cố ý vắng mặt** trong bảng đo tự
+động — nó xong bằng cách GIẢM, mà `refreshDerived` chỉ đẩy bước tiến lên (cùng
+lý do `receivables` vắng mặt, WTM-211).
+
+**Còn lại của Producer:** danh bạ nhà cung cấp vẫn là Future Capability, và chi
+phí đầu vào **chưa nối vào Finance** — sổ thu chi vẫn không có mã cho hạ tầng /
+công cụ / dịch vụ trả theo dùng, nên chúng rơi vào `other` (dogfood lần 1, mục
+"tự làm được").

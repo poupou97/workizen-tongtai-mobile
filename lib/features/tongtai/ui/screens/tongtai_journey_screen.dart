@@ -13,6 +13,7 @@ import 'tongtai_finance_screen.dart';
 import 'tongtai_customer_list_screen.dart';
 import '../../journey/journey_metric.dart';
 import 'tongtai_goals_screen.dart';
+import 'tongtai_business_inputs_screen.dart';
 
 /// The journey, shown as the tiered plan the Concept describes (WTM-187).
 ///
@@ -101,6 +102,7 @@ class TongtaiJourneyScreen extends ConsumerWidget {
           JourneyDestination.inventory => const TongtaiInventoryScreen(),
           JourneyDestination.opportunity =>
             const TongtaiOpportunityFeedScreen(),
+          JourneyDestination.inputs => const TongtaiBusinessInputsScreen(),
         },
       ),
     );

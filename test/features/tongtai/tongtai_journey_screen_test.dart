@@ -92,6 +92,12 @@ void main() {
     testWidgets('[$locale] a real plan renders as a tiered list', (
       tester,
     ) async {
+      // Khung hình cao: kế hoạch dài thêm một mốc (WTM-235 thêm mốc chi phí
+      // đầu vào) là mốc cuối rơi khỏi vùng ListView dựng sẵn, và test đọc ra
+      // "màn hỏng" trong khi màn vẫn đúng (P-26).
+      addTearDown(tester.view.reset);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(500, 3600);
       final journey = await seedRealJourney();
       await tester.pumpWidget(host(locale));
       await tester.pumpAndSettle();

@@ -12,6 +12,8 @@ import '../metrics/business_metrics.dart';
 import '../journey/journey_metric.dart';
 import '../journey/journey_controller.dart';
 import '../journey/journey_node.dart';
+import '../producer/business_input.dart';
+import 'tongtai_context_provider.dart';
 
 /// The real, persistent Business Journey source (WTM-124) — Drift over the local
 /// business's goals. **User Data First**: a new user starts with no goals; the
@@ -86,6 +88,10 @@ final journeyMetricsProvider = FutureProvider<Map<String, double>>((ref) async {
   final customers = await ref.watch(customerRepositoryProvider).loadAll();
   final products = await ref.watch(productRepositoryProvider).loadAll();
   final finance = await ref.watch(financeRepositoryProvider).loadAll();
+  // WTM-235: nguồn đầu vào đã đủ thông tin — suy qua `BusinessInputSummary`,
+  // chủ sở hữu của phép tính đó, chứ không đếm lại ở đây.
+  final inputs = await ref.watch(businessInputRepositoryProvider).loadAll();
+  final inputSummary = BusinessInputSummary.from(inputs);
   return journeyMetrics(
     productCount: products.length,
     customerCount: customers.length,
@@ -94,5 +100,6 @@ final journeyMetricsProvider = FutureProvider<Map<String, double>>((ref) async {
       orders: orders,
       customersCount: customers.length,
     ).revenue,
+    countedInputs: inputSummary.total - inputSummary.unknownCount,
   );
 });

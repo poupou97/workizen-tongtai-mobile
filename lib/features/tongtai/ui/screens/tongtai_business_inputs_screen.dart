@@ -12,6 +12,10 @@ import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_business_input_form_screen.dart';
+import '../../journey/journey_metric.dart';
+import '../../journey/journey_node.dart';
+import '../../providers/tongtai_journey_provider.dart';
+import 'tongtai_journey_screen.dart';
 
 /// Danh sách **nguồn đầu vào** của doanh nghiệp (WTM-234 / ADR-TON-023).
 ///
@@ -46,7 +50,7 @@ class TongtaiBusinessInputsScreen extends ConsumerStatefulWidget {
 
 class _TongtaiBusinessInputsScreenState
     extends ConsumerState<TongtaiBusinessInputsScreen> {
-  late final ScreenDataController<List<BusinessInput>> _data;
+  late final ScreenDataController<_InputsData> _data;
 
   BusinessInputRepository get _repository =>
       widget.repository ?? ref.read(businessInputRepositoryProvider);
@@ -54,11 +58,36 @@ class _TongtaiBusinessInputsScreenState
   @override
   void initState() {
     super.initState();
-    _data = ScreenDataController<List<BusinessInput>>(
-      () => _repository.loadAll(),
+    _data = ScreenDataController<_InputsData>(
+      _read,
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'inputs',
     )..load();
+  }
+
+  /// Nguồn đầu vào **và** bước hành trình đang chờ về chúng, đọc cùng một lần.
+  ///
+  /// Bước hành trình đọc từ Journey — Single Source of Truth (WTM-223) — chứ
+  /// không phải một trạng thái thứ hai màn này tự giữ.
+  Future<_InputsData> _read() async {
+    final inputs = await _repository.loadAll();
+    return (inputs: inputs, step: await _pendingJourneyStep());
+  }
+
+  /// Bước hành trình còn dang dở nói về chi phí đầu vào, nếu có (WTM-235).
+  Future<JourneyNode?> _pendingJourneyStep() async {
+    // Đọc thẳng provider, KHÔNG rẽ nhánh "chế độ test". Một nhánh như vậy làm
+    // test chạy đường khác đường của người dùng — đúng lỗi WTM-190, nơi test
+    // tự dựng một bundle nhỏ hơn bundle thật rồi xanh suốt trong khi bản trên
+    // máy thiếu hai dataset. Test muốn kịch bản nào thì override provider.
+    final journey = await ref.read(activeJourneyProvider.future);
+    if (journey == null) return null;
+    for (final node in journey.nodes) {
+      if (node.state == JourneyNodeState.done) continue;
+      final destination = journeyNodeDestination(node);
+      if (destination == JourneyDestination.inputs) return node;
+    }
+    return null;
   }
 
   @override
@@ -133,7 +162,7 @@ class _TongtaiBusinessInputsScreenState
       ),
       body: ListenableBuilder(
         listenable: _data,
-        builder: (context, _) => TongtaiScreenData<List<BusinessInput>>(
+        builder: (context, _) => TongtaiScreenData<_InputsData>(
           prefix: 'inputs',
           state: _data.state,
           onRetry: _data.retry,
@@ -143,13 +172,21 @@ class _TongtaiBusinessInputsScreenState
     );
   }
 
-  Widget _body(BuildContext context, List<BusinessInput> inputs) {
+  Widget _body(BuildContext context, _InputsData data) {
     final l10n = context.l10n;
+    final inputs = data.inputs;
     final summary = BusinessInputSummary.from(inputs);
     return ListView(
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
       children: [
         _CommitmentCard(summary: summary),
+        // Nhịp 5 của Business Loop: khai xong một nguồn thì người bán phải
+        // biết việc tiếp theo — và biết NGAY TẠI CHỖ họ vừa làm việc, không
+        // phải đi tìm. Đọc từ Journey (SSoT), thường trực, không Snackbar.
+        if (data.step case final step?) ...[
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          _JourneyStepCard(step: step),
+        ],
         const SizedBox(height: TongtaiDesignTokens.spacing4),
         if (inputs.isEmpty)
           Padding(
@@ -175,6 +212,71 @@ class _TongtaiBusinessInputsScreenState
         // Chỗ cho FAB, để mục cuối không nằm dưới nút.
         const SizedBox(height: 88),
       ],
+    );
+  }
+}
+
+/// Những gì màn này cần trong một lần đọc: các nguồn, và bước hành trình đang
+/// chờ về chúng.
+typedef _InputsData = ({List<BusinessInput> inputs, JourneyNode? step});
+
+/// Bước hành trình về chi phí đầu vào, đọc từ Journey (WTM-235).
+///
+/// Thường trực, không phải Snackbar: *"Không dùng Snackbar như điểm kết thúc
+/// của Business Flow"* (Founder 2026-08-02). Và chỉ **mời**, không tự chuyển
+/// màn — người bán giữ quyền quyết định.
+class _JourneyStepCard extends StatelessWidget {
+  const _JourneyStepCard({required this.step});
+
+  final JourneyNode step;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      key: const Key('inputs-journey-step'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      decoration: BoxDecoration(
+        color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
+        border: Border.all(
+          color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.inputsJourneyStepTitle,
+            style: TongtaiDesignTokens.captionStyle.copyWith(
+              color: TongtaiDesignTokens.producerGreenText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing1),
+          Text(
+            step.title,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          OutlinedButton.icon(
+            key: const Key('inputs-open-journey'),
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(builder: (_) => const TongtaiJourneyScreen()),
+            ),
+            icon: const Icon(Icons.route_outlined),
+            label: Text(l10n.oppOpenJourney),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
