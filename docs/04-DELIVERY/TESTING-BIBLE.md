@@ -542,6 +542,37 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-31 · Thêm một trường vào model mới xong **nửa dưới** — đường GHI vẫn viết bằng mô hình cũ
+
+- **Root cause:** thêm một khái niệm mới (`ProductKind`, `paymentStatus`,
+  `quantity` nullable) thường được đo bằng *"miền đã hiểu chưa"*: enum có, luật
+  dẫn xuất có, màn đọc đúng, test xanh. Nhưng khái niệm chỉ **thật sự tồn tại**
+  khi đường **ghi** cũng mang nó — form, codec, `withId`, mọi chỗ dựng lại một
+  bản ghi. Nơi đó thường có sẵn một giá trị mặc định (`?? 0`, tham số bỏ trống)
+  đủ hợp lý để không ai nhìn lại, và nó **dựng lại nguyên vẹn lời nói dối** vừa
+  gỡ.
+- **Regression:** WTM-233 — WTM-227 nới `quantity` thành nullable và dạy cả
+  Inventory/Rule Engine im lặng với hàng không tồn kho, nhưng
+  `ProductFormData.toProduct()` không truyền `kind` và vẫn ép
+  `_tryParseInt(...) ?? 0`. Chỉ cần **mở một sản phẩm số ra sửa tên rồi lưu**
+  là nó thành hàng vật lý còn 0 cái ⇒ "Hết hàng" ⇒ Rule Engine sinh **cơ hội
+  nhập hàng cho một phần mềm** — đúng cảnh ADR-TON-023 sinh ra để xoá. Cùng lần
+  đó: `Product.withId` (móc gieo dữ liệu mẫu) quên `kind`, và
+  `int?.toString()` in bốn chữ `null` vào ô nhập lẫn lịch sử sửa đổi vĩnh viễn.
+  Họ hàng: WTM-211 (`paymentStatus` ship không kèm codec ⇒ restore XOÁ công
+  nợ), WTM-230 (suýt lặp với `BusinessInput`).
+- **Test pattern:** với **mỗi** trường mới, một test đi **trọn vòng ghi**:
+  `fromProduct → copyWith(đổi một thứ khác) → applyEdit` rồi khẳng định trường
+  mới **không đổi**. Đây là bài kiểm mà mọi test "miền hiểu đúng" đều bỏ sót,
+  vì chúng dựng object bằng constructor chứ không đi qua form. Kèm một test
+  cho mỗi **đường sao chép** (`withId`, codec `.ttbk`, CSV).
+- **Prevention:** thêm trường ⇒ liệt kê **mọi** hàm dựng lại một bản ghi
+  (`grep` tên class + `(`), không chỉ chỗ đọc. Trường nullable mới ⇒ soát luôn
+  `.toString()` trên nó: `null` in ra là chữ, và chữ đó đi thẳng vào ô nhập
+  của người bán và vào lịch sử không xoá được.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:

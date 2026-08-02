@@ -8,6 +8,9 @@ enum ProductField {
   sku,
   category,
   description,
+
+  /// Loại sản phẩm (ADR-TON-023) — vật lý · số · dịch vụ.
+  kind,
   unitPrice,
 
   /// Optional (WTM-204) — empty means `costPrice = null`, never 0.
@@ -32,6 +35,7 @@ enum ProductField {
     ProductField.sku => 'SKU',
     ProductField.category => 'Category',
     ProductField.description => 'Description',
+    ProductField.kind => 'Product type',
     ProductField.unitPrice => 'Unit price',
     ProductField.costPrice => 'Cost price',
     ProductField.quantity => 'Quantity',
@@ -44,6 +48,7 @@ enum ProductField {
     ProductField.sku => 'SKU',
     ProductField.category => 'Danh mục',
     ProductField.description => 'Mô tả',
+    ProductField.kind => 'Loại sản phẩm',
     ProductField.unitPrice => 'Đơn giá',
     ProductField.costPrice => 'Giá vốn',
     ProductField.quantity => 'Số lượng',

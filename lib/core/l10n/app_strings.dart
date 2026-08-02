@@ -438,6 +438,17 @@ abstract class AppStrings {
   /// Nhãn chi phí cho sản phẩm KHÔNG phải hàng vật lý (WTM-231).
   String get productVariableCostLabel;
 
+  /// Ô chọn loại sản phẩm trên form (WTM-233 / ADR-TON-023).
+  String get productKindLabel;
+
+  /// Nhãn của một mã [ProductKind]. Mã lạ đọc ra "Hàng hoá" vì mọi dòng có
+  /// trước ADR-TON-023 đều thật sự là hàng vật lý.
+  String productKindName(String code);
+
+  /// Câu nói vì sao ô tồn kho biến mất — không có nó thì việc mất ô trông
+  /// giống một lỗi hiển thị.
+  String get productKindNoStockNote;
+
   String get stockSeeOpportunity;
   String get customerSeeOpportunity;
 
@@ -1490,6 +1501,17 @@ class AppStringsVi extends AppStrings {
   String get subtitleReports => 'Báo cáo & phân tích kinh doanh';
   @override
   String get productVariableCostLabel => 'Chi phí mỗi lượt bán';
+  @override
+  String get productKindLabel => 'Loại sản phẩm';
+  @override
+  String productKindName(String code) => switch (code) {
+    'digital' => 'Sản phẩm số',
+    'service' => 'Dịch vụ',
+    'physical' => 'Hàng hoá',
+    _ => 'Hàng hoá',
+  };
+  @override
+  String get productKindNoStockNote => 'Loại này không có tồn kho để đếm.';
   @override
   String get stockSeeOpportunity => 'Xem cơ hội nhập hàng';
   @override
@@ -2939,6 +2961,17 @@ class AppStringsEn extends AppStrings {
   String get subtitleReports => 'Business reports and analytics';
   @override
   String get productVariableCostLabel => 'Cost per sale';
+  @override
+  String get productKindLabel => 'Product type';
+  @override
+  String productKindName(String code) => switch (code) {
+    'digital' => 'Digital product',
+    'service' => 'Service',
+    'physical' => 'Goods',
+    _ => 'Goods',
+  };
+  @override
+  String get productKindNoStockNote => 'This type has no stock to count.';
   @override
   String get stockSeeOpportunity => 'See the restock opportunity';
   @override
