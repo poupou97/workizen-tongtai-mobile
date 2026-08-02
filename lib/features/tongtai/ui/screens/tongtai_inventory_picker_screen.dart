@@ -107,10 +107,15 @@ class _TongtaiInventoryPickerScreenState
                               color: TongtaiDesignTokens.lightTextSecondary,
                             ),
                           ),
-                          trailing: Text(
-                            p.stockStatus.label(context.l10n.languageCode),
-                            style: TongtaiDesignTokens.captionStyle,
-                          ),
+                          // Không có tồn kho ⇒ không có nhãn trạng thái kho.
+                          trailing: p.stockStatus == null
+                              ? null
+                              : Text(
+                                  p.stockStatus!.label(
+                                    context.l10n.languageCode,
+                                  ),
+                                  style: TongtaiDesignTokens.captionStyle,
+                                ),
                           onTap: () => Navigator.of(context).pop(p),
                         );
                       },

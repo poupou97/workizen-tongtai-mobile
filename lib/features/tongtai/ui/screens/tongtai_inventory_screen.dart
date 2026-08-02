@@ -975,15 +975,22 @@ class _ProductRow extends StatelessWidget {
                         color: TongtaiDesignTokens.lightTextPrimary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
-                    Text(
-                      context.l10n.invQuantity(product.quantity),
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                    // ADR-TON-023: sản phẩm số không có tồn kho — không dòng
+                    // số lượng, không chip trạng thái. Hiện "SL 0 · Hết hàng"
+                    // cho một phần mềm là app nói một điều không có thật.
+                    if (product.quantity case final q?) ...[
+                      const SizedBox(height: TongtaiDesignTokens.spacing1),
+                      Text(
+                        context.l10n.invQuantity(q),
+                        style: TongtaiDesignTokens.captionStyle.copyWith(
+                          color: TongtaiDesignTokens.lightTextSecondary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing2),
-                    _StatusChip(status: product.stockStatus),
+                    ],
+                    if (product.stockStatus case final status?) ...[
+                      const SizedBox(height: TongtaiDesignTokens.spacing2),
+                      _StatusChip(status: status),
+                    ],
                   ],
                 ),
               ),

@@ -205,7 +205,14 @@ class ProductInventoryService {
           b.name.toLowerCase(),
         ),
         ProductSort.price => a.pricePerUnit.compareTo(b.pricePerUnit),
-        ProductSort.quantity => a.quantity.compareTo(b.quantity),
+        // ADR-TON-023: hàng không có tồn kho xuống cuối thay vì giả vờ bằng
+        // 0 — xếp nó lẫn với hàng ĐANG hết là trộn hai sự thật khác nhau.
+        ProductSort.quantity => switch ((a.quantity, b.quantity)) {
+          (null, null) => 0,
+          (null, _) => 1,
+          (_, null) => -1,
+          (final x?, final y?) => x.compareTo(y),
+        },
         ProductSort.lastUpdated => a.updatedAt.compareTo(b.updatedAt),
       };
       if (c != 0) return ascending ? c : -c;

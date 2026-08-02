@@ -2285,10 +2285,18 @@ class $ProductsTableTable extends ProductsTable
   late final GeneratedColumn<double> totalStock = GeneratedColumn<double>(
     'total_stock',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _stockAlertLevelMeta = const VerificationMeta(
     'stockAlertLevel',
@@ -2387,6 +2395,7 @@ class $ProductsTableTable extends ProductsTable
     costPerUnit,
     listPrice,
     totalStock,
+    kind,
     stockAlertLevel,
     supplierId,
     salesChannels,
@@ -2472,6 +2481,12 @@ class $ProductsTableTable extends ProductsTable
       context.handle(
         _totalStockMeta,
         totalStock.isAcceptableOrUnknown(data['total_stock']!, _totalStockMeta),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
       );
     }
     if (data.containsKey('stock_alert_level')) {
@@ -2569,7 +2584,11 @@ class $ProductsTableTable extends ProductsTable
       totalStock: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}total_stock'],
-      )!,
+      ),
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      ),
       stockAlertLevel: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}stock_alert_level'],
@@ -2617,7 +2636,16 @@ class ProductsTableData extends DataClass
   final String? category;
   final double? costPerUnit;
   final double listPrice;
-  final double totalStock;
+
+  /// Số lượng tồn — **nullable từ v14** (ADR-TON-023): `NULL` nghĩa là loại
+  /// sản phẩm này không có tồn kho, KHÔNG phải "hết hàng". Trước v14 cột này
+  /// mặc định 0, và chính con số 0 đó là thứ làm Inventory kêu "Hết hàng" cho
+  /// một phần mềm.
+  final double? totalStock;
+
+  /// Loại sản phẩm bằng **mã canonical** `ProductKind` (v14). Dòng cũ đọc ra
+  /// `physical` — đó là sự thật về chúng, không phải phỏng đoán.
+  final String? kind;
   final double? stockAlertLevel;
   final String? supplierId;
   final String? salesChannels;
@@ -2639,7 +2667,8 @@ class ProductsTableData extends DataClass
     this.category,
     this.costPerUnit,
     required this.listPrice,
-    required this.totalStock,
+    this.totalStock,
+    this.kind,
     this.stockAlertLevel,
     this.supplierId,
     this.salesChannels,
@@ -2665,7 +2694,12 @@ class ProductsTableData extends DataClass
       map['cost_per_unit'] = Variable<double>(costPerUnit);
     }
     map['list_price'] = Variable<double>(listPrice);
-    map['total_stock'] = Variable<double>(totalStock);
+    if (!nullToAbsent || totalStock != null) {
+      map['total_stock'] = Variable<double>(totalStock);
+    }
+    if (!nullToAbsent || kind != null) {
+      map['kind'] = Variable<String>(kind);
+    }
     if (!nullToAbsent || stockAlertLevel != null) {
       map['stock_alert_level'] = Variable<double>(stockAlertLevel);
     }
@@ -2700,7 +2734,10 @@ class ProductsTableData extends DataClass
           ? const Value.absent()
           : Value(costPerUnit),
       listPrice: Value(listPrice),
-      totalStock: Value(totalStock),
+      totalStock: totalStock == null && nullToAbsent
+          ? const Value.absent()
+          : Value(totalStock),
+      kind: kind == null && nullToAbsent ? const Value.absent() : Value(kind),
       stockAlertLevel: stockAlertLevel == null && nullToAbsent
           ? const Value.absent()
           : Value(stockAlertLevel),
@@ -2733,7 +2770,8 @@ class ProductsTableData extends DataClass
       category: serializer.fromJson<String?>(json['category']),
       costPerUnit: serializer.fromJson<double?>(json['costPerUnit']),
       listPrice: serializer.fromJson<double>(json['listPrice']),
-      totalStock: serializer.fromJson<double>(json['totalStock']),
+      totalStock: serializer.fromJson<double?>(json['totalStock']),
+      kind: serializer.fromJson<String?>(json['kind']),
       stockAlertLevel: serializer.fromJson<double?>(json['stockAlertLevel']),
       supplierId: serializer.fromJson<String?>(json['supplierId']),
       salesChannels: serializer.fromJson<String?>(json['salesChannels']),
@@ -2755,7 +2793,8 @@ class ProductsTableData extends DataClass
       'category': serializer.toJson<String?>(category),
       'costPerUnit': serializer.toJson<double?>(costPerUnit),
       'listPrice': serializer.toJson<double>(listPrice),
-      'totalStock': serializer.toJson<double>(totalStock),
+      'totalStock': serializer.toJson<double?>(totalStock),
+      'kind': serializer.toJson<String?>(kind),
       'stockAlertLevel': serializer.toJson<double?>(stockAlertLevel),
       'supplierId': serializer.toJson<String?>(supplierId),
       'salesChannels': serializer.toJson<String?>(salesChannels),
@@ -2775,7 +2814,8 @@ class ProductsTableData extends DataClass
     Value<String?> category = const Value.absent(),
     Value<double?> costPerUnit = const Value.absent(),
     double? listPrice,
-    double? totalStock,
+    Value<double?> totalStock = const Value.absent(),
+    Value<String?> kind = const Value.absent(),
     Value<double?> stockAlertLevel = const Value.absent(),
     Value<String?> supplierId = const Value.absent(),
     Value<String?> salesChannels = const Value.absent(),
@@ -2792,7 +2832,8 @@ class ProductsTableData extends DataClass
     category: category.present ? category.value : this.category,
     costPerUnit: costPerUnit.present ? costPerUnit.value : this.costPerUnit,
     listPrice: listPrice ?? this.listPrice,
-    totalStock: totalStock ?? this.totalStock,
+    totalStock: totalStock.present ? totalStock.value : this.totalStock,
+    kind: kind.present ? kind.value : this.kind,
     stockAlertLevel: stockAlertLevel.present
         ? stockAlertLevel.value
         : this.stockAlertLevel,
@@ -2826,6 +2867,7 @@ class ProductsTableData extends DataClass
       totalStock: data.totalStock.present
           ? data.totalStock.value
           : this.totalStock,
+      kind: data.kind.present ? data.kind.value : this.kind,
       stockAlertLevel: data.stockAlertLevel.present
           ? data.stockAlertLevel.value
           : this.stockAlertLevel,
@@ -2856,6 +2898,7 @@ class ProductsTableData extends DataClass
           ..write('costPerUnit: $costPerUnit, ')
           ..write('listPrice: $listPrice, ')
           ..write('totalStock: $totalStock, ')
+          ..write('kind: $kind, ')
           ..write('stockAlertLevel: $stockAlertLevel, ')
           ..write('supplierId: $supplierId, ')
           ..write('salesChannels: $salesChannels, ')
@@ -2878,6 +2921,7 @@ class ProductsTableData extends DataClass
     costPerUnit,
     listPrice,
     totalStock,
+    kind,
     stockAlertLevel,
     supplierId,
     salesChannels,
@@ -2899,6 +2943,7 @@ class ProductsTableData extends DataClass
           other.costPerUnit == this.costPerUnit &&
           other.listPrice == this.listPrice &&
           other.totalStock == this.totalStock &&
+          other.kind == this.kind &&
           other.stockAlertLevel == this.stockAlertLevel &&
           other.supplierId == this.supplierId &&
           other.salesChannels == this.salesChannels &&
@@ -2917,7 +2962,8 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
   final Value<String?> category;
   final Value<double?> costPerUnit;
   final Value<double> listPrice;
-  final Value<double> totalStock;
+  final Value<double?> totalStock;
+  final Value<String?> kind;
   final Value<double?> stockAlertLevel;
   final Value<String?> supplierId;
   final Value<String?> salesChannels;
@@ -2936,6 +2982,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     this.costPerUnit = const Value.absent(),
     this.listPrice = const Value.absent(),
     this.totalStock = const Value.absent(),
+    this.kind = const Value.absent(),
     this.stockAlertLevel = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.salesChannels = const Value.absent(),
@@ -2955,6 +3002,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     this.costPerUnit = const Value.absent(),
     required double listPrice,
     this.totalStock = const Value.absent(),
+    this.kind = const Value.absent(),
     this.stockAlertLevel = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.salesChannels = const Value.absent(),
@@ -2978,6 +3026,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     Expression<double>? costPerUnit,
     Expression<double>? listPrice,
     Expression<double>? totalStock,
+    Expression<String>? kind,
     Expression<double>? stockAlertLevel,
     Expression<String>? supplierId,
     Expression<String>? salesChannels,
@@ -2997,6 +3046,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
       if (costPerUnit != null) 'cost_per_unit': costPerUnit,
       if (listPrice != null) 'list_price': listPrice,
       if (totalStock != null) 'total_stock': totalStock,
+      if (kind != null) 'kind': kind,
       if (stockAlertLevel != null) 'stock_alert_level': stockAlertLevel,
       if (supplierId != null) 'supplier_id': supplierId,
       if (salesChannels != null) 'sales_channels': salesChannels,
@@ -3017,7 +3067,8 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     Value<String?>? category,
     Value<double?>? costPerUnit,
     Value<double>? listPrice,
-    Value<double>? totalStock,
+    Value<double?>? totalStock,
+    Value<String?>? kind,
     Value<double?>? stockAlertLevel,
     Value<String?>? supplierId,
     Value<String?>? salesChannels,
@@ -3037,6 +3088,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
       costPerUnit: costPerUnit ?? this.costPerUnit,
       listPrice: listPrice ?? this.listPrice,
       totalStock: totalStock ?? this.totalStock,
+      kind: kind ?? this.kind,
       stockAlertLevel: stockAlertLevel ?? this.stockAlertLevel,
       supplierId: supplierId ?? this.supplierId,
       salesChannels: salesChannels ?? this.salesChannels,
@@ -3078,6 +3130,9 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     if (totalStock.present) {
       map['total_stock'] = Variable<double>(totalStock.value);
     }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
     if (stockAlertLevel.present) {
       map['stock_alert_level'] = Variable<double>(stockAlertLevel.value);
     }
@@ -3117,6 +3172,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
           ..write('costPerUnit: $costPerUnit, ')
           ..write('listPrice: $listPrice, ')
           ..write('totalStock: $totalStock, ')
+          ..write('kind: $kind, ')
           ..write('stockAlertLevel: $stockAlertLevel, ')
           ..write('supplierId: $supplierId, ')
           ..write('salesChannels: $salesChannels, ')
@@ -16854,7 +16910,8 @@ typedef $$ProductsTableTableCreateCompanionBuilder =
       Value<String?> category,
       Value<double?> costPerUnit,
       required double listPrice,
-      Value<double> totalStock,
+      Value<double?> totalStock,
+      Value<String?> kind,
       Value<double?> stockAlertLevel,
       Value<String?> supplierId,
       Value<String?> salesChannels,
@@ -16874,7 +16931,8 @@ typedef $$ProductsTableTableUpdateCompanionBuilder =
       Value<String?> category,
       Value<double?> costPerUnit,
       Value<double> listPrice,
-      Value<double> totalStock,
+      Value<double?> totalStock,
+      Value<String?> kind,
       Value<double?> stockAlertLevel,
       Value<String?> supplierId,
       Value<String?> salesChannels,
@@ -16977,6 +17035,11 @@ class $$ProductsTableTableFilterComposer
 
   ColumnFilters<double> get totalStock => $composableBuilder(
     column: $table.totalStock,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -17106,6 +17169,11 @@ class $$ProductsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get stockAlertLevel => $composableBuilder(
     column: $table.stockAlertLevel,
     builder: (column) => ColumnOrderings(column),
@@ -17222,6 +17290,9 @@ class $$ProductsTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
   GeneratedColumn<double> get stockAlertLevel => $composableBuilder(
     column: $table.stockAlertLevel,
     builder: (column) => column,
@@ -17329,7 +17400,8 @@ class $$ProductsTableTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<double?> costPerUnit = const Value.absent(),
                 Value<double> listPrice = const Value.absent(),
-                Value<double> totalStock = const Value.absent(),
+                Value<double?> totalStock = const Value.absent(),
+                Value<String?> kind = const Value.absent(),
                 Value<double?> stockAlertLevel = const Value.absent(),
                 Value<String?> supplierId = const Value.absent(),
                 Value<String?> salesChannels = const Value.absent(),
@@ -17348,6 +17420,7 @@ class $$ProductsTableTableTableManager
                 costPerUnit: costPerUnit,
                 listPrice: listPrice,
                 totalStock: totalStock,
+                kind: kind,
                 stockAlertLevel: stockAlertLevel,
                 supplierId: supplierId,
                 salesChannels: salesChannels,
@@ -17367,7 +17440,8 @@ class $$ProductsTableTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<double?> costPerUnit = const Value.absent(),
                 required double listPrice,
-                Value<double> totalStock = const Value.absent(),
+                Value<double?> totalStock = const Value.absent(),
+                Value<String?> kind = const Value.absent(),
                 Value<double?> stockAlertLevel = const Value.absent(),
                 Value<String?> supplierId = const Value.absent(),
                 Value<String?> salesChannels = const Value.absent(),
@@ -17386,6 +17460,7 @@ class $$ProductsTableTableTableManager
                 costPerUnit: costPerUnit,
                 listPrice: listPrice,
                 totalStock: totalStock,
+                kind: kind,
                 stockAlertLevel: stockAlertLevel,
                 supplierId: supplierId,
                 salesChannels: salesChannels,

@@ -55,7 +55,32 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 13;
+const int kTongtaiSchemaVersion = 14;
+
+/// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
+///
+/// Vì sao cần: `onUpgrade` chạy cả chuỗi bước rồi mới ghi `user_version`. Một
+/// bước ở CUỐI chuỗi hỏng ⇒ version không tiến ⇒ lần mở sau chạy lại **từ
+/// đầu** và vấp vào chính những bước đã áp dụng: *"duplicate column name"*.
+/// Cơ sở dữ liệu người bán kẹt vĩnh viễn, và bản vá cho bước hỏng cũng không
+/// cứu được vì app chết trước khi tới đó.
+///
+/// Tìm thấy trên máy Founder (2026-08-02): v14 hỏng vì thiếu `kind`, lần mở
+/// kế tiếp chết ở `source_opportunity_id` — một bước đã chạy xong từ WTM-191.
+/// Sửa bước hỏng là chưa đủ; **chuỗi migration phải tha thứ được cho việc
+/// chạy lại**.
+Future<void> _addColumnIfMissing(
+  GeneratedDatabase db,
+  Migrator m,
+  TableInfo<Table, dynamic> table,
+  GeneratedColumn column,
+) async {
+  final info = await db
+      .customSelect("PRAGMA table_info('${table.actualTableName}')")
+      .get();
+  final exists = info.any((row) => row.read<String>('name') == column.name);
+  if (!exists) await m.addColumn(table, column);
+}
 
 /// Drift table name of the per-message chat table (WTM-81), added in schema
 /// v4. Same allTables-lookup convention as [kSupplierFavoritesTableName].
@@ -145,7 +170,12 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         final products = db.allTables.firstWhere(
           (t) => t.actualTableName == 'products_table',
         );
-        await m.addColumn(products, products.columnsByName['description']!);
+        await _addColumnIfMissing(
+          db,
+          m,
+          products,
+          products.columnsByName['description']!,
+        );
         // 2) Create the FTS virtual tables + sync triggers, then 3) backfill the
         //    index from rows that predate the triggers and 4) optimize it. On an
         //    upgrade the base tables already hold data, so the backfill is what
@@ -171,7 +201,12 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         final products = db.allTables.firstWhere(
           (t) => t.actualTableName == 'products_table',
         );
-        await m.addColumn(products, products.columnsByName['domain_snapshot']!);
+        await _addColumnIfMissing(
+          db,
+          m,
+          products,
+          products.columnsByName['domain_snapshot']!,
+        );
       }
       if (from < 6) {
         // v6 (WTM-123 — Consumer persistence snapshot, ADR-TON-009). Add the
@@ -180,7 +215,9 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         final customers = db.allTables.firstWhere(
           (t) => t.actualTableName == 'customers_table',
         );
-        await m.addColumn(
+        await _addColumnIfMissing(
+          db,
+          m,
           customers,
           customers.columnsByName['domain_snapshot']!,
         );
@@ -192,7 +229,12 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         final journeys = db.allTables.firstWhere(
           (t) => t.actualTableName == 'journeys_table',
         );
-        await m.addColumn(journeys, journeys.columnsByName['domain_snapshot']!);
+        await _addColumnIfMissing(
+          db,
+          m,
+          journeys,
+          journeys.columnsByName['domain_snapshot']!,
+        );
       }
       if (from < 8) {
         // v8 (WTM-177 — AI Business Profile). Additive: a new table only, no
@@ -233,6 +275,38 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 14) {
+        // v14 (WTM-227 / ADR-TON-023 — Product Type). Two changes to
+        // `products_table`, both about the app being able to say "this does
+        // not apply" instead of a number that means something else:
+        //   * `kind` — canonical ProductKind code; NULL reads back as
+        //     `physical`, which is the TRUTH about every pre-v14 row: they
+        //     were entered under a physical-only model.
+        //   * `total_stock` becomes nullable. It used to default to 0, and
+        //     that 0 is exactly what made Inventory shout "Hết hàng" and the
+        //     Rule Engine generate a restock opportunity — for a piece of
+        //     software.
+        // ORDER MATTERS, and getting it wrong shipped a broken upgrade:
+        // `TableMigration` copies every column of the NEW schema out of the
+        // OLD table, so it must not run while a new column is still missing —
+        // the first device install failed with `no such column: "kind"` and
+        // every screen showed "Could not read your data". v13 got away with a
+        // bare rebuild because it only DROPPED columns; adding one is what
+        // breaks. So: add the column first, then rebuild for the nullability
+        // change.
+        // Cột lấy qua `allTables` như các bước khác trong file này — module
+        // migration cố ý KHÔNG import AppDatabase (sẽ tạo vòng import).
+        final products = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'products_table',
+        );
+        await _addColumnIfMissing(
+          db,
+          m,
+          products,
+          products.$columns.firstWhere((c) => c.name == 'kind'),
+        );
+        await m.alterTable(TableMigration(products));
       }
       if (from < 13) {
         // v13 (WTM-212 — Derived Truth Violation ELIMINATED, not contained).
@@ -275,7 +349,12 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         final nodes = db.allTables.firstWhere(
           (t) => t.actualTableName == kBusinessJourneyNodesTableName,
         );
-        await m.addColumn(nodes, nodes.columnsByName['source_opportunity_id']!);
+        await _addColumnIfMissing(
+          db,
+          m,
+          nodes,
+          nodes.columnsByName['source_opportunity_id']!,
+        );
       }
     },
     beforeOpen: (OpeningDetails details) async {

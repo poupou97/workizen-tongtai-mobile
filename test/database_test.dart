@@ -55,7 +55,9 @@ void main() {
     // v13 (WTM-212): DTV eliminated — mọi cột dẫn xuất chết bị xoá trong một
     //                lần quét; an toàn cho mọi .ttbk vì codec mã hoá domain
     //                object, không mã hoá cột thô.
-    expect(db.schemaVersion, 13);
+    // v14 (WTM-227 / ADR-TON-023): Product Type — `kind` + `total_stock`
+    // nullable, để "không có tồn kho" khác hẳn "hết hàng".
+    expect(db.schemaVersion, 14);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

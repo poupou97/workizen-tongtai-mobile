@@ -28,6 +28,43 @@ enum StockStatus {
   String label(String languageCode) => languageCode == 'vi' ? labelVi : labelEn;
 }
 
+/// What kind of thing the seller sells (ADR-TON-023).
+///
+/// Tổng Tài is an AI Business OS for SMEs of every shape — physical, digital,
+/// service and hybrid — so the model must be able to say *"this has no stock"*
+/// instead of making a software product carry a quantity it does not have.
+/// Dogfood found the cost of not having this: a digital product entered with
+/// `quantity: 0` made Inventory shout "Hết hàng" and the Rule Engine generate
+/// a **restock opportunity for a piece of software**.
+enum ProductKind {
+  /// Có tồn kho thật: nhập, đếm, hết hàng được.
+  physical('physical'),
+
+  /// Bán bao nhiêu lần cũng được — phần mềm, khoá học, tệp tải về.
+  digital('digital'),
+
+  /// Bán thời gian hoặc năng lực, không phải một vật.
+  service('service');
+
+  const ProductKind(this.code);
+
+  /// Mã lưu xuống DB và `.ttbk`. **Không bao giờ là nhãn hiển thị.**
+  final String code;
+
+  /// Chỉ loại này mới có khái niệm tồn kho.
+  bool get tracksStock => this == ProductKind.physical;
+
+  /// `null`/mã lạ ⇒ `physical`: mọi dòng có trước ADR-TON-023 đều được nhập
+  /// dưới mô hình chỉ-có-hàng-vật-lý, nên đó là **sự thật về chúng**, không
+  /// phải một phỏng đoán.
+  static ProductKind fromCode(String? code) {
+    for (final k in ProductKind.values) {
+      if (k.code == code) return k;
+    }
+    return ProductKind.physical;
+  }
+}
+
 /// A product in the sourcing inventory (WTM-68).
 ///
 /// Pure, immutable domain model — no Flutter/UI or persistence concerns — so it
@@ -40,9 +77,10 @@ class Product {
     required this.sku,
     required this.name,
     required this.category,
-    required this.quantity,
     required this.pricePerUnit,
-    required this.reorderLevel,
+    this.kind = ProductKind.physical,
+    this.quantity,
+    this.reorderLevel,
     required this.updatedAt,
     this.costPrice,
     this.description = '',
@@ -63,14 +101,22 @@ class Product {
   final String category;
 
   /// On-hand quantity, in units.
-  final int quantity;
+  /// Loại sản phẩm (ADR-TON-023). Mặc định `physical` để mọi dòng cũ giữ đúng
+  /// ý nghĩa chúng vẫn có.
+  final ProductKind kind;
+
+  /// Số lượng đang có — **`null` nghĩa là "không áp dụng cho loại này"**, KHÔNG
+  /// phải "hết hàng". Cùng kỷ luật với `costPrice` (null ≠ 0, WTM-204) và
+  /// `paymentStatus` (null ≠ chưa trả, WTM-211).
+  final int? quantity;
 
   /// Price per unit, in Vietnamese đồng.
   final double pricePerUnit;
 
   /// Low-stock threshold, in units: at or below this (but above zero) the
   /// product is flagged [StockStatus.lowStock].
-  final int reorderLevel;
+  /// Ngưỡng đặt lại — `null` khi loại sản phẩm không có tồn kho.
+  final int? reorderLevel;
 
   /// When the product's stock/price was last updated.
   final DateTime updatedAt;
@@ -102,12 +148,14 @@ class Product {
     String? description,
     List<String>? imagePaths,
     List<ProductRevision>? history,
+    ProductKind? kind,
   }) {
     return Product(
       id: id ?? this.id,
       sku: sku ?? this.sku,
       name: name ?? this.name,
       category: category ?? this.category,
+      kind: kind ?? this.kind,
       quantity: quantity ?? this.quantity,
       pricePerUnit: pricePerUnit ?? this.pricePerUnit,
       reorderLevel: reorderLevel ?? this.reorderLevel,
@@ -119,11 +167,17 @@ class Product {
     );
   }
 
-  /// Stock health derived from [quantity] vs. [reorderLevel]: zero on hand is
-  /// out of stock; at or below the reorder level is low; otherwise in stock.
-  StockStatus get stockStatus {
-    if (quantity <= 0) return StockStatus.outOfStock;
-    if (quantity <= reorderLevel) return StockStatus.lowStock;
+  /// Stock health derived from [quantity] vs. [reorderLevel] — or **`null`
+  /// when the concept does not apply** (ADR-TON-023).
+  ///
+  /// A digital product is never "out of stock"; returning
+  /// [StockStatus.outOfStock] for one would be the app stating something
+  /// untrue about the seller's business, and the alert engine would act on it.
+  StockStatus? get stockStatus {
+    if (!kind.tracksStock) return null;
+    final onHand = quantity ?? 0;
+    if (onHand <= 0) return StockStatus.outOfStock;
+    if (onHand <= (reorderLevel ?? 0)) return StockStatus.lowStock;
     return StockStatus.inStock;
   }
 
@@ -152,7 +206,21 @@ class Product {
   }
 
   /// Total on-hand value = unit price × quantity (in đồng).
-  double get stockValue => pricePerUnit * quantity;
+  /// Hàng này cần nhập thêm hay không — **một chủ sở hữu** cho câu hỏi đó.
+  ///
+  /// WTM-213 chốt `stockStatus` là chủ của khái niệm "sắp hết hàng", nhưng ba
+  /// chỗ khác (prompt AI, CSV, Rule Engine) vẫn tự viết lại
+  /// `quantity <= reorderLevel` bằng số học. Chúng đọc đúng hôm nay và sẽ lệch
+  /// vào ngày luật đổi — đúng họ lỗi P-27. Sản phẩm không có tồn kho trả
+  /// `false` một cách tự nhiên: nó không bao giờ cần nhập thêm.
+  bool get needsRestock =>
+      stockStatus == StockStatus.lowStock ||
+      stockStatus == StockStatus.outOfStock;
+
+  /// Tiền đang nằm trong kho. Sản phẩm không có tồn kho đóng góp **0** — đây
+  /// là sự thật, không phải giá trị mặc định: một phần mềm không có đồng vốn
+  /// nào nằm trong kho.
+  double get stockValue => pricePerUnit * (quantity ?? 0);
 
   @override
   bool operator ==(Object other) =>

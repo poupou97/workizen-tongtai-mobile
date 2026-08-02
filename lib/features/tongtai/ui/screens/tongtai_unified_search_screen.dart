@@ -829,7 +829,9 @@ class _ProductResultCard extends StatelessWidget {
       subtitle: [
         if (product.category != null && product.category!.isNotEmpty)
           product.category!,
-        '${context.l10n.labelStock}: ${product.stock.toStringAsFixed(0)}',
+        // Không có tồn kho ⇒ bỏ hẳn dòng, không hiện "Tồn: 0" (ADR-TON-023).
+        if (product.stock case final stock?)
+          '${context.l10n.labelStock}: ${stock.toStringAsFixed(0)}',
       ].join(' • '),
       trailing: Text(
         TongtaiFormatters.vnd(product.price),
