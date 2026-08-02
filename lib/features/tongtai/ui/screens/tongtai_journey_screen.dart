@@ -12,6 +12,7 @@ import 'tongtai_inventory_screen.dart';
 import 'tongtai_finance_screen.dart';
 import 'tongtai_customer_list_screen.dart';
 import '../../journey/journey_metric.dart';
+import 'tongtai_goals_screen.dart';
 
 /// The journey, shown as the tiered plan the Concept describes (WTM-187).
 ///
@@ -62,6 +63,11 @@ class TongtaiJourneyScreen extends ConsumerWidget {
             return _JourneyPlan(
               journey: journey,
               onDo: (d) => _openDestination(context, ref, d),
+              // Invite, never auto-create: only the seller sets goals
+              // (WTM-191), so the app opens the place and stops there.
+              onSetNextGoal: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(builder: (_) => const TongtaiGoalsScreen()),
+              ),
             );
           },
         ),
@@ -109,10 +115,15 @@ class TongtaiJourneyScreen extends ConsumerWidget {
 }
 
 class _JourneyPlan extends StatelessWidget {
-  const _JourneyPlan({required this.journey, required this.onDo});
+  const _JourneyPlan({
+    required this.journey,
+    required this.onDo,
+    required this.onSetNextGoal,
+  });
 
   final Journey journey;
   final ValueChanged<JourneyDestination> onDo;
+  final VoidCallback onSetNextGoal;
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +145,20 @@ class _JourneyPlan extends StatelessWidget {
       key: const Key('journey-list'),
       padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
       children: [
+        // WTM-226 — the moment the seller finishes. `JourneyState.completed`
+        // existed from the start and nothing ever set it, so someone who did
+        // every step was left staring at a 100% bar that never became
+        // anything: the most important moment in the product, and the product
+        // said nothing.
+        //
+        // Deliberately says the PLAN is done, not that the goal was reached —
+        // a seller can finish every step the Rule Twin planned and still be
+        // short of their number. Saying the two are one thing would be the
+        // app's first lie to them.
+        if (journey.isPlanComplete) ...[
+          _PlanDone(onSetNextGoal: onSetNextGoal),
+          const SizedBox(height: TongtaiDesignTokens.spacing5),
+        ],
         if (completion != null)
           _ProgressHeader(label: l10n.journeyProgress, value: completion),
         const SizedBox(height: TongtaiDesignTokens.spacing5),
@@ -142,6 +167,60 @@ class _JourneyPlan extends StatelessWidget {
           const SizedBox(height: TongtaiDesignTokens.spacing5),
         ],
       ],
+    );
+  }
+}
+
+class _PlanDone extends StatelessWidget {
+  const _PlanDone({required this.onSetNextGoal});
+
+  final VoidCallback onSetNextGoal;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      key: const Key('journey-plan-done'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      decoration: BoxDecoration(
+        color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
+        border: Border.all(
+          color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.journeyPlanDoneTitle,
+            style: TongtaiDesignTokens.bodyStyle.copyWith(
+              fontWeight: FontWeight.w700,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          Text(
+            l10n.journeyPlanDoneBody,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          OutlinedButton.icon(
+            key: const Key('journey-set-next-goal'),
+            onPressed: onSetNextGoal,
+            icon: const Icon(Icons.flag_outlined),
+            label: Text(l10n.journeySetNextGoal),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
