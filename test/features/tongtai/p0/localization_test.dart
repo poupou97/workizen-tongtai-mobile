@@ -180,15 +180,15 @@ void main() {
         // - `Workizen AI` is the **brand** users interact with (ADR-TON-006);
         //   translating it would break the one name the product promises.
         const allowedPhrases = ['Workizen AI'];
-        // - the showcase is a developer screen, never shipped in a menu.
-        const allowedFiles = ['tongtai_component_showcase_screen.dart'];
+        // WTM-217 removed the last file-level exception (the unreachable
+        // component showcase). An allowlisted FILE is a hole in the net, and
+        // this net has been blind before (WTM-194) — keep it at zero.
 
         for (final f
             in uiDir
                 .listSync(recursive: true)
                 .whereType<File>()
                 .where((f) => f.path.endsWith('.dart'))) {
-          if (allowedFiles.any(f.path.endsWith)) continue;
           // Blank out `assert(...)` bodies first: an assertion message is
           // developer text that never reaches a seller, and it is written in
           // English on purpose.
@@ -264,16 +264,14 @@ void main() {
           r"content:\s*(?:const\s+)?Text\(\s*)'((?:[^'\\]|\\.)+)'",
         );
         final letters = RegExp('[A-Za-zÀ-ỹ]{2,}');
-        // Product names / brands render verbatim in every locale. The dev-only
-        // component showcase is unreachable from production navigation.
+        // Product names / brands render verbatim in every locale. No FILE is
+        // exempt any more (WTM-217).
         const allowValues = ['Workizen AI', 'Tổng Tài', 'SKU'];
-        const allowFiles = ['tongtai_component_showcase_screen.dart'];
         for (final f
             in uiDir
                 .listSync(recursive: true)
                 .whereType<File>()
                 .where((f) => f.path.endsWith('.dart'))) {
-          if (allowFiles.any((ok) => f.path.endsWith(ok))) continue;
           final src = f.readAsStringSync();
           for (final m in position.allMatches(src)) {
             final value = m.group(1)!;

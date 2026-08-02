@@ -87,9 +87,11 @@ bảo vệ). Chúng lên L3 khi/nếu tự chạm IO.
 
 ### L1 — Static UI
 
-| Màn | Tình trạng |
-|---|---|
-| `tongtai_component_showcase_screen` | **dev-only, KHÔNG reachable** từ navigation production (đã verify bằng grep). Ứng viên xoá — nếu giữ phải đánh dấu rõ là dev tool. |
+*Trống.* `tongtai_component_showcase_screen` — màn duy nhất từng ở mức này —
+**đã xoá ở WTM-217**: dev-only, không route nào tới được, và đang mua hai
+ngoại lệ file trong lưới l10n. Nguồn sự thật của design system là
+`tongtai_design_tokens.dart`; lịch sử git giữ lại màn catalogue nếu cần dựng
+lại. (Bước 4 Shift Priority: loại bỏ màn không nhất quán với Concept.)
 
 ### Không áp dụng (chrome/nav, không mang business data)
 
