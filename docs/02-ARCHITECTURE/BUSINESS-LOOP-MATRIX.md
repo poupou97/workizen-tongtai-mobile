@@ -49,9 +49,11 @@ trạng thái thường trực đọc từ Single Source of Truth · không tạ
 | **Inventory** | ✅ | ✅ | ✅ | ✅ WTM-224 | ✅ WTM-225 | ✅ |
 | **Consumer** | ✅ | ✅ | ✅ | ✅ WTM-224 | ✅ WTM-225 | ✅ |
 | **Reports** | ✅ | — | ✅ | — | ⚠️ | ⚠️ |
-| **Producer** | — | — | — | — | — | Future Capability |
+| **Producer** (Business Input) | ✅ WTM-234 | ✅ WTM-234 | ✅ WTM-234 | ❌ | ❌ | ⚠️ |
+| **Producer** (danh bạ NCC) | — | — | — | — | — | Future Capability |
 
-`—` = không áp dụng (Reports không phải nơi hành động; Producer chờ dữ liệu thật).
+`—` = không áp dụng (Reports không phải nơi hành động; danh bạ nhà cung cấp
+chờ dữ liệu thật).
 
 ---
 
@@ -119,9 +121,26 @@ Founder 2026-08-02: sau khi Business Loop Foundation đóng, Autonomous Loop
 chuyển sang **Producer** theo thứ tự Dogfood → Concept Alignment → Source Data
 còn thiếu → Business Loop của Producer.
 
-Producer hôm nay ghi `—` ở mọi nhịp vì danh bạ nhà cung cấp là
+Producer từng ghi `—` ở mọi nhịp vì danh bạ nhà cung cấp là
 `SupplierSearchService.sample()` — **dữ liệu bịa**. Khép vòng cho nó bằng dữ
 liệu giả là đúng thứ quyết định *Future Capability* bảo vệ, nên nhịp đầu tiên
 (*"người dùng phát hiện cơ hội ở đâu"*) chưa có câu trả lời trung thực nào.
-Dogfood là đường để tìm ra câu trả lời đó từ việc dùng thật, không phải từ
-backlog.
+
+**Dogfood tìm ra câu trả lời ở chỗ khác** (ADR-TON-023): Producer không phải
+danh bạ nhà cung cấp — nó quản lý **toàn bộ đầu vào**, và đầu vào thì **người
+bán tự khai**, nên nó không cần danh bạ bịa nào cả. WTM-234 mở được ba nhịp
+đầu bằng dữ liệu thật 100%: thấy *"tháng này tôi cam kết bao nhiêu"* · thêm/sửa
+nguồn · tổng đổi ngay.
+
+**Hai nhịp cuối vẫn ❌, và nói thẳng là ❌:**
+
+* **Journey đổi** — chưa node hay mục tiêu nào đọc `BusinessInput`. Ghi thêm
+  một khoản cam kết 500.000 đ/tháng **không** làm hành trình kinh doanh đổi một
+  chữ nào.
+* **Bước tiếp** — khai xong một nguồn, người bán không được nói gì về việc tiếp
+  theo. Câu hỏi bắt buộc của phương pháp audit (*"sau khi hoàn thành hành động
+  này, họ có biết việc tiếp theo để đạt mục tiêu kinh doanh là gì không?"*) ở
+  đây trả lời là **không**.
+
+Đó là vòng Producer kế tiếp — và nó là việc **nối** (chi phí đầu vào vào
+Finance và Journey), không phải việc thêm màn.

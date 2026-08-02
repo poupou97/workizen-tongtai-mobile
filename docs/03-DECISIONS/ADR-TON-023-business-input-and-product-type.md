@@ -68,13 +68,22 @@ mới:
   phải giá vốn nhập kho — đó là ADR/story riêng (Digital Cost Model, ưu tiên #4
   của Founder), **không** giải quyết ở đây.
 
-## Thứ tự triển khai (Founder)
+## Thứ tự triển khai (Founder) — trạng thái 2026-08-02
 
-1. **Product Type** ← ADR này + WTM-227
-2. Business Type
-3. Business Input
-4. Digital Cost Model
-5. Sales Channel
+| # | Việc | Story | Trạng thái |
+|---|---|---|---|
+| 1 | **Product Type** | WTM-227 (miền, schema v14) · WTM-233 (ô chọn trên form) | ✅ |
+| 2 | **Business Type** | WTM-228 (schema v15, `null` = *chưa hỏi*) | ✅ |
+| 3 | **Business Input** | WTM-229 (miền) · WTM-230 (`.ttbk`) · WTM-234 (màn + đường vào) | ✅ |
+| 4 | **Digital Cost Model** | WTM-231 — `costPrice` **không phải "giá nhập"** mà là *chi phí biến đổi mỗi đơn vị bán*; đổi nhãn theo loại, **không** thêm trường thứ hai | ✅ |
+| 5 | **Sales Channel** | WTM-232 (`website` · `app_store` · `direct`) | ✅ |
+
+Kiểm trên máy thật 2026-08-02 (chuỗi v13→v16, dữ liệu thật của Founder, crash
+buffer rỗng): [DOGFOOD-WORKIZEN-01 §Lần 2](../07-PRODUCT-RESET/DOGFOOD-WORKIZEN-01.md).
+
+**Việc còn hở, đã ghi rõ chứ không tính là xong:** chi phí đầu vào **chưa nối**
+vào Finance và Journey — thêm một khoản cam kết không làm hành trình kinh doanh
+đổi gì (xem [BUSINESS-LOOP-MATRIX](../02-ARCHITECTURE/BUSINESS-LOOP-MATRIX.md)).
 
 ## Điều ADR này KHÔNG quyết
 
