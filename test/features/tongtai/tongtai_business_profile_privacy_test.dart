@@ -196,8 +196,13 @@ void main() {
       // reviewable — this test is the review.
       expect(BusinessTrade.values.length, 7);
       expect(BusinessSize.values.length, 4);
-      expect(SalesChannel.values.length, 7);
+      // WTM-232: 7 → 10. Ba kênh số thêm vào CÓ CHỦ Ý (website · app_store ·
+      // direct) — vẫn là sự thật phân loại về doanh nghiệp, không phải dữ liệu
+      // cá nhân, nên vẫn được phép đi vào prompt.
+      expect(SalesChannel.values.length, 10);
       expect(BusinessSeasonality.values.length, 5);
+      // WTM-228: loại hình kinh doanh cũng nằm trong vựng từ rời máy.
+      expect(BusinessType.values.length, 4);
     });
   });
 }

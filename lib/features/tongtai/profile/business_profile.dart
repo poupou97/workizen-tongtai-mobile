@@ -67,6 +67,13 @@ enum BusinessSize {
 }
 
 /// Where the business sells. A seller usually picks several.
+///
+/// Dùng chung giữa [BusinessProfile.channels] và `CustomerOrder.channel`
+/// (WTM-209) — thêm một kênh ở đây là đủ cho cả hai, và đó chính là lý do nó
+/// phải là **một** enum chứ không phải hai.
+///
+/// **Mã cũ không bao giờ đổi** (ADR-TON-018): đổi một mã sẽ làm mọi đơn đã ghi
+/// mất kênh khi khôi phục.
 enum SalesChannel {
   shop('shop'),
   market('market'),
@@ -74,7 +81,20 @@ enum SalesChannel {
   tiktok('tiktok'),
   facebook('facebook'),
   zalo('zalo'),
-  wholesale('wholesale');
+  wholesale('wholesale'),
+
+  // ── Kênh cho doanh nghiệp số / dịch vụ (WTM-232, ADR-TON-023) ──────────
+  // Trước đây bảy kênh trên đều là bán lẻ vật lý, nên một doanh nghiệp số
+  // KHÔNG CÓ Ô NÀO ĐÚNG để chọn: mọi đơn thành "chưa ghi" và mục "Doanh thu
+  // theo kênh" trống vĩnh viễn — không phải vì người bán lười ghi.
+  /// Bán trên trang của chính mình.
+  website('website'),
+
+  /// Chợ ứng dụng (App Store, Google Play…).
+  appStore('app_store'),
+
+  /// Bán trực tiếp / theo hợp đồng — dịch vụ, B2B.
+  direct('direct');
 
   const SalesChannel(this.code);
 
