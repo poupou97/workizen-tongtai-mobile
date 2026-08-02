@@ -8,6 +8,11 @@ import '../../inventory/stock_alert_service.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import 'tongtai_product_form_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../opportunity/opportunity.dart';
+import '../../opportunity/opportunity_for.dart';
+import '../../providers/tongtai_context_provider.dart';
+import 'tongtai_opportunity_detail_screen.dart';
 
 /// Color for a [StockAlertLevel] badge (WTM-70): out of stock is the error red,
 /// low stock the warning amber. Pure function so the mapping is unit-testable
@@ -25,7 +30,7 @@ Color tongtaiStockAlertColor(StockAlertLevel level) => switch (level) {
 /// restocking. Tapping a row opens the Add/Edit form (WTM-69) where the reorder
 /// threshold and quantity can be adjusted; because the screen listens to the
 /// shared [ProductCatalogController], a restock makes the alert drop off live.
-class TongtaiStockAlertsScreen extends StatelessWidget {
+class TongtaiStockAlertsScreen extends ConsumerWidget {
   const TongtaiStockAlertsScreen({
     super.key,
     required this.catalog,
@@ -40,7 +45,13 @@ class TongtaiStockAlertsScreen extends StatelessWidget {
   final ProductImageSource? imageSource;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // WTM-225: the opportunities the Rule Engine already generated. Read, never
+    // recomputed here — Inventory does not get its own idea of what is worth
+    // restocking.
+    final generated =
+        ref.watch(generatedOpportunitiesProvider).value ??
+        const <Opportunity>[];
     return Scaffold(
       backgroundColor: TongtaiDesignTokens.lightBackground,
       appBar: AppBar(
@@ -77,6 +88,11 @@ class TongtaiStockAlertsScreen extends StatelessWidget {
                     itemBuilder: (context, index) => _AlertRow(
                       alert: alerts[index],
                       onTap: () => _openForm(context, alerts[index].product),
+                      // The fifth beat: the seller sees the problem here, and
+                      // the product has already worked out what to do about it.
+                      opportunity: generated.restockFor(
+                        alerts[index].product.id,
+                      ),
                     ),
                   ),
                 ),
@@ -199,10 +215,15 @@ class _SummaryStat extends StatelessWidget {
 }
 
 class _AlertRow extends StatelessWidget {
-  const _AlertRow({required this.alert, required this.onTap});
+  const _AlertRow({required this.alert, required this.onTap, this.opportunity});
 
   final StockAlert alert;
   final VoidCallback onTap;
+
+  /// The restock opportunity the engine generated for this product, if any.
+  /// `null` for a product that is low but never sells — there is no case to
+  /// make, and a button to a non-existent opportunity is the WTM-169 defect.
+  final Opportunity? opportunity;
 
   @override
   Widget build(BuildContext context) {
@@ -290,6 +311,24 @@ class _AlertRow extends StatelessWidget {
                       color: TongtaiDesignTokens.lightTextSecondary,
                     ),
                   ),
+                  if (opportunity case final o?) ...[
+                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    TextButton(
+                      key: Key('stock-opportunity-${alert.product.id}'),
+                      onPressed: () => Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              TongtaiOpportunityDetailScreen(opportunity: o),
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(context.l10n.stockSeeOpportunity),
+                    ),
+                  ],
                 ],
               ),
             ],

@@ -46,10 +46,15 @@ void main() {
     );
   }
 
-  Widget alertsHost(ProductCatalogController catalog) => MaterialApp(
-    home: TongtaiStockAlertsScreen(
-      catalog: catalog,
-      imageSource: _NoopImageSource(),
+  // WTM-225: the screen reads the generated opportunities so a low-stock row
+  // can lead on to the restock case the engine already made — so it is a
+  // Consumer now and needs a scope.
+  Widget alertsHost(ProductCatalogController catalog) => ProviderScope(
+    child: MaterialApp(
+      home: TongtaiStockAlertsScreen(
+        catalog: catalog,
+        imageSource: _NoopImageSource(),
+      ),
     ),
   );
 
