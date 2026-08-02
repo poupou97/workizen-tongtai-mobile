@@ -494,6 +494,30 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-29 · Governance đo **chất lượng** màn hình, không đo **tính tới-được**
+
+- **Root cause:** mọi suite governance đều nhận đầu vào là *danh sách file* rồi
+  kiểm chất lượng từng file — l10n, a11y, overflow, error seam, stable ID.
+  Không suite nào hỏi câu đứng trước tất cả: *"người bán có mở được màn này
+  không?"*. Một màn mồ côi vì thế **vượt qua mọi cổng** và còn được đánh bóng
+  liên tục.
+- **Regression:** WTM-218 — `TongtaiSupplierSearchScreen` (~600 dòng, L3) chưa
+  bao giờ có caller production kể từ commit bootstrap, trong khi **sáu** lượt
+  governance (WTM-146/147/148/168/171/194) đã sửa chính file đó. Cùng phiên,
+  WTM-217 tìm ra màn showcase tương tự — nó còn *mua hai ngoại lệ file* trong
+  lưới l10n để tồn tại. Hai màn, cùng một chỗ mù.
+- **Test pattern:** scan ở mức **file**, không phải class — hỏi *"có file nào
+  khác trong `lib/` import file màn này không?"* (`p0/nav_availability_test
+  .dart` → `intentionallyUnreached`). Hỏi ở mức class sẽ báo nhầm mẫu
+  *route/host wrapper nằm cùng file* (Unified Search). Danh sách ngoại lệ phải
+  **kèm lý do đọc được** và có test thứ hai bắt ngoại lệ đã hết hạn — một màn
+  được nối lại mà quên gỡ ngoại lệ là lời nói dối tiếp theo.
+- **Prevention:** thêm màn mới ⇒ câu hỏi đầu tiên là *đường vào từ đâu*, trước
+  cả l10n/a11y. Một màn không ai tới được thì mọi chỉ số chất lượng của nó đều
+  bằng 0 dù suite có xanh.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:

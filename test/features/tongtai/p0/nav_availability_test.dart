@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:tongtai/database/database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -261,5 +263,94 @@ void main() {
     ]) {
       expect(find.byKey(Key(key)), findsOneWidget, reason: 'quick action $key');
     }
+  });
+
+  group('no orphan screens (WTM-218)', () {
+    // Why this scan exists: `TongtaiSupplierSearchScreen` — ~600 lines, L3,
+    // with its own tests — has had NO production caller since the repo was
+    // bootstrapped, and SIX governance passes (WTM-146/147/148/168/171/194)
+    // edited that file without one of them asking whether a seller could open
+    // it. Every suite measured the QUALITY of a screen; none measured its
+    // REACHABILITY. Same family as WTM-217's showcase, and the same shape as
+    // the lesson learned four times over in WTM-190→194: governance catches
+    // only what it was written to look for.
+    //
+    // A screen may be intentionally unbuilt — but then it must say so here,
+    // with a reason, instead of hiding as an oversight.
+    const intentionallyUnreached = <String, String>{
+      'tongtai_supplier_search_screen.dart':
+          'Producer = Future Capability (Founder 2026-08-01, "Không cố xây AI '
+          'bằng dữ liệu giả"): the directory is SupplierSearchService'
+          '.sample(), so wiring this into navigation would show a real '
+          'seller a catalogue of invented suppliers. Waits on a real data '
+          'source — a Founder gate, not an oversight.',
+    };
+
+    /// Which screen files some OTHER file under `lib/` imports.
+    ///
+    /// The question is asked per FILE, not per class: a screen is often built
+    /// by a small route/host wrapper living beside it (Unified Search), and a
+    /// per-class rule calls that pattern an orphan. What actually matters is
+    /// whether any other code can reach into the file at all.
+    Set<String> importedScreenFiles() {
+      final imported = <String>{};
+      for (final f
+          in Directory('lib')
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.dart'))) {
+        // The barrel re-exports everything, so it proves nothing about reach.
+        if (f.path.endsWith('features/tongtai/tongtai.dart')) continue;
+        for (final m in RegExp(
+          r"""import\s+'[^']*?([\w]+_screen\.dart)'""",
+        ).allMatches(f.readAsStringSync())) {
+          final target = m.group(1)!;
+          if (!f.path.endsWith(target)) imported.add(target);
+        }
+      }
+      return imported;
+    }
+
+    test('every screen file is reached from lib/, or says why not', () {
+      final imported = importedScreenFiles();
+      final orphans = <String>[];
+      for (final file in Directory(
+        'lib/features/tongtai/ui/screens',
+      ).listSync().whereType<File>()) {
+        final name = file.uri.pathSegments.last;
+        if (!name.endsWith('.dart')) continue;
+        if (intentionallyUnreached.containsKey(name)) continue;
+        if (!imported.contains(name)) orphans.add(name);
+      }
+
+      expect(
+        orphans,
+        isEmpty,
+        reason:
+            'Không file nào trong lib/ import những màn này ⇒ người bán không '
+            'có đường tới. Nối vào navigation, xoá, hoặc khai vào '
+            '`intentionallyUnreached` kèm lý do đọc được:\n${orphans.join('\n')}',
+      );
+    });
+
+    test('the exception list stays honest — no stale entries', () {
+      // An exception that outlives its reason is worse than none: it hides a
+      // screen that HAS been wired, and the next reader trusts the note.
+      final imported = importedScreenFiles();
+      for (final entry in intentionallyUnreached.entries) {
+        expect(
+          File('lib/features/tongtai/ui/screens/${entry.key}').existsSync(),
+          isTrue,
+          reason: '${entry.key} no longer exists — drop the exception',
+        );
+        expect(
+          imported.contains(entry.key),
+          isFalse,
+          reason:
+              '${entry.key} IS reachable now — remove it from '
+              '`intentionallyUnreached`',
+        );
+      }
+    });
   });
 }
