@@ -37,6 +37,8 @@ import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../journey/journey_metric.dart';
 import 'tongtai_opportunity_feed_screen.dart';
+import '../../metrics/home_headline.dart';
+import '../widgets/tongtai_fox_mascot.dart';
 
 /// Home dashboard for Tổng Tài — the app's front door.
 ///
@@ -114,6 +116,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       goals: widget.goals ?? const [],
       opportunities: const [],
       hasSamples: false,
+      hasData: metrics.ordersCount > 0 || metrics.customersCount > 0,
     );
   }
 
@@ -176,6 +179,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       producers: favorites.length,
       opportunities: generated,
       hasSamples: await seeder.hasSamples(),
+      hasData: context.hasData,
       journey: journey,
     );
   }
@@ -423,6 +427,19 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Hero (WTM-221) ────────────────────────────────────────────
+          // The Concept opens Home with the app talking to the seller, not a
+          // row of numbers they must read for themselves — that is what an
+          // "AI Business OS" front door looks like. The sentence is chosen by
+          // a rule over real counts (`homeHeadlineKind`) and the count comes
+          // from the Rule Engine, so this renders with no AI key and no
+          // network (ADR-TON-016).
+          _Hero(
+            opportunityCount: topOpportunities.length,
+            hasData: data.hasData,
+            onAsk: () => _openChat(context),
+          ),
+          const SizedBox(height: 16),
           // ── Sample-data banner (WTM-144/ADR-TON-014): when sample rows
           //    are present, every screen shows them as ordinary data — this
           //    banner is the one reminder + pointer to the remover in More. ─
@@ -652,6 +669,7 @@ class _HomeData {
     required this.producers,
     required this.opportunities,
     required this.hasSamples,
+    required this.hasData,
     this.journey,
   });
 
@@ -664,11 +682,18 @@ class _HomeData {
     producers: 0,
     opportunities: [],
     hasSamples: false,
+    hasData: false,
   );
 
   /// The one active journey, or `null` when the seller has not started one
   /// (WTM-210). What "Nhiệm vụ hôm nay" is actually made of.
   final Journey? journey;
+
+  /// Whether this business has anything in it at all — read from
+  /// `BusinessContext.hasData`, the owner (WTM-221). Home must not re-derive
+  /// it: two answers to "is this business empty" is exactly the defect family
+  /// WTM-196/200/201/205 removed.
+  final bool hasData;
 
   final BusinessMetrics metrics;
   final BusinessHealth health;
@@ -1158,6 +1183,121 @@ class _OpportunityTile extends StatelessWidget {
 /// One active goal shown as a "mission" with its progress.
 /// One journey node on Home (WTM-210) — a real mission, not a goal in a
 /// mission costume.
+/// Home's opening — the Concept's front door (WTM-221).
+///
+/// A greeting, one sentence the app says about the seller's business right
+/// now, and the way to ask it something. The sentence is picked by
+/// [homeHeadlineKind] over real counts, so it can never claim opportunities
+/// that do not exist, and it needs no AI key to render: the count comes from
+/// the Rule Engine (ADR-TON-016 — the twin is authoritative, AI only explains).
+///
+/// No microphone: voice input is a Future Capability (Founder, WTM-208), and a
+/// mic that does nothing is the WTM-169 defect wearing a new icon.
+class _Hero extends StatelessWidget {
+  const _Hero({
+    required this.opportunityCount,
+    required this.hasData,
+    required this.onAsk,
+  });
+
+  final int opportunityCount;
+  final bool hasData;
+  final VoidCallback onAsk;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final headline = switch (homeHeadlineKind(
+      opportunityCount: opportunityCount,
+      hasData: hasData,
+    )) {
+      HomeHeadlineKind.opportunities => l10n.homeHeadlineOpportunities(
+        opportunityCount,
+      ),
+      HomeHeadlineKind.noneToday => l10n.homeHeadlineNoneToday,
+      HomeHeadlineKind.notEnoughData => l10n.homeHeadlineNotEnoughData,
+    };
+
+    return Column(
+      key: const Key('home-hero'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const TongtaiFoxMascot.avatar(size: 40),
+            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            Expanded(
+              child: Text(
+                // No name: the product has no account (D-4), so it does not
+                // know the seller's — and inventing one would be the first
+                // thing it ever told them that was untrue.
+                l10n.homeGreeting,
+                style: TongtaiDesignTokens.smallStyle.copyWith(
+                  color: TongtaiDesignTokens.lightTextSecondary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        Text(
+          headline,
+          key: const Key('home-hero-headline'),
+          style: TongtaiDesignTokens.heading2Style.copyWith(
+            color: TongtaiDesignTokens.lightTextPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: const Key('home-ask'),
+            onTap: onAsk,
+            borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+            child: Container(
+              constraints: const BoxConstraints(
+                minHeight: TongtaiDesignTokens.buttonHeight,
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: TongtaiDesignTokens.spacing4,
+                vertical: TongtaiDesignTokens.spacing3,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(
+                  TongtaiDesignTokens.radiusFull,
+                ),
+                border: Border.all(color: TongtaiDesignTokens.lightBorder),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.auto_awesome,
+                    size: 18,
+                    color: TongtaiDesignTokens.copilotViolet,
+                  ),
+                  const SizedBox(width: TongtaiDesignTokens.spacing2),
+                  Expanded(
+                    child: Text(
+                      l10n.homeAskHint,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TongtaiDesignTokens.smallStyle.copyWith(
+                        color: TongtaiDesignTokens.lightTextSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _JourneyMissionTile extends StatelessWidget {
   const _JourneyMissionTile({required this.node, required this.onOpen});
 
