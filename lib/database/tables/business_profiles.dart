@@ -36,15 +36,15 @@ class BusinessProfilesTable extends Table {
   /// Always `1`. See the class doc — one device, one business, one row.
   IntColumn get id => integer().withDefault(const Constant(1))();
 
-  /// What the business sells, as a canonical code (e.g. `fashion`, `food`).
-  /// Stored as a **code**, never a display label — same rule as `.ttbk` v2
-  /// (ADR-TON-018): labels are localized and would break the moment the seller
-  /// switches language.
   /// Loại hình vận hành bằng **mã canonical** `BusinessType` (v15,
   /// ADR-TON-023). `NULL` = **chưa khai** — cố ý không mặc định `physical`:
   /// người bán có sẵn chưa từng được hỏi câu này.
   TextColumn get typeCode => text().nullable()();
 
+  /// What the business sells, as a canonical code (e.g. `fashion`, `food`).
+  /// Stored as a **code**, never a display label — same rule as `.ttbk` v2
+  /// (ADR-TON-018): labels are localized and would break the moment the seller
+  /// switches language.
   TextColumn get tradeCode => text().nullable()();
 
   /// Rough size band, canonical code (e.g. `solo`, `small`, `growing`).

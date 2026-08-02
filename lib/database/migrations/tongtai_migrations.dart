@@ -55,7 +55,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 15;
+const int kTongtaiSchemaVersion = 16;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -275,6 +275,15 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 16) {
+        // v16 (WTM-229 / ADR-TON-023 — Business Input). Bảng mới, tạo thẳng:
+        // không có dữ liệu cũ để chuyển, và `createTable` không đụng bảng nào
+        // đang có (bài học v14: thêm và rebuild không đi chung vô tư).
+        final inputs = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'business_inputs_table',
+        );
+        await m.createTable(inputs);
       }
       if (from < 15) {
         // v15 (WTM-228 / ADR-TON-023 — Business Type). Thêm một cột nullable,

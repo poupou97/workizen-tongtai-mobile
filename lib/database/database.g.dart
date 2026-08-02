@@ -10917,6 +10917,536 @@ class SupplierFavoritesTableCompanion
   }
 }
 
+class $BusinessInputsTableTable extends BusinessInputsTable
+    with TableInfo<$BusinessInputsTableTable, BusinessInputsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BusinessInputsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cadenceMeta = const VerificationMeta(
+    'cadence',
+  );
+  @override
+  late final GeneratedColumn<String> cadence = GeneratedColumn<String>(
+    'cadence',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _expectedAmountMeta = const VerificationMeta(
+    'expectedAmount',
+  );
+  @override
+  late final GeneratedColumn<double> expectedAmount = GeneratedColumn<double>(
+    'expected_amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    name,
+    kind,
+    cadence,
+    expectedAmount,
+    note,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'business_inputs_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BusinessInputsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('cadence')) {
+      context.handle(
+        _cadenceMeta,
+        cadence.isAcceptableOrUnknown(data['cadence']!, _cadenceMeta),
+      );
+    }
+    if (data.containsKey('expected_amount')) {
+      context.handle(
+        _expectedAmountMeta,
+        expectedAmount.isAcceptableOrUnknown(
+          data['expected_amount']!,
+          _expectedAmountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
+  @override
+  BusinessInputsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BusinessInputsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      cadence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cadence'],
+      ),
+      expectedAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}expected_amount'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $BusinessInputsTableTable createAlias(String alias) {
+    return $BusinessInputsTableTable(attachedDatabase, alias);
+  }
+}
+
+class BusinessInputsTableData extends DataClass
+    implements Insertable<BusinessInputsTableData> {
+  final String id;
+
+  /// Khoá theo doanh nghiệp, như mọi bảng nghiệp vụ khác (ADR-TON-008).
+  final String businessId;
+  final String name;
+
+  /// `BusinessInputKind` bằng **mã canonical**, không bao giờ là nhãn.
+  final String kind;
+
+  /// `InputCadence` bằng mã canonical. `NULL` = chưa khai nhịp trả tiền.
+  final String? cadence;
+
+  /// Số tiền mỗi nhịp. `NULL` = **chưa nhập**, không phải miễn phí.
+  final double? expectedAmount;
+  final String? note;
+  final DateTime? updatedAt;
+  const BusinessInputsTableData({
+    required this.id,
+    required this.businessId,
+    required this.name,
+    required this.kind,
+    this.cadence,
+    this.expectedAmount,
+    this.note,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['name'] = Variable<String>(name);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || cadence != null) {
+      map['cadence'] = Variable<String>(cadence);
+    }
+    if (!nullToAbsent || expectedAmount != null) {
+      map['expected_amount'] = Variable<double>(expectedAmount);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
+  BusinessInputsTableCompanion toCompanion(bool nullToAbsent) {
+    return BusinessInputsTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      name: Value(name),
+      kind: Value(kind),
+      cadence: cadence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cadence),
+      expectedAmount: expectedAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expectedAmount),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory BusinessInputsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BusinessInputsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      name: serializer.fromJson<String>(json['name']),
+      kind: serializer.fromJson<String>(json['kind']),
+      cadence: serializer.fromJson<String?>(json['cadence']),
+      expectedAmount: serializer.fromJson<double?>(json['expectedAmount']),
+      note: serializer.fromJson<String?>(json['note']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'name': serializer.toJson<String>(name),
+      'kind': serializer.toJson<String>(kind),
+      'cadence': serializer.toJson<String?>(cadence),
+      'expectedAmount': serializer.toJson<double?>(expectedAmount),
+      'note': serializer.toJson<String?>(note),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+    };
+  }
+
+  BusinessInputsTableData copyWith({
+    String? id,
+    String? businessId,
+    String? name,
+    String? kind,
+    Value<String?> cadence = const Value.absent(),
+    Value<double?> expectedAmount = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
+  }) => BusinessInputsTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    name: name ?? this.name,
+    kind: kind ?? this.kind,
+    cadence: cadence.present ? cadence.value : this.cadence,
+    expectedAmount: expectedAmount.present
+        ? expectedAmount.value
+        : this.expectedAmount,
+    note: note.present ? note.value : this.note,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  BusinessInputsTableData copyWithCompanion(BusinessInputsTableCompanion data) {
+    return BusinessInputsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      name: data.name.present ? data.name.value : this.name,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      cadence: data.cadence.present ? data.cadence.value : this.cadence,
+      expectedAmount: data.expectedAmount.present
+          ? data.expectedAmount.value
+          : this.expectedAmount,
+      note: data.note.present ? data.note.value : this.note,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessInputsTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('cadence: $cadence, ')
+          ..write('expectedAmount: $expectedAmount, ')
+          ..write('note: $note, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    name,
+    kind,
+    cadence,
+    expectedAmount,
+    note,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BusinessInputsTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.name == this.name &&
+          other.kind == this.kind &&
+          other.cadence == this.cadence &&
+          other.expectedAmount == this.expectedAmount &&
+          other.note == this.note &&
+          other.updatedAt == this.updatedAt);
+}
+
+class BusinessInputsTableCompanion
+    extends UpdateCompanion<BusinessInputsTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> name;
+  final Value<String> kind;
+  final Value<String?> cadence;
+  final Value<double?> expectedAmount;
+  final Value<String?> note;
+  final Value<DateTime?> updatedAt;
+  final Value<int> rowid;
+  const BusinessInputsTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.cadence = const Value.absent(),
+    this.expectedAmount = const Value.absent(),
+    this.note = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BusinessInputsTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String name,
+    required String kind,
+    this.cadence = const Value.absent(),
+    this.expectedAmount = const Value.absent(),
+    this.note = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       name = Value(name),
+       kind = Value(kind);
+  static Insertable<BusinessInputsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? name,
+    Expression<String>? kind,
+    Expression<String>? cadence,
+    Expression<double>? expectedAmount,
+    Expression<String>? note,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (name != null) 'name': name,
+      if (kind != null) 'kind': kind,
+      if (cadence != null) 'cadence': cadence,
+      if (expectedAmount != null) 'expected_amount': expectedAmount,
+      if (note != null) 'note': note,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BusinessInputsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? name,
+    Value<String>? kind,
+    Value<String?>? cadence,
+    Value<double?>? expectedAmount,
+    Value<String?>? note,
+    Value<DateTime?>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return BusinessInputsTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      name: name ?? this.name,
+      kind: kind ?? this.kind,
+      cadence: cadence ?? this.cadence,
+      expectedAmount: expectedAmount ?? this.expectedAmount,
+      note: note ?? this.note,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (cadence.present) {
+      map['cadence'] = Variable<String>(cadence.value);
+    }
+    if (expectedAmount.present) {
+      map['expected_amount'] = Variable<double>(expectedAmount.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessInputsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('cadence: $cadence, ')
+          ..write('expectedAmount: $expectedAmount, ')
+          ..write('note: $note, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $BusinessProfilesTableTable extends BusinessProfilesTable
     with TableInfo<$BusinessProfilesTableTable, BusinessProfilesTableData> {
   @override
@@ -11122,14 +11652,15 @@ class BusinessProfilesTableData extends DataClass
   /// Always `1`. See the class doc — one device, one business, one row.
   final int id;
 
-  /// What the business sells, as a canonical code (e.g. `fashion`, `food`).
-  /// Stored as a **code**, never a display label — same rule as `.ttbk` v2
-  /// (ADR-TON-018): labels are localized and would break the moment the seller
-  /// switches language.
   /// Loại hình vận hành bằng **mã canonical** `BusinessType` (v15,
   /// ADR-TON-023). `NULL` = **chưa khai** — cố ý không mặc định `physical`:
   /// người bán có sẵn chưa từng được hỏi câu này.
   final String? typeCode;
+
+  /// What the business sells, as a canonical code (e.g. `fashion`, `food`).
+  /// Stored as a **code**, never a display label — same rule as `.ttbk` v2
+  /// (ADR-TON-018): labels are localized and would break the moment the seller
+  /// switches language.
   final String? tradeCode;
 
   /// Rough size band, canonical code (e.g. `solo`, `small`, `growing`).
@@ -13994,6 +14525,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
       $SupplierFavoritesTableTable(this);
+  late final $BusinessInputsTableTable businessInputsTable =
+      $BusinessInputsTableTable(this);
   late final $BusinessProfilesTableTable businessProfilesTable =
       $BusinessProfilesTableTable(this);
   late final $BusinessJourneysTableTable businessJourneysTable =
@@ -14086,6 +14619,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     integrationsTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
+    businessInputsTable,
     businessProfilesTable,
     businessJourneysTable,
     businessJourneyNodesTable,
@@ -22962,6 +23496,283 @@ typedef $$SupplierFavoritesTableTableProcessedTableManager =
       SupplierFavoritesTableData,
       PrefetchHooks Function()
     >;
+typedef $$BusinessInputsTableTableCreateCompanionBuilder =
+    BusinessInputsTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String name,
+      required String kind,
+      Value<String?> cadence,
+      Value<double?> expectedAmount,
+      Value<String?> note,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$BusinessInputsTableTableUpdateCompanionBuilder =
+    BusinessInputsTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> name,
+      Value<String> kind,
+      Value<String?> cadence,
+      Value<double?> expectedAmount,
+      Value<String?> note,
+      Value<DateTime?> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$BusinessInputsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $BusinessInputsTableTable> {
+  $$BusinessInputsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get businessId => $composableBuilder(
+    column: $table.businessId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cadence => $composableBuilder(
+    column: $table.cadence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get expectedAmount => $composableBuilder(
+    column: $table.expectedAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BusinessInputsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $BusinessInputsTableTable> {
+  $$BusinessInputsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get businessId => $composableBuilder(
+    column: $table.businessId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cadence => $composableBuilder(
+    column: $table.cadence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get expectedAmount => $composableBuilder(
+    column: $table.expectedAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BusinessInputsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BusinessInputsTableTable> {
+  $$BusinessInputsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get businessId => $composableBuilder(
+    column: $table.businessId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get cadence =>
+      $composableBuilder(column: $table.cadence, builder: (column) => column);
+
+  GeneratedColumn<double> get expectedAmount => $composableBuilder(
+    column: $table.expectedAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$BusinessInputsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BusinessInputsTableTable,
+          BusinessInputsTableData,
+          $$BusinessInputsTableTableFilterComposer,
+          $$BusinessInputsTableTableOrderingComposer,
+          $$BusinessInputsTableTableAnnotationComposer,
+          $$BusinessInputsTableTableCreateCompanionBuilder,
+          $$BusinessInputsTableTableUpdateCompanionBuilder,
+          (
+            BusinessInputsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $BusinessInputsTableTable,
+              BusinessInputsTableData
+            >,
+          ),
+          BusinessInputsTableData,
+          PrefetchHooks Function()
+        > {
+  $$BusinessInputsTableTableTableManager(
+    _$AppDatabase db,
+    $BusinessInputsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BusinessInputsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BusinessInputsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$BusinessInputsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> cadence = const Value.absent(),
+                Value<double?> expectedAmount = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessInputsTableCompanion(
+                id: id,
+                businessId: businessId,
+                name: name,
+                kind: kind,
+                cadence: cadence,
+                expectedAmount: expectedAmount,
+                note: note,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String name,
+                required String kind,
+                Value<String?> cadence = const Value.absent(),
+                Value<double?> expectedAmount = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessInputsTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                name: name,
+                kind: kind,
+                cadence: cadence,
+                expectedAmount: expectedAmount,
+                note: note,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BusinessInputsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BusinessInputsTableTable,
+      BusinessInputsTableData,
+      $$BusinessInputsTableTableFilterComposer,
+      $$BusinessInputsTableTableOrderingComposer,
+      $$BusinessInputsTableTableAnnotationComposer,
+      $$BusinessInputsTableTableCreateCompanionBuilder,
+      $$BusinessInputsTableTableUpdateCompanionBuilder,
+      (
+        BusinessInputsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $BusinessInputsTableTable,
+          BusinessInputsTableData
+        >,
+      ),
+      BusinessInputsTableData,
+      PrefetchHooks Function()
+    >;
 typedef $$BusinessProfilesTableTableCreateCompanionBuilder =
     BusinessProfilesTableCompanion Function({
       Value<int> id,
@@ -25080,6 +25891,8 @@ class $AppDatabaseManager {
         _db,
         _db.supplierFavoritesTable,
       );
+  $$BusinessInputsTableTableTableManager get businessInputsTable =>
+      $$BusinessInputsTableTableTableManager(_db, _db.businessInputsTable);
   $$BusinessProfilesTableTableTableManager get businessProfilesTable =>
       $$BusinessProfilesTableTableTableManager(_db, _db.businessProfilesTable);
   $$BusinessJourneysTableTableTableManager get businessJourneysTable =>
