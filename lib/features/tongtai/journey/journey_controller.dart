@@ -198,7 +198,15 @@ class JourneyController {
           n,
     ];
     if (!changed) return journey;
-    final updated = journey.copyWith(nodes: nodes, updatedAt: now);
+    var updated = journey.copyWith(nodes: nodes, updatedAt: now);
+    // WTM-226: a journey that finishes has to be ABLE to finish.
+    // `JourneyState.completed` existed from the start and nothing ever set it,
+    // so a seller who did all the work was left staring at a 100% bar that
+    // never became anything. State follows the tree — derived here, recorded
+    // once, never a parallel flag.
+    if (updated.isPlanComplete && updated.state == JourneyState.active) {
+      updated = updated.copyWith(state: JourneyState.completed);
+    }
     await _repository.save(updated);
     return updated;
   }

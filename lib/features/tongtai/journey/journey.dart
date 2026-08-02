@@ -99,6 +99,20 @@ class Journey {
     return done / total;
   }
 
+  /// Every piece of work in the plan is done (WTM-226).
+  ///
+  /// Derived from the tree, never a stored flag: a `completed` boolean would be
+  /// a second copy of what the nodes already say, and the two would disagree
+  /// the first time a node changed without it (the defect family
+  /// WTM-196/200/201/205 removed).
+  ///
+  /// **Finishing the journey is not the same as reaching the goal.** A seller
+  /// can do every step the Rule Twin planned and still be short of their
+  /// number — the plan is the app's best advice, not a guarantee. Saying the
+  /// two are one thing would be the app's first lie to them, so the UI states
+  /// them separately.
+  bool get isPlanComplete => completion == 1;
+
   Journey copyWith({
     JourneyState? state,
     int? activePlanVersion,

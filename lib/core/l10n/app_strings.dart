@@ -419,6 +419,12 @@ abstract class AppStrings {
   /// Nút mở capability nơi một bước hành trình được làm (WTM-220).
   String get journeyDoStep;
 
+  /// Hành trình đi hết (WTM-226). Cố ý KHÔNG nói "đạt mục tiêu": làm hết việc
+  /// chưa chắc chạm số, và nói gộp hai thứ là lời nói dối đầu tiên.
+  String get journeyPlanDoneTitle;
+  String get journeyPlanDoneBody;
+  String get journeySetNextGoal;
+
   /// Concept-1 screen headers (WTM-216) — one line saying what a screen is for.
   String get subtitleProducer;
   String get subtitleInventory;
@@ -1459,6 +1465,14 @@ class AppStringsVi extends AppStrings {
   String get homeAskHint => 'Hỏi Tổng Tài bất cứ điều gì…';
   @override
   String get journeyDoStep => 'Làm ngay';
+  @override
+  String get journeyPlanDoneTitle => 'Bạn đã đi hết hành trình này 🎉';
+  @override
+  String get journeyPlanDoneBody =>
+      'Mọi bước trong kế hoạch đã xong. Đặt mục tiêu tiếp theo để tôi lập '
+      'hành trình mới cho bạn.';
+  @override
+  String get journeySetNextGoal => 'Đặt mục tiêu tiếp theo';
   @override
   String get subtitleProducer => 'Tìm cơ hội & nguồn hàng';
   @override
@@ -2890,6 +2904,14 @@ class AppStringsEn extends AppStrings {
   String get homeAskHint => 'Ask Tổng Tài anything…';
   @override
   String get journeyDoStep => 'Do it now';
+  @override
+  String get journeyPlanDoneTitle => 'You finished this journey 🎉';
+  @override
+  String get journeyPlanDoneBody =>
+      'Every step in the plan is done. Set your next goal and I will plan the '
+      'next journey.';
+  @override
+  String get journeySetNextGoal => 'Set the next goal';
   @override
   String get subtitleProducer => 'Find opportunities and suppliers';
   @override
