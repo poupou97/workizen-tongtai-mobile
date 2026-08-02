@@ -18,6 +18,7 @@ import 'tongtai_inventory_provider.dart';
 import 'tongtai_journey_provider.dart';
 import 'tongtai_metrics_provider.dart';
 import 'tongtai_orders_provider.dart';
+import '../producer/business_input_repository.dart';
 
 /// One Context Provider per capability (WTM-131). Each turns its repository into
 /// a read-only summary slice; `BusinessContextService` composes them.
@@ -125,3 +126,8 @@ final opportunitiesWithReactionsProvider = FutureProvider<List<Opportunity>>((
       .loadAll();
   return applyReactions(generated, reactions);
 });
+
+/// Nguồn đầu vào của doanh nghiệp (WTM-229/230).
+final businessInputRepositoryProvider = Provider<BusinessInputRepository>(
+  (ref) => DriftBusinessInputRepository(ref.watch(tongtaiDatabaseProvider)),
+);
