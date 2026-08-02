@@ -71,7 +71,7 @@ không làm CI đỏ.
 | **Consumer** | ✅ | ✅ | ✅ | ✅ v13* | ✅ | ✅ | ✅ | ✅ |
 | **Reports** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Inventory** | ✅ | ✅ | ✅ WTM-213 | ✅ v13 | ✅ | ✅ | ✅ | ✅ |
-| **Producer** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| **Producer** | ✅ | ❌ | ✅ | ✅ | ⚠️ WTM-218 | ✅ | — | ✅ |
 | **AI** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Settings / More** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ |
 
@@ -145,6 +145,26 @@ không setting nào ghi sàn đó, nên WTM-213 **xoá tham số**:
 không thể lệch nhau vì cùng một dòng code. Sweep chốt trong
 `p0/single_source_of_truth_test.dart`. Data ✅: `costPrice` đã nối (WTM-204),
 ROI tính từ giá vốn thật (WTM-207).
+
+### Producer — ❌ Data (có chủ đích) · ⚠️ IA (WTM-218)
+
+**Sửa ô IA: trước ghi ✅ mà chưa ai kiểm lối vào của màn chính.**
+`TongtaiSupplierSearchScreen` (~600 dòng, L3, có test/a11y/l10n) **chưa bao giờ
+có caller production** — `git log -S` cho thấy nó vào repo từ commit bootstrap
+và không commit nào từng thêm navigation tới nó. Tab Producer chỉ push được
+*Nhà cung cấp yêu thích*. Capability mà động từ chính là *tìm nguồn hàng* đang
+không có màn tìm.
+
+**Cố ý không nối** (không phải bỏ sót nữa): danh bạ là
+`SupplierSearchService.sample()` — nhà cung cấp bịa. Nối vào tab sẽ trưng danh
+bạ bịa cho người bán thật, sai đúng thứ quyết định *Future Capability* bảo vệ.
+Ghi vào `intentionallyUnreached` trong `p0/nav_availability_test.dart` kèm lý
+do; CI đỏ nếu có màn mồ côi mới, hoặc nếu màn này được nối mà quên gỡ ngoại lệ.
+
+**Root cause đáng nhớ:** sáu lượt governance (WTM-146/147/148/168/171/194) đã
+sửa chính file đó — test, maturity model, error seam, a11y, hai lượt l10n —
+mà không lượt nào hỏi *"người bán có mở được màn này không?"*. Governance đo
+**chất lượng** màn hình, không đo **tính tới-được**.
 
 ### Producer — ❌ **Data FAIL đã biết, có chủ đích**
 
