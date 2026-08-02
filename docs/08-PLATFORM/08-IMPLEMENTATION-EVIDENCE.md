@@ -89,3 +89,52 @@ Cả hai đã đăng ký với Claude Code, `claude mcp list` báo **✓ Connect
 | Toàn bộ stack n8n | `docker compose down` + xoá `/data/n8n` — **không ảnh hưởng gì ngoài VM này** |
 | DNS | xoá A record `tongtai.workizen.net` (không record nào khác bị chạm) |
 | VM observer / `workizen.net` | **không có gì để lùi — chưa từng chạm** |
+
+---
+
+## Đính chính phạm vi dogfood (Founder, 2026-08-02)
+
+> *"Tạm bỏ qua RevenueCat đi, đã lên store đâu."*
+
+Đúng. RevenueCat chỉ có dữ liệu khi app đã bán hàng, mà Tổng Tài **chưa lên
+store**. Một webhook receiver đã publish nhưng không bao giờ nhận gì là đúng
+hình dạng "thứ chết trông như đang sống" mà repo này đã dọn nhiều lần
+(`opportunities_table`, `integrations_table`, n8n trong sơ đồ App Layer).
+
+**Đã xử lý:** `unpublish_workflow` qua MCP → webhook trả 404. Workflow **giữ
+nguyên**, publish lại bằng **một lệnh MCP** khi app lên store.
+
+### Dữ liệu thật Workizen có NGAY HÔM NAY
+
+| Nguồn | Có gì | Dùng được? |
+|---|---|---|
+| **GitHub** | **208 commit/30 ngày · 100 PR đã merge · 0 release** | ✅ nhiều nhất |
+| **Jira WTM** | ~50 issue, worklog đầy đủ, tạo mới hằng ngày | ✅ |
+| Firebase Crashlytics | app mới cài 2 máy hôm nay, crash rỗng | ⚠️ quá ít |
+| App Store · Play · RevenueCat · GA4 | **không có gì** | ❌ chưa lên store |
+
+### Một tín hiệu kinh doanh tìm được mà không cần connector nào
+
+**208 commit, 100 PR merged, và 0 release.**
+
+Đây chính là loại tín hiệu mà capability *Developer Productivity* sinh ra để
+bắt: công việc chạy rất nhiều nhưng **không có gì tới tay người dùng**. Với một
+doanh nghiệp phần mềm, đó là con số quan trọng hơn mọi biểu đồ commit.
+
+⇒ Dogfood connector đúng đắn kế tiếp là **GitHub**, không phải RevenueCat.
+
+### ✅ Đã làm xong cùng ngày — WTM-268
+
+Founder cấp fine-grained PAT chỉ quyền đọc; connector đã chạy thật:
+
+| Kiểm | Kết quả |
+|---|---|
+| Không có `Authorization` | **403** |
+| Có token · 3 endpoint · 7 trang | **200** · 6,9s · 233 KB · **360 sự kiện** |
+| Số liệu vs đo trực tiếp GitHub API | **208 commit / 152 PR merged / 0 release — khớp tuyệt đối** |
+| Gọi hai lần | **360 `event_id` trùng, 0 lệch** — retry không sinh bản ghi thứ hai |
+| Request cố đổi `repo` | bị bỏ qua — repo **ghim server-side** |
+
+Chi tiết đầy đủ: `docs/08-PLATFORM/11-GITHUB-CONNECTOR-EVIDENCE.md`.
+
+⇒ Mục *"chưa có smoke connector với vendor thật"* trong bộ review **đã đóng**.
