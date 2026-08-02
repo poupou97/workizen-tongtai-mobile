@@ -57,7 +57,7 @@ void main() {
     //                object, không mã hoá cột thô.
     // v14 (WTM-227 / ADR-TON-023): Product Type — `kind` + `total_stock`
     // nullable, để "không có tồn kho" khác hẳn "hết hàng".
-    expect(db.schemaVersion, 14);
+    expect(db.schemaVersion, 15);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

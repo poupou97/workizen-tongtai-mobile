@@ -104,7 +104,7 @@ void main() {
     });
 
     test('schema version constant advanced in lock-step', () {
-      expect(kTongtaiSchemaVersion, 14);
+      expect(kTongtaiSchemaVersion, 15);
       // v12 (WTM-209): orders_table rebuilt without the channel_id FK — it
       //                pointed at channels_table, a dead v1 table nothing ever
       //                wrote, so every real channel code failed the constraint.
@@ -112,7 +112,7 @@ void main() {
       // v13 (WTM-212): DTV eliminated — mọi cột dẫn xuất chết bị xoá trong một
       //                lần quét; an toàn cho mọi .ttbk vì codec mã hoá domain
       //                object, không mã hoá cột thô.
-      expect(db.schemaVersion, 14);
+      expect(db.schemaVersion, 15);
     });
   });
 

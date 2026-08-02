@@ -23,6 +23,16 @@ library;
 
 import '../profile/business_profile.dart';
 
+/// Loại hình vận hành (ADR-TON-023). Đứng TRƯỚC ngành hàng vì nó quyết định
+/// lời khuyên nào còn nghĩa: gợi ý "nhập thêm hàng" cho một studio phần mềm là
+/// vô nghĩa dù ngành có đúng đến đâu.
+String _typeLabel(BusinessType type) => switch (type) {
+  BusinessType.physical => 'bán hàng vật lý (có nhập, có tồn kho)',
+  BusinessType.digital => 'bán sản phẩm số (không có tồn kho)',
+  BusinessType.service => 'bán dịch vụ / thời gian',
+  BusinessType.hybrid => 'vừa hàng vật lý vừa số hoặc dịch vụ',
+};
+
 String _tradeLabel(BusinessTrade trade) => switch (trade) {
   BusinessTrade.fashion => 'thời trang',
   BusinessTrade.food => 'thực phẩm / đồ ăn',
@@ -67,6 +77,9 @@ String? businessProfilePromptText(BusinessProfile? profile) {
   if (profile == null || profile.isEmpty) return null;
 
   final lines = <String>[];
+  if (profile.type != null) {
+    lines.add('- Loại hình: ${_typeLabel(profile.type!)}');
+  }
   if (profile.trade != null) {
     lines.add('- Ngành: ${_tradeLabel(profile.trade!)}');
   }

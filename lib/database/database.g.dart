@@ -10933,6 +10933,17 @@ class $BusinessProfilesTableTable extends BusinessProfilesTable
     requiredDuringInsert: false,
     defaultValue: const Constant(1),
   );
+  static const VerificationMeta _typeCodeMeta = const VerificationMeta(
+    'typeCode',
+  );
+  @override
+  late final GeneratedColumn<String> typeCode = GeneratedColumn<String>(
+    'type_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _tradeCodeMeta = const VerificationMeta(
     'tradeCode',
   );
@@ -10991,6 +11002,7 @@ class $BusinessProfilesTableTable extends BusinessProfilesTable
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    typeCode,
     tradeCode,
     sizeCode,
     channelCodes,
@@ -11011,6 +11023,12 @@ class $BusinessProfilesTableTable extends BusinessProfilesTable
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('type_code')) {
+      context.handle(
+        _typeCodeMeta,
+        typeCode.isAcceptableOrUnknown(data['type_code']!, _typeCodeMeta),
+      );
     }
     if (data.containsKey('trade_code')) {
       context.handle(
@@ -11066,6 +11084,10 @@ class $BusinessProfilesTableTable extends BusinessProfilesTable
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      typeCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type_code'],
+      ),
       tradeCode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}trade_code'],
@@ -11104,6 +11126,10 @@ class BusinessProfilesTableData extends DataClass
   /// Stored as a **code**, never a display label — same rule as `.ttbk` v2
   /// (ADR-TON-018): labels are localized and would break the moment the seller
   /// switches language.
+  /// Loại hình vận hành bằng **mã canonical** `BusinessType` (v15,
+  /// ADR-TON-023). `NULL` = **chưa khai** — cố ý không mặc định `physical`:
+  /// người bán có sẵn chưa từng được hỏi câu này.
+  final String? typeCode;
   final String? tradeCode;
 
   /// Rough size band, canonical code (e.g. `solo`, `small`, `growing`).
@@ -11123,6 +11149,7 @@ class BusinessProfilesTableData extends DataClass
   final DateTime updatedAt;
   const BusinessProfilesTableData({
     required this.id,
+    this.typeCode,
     this.tradeCode,
     this.sizeCode,
     this.channelCodes,
@@ -11133,6 +11160,9 @@ class BusinessProfilesTableData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || typeCode != null) {
+      map['type_code'] = Variable<String>(typeCode);
+    }
     if (!nullToAbsent || tradeCode != null) {
       map['trade_code'] = Variable<String>(tradeCode);
     }
@@ -11152,6 +11182,9 @@ class BusinessProfilesTableData extends DataClass
   BusinessProfilesTableCompanion toCompanion(bool nullToAbsent) {
     return BusinessProfilesTableCompanion(
       id: Value(id),
+      typeCode: typeCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(typeCode),
       tradeCode: tradeCode == null && nullToAbsent
           ? const Value.absent()
           : Value(tradeCode),
@@ -11175,6 +11208,7 @@ class BusinessProfilesTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BusinessProfilesTableData(
       id: serializer.fromJson<int>(json['id']),
+      typeCode: serializer.fromJson<String?>(json['typeCode']),
       tradeCode: serializer.fromJson<String?>(json['tradeCode']),
       sizeCode: serializer.fromJson<String?>(json['sizeCode']),
       channelCodes: serializer.fromJson<String?>(json['channelCodes']),
@@ -11187,6 +11221,7 @@ class BusinessProfilesTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'typeCode': serializer.toJson<String?>(typeCode),
       'tradeCode': serializer.toJson<String?>(tradeCode),
       'sizeCode': serializer.toJson<String?>(sizeCode),
       'channelCodes': serializer.toJson<String?>(channelCodes),
@@ -11197,6 +11232,7 @@ class BusinessProfilesTableData extends DataClass
 
   BusinessProfilesTableData copyWith({
     int? id,
+    Value<String?> typeCode = const Value.absent(),
     Value<String?> tradeCode = const Value.absent(),
     Value<String?> sizeCode = const Value.absent(),
     Value<String?> channelCodes = const Value.absent(),
@@ -11204,6 +11240,7 @@ class BusinessProfilesTableData extends DataClass
     DateTime? updatedAt,
   }) => BusinessProfilesTableData(
     id: id ?? this.id,
+    typeCode: typeCode.present ? typeCode.value : this.typeCode,
     tradeCode: tradeCode.present ? tradeCode.value : this.tradeCode,
     sizeCode: sizeCode.present ? sizeCode.value : this.sizeCode,
     channelCodes: channelCodes.present ? channelCodes.value : this.channelCodes,
@@ -11217,6 +11254,7 @@ class BusinessProfilesTableData extends DataClass
   ) {
     return BusinessProfilesTableData(
       id: data.id.present ? data.id.value : this.id,
+      typeCode: data.typeCode.present ? data.typeCode.value : this.typeCode,
       tradeCode: data.tradeCode.present ? data.tradeCode.value : this.tradeCode,
       sizeCode: data.sizeCode.present ? data.sizeCode.value : this.sizeCode,
       channelCodes: data.channelCodes.present
@@ -11233,6 +11271,7 @@ class BusinessProfilesTableData extends DataClass
   String toString() {
     return (StringBuffer('BusinessProfilesTableData(')
           ..write('id: $id, ')
+          ..write('typeCode: $typeCode, ')
           ..write('tradeCode: $tradeCode, ')
           ..write('sizeCode: $sizeCode, ')
           ..write('channelCodes: $channelCodes, ')
@@ -11245,6 +11284,7 @@ class BusinessProfilesTableData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    typeCode,
     tradeCode,
     sizeCode,
     channelCodes,
@@ -11256,6 +11296,7 @@ class BusinessProfilesTableData extends DataClass
       identical(this, other) ||
       (other is BusinessProfilesTableData &&
           other.id == this.id &&
+          other.typeCode == this.typeCode &&
           other.tradeCode == this.tradeCode &&
           other.sizeCode == this.sizeCode &&
           other.channelCodes == this.channelCodes &&
@@ -11266,6 +11307,7 @@ class BusinessProfilesTableData extends DataClass
 class BusinessProfilesTableCompanion
     extends UpdateCompanion<BusinessProfilesTableData> {
   final Value<int> id;
+  final Value<String?> typeCode;
   final Value<String?> tradeCode;
   final Value<String?> sizeCode;
   final Value<String?> channelCodes;
@@ -11273,6 +11315,7 @@ class BusinessProfilesTableCompanion
   final Value<DateTime> updatedAt;
   const BusinessProfilesTableCompanion({
     this.id = const Value.absent(),
+    this.typeCode = const Value.absent(),
     this.tradeCode = const Value.absent(),
     this.sizeCode = const Value.absent(),
     this.channelCodes = const Value.absent(),
@@ -11281,6 +11324,7 @@ class BusinessProfilesTableCompanion
   });
   BusinessProfilesTableCompanion.insert({
     this.id = const Value.absent(),
+    this.typeCode = const Value.absent(),
     this.tradeCode = const Value.absent(),
     this.sizeCode = const Value.absent(),
     this.channelCodes = const Value.absent(),
@@ -11289,6 +11333,7 @@ class BusinessProfilesTableCompanion
   }) : updatedAt = Value(updatedAt);
   static Insertable<BusinessProfilesTableData> custom({
     Expression<int>? id,
+    Expression<String>? typeCode,
     Expression<String>? tradeCode,
     Expression<String>? sizeCode,
     Expression<String>? channelCodes,
@@ -11297,6 +11342,7 @@ class BusinessProfilesTableCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (typeCode != null) 'type_code': typeCode,
       if (tradeCode != null) 'trade_code': tradeCode,
       if (sizeCode != null) 'size_code': sizeCode,
       if (channelCodes != null) 'channel_codes': channelCodes,
@@ -11307,6 +11353,7 @@ class BusinessProfilesTableCompanion
 
   BusinessProfilesTableCompanion copyWith({
     Value<int>? id,
+    Value<String?>? typeCode,
     Value<String?>? tradeCode,
     Value<String?>? sizeCode,
     Value<String?>? channelCodes,
@@ -11315,6 +11362,7 @@ class BusinessProfilesTableCompanion
   }) {
     return BusinessProfilesTableCompanion(
       id: id ?? this.id,
+      typeCode: typeCode ?? this.typeCode,
       tradeCode: tradeCode ?? this.tradeCode,
       sizeCode: sizeCode ?? this.sizeCode,
       channelCodes: channelCodes ?? this.channelCodes,
@@ -11328,6 +11376,9 @@ class BusinessProfilesTableCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (typeCode.present) {
+      map['type_code'] = Variable<String>(typeCode.value);
     }
     if (tradeCode.present) {
       map['trade_code'] = Variable<String>(tradeCode.value);
@@ -11351,6 +11402,7 @@ class BusinessProfilesTableCompanion
   String toString() {
     return (StringBuffer('BusinessProfilesTableCompanion(')
           ..write('id: $id, ')
+          ..write('typeCode: $typeCode, ')
           ..write('tradeCode: $tradeCode, ')
           ..write('sizeCode: $sizeCode, ')
           ..write('channelCodes: $channelCodes, ')
@@ -22913,6 +22965,7 @@ typedef $$SupplierFavoritesTableTableProcessedTableManager =
 typedef $$BusinessProfilesTableTableCreateCompanionBuilder =
     BusinessProfilesTableCompanion Function({
       Value<int> id,
+      Value<String?> typeCode,
       Value<String?> tradeCode,
       Value<String?> sizeCode,
       Value<String?> channelCodes,
@@ -22922,6 +22975,7 @@ typedef $$BusinessProfilesTableTableCreateCompanionBuilder =
 typedef $$BusinessProfilesTableTableUpdateCompanionBuilder =
     BusinessProfilesTableCompanion Function({
       Value<int> id,
+      Value<String?> typeCode,
       Value<String?> tradeCode,
       Value<String?> sizeCode,
       Value<String?> channelCodes,
@@ -22940,6 +22994,11 @@ class $$BusinessProfilesTableTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get typeCode => $composableBuilder(
+    column: $table.typeCode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -22983,6 +23042,11 @@ class $$BusinessProfilesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get typeCode => $composableBuilder(
+    column: $table.typeCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get tradeCode => $composableBuilder(
     column: $table.tradeCode,
     builder: (column) => ColumnOrderings(column),
@@ -23020,6 +23084,9 @@ class $$BusinessProfilesTableTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get typeCode =>
+      $composableBuilder(column: $table.typeCode, builder: (column) => column);
 
   GeneratedColumn<String> get tradeCode =>
       $composableBuilder(column: $table.tradeCode, builder: (column) => column);
@@ -23088,6 +23155,7 @@ class $$BusinessProfilesTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> typeCode = const Value.absent(),
                 Value<String?> tradeCode = const Value.absent(),
                 Value<String?> sizeCode = const Value.absent(),
                 Value<String?> channelCodes = const Value.absent(),
@@ -23095,6 +23163,7 @@ class $$BusinessProfilesTableTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => BusinessProfilesTableCompanion(
                 id: id,
+                typeCode: typeCode,
                 tradeCode: tradeCode,
                 sizeCode: sizeCode,
                 channelCodes: channelCodes,
@@ -23104,6 +23173,7 @@ class $$BusinessProfilesTableTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> typeCode = const Value.absent(),
                 Value<String?> tradeCode = const Value.absent(),
                 Value<String?> sizeCode = const Value.absent(),
                 Value<String?> channelCodes = const Value.absent(),
@@ -23111,6 +23181,7 @@ class $$BusinessProfilesTableTableTableManager
                 required DateTime updatedAt,
               }) => BusinessProfilesTableCompanion.insert(
                 id: id,
+                typeCode: typeCode,
                 tradeCode: tradeCode,
                 sizeCode: sizeCode,
                 channelCodes: channelCodes,
