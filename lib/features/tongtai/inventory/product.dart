@@ -274,6 +274,9 @@ class Product {
     sku: sku,
     name: name,
     category: category,
+    // `kind` phải đi theo: quên nó ở đây sẽ biến một sản phẩm số thành hàng
+    // vật lý ngay lúc gieo dữ liệu mẫu, rồi lập tức kêu "Hết hàng".
+    kind: kind,
     quantity: quantity,
     pricePerUnit: pricePerUnit,
     reorderLevel: reorderLevel,

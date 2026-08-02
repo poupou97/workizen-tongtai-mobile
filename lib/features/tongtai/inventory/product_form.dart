@@ -16,6 +16,7 @@ class ProductFormData {
     this.sku = '',
     this.category = '',
     this.description = '',
+    this.kind = ProductKind.physical,
     this.priceText = '',
     this.costPriceText = '',
     this.quantityText = '',
@@ -29,12 +30,15 @@ class ProductFormData {
     sku: product.sku,
     category: product.category,
     description: product.description,
+    kind: product.kind,
     priceText: _numberText(product.pricePerUnit),
     costPriceText: product.costPrice == null
         ? ''
         : _numberText(product.costPrice!),
-    quantityText: product.quantity.toString(),
-    reorderLevelText: product.reorderLevel.toString(),
+    // `null` là "không áp dụng", nên ô để TRỐNG. `.toString()` trên một số
+    // nullable in ra chữ "null" vào ô nhập của người bán.
+    quantityText: product.quantity?.toString() ?? '',
+    reorderLevelText: product.reorderLevel?.toString() ?? '',
     imagePaths: List.of(product.imagePaths),
   );
 
@@ -42,6 +46,10 @@ class ProductFormData {
   final String sku;
   final String category;
   final String description;
+
+  /// Loại sản phẩm (ADR-TON-023) — quyết định form còn hỏi tồn kho hay không.
+  final ProductKind kind;
+
   final String priceText;
 
   /// Optional (WTM-204): empty means the seller has not entered a cost, and
@@ -57,6 +65,7 @@ class ProductFormData {
     String? sku,
     String? category,
     String? description,
+    ProductKind? kind,
     String? priceText,
     String? costPriceText,
     String? quantityText,
@@ -68,6 +77,7 @@ class ProductFormData {
       sku: sku ?? this.sku,
       category: category ?? this.category,
       description: description ?? this.description,
+      kind: kind ?? this.kind,
       priceText: priceText ?? this.priceText,
       costPriceText: costPriceText ?? this.costPriceText,
       quantityText: quantityText ?? this.quantityText,
@@ -126,7 +136,12 @@ class ProductFormData {
     }
 
     final quantity = quantityText.trim();
-    if (quantity.isEmpty) {
+    // Chỉ hàng vật lý mới có tồn kho. Bắt một sản phẩm số điền số lượng là
+    // buộc người bán **bịa một con số**, đúng thứ ADR-TON-023 cấm — và con số
+    // bịa đó lập tức thành "Hết hàng" + một cơ hội nhập hàng cho phần mềm.
+    if (!kind.tracksStock) {
+      // không hỏi, nên cũng không có gì để báo sai
+    } else if (quantity.isEmpty) {
       errors[ProductField.quantity] = 'Quantity is required';
     } else {
       final value = _tryParseInt(quantity);
@@ -158,18 +173,23 @@ class ProductFormData {
   /// unparseable numbers fall back to 0 so this never throws (a best-effort
   /// product is also handy for computing a live change preview).
   Product toProduct({required String id, required DateTime updatedAt}) {
+    // Loại không có tồn kho ⇒ `null`, không phải 0. `?? 0` ở đây từng đủ để
+    // dựng lại nguyên vẹn lời nói dối mà ADR-TON-023 vừa gỡ: mở một sản phẩm
+    // số ra sửa rồi lưu lại là nó thành hàng vật lý còn 0 cái.
+    final tracksStock = kind.tracksStock;
     return Product(
       id: id,
       sku: sku.trim(),
       name: name.trim(),
       category: category.trim(),
-      quantity: _tryParseInt(quantityText) ?? 0,
+      kind: kind,
+      quantity: tracksStock ? (_tryParseInt(quantityText) ?? 0) : null,
       pricePerUnit: _tryParseNumber(priceText) ?? 0,
       // Empty stays null — "not entered" is not the same fact as "free".
       costPrice: costPriceText.trim().isEmpty
           ? null
           : _tryParseNumber(costPriceText),
-      reorderLevel: parsedReorderLevel,
+      reorderLevel: tracksStock ? parsedReorderLevel : null,
       description: description.trim(),
       imagePaths: List.unmodifiable(imagePaths),
       updatedAt: updatedAt,
@@ -225,6 +245,10 @@ abstract final class ProductEditor {
     compare(ProductField.sku, before.sku, after.sku);
     compare(ProductField.category, before.category, after.category);
     compare(ProductField.description, before.description, after.description);
+    // Đổi loại là đổi ý nghĩa của mọi con số còn lại trên sản phẩm (tồn kho
+    // biến mất, "giá vốn" thành "chi phí mỗi lượt bán") — đúng thứ lịch sử
+    // sinh ra để trả lời.
+    compare(ProductField.kind, before.kind.code, after.kind.code);
     compare(
       ProductField.unitPrice,
       _numberText(before.pricePerUnit),
@@ -237,15 +261,17 @@ abstract final class ProductEditor {
       before.costPrice == null ? '' : _numberText(before.costPrice!),
       after.costPrice == null ? '' : _numberText(after.costPrice!),
     );
+    // `null` = "không áp dụng", nên hiện là ô trống. `.toString()` sẽ ghi vào
+    // lịch sử vĩnh viễn dòng chữ `Số lượng: 12 → null`.
     compare(
       ProductField.quantity,
-      before.quantity.toString(),
-      after.quantity.toString(),
+      before.quantity?.toString() ?? '',
+      after.quantity?.toString() ?? '',
     );
     compare(
       ProductField.reorderLevel,
-      before.reorderLevel.toString(),
-      after.reorderLevel.toString(),
+      before.reorderLevel?.toString() ?? '',
+      after.reorderLevel?.toString() ?? '',
     );
     compare(
       ProductField.images,

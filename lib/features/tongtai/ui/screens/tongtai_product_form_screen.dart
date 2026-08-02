@@ -70,10 +70,10 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
   late final TextEditingController _price;
   late final TextEditingController _costPrice;
 
-  /// Loại sản phẩm đang sửa (ADR-TON-023). Sản phẩm mới mặc định `physical` —
+  /// Loại sản phẩm đang chọn (ADR-TON-023). Sản phẩm mới mặc định `physical` —
   /// đó là loại hình phổ biến nhất của người dùng hôm nay, và người bán đổi
-  /// được. Chọn loại là việc của story giao diện Product Type.
-  ProductKind get _kind => widget.product?.kind ?? ProductKind.physical;
+  /// được ngay trên form.
+  late ProductKind _kind;
   late final TextEditingController _quantity;
   late final TextEditingController _reorder;
   late final TextEditingController _description;
@@ -96,6 +96,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     final data = widget.product == null
         ? const ProductFormData()
         : ProductFormData.fromProduct(widget.product!);
+    _kind = data.kind;
     _name = TextEditingController(text: data.name);
     _sku = TextEditingController(text: data.sku);
     _category = TextEditingController(text: data.category);
@@ -148,6 +149,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     sku: _sku.text,
     category: _category.text,
     description: _description.text,
+    kind: _kind,
     priceText: _price.text,
     costPriceText: _costPrice.text,
     quantityText: _quantity.text,
@@ -234,6 +236,16 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
           children: [
+            // Đứng trước mọi ô khác vì nó quyết định các ô sau còn nghĩa hay
+            // không: chọn "Sản phẩm số" thì tồn kho biến mất và "giá vốn" đổi
+            // tên thành "chi phí mỗi lượt bán".
+            _KindPicker(
+              selected: _kind,
+              onSelected: (kind) => setState(() {
+                _kind = kind;
+                if (_submitted) _errors = _validate(_currentData());
+              }),
+            ),
             _field(
               key: const Key('product-name-field'),
               controller: _name,
@@ -297,33 +309,50 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
               ],
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _field(
-                    key: const Key('product-quantity-field'),
-                    controller: _quantity,
-                    field: ProductField.quantity,
-                    hint: '0',
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            // Hai ô này BIẾN MẤT cho loại không có tồn kho, chứ không bị làm
+            // mờ: một ô xám vẫn nói "khái niệm này có thật với bạn, bạn chưa
+            // điền" — và người bán phần mềm sẽ đi tìm cách điền nó.
+            if (_kind.tracksStock)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _field(
+                      key: const Key('product-quantity-field'),
+                      controller: _quantity,
+                      field: ProductField.quantity,
+                      hint: '0',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),
+                  ),
+                  const SizedBox(width: TongtaiDesignTokens.spacing3),
+                  Expanded(
+                    child: _field(
+                      key: const Key('product-reorder-field'),
+                      controller: _reorder,
+                      field: ProductField.reorderLevel,
+                      hint: '0',
+                      optional: true,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),
+                  ),
+                ],
+              )
+            else
+              Padding(
+                key: const Key('product-no-stock-note'),
+                padding: const EdgeInsets.only(
+                  bottom: TongtaiDesignTokens.spacing3,
+                ),
+                child: Text(
+                  context.l10n.productKindNoStockNote,
+                  style: TongtaiDesignTokens.captionStyle.copyWith(
+                    color: TongtaiDesignTokens.lightTextSecondary,
                   ),
                 ),
-                const SizedBox(width: TongtaiDesignTokens.spacing3),
-                Expanded(
-                  child: _field(
-                    key: const Key('product-reorder-field'),
-                    controller: _reorder,
-                    field: ProductField.reorderLevel,
-                    hint: '0',
-                    optional: true,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  ),
-                ),
-              ],
-            ),
+              ),
             const SizedBox(height: TongtaiDesignTokens.spacing4),
             _DescriptionField(
               controller: _description,
@@ -405,6 +434,55 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
             borderSide: BorderSide.none,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Ô chọn loại sản phẩm (WTM-233 / ADR-TON-023).
+///
+/// `ProductKind` đã có trong miền từ WTM-227 nhưng **không có đường nào để
+/// người bán chọn**, nên với họ ADR chưa hề xảy ra: mọi sản phẩm mới vẫn là
+/// hàng vật lý và một phần mềm vẫn phải mang một con số tồn kho.
+///
+/// Suy thẳng từ `ProductKind.values` — chép tay danh sách là đúng lỗi vừa bắt
+/// được ở WTM-232, nơi kịch bản onboarding giữ bảy mã trong khi enum đã có
+/// mười.
+class _KindPicker extends StatelessWidget {
+  const _KindPicker({required this.selected, required this.onSelected});
+
+  final ProductKind selected;
+  final ValueChanged<ProductKind> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.productKindLabel,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              fontWeight: FontWeight.w600,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          Wrap(
+            spacing: TongtaiDesignTokens.spacing2,
+            runSpacing: TongtaiDesignTokens.spacing1,
+            children: [
+              for (final kind in ProductKind.values)
+                ChoiceChip(
+                  key: Key('product-kind-${kind.code}'),
+                  label: Text(context.l10n.productKindName(kind.code)),
+                  selected: kind == selected,
+                  onSelected: (_) => onSelected(kind),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -784,6 +862,7 @@ class _SaveCancelBar extends StatelessWidget {
             Expanded(
               flex: 2,
               child: FilledButton(
+                key: const Key('product-save-button'),
                 onPressed: onSave,
                 style: FilledButton.styleFrom(
                   backgroundColor: TongtaiDesignTokens.inventoryOrangeText,
