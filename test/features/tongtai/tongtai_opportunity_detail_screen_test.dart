@@ -16,6 +16,7 @@ import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_feed_controller.dart';
+import 'package:tongtai/features/tongtai/ui/screens/tongtai_journey_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
 
@@ -36,7 +37,14 @@ void main() {
 
   testWidgets('renders title, score and the action plan', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: TongtaiOpportunityDetailScreen(opportunity: sample)),
+      // WTM-223: the screen now READS the journey in `build` (to show whether
+      // this opportunity is already in it), so it needs a scope — these bare
+      // pumps only ever worked because nothing touched `ref`.
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiOpportunityDetailScreen(opportunity: sample),
+        ),
+      ),
     );
 
     expect(find.byKey(const Key('opportunity-detail-title')), findsOneWidget);
@@ -54,10 +62,12 @@ void main() {
   testWidgets('the Interested button calls back', (tester) async {
     var interested = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: TongtaiOpportunityDetailScreen(
-          opportunity: sample,
-          onInterested: () => interested = true,
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiOpportunityDetailScreen(
+            opportunity: sample,
+            onInterested: () => interested = true,
+          ),
         ),
       ),
     );
@@ -82,10 +92,12 @@ void main() {
   ) async {
     var toggles = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: TongtaiOpportunityDetailScreen(
-          opportunity: sample,
-          onToggleSaved: () => toggles++,
+      ProviderScope(
+        child: MaterialApp(
+          home: TongtaiOpportunityDetailScreen(
+            opportunity: sample,
+            onToggleSaved: () => toggles++,
+          ),
         ),
       ),
     );
@@ -263,21 +275,49 @@ void main() {
       expect(find.textContaining('No journey is running'), findsOneWidget);
     });
 
-    testWidgets('tapping twice does not duplicate the commitment', (
+    testWidgets('the RESULT replaces the button, and leads on to the journey', (
       tester,
     ) async {
+      // Business Loop beats 3 and 4 (Founder 2026-08-02): "thấy kết quả" and
+      // "biết bước tiếp theo" must OUTLIVE the action. A snackbar is
+      // explicitly not the end of a business flow — it vanishes in seconds,
+      // leaving a seller who looked away with a decision they made and no
+      // trace of where it went.
+      //
+      // This replaces the old "tapping twice does not duplicate" test: the
+      // second tap is now impossible because the button is gone once the
+      // work exists. The repository-level guard in `_addToJourney` stays as
+      // defence in depth for a stale screen.
       useTallViewport(tester);
       await seedActiveJourney();
       await tester.pumpWidget(host());
 
       await tapAdd(tester);
-      await tapAdd(tester);
+      await tester.pumpAndSettle();
+      // Let every snackbar time out: whatever remains is the real answer.
+      await tester.pump(const Duration(seconds: 10));
+      await tester.pumpAndSettle();
 
-      final nodes = (await journeys.loadAll()).single.nodes.where(
-        (n) => n.sourceOpportunityId == 'o1',
+      expect(
+        (await journeys.loadAll()).single.nodes.where(
+          (n) => n.sourceOpportunityId == 'o1',
+        ),
+        hasLength(1),
       );
-      expect(nodes, hasLength(1));
-      expect(find.textContaining('Already in the journey'), findsOneWidget);
+      expect(find.byKey(const Key('opportunity-in-journey')), findsOneWidget);
+      expect(
+        find.byKey(const Key('opportunity-detail-add-to-journey')),
+        findsNothing,
+        reason: 'the button is replaced by its result, not left to repeat',
+      );
+
+      await tester.tapByKey(
+        'opportunity-open-journey',
+        scrollableUnder: 'opportunity-detail-list',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TongtaiJourneyScreen), findsOneWidget);
     });
   });
 }
