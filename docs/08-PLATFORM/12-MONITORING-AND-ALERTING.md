@@ -115,10 +115,21 @@ lách**. Vậy nên hiện trạng chính xác là:
 hoàn thành"*. Cấu hình đúng và cảnh báo thật sự kêu là **hai chuyện khác nhau**,
 và tôi mới chứng minh được chuyện thứ nhất.
 
-**Cách đóng nốt (cần Founder đồng ý vì có downtime chủ ý):** dừng container `n8n`
-~8 phút, xem `probe_success` xuống 0, rule đi `Normal → Pending → Alerting`, email
-tới, rồi bật lại. Kịch bản đã viết sẵn:
-`scratchpad/alert-drill.sh`.
+**Quyết định của Founder (2026-08-02): KHÔNG diễn tập.** Được hỏi giữa ba lựa
+chọn — chạy diễn tập ~8 phút downtime · để treo ở QA · chờ tới khi có sự cố thật
+— Founder chọn **chờ sự cố thật**.
+
+⇒ Đây là một **đánh đổi có chủ ý, không phải việc bỏ quên**. Ghi lại để người đọc
+sau không tưởng là sót:
+
+| | |
+|---|---|
+| Được gì | không có downtime chủ ý; tiết kiệm thời gian ngay lúc này |
+| Mất gì | **lần n8n chết thật sẽ là lần kiểm đầu tiên.** Nếu rule sai, ta phát hiện đúng lúc đang cần nó nhất |
+| Rẻ nhất khi nào | **bây giờ** — n8n chưa có người dùng, chưa có connector nào chạy theo lịch |
+
+Kịch bản diễn tập vẫn giữ, chạy được bất cứ lúc nào: dừng container `n8n`, xem
+`probe_success` xuống 0, rule đi `Normal → Pending → Alerting`, email tới, bật lại.
 
 ---
 
