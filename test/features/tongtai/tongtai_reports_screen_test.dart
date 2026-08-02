@@ -332,7 +332,15 @@ void main() {
     await tester.pumpWidget(host(service: ReportsService([])));
     await tester.pumpAndSettle();
 
-    expect(find.byType(TongtaiFoxMascot), findsOneWidget);
+    // Scoped to the empty state (WTM-216 added a header fox) — the claim is
+    // "the empty state greets you with the fox", not "one fox exists".
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('reports-empty')),
+        matching: find.byType(TongtaiFoxMascot),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('No revenue to report yet'), findsOneWidget);
     expect(find.byKey(const Key('reports-kpi-revenue')), findsNothing);
   });

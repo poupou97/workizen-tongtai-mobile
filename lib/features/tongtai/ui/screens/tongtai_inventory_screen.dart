@@ -15,7 +15,7 @@ import '../../providers/tongtai_inventory_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import 'tongtai_product_form_screen.dart';
 import '../widgets/tongtai_screen_data.dart';
-import '../widgets/tongtai_more_action.dart';
+import '../widgets/tongtai_screen_header.dart';
 import 'tongtai_stock_alerts_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
@@ -159,12 +159,11 @@ class _TongtaiInventoryScreenState
         final alerts = StockAlertService(_catalog.products);
         return Scaffold(
           backgroundColor: TongtaiDesignTokens.lightBackground,
-          appBar: AppBar(
-            title: Text(context.l10n.navInventory),
-            elevation: 0,
-            backgroundColor: TongtaiDesignTokens.lightBackground,
-            foregroundColor: TongtaiDesignTokens.lightTextPrimary,
-            actions: const [TongtaiMoreAction()],
+          appBar: tongtaiScreenHeader(
+            context,
+            screen: 'inventory',
+            title: context.l10n.navInventory,
+            subtitle: tongtaiScreenSubtitle(context.l10n, 'inventory'),
           ),
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('inventory-action-add'),

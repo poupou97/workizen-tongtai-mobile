@@ -145,6 +145,9 @@ class TongtaiScreenData<T> extends StatelessWidget {
       );
     }
     if (isEmpty?.call(value) ?? false) {
+      // A custom empty view carries the `<prefix>-empty` stable ID itself
+      // (ADR-TON-015 §3) — wrapping it here would double the key on the
+      // screens that already do so.
       return emptyBuilder?.call(context) ??
           TongtaiEmptyView(prefix: prefix, message: emptyMessage);
     }
