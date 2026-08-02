@@ -7,6 +7,12 @@ import '../../journey/journey_node.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../widgets/tongtai_screen_data.dart' show TongtaiAsyncScreenData;
+import 'tongtai_opportunity_feed_screen.dart';
+import 'tongtai_inventory_screen.dart';
+import 'tongtai_finance_screen.dart';
+import 'tongtai_customer_list_screen.dart';
+import '../../journey/journey_metric.dart';
+import '../../journey/journey_controller.dart';
 
 /// The journey, shown as the tiered plan the Concept describes (WTM-187).
 ///
@@ -54,18 +60,65 @@ class TongtaiJourneyScreen extends ConsumerWidget {
               (j) => j.state == JourneyState.active,
               orElse: () => list.first,
             );
-            return _JourneyPlan(journey: journey);
+            return _JourneyPlan(
+              journey: journey,
+              onDo: (d) => _openDestination(context, ref, d),
+            );
           },
         ),
       ),
     );
   }
+
+  /// Opens the capability a step's work happens in, then **closes the loop**
+  /// (WTM-220).
+  ///
+  /// `push`, deliberately — not a tab switch: popping puts the seller back on
+  /// the journey they left, which is the third thing the Founder's rule asks
+  /// for ("đi tới được · hoàn thành được luồng · **quay lại Journey**").
+  ///
+  /// On the way back the journey re-measures itself. `refreshDerived` has
+  /// existed since WTM-187 with **no production caller at all**, so a step tied
+  /// to `expenses >= 5` never actually ticked itself: the journey could only
+  /// ever tell the seller what to do, never notice they had done it. This is
+  /// that missing engine, run at the one moment it matters — the seller just
+  /// came back from doing the work.
+  Future<void> _openDestination(
+    BuildContext context,
+    WidgetRef ref,
+    JourneyDestination destination,
+  ) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => switch (destination) {
+          JourneyDestination.finance => const TongtaiFinanceScreen(),
+          JourneyDestination.customers => const TongtaiCustomerListScreen(),
+          JourneyDestination.inventory => const TongtaiInventoryScreen(),
+          JourneyDestination.opportunity =>
+            const TongtaiOpportunityFeedScreen(),
+        },
+      ),
+    );
+
+    final journeys = await ref.read(journeysProvider.future);
+    final active = journeys.where((j) => j.state == JourneyState.active);
+    if (active.isNotEmpty) {
+      final metrics = await ref.refresh(journeyMetricsProvider.future);
+      await JourneyController(
+        ref.read(journeyRepositoryProvider),
+      ).refreshDerived(active.first, metrics);
+    }
+    // Re-read whatever `refreshDerived` may have written, so the seller sees
+    // the step tick the moment they land back here.
+    ref.invalidate(journeysProvider);
+  }
 }
 
 class _JourneyPlan extends StatelessWidget {
-  const _JourneyPlan({required this.journey});
+  const _JourneyPlan({required this.journey, required this.onDo});
 
   final Journey journey;
+  final ValueChanged<JourneyDestination> onDo;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +144,7 @@ class _JourneyPlan extends StatelessWidget {
           _ProgressHeader(label: l10n.journeyProgress, value: completion),
         const SizedBox(height: TongtaiDesignTokens.spacing5),
         for (final milestone in roots) ...[
-          _MilestoneTile(milestone: milestone, journey: journey),
+          _MilestoneTile(milestone: milestone, journey: journey, onDo: onDo),
           const SizedBox(height: TongtaiDesignTokens.spacing5),
         ],
       ],
@@ -133,7 +186,13 @@ class _ProgressHeader extends StatelessWidget {
 }
 
 class _MilestoneTile extends StatelessWidget {
-  const _MilestoneTile({required this.milestone, required this.journey});
+  const _MilestoneTile({
+    required this.milestone,
+    required this.journey,
+    required this.onDo,
+  });
+
+  final ValueChanged<JourneyDestination> onDo;
 
   final JourneyNode milestone;
   final Journey journey;
@@ -188,7 +247,7 @@ class _MilestoneTile extends StatelessWidget {
               left: TongtaiDesignTokens.spacing8,
               top: TongtaiDesignTokens.spacing3,
             ),
-            child: _StepTile(step: step),
+            child: _StepTile(step: step, onDo: onDo),
           ),
       ],
     );
@@ -196,13 +255,17 @@ class _MilestoneTile extends StatelessWidget {
 }
 
 class _StepTile extends StatelessWidget {
-  const _StepTile({required this.step});
+  const _StepTile({required this.step, required this.onDo});
 
   final JourneyNode step;
+
+  /// Opens the capability where this step's work happens (WTM-220).
+  final ValueChanged<JourneyDestination> onDo;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final destination = journeyNodeDestination(step);
     return Column(
       key: Key('journey-step-${step.id}'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,6 +309,18 @@ class _StepTile extends StatelessWidget {
                 _Tag(
                   key: Key('journey-step-measured-${step.id}'),
                   label: l10n.journeyMeasured,
+                ),
+              // The step that closes the loop (WTM-220). Until this button
+              // existed the journey named the work and then abandoned the
+              // seller: no way from "ghi 5 khoản chi" to the place expenses
+              // are recorded. Only on steps that are still open and have an
+              // honest destination — a button that goes nowhere is worse than
+              // no button (WTM-169).
+              if (!step.isDone && destination != null)
+                TextButton(
+                  key: Key('journey-step-do-${step.id}'),
+                  onPressed: () => onDo(destination),
+                  child: Text(l10n.journeyDoStep),
                 ),
             ],
           ),

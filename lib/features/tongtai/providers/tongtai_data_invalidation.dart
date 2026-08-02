@@ -65,6 +65,11 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // the AI as if it were this seller's. Same shape as the WTM-149 defect.
   journeysProvider,
   activeJourneyProvider,
+  // The numbers the journey measures its steps against (WTM-220). A restore
+  // swaps the whole business, so a cached snapshot here would tick steps
+  // against the PREVIOUS seller's counts — a journey marking work done that
+  // this business never did.
+  journeyMetricsProvider,
   // Opportunity reactions (WTM-190). The generated feed above is invalidated
   // already, but the reactions layered on top of it is a separate read: without
   // this, a restore would show the incoming business's opportunities carrying

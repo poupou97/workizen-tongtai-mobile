@@ -403,6 +403,9 @@ abstract class AppStrings {
   /// Vietnamese build showed "Stock alerts: 4 out of stock • 2 low".
   String invStockAlerts(String parts);
 
+  /// Nút mở capability nơi một bước hành trình được làm (WTM-220).
+  String get journeyDoStep;
+
   /// Concept-1 screen headers (WTM-216) — one line saying what a screen is for.
   String get subtitleProducer;
   String get subtitleInventory;
@@ -1419,6 +1422,8 @@ class AppStringsVi extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Cảnh báo tồn kho: $parts';
+  @override
+  String get journeyDoStep => 'Làm ngay';
   @override
   String get subtitleProducer => 'Tìm cơ hội & nguồn hàng';
   @override
@@ -2826,6 +2831,8 @@ class AppStringsEn extends AppStrings {
   @override
   @override
   String invStockAlerts(String parts) => 'Stock alerts: $parts';
+  @override
+  String get journeyDoStep => 'Do it now';
   @override
   String get subtitleProducer => 'Find opportunities and suppliers';
   @override

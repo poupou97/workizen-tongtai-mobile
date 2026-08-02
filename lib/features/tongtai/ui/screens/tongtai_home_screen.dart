@@ -35,6 +35,8 @@ import 'tongtai_reports_screen.dart';
 import 'tongtai_unified_search_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
+import '../../journey/journey_metric.dart';
+import 'tongtai_opportunity_feed_screen.dart';
 
 /// Home dashboard for Tổng Tài — the app's front door.
 ///
@@ -226,8 +228,12 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     ).push(MaterialPageRoute(builder: (_) => const TongtaiChatScreen()));
   }
 
-  void _push(BuildContext context, Widget screen) {
-    Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => screen));
+  /// Returns when the pushed screen is popped — WTM-220 needs that moment to
+  /// re-measure the journey the seller just did work for.
+  Future<void> _push(BuildContext context, Widget screen) {
+    return Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => screen));
   }
 
   /// The mission tiles, or the honest state that explains what to do next.
@@ -269,9 +275,49 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       for (final node in shown.take(3))
         _JourneyMissionTile(
           node: node,
-          onOpen: () => _push(context, const TongtaiJourneyScreen()),
+          // WTM-220: a mission tile opens the WORK, not a list of missions.
+          // Sending the seller to the journey screen was a half-step — they
+          // already know what the mission is; what they lacked was the door.
+          // Steps with nowhere honest to go still open the journey, where the
+          // full plan and its provenance live.
+          onOpen: () async {
+            final destination = journeyNodeDestination(node);
+            if (destination == null) {
+              _push(context, const TongtaiJourneyScreen());
+              return;
+            }
+            await _push(context, _destinationScreen(destination));
+            if (!mounted) return;
+            await _refreshJourneyProgress();
+          },
         ),
     ];
+  }
+
+  /// The screen a journey step's work happens in (WTM-220). The mapping rule
+  /// itself lives in the domain (`journeyNodeDestination`) — this only turns
+  /// its answer into a widget.
+  Widget _destinationScreen(JourneyDestination destination) =>
+      switch (destination) {
+        JourneyDestination.finance => const TongtaiFinanceScreen(),
+        JourneyDestination.customers => const TongtaiCustomerListScreen(),
+        JourneyDestination.inventory => const TongtaiInventoryScreen(),
+        JourneyDestination.opportunity => const TongtaiOpportunityFeedScreen(),
+      };
+
+  /// Re-measures the journey after the seller comes back from doing the work,
+  /// so Home's mission block reflects it immediately (WTM-220).
+  Future<void> _refreshJourneyProgress() async {
+    final journeys = await ref.read(journeysProvider.future);
+    final active = journeys.where((j) => j.state == JourneyState.active);
+    if (active.isNotEmpty) {
+      final metrics = await ref.refresh(journeyMetricsProvider.future);
+      await JourneyController(
+        ref.read(journeyRepositoryProvider),
+      ).refreshDerived(active.first, metrics);
+    }
+    ref.invalidate(journeysProvider);
+    if (mounted) await _data.refresh();
   }
 
   /// Plans and stores a journey for the seller's first goal (WTM-210).

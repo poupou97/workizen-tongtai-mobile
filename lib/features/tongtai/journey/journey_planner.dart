@@ -19,6 +19,7 @@ library;
 import '../profile/business_profile.dart';
 import 'business_goal.dart';
 import 'journey.dart';
+import 'journey_metric.dart';
 import 'journey_node.dart';
 
 /// What the planner knows about the business right now.
@@ -227,10 +228,10 @@ List<_Milestone> _revenuePlan(JourneyPlanInput input) {
     // profit-reading steps instead. Before this, everyone got the same two
     // manual ticks regardless of their data.
     if (input.expenseCount == 0)
-      const _Milestone('Biết tiền đang đi đâu', [
+      _Milestone('Biết tiền đang đi đâu', [
         _Step(
           'Ghi 5 khoản chi đầu tiên',
-          metric: 'expenses',
+          metric: JourneyMetric.expenses.code,
           target: 5,
           reasonCodes: [JourneyReason.dataEmptyExpenses],
         ),
@@ -243,7 +244,7 @@ List<_Milestone> _revenuePlan(JourneyPlanInput input) {
     _Milestone('Bán được nhiều hơn cho khách đang có', [
       _Step(
         'Liên hệ lại 10 khách mua gần nhất',
-        metric: 'customers',
+        metric: JourneyMetric.customers.code,
         target: 10,
         reasonCodes: const [JourneyReason.dataHasHistory],
       ),
@@ -260,7 +261,7 @@ List<_Milestone> _revenuePlan(JourneyPlanInput input) {
         [
           _Step(
             'Thu nợ ${input.debtorCount} khách đang thiếu tiền',
-            metric: 'receivables',
+            metric: JourneyMetric.receivables.code,
             // Completion = the outstanding amount drops to under half of what
             // it is today. refreshDerived only moves forward, so a new debt
             // later does not un-finish the work.
@@ -273,7 +274,7 @@ List<_Milestone> _revenuePlan(JourneyPlanInput input) {
     _Milestone('Chạm mốc doanh thu', [
       _Step(
         'Đạt ${_money(target)} doanh thu',
-        metric: 'revenue',
+        metric: JourneyMetric.revenue.code,
         target: target,
       ),
     ]),
@@ -301,7 +302,11 @@ List<_Milestone> _newChannelPlan(JourneyPlanInput input) {
       reasonCodes: const [JourneyReason.goalNewChannel],
     ),
     _Milestone('Đưa hàng lên kênh mới', [
-      _Step('Đăng 10 sản phẩm đầu tiên', metric: 'products', target: 10),
+      _Step(
+        'Đăng 10 sản phẩm đầu tiên',
+        metric: JourneyMetric.products.code,
+        target: 10,
+      ),
       const _Step('Đặt giá đã tính phí kênh và phí ship'),
     ]),
     _Milestone('Có đơn đầu tiên từ kênh mới', [
@@ -317,7 +322,7 @@ List<_Milestone> _customerGrowthPlan(JourneyPlanInput input) {
       const _Step('Xem danh sách khách sắp rời bỏ'),
       _Step(
         'Liên hệ lại 5 khách rủi ro cao nhất',
-        metric: 'customers',
+        metric: JourneyMetric.customers.code,
         target: 5,
       ),
     ]),
@@ -334,9 +339,9 @@ List<_Milestone> _customerGrowthPlan(JourneyPlanInput input) {
       // first-expenses step; a seller already recording is asked to book the
       // acquisition costs specifically.
       if (input.expenseCount == 0)
-        const _Step(
+        _Step(
           'Ghi 5 khoản chi đầu tiên',
-          metric: 'expenses',
+          metric: JourneyMetric.expenses.code,
           target: 5,
           reasonCodes: [JourneyReason.dataEmptyExpenses],
         )
@@ -346,7 +351,7 @@ List<_Milestone> _customerGrowthPlan(JourneyPlanInput input) {
     _Milestone('Chạm mốc số khách', [
       _Step(
         'Đạt ${input.goal.growthTarget} khách mới',
-        metric: 'customers',
+        metric: JourneyMetric.customers.code,
         target: input.goal.growthTarget.toDouble(),
       ),
     ]),

@@ -4,6 +4,12 @@ import '../journey/business_goal_repository.dart';
 import '../journey/journey.dart';
 import '../journey/journey_repository.dart';
 import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
+import 'tongtai_orders_provider.dart';
+import 'tongtai_inventory_provider.dart';
+import 'tongtai_finance_provider.dart';
+import 'tongtai_consumer_provider.dart';
+import '../metrics/business_metrics.dart';
+import '../journey/journey_metric.dart';
 
 /// The real, persistent Business Journey source (WTM-124) — Drift over the local
 /// business's goals. **User Data First**: a new user starts with no goals; the
@@ -34,3 +40,25 @@ final journeysProvider = FutureProvider<List<Journey>>(
 final activeJourneyProvider = FutureProvider<Journey?>(
   (ref) => ref.watch(journeyRepositoryProvider).loadActive(),
 );
+
+/// The real numbers the journey measures its steps against (WTM-220).
+///
+/// Assembled from the owners, never recomputed here: revenue via
+/// [BusinessMetrics] (ADR-TON-011), counts straight from the repositories.
+/// One provider, so a step cannot mean one thing on Home and another on the
+/// journey screen.
+final journeyMetricsProvider = FutureProvider<Map<String, double>>((ref) async {
+  final orders = await ref.watch(orderRepositoryProvider).loadAll();
+  final customers = await ref.watch(customerRepositoryProvider).loadAll();
+  final products = await ref.watch(productRepositoryProvider).loadAll();
+  final finance = await ref.watch(financeRepositoryProvider).loadAll();
+  return journeyMetrics(
+    productCount: products.length,
+    customerCount: customers.length,
+    expenseCount: finance.length,
+    revenue: BusinessMetrics.from(
+      orders: orders,
+      customersCount: customers.length,
+    ).revenue,
+  );
+});
