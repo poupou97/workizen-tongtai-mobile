@@ -20,6 +20,10 @@ import 'tongtai_customer_history_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../providers/tongtai_data_invalidation.dart';
+import '../../opportunity/opportunity.dart';
+import '../../opportunity/opportunity_for.dart';
+import '../../providers/tongtai_context_provider.dart';
+import 'tongtai_opportunity_detail_screen.dart';
 
 /// Color for a [CustomerTier] badge (WTM-75 AC: visual indicators for VIP /
 /// high-value customers). Pulled out as a pure function so the mapping is
@@ -298,6 +302,9 @@ class _TongtaiCustomerListScreenState
                       onEdit: (customer) =>
                           _openForm(context, customer: customer),
                       onHistory: (customer) => _openHistory(context, customer),
+                      opportunities:
+                          ref.watch(generatedOpportunitiesProvider).value ??
+                          const [],
                     ),
                   ),
                 ),
@@ -516,11 +523,16 @@ class _CustomerList extends StatelessWidget {
     required this.customers,
     required this.onEdit,
     required this.onHistory,
+    this.opportunities = const [],
   });
 
   final List<Customer> customers;
   final ValueChanged<Customer> onEdit;
   final ValueChanged<Customer> onHistory;
+
+  /// What the Rule Engine already generated (WTM-225) — read, never recomputed
+  /// here: Consumer does not get its own idea of who has gone quiet.
+  final List<Opportunity> opportunities;
 
   @override
   Widget build(BuildContext context) {
@@ -538,6 +550,9 @@ class _CustomerList extends StatelessWidget {
         customer: customers[index],
         onTap: () => onEdit(customers[index]),
         onHistory: () => onHistory(customers[index]),
+        // The fifth beat: this customer has gone quiet, and the product has
+        // already worked out what to do about it.
+        opportunity: opportunities.winBackFor(customers[index].id),
       ),
     );
   }
@@ -548,11 +563,17 @@ class _CustomerRow extends StatelessWidget {
     required this.customer,
     required this.onTap,
     required this.onHistory,
+    this.opportunity,
   });
 
   final Customer customer;
   final VoidCallback onTap;
   final VoidCallback onHistory;
+
+  /// The win-back opportunity generated for this customer, if any. `null` for
+  /// a customer who is not quiet — a button to an opportunity that does not
+  /// exist is the WTM-169 defect.
+  final Opportunity? opportunity;
 
   @override
   Widget build(BuildContext context) {
@@ -633,6 +654,24 @@ class _CustomerRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: TongtaiDesignTokens.spacing1),
+                if (opportunity case final o?) ...[
+                  TextButton(
+                    key: Key('customer-opportunity-${customer.id}'),
+                    onPressed: () => Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            TongtaiOpportunityDetailScreen(opportunity: o),
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 32),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(context.l10n.customerSeeOpportunity),
+                  ),
+                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                ],
                 Text(
                   customer.orderCount == 1
                       ? '1 order'

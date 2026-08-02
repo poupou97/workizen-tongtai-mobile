@@ -428,6 +428,10 @@ abstract class AppStrings {
   String get subtitleReports;
 
   /// Concept-1 inventory overview card (WTM-215).
+  /// CTA nối nơi thấy vấn đề tới cơ hội engine đã sinh (WTM-225).
+  String get stockSeeOpportunity;
+  String get customerSeeOpportunity;
+
   String get invOverviewTitle;
   String get invOverviewProducts;
   String get invOverviewValue;
@@ -1467,6 +1471,10 @@ class AppStringsVi extends AppStrings {
   String get subtitleFinance => 'Quản lý tài chính doanh nghiệp';
   @override
   String get subtitleReports => 'Báo cáo & phân tích kinh doanh';
+  @override
+  String get stockSeeOpportunity => 'Xem cơ hội nhập hàng';
+  @override
+  String get customerSeeOpportunity => 'Xem cơ hội mời khách quay lại';
   @override
   String get invOverviewTitle => 'Tổng quan tồn kho';
   @override
@@ -2894,6 +2902,10 @@ class AppStringsEn extends AppStrings {
   String get subtitleFinance => 'Business finances';
   @override
   String get subtitleReports => 'Business reports and analytics';
+  @override
+  String get stockSeeOpportunity => 'See the restock opportunity';
+  @override
+  String get customerSeeOpportunity => 'See the win-back opportunity';
   @override
   String get invOverviewTitle => 'Inventory overview';
   @override
