@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../finance/finance_category.dart';
+
 /// Loại nguồn đầu vào (ADR-TON-023).
 ///
 /// Producer **không phải** danh bạ nhà cung cấp — nó là capability quản lý
@@ -34,6 +36,23 @@ enum BusinessInputKind {
     }
     return null;
   }
+
+  /// Nhóm chi phí một khoản tiền trả cho nguồn này thuộc về (WTM-236).
+  ///
+  /// Một nguồn đầu vào và khoản tiền trả cho nó là **hai mặt của cùng một sự
+  /// việc**, nên ánh xạ này phải tồn tại ở đúng một chỗ. Ba loại dùng chung mã
+  /// với `FinanceCategory`; hai loại còn lại đã có nhóm sẵn từ trước — nhà
+  /// cung cấp hàng hoá là tiền nhập hàng, và người là chi phí nhân sự.
+  ///
+  /// Hàm này **toàn phần**: không loại nào rơi vào "Khác", vì rơi vào "Khác"
+  /// chính là vấn đề dogfood tìm ra.
+  FinanceCategory get financeCategory => switch (this) {
+    BusinessInputKind.supplier => FinanceCategory.productCost,
+    BusinessInputKind.provider => FinanceCategory.provider,
+    BusinessInputKind.infrastructure => FinanceCategory.infrastructure,
+    BusinessInputKind.tooling => FinanceCategory.tooling,
+    BusinessInputKind.people => FinanceCategory.staff,
+  };
 }
 
 /// Nhịp trả tiền của một nguồn đầu vào.

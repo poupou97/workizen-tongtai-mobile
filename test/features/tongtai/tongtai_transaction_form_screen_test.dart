@@ -71,7 +71,7 @@ void main() {
       find.byKey(const Key('transaction-amount')),
       '1500000',
     );
-    await tester.tap(find.byKey(const Key('transaction-cat-Bán hàng')));
+    await tester.tap(find.byKey(const Key('transaction-cat-sales')));
     await tester.pump();
 
     await tester.tap(find.byKey(const Key('transaction-save')));

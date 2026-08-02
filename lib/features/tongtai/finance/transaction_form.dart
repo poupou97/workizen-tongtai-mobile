@@ -7,16 +7,23 @@ import 'finance_transaction.dart';
 /// Validation fields for the transaction form (WTM-113).
 enum TransactionField { amount, category }
 
-/// Common categories offered as quick-pick chips, per direction (WTM-113).
-const List<String> kIncomeCategories = ['Bán hàng', 'Khác'];
-const List<String> kExpenseCategories = [
-  'Nhập hàng',
-  'Thuê mặt bằng',
-  'Quảng cáo',
-  'Vận chuyển',
-  'Phí sàn',
-  'Khác',
-];
+/// Nhóm gợi ý cho mỗi chiều tiền, **suy từ vựng từ** (WTM-236).
+///
+/// Trước đây là hai danh sách **nhãn tiếng Việt chép tay**. Ba hệ quả, cả ba
+/// đều thật: người bán không bao giờ chọn được `staff` (enum có, danh sách
+/// không); bản tiếng Anh hiện chip tiếng Việt — mà lưới l10n chỉ quét `ui/`
+/// nên mù với file này (P-23/P-29: governance chỉ bắt thứ nó được viết để
+/// tìm); và mỗi mã thêm vào enum lại phải nhớ sửa tay ở đây (P-31).
+///
+/// Nay suy thẳng: chi = mọi nhóm **trừ** nhóm thu; thu = bán hàng + khác. Thứ
+/// tự lấy theo thứ tự khai trong enum, nên `other` vẫn nằm cuối.
+List<FinanceCategory> transactionCategories(TransactionType type) =>
+    type == TransactionType.income
+    ? const [FinanceCategory.sales, FinanceCategory.other]
+    : [
+        for (final c in FinanceCategory.values)
+          if (!c.isIncome) c,
+      ];
 
 /// Immutable snapshot of the Add Transaction form (WTM-113).
 ///
