@@ -716,6 +716,16 @@ abstract class AppStrings {
   String get forecastVsPrevious;
   String get forecastWhy;
   String get forecastRuleBased;
+
+  /// Câu miễn trừ cho mọi con số mang tính phán đoán (WTM-280).
+  ///
+  /// Đặt **ngay cạnh con số**, không phải trong một trang điều khoản — người
+  /// bán đọc nó đúng lúc đang nhìn con số và sắp quyết định theo nó.
+  ///
+  /// Câu chữ phải giữ đúng ADR-TON-016: số đến từ **phép tính trên dữ liệu của
+  /// chính người bán** (Rule Twin), AI chỉ giải thích. Cấm ngụ ý "AI tính ra
+  /// con số này".
+  String get estimateDisclaimer;
   String get riskStageActive;
   String get riskStageCooling;
   String get riskStageAtRisk;
@@ -2106,6 +2116,11 @@ class AppStringsVi extends AppStrings {
   String get forecastWhy => 'Vì sao';
   @override
   String get forecastRuleBased => 'Quy tắc (không cần AI)';
+
+  @override
+  String get estimateDisclaimer =>
+      'Đây là ước tính tính từ dữ liệu bán hàng của chính bạn — không phải '
+      'cam kết. Quyết định cuối cùng vẫn là của bạn.';
   @override
   String get riskStageActive => 'Đang mua';
   @override
@@ -3635,6 +3650,11 @@ class AppStringsEn extends AppStrings {
   String get forecastWhy => 'Why';
   @override
   String get forecastRuleBased => 'Rule-based (no AI needed)';
+
+  @override
+  String get estimateDisclaimer =>
+      'These are estimates calculated from your own sales data — not a '
+      'promise. The final call is yours.';
   @override
   String get riskStageActive => 'Active';
   @override
