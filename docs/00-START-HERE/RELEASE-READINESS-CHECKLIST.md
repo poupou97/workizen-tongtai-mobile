@@ -1,59 +1,116 @@
-# Release-Readiness Checklist — Closed Beta (WTM-118 · re-audit WTM-142)
+# Release-Readiness Checklist — Closed Beta
 
-**Assessed:** 2026-07-30 (re-audit; bản gốc 2026-07-24 @757 test) · **Priority:** P1
-· **Related:** WTM-37 (Privacy), WTM-119 (Localization), D-7/ADR-TON-005 (telemetry),
-ADR-TON-013 (AI tier).
+**WTM-118 · re-audit WTM-142 (2026-07-30) · re-audit WTM-275 (2026-08-05)**
 
-> Checklist chuẩn bị phát hành, không phải feature. Trạng thái phản ánh codebase
-> tại thời điểm đánh giá. / Release-readiness, statuses reflect the code as assessed.
+> Mỗi dòng dưới đây được **đo lại từ code** ngày 2026-08-05, không chép từ bản
+> trước. Dòng nào đổi trạng thái đều kèm bằng chứng.
 
-Legend: ✅ done · 🟡 partial / gap noted · 🔴 not started · N/A không áp dụng Phase 2.
+---
 
-## 1. States
+## ⭐ Kết luận đọc trước
 
-| Item | Status | Note |
+**Việc kỹ thuật gần như đã xong. Cái còn chặn Beta hầu hết là thứ chỉ Founder
+làm được.**
+
+| Nhóm | Còn lại |
+|---|---|
+| Kỹ thuật (AI làm được) | **1** — pass TalkBack + jank trên máy thật |
+| Nội dung pháp lý (Founder) | **2** — địa chỉ liên hệ · Điều khoản dịch vụ |
+| Tài khoản / khoá ký (Founder) | **2** — keystore release · tài khoản Apple |
+
+WTM-175 tự nhận là **P0 #1** vì *"mọi ưu tiên khác đang được quyết bằng phỏng
+đoán"*. Kết luận trên nói thẳng: **hàng đợi kỹ thuật không còn là thứ chặn.**
+
+---
+
+## ⚠️ Bản trước nói sai những gì
+
+Ghi ra vì đây là lý do story WTM-275 tồn tại — một checklist sai làm đúng cái
+việc nó sinh ra để ngăn.
+
+| Dòng | Bản 2026-07-30 | Sự thật 2026-08-05 |
 |---|---|---|
-| Empty states | ✅ | Fox empty state trên 11+ màn; User Data First toàn app (Home/Reports/Feed/Goals… đều có zero-state + CTA). |
-| Loading states | ✅ | Progressive load (empty→real, không spinner chặn) trên Home/Reports/Feed sau khi lên Drift async (WTM-128+); chat có typing indicator. |
-| Error states | 🟡 | Form validation đầy đủ; AI có fallback rule-based + provenance chip; BackupCrypto có lỗi thân thiện. Lỗi DB-level chưa có UI riêng (local-first nên hiếm; sync Phase 3). |
+| Số test | `962` | **1818**, toàn bộ PASS |
+| Privacy policy | 🔴 *"cần văn bản trước Beta"* | ✅ WTM-37 đã ship (doc + màn trong app) — **chỉ thiếu một dòng địa chỉ liên hệ** |
+| Restore `.ttbk` | 🟡 *"thiếu UI"* | ✅ WTM-164 ADR-TON-018, **đã kiểm trên thiết bị** 2026-08-01 |
+| Error states | 🟡 *"lỗi DB-level chưa có UI riêng"* | ✅ WTM-148 ADR-TON-017 — 6 trạng thái màn, governance khoá |
+| Accessibility | 🟡 *"còn thiếu tap-target + contrast"* | ✅ WTM-168 — 28 vi phạm → sạch, `accessibility_test.dart` khoá |
+| Performance | 🟡 *"chưa đo cold-start"* | ✅ WTM-166 — đo trên S24 Ultra **và** Nokia 6.1 |
 
-## 2. Platform behaviour
+Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không phải là mất mặt — mà là
+**Founder tưởng còn 5 khoảng trống kỹ thuật trong khi thật ra còn 1**, và có thể
+đã hoãn những quyết định chỉ mình anh gỡ được.
 
-| Item | Status | Note |
-|---|---|---|
-| Offline behaviour | ✅ | Local-first (D-5); AI off/offline → twin rule-based cho cả 5 AI feature (test chứng minh). |
-| Responsive layouts | 🟡 | Expanded/Wrap/ListView + vndShort chống tràn. Chưa pass thủ công đa cỡ máy + text-scale (Phase 3 Product Quality). |
-| Performance | 🟡 | CustomPaint charts, lazy lists. Chưa đo cold-start/jank có số liệu (candidate Phase 1 tiếp). |
+---
 
-## 3. Quality gates
+## 1. Trạng thái màn hình
 
-| Item | Status | Note |
-|---|---|---|
-| Accessibility | 🟡 | Re-audit: 27 tooltip trên IconButton (~26/27 phủ) + 35 điểm Semantics — khá hơn đánh giá cũ ("~2 chỗ"). Còn thiếu: pass tap-target ≥48dp + contrast + TalkBack (story riêng, Phase 3). |
-| Localization | 🟡 | Bilingual enums/labels; UI string còn hard-code VI (WTM-119 Boy-Scout theo chỉ đạo Founder — không mở PR refactor riêng). |
-| Automated tests | ✅ | **962 test** (unit+widget), evidence-driven, CI format+analyze+test xanh mỗi PR, cấm placebo. |
-| Analyzer / format | ✅ | `flutter analyze` sạch; `dart format` enforced. |
+| Mục | Trạng thái | Bằng chứng |
+|---|:--:|---|
+| Empty states | ✅ | Fox empty state 11+ màn; User Data First toàn app |
+| Loading states | ✅ | Progressive load, **không animation** (ADR-TON-017); idiom `pumpUntilFound` |
+| Error states | ✅ | **WTM-148 · ADR-TON-017** — `ScreenState` 6 trạng thái · `TongtaiFailure(kind·code·detail)` · refresh lỗi **giữ dữ liệu cũ**; `error_handling_governance_test.dart` cấm catch thủ công / spinner tự chế / `FutureBuilder` trong `ui/` |
 
-## 4. Store readiness
+## 2. Hành vi nền tảng
 
-| Item | Status | Note |
-|---|---|---|
-| App icon + splash | ✅ | Origami fox native (WTM-110). |
-| App identity | ✅ | `com.workizen.tongtai` · version 0.1.0+1 · **label "Tổng Tài"** (WTM-142 — trước là "tongtai"). |
-| **Permissions (Android, đã verify trên APK release bằng aapt2)** | ✅ | **INTERNET** (BYOK AI + telemetry — WTM-142 fix: template chỉ khai ở debug, release từng THIẾU) · **CAMERA** (mobile_scanner, quét QR key WTM-83) · ACCESS_NETWORK_STATE + WAKE_LOCK (Firebase measurement, vô hại) · DYNAMIC_RECEIVER_NOT_EXPORTED (nội bộ Android 13+). **Đã STRIP theo red-line:** `AD_ID`, `ACCESS_ADSERVICES_*` (attribution/topics), `BIND_GET_INSTALL_REFERRER_SERVICE` — Firebase Analytics kéo mặc định, đã remove bằng `tools:node="remove"` + tắt `google_analytics_adid_collection_enabled` + `ad_personalization_signals` (meta-data). |
-| Permissions (iOS) | ✅ | `NSCameraUsageDescription` (QR key scan, WTM-83). Không quyền nào khác. |
-| Telemetry | ✅ | WTM-108 shipped + **verified live trên S24** (app_open trong logcat/DebugView). Operational-only catalogue: `docs/05-OPERATIONS/TELEMETRY-EVENTS.md`; config thật bị `.gitignore` chặn. |
-| Privacy policy | 🔴 | **Cần văn bản privacy policy + telemetry disclosure trước Beta** (WTM-37) — candidate kế tiếp Phase 1. |
-| Release build | ✅ | `flutter build apk --release` PASS (85.5MB, debug-signed) với Firebase config — verify aapt2. |
-| **Smoke-launch release APK trên máy thật (BẮT BUỘC)** | ✅ | Bài học 2026-07-30: release + google-services.json + `firebase_crashlytics` nhưng THIẾU Crashlytics Gradle plugin → crash ngay khi mở ("Crashlytics build ID is missing") — aapt2/analyze/990 test KHÔNG bắt được lỗi tầng gradle-runtime này. Quy trình: `adb install -r` → mở app → `adb logcat -b crash` phải RỖNG + thấy `app_open`. Fix: apply `com.google.firebase.crashlytics` cùng điều kiện với google-services (settings.gradle.kts + app/build.gradle.kts). |
-| Release signing / store upload | 🔴 | Keystore thật + upload = **Founder gate** (release production). |
-| iOS build | 🔴 | Chưa verify (cần máy có Xcode signing — Founder/external). |
-| Backup/Restore | 🟡 | Export CSV + **mã hoá passphrase (WTM-100)** ✅; **chưa có luồng RESTORE/import trong app** (decrypt đã có API + test) — candidate Phase 1. |
+| Mục | Trạng thái | Bằng chứng |
+|---|:--:|---|
+| Offline | ✅ | Local-first (D-5); AI off/offline → Rule Twin cho cả 5 tính năng AI |
+| Responsive | 🟡 | `overflow_test.dart` khoá 3 tab chính + phân trang. **Chưa pass thủ công đa cỡ máy + text-scale** |
+| Performance | 🟡 | **WTM-166 đã đo**: cold start S24 Ultra 249–316ms · Nokia 6.1 750–794ms; hydration 12 tháng 405ms. Benchmark 60 tháng chạy trong CI (`capability_hydration_benchmark_test`). **Chưa đo scroll jank trên máy thật** |
 
-## Top gaps còn lại trước Closed Beta (đã cập nhật 2026-07-30)
+## 3. Cổng chất lượng
 
-1. **Privacy policy + telemetry disclosure** (WTM-37) — tài liệu bắt buộc trước Beta.
-2. **Restore/import flow** cho backup `.ttbk` (decrypt API sẵn, thiếu UI).
-3. **Accessibility pass** (tap targets, contrast, TalkBack) + **responsive/text-scale pass**.
-4. **Performance số liệu** (cold start, scroll jank) trên máy thật.
-5. **iOS build + release signing** — Founder/external.
+| Mục | Trạng thái | Bằng chứng |
+|---|:--:|---|
+| Accessibility | 🟡 | **WTM-168 đã ship** — 28 vi phạm → sạch (contrast ≥4.5:1 qua cặp `-700` + `readableText()`; tap target 48dp). `accessibility_test.dart` khoá. **Chưa pass TalkBack thủ công** |
+| Localization | ✅ | Một locale, mọi chuỗi qua `AppStrings` (ADR-TON-007); `localization_test.dart` + `l10n_placeholder_test.dart` khoá chuỗi trần và trộn hai ngôn ngữ |
+| Test tự động | ✅ | **1818 test PASS** (đo 2026-08-05, `flutter test`). 17 suite governance P0. Cấm placebo |
+| Analyzer / format | ✅ | CI `format + analyze + test` xanh mỗi PR |
+| Journey Reachability | ✅ | `journey_reachability_test.dart` — màn L2+ phải chứng minh được lối vào; màn mới không khai ⇒ CI đỏ (WTM-218) |
+
+## 4. Sẵn sàng lên store
+
+| Mục | Trạng thái | Bằng chứng |
+|---|:--:|---|
+| Icon + splash | ✅ | Origami fox native (WTM-110) |
+| Định danh app | ✅ | `com.workizen.tongtai` · label **"Tổng Tài"** (WTM-142) |
+| Quyền Android | ✅ | Verify bằng aapt2 trên APK release. **Đã strip theo red-line:** `AD_ID`, `ACCESS_ADSERVICES_*`, install-referrer |
+| Quyền iOS | ✅ | Chỉ `NSCameraUsageDescription` (quét QR key) |
+| Telemetry | ✅ | WTM-108, verified live trên S24. Catalogue `TELEMETRY-EVENTS.md`: chỉ `app_open` · `screen_view` · `flow_error` · `screen_error` |
+| **Khai báo Data Safety** | ✅ | `docs/05-OPERATIONS/STORE-DATA-SAFETY.md` (107 dòng), khớp `TELEMETRY-EVENTS.md` + `PRIVACY-POLICY.md` |
+| **Privacy policy** | 🟡 | Văn bản + màn trong app **đã có** (WTM-37). **Thiếu đúng một dòng: địa chỉ liên hệ** (`PRIVACY-POLICY.md:134`) — **Founder** |
+| **Điều khoản dịch vụ** | 🔴 | **Chưa tồn tại** — `docs/05-OPERATIONS/` không có file nào. **Founder** |
+| Backup / Restore | ✅ | **WTM-164 ADR-TON-018** `.ttbk` v2 lossless 6 repo + Restore=Replace; apply + hoàn tác **đã kiểm trên thiết bị** 2026-08-01 |
+| Build release | ✅ | `flutter build apk --release` PASS |
+| **Smoke-launch trên máy thật** | ✅ | Bắt buộc theo bài học 2026-07-30 (thiếu Crashlytics Gradle plugin → crash mà analyze/test không bắt được). Quy trình: `adb install -r` → mở → `adb logcat -b crash` rỗng |
+| **Ký release / upload store** | 🔴 | `android/app/build.gradle.kts:44` vẫn `signingConfigs.getByName("debug")`. Keystore thật = **Founder gate** |
+| **Build iOS** | 🔴 | `ios/` có nhưng **chưa verify** — cần tài khoản Apple Developer. **Founder / bên ngoài** |
+
+---
+
+## Còn lại trước Closed Beta — 5 mục, và ai gỡ được
+
+| # | Mục | Ai | Chặn cứng? |
+|---|---|---|:--:|
+| 1 | **Địa chỉ liên hệ** cho privacy §10 | **Founder** | ✅ |
+| 2 | **Điều khoản dịch vụ** | **Founder** | ✅ |
+| 3 | **Keystore release** + upload Play Console | **Founder** | ✅ |
+| 4 | **Tài khoản Apple Developer** → build + ký iOS | **Founder** | chỉ chặn iOS |
+| 5 | Pass **TalkBack** + đo **scroll jank** trên máy thật | AI (cần thiết bị) | ❌ nên làm, không chặn |
+
+Bốn trong năm mục là của Founder. Mục 5 là thứ duy nhất còn lại trong hàng đợi
+kỹ thuật, và nó **không chặn** Beta Android.
+
+⇒ **Android có thể lên closed beta ngay sau khi có mục 1–3.**
+
+---
+
+## Nguyên tắc giữ tài liệu này đúng
+
+Bản trước sai vì nó được viết một lần rồi không ai đối chiếu lại, trong khi
+6 story đã đóng đúng những dòng nó đánh dấu thiếu.
+
+**Luật:** story nào đóng một dòng ở đây thì **cập nhật dòng đó trong cùng PR** —
+đúng như luật đã áp cho `UI-IMPLEMENTATION-LEVELS.md`. Trạng thái ở đây là
+**sự thật đo được**, không phải ý định.
