@@ -14,7 +14,7 @@ làm được.**
 
 | Nhóm | Còn lại |
 |---|---|
-| Kỹ thuật (AI làm được) | **2** — pass TalkBack + jank trên máy thật · câu miễn trừ cho số AI |
+| Kỹ thuật (AI làm được) | **1** — pass TalkBack + jank trên máy thật |
 | Nội dung pháp lý (Founder) | **1** — địa chỉ liên hệ cho privacy §10 |
 | Tài khoản / khoá ký (Founder) | **2** — keystore release · tài khoản Apple |
 
@@ -42,7 +42,7 @@ việc nó sinh ra để ngăn.
 | Performance | 🟡 *"chưa đo cold-start"* | ✅ WTM-166 — đo trên S24 Ultra **và** Nokia 6.1 |
 
 Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không phải là mất mặt — mà là
-**Founder tưởng còn 5 khoảng trống kỹ thuật trong khi thật ra còn 2**, và có thể
+**Founder tưởng còn 5 khoảng trống kỹ thuật trong khi thật ra còn 1**, và có thể
 đã hoãn những quyết định chỉ mình anh gỡ được.
 
 ---
@@ -85,7 +85,7 @@ Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không ph�
 | **Khai báo Data Safety** | ✅ | `docs/05-OPERATIONS/STORE-DATA-SAFETY.md` (107 dòng), khớp `TELEMETRY-EVENTS.md` + `PRIVACY-POLICY.md` |
 | **Privacy policy** | 🟡 | Văn bản + màn trong app **đã có** (WTM-37). **Thiếu đúng một dòng: địa chỉ liên hệ** (`PRIVACY-POLICY.md:134`) — **Founder** |
 | **Điều khoản dịch vụ** | ⚪ | **KHÔNG bắt buộc để lên store** (đính chính 2026-08-05). Apple có EULA chuẩn tự áp dụng nếu không nộp bản riêng; Play chỉ bắt với vài nhóm đặc thù. **Thành bắt buộc khi bật thuê bao tự gia hạn** — Apple đòi link Terms of Use trong app. Hiện `pubspec.yaml` không có dependency mua bán nào |
-| **Câu miễn trừ cho số AI dự báo** | 🟡 | App đưa dự báo doanh thu · chấm sức khoẻ · kế hoạch tuần · khuyến nghị, mà `app_strings.dart` **không có câu nào** nói đây là ước tính. Không phải yêu cầu của cửa hàng — là rủi ro người bán tin số rồi nhập hàng. **WTM-280** |
+| **Câu miễn trừ cho số AI dự báo** | ✅ | **WTM-280 đã ship** — `AppStrings.estimateDisclaimer` render **bên trong thẻ chứa con số** ở màn dự báo · màn rủi ro khách hàng · card AI trên Reports. Test khoá **luật đặt chỗ**: có số ⇒ có dòng (`find.descendant`); twin từ chối ⇒ **không** có dòng (absence) |
 | Backup / Restore | ✅ | **WTM-164 ADR-TON-018** `.ttbk` v2 lossless 6 repo + Restore=Replace; apply + hoàn tác **đã kiểm trên thiết bị** 2026-08-01 |
 | Build release | ✅ | `flutter build apk --release` PASS |
 | **Smoke-launch trên máy thật** | ✅ | Bắt buộc theo bài học 2026-07-30 (thiếu Crashlytics Gradle plugin → crash mà analyze/test không bắt được). Quy trình: `adb install -r` → mở → `adb logcat -b crash` rỗng |
@@ -94,12 +94,12 @@ Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không ph�
 
 ---
 
-## Còn lại trước Closed Beta — 5 mục, và ai gỡ được
+## Còn lại trước Closed Beta — 4 mục, và ai gỡ được
 
 | # | Mục | Ai | Chặn cứng? |
 |---|---|---|:--:|
 | 1 | **Địa chỉ liên hệ** cho privacy §10 | **Founder** | ✅ |
-| 2 | **Câu miễn trừ cho số AI dự báo** (WTM-280) | AI | ❌ nên làm |
+| 2 | ~~Câu miễn trừ cho số AI dự báo~~ | — | ✅ **xong** (WTM-280) |
 | 3 | **Keystore release** + upload Play Console | **Founder** | ✅ |
 | 4 | **Tài khoản Apple Developer** → build + ký iOS | **Founder** | chỉ chặn iOS |
 | 5 | Pass **TalkBack** + đo **scroll jank** trên máy thật | AI (cần thiết bị) | ❌ nên làm, không chặn |
