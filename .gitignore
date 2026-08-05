@@ -52,3 +52,9 @@ app.*.map.json
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 lib/firebase_options.dart
+
+# SSH keys — KHÔNG BAO GIỜ commit (bài học: key VM để ngay trong repo)
+key-vm/
+*.key
+*.pem
+!*.key.pub
