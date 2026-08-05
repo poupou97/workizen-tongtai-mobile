@@ -14,9 +14,13 @@ làm được.**
 
 | Nhóm | Còn lại |
 |---|---|
-| Kỹ thuật (AI làm được) | **1** — pass TalkBack + jank trên máy thật |
-| Nội dung pháp lý (Founder) | **2** — địa chỉ liên hệ · Điều khoản dịch vụ |
+| Kỹ thuật (AI làm được) | **2** — pass TalkBack + jank trên máy thật · câu miễn trừ cho số AI |
+| Nội dung pháp lý (Founder) | **1** — địa chỉ liên hệ cho privacy §10 |
 | Tài khoản / khoá ký (Founder) | **2** — keystore release · tài khoản Apple |
+
+> **Đính chính 2026-08-05:** bản đầu của lần re-audit này xếp **Điều khoản dịch
+> vụ** vào nhóm chặn cứng. **Sai** — không cửa hàng nào bắt buộc nó với app này.
+> Founder hỏi lại đúng chỗ đó. Chi tiết ở bảng §4.
 
 WTM-175 tự nhận là **P0 #1** vì *"mọi ưu tiên khác đang được quyết bằng phỏng
 đoán"*. Kết luận trên nói thẳng: **hàng đợi kỹ thuật không còn là thứ chặn.**
@@ -38,7 +42,7 @@ việc nó sinh ra để ngăn.
 | Performance | 🟡 *"chưa đo cold-start"* | ✅ WTM-166 — đo trên S24 Ultra **và** Nokia 6.1 |
 
 Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không phải là mất mặt — mà là
-**Founder tưởng còn 5 khoảng trống kỹ thuật trong khi thật ra còn 1**, và có thể
+**Founder tưởng còn 5 khoảng trống kỹ thuật trong khi thật ra còn 2**, và có thể
 đã hoãn những quyết định chỉ mình anh gỡ được.
 
 ---
@@ -80,7 +84,8 @@ Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không ph�
 | Telemetry | ✅ | WTM-108, verified live trên S24. Catalogue `TELEMETRY-EVENTS.md`: chỉ `app_open` · `screen_view` · `flow_error` · `screen_error` |
 | **Khai báo Data Safety** | ✅ | `docs/05-OPERATIONS/STORE-DATA-SAFETY.md` (107 dòng), khớp `TELEMETRY-EVENTS.md` + `PRIVACY-POLICY.md` |
 | **Privacy policy** | 🟡 | Văn bản + màn trong app **đã có** (WTM-37). **Thiếu đúng một dòng: địa chỉ liên hệ** (`PRIVACY-POLICY.md:134`) — **Founder** |
-| **Điều khoản dịch vụ** | 🔴 | **Chưa tồn tại** — `docs/05-OPERATIONS/` không có file nào. **Founder** |
+| **Điều khoản dịch vụ** | ⚪ | **KHÔNG bắt buộc để lên store** (đính chính 2026-08-05). Apple có EULA chuẩn tự áp dụng nếu không nộp bản riêng; Play chỉ bắt với vài nhóm đặc thù. **Thành bắt buộc khi bật thuê bao tự gia hạn** — Apple đòi link Terms of Use trong app. Hiện `pubspec.yaml` không có dependency mua bán nào |
+| **Câu miễn trừ cho số AI dự báo** | 🟡 | App đưa dự báo doanh thu · chấm sức khoẻ · kế hoạch tuần · khuyến nghị, mà `app_strings.dart` **không có câu nào** nói đây là ước tính. Không phải yêu cầu của cửa hàng — là rủi ro người bán tin số rồi nhập hàng. **WTM-280** |
 | Backup / Restore | ✅ | **WTM-164 ADR-TON-018** `.ttbk` v2 lossless 6 repo + Restore=Replace; apply + hoàn tác **đã kiểm trên thiết bị** 2026-08-01 |
 | Build release | ✅ | `flutter build apk --release` PASS |
 | **Smoke-launch trên máy thật** | ✅ | Bắt buộc theo bài học 2026-07-30 (thiếu Crashlytics Gradle plugin → crash mà analyze/test không bắt được). Quy trình: `adb install -r` → mở → `adb logcat -b crash` rỗng |
@@ -94,15 +99,15 @@ Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không ph�
 | # | Mục | Ai | Chặn cứng? |
 |---|---|---|:--:|
 | 1 | **Địa chỉ liên hệ** cho privacy §10 | **Founder** | ✅ |
-| 2 | **Điều khoản dịch vụ** | **Founder** | ✅ |
+| 2 | **Câu miễn trừ cho số AI dự báo** (WTM-280) | AI | ❌ nên làm |
 | 3 | **Keystore release** + upload Play Console | **Founder** | ✅ |
 | 4 | **Tài khoản Apple Developer** → build + ký iOS | **Founder** | chỉ chặn iOS |
 | 5 | Pass **TalkBack** + đo **scroll jank** trên máy thật | AI (cần thiết bị) | ❌ nên làm, không chặn |
 
-Bốn trong năm mục là của Founder. Mục 5 là thứ duy nhất còn lại trong hàng đợi
-kỹ thuật, và nó **không chặn** Beta Android.
+**Ba** trong năm mục là của Founder, và **chỉ mục 1 chặn cứng**. Hai mục kỹ
+thuật còn lại (2 và 5) đều **không chặn** Beta Android.
 
-⇒ **Android có thể lên closed beta ngay sau khi có mục 1–3.**
+⇒ **Android có thể lên closed beta ngay sau khi có mục 1 và 3** — hai mục Founder.
 
 ---
 
