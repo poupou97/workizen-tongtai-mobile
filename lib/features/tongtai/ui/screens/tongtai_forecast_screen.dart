@@ -311,6 +311,18 @@ class _HeadlineCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          // WTM-280 — câu miễn trừ đi CÙNG con số, trong cùng một thẻ.
+          // Đặt ở trang riêng thì người bán đọc nó lúc không nhìn số, tức là
+          // không bao giờ đọc đúng lúc.
+          Text(
+            l10n.estimateDisclaimer,
+            key: const Key('forecast-estimate-disclaimer'),
+            style: TongtaiDesignTokens.captionStyle.copyWith(
+              color: TongtaiDesignTokens.lightTextSecondary,
+              height: 1.4,
+            ),
+          ),
         ],
       ),
     );

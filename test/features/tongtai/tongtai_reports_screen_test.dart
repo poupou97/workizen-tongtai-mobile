@@ -289,6 +289,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('reports-ai-summary')), findsOneWidget);
+
+      // WTM-280 — before anything is generated there is nothing to qualify,
+      // so the disclaimer must be ABSENT. A line that is always on screen is
+      // one people stop seeing by the time it matters.
+      expect(
+        find.byKey(const Key('reports-ai-estimate-disclaimer')),
+        findsNothing,
+      );
+
       await tester.tap(find.byKey(const Key('reports-ai-summary-run')));
       await tester.pumpAndSettle();
 
@@ -296,6 +305,12 @@ void main() {
       expect(find.byKey(const Key('reports-ai-summary-text')), findsOneWidget);
       expect(find.text('Rule-based'), findsOneWidget);
       expect(find.textContaining('500.000 ₫'), findsWidgets);
+
+      // WTM-280 — and now that a judgement is on screen, the disclaimer is.
+      expect(
+        find.byKey(const Key('reports-ai-estimate-disclaimer')),
+        findsOneWidget,
+      );
 
       // G-3B (WTM-135): the Recommend action shares the card — rule twin
       // renders actionable suggestions with the same provenance chip.

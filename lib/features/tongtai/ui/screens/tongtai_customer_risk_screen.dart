@@ -274,6 +274,18 @@ class _RiskHeader extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        // WTM-280 — màn này xếp hạng khách theo rủi ro rồi gợi ý liên hệ /
+        // ưu đãi. Đó là phán đoán về người thật, nên cùng câu miễn trừ với
+        // màn dự báo: số là ước tính, quyết định là của người bán.
+        Text(
+          l10n.estimateDisclaimer,
+          key: const Key('risk-estimate-disclaimer'),
+          style: TongtaiDesignTokens.captionStyle.copyWith(
+            color: TongtaiDesignTokens.lightTextSecondary,
+            height: 1.4,
+          ),
+        ),
         if (twin.reasonCodes.isNotEmpty) ...[
           const SizedBox(height: TongtaiDesignTokens.spacing3),
           Text(

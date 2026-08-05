@@ -604,6 +604,18 @@ class _AiSummaryCard extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
+              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              // WTM-280 — chỉ hiện KHI có kết quả. Không có gì để đọc thì câu
+              // miễn trừ chỉ là nhiễu, và nhiễu thường xuyên làm người ta
+              // ngừng đọc đúng lúc nó quan trọng.
+              Text(
+                context.l10n.estimateDisclaimer,
+                key: const Key('reports-ai-estimate-disclaimer'),
+                style: TongtaiDesignTokens.captionStyle.copyWith(
+                  color: TongtaiDesignTokens.lightTextSecondary,
+                  height: 1.4,
+                ),
+              ),
               const SizedBox(height: TongtaiDesignTokens.spacing3),
             ],
             Wrap(
