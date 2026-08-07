@@ -103,3 +103,61 @@ giống nhất" mà luật 1 cấm.
   nghiệp vụ, `received_at` chỉ để chẩn đoán
 - Sự kiện đến **muộn hơn** một sự kiện mới hơn của cùng đối tượng ⇒ **không
   được ghi đè**. Đây là chỗ hay hỏng nhất khi có retry
+
+---
+
+## Đã cài đặt — WTM-294 (2026-08-07)
+
+`lib/features/tongtai/platform/canonical_event.dart`. Không bảng, không
+migration — chưa connector nào emit; đây là bao bì để connector thứ hai có chỗ
+đặt chân.
+
+### Luật "connector không emit event riêng của nền tảng" là một KIỂU
+
+`CanonicalEvent.type` là **enum**, không phải `String`. Nếu nó là `String` thì
+một connector viết `'shopee.order_status_push'` vẫn dựng được envelope, và lõi
+nghiệp vụ sẽ thấy mã của nền tảng — đúng thứ luật này cấm. Là enum thì **không
+viết ra được**.
+
+Bảng ánh xạ `mã nền tảng → mã canonical` nằm trong `ConnectorEventMapping`, một
+đối tượng **của từng connector**. Lõi nghiệp vụ không bao giờ thấy mã thô.
+
+### Ba kết quả của `resolve()`, và cả ba khác nhau
+
+| Đầu vào | Kết quả | Nghĩa |
+|---|---|---|
+| mã đã biết | mã canonical tương ứng | bình thường |
+| mã **cố ý bỏ qua** | `null` | quyết định đã cân nhắc — GitHub `tag`, PR đóng không merge |
+| mã **lạ** | `<miền>.unknown` | khoảng trống **cần người xem** |
+
+Tách "bỏ qua" khỏi "chưa biết" là điểm bản thiết kế chưa nói rõ. Gộp chúng thì
+một mã mới của sàn sẽ **im lặng biến mất** — mất dữ liệu không ai phát hiện.
+
+Test khoá đúng cám dỗ đã nêu trong thiết kế: Shopee `TO_CONFIRM_RECEIVE` ⇒
+`order.unknown`, **không** phải `order.fulfilled`. Ánh xạ bừa vào đó làm doanh
+thu ghi nhận **sớm một khâu**.
+
+### "Backend không đặt kết luận kinh doanh vào event" thành assert
+
+Bản thiết kế liệt kê các trường cấm (`revenue` · `mrr` · `profit` ·
+`is_important` · `priority` · `score` · `should_notify`) như một nội quy. Trong
+code nó là **assert trong constructor**: một envelope mang kết luận kinh doanh
+**không dựng được**.
+
+Đổi lại, `CanonicalEvent` mất `const`. Giữ assert quan trọng hơn — một lời
+khuyên thì bị bỏ qua đúng vào ngày ai đó vội. (Cùng lựa chọn đã làm với
+`SuggestLink` ở WTM-291.)
+
+`businessConclusionsInPayload` vẫn còn, nhưng đổi vai: nó soi một payload
+**chưa** bọc — ví dụ ngay khi vừa nhận từ mạng — để báo lỗi nói được **cái nào**
+sai thay vì chỉ ném.
+
+### Thứ tự và trùng lặp
+
+- `dedupeKey` = `(connectionId, eventId)`. Test khẳng định hai sự việc **trùng
+  mốc thời gian** vẫn là hai sự việc.
+- `supersedes()`: dữ liệu **cũ hơn không ghi đè** dữ liệu mới. Chỗ hay hỏng
+  nhất khi có retry — một lần gọi lại mang về sự việc cũ, và nếu nó ghi đè thì
+  trạng thái đơn lùi lại một bước mà không ai biết vì sao.
+- `lag` âm được trả **nguyên** để chẩn đoán, không kẹp về 0: âm nghĩa là đồng
+  hồ lệch, và kẹp về 0 là giấu đúng thứ cần nhìn thấy.

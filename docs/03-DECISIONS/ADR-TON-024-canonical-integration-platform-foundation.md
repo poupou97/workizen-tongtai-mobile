@@ -116,13 +116,36 @@ Jira: Epic **WTM-284**, story thiết kế **WTM-285…290**, story cài đặt
 
 ## Tình trạng cài đặt (cập nhật 2026-08-07)
 
-| Luật | Cài ở đâu | Khoá bằng |
-|---|---|---|
-| 1 · liên kết ≠ gộp | `consumer/external_identity*.dart`, schema **v19** | `identity_no_auto_merge_governance_test` — 3 lớp, lớp quyết định là *"seam không chạm `customersTable`"* |
-| 2 · settlement | `finance/settlement*.dart`, `true_profit.dart`, schema **v20** | `settlement_no_derived_write_governance_test` — 3 lớp, lớp tinh tế nhất là *"phân bổ không trả về `SettlementLine`"* |
-| 3 · catalog/matrix là dữ liệu | chưa cài (WTM-287/288 mới là thiết kế) | — |
-| 4 · canonical event | chưa cài (WTM-289 mới là thiết kế) | — |
+**Cả bốn luật đã được cài đặt.** 1964 test xanh; tất cả ở mức `L0` (domain +
+persistence, chưa nối UI, chưa connector nào ghi vào các bảng mới).
 
-Cả hai luật đã cài đều **buộc sửa API chứ không nới luật** khi bộ quét báo
-vi phạm — chi tiết trong §"Đã cài đặt" của hai tài liệu tương ứng. Đó là bằng
-chứng luật này có răng: nó đã cắn tác giả của chính nó.
+| Luật | Cài ở đâu | Story | Cách khoá |
+|---|---|---|---|
+| 1 · liên kết ≠ gộp | `consumer/external_identity*.dart` · schema **v19** | WTM-291 | suite quét mã, 3 lớp — lớp quyết định: *"seam không chạm `customersTable`"* |
+| 2 · settlement | `finance/settlement*.dart` · `true_profit.dart` · schema **v20** | WTM-292 | suite quét mã, 3 lớp — lớp tinh tế nhất: *"phân bổ không trả về `SettlementLine`"* |
+| 3 · catalog/matrix là dữ liệu | `platform/vendor_catalog.dart` · `capability_matrix.dart` | WTM-293 | **kiểu dữ liệu** — `CapabilityClaim` không mang hai cột đầu, constructor private |
+| 4 · canonical event | `platform/canonical_event.dart` | WTM-294 | **kiểu dữ liệu** — `type` là enum, nên mã nền tảng không dựng được envelope |
+
+### Hai cách khoá, và khi nào dùng cái nào
+
+Luật 1 và 2 cấm một **đường đi** (một hàm nào đó không được tồn tại) ⇒ phải quét
+mã nguồn, vì không kiểu dữ liệu nào diễn đạt được *"không có hàm nào làm X"*.
+
+Luật 3 và 4 cấm một **giá trị** đi tới sai chỗ ⇒ diễn đạt được bằng kiểu, và
+kiểu mạnh hơn: nó chặn lúc biên dịch, không cần ai chạy test.
+
+Chọn kiểu khi diễn đạt được; quét mã khi không.
+
+### Bằng chứng luật có răng: nó đã cắn tác giả của chính nó
+
+- **Luật 1** bắt được `IdentityResolver.resolve()` bản đầu nhận hai
+  `customerId`. Đã **sửa API chứ không nới luật** — mọi ứng viên đi qua
+  `IdentityCandidate`, và luật không cần ngoại lệ nào.
+- **Luật 2** lộ ra hai chỗ bản thiết kế nói chưa đủ chặt: `shared` không kèm tỷ
+  lệ thực chất là `unknown`; và đọc số tiền khi chưa biết ai trả phải **ném**
+  chứ không trả `0`.
+- **Luật 4** buộc bỏ `const` khỏi `CanonicalEvent` để giữ được assert cấm kết
+  luận kinh doanh trong payload. Giữ assert quan trọng hơn giữ `const` — một
+  lời khuyên bị bỏ qua đúng vào ngày ai đó vội.
+
+Chi tiết trong §"Đã cài đặt" của bốn tài liệu `docs/08-PLATFORM/14`–`18`.
