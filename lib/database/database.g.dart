@@ -11356,6 +11356,1353 @@ class IdentityLinkEventsTableCompanion
   }
 }
 
+class $SettlementLinesTableTable extends SettlementLinesTable
+    with TableInfo<$SettlementLinesTableTable, SettlementLinesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SettlementLinesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _orderIdMeta = const VerificationMeta(
+    'orderId',
+  );
+  @override
+  late final GeneratedColumn<String> orderId = GeneratedColumn<String>(
+    'order_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderItemIdMeta = const VerificationMeta(
+    'orderItemId',
+  );
+  @override
+  late final GeneratedColumn<String> orderItemId = GeneratedColumn<String>(
+    'order_item_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _directionMeta = const VerificationMeta(
+    'direction',
+  );
+  @override
+  late final GeneratedColumn<String> direction = GeneratedColumn<String>(
+    'direction',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _occurredAtMeta = const VerificationMeta(
+    'occurredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> occurredAt = GeneratedColumn<DateTime>(
+    'occurred_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fundedByMeta = const VerificationMeta(
+    'fundedBy',
+  );
+  @override
+  late final GeneratedColumn<String> fundedBy = GeneratedColumn<String>(
+    'funded_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sellerShareMeta = const VerificationMeta(
+    'sellerShare',
+  );
+  @override
+  late final GeneratedColumn<double> sellerShare = GeneratedColumn<double>(
+    'seller_share',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _payoutIdMeta = const VerificationMeta(
+    'payoutId',
+  );
+  @override
+  late final GeneratedColumn<String> payoutId = GeneratedColumn<String>(
+    'payout_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _provenanceCodeMeta = const VerificationMeta(
+    'provenanceCode',
+  );
+  @override
+  late final GeneratedColumn<String> provenanceCode = GeneratedColumn<String>(
+    'provenance_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    orderId,
+    orderItemId,
+    kind,
+    direction,
+    amount,
+    currency,
+    occurredAt,
+    fundedBy,
+    sellerShare,
+    payoutId,
+    provenanceCode,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'settlement_lines_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SettlementLinesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('order_id')) {
+      context.handle(
+        _orderIdMeta,
+        orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderIdMeta);
+    }
+    if (data.containsKey('order_item_id')) {
+      context.handle(
+        _orderItemIdMeta,
+        orderItemId.isAcceptableOrUnknown(
+          data['order_item_id']!,
+          _orderItemIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('direction')) {
+      context.handle(
+        _directionMeta,
+        direction.isAcceptableOrUnknown(data['direction']!, _directionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_directionMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+        _occurredAtMeta,
+        occurredAt.isAcceptableOrUnknown(data['occurred_at']!, _occurredAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredAtMeta);
+    }
+    if (data.containsKey('funded_by')) {
+      context.handle(
+        _fundedByMeta,
+        fundedBy.isAcceptableOrUnknown(data['funded_by']!, _fundedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fundedByMeta);
+    }
+    if (data.containsKey('seller_share')) {
+      context.handle(
+        _sellerShareMeta,
+        sellerShare.isAcceptableOrUnknown(
+          data['seller_share']!,
+          _sellerShareMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payout_id')) {
+      context.handle(
+        _payoutIdMeta,
+        payoutId.isAcceptableOrUnknown(data['payout_id']!, _payoutIdMeta),
+      );
+    }
+    if (data.containsKey('provenance_code')) {
+      context.handle(
+        _provenanceCodeMeta,
+        provenanceCode.isAcceptableOrUnknown(
+          data['provenance_code']!,
+          _provenanceCodeMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
+  @override
+  SettlementLinesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SettlementLinesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      orderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_id'],
+      )!,
+      orderItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_item_id'],
+      ),
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      direction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}direction'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      )!,
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
+      occurredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}occurred_at'],
+      )!,
+      fundedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}funded_by'],
+      )!,
+      sellerShare: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}seller_share'],
+      ),
+      payoutId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payout_id'],
+      ),
+      provenanceCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provenance_code'],
+      ),
+    );
+  }
+
+  @override
+  $SettlementLinesTableTable createAlias(String alias) {
+    return $SettlementLinesTableTable(attachedDatabase, alias);
+  }
+}
+
+class SettlementLinesTableData extends DataClass
+    implements Insertable<SettlementLinesTableData> {
+  final String id;
+  final String businessId;
+
+  /// Luôn có — một khoản không gắn đơn là giao dịch Finance bình thường.
+  final String orderId;
+
+  /// `null` = khoản **cấp đơn**, không phải "chưa biết món nào".
+  final String? orderItemId;
+
+  /// Mã canonical `SettlementKind`. Mã lạ ⇒ đọc ra `null` ⇒ bản ghi hỏng.
+  final String kind;
+
+  /// Mã canonical `SettlementDirection`.
+  final String direction;
+
+  /// **Luôn dương.**
+  final double amount;
+  final String currency;
+  final DateTime occurredAt;
+
+  /// Mã canonical `FundingSource`. **Không DEFAULT** — xem doc của lớp.
+  final String fundedBy;
+
+  /// Tỷ lệ người bán chịu khi `funded_by = 'shared'`, 0..1.
+  /// `null` với `shared` ⇒ thực chất là chưa biết.
+  final double? sellerShare;
+
+  /// `null` = **chưa về tài khoản**, không phải "về lúc 0".
+  final String? payoutId;
+
+  /// Mã canonical `Provenance` (WTM-282). `null` ⇒ suy từ tiền tố id lúc đọc
+  /// và đánh dấu `inferred` — không ghi suy đoán xuống đĩa.
+  final String? provenanceCode;
+  const SettlementLinesTableData({
+    required this.id,
+    required this.businessId,
+    required this.orderId,
+    this.orderItemId,
+    required this.kind,
+    required this.direction,
+    required this.amount,
+    required this.currency,
+    required this.occurredAt,
+    required this.fundedBy,
+    this.sellerShare,
+    this.payoutId,
+    this.provenanceCode,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['order_id'] = Variable<String>(orderId);
+    if (!nullToAbsent || orderItemId != null) {
+      map['order_item_id'] = Variable<String>(orderItemId);
+    }
+    map['kind'] = Variable<String>(kind);
+    map['direction'] = Variable<String>(direction);
+    map['amount'] = Variable<double>(amount);
+    map['currency'] = Variable<String>(currency);
+    map['occurred_at'] = Variable<DateTime>(occurredAt);
+    map['funded_by'] = Variable<String>(fundedBy);
+    if (!nullToAbsent || sellerShare != null) {
+      map['seller_share'] = Variable<double>(sellerShare);
+    }
+    if (!nullToAbsent || payoutId != null) {
+      map['payout_id'] = Variable<String>(payoutId);
+    }
+    if (!nullToAbsent || provenanceCode != null) {
+      map['provenance_code'] = Variable<String>(provenanceCode);
+    }
+    return map;
+  }
+
+  SettlementLinesTableCompanion toCompanion(bool nullToAbsent) {
+    return SettlementLinesTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      orderId: Value(orderId),
+      orderItemId: orderItemId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderItemId),
+      kind: Value(kind),
+      direction: Value(direction),
+      amount: Value(amount),
+      currency: Value(currency),
+      occurredAt: Value(occurredAt),
+      fundedBy: Value(fundedBy),
+      sellerShare: sellerShare == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sellerShare),
+      payoutId: payoutId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payoutId),
+      provenanceCode: provenanceCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(provenanceCode),
+    );
+  }
+
+  factory SettlementLinesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SettlementLinesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      orderId: serializer.fromJson<String>(json['orderId']),
+      orderItemId: serializer.fromJson<String?>(json['orderItemId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      direction: serializer.fromJson<String>(json['direction']),
+      amount: serializer.fromJson<double>(json['amount']),
+      currency: serializer.fromJson<String>(json['currency']),
+      occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+      fundedBy: serializer.fromJson<String>(json['fundedBy']),
+      sellerShare: serializer.fromJson<double?>(json['sellerShare']),
+      payoutId: serializer.fromJson<String?>(json['payoutId']),
+      provenanceCode: serializer.fromJson<String?>(json['provenanceCode']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'orderId': serializer.toJson<String>(orderId),
+      'orderItemId': serializer.toJson<String?>(orderItemId),
+      'kind': serializer.toJson<String>(kind),
+      'direction': serializer.toJson<String>(direction),
+      'amount': serializer.toJson<double>(amount),
+      'currency': serializer.toJson<String>(currency),
+      'occurredAt': serializer.toJson<DateTime>(occurredAt),
+      'fundedBy': serializer.toJson<String>(fundedBy),
+      'sellerShare': serializer.toJson<double?>(sellerShare),
+      'payoutId': serializer.toJson<String?>(payoutId),
+      'provenanceCode': serializer.toJson<String?>(provenanceCode),
+    };
+  }
+
+  SettlementLinesTableData copyWith({
+    String? id,
+    String? businessId,
+    String? orderId,
+    Value<String?> orderItemId = const Value.absent(),
+    String? kind,
+    String? direction,
+    double? amount,
+    String? currency,
+    DateTime? occurredAt,
+    String? fundedBy,
+    Value<double?> sellerShare = const Value.absent(),
+    Value<String?> payoutId = const Value.absent(),
+    Value<String?> provenanceCode = const Value.absent(),
+  }) => SettlementLinesTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    orderId: orderId ?? this.orderId,
+    orderItemId: orderItemId.present ? orderItemId.value : this.orderItemId,
+    kind: kind ?? this.kind,
+    direction: direction ?? this.direction,
+    amount: amount ?? this.amount,
+    currency: currency ?? this.currency,
+    occurredAt: occurredAt ?? this.occurredAt,
+    fundedBy: fundedBy ?? this.fundedBy,
+    sellerShare: sellerShare.present ? sellerShare.value : this.sellerShare,
+    payoutId: payoutId.present ? payoutId.value : this.payoutId,
+    provenanceCode: provenanceCode.present
+        ? provenanceCode.value
+        : this.provenanceCode,
+  );
+  SettlementLinesTableData copyWithCompanion(
+    SettlementLinesTableCompanion data,
+  ) {
+    return SettlementLinesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      orderId: data.orderId.present ? data.orderId.value : this.orderId,
+      orderItemId: data.orderItemId.present
+          ? data.orderItemId.value
+          : this.orderItemId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      occurredAt: data.occurredAt.present
+          ? data.occurredAt.value
+          : this.occurredAt,
+      fundedBy: data.fundedBy.present ? data.fundedBy.value : this.fundedBy,
+      sellerShare: data.sellerShare.present
+          ? data.sellerShare.value
+          : this.sellerShare,
+      payoutId: data.payoutId.present ? data.payoutId.value : this.payoutId,
+      provenanceCode: data.provenanceCode.present
+          ? data.provenanceCode.value
+          : this.provenanceCode,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettlementLinesTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('orderId: $orderId, ')
+          ..write('orderItemId: $orderItemId, ')
+          ..write('kind: $kind, ')
+          ..write('direction: $direction, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('fundedBy: $fundedBy, ')
+          ..write('sellerShare: $sellerShare, ')
+          ..write('payoutId: $payoutId, ')
+          ..write('provenanceCode: $provenanceCode')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    orderId,
+    orderItemId,
+    kind,
+    direction,
+    amount,
+    currency,
+    occurredAt,
+    fundedBy,
+    sellerShare,
+    payoutId,
+    provenanceCode,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SettlementLinesTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.orderId == this.orderId &&
+          other.orderItemId == this.orderItemId &&
+          other.kind == this.kind &&
+          other.direction == this.direction &&
+          other.amount == this.amount &&
+          other.currency == this.currency &&
+          other.occurredAt == this.occurredAt &&
+          other.fundedBy == this.fundedBy &&
+          other.sellerShare == this.sellerShare &&
+          other.payoutId == this.payoutId &&
+          other.provenanceCode == this.provenanceCode);
+}
+
+class SettlementLinesTableCompanion
+    extends UpdateCompanion<SettlementLinesTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> orderId;
+  final Value<String?> orderItemId;
+  final Value<String> kind;
+  final Value<String> direction;
+  final Value<double> amount;
+  final Value<String> currency;
+  final Value<DateTime> occurredAt;
+  final Value<String> fundedBy;
+  final Value<double?> sellerShare;
+  final Value<String?> payoutId;
+  final Value<String?> provenanceCode;
+  final Value<int> rowid;
+  const SettlementLinesTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.orderItemId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+    this.fundedBy = const Value.absent(),
+    this.sellerShare = const Value.absent(),
+    this.payoutId = const Value.absent(),
+    this.provenanceCode = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SettlementLinesTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String orderId,
+    this.orderItemId = const Value.absent(),
+    required String kind,
+    required String direction,
+    required double amount,
+    required String currency,
+    required DateTime occurredAt,
+    required String fundedBy,
+    this.sellerShare = const Value.absent(),
+    this.payoutId = const Value.absent(),
+    this.provenanceCode = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       orderId = Value(orderId),
+       kind = Value(kind),
+       direction = Value(direction),
+       amount = Value(amount),
+       currency = Value(currency),
+       occurredAt = Value(occurredAt),
+       fundedBy = Value(fundedBy);
+  static Insertable<SettlementLinesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? orderId,
+    Expression<String>? orderItemId,
+    Expression<String>? kind,
+    Expression<String>? direction,
+    Expression<double>? amount,
+    Expression<String>? currency,
+    Expression<DateTime>? occurredAt,
+    Expression<String>? fundedBy,
+    Expression<double>? sellerShare,
+    Expression<String>? payoutId,
+    Expression<String>? provenanceCode,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (orderId != null) 'order_id': orderId,
+      if (orderItemId != null) 'order_item_id': orderItemId,
+      if (kind != null) 'kind': kind,
+      if (direction != null) 'direction': direction,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+      if (fundedBy != null) 'funded_by': fundedBy,
+      if (sellerShare != null) 'seller_share': sellerShare,
+      if (payoutId != null) 'payout_id': payoutId,
+      if (provenanceCode != null) 'provenance_code': provenanceCode,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SettlementLinesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? orderId,
+    Value<String?>? orderItemId,
+    Value<String>? kind,
+    Value<String>? direction,
+    Value<double>? amount,
+    Value<String>? currency,
+    Value<DateTime>? occurredAt,
+    Value<String>? fundedBy,
+    Value<double?>? sellerShare,
+    Value<String?>? payoutId,
+    Value<String?>? provenanceCode,
+    Value<int>? rowid,
+  }) {
+    return SettlementLinesTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      orderId: orderId ?? this.orderId,
+      orderItemId: orderItemId ?? this.orderItemId,
+      kind: kind ?? this.kind,
+      direction: direction ?? this.direction,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      occurredAt: occurredAt ?? this.occurredAt,
+      fundedBy: fundedBy ?? this.fundedBy,
+      sellerShare: sellerShare ?? this.sellerShare,
+      payoutId: payoutId ?? this.payoutId,
+      provenanceCode: provenanceCode ?? this.provenanceCode,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<String>(orderId.value);
+    }
+    if (orderItemId.present) {
+      map['order_item_id'] = Variable<String>(orderItemId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (direction.present) {
+      map['direction'] = Variable<String>(direction.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<DateTime>(occurredAt.value);
+    }
+    if (fundedBy.present) {
+      map['funded_by'] = Variable<String>(fundedBy.value);
+    }
+    if (sellerShare.present) {
+      map['seller_share'] = Variable<double>(sellerShare.value);
+    }
+    if (payoutId.present) {
+      map['payout_id'] = Variable<String>(payoutId.value);
+    }
+    if (provenanceCode.present) {
+      map['provenance_code'] = Variable<String>(provenanceCode.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettlementLinesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('orderId: $orderId, ')
+          ..write('orderItemId: $orderItemId, ')
+          ..write('kind: $kind, ')
+          ..write('direction: $direction, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('fundedBy: $fundedBy, ')
+          ..write('sellerShare: $sellerShare, ')
+          ..write('payoutId: $payoutId, ')
+          ..write('provenanceCode: $provenanceCode, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PayoutsTableTable extends PayoutsTable
+    with TableInfo<$PayoutsTableTable, PayoutsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PayoutsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _connectionIdMeta = const VerificationMeta(
+    'connectionId',
+  );
+  @override
+  late final GeneratedColumn<String> connectionId = GeneratedColumn<String>(
+    'connection_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _settledAtMeta = const VerificationMeta(
+    'settledAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> settledAt = GeneratedColumn<DateTime>(
+    'settled_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reconciledDeltaMeta = const VerificationMeta(
+    'reconciledDelta',
+  );
+  @override
+  late final GeneratedColumn<double> reconciledDelta = GeneratedColumn<double>(
+    'reconciled_delta',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _provenanceCodeMeta = const VerificationMeta(
+    'provenanceCode',
+  );
+  @override
+  late final GeneratedColumn<String> provenanceCode = GeneratedColumn<String>(
+    'provenance_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    connectionId,
+    amount,
+    currency,
+    settledAt,
+    reconciledDelta,
+    provenanceCode,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'payouts_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PayoutsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('connection_id')) {
+      context.handle(
+        _connectionIdMeta,
+        connectionId.isAcceptableOrUnknown(
+          data['connection_id']!,
+          _connectionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_connectionIdMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('settled_at')) {
+      context.handle(
+        _settledAtMeta,
+        settledAt.isAcceptableOrUnknown(data['settled_at']!, _settledAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_settledAtMeta);
+    }
+    if (data.containsKey('reconciled_delta')) {
+      context.handle(
+        _reconciledDeltaMeta,
+        reconciledDelta.isAcceptableOrUnknown(
+          data['reconciled_delta']!,
+          _reconciledDeltaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('provenance_code')) {
+      context.handle(
+        _provenanceCodeMeta,
+        provenanceCode.isAcceptableOrUnknown(
+          data['provenance_code']!,
+          _provenanceCodeMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
+  @override
+  PayoutsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PayoutsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      connectionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}connection_id'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      )!,
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
+      settledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}settled_at'],
+      )!,
+      reconciledDelta: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}reconciled_delta'],
+      ),
+      provenanceCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provenance_code'],
+      ),
+    );
+  }
+
+  @override
+  $PayoutsTableTable createAlias(String alias) {
+    return $PayoutsTableTable(attachedDatabase, alias);
+  }
+}
+
+class PayoutsTableData extends DataClass
+    implements Insertable<PayoutsTableData> {
+  final String id;
+  final String businessId;
+
+  /// Kết nối nào trả lô này (WTM-283). Không khoá ngoại: gỡ kết nối không được
+  /// xoá lịch sử tiền đã về.
+  final String connectionId;
+
+  /// Số sàn báo đã trả. **Luôn dương.**
+  final double amount;
+  final String currency;
+  final DateTime settledAt;
+
+  /// Chênh lệch **chưa giải thích được**, có dấu. `null` = chưa đối soát.
+  final double? reconciledDelta;
+  final String? provenanceCode;
+  const PayoutsTableData({
+    required this.id,
+    required this.businessId,
+    required this.connectionId,
+    required this.amount,
+    required this.currency,
+    required this.settledAt,
+    this.reconciledDelta,
+    this.provenanceCode,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['connection_id'] = Variable<String>(connectionId);
+    map['amount'] = Variable<double>(amount);
+    map['currency'] = Variable<String>(currency);
+    map['settled_at'] = Variable<DateTime>(settledAt);
+    if (!nullToAbsent || reconciledDelta != null) {
+      map['reconciled_delta'] = Variable<double>(reconciledDelta);
+    }
+    if (!nullToAbsent || provenanceCode != null) {
+      map['provenance_code'] = Variable<String>(provenanceCode);
+    }
+    return map;
+  }
+
+  PayoutsTableCompanion toCompanion(bool nullToAbsent) {
+    return PayoutsTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      connectionId: Value(connectionId),
+      amount: Value(amount),
+      currency: Value(currency),
+      settledAt: Value(settledAt),
+      reconciledDelta: reconciledDelta == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reconciledDelta),
+      provenanceCode: provenanceCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(provenanceCode),
+    );
+  }
+
+  factory PayoutsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PayoutsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      connectionId: serializer.fromJson<String>(json['connectionId']),
+      amount: serializer.fromJson<double>(json['amount']),
+      currency: serializer.fromJson<String>(json['currency']),
+      settledAt: serializer.fromJson<DateTime>(json['settledAt']),
+      reconciledDelta: serializer.fromJson<double?>(json['reconciledDelta']),
+      provenanceCode: serializer.fromJson<String?>(json['provenanceCode']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'connectionId': serializer.toJson<String>(connectionId),
+      'amount': serializer.toJson<double>(amount),
+      'currency': serializer.toJson<String>(currency),
+      'settledAt': serializer.toJson<DateTime>(settledAt),
+      'reconciledDelta': serializer.toJson<double?>(reconciledDelta),
+      'provenanceCode': serializer.toJson<String?>(provenanceCode),
+    };
+  }
+
+  PayoutsTableData copyWith({
+    String? id,
+    String? businessId,
+    String? connectionId,
+    double? amount,
+    String? currency,
+    DateTime? settledAt,
+    Value<double?> reconciledDelta = const Value.absent(),
+    Value<String?> provenanceCode = const Value.absent(),
+  }) => PayoutsTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    connectionId: connectionId ?? this.connectionId,
+    amount: amount ?? this.amount,
+    currency: currency ?? this.currency,
+    settledAt: settledAt ?? this.settledAt,
+    reconciledDelta: reconciledDelta.present
+        ? reconciledDelta.value
+        : this.reconciledDelta,
+    provenanceCode: provenanceCode.present
+        ? provenanceCode.value
+        : this.provenanceCode,
+  );
+  PayoutsTableData copyWithCompanion(PayoutsTableCompanion data) {
+    return PayoutsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      connectionId: data.connectionId.present
+          ? data.connectionId.value
+          : this.connectionId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      settledAt: data.settledAt.present ? data.settledAt.value : this.settledAt,
+      reconciledDelta: data.reconciledDelta.present
+          ? data.reconciledDelta.value
+          : this.reconciledDelta,
+      provenanceCode: data.provenanceCode.present
+          ? data.provenanceCode.value
+          : this.provenanceCode,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PayoutsTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('connectionId: $connectionId, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('settledAt: $settledAt, ')
+          ..write('reconciledDelta: $reconciledDelta, ')
+          ..write('provenanceCode: $provenanceCode')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    connectionId,
+    amount,
+    currency,
+    settledAt,
+    reconciledDelta,
+    provenanceCode,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PayoutsTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.connectionId == this.connectionId &&
+          other.amount == this.amount &&
+          other.currency == this.currency &&
+          other.settledAt == this.settledAt &&
+          other.reconciledDelta == this.reconciledDelta &&
+          other.provenanceCode == this.provenanceCode);
+}
+
+class PayoutsTableCompanion extends UpdateCompanion<PayoutsTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> connectionId;
+  final Value<double> amount;
+  final Value<String> currency;
+  final Value<DateTime> settledAt;
+  final Value<double?> reconciledDelta;
+  final Value<String?> provenanceCode;
+  final Value<int> rowid;
+  const PayoutsTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.connectionId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.settledAt = const Value.absent(),
+    this.reconciledDelta = const Value.absent(),
+    this.provenanceCode = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PayoutsTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String connectionId,
+    required double amount,
+    required String currency,
+    required DateTime settledAt,
+    this.reconciledDelta = const Value.absent(),
+    this.provenanceCode = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       connectionId = Value(connectionId),
+       amount = Value(amount),
+       currency = Value(currency),
+       settledAt = Value(settledAt);
+  static Insertable<PayoutsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? connectionId,
+    Expression<double>? amount,
+    Expression<String>? currency,
+    Expression<DateTime>? settledAt,
+    Expression<double>? reconciledDelta,
+    Expression<String>? provenanceCode,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (connectionId != null) 'connection_id': connectionId,
+      if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
+      if (settledAt != null) 'settled_at': settledAt,
+      if (reconciledDelta != null) 'reconciled_delta': reconciledDelta,
+      if (provenanceCode != null) 'provenance_code': provenanceCode,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PayoutsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? connectionId,
+    Value<double>? amount,
+    Value<String>? currency,
+    Value<DateTime>? settledAt,
+    Value<double?>? reconciledDelta,
+    Value<String?>? provenanceCode,
+    Value<int>? rowid,
+  }) {
+    return PayoutsTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      connectionId: connectionId ?? this.connectionId,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      settledAt: settledAt ?? this.settledAt,
+      reconciledDelta: reconciledDelta ?? this.reconciledDelta,
+      provenanceCode: provenanceCode ?? this.provenanceCode,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (connectionId.present) {
+      map['connection_id'] = Variable<String>(connectionId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (settledAt.present) {
+      map['settled_at'] = Variable<DateTime>(settledAt.value);
+    }
+    if (reconciledDelta.present) {
+      map['reconciled_delta'] = Variable<double>(reconciledDelta.value);
+    }
+    if (provenanceCode.present) {
+      map['provenance_code'] = Variable<String>(provenanceCode.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PayoutsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('connectionId: $connectionId, ')
+          ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
+          ..write('settledAt: $settledAt, ')
+          ..write('reconciledDelta: $reconciledDelta, ')
+          ..write('provenanceCode: $provenanceCode, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueItemsTableTable extends SyncQueueItemsTable
     with TableInfo<$SyncQueueItemsTableTable, SyncQueueItemsTableData> {
   @override
@@ -15630,6 +16977,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ExternalIdentitiesTableTable(this);
   late final $IdentityLinkEventsTableTable identityLinkEventsTable =
       $IdentityLinkEventsTableTable(this);
+  late final $SettlementLinesTableTable settlementLinesTable =
+      $SettlementLinesTableTable(this);
+  late final $PayoutsTableTable payoutsTable = $PayoutsTableTable(this);
   late final $SyncQueueItemsTableTable syncQueueItemsTable =
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
@@ -15728,6 +17078,26 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'identity_link_events_actor',
     'CREATE INDEX identity_link_events_actor ON identity_link_events_table (actor)',
   );
+  late final Index settlementLinesBusinessId = Index(
+    'settlement_lines_business_id',
+    'CREATE INDEX settlement_lines_business_id ON settlement_lines_table (business_id)',
+  );
+  late final Index settlementLinesOrderId = Index(
+    'settlement_lines_order_id',
+    'CREATE INDEX settlement_lines_order_id ON settlement_lines_table (order_id)',
+  );
+  late final Index settlementLinesPayoutId = Index(
+    'settlement_lines_payout_id',
+    'CREATE INDEX settlement_lines_payout_id ON settlement_lines_table (payout_id)',
+  );
+  late final Index payoutsBusinessId = Index(
+    'payouts_business_id',
+    'CREATE INDEX payouts_business_id ON payouts_table (business_id)',
+  );
+  late final Index payoutsConnectionId = Index(
+    'payouts_connection_id',
+    'CREATE INDEX payouts_connection_id ON payouts_table (connection_id)',
+  );
   late final Index businessJourneyNodesJourney = Index(
     'business_journey_nodes_journey',
     'CREATE INDEX business_journey_nodes_journey ON business_journey_nodes_table (journey_id)',
@@ -15760,6 +17130,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     connectionsTable,
     externalIdentitiesTable,
     identityLinkEventsTable,
+    settlementLinesTable,
+    payoutsTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
     businessInputsTable,
@@ -15789,6 +17161,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     identityLinkEventsBusinessId,
     identityLinkEventsIdentityId,
     identityLinkEventsActor,
+    settlementLinesBusinessId,
+    settlementLinesOrderId,
+    settlementLinesPayoutId,
+    payoutsBusinessId,
+    payoutsConnectionId,
     businessJourneyNodesJourney,
     chatMessagesConversation,
     chatMessagesSentAt,
@@ -15905,6 +17282,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       result: [
         TableUpdate('identity_link_events_table', kind: UpdateKind.delete),
       ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('settlement_lines_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('payouts_table', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -16241,6 +17632,49 @@ final class $$BusinessesTableTableReferences
     final cache = $_typedResult.readTableOrNull(
       _identityLinkEventsTableRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $SettlementLinesTableTable,
+    List<SettlementLinesTableData>
+  >
+  _settlementLinesTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.settlementLinesTable,
+        aliasName: 'businesses_table__id__settlement_lines_table__business_id',
+      );
+
+  $$SettlementLinesTableTableProcessedTableManager
+  get settlementLinesTableRefs {
+    final manager = $$SettlementLinesTableTableTableManager(
+      $_db,
+      $_db.settlementLinesTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _settlementLinesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$PayoutsTableTable, List<PayoutsTableData>>
+  _payoutsTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.payoutsTable,
+    aliasName: 'businesses_table__id__payouts_table__business_id',
+  );
+
+  $$PayoutsTableTableProcessedTableManager get payoutsTableRefs {
+    final manager = $$PayoutsTableTableTableManager(
+      $_db,
+      $_db.payoutsTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_payoutsTableRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -16653,6 +18087,56 @@ class $$BusinessesTableTableFilterComposer
                     $removeJoinBuilderFromRootComposer,
               ),
         );
+    return f(composer);
+  }
+
+  Expression<bool> settlementLinesTableRefs(
+    Expression<bool> Function($$SettlementLinesTableTableFilterComposer f) f,
+  ) {
+    final $$SettlementLinesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.settlementLinesTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SettlementLinesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.settlementLinesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> payoutsTableRefs(
+    Expression<bool> Function($$PayoutsTableTableFilterComposer f) f,
+  ) {
+    final $$PayoutsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.payoutsTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PayoutsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.payoutsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -17135,6 +18619,57 @@ class $$BusinessesTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> settlementLinesTableRefs<T extends Object>(
+    Expression<T> Function($$SettlementLinesTableTableAnnotationComposer a) f,
+  ) {
+    final $$SettlementLinesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.settlementLinesTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SettlementLinesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.settlementLinesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> payoutsTableRefs<T extends Object>(
+    Expression<T> Function($$PayoutsTableTableAnnotationComposer a) f,
+  ) {
+    final $$PayoutsTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.payoutsTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PayoutsTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.payoutsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$BusinessesTableTableTableManager
@@ -17165,6 +18700,8 @@ class $$BusinessesTableTableTableManager
             bool connectionsTableRefs,
             bool externalIdentitiesTableRefs,
             bool identityLinkEventsTableRefs,
+            bool settlementLinesTableRefs,
+            bool payoutsTableRefs,
           })
         > {
   $$BusinessesTableTableTableManager(
@@ -17260,6 +18797,8 @@ class $$BusinessesTableTableTableManager
                 connectionsTableRefs = false,
                 externalIdentitiesTableRefs = false,
                 identityLinkEventsTableRefs = false,
+                settlementLinesTableRefs = false,
+                payoutsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -17277,6 +18816,8 @@ class $$BusinessesTableTableTableManager
                     if (connectionsTableRefs) db.connectionsTable,
                     if (externalIdentitiesTableRefs) db.externalIdentitiesTable,
                     if (identityLinkEventsTableRefs) db.identityLinkEventsTable,
+                    if (settlementLinesTableRefs) db.settlementLinesTable,
+                    if (payoutsTableRefs) db.payoutsTable,
                   ],
                   addJoins:
                       <
@@ -17587,6 +19128,48 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (settlementLinesTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          SettlementLinesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._settlementLinesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).settlementLinesTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (payoutsTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          PayoutsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._payoutsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).payoutsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -17622,6 +19205,8 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool connectionsTableRefs,
         bool externalIdentitiesTableRefs,
         bool identityLinkEventsTableRefs,
+        bool settlementLinesTableRefs,
+        bool payoutsTableRefs,
       })
     >;
 typedef $$UsersTableTableCreateCompanionBuilder =
@@ -25496,6 +27081,885 @@ typedef $$IdentityLinkEventsTableTableProcessedTableManager =
       IdentityLinkEventsTableData,
       PrefetchHooks Function({bool businessId})
     >;
+typedef $$SettlementLinesTableTableCreateCompanionBuilder =
+    SettlementLinesTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String orderId,
+      Value<String?> orderItemId,
+      required String kind,
+      required String direction,
+      required double amount,
+      required String currency,
+      required DateTime occurredAt,
+      required String fundedBy,
+      Value<double?> sellerShare,
+      Value<String?> payoutId,
+      Value<String?> provenanceCode,
+      Value<int> rowid,
+    });
+typedef $$SettlementLinesTableTableUpdateCompanionBuilder =
+    SettlementLinesTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> orderId,
+      Value<String?> orderItemId,
+      Value<String> kind,
+      Value<String> direction,
+      Value<double> amount,
+      Value<String> currency,
+      Value<DateTime> occurredAt,
+      Value<String> fundedBy,
+      Value<double?> sellerShare,
+      Value<String?> payoutId,
+      Value<String?> provenanceCode,
+      Value<int> rowid,
+    });
+
+final class $$SettlementLinesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $SettlementLinesTableTable,
+          SettlementLinesTableData
+        > {
+  $$SettlementLinesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
+      .businessesTable
+      .createAlias('settlement_lines_table__business_id__businesses_table__id');
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$SettlementLinesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SettlementLinesTableTable> {
+  $$SettlementLinesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderItemId => $composableBuilder(
+    column: $table.orderItemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fundedBy => $composableBuilder(
+    column: $table.fundedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get sellerShare => $composableBuilder(
+    column: $table.sellerShare,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payoutId => $composableBuilder(
+    column: $table.payoutId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SettlementLinesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SettlementLinesTableTable> {
+  $$SettlementLinesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderItemId => $composableBuilder(
+    column: $table.orderItemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fundedBy => $composableBuilder(
+    column: $table.fundedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get sellerShare => $composableBuilder(
+    column: $table.sellerShare,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payoutId => $composableBuilder(
+    column: $table.payoutId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SettlementLinesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SettlementLinesTableTable> {
+  $$SettlementLinesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orderId =>
+      $composableBuilder(column: $table.orderId, builder: (column) => column);
+
+  GeneratedColumn<String> get orderItemId => $composableBuilder(
+    column: $table.orderItemId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fundedBy =>
+      $composableBuilder(column: $table.fundedBy, builder: (column) => column);
+
+  GeneratedColumn<double> get sellerShare => $composableBuilder(
+    column: $table.sellerShare,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get payoutId =>
+      $composableBuilder(column: $table.payoutId, builder: (column) => column);
+
+  GeneratedColumn<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => column,
+  );
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SettlementLinesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SettlementLinesTableTable,
+          SettlementLinesTableData,
+          $$SettlementLinesTableTableFilterComposer,
+          $$SettlementLinesTableTableOrderingComposer,
+          $$SettlementLinesTableTableAnnotationComposer,
+          $$SettlementLinesTableTableCreateCompanionBuilder,
+          $$SettlementLinesTableTableUpdateCompanionBuilder,
+          (SettlementLinesTableData, $$SettlementLinesTableTableReferences),
+          SettlementLinesTableData,
+          PrefetchHooks Function({bool businessId})
+        > {
+  $$SettlementLinesTableTableTableManager(
+    _$AppDatabase db,
+    $SettlementLinesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SettlementLinesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SettlementLinesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SettlementLinesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> orderId = const Value.absent(),
+                Value<String?> orderItemId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> direction = const Value.absent(),
+                Value<double> amount = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<DateTime> occurredAt = const Value.absent(),
+                Value<String> fundedBy = const Value.absent(),
+                Value<double?> sellerShare = const Value.absent(),
+                Value<String?> payoutId = const Value.absent(),
+                Value<String?> provenanceCode = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SettlementLinesTableCompanion(
+                id: id,
+                businessId: businessId,
+                orderId: orderId,
+                orderItemId: orderItemId,
+                kind: kind,
+                direction: direction,
+                amount: amount,
+                currency: currency,
+                occurredAt: occurredAt,
+                fundedBy: fundedBy,
+                sellerShare: sellerShare,
+                payoutId: payoutId,
+                provenanceCode: provenanceCode,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String orderId,
+                Value<String?> orderItemId = const Value.absent(),
+                required String kind,
+                required String direction,
+                required double amount,
+                required String currency,
+                required DateTime occurredAt,
+                required String fundedBy,
+                Value<double?> sellerShare = const Value.absent(),
+                Value<String?> payoutId = const Value.absent(),
+                Value<String?> provenanceCode = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SettlementLinesTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                orderId: orderId,
+                orderItemId: orderItemId,
+                kind: kind,
+                direction: direction,
+                amount: amount,
+                currency: currency,
+                occurredAt: occurredAt,
+                fundedBy: fundedBy,
+                sellerShare: sellerShare,
+                payoutId: payoutId,
+                provenanceCode: provenanceCode,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$SettlementLinesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$SettlementLinesTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$SettlementLinesTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$SettlementLinesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SettlementLinesTableTable,
+      SettlementLinesTableData,
+      $$SettlementLinesTableTableFilterComposer,
+      $$SettlementLinesTableTableOrderingComposer,
+      $$SettlementLinesTableTableAnnotationComposer,
+      $$SettlementLinesTableTableCreateCompanionBuilder,
+      $$SettlementLinesTableTableUpdateCompanionBuilder,
+      (SettlementLinesTableData, $$SettlementLinesTableTableReferences),
+      SettlementLinesTableData,
+      PrefetchHooks Function({bool businessId})
+    >;
+typedef $$PayoutsTableTableCreateCompanionBuilder =
+    PayoutsTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String connectionId,
+      required double amount,
+      required String currency,
+      required DateTime settledAt,
+      Value<double?> reconciledDelta,
+      Value<String?> provenanceCode,
+      Value<int> rowid,
+    });
+typedef $$PayoutsTableTableUpdateCompanionBuilder =
+    PayoutsTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> connectionId,
+      Value<double> amount,
+      Value<String> currency,
+      Value<DateTime> settledAt,
+      Value<double?> reconciledDelta,
+      Value<String?> provenanceCode,
+      Value<int> rowid,
+    });
+
+final class $$PayoutsTableTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $PayoutsTableTable, PayoutsTableData> {
+  $$PayoutsTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
+      .businessesTable
+      .createAlias('payouts_table__business_id__businesses_table__id');
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PayoutsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PayoutsTableTable> {
+  $$PayoutsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get connectionId => $composableBuilder(
+    column: $table.connectionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get settledAt => $composableBuilder(
+    column: $table.settledAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get reconciledDelta => $composableBuilder(
+    column: $table.reconciledDelta,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PayoutsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PayoutsTableTable> {
+  $$PayoutsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get connectionId => $composableBuilder(
+    column: $table.connectionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get settledAt => $composableBuilder(
+    column: $table.settledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get reconciledDelta => $composableBuilder(
+    column: $table.reconciledDelta,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PayoutsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PayoutsTableTable> {
+  $$PayoutsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get connectionId => $composableBuilder(
+    column: $table.connectionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get settledAt =>
+      $composableBuilder(column: $table.settledAt, builder: (column) => column);
+
+  GeneratedColumn<double> get reconciledDelta => $composableBuilder(
+    column: $table.reconciledDelta,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => column,
+  );
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PayoutsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PayoutsTableTable,
+          PayoutsTableData,
+          $$PayoutsTableTableFilterComposer,
+          $$PayoutsTableTableOrderingComposer,
+          $$PayoutsTableTableAnnotationComposer,
+          $$PayoutsTableTableCreateCompanionBuilder,
+          $$PayoutsTableTableUpdateCompanionBuilder,
+          (PayoutsTableData, $$PayoutsTableTableReferences),
+          PayoutsTableData,
+          PrefetchHooks Function({bool businessId})
+        > {
+  $$PayoutsTableTableTableManager(_$AppDatabase db, $PayoutsTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PayoutsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PayoutsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PayoutsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> connectionId = const Value.absent(),
+                Value<double> amount = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<DateTime> settledAt = const Value.absent(),
+                Value<double?> reconciledDelta = const Value.absent(),
+                Value<String?> provenanceCode = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PayoutsTableCompanion(
+                id: id,
+                businessId: businessId,
+                connectionId: connectionId,
+                amount: amount,
+                currency: currency,
+                settledAt: settledAt,
+                reconciledDelta: reconciledDelta,
+                provenanceCode: provenanceCode,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String connectionId,
+                required double amount,
+                required String currency,
+                required DateTime settledAt,
+                Value<double?> reconciledDelta = const Value.absent(),
+                Value<String?> provenanceCode = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PayoutsTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                connectionId: connectionId,
+                amount: amount,
+                currency: currency,
+                settledAt: settledAt,
+                reconciledDelta: reconciledDelta,
+                provenanceCode: provenanceCode,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PayoutsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable: $$PayoutsTableTableReferences
+                                    ._businessIdTable(db),
+                                referencedColumn: $$PayoutsTableTableReferences
+                                    ._businessIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PayoutsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PayoutsTableTable,
+      PayoutsTableData,
+      $$PayoutsTableTableFilterComposer,
+      $$PayoutsTableTableOrderingComposer,
+      $$PayoutsTableTableAnnotationComposer,
+      $$PayoutsTableTableCreateCompanionBuilder,
+      $$PayoutsTableTableUpdateCompanionBuilder,
+      (PayoutsTableData, $$PayoutsTableTableReferences),
+      PayoutsTableData,
+      PrefetchHooks Function({bool businessId})
+    >;
 typedef $$SyncQueueItemsTableTableCreateCompanionBuilder =
     SyncQueueItemsTableCompanion Function({
       Value<int> id,
@@ -28291,6 +30755,10 @@ class $AppDatabaseManager {
         _db,
         _db.identityLinkEventsTable,
       );
+  $$SettlementLinesTableTableTableManager get settlementLinesTable =>
+      $$SettlementLinesTableTableTableManager(_db, _db.settlementLinesTable);
+  $$PayoutsTableTableTableManager get payoutsTable =>
+      $$PayoutsTableTableTableManager(_db, _db.payoutsTable);
   $$SyncQueueItemsTableTableTableManager get syncQueueItemsTable =>
       $$SyncQueueItemsTableTableTableManager(_db, _db.syncQueueItemsTable);
   $$SupplierFavoritesTableTableTableManager get supplierFavoritesTable =>

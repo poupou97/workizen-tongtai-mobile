@@ -71,7 +71,13 @@ void main() {
     //                customers_table.external_id/external_source để NGUYÊN,
     //                không migrate — chúng đang rỗng, và chép một suy đoán
     //                sang bảng mới là lặp lại sai lầm v17 đã tránh.
-    expect(db.schemaVersion, 19);
+    // v20 (WTM-292 / N0.4): settlement_lines_table + payouts_table
+    //                (ADR-TON-024 luật 2). Thuần thêm mới. Hai cột cố ý KHÔNG
+    //                có DEFAULT: `funded_by` (mặc định = app tự khai thay sàn
+    //                rằng "sàn tài trợ", sai theo hướng tâng bốc lợi nhuận) và
+    //                `reconciled_delta` nullable (null = CHƯA đối soát, 0 = đã
+    //                đối soát và khớp).
+    expect(db.schemaVersion, 20);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

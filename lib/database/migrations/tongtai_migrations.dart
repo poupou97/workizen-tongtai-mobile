@@ -38,6 +38,21 @@
 /// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
 /// addresses, notes). Same additive-nullable convention as v5.
 ///
+/// ## Schema v20 (WTM-292 — Settlement Domain, N0.4 · ADR-TON-024)
+/// v20 adds `settlement_lines_table` and `payouts_table`. Purely additive.
+///
+/// Two columns deliberately have **no DEFAULT**. `funded_by` is not nullable
+/// and defaults to nothing: a `DEFAULT 'platform'` would be the app declaring
+/// on the marketplace's behalf that *the platform paid for it*, and that error
+/// falls exactly in the direction that flatters profit. A connector that
+/// cannot tell writes `unknown`, and the Rule Twin refuses to state a profit
+/// figure. `reconciled_delta` is nullable because `null` means **not yet
+/// reconciled** while `0` means *reconciled and it matched* — a `DEFAULT 0`
+/// makes an unchecked payout look checked (the `null` ≠ `0` lesson from v14).
+///
+/// Marketplace-fee transactions the seller already entered by hand **stay in
+/// Finance**: moving them here would be guessing what the seller meant.
+///
 /// ## Schema v19 (WTM-291 — Identity Resolution, N0.3 · ADR-TON-024)
 /// v19 adds `external_identities_table` and `identity_link_events_table`.
 /// Purely additive — no existing column changes and no existing row is touched.
@@ -85,7 +100,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 19;
+const int kTongtaiSchemaVersion = 20;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -313,6 +328,28 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 20) {
+        // v20 (WTM-292 / N0.4 — Settlement Domain, ADR-TON-024 luật 2). Hai
+        // bảng mới, thuần thêm mới.
+        //
+        // Hai cột cố ý KHÔNG có DEFAULT:
+        // • `settlement_lines_table.funded_by` — một `DEFAULT 'platform'` là
+        //   app tự khai thay cho sàn rằng "sàn tài trợ", và nó rơi đúng vào
+        //   hướng làm lợi nhuận đẹp lên. Không khai được thì ghi `unknown`,
+        //   và Rule Twin từ chối trả số.
+        // • `payouts_table.reconciled_delta` nullable — `null` = CHƯA đối
+        //   soát, `0` = đã đối soát và khớp. Một `DEFAULT 0` làm lô chưa ai
+        //   kiểm trông như đã kiểm xong (họ `null` ≠ `0`, bài học v14).
+        //
+        // Giao dịch phí sàn người bán đã tự nhập GIỮ NGUYÊN trong Finance —
+        // di chuyển chúng sang đây là đoán ý người bán.
+        for (final name in ['settlement_lines_table', 'payouts_table']) {
+          final table = db.allTables.firstWhere(
+            (t) => t.actualTableName == name,
+          );
+          await m.createTable(table);
+        }
       }
       if (from < 19) {
         // v19 (WTM-291 / N0.3 — Identity Resolution). Hai bảng mới, **thuần

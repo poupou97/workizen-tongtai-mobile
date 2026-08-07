@@ -158,3 +158,90 @@ số quan trọng nhất trong app.
 
 ⇒ Không đụng local-first, không migration phá huỷ. Điều kiện dừng của Task
 Order **không kích hoạt**.
+
+---
+
+## Đã cài đặt — WTM-292, schema v20 (2026-08-07)
+
+Thiết kế trên đã thành code. Hai chỗ **thêm** so với bản thiết kế, cả hai do
+viết test mới lộ ra:
+
+### 1. `shared` không có tỷ lệ = `unknown` mặc áo khác
+
+Bản thiết kế nói *"`shared` phải có thêm tỷ lệ, nếu không thì là `unknown`"*
+nhưng để đó như một câu ghi chú. Trong code nó là một hàm:
+
+```dart
+bool get fundingIsKnown => switch (fundedBy) {
+  FundingSource.platform || FundingSource.seller => true,
+  FundingSource.shared => sellerShare != null,   // ← chỗ dễ tưởng là đã biết
+  FundingSource.unknown => false,
+};
+```
+
+Không có nó thì `shared` trông như một câu trả lời, và Rule Twin sẽ trả một con
+số dựa trên tỷ lệ không tồn tại.
+
+### 2. Đọc số khi chưa biết ai trả thì **ném**, không trả `0`
+
+```dart
+double get sellerBorneAmount {
+  if (!fundingIsKnown) throw StateError(...);
+  ...
+}
+```
+
+Trả `0` ở đây là đúng cách một con số bịa lọt vào báo cáo — và nó lọt theo
+hướng *"người bán không phải chịu khoản này"*, tức hướng tâng bốc lợi nhuận.
+Ném thì chỗ gọi buộc phải hỏi `fundingIsKnown` trước, và Rule Twin trả
+`insufficient`.
+
+### `TrueProfit` là kiểu sealed, không phải `double?`
+
+```
+ProfitKnown {revenue, cogs, settlementImpact}  |  ProfitInsufficient {blockers}
+```
+
+`double?` rất dễ thành `?? 0` ở chỗ gọi, và `0` hiện lên màn hình như một con
+số thật. Buộc phân nhánh là cách duy nhất khiến "chưa biết" không lặng lẽ
+thành "bằng không". `ProfitInsufficient` **không dựng được với danh sách rỗng**
+— insufficient thì phải nói được thiếu gì.
+
+`ProfitBlocker`: `missing_cost` · `unknown_funding` · `unexplained_delta`.
+Ngưỡng bỏ qua chênh lệch là **1.000 đ**, nằm ở `TrueProfitRule.deltaTolerance`
+— đủ nhỏ để một khoản phí thật không lọt, đủ lớn để không chặn vì lẻ đồng.
+
+### Luật 3 khoá bằng ba lớp
+
+`test/features/tongtai/p0/settlement_no_derived_write_governance_test.dart`:
+
+| Lớp | Kiểm gì |
+|---|---|
+| 1 | `settlement_allocation.dart` **không import** repository/drift/database, và không có `await` — nó không có tay để ghi |
+| 2 | phân bổ **không trả về `SettlementLine`**, và `AllocatedSettlement` **không có `id`** — không khoá thì không ghi vào bảng được |
+| 3 | repository chỉ có **đúng một** chỗ ghi hàng loạt (`upsertAll`), không lặp qua món, không biết `ItemRevenues` |
+
+Lớp 2 là chỗ tinh tế nhất: nếu hàm phân bổ trả về `List<SettlementLine>` thì
+bước tiếp theo tự nhiên nhất của bất kỳ ai đọc code là đem chúng đi
+`upsertAll`. Trả về một kiểu khác làm việc đó **không viết ra được**.
+
+### Schema v20
+
+`settlement_lines_table` · `payouts_table`. Thuần thêm mới.
+
+Hai cột cố ý **không có DEFAULT**:
+
+| Cột | Vì sao không DEFAULT |
+|---|---|
+| `funded_by` | `DEFAULT 'platform'` là app tự khai thay sàn rằng *sàn tài trợ* — sai đúng theo hướng tâng bốc lợi nhuận |
+| `reconciled_delta` (nullable) | `null` = **chưa đối soát**, `0` = **đã đối soát và khớp**. `DEFAULT 0` làm lô chưa ai kiểm trông như đã kiểm xong |
+
+Không khoá ngoại tới `orders_table`: khoản đối soát có thể về **trước** khi đơn
+được đồng bộ xong, và một FK ở đây biến thứ tự đồng bộ thành lỗi ghi (bài học
+787 ở v12).
+
+Đọc thấy mã canonical lạ (`kind`/`direction`/`funded_by`) hoặc `amount` âm ⇒
+**bỏ qua dòng**, không rơi về mặc định.
+
+**Chưa nối vào UI** (L0). Giao dịch phí sàn người bán đã tự nhập vẫn nguyên
+trong Finance — không tự nhảy sang đây.

@@ -21,6 +21,8 @@ import 'tables/ai_chats.dart';
 import 'tables/connections.dart';
 import 'tables/external_identities.dart';
 import 'tables/identity_link_events.dart';
+import 'tables/settlement_lines.dart';
+import 'tables/payouts.dart';
 import 'tables/sync_queue_items.dart';
 import 'tables/supplier_favorites.dart';
 import 'tables/chat_messages.dart';
@@ -79,6 +81,8 @@ part 'database.g.dart';
     ConnectionsTable,
     ExternalIdentitiesTable,
     IdentityLinkEventsTable,
+    SettlementLinesTable,
+    PayoutsTable,
     SyncQueueItemsTable,
     SupplierFavoritesTable,
     BusinessInputsTable,
