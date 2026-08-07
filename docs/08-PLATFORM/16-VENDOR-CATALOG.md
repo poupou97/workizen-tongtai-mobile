@@ -101,3 +101,41 @@ Nằm trong prompt AI thì: không truy vấn được · không test được �
 phải đổi mã · và AI sẽ "nhớ" phiên bản cũ khi nội dung đổi. Đúng ranh giới
 ADR-TON-016: **Rule Twin có thẩm quyền, AI chỉ giải thích** — catalog là dữ
 liệu của Rule Twin, không phải kiến thức của AI.
+
+---
+
+## Đã cài đặt — WTM-293 (2026-08-07)
+
+`lib/features/tongtai/platform/vendor_catalog.dart`. **Không bảng, không
+migration**: catalog là **kiến thức của app**, không phải dữ liệu người bán.
+Lưu nó vào SQLite sẽ sinh ra một bản sao cũ trên máy mỗi người, và mỗi lần sửa
+catalog lại thành một migration.
+
+### `recommended` là getter, và nó nói cả LÝ DO
+
+Ngoài `recommended` (đúng công thức ở trên), có thêm `notRecommendedBecause`
+trả về danh sách mã lý do:
+
+```
+api_not_production_ready · never_tried · no_free_entry ·
+no_official_integration_path · no_vietnam_support · requires_annual_audit
+```
+
+Đây là thứ một cờ gán tay không bao giờ cho được: một cờ nói *"không"*, còn cái
+này nói *"không, vì ba lý do sau"* — và người đọc sửa được đúng chỗ.
+
+Ví dụ thật: Gmail bị loại vì `requires_annual_audit`, **không** vì thiếu đường
+tích hợp. Đường có; giá mới là vấn đề. Test khoá đúng phân biệt đó.
+
+### Khoá bằng governance
+
+`test/features/tongtai/p0/catalog_is_data_governance_test.dart`:
+
+| Kiểm gì | Vì sao |
+|---|---|
+| `bool get recommended` tồn tại, **không** có `final bool recommended` hay `this.recommended` | một trường là ý kiến đội lốt dữ liệu |
+| **không bảng nào** trong `lib/database/tables/` chứa chữ `recommended` | đường ghi xuống đĩa là chỗ giá trị dẫn xuất thành nguồn sự thật thứ hai |
+| catalog không import drift/database/workspace | nó không được có tay để ghi |
+
+Phép quét bảng có chống PASS GIẢ: `expect(scanned, greaterThan(10))` — thư mục
+rỗng thì vòng lặp không chạy và test xanh oan.
