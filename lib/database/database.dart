@@ -18,7 +18,7 @@ import 'tables/transactions.dart';
 import 'tables/documents.dart';
 import 'tables/alerts.dart';
 import 'tables/ai_chats.dart';
-import 'tables/integrations.dart';
+import 'tables/connections.dart';
 import 'tables/sync_queue_items.dart';
 import 'tables/supplier_favorites.dart';
 import 'tables/chat_messages.dart';
@@ -74,7 +74,7 @@ part 'database.g.dart';
     DocumentsTable,
     AlertsTable,
     AIChatTable,
-    IntegrationsTable,
+    ConnectionsTable,
     SyncQueueItemsTable,
     SupplierFavoritesTable,
     BusinessInputsTable,

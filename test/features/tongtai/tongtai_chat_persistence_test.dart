@@ -104,7 +104,7 @@ void main() {
     });
 
     test('schema version constant advanced in lock-step', () {
-      expect(kTongtaiSchemaVersion, 17);
+      expect(kTongtaiSchemaVersion, 18);
       // v12 (WTM-209): orders_table rebuilt without the channel_id FK — it
       //                pointed at channels_table, a dead v1 table nothing ever
       //                wrote, so every real channel code failed the constraint.
@@ -115,7 +115,10 @@ void main() {
       // v17 (WTM-282): orders_table.provenance_code — nguồn gốc bản ghi. Cột
       //                nullable, KHÔNG backfill: dòng cũ không khai nguồn gốc,
       //                và ghi suy đoán xuống đĩa sẽ biến nó thành lời khai.
-      expect(db.schemaVersion, 17);
+      // v18 (WTM-283): connections_table thêm; integrations_table XOÁ — bảng
+      //                rỗng từ v1 mang 4 cột token, mã hoá một quyết định
+      //                trái luật credential của Founder.
+      expect(db.schemaVersion, 18);
     });
   });
 

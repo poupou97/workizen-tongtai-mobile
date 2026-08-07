@@ -38,6 +38,13 @@
 /// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
 /// addresses, notes). Same additive-nullable convention as v5.
 ///
+/// ## Schema v18 (WTM-283 — Connection, N0.2)
+/// v18 adds `connections_table` (external-platform connection **metadata**) and
+/// drops `integrations_table` — a bootstrap-v1 table nothing ever wrote, whose
+/// four `*Encrypted` columns encoded a decision that violates the Founder's
+/// credential rule: secrets belong in Keychain/Keystore, never in the business
+/// database (and therefore never in an unencrypted `.ttbk`).
+///
 /// ## Schema v17 (WTM-282 — Provenance, N0.1)
 /// v17 adds the nullable `orders_table.provenance_code` column: which of the
 /// four canonical sources a row came from (`manual` · `sample` · `derived` ·
@@ -63,7 +70,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 17;
+const int kTongtaiSchemaVersion = 18;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -121,6 +128,14 @@ const String kBusinessJourneyNodesTableName = 'business_journey_nodes_table';
 /// schema v10. See `tables/opportunity_reactions.dart` for why only the
 /// seller's judgement is stored and not the opportunity itself.
 const String kOpportunityReactionsTableName = 'opportunity_reactions_table';
+
+/// The unused integration table, dropped in schema v18 (WTM-283).
+///
+/// It shipped in v1 and **nothing ever wrote a row to it** — but unlike the
+/// opportunity table, this one was actively harmful while it sat there: its
+/// `api_key_encrypted` / `access_token_encrypted` columns told every future
+/// reader that tokens belong in the business database.
+const String kDroppedIntegrationsTableName = 'integrations_table';
 
 /// The unused opportunity table, dropped in schema v10 (WTM-190).
 ///
@@ -282,6 +297,23 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         // build that already dropped it must upgrade cleanly too.
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
+        );
+      }
+      if (from < 18) {
+        // v18 (WTM-283 / N0.2 — Connection). Bảng mới cho metadata kết nối…
+        final conns = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'connections_table',
+        );
+        await m.createTable(conns);
+        // …và xoá `integrations_table`: có từ bootstrap v1, CHƯA TỪNG có dòng
+        // nào, nhưng mang bốn cột `*Encrypted` — tức mã hoá sẵn quyết định
+        // "token nằm trong SQLite nghiệp vụ", trái luật credential của Founder.
+        //
+        // An toàn để xoá chứ không phải để lại: không đường ghi nào từng tồn
+        // tại, nên không có dòng nào để mất. `IF EXISTS` vì một DB tạo bởi bản
+        // dựng đã xoá nó cũng phải nâng cấp sạch (tiền lệ WTM-190).
+        await db.customStatement(
+          'DROP TABLE IF EXISTS $kDroppedIntegrationsTableName',
         );
       }
       if (from < 17) {
