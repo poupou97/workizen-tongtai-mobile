@@ -35,6 +35,17 @@ class OrdersTable extends Table {
   TextColumn get paymentStatus => text().nullable()();
   TextColumn get items => text()(); // JSON array
   TextColumn get externalId => text().nullable()();
+
+  /// Canonical `ProvenanceSource` code (WTM-282 · N0.1) — bản ghi này từ đâu tới.
+  ///
+  /// **Nullable, và `null` KHÔNG có nghĩa là `manual`.** Nó có nghĩa là *bản
+  /// ghi không khai*, tức đơn tạo trước schema v17. Repository suy nguồn gốc
+  /// từ tiền tố id và đánh dấu kết quả là suy đoán, thay vì viết một phỏng
+  /// đoán xuống đĩa — ghi xuống là biến nó thành lời khai, và lần đọc sau
+  /// không còn ai biết đó từng là phỏng đoán.
+  ///
+  /// Cùng kỷ luật `null` ≠ `0` đã áp cho `paymentStatus` và `channelId`.
+  TextColumn get provenanceCode => text().nullable()();
   DateTimeColumn get createdAt =>
       dateTime().withDefault(Constant(DateTime.now()))();
   DateTimeColumn get updatedAt =>

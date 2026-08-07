@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import '../profile/business_profile.dart';
 import '../../../database/database.dart';
 import '../core/local_workspace.dart';
+import '../core/provenance.dart';
 import '../core/tongtai_enums.dart';
 import 'order.dart';
 
@@ -145,6 +146,9 @@ class DriftOrderRepository implements OrderRepository {
         status: o.status.name,
         // Full line detail as a tolerant JSON array.
         items: encodeOrderItems(o.items),
+        // WTM-282 — `storedCode` trả null cho nguồn gốc SUY ĐOÁN, nên một đơn
+        // cũ đọc lên rồi ghi lại KHÔNG biến phỏng đoán thành lời khai.
+        provenanceCode: Value(o.provenance.storedCode),
         updatedAt: Value(DateTime.now()),
       );
 
@@ -159,6 +163,9 @@ class DriftOrderRepository implements OrderRepository {
     // build may know channels this build does not).
     channel: SalesChannel.fromCode(row.channelId),
     items: decodeOrderItems(row.items),
+    // WTM-282 — cột null (đơn trước v17) hoặc mã lạ ⇒ suy từ tiền tố id và
+    // đánh dấu là suy đoán. Một chỗ duy nhất quyết định, không nơi nào tự chế.
+    provenance: Provenance.fromStored(code: row.provenanceCode, id: row.id),
   );
   @override
   Future<void> deleteByIdPrefix(String prefix) async {

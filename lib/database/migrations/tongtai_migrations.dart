@@ -38,6 +38,14 @@
 /// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
 /// addresses, notes). Same additive-nullable convention as v5.
 ///
+/// ## Schema v17 (WTM-282 — Provenance, N0.1)
+/// v17 adds the nullable `orders_table.provenance_code` column: which of the
+/// four canonical sources a row came from (`manual` · `sample` · `derived` ·
+/// `connector`). **No backfill on purpose** — a row that predates v17 never
+/// declared its origin, and writing a guess to disk would turn that guess into
+/// a declaration. The repository infers from the id prefix at read time and
+/// marks the result as inferred.
+///
 /// ## Schema v7 (WTM-124 — Journey persistence snapshot, ADR-TON-009)
 /// v7 adds the nullable `journeys_table.domain_snapshot` column: the divergent
 /// `BusinessGoal` domain fields (type, achievedAmount, growth, endDate, notes)
@@ -55,7 +63,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 16;
+const int kTongtaiSchemaVersion = 17;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -274,6 +282,26 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         // build that already dropped it must upgrade cleanly too.
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
+        );
+      }
+      if (from < 17) {
+        // v17 (WTM-282 / N0.1 — Provenance). Một cột nullable trên
+        // `orders_table`: bản ghi này từ đâu tới.
+        //
+        // KHÔNG backfill. Đơn cũ không khai nguồn gốc, và ghi một suy đoán
+        // xuống đĩa sẽ biến nó thành lời khai — lần đọc sau không còn ai biết
+        // đó từng là phỏng đoán. Repository suy từ tiền tố id lúc đọc và đánh
+        // dấu `inferred`; xem `Provenance.fromStored`.
+        //
+        // Thêm cột, KHÔNG rebuild bảng — bài học v14.
+        final orders = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'orders_table',
+        );
+        await _addColumnIfMissing(
+          db,
+          m,
+          orders,
+          orders.columnsByName['provenance_code']!,
         );
       }
       if (from < 16) {

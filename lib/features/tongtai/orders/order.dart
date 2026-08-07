@@ -1,6 +1,7 @@
 import '../profile/business_profile.dart';
 import 'package:flutter/foundation.dart';
 
+import '../core/provenance.dart';
 import '../core/tongtai_enums.dart';
 import '../inventory/product.dart';
 
@@ -114,6 +115,7 @@ class CustomerOrder {
     required this.items,
     this.paymentStatus,
     this.channel,
+    this.provenance = Provenance.manual,
   });
 
   /// Stable identifier.
@@ -158,6 +160,15 @@ class CustomerOrder {
 
   /// The purchased lines (AC3). Never empty for a real order.
   final List<OrderItem> items;
+
+  /// Nguồn gốc bản ghi (WTM-282 · N0.1) — người bán nhập, dữ liệu mẫu, hệ
+  /// thống sinh, hay về từ connector.
+  ///
+  /// Mặc định [Provenance.manual] vì đường tạo đơn duy nhất hôm nay là người
+  /// bán tự nhập; dữ liệu mẫu khai `sample` khi gieo. Đơn đọc từ đĩa **trước**
+  /// schema v17 không khai gì, nên repository suy từ tiền tố id và đánh dấu
+  /// `inferred` — xem `Provenance.fromStored`.
+  final Provenance provenance;
 
   /// Total units across all lines.
   int get totalQuantity => items.fold(0, (sum, item) => sum + item.quantity);
