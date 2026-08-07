@@ -4338,6 +4338,17 @@ class $OrdersTableTable extends OrdersTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _provenanceCodeMeta = const VerificationMeta(
+    'provenanceCode',
+  );
+  @override
+  late final GeneratedColumn<String> provenanceCode = GeneratedColumn<String>(
+    'provenance_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4379,6 +4390,7 @@ class $OrdersTableTable extends OrdersTable
     paymentStatus,
     items,
     externalId,
+    provenanceCode,
     createdAt,
     updatedAt,
   ];
@@ -4514,6 +4526,15 @@ class $OrdersTableTable extends OrdersTable
         externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
       );
     }
+    if (data.containsKey('provenance_code')) {
+      context.handle(
+        _provenanceCodeMeta,
+        provenanceCode.isAcceptableOrUnknown(
+          data['provenance_code']!,
+          _provenanceCodeMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -4595,6 +4616,10 @@ class $OrdersTableTable extends OrdersTable
         DriftSqlType.string,
         data['${effectivePrefix}external_id'],
       ),
+      provenanceCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provenance_code'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4639,6 +4664,17 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
   final String? paymentStatus;
   final String items;
   final String? externalId;
+
+  /// Canonical `ProvenanceSource` code (WTM-282 · N0.1) — bản ghi này từ đâu tới.
+  ///
+  /// **Nullable, và `null` KHÔNG có nghĩa là `manual`.** Nó có nghĩa là *bản
+  /// ghi không khai*, tức đơn tạo trước schema v17. Repository suy nguồn gốc
+  /// từ tiền tố id và đánh dấu kết quả là suy đoán, thay vì viết một phỏng
+  /// đoán xuống đĩa — ghi xuống là biến nó thành lời khai, và lần đọc sau
+  /// không còn ai biết đó từng là phỏng đoán.
+  ///
+  /// Cùng kỷ luật `null` ≠ `0` đã áp cho `paymentStatus` và `channelId`.
+  final String? provenanceCode;
   final DateTime createdAt;
   final DateTime updatedAt;
   const OrdersTableData({
@@ -4657,6 +4693,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     this.paymentStatus,
     required this.items,
     this.externalId,
+    this.provenanceCode,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -4687,6 +4724,9 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     map['items'] = Variable<String>(items);
     if (!nullToAbsent || externalId != null) {
       map['external_id'] = Variable<String>(externalId);
+    }
+    if (!nullToAbsent || provenanceCode != null) {
+      map['provenance_code'] = Variable<String>(provenanceCode);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -4720,6 +4760,9 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       externalId: externalId == null && nullToAbsent
           ? const Value.absent()
           : Value(externalId),
+      provenanceCode: provenanceCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(provenanceCode),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -4746,6 +4789,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       paymentStatus: serializer.fromJson<String?>(json['paymentStatus']),
       items: serializer.fromJson<String>(json['items']),
       externalId: serializer.fromJson<String?>(json['externalId']),
+      provenanceCode: serializer.fromJson<String?>(json['provenanceCode']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -4769,6 +4813,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       'paymentStatus': serializer.toJson<String?>(paymentStatus),
       'items': serializer.toJson<String>(items),
       'externalId': serializer.toJson<String?>(externalId),
+      'provenanceCode': serializer.toJson<String?>(provenanceCode),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -4790,6 +4835,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     Value<String?> paymentStatus = const Value.absent(),
     String? items,
     Value<String?> externalId = const Value.absent(),
+    Value<String?> provenanceCode = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => OrdersTableData(
@@ -4810,6 +4856,9 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
         : this.paymentStatus,
     items: items ?? this.items,
     externalId: externalId.present ? externalId.value : this.externalId,
+    provenanceCode: provenanceCode.present
+        ? provenanceCode.value
+        : this.provenanceCode,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -4846,6 +4895,9 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       externalId: data.externalId.present
           ? data.externalId.value
           : this.externalId,
+      provenanceCode: data.provenanceCode.present
+          ? data.provenanceCode.value
+          : this.provenanceCode,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -4869,6 +4921,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           ..write('paymentStatus: $paymentStatus, ')
           ..write('items: $items, ')
           ..write('externalId: $externalId, ')
+          ..write('provenanceCode: $provenanceCode, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4892,6 +4945,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     paymentStatus,
     items,
     externalId,
+    provenanceCode,
     createdAt,
     updatedAt,
   );
@@ -4914,6 +4968,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           other.paymentStatus == this.paymentStatus &&
           other.items == this.items &&
           other.externalId == this.externalId &&
+          other.provenanceCode == this.provenanceCode &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -4934,6 +4989,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
   final Value<String?> paymentStatus;
   final Value<String> items;
   final Value<String?> externalId;
+  final Value<String?> provenanceCode;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -4953,6 +5009,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     this.paymentStatus = const Value.absent(),
     this.items = const Value.absent(),
     this.externalId = const Value.absent(),
+    this.provenanceCode = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -4973,6 +5030,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     this.paymentStatus = const Value.absent(),
     required String items,
     this.externalId = const Value.absent(),
+    this.provenanceCode = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -5001,6 +5059,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     Expression<String>? paymentStatus,
     Expression<String>? items,
     Expression<String>? externalId,
+    Expression<String>? provenanceCode,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -5021,6 +5080,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
       if (paymentStatus != null) 'payment_status': paymentStatus,
       if (items != null) 'items': items,
       if (externalId != null) 'external_id': externalId,
+      if (provenanceCode != null) 'provenance_code': provenanceCode,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -5043,6 +5103,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     Value<String?>? paymentStatus,
     Value<String>? items,
     Value<String?>? externalId,
+    Value<String?>? provenanceCode,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -5063,6 +5124,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
       paymentStatus: paymentStatus ?? this.paymentStatus,
       items: items ?? this.items,
       externalId: externalId ?? this.externalId,
+      provenanceCode: provenanceCode ?? this.provenanceCode,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -5117,6 +5179,9 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     if (externalId.present) {
       map['external_id'] = Variable<String>(externalId.value);
     }
+    if (provenanceCode.present) {
+      map['provenance_code'] = Variable<String>(provenanceCode.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5147,6 +5212,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
           ..write('paymentStatus: $paymentStatus, ')
           ..write('items: $items, ')
           ..write('externalId: $externalId, ')
+          ..write('provenanceCode: $provenanceCode, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -18817,6 +18883,7 @@ typedef $$OrdersTableTableCreateCompanionBuilder =
       Value<String?> paymentStatus,
       required String items,
       Value<String?> externalId,
+      Value<String?> provenanceCode,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -18838,6 +18905,7 @@ typedef $$OrdersTableTableUpdateCompanionBuilder =
       Value<String?> paymentStatus,
       Value<String> items,
       Value<String?> externalId,
+      Value<String?> provenanceCode,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -18979,6 +19047,11 @@ class $$OrdersTableTableFilterComposer
 
   ColumnFilters<String> get externalId => $composableBuilder(
     column: $table.externalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -19138,6 +19211,11 @@ class $$OrdersTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -19252,6 +19330,11 @@ class $$OrdersTableTableAnnotationComposer
 
   GeneratedColumn<String> get externalId => $composableBuilder(
     column: $table.externalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
     builder: (column) => column,
   );
 
@@ -19381,6 +19464,7 @@ class $$OrdersTableTableTableManager
                 Value<String?> paymentStatus = const Value.absent(),
                 Value<String> items = const Value.absent(),
                 Value<String?> externalId = const Value.absent(),
+                Value<String?> provenanceCode = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -19400,6 +19484,7 @@ class $$OrdersTableTableTableManager
                 paymentStatus: paymentStatus,
                 items: items,
                 externalId: externalId,
+                provenanceCode: provenanceCode,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -19421,6 +19506,7 @@ class $$OrdersTableTableTableManager
                 Value<String?> paymentStatus = const Value.absent(),
                 required String items,
                 Value<String?> externalId = const Value.absent(),
+                Value<String?> provenanceCode = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -19440,6 +19526,7 @@ class $$OrdersTableTableTableManager
                 paymentStatus: paymentStatus,
                 items: items,
                 externalId: externalId,
+                provenanceCode: provenanceCode,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

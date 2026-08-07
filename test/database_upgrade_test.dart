@@ -93,4 +93,80 @@ void main() {
     );
     expect(version.read<int>('user_version'), kTongtaiSchemaVersion);
   });
+
+  test('v16 có đơn hàng → v17: đơn cũ KHÔNG bị gán nguồn gốc', () async {
+    final dir = await Directory.systemTemp.createTemp('tongtai_upgrade17');
+    final file = File('${dir.path}/t.sqlite');
+    addTearDown(() => dir.delete(recursive: true));
+
+    // ── Dựng orders_table ở đúng hình dạng v16: KHÔNG có provenance_code ──
+    var raw = NativeDatabase(file);
+    var db = AppDatabase.forExecutor(raw);
+    await db.customStatement('DROP TABLE IF EXISTS orders_table');
+    await db.customStatement('''
+      CREATE TABLE orders_table (
+        id TEXT NOT NULL,
+        business_id TEXT NOT NULL,
+        customer_id TEXT NOT NULL,
+        channel_id TEXT NULL,
+        order_number TEXT NULL,
+        order_date INTEGER NOT NULL,
+        total_quantity INTEGER NOT NULL,
+        subtotal REAL NOT NULL,
+        discount REAL NOT NULL DEFAULT 0,
+        shipping_cost REAL NULL,
+        total_amount REAL NOT NULL,
+        status TEXT NOT NULL,
+        payment_status TEXT NULL,
+        items TEXT NOT NULL,
+        external_id TEXT NULL,
+        created_at INTEGER NOT NULL DEFAULT 0,
+        updated_at INTEGER NOT NULL,
+        PRIMARY KEY (business_id, id)
+      )''');
+    // Một đơn người bán tự nhập, và một đơn mẫu — hai nguồn gốc khác nhau mà
+    // v16 chỉ phân biệt được bằng tiền tố id.
+    for (final id in ['9f1c2b7a-uuid', 'sample-order-1']) {
+      await db.customStatement(
+        "INSERT INTO orders_table (id, business_id, customer_id, order_date, "
+        "total_quantity, subtotal, total_amount, status, items, updated_at) "
+        "VALUES ('$id', 'b1', 'c1', 1, 1, 1000, 1000, 'completed', '[]', 1)",
+      );
+    }
+    await db.customStatement('PRAGMA user_version = 16');
+    await db.close();
+
+    // ── Mở lại bằng schema hiện tại ⇒ onUpgrade chạy thật ────────────────
+    raw = NativeDatabase(file);
+    db = AppDatabase.forExecutor(raw);
+    final rows = await db
+        .customSelect(
+          'SELECT id, provenance_code FROM orders_table ORDER BY id',
+        )
+        .get();
+    final version = await db.customSelect('PRAGMA user_version').getSingle();
+    await db.close();
+
+    expect(rows, hasLength(2), reason: 'nâng cấp không được làm mất đơn nào');
+
+    // ⭐ Tính chất chính của v17: KHÔNG backfill.
+    //
+    // Ta *đoán được* nguồn gốc từ tiền tố id, và cám dỗ là ghi luôn suy đoán
+    // đó xuống cột. Nhưng ghi xuống là biến phỏng đoán thành lời khai — lần
+    // đọc sau không còn ai biết đó từng là phỏng đoán, kể cả khi nó sai (một
+    // người bán từng tự đặt id bắt đầu bằng `sample-`).
+    //
+    // Nên cột phải RỖNG sau nâng cấp, và việc suy đoán xảy ra lúc đọc.
+    for (final row in rows) {
+      expect(
+        row.read<String?>('provenance_code'),
+        isNull,
+        reason:
+            'đơn ${row.read<String>('id')} có trước v17 nên không khai nguồn '
+            'gốc; migration KHÔNG được ghi suy đoán xuống đĩa',
+      );
+    }
+
+    expect(version.read<int>('user_version'), kTongtaiSchemaVersion);
+  });
 }
