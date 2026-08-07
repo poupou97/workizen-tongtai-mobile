@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -14,6 +17,15 @@ if (file("google-services.json").exists()) {
     // dependency tree: the plugin injects the Crashlytics build ID; without
     // it the app crashes at launch inside FirebaseInitProvider.
     apply(plugin = "com.google.firebase.crashlytics")
+}
+
+// Khoá ký release đọc từ android/key.properties — file này bị gitignore và
+// KHÔNG BAO GIỜ vào repo. Vắng mặt ⇒ rơi về khoá debug, nên `flutter run
+// --release` vẫn chạy được trên máy chưa có khoá (và CI cũng vậy).
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -37,11 +49,29 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            // Chỉ cấu hình khi thật sự có khoá. Đọc mù rồi để Gradle ném lỗi
+            // sẽ làm mọi máy chưa có khoá không build được release.
+            if (keystorePropertiesFile.exists()) {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Có khoá thật ⇒ ký bằng khoá thật. Không có ⇒ khoá debug, để
+            // `flutter run --release` và CI vẫn chạy. Bản debug-signed KHÔNG
+            // upload lên Play được, nên nhầm lẫn này không im lặng.
+            signingConfig = if (keystorePropertiesFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }
