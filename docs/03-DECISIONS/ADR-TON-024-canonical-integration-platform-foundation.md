@@ -109,4 +109,20 @@ Local-first (D-5) không bị chạm: mọi thứ ở đây nằm trên máy.
 `16-VENDOR-CATALOG` · `17-CAPABILITY-MATRIX` · `18-CANONICAL-EVENTS` ·
 `19-INTEGRATION-SANDBOX`.
 
-Jira: Epic **WTM-284**, story **WTM-285…290**.
+Jira: Epic **WTM-284**, story thiết kế **WTM-285…290**, story cài đặt
+**WTM-291** (N0.3) · **WTM-292** (N0.4).
+
+---
+
+## Tình trạng cài đặt (cập nhật 2026-08-07)
+
+| Luật | Cài ở đâu | Khoá bằng |
+|---|---|---|
+| 1 · liên kết ≠ gộp | `consumer/external_identity*.dart`, schema **v19** | `identity_no_auto_merge_governance_test` — 3 lớp, lớp quyết định là *"seam không chạm `customersTable`"* |
+| 2 · settlement | `finance/settlement*.dart`, `true_profit.dart`, schema **v20** | `settlement_no_derived_write_governance_test` — 3 lớp, lớp tinh tế nhất là *"phân bổ không trả về `SettlementLine`"* |
+| 3 · catalog/matrix là dữ liệu | chưa cài (WTM-287/288 mới là thiết kế) | — |
+| 4 · canonical event | chưa cài (WTM-289 mới là thiết kế) | — |
+
+Cả hai luật đã cài đều **buộc sửa API chứ không nới luật** khi bộ quét báo
+vi phạm — chi tiết trong §"Đã cài đặt" của hai tài liệu tương ứng. Đó là bằng
+chứng luật này có răng: nó đã cắn tác giả của chính nó.
