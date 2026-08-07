@@ -38,6 +38,21 @@
 /// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
 /// addresses, notes). Same additive-nullable convention as v5.
 ///
+/// ## Schema v19 (WTM-291 — Identity Resolution, N0.3 · ADR-TON-024)
+/// v19 adds `external_identities_table` and `identity_link_events_table`.
+/// Purely additive — no existing column changes and no existing row is touched.
+///
+/// The unique key is `(business, connection, platform, external_id)`, **not**
+/// `(platform, external_id)`: a marketplace only guarantees buyer-id uniqueness
+/// *within one shop*, so dropping the connection from the key silently merges
+/// two sellers' customers — exactly the mistake ADR-TON-024 exists to prevent.
+///
+/// `customers_table.external_id` / `external_source` (single columns since
+/// bootstrap v1, encoding "one customer has at most one external identity")
+/// are **left untouched**: they are empty because no connector write path has
+/// ever existed, and copying a guess into the new table would repeat the
+/// mistake v17 avoided.
+///
 /// ## Schema v18 (WTM-283 — Connection, N0.2)
 /// v18 adds `connections_table` (external-platform connection **metadata**) and
 /// drops `integrations_table` — a bootstrap-v1 table nothing ever wrote, whose
@@ -70,7 +85,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 18;
+const int kTongtaiSchemaVersion = 19;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -298,6 +313,26 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 19) {
+        // v19 (WTM-291 / N0.3 — Identity Resolution). Hai bảng mới, **thuần
+        // thêm mới**: không cột nào của bảng cũ đổi, không dòng nào bị đụng.
+        //
+        // Đặc biệt `customers_table.external_id` / `external_source` (hai cột
+        // đơn từ bootstrap v1) **để nguyên, không migrate, không backfill**.
+        // Chúng đang rỗng vì chưa có đường ghi nào từ connector; chép một suy
+        // đoán vào bảng danh tính mới sẽ biến phỏng đoán thành lời khai — đúng
+        // sai lầm v17 đã tránh. Khi connector đầu tiên chạy thật, việc dời hai
+        // cột đó sang đây là một story riêng, có bằng chứng thật để dời.
+        for (final name in [
+          'external_identities_table',
+          'identity_link_events_table',
+        ]) {
+          final table = db.allTables.firstWhere(
+            (t) => t.actualTableName == name,
+          );
+          await m.createTable(table);
+        }
       }
       if (from < 18) {
         // v18 (WTM-283 / N0.2 — Connection). Bảng mới cho metadata kết nối…

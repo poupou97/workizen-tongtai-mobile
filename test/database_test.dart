@@ -57,7 +57,21 @@ void main() {
     //                object, không mã hoá cột thô.
     // v14 (WTM-227 / ADR-TON-023): Product Type — `kind` + `total_stock`
     // nullable, để "không có tồn kho" khác hẳn "hết hàng".
-    expect(db.schemaVersion, 18);
+    // v15 (WTM-228 / ADR-TON-023): Business Type — một cột nullable trên
+    //                businesses_table.
+    // v16 (WTM-229 / ADR-TON-023): business_inputs_table (Business Input).
+    // v17 (WTM-282 / N0.1): orders_table.provenance_code — bản ghi này từ đâu
+    //                tới. KHÔNG backfill: ghi một suy đoán xuống đĩa sẽ biến
+    //                nó thành lời khai.
+    // v18 (WTM-283 / N0.2): connections_table (metadata kết nối, KHÔNG token)
+    //                và DROP integrations_table — bảng chết từ v1 mang bốn cột
+    //                `*Encrypted`, tức giả định "token nằm trong SQLite".
+    // v19 (WTM-291 / N0.3): external_identities_table +
+    //                identity_link_events_table (ADR-TON-024). Thuần thêm mới;
+    //                customers_table.external_id/external_source để NGUYÊN,
+    //                không migrate — chúng đang rỗng, và chép một suy đoán
+    //                sang bảng mới là lặp lại sai lầm v17 đã tránh.
+    expect(db.schemaVersion, 19);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });
