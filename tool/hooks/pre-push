@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Chặn push nếu cổng chất lượng tại chỗ không xanh.
+#
+# Bật:  git config core.hooksPath tool/hooks
+# Tắt:  git config --unset core.hooksPath
+#
+# Đây là thứ thay CI trong lúc GitHub Actions bị chặn vì thanh toán. Nó tồn tại
+# vì luật đã học của repo: một quy trình chỉ dựa vào việc người thực hiện NHỚ
+# làm thì không phải cổng — và người viết dòng này đã merge một PR khi check
+# đang đỏ, đúng 20 phút sau khi tự viết ra luật phải chờ CI xanh.
+#
+# Bỏ qua có chủ ý (hiếm, và phải nói ra):  git push --no-verify
+set -uo pipefail
+
+# Xoá nhánh thì không có gì để kiểm.
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && exit 0
+done
+
+printf '\n\033[1m⛓  pre-push: chạy cổng chất lượng tại chỗ (CI đang bị chặn)\033[0m\n'
+if ! ./tool/verify.sh; then
+  printf '\n\033[31m⛔ PUSH BỊ CHẶN — sửa xong rồi đẩy lại.\033[0m\n'
+  printf '   Nếu thật sự cần bỏ qua: git push --no-verify (và nói ra ở PR)\n\n'
+  exit 1
+fi
+exit 0
