@@ -85,3 +85,58 @@ tại — và lý do gộp khách tự động bị cấm.
 Nó là **dữ liệu**, đọc qua repository, cùng lý do với Vendor Catalog: truy vấn
 được, test được, và không nằm trong prompt AI. Tài liệu này là **đặc tả**;
 nguồn thi hành nằm trong module.
+
+---
+
+## Đã cài đặt — WTM-293 (2026-08-07)
+
+`lib/features/tongtai/platform/capability_matrix.dart`. **Không bảng** — cùng
+lý do với Vendor Catalog.
+
+### Luật "AI chỉ được hứa ở cột ba" là một KIỂU DỮ LIỆU
+
+Bản thiết kế viết luật này thành câu. Một câu như vậy sẽ bị vi phạm ngày đầu
+tiên có người viết `if (cell.platformSupports) return 'làm được'`.
+
+Nên nó thành cấu trúc:
+
+```dart
+class CapabilityClaim {
+  const CapabilityClaim._({...});   // ← constructor PRIVATE
+  final String platform;
+  final PlatformCapability capability;
+  final String evidence;            // ← luôn có
+  // KHÔNG có platformSupports, KHÔNG có connectorCovers
+}
+
+CapabilityClaim? CapabilityCell.toClaim() =>
+    verifiedOnDogfood ? CapabilityClaim._(...) : null;   // ← cổng DUY NHẤT
+```
+
+Tầng AI nhận `List<CapabilityClaim>`, nên nó **không cầm** hai cột kia. Không
+cầm thì không đọc nhầm được. Và constructor private nghĩa là không ai dựng được
+một lời hứa từ hư không.
+
+### Ba assert trong `CapabilityCell`
+
+| Assert | Nói gì |
+|---|---|
+| `C ⟹ P` | connector không phủ được thứ nền tảng không có — thấy vậy nghĩa là một trong hai ô sai |
+| `D ⟹ C` | chưa viết thì chạy thật bằng gì |
+| `D ⟹ evidence != null` | không bằng chứng thì đó là **ý định**, và ý định không nói được với người bán |
+
+### Sự thật hôm nay, đã khoá bằng test
+
+```dart
+expect(CapabilityMatrix.claims.map((c) => c.platform).toSet(), {'github'});
+```
+
+**Chỉ GitHub** có lời hứa. Shopee có `P` đầy đủ ở 5 capability và **không lời
+hứa nào** — test khẳng định cả hai vế cùng lúc, nên ngày ai đó bật nhầm một ô,
+test đỏ trước khi AI kịp nói.
+
+### Khoá bằng governance
+
+`catalog_is_data_governance_test`: `CapabilityClaim` không mang hai cột đầu ·
+constructor private · **đúng một** chỗ trong module dựng được lời hứa, và chỗ
+đó nằm **sau** phép kiểm `verifiedOnDogfood`.
