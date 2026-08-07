@@ -1,6 +1,6 @@
 # ADR-TON-024 — Canonical Integration Platform Foundation
 
-**Trạng thái:** Proposed (Founder Task Order Wave 2, 2026-08-07 — chờ duyệt)
+**Trạng thái:** **Accepted** (Founder, 2026-08-07)
 **Mở rộng:** ADR-TON-016 (Rule Twin authoritative) · ADR-TON-018 (mã canonical)
 **Không thay thế gì.** Contract envelope (WTM-270) giữ nguyên.
 
