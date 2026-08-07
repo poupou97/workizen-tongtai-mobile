@@ -22,8 +22,8 @@ info and performance*.
 
 | Loại dữ liệu | Thu thập? | Chia sẻ? | Bắt buộc? | Mục đích | Ghi chú |
 |---|---|---|---|---|---|
-| **Crash logs** | ✅ Có | ❌ Không | Tuỳ chọn¹ | Analytics · App functionality | Firebase Crashlytics (ADR-TON-005) |
-| **Diagnostics** | ✅ Có | ❌ Không | Tuỳ chọn¹ | Analytics · App functionality | 4 sự kiện: `app_open` · `screen_view` · `flow_error` · `screen_error` |
+| **Crash logs** | ✅ Có | ❌ Không | **Bắt buộc**¹ | Analytics · App functionality | Firebase Crashlytics (ADR-TON-005) |
+| **Diagnostics** | ✅ Có | ❌ Không | **Bắt buộc**¹ | Analytics · App functionality | 4 sự kiện: `app_open` · `screen_view` · `flow_error` · `screen_error` |
 | Tên · Email · SĐT · Địa chỉ | ❌ | ❌ | | | **Không có tài khoản** (D-4) |
 | Thông tin tài chính | ❌ | ❌ | | | Số liệu kinh doanh **nằm trên máy**, không rời đi (D-5) |
 | Danh bạ · Vị trí · Ảnh · Tệp | ❌ | ❌ | | | App chỉ đọc tệp người dùng **tự chọn** khi khôi phục `.ttbk` |
@@ -31,8 +31,23 @@ info and performance*.
 | Lịch sử tìm kiếm trong app | ❌ | ❌ | | | Lưu **cục bộ**, không gửi đi |
 | Nội dung do người dùng tạo | ❌ | ❌ | | | Kể cả nội dung chat AI |
 
-¹ *Tuỳ chọn* vì app **chạy đầy đủ khi không có file cấu hình Firebase** —
-telemetry no-op, có test khoá điều này.
+¹ ⚠️ **Đính chính 2026-08-07 (lúc khai thật trên Play Console).**
+Ô này từng ghi *"Tuỳ chọn"*, với lý do *app chạy đầy đủ khi không có file cấu
+hình Firebase*. Lý do đó **đúng nhưng trả lời sai câu hỏi**: nó nói về điều
+kiện **lúc dựng bản**, còn Play hỏi *"**người dùng** có tự tắt được không"*.
+
+`tongtai_telemetry.dart` gọi `setCrashlyticsCollectionEnabled(!kDebugMode)` —
+bật cứng ở bản release, và **không có công tắc nào trong app**. Nên câu trả lời
+đúng là **Data collection is required**.
+
+Khai *Optional* sẽ hiện nhãn "optional" trên trang store, người dùng đi tìm nút
+tắt không thấy — một lời hứa app không giữ được.
+
+⇒ **Muốn khai lại thành *Optional* thì phải thêm công tắc thật trong Cài đặt**
+trước, không phải sửa dòng này. Đó là một story riêng, chưa làm.
+
+**Ephemeral:** khai **No** — Crashlytics giữ dữ liệu **90 ngày**, không phải
+chỉ trong bộ nhớ.
 
 ### Các cam kết khác trong form
 
