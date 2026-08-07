@@ -9559,12 +9559,12 @@ class AIChatTableCompanion extends UpdateCompanion<AIChatTableData> {
   }
 }
 
-class $IntegrationsTableTable extends IntegrationsTable
-    with TableInfo<$IntegrationsTableTable, IntegrationsTableData> {
+class $ConnectionsTableTable extends ConnectionsTable
+    with TableInfo<$ConnectionsTableTable, ConnectionsTableData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $IntegrationsTableTable(this.attachedDatabase, [this._alias]);
+  $ConnectionsTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -9588,12 +9588,21 @@ class $IntegrationsTableTable extends IntegrationsTable
       'REFERENCES businesses_table (id) ON DELETE CASCADE',
     ),
   );
-  static const VerificationMeta _providerMeta = const VerificationMeta(
-    'provider',
+  static const VerificationMeta _connectorIdMeta = const VerificationMeta(
+    'connectorId',
   );
   @override
-  late final GeneratedColumn<String> provider = GeneratedColumn<String>(
-    'provider',
+  late final GeneratedColumn<String> connectorId = GeneratedColumn<String>(
+    'connector_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -9604,62 +9613,20 @@ class $IntegrationsTableTable extends IntegrationsTable
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
     'status',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
-  static const VerificationMeta _apiKeyEncryptedMeta = const VerificationMeta(
-    'apiKeyEncrypted',
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
   );
   @override
-  late final GeneratedColumn<String> apiKeyEncrypted = GeneratedColumn<String>(
-    'api_key_encrypted',
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
     aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _apiSecretEncryptedMeta =
-      const VerificationMeta('apiSecretEncrypted');
-  @override
-  late final GeneratedColumn<String> apiSecretEncrypted =
-      GeneratedColumn<String>(
-        'api_secret_encrypted',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _accessTokenEncryptedMeta =
-      const VerificationMeta('accessTokenEncrypted');
-  @override
-  late final GeneratedColumn<String> accessTokenEncrypted =
-      GeneratedColumn<String>(
-        'access_token_encrypted',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _refreshTokenEncryptedMeta =
-      const VerificationMeta('refreshTokenEncrypted');
-  @override
-  late final GeneratedColumn<String> refreshTokenEncrypted =
-      GeneratedColumn<String>(
-        'refresh_token_encrypted',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _configMeta = const VerificationMeta('config');
-  @override
-  late final GeneratedColumn<String> config = GeneratedColumn<String>(
-    'config',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _lastSyncAtMeta = const VerificationMeta(
     'lastSyncAt',
@@ -9672,53 +9639,24 @@ class $IntegrationsTableTable extends IntegrationsTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: Constant(DateTime.now()),
-  );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-    'updated_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: Constant(DateTime.now()),
-  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     businessId,
-    provider,
+    connectorId,
+    label,
     status,
-    apiKeyEncrypted,
-    apiSecretEncrypted,
-    accessTokenEncrypted,
-    refreshTokenEncrypted,
-    config,
-    lastSyncAt,
     createdAt,
-    updatedAt,
+    lastSyncAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'integrations_table';
+  static const String $name = 'connections_table';
   @override
   VerificationContext validateIntegrity(
-    Insertable<IntegrationsTableData> instance, {
+    Insertable<ConnectionsTableData> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -9736,61 +9674,40 @@ class $IntegrationsTableTable extends IntegrationsTable
     } else if (isInserting) {
       context.missing(_businessIdMeta);
     }
-    if (data.containsKey('provider')) {
+    if (data.containsKey('connector_id')) {
       context.handle(
-        _providerMeta,
-        provider.isAcceptableOrUnknown(data['provider']!, _providerMeta),
+        _connectorIdMeta,
+        connectorId.isAcceptableOrUnknown(
+          data['connector_id']!,
+          _connectorIdMeta,
+        ),
       );
     } else if (isInserting) {
-      context.missing(_providerMeta);
+      context.missing(_connectorIdMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
     }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
       );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
     }
-    if (data.containsKey('api_key_encrypted')) {
+    if (data.containsKey('created_at')) {
       context.handle(
-        _apiKeyEncryptedMeta,
-        apiKeyEncrypted.isAcceptableOrUnknown(
-          data['api_key_encrypted']!,
-          _apiKeyEncryptedMeta,
-        ),
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
-    }
-    if (data.containsKey('api_secret_encrypted')) {
-      context.handle(
-        _apiSecretEncryptedMeta,
-        apiSecretEncrypted.isAcceptableOrUnknown(
-          data['api_secret_encrypted']!,
-          _apiSecretEncryptedMeta,
-        ),
-      );
-    }
-    if (data.containsKey('access_token_encrypted')) {
-      context.handle(
-        _accessTokenEncryptedMeta,
-        accessTokenEncrypted.isAcceptableOrUnknown(
-          data['access_token_encrypted']!,
-          _accessTokenEncryptedMeta,
-        ),
-      );
-    }
-    if (data.containsKey('refresh_token_encrypted')) {
-      context.handle(
-        _refreshTokenEncryptedMeta,
-        refreshTokenEncrypted.isAcceptableOrUnknown(
-          data['refresh_token_encrypted']!,
-          _refreshTokenEncryptedMeta,
-        ),
-      );
-    }
-    if (data.containsKey('config')) {
-      context.handle(
-        _configMeta,
-        config.isAcceptableOrUnknown(data['config']!, _configMeta),
-      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     if (data.containsKey('last_sync_at')) {
       context.handle(
@@ -9801,27 +9718,15 @@ class $IntegrationsTableTable extends IntegrationsTable
         ),
       );
     }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    if (data.containsKey('updated_at')) {
-      context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
-      );
-    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
   @override
-  IntegrationsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ConnectionsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return IntegrationsTableData(
+    return ConnectionsTableData(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -9830,170 +9735,108 @@ class $IntegrationsTableTable extends IntegrationsTable
         DriftSqlType.string,
         data['${effectivePrefix}business_id'],
       )!,
-      provider: attachedDatabase.typeMapping.read(
+      connectorId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}provider'],
+        data['${effectivePrefix}connector_id'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
       )!,
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
-      ),
-      apiKeyEncrypted: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}api_key_encrypted'],
-      ),
-      apiSecretEncrypted: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}api_secret_encrypted'],
-      ),
-      accessTokenEncrypted: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}access_token_encrypted'],
-      ),
-      refreshTokenEncrypted: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}refresh_token_encrypted'],
-      ),
-      config: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}config'],
-      ),
-      lastSyncAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}last_sync_at'],
-      ),
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
-      updatedAt: attachedDatabase.typeMapping.read(
+      lastSyncAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}updated_at'],
-      )!,
+        data['${effectivePrefix}last_sync_at'],
+      ),
     );
   }
 
   @override
-  $IntegrationsTableTable createAlias(String alias) {
-    return $IntegrationsTableTable(attachedDatabase, alias);
+  $ConnectionsTableTable createAlias(String alias) {
+    return $ConnectionsTableTable(attachedDatabase, alias);
   }
 }
 
-class IntegrationsTableData extends DataClass
-    implements Insertable<IntegrationsTableData> {
+class ConnectionsTableData extends DataClass
+    implements Insertable<ConnectionsTableData> {
   final String id;
   final String businessId;
-  final String provider;
-  final String? status;
-  final String? apiKeyEncrypted;
-  final String? apiSecretEncrypted;
-  final String? accessTokenEncrypted;
-  final String? refreshTokenEncrypted;
-  final String? config;
-  final DateTime? lastSyncAt;
+
+  /// Nền tảng nào — `github` · `revenuecat` · … Mã canonical, **không** phải
+  /// khoá ngoại: cùng lý do `orders_table.channelId` bỏ FK ở v12 (một mã từ
+  /// từ vựng đóng, không phải tham chiếu tới một dòng).
+  final String connectorId;
+
+  /// Tên người bán tự đặt. Một người có thể nối nhiều tài khoản trên cùng một
+  /// nền tảng, nên `connectorId` không đủ làm định danh.
+  final String label;
+
+  /// Mã canonical `ConnectionStatus`. Mã lạ ⇒ đọc ra `null`, không rơi về
+  /// `active` — một kết nối hỏng trông như đang chạy là kiểu nói dối tệ nhất
+  /// ở đây.
+  final String status;
   final DateTime createdAt;
-  final DateTime updatedAt;
-  const IntegrationsTableData({
+
+  /// `null` = **chưa đồng bộ lần nào**, không phải "đồng bộ lúc 0".
+  final DateTime? lastSyncAt;
+  const ConnectionsTableData({
     required this.id,
     required this.businessId,
-    required this.provider,
-    this.status,
-    this.apiKeyEncrypted,
-    this.apiSecretEncrypted,
-    this.accessTokenEncrypted,
-    this.refreshTokenEncrypted,
-    this.config,
-    this.lastSyncAt,
+    required this.connectorId,
+    required this.label,
+    required this.status,
     required this.createdAt,
-    required this.updatedAt,
+    this.lastSyncAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['business_id'] = Variable<String>(businessId);
-    map['provider'] = Variable<String>(provider);
-    if (!nullToAbsent || status != null) {
-      map['status'] = Variable<String>(status);
-    }
-    if (!nullToAbsent || apiKeyEncrypted != null) {
-      map['api_key_encrypted'] = Variable<String>(apiKeyEncrypted);
-    }
-    if (!nullToAbsent || apiSecretEncrypted != null) {
-      map['api_secret_encrypted'] = Variable<String>(apiSecretEncrypted);
-    }
-    if (!nullToAbsent || accessTokenEncrypted != null) {
-      map['access_token_encrypted'] = Variable<String>(accessTokenEncrypted);
-    }
-    if (!nullToAbsent || refreshTokenEncrypted != null) {
-      map['refresh_token_encrypted'] = Variable<String>(refreshTokenEncrypted);
-    }
-    if (!nullToAbsent || config != null) {
-      map['config'] = Variable<String>(config);
-    }
+    map['connector_id'] = Variable<String>(connectorId);
+    map['label'] = Variable<String>(label);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || lastSyncAt != null) {
       map['last_sync_at'] = Variable<DateTime>(lastSyncAt);
     }
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
 
-  IntegrationsTableCompanion toCompanion(bool nullToAbsent) {
-    return IntegrationsTableCompanion(
+  ConnectionsTableCompanion toCompanion(bool nullToAbsent) {
+    return ConnectionsTableCompanion(
       id: Value(id),
       businessId: Value(businessId),
-      provider: Value(provider),
-      status: status == null && nullToAbsent
-          ? const Value.absent()
-          : Value(status),
-      apiKeyEncrypted: apiKeyEncrypted == null && nullToAbsent
-          ? const Value.absent()
-          : Value(apiKeyEncrypted),
-      apiSecretEncrypted: apiSecretEncrypted == null && nullToAbsent
-          ? const Value.absent()
-          : Value(apiSecretEncrypted),
-      accessTokenEncrypted: accessTokenEncrypted == null && nullToAbsent
-          ? const Value.absent()
-          : Value(accessTokenEncrypted),
-      refreshTokenEncrypted: refreshTokenEncrypted == null && nullToAbsent
-          ? const Value.absent()
-          : Value(refreshTokenEncrypted),
-      config: config == null && nullToAbsent
-          ? const Value.absent()
-          : Value(config),
+      connectorId: Value(connectorId),
+      label: Value(label),
+      status: Value(status),
+      createdAt: Value(createdAt),
       lastSyncAt: lastSyncAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncAt),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
     );
   }
 
-  factory IntegrationsTableData.fromJson(
+  factory ConnectionsTableData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return IntegrationsTableData(
+    return ConnectionsTableData(
       id: serializer.fromJson<String>(json['id']),
       businessId: serializer.fromJson<String>(json['businessId']),
-      provider: serializer.fromJson<String>(json['provider']),
-      status: serializer.fromJson<String?>(json['status']),
-      apiKeyEncrypted: serializer.fromJson<String?>(json['apiKeyEncrypted']),
-      apiSecretEncrypted: serializer.fromJson<String?>(
-        json['apiSecretEncrypted'],
-      ),
-      accessTokenEncrypted: serializer.fromJson<String?>(
-        json['accessTokenEncrypted'],
-      ),
-      refreshTokenEncrypted: serializer.fromJson<String?>(
-        json['refreshTokenEncrypted'],
-      ),
-      config: serializer.fromJson<String?>(json['config']),
-      lastSyncAt: serializer.fromJson<DateTime?>(json['lastSyncAt']),
+      connectorId: serializer.fromJson<String>(json['connectorId']),
+      label: serializer.fromJson<String>(json['label']),
+      status: serializer.fromJson<String>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      lastSyncAt: serializer.fromJson<DateTime?>(json['lastSyncAt']),
     );
   }
   @override
@@ -10002,100 +9845,59 @@ class IntegrationsTableData extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'businessId': serializer.toJson<String>(businessId),
-      'provider': serializer.toJson<String>(provider),
-      'status': serializer.toJson<String?>(status),
-      'apiKeyEncrypted': serializer.toJson<String?>(apiKeyEncrypted),
-      'apiSecretEncrypted': serializer.toJson<String?>(apiSecretEncrypted),
-      'accessTokenEncrypted': serializer.toJson<String?>(accessTokenEncrypted),
-      'refreshTokenEncrypted': serializer.toJson<String?>(
-        refreshTokenEncrypted,
-      ),
-      'config': serializer.toJson<String?>(config),
-      'lastSyncAt': serializer.toJson<DateTime?>(lastSyncAt),
+      'connectorId': serializer.toJson<String>(connectorId),
+      'label': serializer.toJson<String>(label),
+      'status': serializer.toJson<String>(status),
       'createdAt': serializer.toJson<DateTime>(createdAt),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'lastSyncAt': serializer.toJson<DateTime?>(lastSyncAt),
     };
   }
 
-  IntegrationsTableData copyWith({
+  ConnectionsTableData copyWith({
     String? id,
     String? businessId,
-    String? provider,
-    Value<String?> status = const Value.absent(),
-    Value<String?> apiKeyEncrypted = const Value.absent(),
-    Value<String?> apiSecretEncrypted = const Value.absent(),
-    Value<String?> accessTokenEncrypted = const Value.absent(),
-    Value<String?> refreshTokenEncrypted = const Value.absent(),
-    Value<String?> config = const Value.absent(),
-    Value<DateTime?> lastSyncAt = const Value.absent(),
+    String? connectorId,
+    String? label,
+    String? status,
     DateTime? createdAt,
-    DateTime? updatedAt,
-  }) => IntegrationsTableData(
+    Value<DateTime?> lastSyncAt = const Value.absent(),
+  }) => ConnectionsTableData(
     id: id ?? this.id,
     businessId: businessId ?? this.businessId,
-    provider: provider ?? this.provider,
-    status: status.present ? status.value : this.status,
-    apiKeyEncrypted: apiKeyEncrypted.present
-        ? apiKeyEncrypted.value
-        : this.apiKeyEncrypted,
-    apiSecretEncrypted: apiSecretEncrypted.present
-        ? apiSecretEncrypted.value
-        : this.apiSecretEncrypted,
-    accessTokenEncrypted: accessTokenEncrypted.present
-        ? accessTokenEncrypted.value
-        : this.accessTokenEncrypted,
-    refreshTokenEncrypted: refreshTokenEncrypted.present
-        ? refreshTokenEncrypted.value
-        : this.refreshTokenEncrypted,
-    config: config.present ? config.value : this.config,
-    lastSyncAt: lastSyncAt.present ? lastSyncAt.value : this.lastSyncAt,
+    connectorId: connectorId ?? this.connectorId,
+    label: label ?? this.label,
+    status: status ?? this.status,
     createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
+    lastSyncAt: lastSyncAt.present ? lastSyncAt.value : this.lastSyncAt,
   );
-  IntegrationsTableData copyWithCompanion(IntegrationsTableCompanion data) {
-    return IntegrationsTableData(
+  ConnectionsTableData copyWithCompanion(ConnectionsTableCompanion data) {
+    return ConnectionsTableData(
       id: data.id.present ? data.id.value : this.id,
       businessId: data.businessId.present
           ? data.businessId.value
           : this.businessId,
-      provider: data.provider.present ? data.provider.value : this.provider,
+      connectorId: data.connectorId.present
+          ? data.connectorId.value
+          : this.connectorId,
+      label: data.label.present ? data.label.value : this.label,
       status: data.status.present ? data.status.value : this.status,
-      apiKeyEncrypted: data.apiKeyEncrypted.present
-          ? data.apiKeyEncrypted.value
-          : this.apiKeyEncrypted,
-      apiSecretEncrypted: data.apiSecretEncrypted.present
-          ? data.apiSecretEncrypted.value
-          : this.apiSecretEncrypted,
-      accessTokenEncrypted: data.accessTokenEncrypted.present
-          ? data.accessTokenEncrypted.value
-          : this.accessTokenEncrypted,
-      refreshTokenEncrypted: data.refreshTokenEncrypted.present
-          ? data.refreshTokenEncrypted.value
-          : this.refreshTokenEncrypted,
-      config: data.config.present ? data.config.value : this.config,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       lastSyncAt: data.lastSyncAt.present
           ? data.lastSyncAt.value
           : this.lastSyncAt,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('IntegrationsTableData(')
+    return (StringBuffer('ConnectionsTableData(')
           ..write('id: $id, ')
           ..write('businessId: $businessId, ')
-          ..write('provider: $provider, ')
+          ..write('connectorId: $connectorId, ')
+          ..write('label: $label, ')
           ..write('status: $status, ')
-          ..write('apiKeyEncrypted: $apiKeyEncrypted, ')
-          ..write('apiSecretEncrypted: $apiSecretEncrypted, ')
-          ..write('accessTokenEncrypted: $accessTokenEncrypted, ')
-          ..write('refreshTokenEncrypted: $refreshTokenEncrypted, ')
-          ..write('config: $config, ')
-          ..write('lastSyncAt: $lastSyncAt, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('lastSyncAt: $lastSyncAt')
           ..write(')'))
         .toString();
   }
@@ -10104,146 +9906,99 @@ class IntegrationsTableData extends DataClass
   int get hashCode => Object.hash(
     id,
     businessId,
-    provider,
+    connectorId,
+    label,
     status,
-    apiKeyEncrypted,
-    apiSecretEncrypted,
-    accessTokenEncrypted,
-    refreshTokenEncrypted,
-    config,
-    lastSyncAt,
     createdAt,
-    updatedAt,
+    lastSyncAt,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is IntegrationsTableData &&
+      (other is ConnectionsTableData &&
           other.id == this.id &&
           other.businessId == this.businessId &&
-          other.provider == this.provider &&
+          other.connectorId == this.connectorId &&
+          other.label == this.label &&
           other.status == this.status &&
-          other.apiKeyEncrypted == this.apiKeyEncrypted &&
-          other.apiSecretEncrypted == this.apiSecretEncrypted &&
-          other.accessTokenEncrypted == this.accessTokenEncrypted &&
-          other.refreshTokenEncrypted == this.refreshTokenEncrypted &&
-          other.config == this.config &&
-          other.lastSyncAt == this.lastSyncAt &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.lastSyncAt == this.lastSyncAt);
 }
 
-class IntegrationsTableCompanion
-    extends UpdateCompanion<IntegrationsTableData> {
+class ConnectionsTableCompanion extends UpdateCompanion<ConnectionsTableData> {
   final Value<String> id;
   final Value<String> businessId;
-  final Value<String> provider;
-  final Value<String?> status;
-  final Value<String?> apiKeyEncrypted;
-  final Value<String?> apiSecretEncrypted;
-  final Value<String?> accessTokenEncrypted;
-  final Value<String?> refreshTokenEncrypted;
-  final Value<String?> config;
-  final Value<DateTime?> lastSyncAt;
+  final Value<String> connectorId;
+  final Value<String> label;
+  final Value<String> status;
   final Value<DateTime> createdAt;
-  final Value<DateTime> updatedAt;
+  final Value<DateTime?> lastSyncAt;
   final Value<int> rowid;
-  const IntegrationsTableCompanion({
+  const ConnectionsTableCompanion({
     this.id = const Value.absent(),
     this.businessId = const Value.absent(),
-    this.provider = const Value.absent(),
+    this.connectorId = const Value.absent(),
+    this.label = const Value.absent(),
     this.status = const Value.absent(),
-    this.apiKeyEncrypted = const Value.absent(),
-    this.apiSecretEncrypted = const Value.absent(),
-    this.accessTokenEncrypted = const Value.absent(),
-    this.refreshTokenEncrypted = const Value.absent(),
-    this.config = const Value.absent(),
-    this.lastSyncAt = const Value.absent(),
     this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  IntegrationsTableCompanion.insert({
+  ConnectionsTableCompanion.insert({
     required String id,
     required String businessId,
-    required String provider,
-    this.status = const Value.absent(),
-    this.apiKeyEncrypted = const Value.absent(),
-    this.apiSecretEncrypted = const Value.absent(),
-    this.accessTokenEncrypted = const Value.absent(),
-    this.refreshTokenEncrypted = const Value.absent(),
-    this.config = const Value.absent(),
+    required String connectorId,
+    required String label,
+    required String status,
+    required DateTime createdAt,
     this.lastSyncAt = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        businessId = Value(businessId),
-       provider = Value(provider);
-  static Insertable<IntegrationsTableData> custom({
+       connectorId = Value(connectorId),
+       label = Value(label),
+       status = Value(status),
+       createdAt = Value(createdAt);
+  static Insertable<ConnectionsTableData> custom({
     Expression<String>? id,
     Expression<String>? businessId,
-    Expression<String>? provider,
+    Expression<String>? connectorId,
+    Expression<String>? label,
     Expression<String>? status,
-    Expression<String>? apiKeyEncrypted,
-    Expression<String>? apiSecretEncrypted,
-    Expression<String>? accessTokenEncrypted,
-    Expression<String>? refreshTokenEncrypted,
-    Expression<String>? config,
-    Expression<DateTime>? lastSyncAt,
     Expression<DateTime>? createdAt,
-    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? lastSyncAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (businessId != null) 'business_id': businessId,
-      if (provider != null) 'provider': provider,
+      if (connectorId != null) 'connector_id': connectorId,
+      if (label != null) 'label': label,
       if (status != null) 'status': status,
-      if (apiKeyEncrypted != null) 'api_key_encrypted': apiKeyEncrypted,
-      if (apiSecretEncrypted != null)
-        'api_secret_encrypted': apiSecretEncrypted,
-      if (accessTokenEncrypted != null)
-        'access_token_encrypted': accessTokenEncrypted,
-      if (refreshTokenEncrypted != null)
-        'refresh_token_encrypted': refreshTokenEncrypted,
-      if (config != null) 'config': config,
-      if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
       if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
+      if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  IntegrationsTableCompanion copyWith({
+  ConnectionsTableCompanion copyWith({
     Value<String>? id,
     Value<String>? businessId,
-    Value<String>? provider,
-    Value<String?>? status,
-    Value<String?>? apiKeyEncrypted,
-    Value<String?>? apiSecretEncrypted,
-    Value<String?>? accessTokenEncrypted,
-    Value<String?>? refreshTokenEncrypted,
-    Value<String?>? config,
-    Value<DateTime?>? lastSyncAt,
+    Value<String>? connectorId,
+    Value<String>? label,
+    Value<String>? status,
     Value<DateTime>? createdAt,
-    Value<DateTime>? updatedAt,
+    Value<DateTime?>? lastSyncAt,
     Value<int>? rowid,
   }) {
-    return IntegrationsTableCompanion(
+    return ConnectionsTableCompanion(
       id: id ?? this.id,
       businessId: businessId ?? this.businessId,
-      provider: provider ?? this.provider,
+      connectorId: connectorId ?? this.connectorId,
+      label: label ?? this.label,
       status: status ?? this.status,
-      apiKeyEncrypted: apiKeyEncrypted ?? this.apiKeyEncrypted,
-      apiSecretEncrypted: apiSecretEncrypted ?? this.apiSecretEncrypted,
-      accessTokenEncrypted: accessTokenEncrypted ?? this.accessTokenEncrypted,
-      refreshTokenEncrypted:
-          refreshTokenEncrypted ?? this.refreshTokenEncrypted,
-      config: config ?? this.config,
-      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -10257,39 +10012,20 @@ class IntegrationsTableCompanion
     if (businessId.present) {
       map['business_id'] = Variable<String>(businessId.value);
     }
-    if (provider.present) {
-      map['provider'] = Variable<String>(provider.value);
+    if (connectorId.present) {
+      map['connector_id'] = Variable<String>(connectorId.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
     }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
-    if (apiKeyEncrypted.present) {
-      map['api_key_encrypted'] = Variable<String>(apiKeyEncrypted.value);
-    }
-    if (apiSecretEncrypted.present) {
-      map['api_secret_encrypted'] = Variable<String>(apiSecretEncrypted.value);
-    }
-    if (accessTokenEncrypted.present) {
-      map['access_token_encrypted'] = Variable<String>(
-        accessTokenEncrypted.value,
-      );
-    }
-    if (refreshTokenEncrypted.present) {
-      map['refresh_token_encrypted'] = Variable<String>(
-        refreshTokenEncrypted.value,
-      );
-    }
-    if (config.present) {
-      map['config'] = Variable<String>(config.value);
-    }
-    if (lastSyncAt.present) {
-      map['last_sync_at'] = Variable<DateTime>(lastSyncAt.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    if (lastSyncAt.present) {
+      map['last_sync_at'] = Variable<DateTime>(lastSyncAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -10299,19 +10035,14 @@ class IntegrationsTableCompanion
 
   @override
   String toString() {
-    return (StringBuffer('IntegrationsTableCompanion(')
+    return (StringBuffer('ConnectionsTableCompanion(')
           ..write('id: $id, ')
           ..write('businessId: $businessId, ')
-          ..write('provider: $provider, ')
+          ..write('connectorId: $connectorId, ')
+          ..write('label: $label, ')
           ..write('status: $status, ')
-          ..write('apiKeyEncrypted: $apiKeyEncrypted, ')
-          ..write('apiSecretEncrypted: $apiSecretEncrypted, ')
-          ..write('accessTokenEncrypted: $accessTokenEncrypted, ')
-          ..write('refreshTokenEncrypted: $refreshTokenEncrypted, ')
-          ..write('config: $config, ')
-          ..write('lastSyncAt: $lastSyncAt, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt, ')
+          ..write('lastSyncAt: $lastSyncAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -14585,8 +14316,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DocumentsTableTable documentsTable = $DocumentsTableTable(this);
   late final $AlertsTableTable alertsTable = $AlertsTableTable(this);
   late final $AIChatTableTable aIChatTable = $AIChatTableTable(this);
-  late final $IntegrationsTableTable integrationsTable =
-      $IntegrationsTableTable(this);
+  late final $ConnectionsTableTable connectionsTable = $ConnectionsTableTable(
+    this,
+  );
   late final $SyncQueueItemsTableTable syncQueueItemsTable =
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
@@ -14653,6 +14385,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'transactions_date',
     'CREATE INDEX transactions_date ON transactions_table (date)',
   );
+  late final Index connectionsBusinessId = Index(
+    'connections_business_id',
+    'CREATE INDEX connections_business_id ON connections_table (business_id)',
+  );
+  late final Index connectionsConnector = Index(
+    'connections_connector',
+    'CREATE INDEX connections_connector ON connections_table (connector_id)',
+  );
   late final Index businessJourneyNodesJourney = Index(
     'business_journey_nodes_journey',
     'CREATE INDEX business_journey_nodes_journey ON business_journey_nodes_table (journey_id)',
@@ -14682,7 +14422,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     documentsTable,
     alertsTable,
     aIChatTable,
-    integrationsTable,
+    connectionsTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
     businessInputsTable,
@@ -14704,6 +14444,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     journeysBusinessId,
     transactionsBusinessId,
     transactionsDate,
+    connectionsBusinessId,
+    connectionsConnector,
     businessJourneyNodesJourney,
     chatMessagesConversation,
     chatMessagesSentAt,
@@ -14792,7 +14534,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         'businesses_table',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [TableUpdate('integrations_table', kind: UpdateKind.delete)],
+      result: [TableUpdate('connections_table', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -15062,24 +14804,20 @@ final class $$BusinessesTableTableReferences
     );
   }
 
-  static MultiTypedResultKey<
-    $IntegrationsTableTable,
-    List<IntegrationsTableData>
-  >
-  _integrationsTableRefsTable(_$AppDatabase db) =>
-      MultiTypedResultKey.fromTable(
-        db.integrationsTable,
-        aliasName: 'businesses_table__id__integrations_table__business_id',
-      );
+  static MultiTypedResultKey<$ConnectionsTableTable, List<ConnectionsTableData>>
+  _connectionsTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.connectionsTable,
+    aliasName: 'businesses_table__id__connections_table__business_id',
+  );
 
-  $$IntegrationsTableTableProcessedTableManager get integrationsTableRefs {
-    final manager = $$IntegrationsTableTableTableManager(
+  $$ConnectionsTableTableProcessedTableManager get connectionsTableRefs {
+    final manager = $$ConnectionsTableTableTableManager(
       $_db,
-      $_db.integrationsTable,
+      $_db.connectionsTable,
     ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(
-      _integrationsTableRefsTable($_db),
+      _connectionsTableRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -15419,22 +15157,22 @@ class $$BusinessesTableTableFilterComposer
     return f(composer);
   }
 
-  Expression<bool> integrationsTableRefs(
-    Expression<bool> Function($$IntegrationsTableTableFilterComposer f) f,
+  Expression<bool> connectionsTableRefs(
+    Expression<bool> Function($$ConnectionsTableTableFilterComposer f) f,
   ) {
-    final $$IntegrationsTableTableFilterComposer composer = $composerBuilder(
+    final $$ConnectionsTableTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: $db.integrationsTable,
+      referencedTable: $db.connectionsTable,
       getReferencedColumn: (t) => t.businessId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$IntegrationsTableTableFilterComposer(
+          }) => $$ConnectionsTableTableFilterComposer(
             $db: $db,
-            $table: $db.integrationsTable,
+            $table: $db.connectionsTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -15845,29 +15583,28 @@ class $$BusinessesTableTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> integrationsTableRefs<T extends Object>(
-    Expression<T> Function($$IntegrationsTableTableAnnotationComposer a) f,
+  Expression<T> connectionsTableRefs<T extends Object>(
+    Expression<T> Function($$ConnectionsTableTableAnnotationComposer a) f,
   ) {
-    final $$IntegrationsTableTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.id,
-          referencedTable: $db.integrationsTable,
-          getReferencedColumn: (t) => t.businessId,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
+    final $$ConnectionsTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.connectionsTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ConnectionsTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.connectionsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
                 $removeJoinBuilderFromRootComposer,
-              }) => $$IntegrationsTableTableAnnotationComposer(
-                $db: $db,
-                $table: $db.integrationsTable,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
+          ),
+    );
     return f(composer);
   }
 }
@@ -15897,7 +15634,7 @@ class $$BusinessesTableTableTableManager
             bool documentsTableRefs,
             bool alertsTableRefs,
             bool aIChatTableRefs,
-            bool integrationsTableRefs,
+            bool connectionsTableRefs,
           })
         > {
   $$BusinessesTableTableTableManager(
@@ -15990,7 +15727,7 @@ class $$BusinessesTableTableTableManager
                 documentsTableRefs = false,
                 alertsTableRefs = false,
                 aIChatTableRefs = false,
-                integrationsTableRefs = false,
+                connectionsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -16005,7 +15742,7 @@ class $$BusinessesTableTableTableManager
                     if (documentsTableRefs) db.documentsTable,
                     if (alertsTableRefs) db.alertsTable,
                     if (aIChatTableRefs) db.aIChatTable,
-                    if (integrationsTableRefs) db.integrationsTable,
+                    if (connectionsTableRefs) db.connectionsTable,
                   ],
                   addJoins:
                       <
@@ -16253,21 +15990,21 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
-                      if (integrationsTableRefs)
+                      if (connectionsTableRefs)
                         await $_getPrefetchedData<
                           BusinessesTableData,
                           $BusinessesTableTable,
-                          IntegrationsTableData
+                          ConnectionsTableData
                         >(
                           currentTable: table,
                           referencedTable: $$BusinessesTableTableReferences
-                              ._integrationsTableRefsTable(db),
+                              ._connectionsTableRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$BusinessesTableTableReferences(
                                 db,
                                 table,
                                 p0,
-                              ).integrationsTableRefs,
+                              ).connectionsTableRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.businessId == item.id,
@@ -16306,7 +16043,7 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool documentsTableRefs,
         bool alertsTableRefs,
         bool aIChatTableRefs,
-        bool integrationsTableRefs,
+        bool connectionsTableRefs,
       })
     >;
 typedef $$UsersTableTableCreateCompanionBuilder =
@@ -22709,47 +22446,37 @@ typedef $$AIChatTableTableProcessedTableManager =
       AIChatTableData,
       PrefetchHooks Function({bool businessId, bool userId})
     >;
-typedef $$IntegrationsTableTableCreateCompanionBuilder =
-    IntegrationsTableCompanion Function({
+typedef $$ConnectionsTableTableCreateCompanionBuilder =
+    ConnectionsTableCompanion Function({
       required String id,
       required String businessId,
-      required String provider,
-      Value<String?> status,
-      Value<String?> apiKeyEncrypted,
-      Value<String?> apiSecretEncrypted,
-      Value<String?> accessTokenEncrypted,
-      Value<String?> refreshTokenEncrypted,
-      Value<String?> config,
+      required String connectorId,
+      required String label,
+      required String status,
+      required DateTime createdAt,
       Value<DateTime?> lastSyncAt,
-      Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
       Value<int> rowid,
     });
-typedef $$IntegrationsTableTableUpdateCompanionBuilder =
-    IntegrationsTableCompanion Function({
+typedef $$ConnectionsTableTableUpdateCompanionBuilder =
+    ConnectionsTableCompanion Function({
       Value<String> id,
       Value<String> businessId,
-      Value<String> provider,
-      Value<String?> status,
-      Value<String?> apiKeyEncrypted,
-      Value<String?> apiSecretEncrypted,
-      Value<String?> accessTokenEncrypted,
-      Value<String?> refreshTokenEncrypted,
-      Value<String?> config,
-      Value<DateTime?> lastSyncAt,
+      Value<String> connectorId,
+      Value<String> label,
+      Value<String> status,
       Value<DateTime> createdAt,
-      Value<DateTime> updatedAt,
+      Value<DateTime?> lastSyncAt,
       Value<int> rowid,
     });
 
-final class $$IntegrationsTableTableReferences
+final class $$ConnectionsTableTableReferences
     extends
         BaseReferences<
           _$AppDatabase,
-          $IntegrationsTableTable,
-          IntegrationsTableData
+          $ConnectionsTableTable,
+          ConnectionsTableData
         > {
-  $$IntegrationsTableTableReferences(
+  $$ConnectionsTableTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
@@ -22757,7 +22484,7 @@ final class $$IntegrationsTableTableReferences
 
   static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
       .businessesTable
-      .createAlias('integrations_table__business_id__businesses_table__id');
+      .createAlias('connections_table__business_id__businesses_table__id');
 
   $$BusinessesTableTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -22774,9 +22501,9 @@ final class $$IntegrationsTableTableReferences
   }
 }
 
-class $$IntegrationsTableTableFilterComposer
-    extends Composer<_$AppDatabase, $IntegrationsTableTable> {
-  $$IntegrationsTableTableFilterComposer({
+class $$ConnectionsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ConnectionsTableTable> {
+  $$ConnectionsTableTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -22788,8 +22515,13 @@ class $$IntegrationsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get provider => $composableBuilder(
-    column: $table.provider,
+  ColumnFilters<String> get connectorId => $composableBuilder(
+    column: $table.connectorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -22798,43 +22530,13 @@ class $$IntegrationsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get apiKeyEncrypted => $composableBuilder(
-    column: $table.apiKeyEncrypted,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get apiSecretEncrypted => $composableBuilder(
-    column: $table.apiSecretEncrypted,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get accessTokenEncrypted => $composableBuilder(
-    column: $table.accessTokenEncrypted,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get refreshTokenEncrypted => $composableBuilder(
-    column: $table.refreshTokenEncrypted,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get config => $composableBuilder(
-    column: $table.config,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get lastSyncAt => $composableBuilder(
-    column: $table.lastSyncAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
+  ColumnFilters<DateTime> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -22862,9 +22564,9 @@ class $$IntegrationsTableTableFilterComposer
   }
 }
 
-class $$IntegrationsTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $IntegrationsTableTable> {
-  $$IntegrationsTableTableOrderingComposer({
+class $$ConnectionsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ConnectionsTableTable> {
+  $$ConnectionsTableTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -22876,8 +22578,13 @@ class $$IntegrationsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get provider => $composableBuilder(
-    column: $table.provider,
+  ColumnOrderings<String> get connectorId => $composableBuilder(
+    column: $table.connectorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -22886,43 +22593,13 @@ class $$IntegrationsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get apiKeyEncrypted => $composableBuilder(
-    column: $table.apiKeyEncrypted,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get apiSecretEncrypted => $composableBuilder(
-    column: $table.apiSecretEncrypted,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get accessTokenEncrypted => $composableBuilder(
-    column: $table.accessTokenEncrypted,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get refreshTokenEncrypted => $composableBuilder(
-    column: $table.refreshTokenEncrypted,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get config => $composableBuilder(
-    column: $table.config,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get lastSyncAt => $composableBuilder(
-    column: $table.lastSyncAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
+  ColumnOrderings<DateTime> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -22950,9 +22627,9 @@ class $$IntegrationsTableTableOrderingComposer
   }
 }
 
-class $$IntegrationsTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $IntegrationsTableTable> {
-  $$IntegrationsTableTableAnnotationComposer({
+class $$ConnectionsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ConnectionsTableTable> {
+  $$ConnectionsTableTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -22962,45 +22639,24 @@ class $$IntegrationsTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get provider =>
-      $composableBuilder(column: $table.provider, builder: (column) => column);
+  GeneratedColumn<String> get connectorId => $composableBuilder(
+    column: $table.connectorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
-  GeneratedColumn<String> get apiKeyEncrypted => $composableBuilder(
-    column: $table.apiKeyEncrypted,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get apiSecretEncrypted => $composableBuilder(
-    column: $table.apiSecretEncrypted,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get accessTokenEncrypted => $composableBuilder(
-    column: $table.accessTokenEncrypted,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get refreshTokenEncrypted => $composableBuilder(
-    column: $table.refreshTokenEncrypted,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get config =>
-      $composableBuilder(column: $table.config, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastSyncAt => $composableBuilder(
     column: $table.lastSyncAt,
     builder: (column) => column,
   );
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   $$BusinessesTableTableAnnotationComposer get businessId {
     final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
@@ -23026,102 +22682,79 @@ class $$IntegrationsTableTableAnnotationComposer
   }
 }
 
-class $$IntegrationsTableTableTableManager
+class $$ConnectionsTableTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $IntegrationsTableTable,
-          IntegrationsTableData,
-          $$IntegrationsTableTableFilterComposer,
-          $$IntegrationsTableTableOrderingComposer,
-          $$IntegrationsTableTableAnnotationComposer,
-          $$IntegrationsTableTableCreateCompanionBuilder,
-          $$IntegrationsTableTableUpdateCompanionBuilder,
-          (IntegrationsTableData, $$IntegrationsTableTableReferences),
-          IntegrationsTableData,
+          $ConnectionsTableTable,
+          ConnectionsTableData,
+          $$ConnectionsTableTableFilterComposer,
+          $$ConnectionsTableTableOrderingComposer,
+          $$ConnectionsTableTableAnnotationComposer,
+          $$ConnectionsTableTableCreateCompanionBuilder,
+          $$ConnectionsTableTableUpdateCompanionBuilder,
+          (ConnectionsTableData, $$ConnectionsTableTableReferences),
+          ConnectionsTableData,
           PrefetchHooks Function({bool businessId})
         > {
-  $$IntegrationsTableTableTableManager(
+  $$ConnectionsTableTableTableManager(
     _$AppDatabase db,
-    $IntegrationsTableTable table,
+    $ConnectionsTableTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$IntegrationsTableTableFilterComposer($db: db, $table: table),
+              $$ConnectionsTableTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$IntegrationsTableTableOrderingComposer($db: db, $table: table),
+              $$ConnectionsTableTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$IntegrationsTableTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+              $$ConnectionsTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> businessId = const Value.absent(),
-                Value<String> provider = const Value.absent(),
-                Value<String?> status = const Value.absent(),
-                Value<String?> apiKeyEncrypted = const Value.absent(),
-                Value<String?> apiSecretEncrypted = const Value.absent(),
-                Value<String?> accessTokenEncrypted = const Value.absent(),
-                Value<String?> refreshTokenEncrypted = const Value.absent(),
-                Value<String?> config = const Value.absent(),
-                Value<DateTime?> lastSyncAt = const Value.absent(),
+                Value<String> connectorId = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String> status = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> lastSyncAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => IntegrationsTableCompanion(
+              }) => ConnectionsTableCompanion(
                 id: id,
                 businessId: businessId,
-                provider: provider,
+                connectorId: connectorId,
+                label: label,
                 status: status,
-                apiKeyEncrypted: apiKeyEncrypted,
-                apiSecretEncrypted: apiSecretEncrypted,
-                accessTokenEncrypted: accessTokenEncrypted,
-                refreshTokenEncrypted: refreshTokenEncrypted,
-                config: config,
-                lastSyncAt: lastSyncAt,
                 createdAt: createdAt,
-                updatedAt: updatedAt,
+                lastSyncAt: lastSyncAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String id,
                 required String businessId,
-                required String provider,
-                Value<String?> status = const Value.absent(),
-                Value<String?> apiKeyEncrypted = const Value.absent(),
-                Value<String?> apiSecretEncrypted = const Value.absent(),
-                Value<String?> accessTokenEncrypted = const Value.absent(),
-                Value<String?> refreshTokenEncrypted = const Value.absent(),
-                Value<String?> config = const Value.absent(),
+                required String connectorId,
+                required String label,
+                required String status,
+                required DateTime createdAt,
                 Value<DateTime?> lastSyncAt = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => IntegrationsTableCompanion.insert(
+              }) => ConnectionsTableCompanion.insert(
                 id: id,
                 businessId: businessId,
-                provider: provider,
+                connectorId: connectorId,
+                label: label,
                 status: status,
-                apiKeyEncrypted: apiKeyEncrypted,
-                apiSecretEncrypted: apiSecretEncrypted,
-                accessTokenEncrypted: accessTokenEncrypted,
-                refreshTokenEncrypted: refreshTokenEncrypted,
-                config: config,
-                lastSyncAt: lastSyncAt,
                 createdAt: createdAt,
-                updatedAt: updatedAt,
+                lastSyncAt: lastSyncAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
                   e.readTable(table),
-                  $$IntegrationsTableTableReferences(db, table, e),
+                  $$ConnectionsTableTableReferences(db, table, e),
                 ),
               )
               .toList(),
@@ -23151,10 +22784,10 @@ class $$IntegrationsTableTableTableManager
                                 currentTable: table,
                                 currentColumn: table.businessId,
                                 referencedTable:
-                                    $$IntegrationsTableTableReferences
+                                    $$ConnectionsTableTableReferences
                                         ._businessIdTable(db),
                                 referencedColumn:
-                                    $$IntegrationsTableTableReferences
+                                    $$ConnectionsTableTableReferences
                                         ._businessIdTable(db)
                                         .id,
                               )
@@ -23172,18 +22805,18 @@ class $$IntegrationsTableTableTableManager
       );
 }
 
-typedef $$IntegrationsTableTableProcessedTableManager =
+typedef $$ConnectionsTableTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $IntegrationsTableTable,
-      IntegrationsTableData,
-      $$IntegrationsTableTableFilterComposer,
-      $$IntegrationsTableTableOrderingComposer,
-      $$IntegrationsTableTableAnnotationComposer,
-      $$IntegrationsTableTableCreateCompanionBuilder,
-      $$IntegrationsTableTableUpdateCompanionBuilder,
-      (IntegrationsTableData, $$IntegrationsTableTableReferences),
-      IntegrationsTableData,
+      $ConnectionsTableTable,
+      ConnectionsTableData,
+      $$ConnectionsTableTableFilterComposer,
+      $$ConnectionsTableTableOrderingComposer,
+      $$ConnectionsTableTableAnnotationComposer,
+      $$ConnectionsTableTableCreateCompanionBuilder,
+      $$ConnectionsTableTableUpdateCompanionBuilder,
+      (ConnectionsTableData, $$ConnectionsTableTableReferences),
+      ConnectionsTableData,
       PrefetchHooks Function({bool businessId})
     >;
 typedef $$SyncQueueItemsTableTableCreateCompanionBuilder =
@@ -25969,8 +25602,8 @@ class $AppDatabaseManager {
       $$AlertsTableTableTableManager(_db, _db.alertsTable);
   $$AIChatTableTableTableManager get aIChatTable =>
       $$AIChatTableTableTableManager(_db, _db.aIChatTable);
-  $$IntegrationsTableTableTableManager get integrationsTable =>
-      $$IntegrationsTableTableTableManager(_db, _db.integrationsTable);
+  $$ConnectionsTableTableTableManager get connectionsTable =>
+      $$ConnectionsTableTableTableManager(_db, _db.connectionsTable);
   $$SyncQueueItemsTableTableTableManager get syncQueueItemsTable =>
       $$SyncQueueItemsTableTableTableManager(_db, _db.syncQueueItemsTable);
   $$SupplierFavoritesTableTableTableManager get supplierFavoritesTable =>

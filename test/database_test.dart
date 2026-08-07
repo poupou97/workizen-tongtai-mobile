@@ -57,7 +57,7 @@ void main() {
     //                object, không mã hoá cột thô.
     // v14 (WTM-227 / ADR-TON-023): Product Type — `kind` + `total_stock`
     // nullable, để "không có tồn kho" khác hẳn "hết hàng".
-    expect(db.schemaVersion, 17);
+    expect(db.schemaVersion, 18);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });
@@ -81,7 +81,7 @@ void main() {
     expect(await db.select(db.documentsTable).get(), isEmpty);
     expect(await db.select(db.alertsTable).get(), isEmpty);
     expect(await db.select(db.aIChatTable).get(), isEmpty);
-    expect(await db.select(db.integrationsTable).get(), isEmpty);
+    expect(await db.select(db.connectionsTable).get(), isEmpty);
   });
 
   test('insert + read round-trips a Business and a Product', () async {
