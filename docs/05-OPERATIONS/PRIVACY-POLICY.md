@@ -131,8 +131,23 @@ Chúng tôi không cố ý thu thập dữ liệu của trẻ em.
 Chính sách này thay đổi khi hành vi của app thay đổi — không thay đổi trước.
 Ngày cập nhật ở đầu trang.
 
-**Liên hệ:** [TBD — Founder cần cung cấp địa chỉ liên hệ trước khi phát hành lên
-cửa hàng.]
+**Liên hệ:** privacy@workizen.net
+
+Địa chỉ này đã được công bố sẵn tại
+[workizen.net/privacy](https://workizen.net/privacy) — dùng chung cho toàn bộ
+sản phẩm Workizen, và đó là lý do nó dùng được ngay (Founder xác nhận
+2026-08-07).
+
+**URL công bố của chính sách này:** `https://workizen.net/privacy/tongtai`
+
+⚠️ **Không dùng `workizen.net/privacy` làm URL cho Tổng Tài.** Trang đó mô tả
+*Workizen Hub* — nó không nhắc tên Tổng Tài, **không khai Firebase Analytics /
+Crashlytics**, và nói *"Authentication is handled by our dedicated identity
+service"* trong khi Tổng Tài **không có tài khoản** (D-4).
+
+Khai thiếu mức thu thập là hướng sai nguy hiểm nhất, và Play đối chiếu bản khai
+Data Safety với chính sách được trỏ tới. Cùng tên miền là đủ để nhất quán
+thương hiệu; nội dung thì phải là của app này.
 
 ---
 

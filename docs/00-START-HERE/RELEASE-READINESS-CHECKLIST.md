@@ -15,8 +15,8 @@ làm được.**
 | Nhóm | Còn lại |
 |---|---|
 | Kỹ thuật (AI làm được) | **1** — pass TalkBack + jank trên máy thật |
-| Nội dung pháp lý (Founder) | **1** — địa chỉ liên hệ cho privacy §10 |
-| Tài khoản / khoá ký (Founder) | **2** — keystore release · tài khoản Apple |
+| Nội dung pháp lý (Founder) | **0** — xong 2026-08-07 |
+| Tài khoản / khoá ký (Founder) | **1** — tải AAB lên Play Console (khoá ký **đã xong**) |
 
 > **Đính chính 2026-08-05:** bản đầu của lần re-audit này xếp **Điều khoản dịch
 > vụ** vào nhóm chặn cứng. **Sai** — không cửa hàng nào bắt buộc nó với app này.
@@ -83,14 +83,15 @@ Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không ph�
 | Quyền iOS | ✅ | Chỉ `NSCameraUsageDescription` (quét QR key) |
 | Telemetry | ✅ | WTM-108, verified live trên S24. Catalogue `TELEMETRY-EVENTS.md`: chỉ `app_open` · `screen_view` · `flow_error` · `screen_error` |
 | **Khai báo Data Safety** | ✅ | `docs/05-OPERATIONS/STORE-DATA-SAFETY.md` (107 dòng), khớp `TELEMETRY-EVENTS.md` + `PRIVACY-POLICY.md` |
-| **Privacy policy** | 🟡 | Văn bản + màn trong app **đã có** (WTM-37). **Thiếu đúng một dòng: địa chỉ liên hệ** (`PRIVACY-POLICY.md:134`) — **Founder** |
+| **Privacy policy** | ✅ | Văn bản + màn trong app (WTM-37) · liên hệ **privacy@workizen.net** (Founder xác nhận 2026-08-07, đã công bố sẵn ở workizen.net/privacy) · trang publish dựng sẵn cho `workizen.net/privacy/tongtai`. ⚠️ **Không** dùng `workizen.net/privacy` — trang đó không khai Firebase/Crashlytics và mô tả app có tài khoản |
 | **Điều khoản dịch vụ** | ⚪ | **KHÔNG bắt buộc để lên store** (đính chính 2026-08-05). Apple có EULA chuẩn tự áp dụng nếu không nộp bản riêng; Play chỉ bắt với vài nhóm đặc thù. **Thành bắt buộc khi bật thuê bao tự gia hạn** — Apple đòi link Terms of Use trong app. Hiện `pubspec.yaml` không có dependency mua bán nào |
 | **Câu miễn trừ cho số AI dự báo** | ✅ | **WTM-280 đã ship** — `AppStrings.estimateDisclaimer` render **bên trong thẻ chứa con số** ở màn dự báo · màn rủi ro khách hàng · card AI trên Reports. Test khoá **luật đặt chỗ**: có số ⇒ có dòng (`find.descendant`); twin từ chối ⇒ **không** có dòng (absence) |
 | Backup / Restore | ✅ | **WTM-164 ADR-TON-018** `.ttbk` v2 lossless 6 repo + Restore=Replace; apply + hoàn tác **đã kiểm trên thiết bị** 2026-08-01 |
 | Build release | ✅ | `flutter build apk --release` PASS |
 | **Smoke-launch trên máy thật** | ✅ | Bắt buộc theo bài học 2026-07-30 (thiếu Crashlytics Gradle plugin → crash mà analyze/test không bắt được). Quy trình: `adb install -r` → mở → `adb logcat -b crash` rỗng |
-| **Ký release / upload store** | 🔴 | `android/app/build.gradle.kts:44` vẫn `signingConfigs.getByName("debug")`. Keystore thật = **Founder gate** |
-| **Build iOS** | 🔴 | `ios/` có nhưng **chưa verify** — cần tài khoản Apple Developer. **Founder / bên ngoài** |
+| **Ký release** | ✅ | Upload key RSA-4096 hạn **2053**, ngoài mọi repo, quyền 600. Gradle đọc `android/key.properties` (gitignore); **vắng khoá ⇒ rơi về debug** nên CI và máy chưa có khoá vẫn build được. AAB đã ký, **vân tay SHA256 khớp keystore**. Red-line vẫn sạch: `AD_ID` · `ACCESS_ADSERVICES_*` · install-referrer đều **vắng** trong bản ký thật |
+| **Upload store** | 🟡 | Còn **một** việc của Founder: tải AAB lên Play Console (đăng ký Play App Signing) |
+| **Build iOS** | 🟡 | `ios/` có nhưng **chưa build/ký lần nào**. Tài khoản Apple Developer **đã có** (Founder, 2026-08-07) ⇒ không còn chặn bởi tài khoản; chỉ còn là việc chưa làm |
 
 ---
 
@@ -98,16 +99,17 @@ Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không ph�
 
 | # | Mục | Ai | Chặn cứng? |
 |---|---|---|:--:|
-| 1 | **Địa chỉ liên hệ** cho privacy §10 | **Founder** | ✅ |
+| 1 | ~~Địa chỉ liên hệ cho privacy §10~~ | — | ✅ **xong** (privacy@workizen.net) |
 | 2 | ~~Câu miễn trừ cho số AI dự báo~~ | — | ✅ **xong** (WTM-280) |
-| 3 | **Keystore release** + upload Play Console | **Founder** | ✅ |
-| 4 | **Tài khoản Apple Developer** → build + ký iOS | **Founder** | chỉ chặn iOS |
+| 3 | ~~Keystore release~~ | — | ✅ **xong 2026-08-07** (upload key, đã ký AAB) |
+| 3b | Tải AAB lên Play Console | **Founder** | ✅ |
+| 4 | Tài khoản Apple Developer | — | ✅ **Founder đã có** (2026-08-07) |
 | 5 | Pass **TalkBack** + đo **scroll jank** trên máy thật | AI (cần thiết bị) | ❌ nên làm, không chặn |
 
-**Ba** trong năm mục là của Founder, và **chỉ mục 1 chặn cứng**. Hai mục kỹ
-thuật còn lại (2 và 5) đều **không chặn** Beta Android.
+Ba trong năm mục **đã xong trong ngày 2026-08-07**. Còn lại đúng hai: một keystore
+(Founder) và một pass thiết bị (không chặn).
 
-⇒ **Android có thể lên closed beta ngay sau khi có mục 1 và 3** — hai mục Founder.
+⇒ **Android sẵn sàng nộp.** AAB đã ký nằm ở `build/app/outputs/bundle/release/app-release.aab`.
 
 ---
 
