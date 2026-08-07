@@ -10049,6 +10049,1313 @@ class ConnectionsTableCompanion extends UpdateCompanion<ConnectionsTableData> {
   }
 }
 
+class $ExternalIdentitiesTableTable extends ExternalIdentitiesTable
+    with TableInfo<$ExternalIdentitiesTableTable, ExternalIdentitiesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExternalIdentitiesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _platformMeta = const VerificationMeta(
+    'platform',
+  );
+  @override
+  late final GeneratedColumn<String> platform = GeneratedColumn<String>(
+    'platform',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _externalIdMeta = const VerificationMeta(
+    'externalId',
+  );
+  @override
+  late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
+    'external_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _connectionIdMeta = const VerificationMeta(
+    'connectionId',
+  );
+  @override
+  late final GeneratedColumn<String> connectionId = GeneratedColumn<String>(
+    'connection_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _customerIdMeta = const VerificationMeta(
+    'customerId',
+  );
+  @override
+  late final GeneratedColumn<String> customerId = GeneratedColumn<String>(
+    'customer_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES customers_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<String> confidence = GeneratedColumn<String>(
+    'confidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _linkKindMeta = const VerificationMeta(
+    'linkKind',
+  );
+  @override
+  late final GeneratedColumn<String> linkKind = GeneratedColumn<String>(
+    'link_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _linkedAtMeta = const VerificationMeta(
+    'linkedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> linkedAt = GeneratedColumn<DateTime>(
+    'linked_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _verifiedAtMeta = const VerificationMeta(
+    'verifiedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> verifiedAt = GeneratedColumn<DateTime>(
+    'verified_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    platform,
+    externalId,
+    connectionId,
+    customerId,
+    confidence,
+    linkKind,
+    linkedAt,
+    displayName,
+    verifiedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'external_identities_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExternalIdentitiesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('platform')) {
+      context.handle(
+        _platformMeta,
+        platform.isAcceptableOrUnknown(data['platform']!, _platformMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_platformMeta);
+    }
+    if (data.containsKey('external_id')) {
+      context.handle(
+        _externalIdMeta,
+        externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_externalIdMeta);
+    }
+    if (data.containsKey('connection_id')) {
+      context.handle(
+        _connectionIdMeta,
+        connectionId.isAcceptableOrUnknown(
+          data['connection_id']!,
+          _connectionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_connectionIdMeta);
+    }
+    if (data.containsKey('customer_id')) {
+      context.handle(
+        _customerIdMeta,
+        customerId.isAcceptableOrUnknown(data['customer_id']!, _customerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_customerIdMeta);
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_confidenceMeta);
+    }
+    if (data.containsKey('link_kind')) {
+      context.handle(
+        _linkKindMeta,
+        linkKind.isAcceptableOrUnknown(data['link_kind']!, _linkKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_linkKindMeta);
+    }
+    if (data.containsKey('linked_at')) {
+      context.handle(
+        _linkedAtMeta,
+        linkedAt.isAcceptableOrUnknown(data['linked_at']!, _linkedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_linkedAtMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('verified_at')) {
+      context.handle(
+        _verifiedAtMeta,
+        verifiedAt.isAcceptableOrUnknown(data['verified_at']!, _verifiedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
+  @override
+  ExternalIdentitiesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExternalIdentitiesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      platform: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}platform'],
+      )!,
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      )!,
+      connectionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}connection_id'],
+      )!,
+      customerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_id'],
+      )!,
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}confidence'],
+      )!,
+      linkKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}link_kind'],
+      )!,
+      linkedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}linked_at'],
+      )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      ),
+      verifiedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}verified_at'],
+      ),
+    );
+  }
+
+  @override
+  $ExternalIdentitiesTableTable createAlias(String alias) {
+    return $ExternalIdentitiesTableTable(attachedDatabase, alias);
+  }
+}
+
+class ExternalIdentitiesTableData extends DataClass
+    implements Insertable<ExternalIdentitiesTableData> {
+  final String id;
+  final String businessId;
+
+  /// Mã canonical của nền tảng — `shopee` · `tiktok` · `messenger` · …
+  ///
+  /// Mã từ từ vựng đóng, **không** khoá ngoại (cùng lý do `orders_table
+  /// .channelId` bỏ FK ở v12: một mã không phải tham chiếu tới một dòng).
+  final String platform;
+
+  /// Mã do **nền tảng** cấp. Không bao giờ là nhãn hiển thị (ADR-TON-018).
+  final String externalId;
+
+  /// Kết nối nào mang danh tính này về. **Không** khoá ngoại tới
+  /// `connections_table`: gỡ một kết nối không được phép xoá lịch sử khách —
+  /// đơn hàng đã ghi rồi thì người mua vẫn là người mua đó.
+  final String connectionId;
+
+  /// Khách hàng mà danh tính này trỏ về. **Cascade**: xoá khách thì danh tính
+  /// mồ côi không còn nghĩa gì.
+  final String customerId;
+
+  /// Mã canonical `IdentityConfidence`. Mã lạ ⇒ đọc ra `null` ⇒ bản ghi hỏng,
+  /// **không** rơi về `exact` (ADR-TON-018).
+  final String confidence;
+
+  /// Mã canonical `IdentityLinkKind` — ai đã quyết định liên kết này.
+  final String linkKind;
+  final DateTime linkedAt;
+
+  /// Tên hiển thị lúc thấy — **chỉ để người bán nhận ra mặt**, không dùng để
+  /// khớp. Khớp theo tên là nguồn của `weak`, và `weak` không tự động hoá gì.
+  final String? displayName;
+
+  /// `null` = **chưa xác nhận**, không phải "xác nhận lúc 0".
+  final DateTime? verifiedAt;
+  const ExternalIdentitiesTableData({
+    required this.id,
+    required this.businessId,
+    required this.platform,
+    required this.externalId,
+    required this.connectionId,
+    required this.customerId,
+    required this.confidence,
+    required this.linkKind,
+    required this.linkedAt,
+    this.displayName,
+    this.verifiedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['platform'] = Variable<String>(platform);
+    map['external_id'] = Variable<String>(externalId);
+    map['connection_id'] = Variable<String>(connectionId);
+    map['customer_id'] = Variable<String>(customerId);
+    map['confidence'] = Variable<String>(confidence);
+    map['link_kind'] = Variable<String>(linkKind);
+    map['linked_at'] = Variable<DateTime>(linkedAt);
+    if (!nullToAbsent || displayName != null) {
+      map['display_name'] = Variable<String>(displayName);
+    }
+    if (!nullToAbsent || verifiedAt != null) {
+      map['verified_at'] = Variable<DateTime>(verifiedAt);
+    }
+    return map;
+  }
+
+  ExternalIdentitiesTableCompanion toCompanion(bool nullToAbsent) {
+    return ExternalIdentitiesTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      platform: Value(platform),
+      externalId: Value(externalId),
+      connectionId: Value(connectionId),
+      customerId: Value(customerId),
+      confidence: Value(confidence),
+      linkKind: Value(linkKind),
+      linkedAt: Value(linkedAt),
+      displayName: displayName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayName),
+      verifiedAt: verifiedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(verifiedAt),
+    );
+  }
+
+  factory ExternalIdentitiesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExternalIdentitiesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      platform: serializer.fromJson<String>(json['platform']),
+      externalId: serializer.fromJson<String>(json['externalId']),
+      connectionId: serializer.fromJson<String>(json['connectionId']),
+      customerId: serializer.fromJson<String>(json['customerId']),
+      confidence: serializer.fromJson<String>(json['confidence']),
+      linkKind: serializer.fromJson<String>(json['linkKind']),
+      linkedAt: serializer.fromJson<DateTime>(json['linkedAt']),
+      displayName: serializer.fromJson<String?>(json['displayName']),
+      verifiedAt: serializer.fromJson<DateTime?>(json['verifiedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'platform': serializer.toJson<String>(platform),
+      'externalId': serializer.toJson<String>(externalId),
+      'connectionId': serializer.toJson<String>(connectionId),
+      'customerId': serializer.toJson<String>(customerId),
+      'confidence': serializer.toJson<String>(confidence),
+      'linkKind': serializer.toJson<String>(linkKind),
+      'linkedAt': serializer.toJson<DateTime>(linkedAt),
+      'displayName': serializer.toJson<String?>(displayName),
+      'verifiedAt': serializer.toJson<DateTime?>(verifiedAt),
+    };
+  }
+
+  ExternalIdentitiesTableData copyWith({
+    String? id,
+    String? businessId,
+    String? platform,
+    String? externalId,
+    String? connectionId,
+    String? customerId,
+    String? confidence,
+    String? linkKind,
+    DateTime? linkedAt,
+    Value<String?> displayName = const Value.absent(),
+    Value<DateTime?> verifiedAt = const Value.absent(),
+  }) => ExternalIdentitiesTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    platform: platform ?? this.platform,
+    externalId: externalId ?? this.externalId,
+    connectionId: connectionId ?? this.connectionId,
+    customerId: customerId ?? this.customerId,
+    confidence: confidence ?? this.confidence,
+    linkKind: linkKind ?? this.linkKind,
+    linkedAt: linkedAt ?? this.linkedAt,
+    displayName: displayName.present ? displayName.value : this.displayName,
+    verifiedAt: verifiedAt.present ? verifiedAt.value : this.verifiedAt,
+  );
+  ExternalIdentitiesTableData copyWithCompanion(
+    ExternalIdentitiesTableCompanion data,
+  ) {
+    return ExternalIdentitiesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      platform: data.platform.present ? data.platform.value : this.platform,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
+      connectionId: data.connectionId.present
+          ? data.connectionId.value
+          : this.connectionId,
+      customerId: data.customerId.present
+          ? data.customerId.value
+          : this.customerId,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+      linkKind: data.linkKind.present ? data.linkKind.value : this.linkKind,
+      linkedAt: data.linkedAt.present ? data.linkedAt.value : this.linkedAt,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      verifiedAt: data.verifiedAt.present
+          ? data.verifiedAt.value
+          : this.verifiedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExternalIdentitiesTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('platform: $platform, ')
+          ..write('externalId: $externalId, ')
+          ..write('connectionId: $connectionId, ')
+          ..write('customerId: $customerId, ')
+          ..write('confidence: $confidence, ')
+          ..write('linkKind: $linkKind, ')
+          ..write('linkedAt: $linkedAt, ')
+          ..write('displayName: $displayName, ')
+          ..write('verifiedAt: $verifiedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    platform,
+    externalId,
+    connectionId,
+    customerId,
+    confidence,
+    linkKind,
+    linkedAt,
+    displayName,
+    verifiedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExternalIdentitiesTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.platform == this.platform &&
+          other.externalId == this.externalId &&
+          other.connectionId == this.connectionId &&
+          other.customerId == this.customerId &&
+          other.confidence == this.confidence &&
+          other.linkKind == this.linkKind &&
+          other.linkedAt == this.linkedAt &&
+          other.displayName == this.displayName &&
+          other.verifiedAt == this.verifiedAt);
+}
+
+class ExternalIdentitiesTableCompanion
+    extends UpdateCompanion<ExternalIdentitiesTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> platform;
+  final Value<String> externalId;
+  final Value<String> connectionId;
+  final Value<String> customerId;
+  final Value<String> confidence;
+  final Value<String> linkKind;
+  final Value<DateTime> linkedAt;
+  final Value<String?> displayName;
+  final Value<DateTime?> verifiedAt;
+  final Value<int> rowid;
+  const ExternalIdentitiesTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.platform = const Value.absent(),
+    this.externalId = const Value.absent(),
+    this.connectionId = const Value.absent(),
+    this.customerId = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.linkKind = const Value.absent(),
+    this.linkedAt = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.verifiedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExternalIdentitiesTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String platform,
+    required String externalId,
+    required String connectionId,
+    required String customerId,
+    required String confidence,
+    required String linkKind,
+    required DateTime linkedAt,
+    this.displayName = const Value.absent(),
+    this.verifiedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       platform = Value(platform),
+       externalId = Value(externalId),
+       connectionId = Value(connectionId),
+       customerId = Value(customerId),
+       confidence = Value(confidence),
+       linkKind = Value(linkKind),
+       linkedAt = Value(linkedAt);
+  static Insertable<ExternalIdentitiesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? platform,
+    Expression<String>? externalId,
+    Expression<String>? connectionId,
+    Expression<String>? customerId,
+    Expression<String>? confidence,
+    Expression<String>? linkKind,
+    Expression<DateTime>? linkedAt,
+    Expression<String>? displayName,
+    Expression<DateTime>? verifiedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (platform != null) 'platform': platform,
+      if (externalId != null) 'external_id': externalId,
+      if (connectionId != null) 'connection_id': connectionId,
+      if (customerId != null) 'customer_id': customerId,
+      if (confidence != null) 'confidence': confidence,
+      if (linkKind != null) 'link_kind': linkKind,
+      if (linkedAt != null) 'linked_at': linkedAt,
+      if (displayName != null) 'display_name': displayName,
+      if (verifiedAt != null) 'verified_at': verifiedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExternalIdentitiesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? platform,
+    Value<String>? externalId,
+    Value<String>? connectionId,
+    Value<String>? customerId,
+    Value<String>? confidence,
+    Value<String>? linkKind,
+    Value<DateTime>? linkedAt,
+    Value<String?>? displayName,
+    Value<DateTime?>? verifiedAt,
+    Value<int>? rowid,
+  }) {
+    return ExternalIdentitiesTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      platform: platform ?? this.platform,
+      externalId: externalId ?? this.externalId,
+      connectionId: connectionId ?? this.connectionId,
+      customerId: customerId ?? this.customerId,
+      confidence: confidence ?? this.confidence,
+      linkKind: linkKind ?? this.linkKind,
+      linkedAt: linkedAt ?? this.linkedAt,
+      displayName: displayName ?? this.displayName,
+      verifiedAt: verifiedAt ?? this.verifiedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (platform.present) {
+      map['platform'] = Variable<String>(platform.value);
+    }
+    if (externalId.present) {
+      map['external_id'] = Variable<String>(externalId.value);
+    }
+    if (connectionId.present) {
+      map['connection_id'] = Variable<String>(connectionId.value);
+    }
+    if (customerId.present) {
+      map['customer_id'] = Variable<String>(customerId.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<String>(confidence.value);
+    }
+    if (linkKind.present) {
+      map['link_kind'] = Variable<String>(linkKind.value);
+    }
+    if (linkedAt.present) {
+      map['linked_at'] = Variable<DateTime>(linkedAt.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (verifiedAt.present) {
+      map['verified_at'] = Variable<DateTime>(verifiedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExternalIdentitiesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('platform: $platform, ')
+          ..write('externalId: $externalId, ')
+          ..write('connectionId: $connectionId, ')
+          ..write('customerId: $customerId, ')
+          ..write('confidence: $confidence, ')
+          ..write('linkKind: $linkKind, ')
+          ..write('linkedAt: $linkedAt, ')
+          ..write('displayName: $displayName, ')
+          ..write('verifiedAt: $verifiedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $IdentityLinkEventsTableTable extends IdentityLinkEventsTable
+    with TableInfo<$IdentityLinkEventsTableTable, IdentityLinkEventsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IdentityLinkEventsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _identityIdMeta = const VerificationMeta(
+    'identityId',
+  );
+  @override
+  late final GeneratedColumn<String> identityId = GeneratedColumn<String>(
+    'identity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actionMeta = const VerificationMeta('action');
+  @override
+  late final GeneratedColumn<String> action = GeneratedColumn<String>(
+    'action',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _atMeta = const VerificationMeta('at');
+  @override
+  late final GeneratedColumn<DateTime> at = GeneratedColumn<DateTime>(
+    'at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actorMeta = const VerificationMeta('actor');
+  @override
+  late final GeneratedColumn<String> actor = GeneratedColumn<String>(
+    'actor',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fromCustomerIdMeta = const VerificationMeta(
+    'fromCustomerId',
+  );
+  @override
+  late final GeneratedColumn<String> fromCustomerId = GeneratedColumn<String>(
+    'from_customer_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _toCustomerIdMeta = const VerificationMeta(
+    'toCustomerId',
+  );
+  @override
+  late final GeneratedColumn<String> toCustomerId = GeneratedColumn<String>(
+    'to_customer_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<String> confidence = GeneratedColumn<String>(
+    'confidence',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    identityId,
+    action,
+    at,
+    actor,
+    fromCustomerId,
+    toCustomerId,
+    confidence,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'identity_link_events_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<IdentityLinkEventsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('identity_id')) {
+      context.handle(
+        _identityIdMeta,
+        identityId.isAcceptableOrUnknown(data['identity_id']!, _identityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_identityIdMeta);
+    }
+    if (data.containsKey('action')) {
+      context.handle(
+        _actionMeta,
+        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actionMeta);
+    }
+    if (data.containsKey('at')) {
+      context.handle(_atMeta, at.isAcceptableOrUnknown(data['at']!, _atMeta));
+    } else if (isInserting) {
+      context.missing(_atMeta);
+    }
+    if (data.containsKey('actor')) {
+      context.handle(
+        _actorMeta,
+        actor.isAcceptableOrUnknown(data['actor']!, _actorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actorMeta);
+    }
+    if (data.containsKey('from_customer_id')) {
+      context.handle(
+        _fromCustomerIdMeta,
+        fromCustomerId.isAcceptableOrUnknown(
+          data['from_customer_id']!,
+          _fromCustomerIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('to_customer_id')) {
+      context.handle(
+        _toCustomerIdMeta,
+        toCustomerId.isAcceptableOrUnknown(
+          data['to_customer_id']!,
+          _toCustomerIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
+  @override
+  IdentityLinkEventsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return IdentityLinkEventsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      identityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}identity_id'],
+      )!,
+      action: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}action'],
+      )!,
+      at: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}at'],
+      )!,
+      actor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}actor'],
+      )!,
+      fromCustomerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}from_customer_id'],
+      ),
+      toCustomerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}to_customer_id'],
+      ),
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}confidence'],
+      ),
+    );
+  }
+
+  @override
+  $IdentityLinkEventsTableTable createAlias(String alias) {
+    return $IdentityLinkEventsTableTable(attachedDatabase, alias);
+  }
+}
+
+class IdentityLinkEventsTableData extends DataClass
+    implements Insertable<IdentityLinkEventsTableData> {
+  final String id;
+  final String businessId;
+  final String identityId;
+
+  /// Mã canonical `IdentityLinkAction` — `linked` · `unlinked` · `moved`.
+  final String action;
+  final DateTime at;
+
+  /// `seller` hoặc `rule:<tên luật>`. Xem doc của lớp.
+  final String actor;
+
+  /// Trạng thái **trước**. `null` ở `linked` — không phải "khách rỗng".
+  final String? fromCustomerId;
+
+  /// Trạng thái **sau**. `null` ở `unlinked`.
+  final String? toCustomerId;
+
+  /// Mức tin cậy lúc quyết định — để về sau soi lại *luật nào đã tin quá mức*.
+  final String? confidence;
+  const IdentityLinkEventsTableData({
+    required this.id,
+    required this.businessId,
+    required this.identityId,
+    required this.action,
+    required this.at,
+    required this.actor,
+    this.fromCustomerId,
+    this.toCustomerId,
+    this.confidence,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['identity_id'] = Variable<String>(identityId);
+    map['action'] = Variable<String>(action);
+    map['at'] = Variable<DateTime>(at);
+    map['actor'] = Variable<String>(actor);
+    if (!nullToAbsent || fromCustomerId != null) {
+      map['from_customer_id'] = Variable<String>(fromCustomerId);
+    }
+    if (!nullToAbsent || toCustomerId != null) {
+      map['to_customer_id'] = Variable<String>(toCustomerId);
+    }
+    if (!nullToAbsent || confidence != null) {
+      map['confidence'] = Variable<String>(confidence);
+    }
+    return map;
+  }
+
+  IdentityLinkEventsTableCompanion toCompanion(bool nullToAbsent) {
+    return IdentityLinkEventsTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      identityId: Value(identityId),
+      action: Value(action),
+      at: Value(at),
+      actor: Value(actor),
+      fromCustomerId: fromCustomerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fromCustomerId),
+      toCustomerId: toCustomerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toCustomerId),
+      confidence: confidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confidence),
+    );
+  }
+
+  factory IdentityLinkEventsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return IdentityLinkEventsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      identityId: serializer.fromJson<String>(json['identityId']),
+      action: serializer.fromJson<String>(json['action']),
+      at: serializer.fromJson<DateTime>(json['at']),
+      actor: serializer.fromJson<String>(json['actor']),
+      fromCustomerId: serializer.fromJson<String?>(json['fromCustomerId']),
+      toCustomerId: serializer.fromJson<String?>(json['toCustomerId']),
+      confidence: serializer.fromJson<String?>(json['confidence']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'identityId': serializer.toJson<String>(identityId),
+      'action': serializer.toJson<String>(action),
+      'at': serializer.toJson<DateTime>(at),
+      'actor': serializer.toJson<String>(actor),
+      'fromCustomerId': serializer.toJson<String?>(fromCustomerId),
+      'toCustomerId': serializer.toJson<String?>(toCustomerId),
+      'confidence': serializer.toJson<String?>(confidence),
+    };
+  }
+
+  IdentityLinkEventsTableData copyWith({
+    String? id,
+    String? businessId,
+    String? identityId,
+    String? action,
+    DateTime? at,
+    String? actor,
+    Value<String?> fromCustomerId = const Value.absent(),
+    Value<String?> toCustomerId = const Value.absent(),
+    Value<String?> confidence = const Value.absent(),
+  }) => IdentityLinkEventsTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    identityId: identityId ?? this.identityId,
+    action: action ?? this.action,
+    at: at ?? this.at,
+    actor: actor ?? this.actor,
+    fromCustomerId: fromCustomerId.present
+        ? fromCustomerId.value
+        : this.fromCustomerId,
+    toCustomerId: toCustomerId.present ? toCustomerId.value : this.toCustomerId,
+    confidence: confidence.present ? confidence.value : this.confidence,
+  );
+  IdentityLinkEventsTableData copyWithCompanion(
+    IdentityLinkEventsTableCompanion data,
+  ) {
+    return IdentityLinkEventsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      identityId: data.identityId.present
+          ? data.identityId.value
+          : this.identityId,
+      action: data.action.present ? data.action.value : this.action,
+      at: data.at.present ? data.at.value : this.at,
+      actor: data.actor.present ? data.actor.value : this.actor,
+      fromCustomerId: data.fromCustomerId.present
+          ? data.fromCustomerId.value
+          : this.fromCustomerId,
+      toCustomerId: data.toCustomerId.present
+          ? data.toCustomerId.value
+          : this.toCustomerId,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IdentityLinkEventsTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('identityId: $identityId, ')
+          ..write('action: $action, ')
+          ..write('at: $at, ')
+          ..write('actor: $actor, ')
+          ..write('fromCustomerId: $fromCustomerId, ')
+          ..write('toCustomerId: $toCustomerId, ')
+          ..write('confidence: $confidence')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    identityId,
+    action,
+    at,
+    actor,
+    fromCustomerId,
+    toCustomerId,
+    confidence,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is IdentityLinkEventsTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.identityId == this.identityId &&
+          other.action == this.action &&
+          other.at == this.at &&
+          other.actor == this.actor &&
+          other.fromCustomerId == this.fromCustomerId &&
+          other.toCustomerId == this.toCustomerId &&
+          other.confidence == this.confidence);
+}
+
+class IdentityLinkEventsTableCompanion
+    extends UpdateCompanion<IdentityLinkEventsTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> identityId;
+  final Value<String> action;
+  final Value<DateTime> at;
+  final Value<String> actor;
+  final Value<String?> fromCustomerId;
+  final Value<String?> toCustomerId;
+  final Value<String?> confidence;
+  final Value<int> rowid;
+  const IdentityLinkEventsTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.identityId = const Value.absent(),
+    this.action = const Value.absent(),
+    this.at = const Value.absent(),
+    this.actor = const Value.absent(),
+    this.fromCustomerId = const Value.absent(),
+    this.toCustomerId = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  IdentityLinkEventsTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String identityId,
+    required String action,
+    required DateTime at,
+    required String actor,
+    this.fromCustomerId = const Value.absent(),
+    this.toCustomerId = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       identityId = Value(identityId),
+       action = Value(action),
+       at = Value(at),
+       actor = Value(actor);
+  static Insertable<IdentityLinkEventsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? identityId,
+    Expression<String>? action,
+    Expression<DateTime>? at,
+    Expression<String>? actor,
+    Expression<String>? fromCustomerId,
+    Expression<String>? toCustomerId,
+    Expression<String>? confidence,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (identityId != null) 'identity_id': identityId,
+      if (action != null) 'action': action,
+      if (at != null) 'at': at,
+      if (actor != null) 'actor': actor,
+      if (fromCustomerId != null) 'from_customer_id': fromCustomerId,
+      if (toCustomerId != null) 'to_customer_id': toCustomerId,
+      if (confidence != null) 'confidence': confidence,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  IdentityLinkEventsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? identityId,
+    Value<String>? action,
+    Value<DateTime>? at,
+    Value<String>? actor,
+    Value<String?>? fromCustomerId,
+    Value<String?>? toCustomerId,
+    Value<String?>? confidence,
+    Value<int>? rowid,
+  }) {
+    return IdentityLinkEventsTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      identityId: identityId ?? this.identityId,
+      action: action ?? this.action,
+      at: at ?? this.at,
+      actor: actor ?? this.actor,
+      fromCustomerId: fromCustomerId ?? this.fromCustomerId,
+      toCustomerId: toCustomerId ?? this.toCustomerId,
+      confidence: confidence ?? this.confidence,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (identityId.present) {
+      map['identity_id'] = Variable<String>(identityId.value);
+    }
+    if (action.present) {
+      map['action'] = Variable<String>(action.value);
+    }
+    if (at.present) {
+      map['at'] = Variable<DateTime>(at.value);
+    }
+    if (actor.present) {
+      map['actor'] = Variable<String>(actor.value);
+    }
+    if (fromCustomerId.present) {
+      map['from_customer_id'] = Variable<String>(fromCustomerId.value);
+    }
+    if (toCustomerId.present) {
+      map['to_customer_id'] = Variable<String>(toCustomerId.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<String>(confidence.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IdentityLinkEventsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('identityId: $identityId, ')
+          ..write('action: $action, ')
+          ..write('at: $at, ')
+          ..write('actor: $actor, ')
+          ..write('fromCustomerId: $fromCustomerId, ')
+          ..write('toCustomerId: $toCustomerId, ')
+          ..write('confidence: $confidence, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueItemsTableTable extends SyncQueueItemsTable
     with TableInfo<$SyncQueueItemsTableTable, SyncQueueItemsTableData> {
   @override
@@ -14319,6 +15626,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ConnectionsTableTable connectionsTable = $ConnectionsTableTable(
     this,
   );
+  late final $ExternalIdentitiesTableTable externalIdentitiesTable =
+      $ExternalIdentitiesTableTable(this);
+  late final $IdentityLinkEventsTableTable identityLinkEventsTable =
+      $IdentityLinkEventsTableTable(this);
   late final $SyncQueueItemsTableTable syncQueueItemsTable =
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
@@ -14393,6 +15704,30 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'connections_connector',
     'CREATE INDEX connections_connector ON connections_table (connector_id)',
   );
+  late final Index externalIdentitiesBusinessId = Index(
+    'external_identities_business_id',
+    'CREATE INDEX external_identities_business_id ON external_identities_table (business_id)',
+  );
+  late final Index externalIdentitiesCustomerId = Index(
+    'external_identities_customer_id',
+    'CREATE INDEX external_identities_customer_id ON external_identities_table (customer_id)',
+  );
+  late final Index externalIdentitiesLookup = Index(
+    'external_identities_lookup',
+    'CREATE UNIQUE INDEX external_identities_lookup ON external_identities_table (business_id, connection_id, platform, external_id)',
+  );
+  late final Index identityLinkEventsBusinessId = Index(
+    'identity_link_events_business_id',
+    'CREATE INDEX identity_link_events_business_id ON identity_link_events_table (business_id)',
+  );
+  late final Index identityLinkEventsIdentityId = Index(
+    'identity_link_events_identity_id',
+    'CREATE INDEX identity_link_events_identity_id ON identity_link_events_table (identity_id)',
+  );
+  late final Index identityLinkEventsActor = Index(
+    'identity_link_events_actor',
+    'CREATE INDEX identity_link_events_actor ON identity_link_events_table (actor)',
+  );
   late final Index businessJourneyNodesJourney = Index(
     'business_journey_nodes_journey',
     'CREATE INDEX business_journey_nodes_journey ON business_journey_nodes_table (journey_id)',
@@ -14423,6 +15758,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     alertsTable,
     aIChatTable,
     connectionsTable,
+    externalIdentitiesTable,
+    identityLinkEventsTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
     businessInputsTable,
@@ -14446,6 +15783,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     transactionsDate,
     connectionsBusinessId,
     connectionsConnector,
+    externalIdentitiesBusinessId,
+    externalIdentitiesCustomerId,
+    externalIdentitiesLookup,
+    identityLinkEventsBusinessId,
+    identityLinkEventsIdentityId,
+    identityLinkEventsActor,
     businessJourneyNodesJourney,
     chatMessagesConversation,
     chatMessagesSentAt,
@@ -14535,6 +15878,33 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('connections_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('external_identities_table', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'customers_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('external_identities_table', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('identity_link_events_table', kind: UpdateKind.delete),
+      ],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -14818,6 +16188,58 @@ final class $$BusinessesTableTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _connectionsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ExternalIdentitiesTableTable,
+    List<ExternalIdentitiesTableData>
+  >
+  _externalIdentitiesTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.externalIdentitiesTable,
+        aliasName:
+            'businesses_table__id__external_identities_table__business_id',
+      );
+
+  $$ExternalIdentitiesTableTableProcessedTableManager
+  get externalIdentitiesTableRefs {
+    final manager = $$ExternalIdentitiesTableTableTableManager(
+      $_db,
+      $_db.externalIdentitiesTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _externalIdentitiesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $IdentityLinkEventsTableTable,
+    List<IdentityLinkEventsTableData>
+  >
+  _identityLinkEventsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.identityLinkEventsTable,
+        aliasName:
+            'businesses_table__id__identity_link_events_table__business_id',
+      );
+
+  $$IdentityLinkEventsTableTableProcessedTableManager
+  get identityLinkEventsTableRefs {
+    final manager = $$IdentityLinkEventsTableTableTableManager(
+      $_db,
+      $_db.identityLinkEventsTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _identityLinkEventsTableRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -15179,6 +16601,58 @@ class $$BusinessesTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> externalIdentitiesTableRefs(
+    Expression<bool> Function($$ExternalIdentitiesTableTableFilterComposer f) f,
+  ) {
+    final $$ExternalIdentitiesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.externalIdentitiesTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExternalIdentitiesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.externalIdentitiesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> identityLinkEventsTableRefs(
+    Expression<bool> Function($$IdentityLinkEventsTableTableFilterComposer f) f,
+  ) {
+    final $$IdentityLinkEventsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.identityLinkEventsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$IdentityLinkEventsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.identityLinkEventsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -15607,6 +17081,60 @@ class $$BusinessesTableTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> externalIdentitiesTableRefs<T extends Object>(
+    Expression<T> Function($$ExternalIdentitiesTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$ExternalIdentitiesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.externalIdentitiesTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExternalIdentitiesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.externalIdentitiesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> identityLinkEventsTableRefs<T extends Object>(
+    Expression<T> Function($$IdentityLinkEventsTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$IdentityLinkEventsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.identityLinkEventsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$IdentityLinkEventsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.identityLinkEventsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$BusinessesTableTableTableManager
@@ -15635,6 +17163,8 @@ class $$BusinessesTableTableTableManager
             bool alertsTableRefs,
             bool aIChatTableRefs,
             bool connectionsTableRefs,
+            bool externalIdentitiesTableRefs,
+            bool identityLinkEventsTableRefs,
           })
         > {
   $$BusinessesTableTableTableManager(
@@ -15728,6 +17258,8 @@ class $$BusinessesTableTableTableManager
                 alertsTableRefs = false,
                 aIChatTableRefs = false,
                 connectionsTableRefs = false,
+                externalIdentitiesTableRefs = false,
+                identityLinkEventsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -15743,6 +17275,8 @@ class $$BusinessesTableTableTableManager
                     if (alertsTableRefs) db.alertsTable,
                     if (aIChatTableRefs) db.aIChatTable,
                     if (connectionsTableRefs) db.connectionsTable,
+                    if (externalIdentitiesTableRefs) db.externalIdentitiesTable,
+                    if (identityLinkEventsTableRefs) db.identityLinkEventsTable,
                   ],
                   addJoins:
                       <
@@ -16011,6 +17545,48 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (externalIdentitiesTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          ExternalIdentitiesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._externalIdentitiesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).externalIdentitiesTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (identityLinkEventsTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          IdentityLinkEventsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._identityLinkEventsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).identityLinkEventsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -16044,6 +17620,8 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool alertsTableRefs,
         bool aIChatTableRefs,
         bool connectionsTableRefs,
+        bool externalIdentitiesTableRefs,
+        bool identityLinkEventsTableRefs,
       })
     >;
 typedef $$UsersTableTableCreateCompanionBuilder =
@@ -18030,6 +19608,32 @@ final class $$CustomersTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $ExternalIdentitiesTableTable,
+    List<ExternalIdentitiesTableData>
+  >
+  _externalIdentitiesTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.externalIdentitiesTable,
+        aliasName:
+            'customers_table__id__external_identities_table__customer_id',
+      );
+
+  $$ExternalIdentitiesTableTableProcessedTableManager
+  get externalIdentitiesTableRefs {
+    final manager = $$ExternalIdentitiesTableTableTableManager(
+      $_db,
+      $_db.externalIdentitiesTable,
+    ).filter((f) => f.customerId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _externalIdentitiesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CustomersTableTableFilterComposer
@@ -18166,6 +19770,32 @@ class $$CustomersTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> externalIdentitiesTableRefs(
+    Expression<bool> Function($$ExternalIdentitiesTableTableFilterComposer f) f,
+  ) {
+    final $$ExternalIdentitiesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.externalIdentitiesTable,
+          getReferencedColumn: (t) => t.customerId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExternalIdentitiesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.externalIdentitiesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -18399,6 +20029,33 @@ class $$CustomersTableTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> externalIdentitiesTableRefs<T extends Object>(
+    Expression<T> Function($$ExternalIdentitiesTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$ExternalIdentitiesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.externalIdentitiesTable,
+          getReferencedColumn: (t) => t.customerId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExternalIdentitiesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.externalIdentitiesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$CustomersTableTableTableManager
@@ -18414,7 +20071,11 @@ class $$CustomersTableTableTableManager
           $$CustomersTableTableUpdateCompanionBuilder,
           (CustomersTableData, $$CustomersTableTableReferences),
           CustomersTableData,
-          PrefetchHooks Function({bool businessId, bool ordersTableRefs})
+          PrefetchHooks Function({
+            bool businessId,
+            bool ordersTableRefs,
+            bool externalIdentitiesTableRefs,
+          })
         > {
   $$CustomersTableTableTableManager(
     _$AppDatabase db,
@@ -18518,11 +20179,16 @@ class $$CustomersTableTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({businessId = false, ordersTableRefs = false}) {
+              ({
+                businessId = false,
+                ordersTableRefs = false,
+                externalIdentitiesTableRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (ordersTableRefs) db.ordersTable,
+                    if (externalIdentitiesTableRefs) db.externalIdentitiesTable,
                   ],
                   addJoins:
                       <
@@ -18581,6 +20247,27 @@ class $$CustomersTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (externalIdentitiesTableRefs)
+                        await $_getPrefetchedData<
+                          CustomersTableData,
+                          $CustomersTableTable,
+                          ExternalIdentitiesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CustomersTableTableReferences
+                              ._externalIdentitiesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CustomersTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).externalIdentitiesTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.customerId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -18601,7 +20288,11 @@ typedef $$CustomersTableTableProcessedTableManager =
       $$CustomersTableTableUpdateCompanionBuilder,
       (CustomersTableData, $$CustomersTableTableReferences),
       CustomersTableData,
-      PrefetchHooks Function({bool businessId, bool ordersTableRefs})
+      PrefetchHooks Function({
+        bool businessId,
+        bool ordersTableRefs,
+        bool externalIdentitiesTableRefs,
+      })
     >;
 typedef $$OrdersTableTableCreateCompanionBuilder =
     OrdersTableCompanion Function({
@@ -22819,6 +24510,992 @@ typedef $$ConnectionsTableTableProcessedTableManager =
       ConnectionsTableData,
       PrefetchHooks Function({bool businessId})
     >;
+typedef $$ExternalIdentitiesTableTableCreateCompanionBuilder =
+    ExternalIdentitiesTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String platform,
+      required String externalId,
+      required String connectionId,
+      required String customerId,
+      required String confidence,
+      required String linkKind,
+      required DateTime linkedAt,
+      Value<String?> displayName,
+      Value<DateTime?> verifiedAt,
+      Value<int> rowid,
+    });
+typedef $$ExternalIdentitiesTableTableUpdateCompanionBuilder =
+    ExternalIdentitiesTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> platform,
+      Value<String> externalId,
+      Value<String> connectionId,
+      Value<String> customerId,
+      Value<String> confidence,
+      Value<String> linkKind,
+      Value<DateTime> linkedAt,
+      Value<String?> displayName,
+      Value<DateTime?> verifiedAt,
+      Value<int> rowid,
+    });
+
+final class $$ExternalIdentitiesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ExternalIdentitiesTableTable,
+          ExternalIdentitiesTableData
+        > {
+  $$ExternalIdentitiesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) =>
+      db.businessesTable.createAlias(
+        'external_identities_table__business_id__businesses_table__id',
+      );
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CustomersTableTable _customerIdTable(_$AppDatabase db) =>
+      db.customersTable.createAlias(
+        'external_identities_table__customer_id__customers_table__id',
+      );
+
+  $$CustomersTableTableProcessedTableManager get customerId {
+    final $_column = $_itemColumn<String>('customer_id')!;
+
+    final manager = $$CustomersTableTableTableManager(
+      $_db,
+      $_db.customersTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_customerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ExternalIdentitiesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ExternalIdentitiesTableTable> {
+  $$ExternalIdentitiesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get platform => $composableBuilder(
+    column: $table.platform,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get connectionId => $composableBuilder(
+    column: $table.connectionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkKind => $composableBuilder(
+    column: $table.linkKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get linkedAt => $composableBuilder(
+    column: $table.linkedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get verifiedAt => $composableBuilder(
+    column: $table.verifiedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CustomersTableTableFilterComposer get customerId {
+    final $$CustomersTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.customerId,
+      referencedTable: $db.customersTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CustomersTableTableFilterComposer(
+            $db: $db,
+            $table: $db.customersTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExternalIdentitiesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExternalIdentitiesTableTable> {
+  $$ExternalIdentitiesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get platform => $composableBuilder(
+    column: $table.platform,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get connectionId => $composableBuilder(
+    column: $table.connectionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linkKind => $composableBuilder(
+    column: $table.linkKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get linkedAt => $composableBuilder(
+    column: $table.linkedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get verifiedAt => $composableBuilder(
+    column: $table.verifiedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CustomersTableTableOrderingComposer get customerId {
+    final $$CustomersTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.customerId,
+      referencedTable: $db.customersTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CustomersTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.customersTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExternalIdentitiesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExternalIdentitiesTableTable> {
+  $$ExternalIdentitiesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get platform =>
+      $composableBuilder(column: $table.platform, builder: (column) => column);
+
+  GeneratedColumn<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get connectionId => $composableBuilder(
+    column: $table.connectionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linkKind =>
+      $composableBuilder(column: $table.linkKind, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get linkedAt =>
+      $composableBuilder(column: $table.linkedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get verifiedAt => $composableBuilder(
+    column: $table.verifiedAt,
+    builder: (column) => column,
+  );
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CustomersTableTableAnnotationComposer get customerId {
+    final $$CustomersTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.customerId,
+      referencedTable: $db.customersTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CustomersTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.customersTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExternalIdentitiesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExternalIdentitiesTableTable,
+          ExternalIdentitiesTableData,
+          $$ExternalIdentitiesTableTableFilterComposer,
+          $$ExternalIdentitiesTableTableOrderingComposer,
+          $$ExternalIdentitiesTableTableAnnotationComposer,
+          $$ExternalIdentitiesTableTableCreateCompanionBuilder,
+          $$ExternalIdentitiesTableTableUpdateCompanionBuilder,
+          (
+            ExternalIdentitiesTableData,
+            $$ExternalIdentitiesTableTableReferences,
+          ),
+          ExternalIdentitiesTableData,
+          PrefetchHooks Function({bool businessId, bool customerId})
+        > {
+  $$ExternalIdentitiesTableTableTableManager(
+    _$AppDatabase db,
+    $ExternalIdentitiesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExternalIdentitiesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ExternalIdentitiesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ExternalIdentitiesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> platform = const Value.absent(),
+                Value<String> externalId = const Value.absent(),
+                Value<String> connectionId = const Value.absent(),
+                Value<String> customerId = const Value.absent(),
+                Value<String> confidence = const Value.absent(),
+                Value<String> linkKind = const Value.absent(),
+                Value<DateTime> linkedAt = const Value.absent(),
+                Value<String?> displayName = const Value.absent(),
+                Value<DateTime?> verifiedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExternalIdentitiesTableCompanion(
+                id: id,
+                businessId: businessId,
+                platform: platform,
+                externalId: externalId,
+                connectionId: connectionId,
+                customerId: customerId,
+                confidence: confidence,
+                linkKind: linkKind,
+                linkedAt: linkedAt,
+                displayName: displayName,
+                verifiedAt: verifiedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String platform,
+                required String externalId,
+                required String connectionId,
+                required String customerId,
+                required String confidence,
+                required String linkKind,
+                required DateTime linkedAt,
+                Value<String?> displayName = const Value.absent(),
+                Value<DateTime?> verifiedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExternalIdentitiesTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                platform: platform,
+                externalId: externalId,
+                connectionId: connectionId,
+                customerId: customerId,
+                confidence: confidence,
+                linkKind: linkKind,
+                linkedAt: linkedAt,
+                displayName: displayName,
+                verifiedAt: verifiedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ExternalIdentitiesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false, customerId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$ExternalIdentitiesTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$ExternalIdentitiesTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (customerId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.customerId,
+                                referencedTable:
+                                    $$ExternalIdentitiesTableTableReferences
+                                        ._customerIdTable(db),
+                                referencedColumn:
+                                    $$ExternalIdentitiesTableTableReferences
+                                        ._customerIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ExternalIdentitiesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExternalIdentitiesTableTable,
+      ExternalIdentitiesTableData,
+      $$ExternalIdentitiesTableTableFilterComposer,
+      $$ExternalIdentitiesTableTableOrderingComposer,
+      $$ExternalIdentitiesTableTableAnnotationComposer,
+      $$ExternalIdentitiesTableTableCreateCompanionBuilder,
+      $$ExternalIdentitiesTableTableUpdateCompanionBuilder,
+      (ExternalIdentitiesTableData, $$ExternalIdentitiesTableTableReferences),
+      ExternalIdentitiesTableData,
+      PrefetchHooks Function({bool businessId, bool customerId})
+    >;
+typedef $$IdentityLinkEventsTableTableCreateCompanionBuilder =
+    IdentityLinkEventsTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String identityId,
+      required String action,
+      required DateTime at,
+      required String actor,
+      Value<String?> fromCustomerId,
+      Value<String?> toCustomerId,
+      Value<String?> confidence,
+      Value<int> rowid,
+    });
+typedef $$IdentityLinkEventsTableTableUpdateCompanionBuilder =
+    IdentityLinkEventsTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> identityId,
+      Value<String> action,
+      Value<DateTime> at,
+      Value<String> actor,
+      Value<String?> fromCustomerId,
+      Value<String?> toCustomerId,
+      Value<String?> confidence,
+      Value<int> rowid,
+    });
+
+final class $$IdentityLinkEventsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $IdentityLinkEventsTableTable,
+          IdentityLinkEventsTableData
+        > {
+  $$IdentityLinkEventsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) =>
+      db.businessesTable.createAlias(
+        'identity_link_events_table__business_id__businesses_table__id',
+      );
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$IdentityLinkEventsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $IdentityLinkEventsTableTable> {
+  $$IdentityLinkEventsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get identityId => $composableBuilder(
+    column: $table.identityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get action => $composableBuilder(
+    column: $table.action,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get at => $composableBuilder(
+    column: $table.at,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actor => $composableBuilder(
+    column: $table.actor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fromCustomerId => $composableBuilder(
+    column: $table.fromCustomerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toCustomerId => $composableBuilder(
+    column: $table.toCustomerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$IdentityLinkEventsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $IdentityLinkEventsTableTable> {
+  $$IdentityLinkEventsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get identityId => $composableBuilder(
+    column: $table.identityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get action => $composableBuilder(
+    column: $table.action,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get at => $composableBuilder(
+    column: $table.at,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actor => $composableBuilder(
+    column: $table.actor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fromCustomerId => $composableBuilder(
+    column: $table.fromCustomerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toCustomerId => $composableBuilder(
+    column: $table.toCustomerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$IdentityLinkEventsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $IdentityLinkEventsTableTable> {
+  $$IdentityLinkEventsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get identityId => $composableBuilder(
+    column: $table.identityId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get action =>
+      $composableBuilder(column: $table.action, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get at =>
+      $composableBuilder(column: $table.at, builder: (column) => column);
+
+  GeneratedColumn<String> get actor =>
+      $composableBuilder(column: $table.actor, builder: (column) => column);
+
+  GeneratedColumn<String> get fromCustomerId => $composableBuilder(
+    column: $table.fromCustomerId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get toCustomerId => $composableBuilder(
+    column: $table.toCustomerId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$IdentityLinkEventsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $IdentityLinkEventsTableTable,
+          IdentityLinkEventsTableData,
+          $$IdentityLinkEventsTableTableFilterComposer,
+          $$IdentityLinkEventsTableTableOrderingComposer,
+          $$IdentityLinkEventsTableTableAnnotationComposer,
+          $$IdentityLinkEventsTableTableCreateCompanionBuilder,
+          $$IdentityLinkEventsTableTableUpdateCompanionBuilder,
+          (
+            IdentityLinkEventsTableData,
+            $$IdentityLinkEventsTableTableReferences,
+          ),
+          IdentityLinkEventsTableData,
+          PrefetchHooks Function({bool businessId})
+        > {
+  $$IdentityLinkEventsTableTableTableManager(
+    _$AppDatabase db,
+    $IdentityLinkEventsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IdentityLinkEventsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$IdentityLinkEventsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$IdentityLinkEventsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> identityId = const Value.absent(),
+                Value<String> action = const Value.absent(),
+                Value<DateTime> at = const Value.absent(),
+                Value<String> actor = const Value.absent(),
+                Value<String?> fromCustomerId = const Value.absent(),
+                Value<String?> toCustomerId = const Value.absent(),
+                Value<String?> confidence = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IdentityLinkEventsTableCompanion(
+                id: id,
+                businessId: businessId,
+                identityId: identityId,
+                action: action,
+                at: at,
+                actor: actor,
+                fromCustomerId: fromCustomerId,
+                toCustomerId: toCustomerId,
+                confidence: confidence,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String identityId,
+                required String action,
+                required DateTime at,
+                required String actor,
+                Value<String?> fromCustomerId = const Value.absent(),
+                Value<String?> toCustomerId = const Value.absent(),
+                Value<String?> confidence = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IdentityLinkEventsTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                identityId: identityId,
+                action: action,
+                at: at,
+                actor: actor,
+                fromCustomerId: fromCustomerId,
+                toCustomerId: toCustomerId,
+                confidence: confidence,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$IdentityLinkEventsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$IdentityLinkEventsTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$IdentityLinkEventsTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$IdentityLinkEventsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $IdentityLinkEventsTableTable,
+      IdentityLinkEventsTableData,
+      $$IdentityLinkEventsTableTableFilterComposer,
+      $$IdentityLinkEventsTableTableOrderingComposer,
+      $$IdentityLinkEventsTableTableAnnotationComposer,
+      $$IdentityLinkEventsTableTableCreateCompanionBuilder,
+      $$IdentityLinkEventsTableTableUpdateCompanionBuilder,
+      (IdentityLinkEventsTableData, $$IdentityLinkEventsTableTableReferences),
+      IdentityLinkEventsTableData,
+      PrefetchHooks Function({bool businessId})
+    >;
 typedef $$SyncQueueItemsTableTableCreateCompanionBuilder =
     SyncQueueItemsTableCompanion Function({
       Value<int> id,
@@ -25604,6 +28281,16 @@ class $AppDatabaseManager {
       $$AIChatTableTableTableManager(_db, _db.aIChatTable);
   $$ConnectionsTableTableTableManager get connectionsTable =>
       $$ConnectionsTableTableTableManager(_db, _db.connectionsTable);
+  $$ExternalIdentitiesTableTableTableManager get externalIdentitiesTable =>
+      $$ExternalIdentitiesTableTableTableManager(
+        _db,
+        _db.externalIdentitiesTable,
+      );
+  $$IdentityLinkEventsTableTableTableManager get identityLinkEventsTable =>
+      $$IdentityLinkEventsTableTableTableManager(
+        _db,
+        _db.identityLinkEventsTable,
+      );
   $$SyncQueueItemsTableTableTableManager get syncQueueItemsTable =>
       $$SyncQueueItemsTableTableTableManager(_db, _db.syncQueueItemsTable);
   $$SupplierFavoritesTableTableTableManager get supplierFavoritesTable =>

@@ -130,3 +130,80 @@ hoá ra sai, tìm được **tất cả** thứ nó đã gắn và gỡ hàng lo
 - **Người mua ẩn danh** — nhiều sàn không trả gì ngoài một mã đơn. Khi đó không
   có `ExternalIdentity` nào cả, và đơn gắn vào một khách "chưa định danh".
   Đó là trạng thái hợp lệ, **không** phải lỗi cần vá bằng cách đoán.
+
+---
+
+## Đã cài đặt — WTM-291, schema v19 (2026-08-07)
+
+Thiết kế trên đã thành code. Ba chỗ **khác** bản thiết kế, và cả ba là do viết
+test mới lộ ra:
+
+### 1. `resolve()` không nhận `customerId` nào
+
+Bản thiết kế hình dung `resolve(…, matchedCustomerIdByPhone, matchedCustomerIdByEmail)`.
+Viết xong thì bộ quét governance báo vi phạm luật 4 — **và nó đúng**: một hàm
+nhận hai `customerId` chính là hình dạng cần cấm, kể cả khi thân hàm vô hại.
+
+Sửa API chứ không nới luật. Mọi ứng viên đi qua một kiểu:
+
+```dart
+IdentityDecision resolve({
+  required String platform,
+  required String externalId,
+  required String connectionId,
+  required List<ExternalIdentity> existing,
+  List<IdentityCandidate> candidates = const [],   // ← không còn customerId rời
+});
+```
+
+`IdentityCandidate {customerId, signal, confidence}` — `signal` là enum
+(`phone` · `email`), không phải chuỗi mô tả: chuỗi mô tả sẽ là tiếng Việt nằm
+trong tầng domain, trái ADR-TON-007.
+
+### 2. Ứng viên tự nhận `exact` vẫn bị hạ về `strong`
+
+Tự động liên kết **chỉ** dành cho khoá do chính nền tảng cấp (nhánh "đã gắn
+rồi"). Một luật khớp tự gán cho mình mức `exact` không được mở đường tắt —
+nếu không thì luật 2 vô hiệu chỉ bằng cách đổi một hằng số trong luật khớp.
+
+### 3. `moveToCustomer` đổi `linkKind` sang `manual`
+
+Người bán sửa tay thì liên kết trở thành thủ công. Giữ `automatic` sẽ để lần
+chạy sau của luật ghi đè đúng chỗ người bán vừa sửa — cùng kỷ luật với FK 787
+(dữ liệu người dùng thắng dữ liệu mẫu).
+
+### Luật 4 được khoá bằng ba lớp, mạnh dần
+
+`test/features/tongtai/p0/identity_no_auto_merge_governance_test.dart`:
+
+| Lớp | Kiểm gì | Bắt được gì |
+|---|---|---|
+| 1 | không hàm nào nhận hai `customerId` **và trả về một** | đúng câu chữ tiêu chí WTM-291 |
+| 2 | không tên hàm nào hình dạng `merge*`/`absorb*`/`consolidate*` | ý định, kể cả khi thân hàm còn vô hại |
+| 3 | **seam không chạm `customersTable`**, và không import `CustomerRepository` | quyết định — không đặt tên khéo nào lách được |
+
+Lớp 3 là lớp thật sự bảo đảm: một seam không với tới bảng khách thì không xoá
+hay nhập bản ghi khách nào được.
+
+Suite còn có bốn test tự kiểm **chống PASS GIẢ** — chứng minh bộ quét đọc được
+code, bắt được vi phạm khi vi phạm có mặt, và **không** báo nhầm hai thứ hợp lệ
+(lời gọi `customerId: row.customerId`, và hàm ghi nhật ký nhận
+`fromCustomerId` + `toCustomerId` trả `Future<void>`). Lớp 3 từng xanh oan vì
+biểu thức viết `\bdb\.` trong khi trường tên `_db` — tập rỗng thoả mãn mọi ràng
+buộc; `expect(all, allowedTables)` là thứ bắt được.
+
+### Schema v19
+
+`external_identities_table` · `identity_link_events_table`. Thuần thêm mới.
+
+- Khoá duy nhất `(business, connection, platform, external_id)`.
+- Lịch sử **không** có khoá ngoại tới bảng danh tính: gỡ liên kết là xoá dòng
+  danh tính, mà bằng chứng phải sống sót qua chính việc nó ghi lại.
+- Danh tính có FK cascade tới `customers_table`: khách bị xoá thì danh tính mồ
+  côi không còn nghĩa.
+- `customers_table.external_id` / `external_source` **để nguyên, không migrate**
+  — chúng đang rỗng, và chép một suy đoán sang bảng mới là lặp lại sai lầm v17
+  đã tránh.
+
+**Chưa nối vào UI** (L0). Chưa connector nào ghi vào hai bảng này; chúng là nền
+để connector đầu tiên có chỗ đặt chân.
