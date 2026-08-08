@@ -249,6 +249,18 @@ class AgentTaskQueue {
     )..where((t) => t.businessId.equals(businessId))).go();
   }
 
+  /// Mọi việc **kể cả đã đóng**, mới đặt trước — nguồn của màn Hoạt động.
+  Future<List<AgentTask>> loadRecent({int limit = 50}) async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    final rows =
+        await (_db.select(_db.agentTasksTable)
+              ..where((t) => t.businessId.equals(businessId))
+              ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+              ..limit(limit))
+            .get();
+    return rows.map(_toTask).nonNulls.toList();
+  }
+
   Future<AgentTask?> byId(String id) async =>
       _byId(await _workspace.ensureBusinessId(_db), id);
 

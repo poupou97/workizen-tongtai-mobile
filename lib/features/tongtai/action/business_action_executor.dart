@@ -295,6 +295,18 @@ class BusinessActionExecutor {
     return rows.map(_toAction).nonNulls.toList();
   }
 
+  /// Mọi hành động, mới nhất trước — nguồn của màn Hoạt động.
+  Future<List<BusinessAction>> loadRecent({int limit = 50}) async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    final rows =
+        await (_db.select(_db.businessActionsTable)
+              ..where((t) => t.businessId.equals(businessId))
+              ..orderBy([(t) => OrderingTerm.desc(t.plannedAt)])
+              ..limit(limit))
+            .get();
+    return rows.map(_toAction).nonNulls.toList();
+  }
+
   Future<BusinessAction?> byId(String id) async =>
       _byId(await _workspace.ensureBusinessId(_db), id);
 

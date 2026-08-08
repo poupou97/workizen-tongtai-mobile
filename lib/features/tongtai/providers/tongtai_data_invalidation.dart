@@ -83,6 +83,7 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // phải cache cũ.
   businessBriefProvider,
   briefDecisionsProvider,
+  agentActivityProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).

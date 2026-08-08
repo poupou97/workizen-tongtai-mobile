@@ -34,6 +34,12 @@ abstract class ProposedChangeRepository {
   /// `BusinessConversation` (WTM-296 §10).
   Future<List<ProposedChange>> loadByCorrelation(String correlationId);
 
+  /// Mọi đề xuất **kể cả đã quyết**, mới nhất trước — nguồn của màn Hoạt động.
+  ///
+  /// Khác [loadVisible] ở chỗ nó cố ý giữ lại thứ đã bỏ qua: câu chuyện *"bạn
+  /// đã bỏ qua việc này"* cũng là một phần của việc agent đã làm.
+  Future<List<ProposedChange>> loadRecent({int limit = 50});
+
   /// Đề nghị một thay đổi. **Đi qua bốn cổng.**
   ///
   /// [humanOwnsField] do chỗ gọi trả lời — nó biết miền, cổng thì không.
@@ -96,6 +102,12 @@ class DriftProposedChangeRepository implements ProposedChangeRepository {
   @override
   Future<List<ProposedChange>> loadByCorrelation(String correlationId) async {
     final rows = await _rows((t) => t.correlationId.equals(correlationId));
+    return rows.map(_toProposal).nonNulls.toList();
+  }
+
+  @override
+  Future<List<ProposedChange>> loadRecent({int limit = 50}) async {
+    final rows = await _rows(null, limit: limit);
     return rows.map(_toProposal).nonNulls.toList();
   }
 
@@ -191,13 +203,19 @@ class DriftProposedChangeRepository implements ProposedChangeRepository {
   }
 
   Future<List<ProposedChangesTableData>> _rows(
-    Expression<bool> Function($ProposedChangesTableTable t) filter,
-  ) async {
+    Expression<bool> Function($ProposedChangesTableTable t)? filter, {
+    int? limit,
+  }) async {
     final businessId = await _workspace.ensureBusinessId(_db);
-    return (_db.select(_db.proposedChangesTable)
-          ..where((t) => t.businessId.equals(businessId) & filter(t))
-          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-        .get();
+    final query = _db.select(_db.proposedChangesTable)
+      ..where(
+        (t) =>
+            t.businessId.equals(businessId) &
+            (filter == null ? const Constant(true) : filter(t)),
+      )
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
+    if (limit != null) query.limit(limit);
+    return query.get();
   }
 
   ProposedChangesTableCompanion _companion(

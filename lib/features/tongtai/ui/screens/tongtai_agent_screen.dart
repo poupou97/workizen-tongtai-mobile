@@ -10,6 +10,8 @@ import '../widgets/tongtai_brief_widgets.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_more_action.dart';
 import '../widgets/tongtai_screen_data.dart';
+import 'tongtai_activity_screen.dart';
+import 'tongtai_brief_story_screen.dart';
 
 /// **Màn Tổng Tài** — nơi ở của agent (WTM-304 · Epic WTM-302).
 ///
@@ -50,7 +52,17 @@ class TongtaiAgentScreen extends ConsumerWidget {
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
-        actions: const [TongtaiMoreAction()],
+        actions: [
+          IconButton(
+            key: const Key('agent-open-activity'),
+            tooltip: l10n.titleActivity,
+            icon: const Icon(Icons.history),
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(builder: (_) => const TongtaiActivityScreen()),
+            ),
+          ),
+          const TongtaiMoreAction(),
+        ],
       ),
       body: SafeArea(
         // Qua seam chung (ADR-TON-017). Một lần đọc hỏng KHÔNG phải "không có
@@ -121,6 +133,14 @@ class _AgentBody extends StatelessWidget {
                 item: item,
                 keyPrefix: 'agent',
                 decision: decisions[item.id],
+                onTap: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => TongtaiBriefStoryScreen(
+                      item: item,
+                      decision: decisions[item.id],
+                    ),
+                  ),
+                ),
               ),
             ],
           ],
