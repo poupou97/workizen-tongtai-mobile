@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/consumer/external_identity.dart';
 import 'package:tongtai/features/tongtai/consumer/external_identity_repository.dart';
+import 'package:tongtai/features/tongtai/consumer/identity_evidence.dart';
 import 'package:tongtai/features/tongtai/consumer/identity_resolver.dart';
 import 'package:tongtai/features/tongtai/core/local_workspace.dart';
 
@@ -119,18 +120,22 @@ void main() {
         externalId: 'psid-77',
         connectionId: 'conn-fb',
         existing: const [],
-        candidates: const [
+        candidates: [
           IdentityCandidate(
             customerId: 'cust-1',
-            signal: IdentityMatchSignal.phone,
-            confidence: IdentityConfidence.strong,
+            evidence: const [
+              IdentityEvidence(
+                kind: IdentityEvidenceKind.phoneExactMatch,
+                source: 'seller_contact',
+              ),
+            ],
           ),
         ],
       );
       expect(decision, isA<SuggestLink>());
       expect(decision, isNot(isA<AutoLink>()));
       expect((decision as SuggestLink).confidence, IdentityConfidence.strong);
-      expect(decision.signal, IdentityMatchSignal.phone);
+      expect(decision.signal, EvidenceFamily.phone);
     });
 
     test('trùng email cũng chỉ là đề xuất', () {
@@ -139,11 +144,15 @@ void main() {
         externalId: 'a@example.com',
         connectionId: 'conn-mail',
         existing: const [],
-        candidates: const [
+        candidates: [
           IdentityCandidate(
             customerId: 'cust-2',
-            signal: IdentityMatchSignal.email,
-            confidence: IdentityConfidence.strong,
+            evidence: const [
+              IdentityEvidence(
+                kind: IdentityEvidenceKind.emailExactMatch,
+                source: 'seller_contact',
+              ),
+            ],
           ),
         ],
       );
@@ -190,52 +199,76 @@ void main() {
         externalId: 'buyer-new',
         connectionId: 'conn-shop-a',
         existing: const [],
-        candidates: const [
+        candidates: [
           IdentityCandidate(
             customerId: 'cust-1',
-            signal: IdentityMatchSignal.phone,
-            confidence: IdentityConfidence.weak,
+            evidence: const [
+              IdentityEvidence(
+                kind: IdentityEvidenceKind.nameExactMatch,
+                source: 'seller_contact',
+              ),
+            ],
           ),
         ],
       );
       expect(decision, isA<NoMatch>());
     });
 
-    test('SuggestLink không dựng được với weak/none', () {
-      for (final c in [IdentityConfidence.weak, IdentityConfidence.none]) {
+    test('SuggestLink không dựng được từ ứng viên weak/none', () {
+      // Không còn khai `confidence` được nữa — nên phải dựng bằng bằng chứng
+      // thật sự yếu, và đó chính là điểm: cửa sau đã đóng.
+      for (final kind in [
+        IdentityEvidenceKind.nameExactMatch, // → none
+        IdentityEvidenceKind.addressSimilar, // → none
+      ]) {
         expect(
           () => SuggestLink(
             candidate: IdentityCandidate(
               customerId: 'cust-1',
-              signal: IdentityMatchSignal.phone,
-              confidence: c,
+              evidence: [
+                IdentityEvidence(kind: kind, source: 'seller_contact'),
+              ],
             ),
           ),
           throwsA(isA<AssertionError>()),
-          reason: 'SuggestLink(${c.code}) phải bị chặn tại constructor',
+          reason: 'SuggestLink từ ${kind.code} phải bị chặn tại constructor',
         );
       }
     });
 
-    test('ứng viên tự nhận exact vẫn CHỈ là đề xuất, và bị hạ về strong', () {
-      // Tự động chỉ dành cho khoá do chính nền tảng cấp. Một luật khớp tự
-      // gán cho mình mức `exact` không được mở đường tắt — nếu không thì luật
-      // 2 vô hiệu chỉ bằng cách đổi một hằng số trong luật khớp.
+    test('ứng viên KHÔNG có đường nào tự nhận exact (WTM-298)', () {
+      // Bản trước phải hạ `exact` của ứng viên về `strong` bằng tay, vì chỗ
+      // gọi khai được mức. Nay `exact` chỉ đến từ khoá do nền tảng cấp, và
+      // khoá đó đi qua nhánh "đã gắn rồi" — nên một ứng viên khớp theo số
+      // điện thoại/email/tên **không có đường nào** lên exact.
       final decision = const IdentityResolver().resolve(
         platform: 'shopee',
         externalId: 'buyer-new',
         connectionId: 'conn-shop-a',
         existing: const [],
-        candidates: const [
+        candidates: [
           IdentityCandidate(
             customerId: 'cust-1',
-            signal: IdentityMatchSignal.phone,
-            confidence: IdentityConfidence.exact,
+            evidence: const [
+              IdentityEvidence(
+                kind: IdentityEvidenceKind.orderHistoryMatch,
+                source: 'orders',
+              ),
+              IdentityEvidence(
+                kind: IdentityEvidenceKind.phoneExactMatch,
+                source: 'seller_contact',
+              ),
+              IdentityEvidence(
+                kind: IdentityEvidenceKind.emailExactMatch,
+                source: 'shopee:profile',
+              ),
+            ],
           ),
         ],
       );
       expect(decision, isA<SuggestLink>());
       expect((decision as SuggestLink).confidence, IdentityConfidence.strong);
+      expect(decision.confidence, isNot(IdentityConfidence.exact));
     });
   });
 
