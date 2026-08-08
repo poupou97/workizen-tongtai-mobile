@@ -38,6 +38,7 @@ import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../journey/journey_metric.dart';
 import 'tongtai_opportunity_feed_screen.dart';
 import '../../metrics/home_headline.dart';
+import '../widgets/tongtai_brief_card.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_business_inputs_screen.dart';
 import '../../producer/business_input.dart';
@@ -445,6 +446,24 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             hasData: data.hasData,
             onAsk: () => _openChat(context),
           ),
+          const SizedBox(height: 16),
+
+          // ── AI Morning Brief (WTM-304 · Epic WTM-302) ─────────────────
+          //
+          // Ngay sau hero và TRÊN mọi ô số. Hero nói app biết doanh nghiệp
+          // này; brief nói nó đã NHÌN doanh nghiệp này sáng nay — *"Tổng Tài
+          // đã nhìn doanh nghiệp trước khi tôi mở app"* (Task Order §6).
+          //
+          // Đặt nó dưới các ô KPI sẽ biến nó thành một mục nữa trong bảng
+          // điều khiển. Thứ tự trên màn hình LÀ một lời khẳng định về thứ gì
+          // quan trọng — cùng lập luận đã đưa "việc hôm nay" lên trên KPI ở
+          // WTM-222.
+          //
+          // Thẻ tự lo trạng thái của nó: chưa tính xong thì không chiếm chỗ,
+          // hỏng thì nói ra. Nó KHÔNG đi qua `_data` vì brief là một đường
+          // đọc khác nhịp — Rule Twin trên toàn sổ sách, không phải năm con
+          // số của Home.
+          TongtaiBriefCard(clock: widget.clock),
           const SizedBox(height: 16),
 
           // ── Today's missions — from the JOURNEY (WTM-210 · D-11) ──

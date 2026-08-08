@@ -55,7 +55,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 
 | Màn | Data | Err qua seam | Ghi chú |
 |---|---|---|---|
-| `tongtai_home_screen` | BusinessContext + 5 nguồn, một `_HomeData` | `ScreenDataController` + `runTongtaiAction` (seed) | KPI = 0 do đọc hỏng nay là **failed**, không phải "doanh thu 0 ₫" |
+| `tongtai_home_screen` | BusinessContext + 5 nguồn, một `_HomeData` **+ `businessBriefProvider`** | `ScreenDataController` + `runTongtaiAction` (seed) | KPI = 0 do đọc hỏng nay là **failed**, không phải "doanh thu 0 ₫". **WTM-304:** thẻ brief nằm ngay dưới hero, **trên** mọi ô số — nó tự lo trạng thái riêng vì đọc theo nhịp khác (Rule Twin trên toàn sổ sách, không phải 5 con số của Home) |
 | `tongtai_consumer_screen` | customerRepository | `ScreenDataController` | màn của bug gốc — có suite hành vi riêng |
 | `tongtai_producer_screen` | favorites store + generated opportunities | `ScreenDataController` | hai nguồn, một trạng thái |
 | `tongtai_inventory_screen` | productRepository | `ScreenDataController` + guarded upsert | |
@@ -66,6 +66,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | `tongtai_opportunity_feed_screen` | generated opportunities **+ phản ứng đã lưu** | `ScreenDataController` | WTM-190: lưu/gạt bỏ sống sót qua lần đóng app. **WTM-192: là TAB thứ 5** (Founder chọn phương án B) — Home/Reports **chuyển tab** chứ không push bản sao |
 | `tongtai_forecast_screen` | RevenueCapabilityContext + Rule Twin | `TongtaiAsyncScreenData` | `insufficient` ≠ `failed` ≠ `empty` |
 | `tongtai_customer_risk_screen` | CustomerCapabilityContext + Rule Twin + customer repo | `TongtaiAsyncScreenData` | khách rỗng = **empty**, không phải từ chối |
+| `tongtai_agent_screen` | `businessBriefProvider` (Rule Twin → BriefItem) + `briefDecisionsProvider` | `TongtaiAsyncScreenData` | **WTM-304 · Epic WTM-302.** Nơi ở của agent. `empty` = *chưa có việc nào cần bạn quyết* (một **tin tốt**, không phải lỗi) ≠ `failed` = *chưa tính được*. Hàng dựng bằng widget dùng chung với thẻ brief trên Home — một khách không thể được hai bề mặt mô tả khác nhau |
 | `tongtai_export_screen` | 3 repo + history store | `ScreenDataController` + guarded export | sửa `try/finally` **không có catch** |
 | `tongtai_more_screen` | seeder + prefs | `runTongtaiAction` ×3 | invalidate cache **chỉ khi ghi thành công** |
 | `tongtai_chat_screen` | chat store + 3 repo | `ScreenDataController` + guarded attach | ảnh bị từ chối quyền nay báo rõ |
