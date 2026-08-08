@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // `misc` surface, not the default export.
 import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
+import 'tongtai_agentic_provider.dart';
 import 'tongtai_capability_provider.dart';
 import 'tongtai_profile_provider.dart';
 import 'tongtai_journey_provider.dart';
@@ -75,6 +76,13 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // this, a restore would show the incoming business's opportunities carrying
   // the PREVIOUS seller's saves and dismissals.
   opportunitiesWithReactionsProvider,
+  // Brief hằng ngày và các quyết định đã ghi nhận (WTM-303). Đây là bề mặt
+  // **đầu tiên** người bán nhìn thấy khi mở app, nên một lần đọc cũ ở đây là
+  // lần đọc cũ dễ thấy nhất trong cả app: gieo dữ liệu mẫu xong mà brief vẫn
+  // nói "chưa có gì đáng chú ý" thì Founder kết luận tính năng hỏng, không
+  // phải cache cũ.
+  businessBriefProvider,
+  briefDecisionsProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).

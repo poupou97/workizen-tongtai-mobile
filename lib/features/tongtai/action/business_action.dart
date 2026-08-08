@@ -12,6 +12,15 @@ enum ActionVendor {
   /// Ghi vào chính Tổng Tài.
   internal('internal'),
 
+  /// **Chưa gửi đi đâu cả** — hành động được diễn tập trọn vòng đời trên máy,
+  /// nhưng không có nền tảng ngoài nào nhận nó (WTM-303, Founder Task Order §7).
+  ///
+  /// Đây là một *vendor*, không phải một lá cờ, và đó là chủ ý: một cờ
+  /// `isDemo` thì có đường bỏ qua khi hiển thị. Nơi thực thi là **trường bắt
+  /// buộc** của mọi hành động, nên không màn nào quên mất nó được. Đổi sang
+  /// Telegram thật về sau là đổi đúng một trường.
+  demo('demo'),
+
   telegram('telegram'),
   messenger('messenger'),
   shopee('shopee'),

@@ -163,6 +163,32 @@ class BusinessActionExecutor {
     return count > 0 ? null : const ActionRefused(ActionRejection.notApproved);
   }
 
+  /// Người bán **từ chối** một hành động đang chờ.
+  ///
+  /// `cancelled` là trạng thái cuối, nên một việc bị bỏ qua không quay lại
+  /// vào sáng hôm sau — đó chính là thứ phân biệt một trợ lý với một cái
+  /// chuông báo.
+  ///
+  /// Chỉ đóng được từ `planned`: hành động đã duyệt hoặc đang chạy thì có thể
+  /// đã chạm ra ngoài, và "huỷ" một việc đã xảy ra là nói dối.
+  Future<bool> cancel(String id) async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    final count =
+        await (_db.update(_db.businessActionsTable)..where(
+              (t) =>
+                  t.businessId.equals(businessId) &
+                  t.id.equals(id) &
+                  t.status.equals(ActionStatus.planned.code),
+            ))
+            .write(
+              BusinessActionsTableCompanion(
+                status: Value(ActionStatus.cancelled.code),
+                completedAt: Value(_now()),
+              ),
+            );
+    return count > 0;
+  }
+
   /// Chạy một hành động đã duyệt. **Đây là chỗ duy nhất side effect xảy ra.**
   Future<ActionRunResult> run(String id) async {
     final businessId = await _workspace.ensureBusinessId(_db);

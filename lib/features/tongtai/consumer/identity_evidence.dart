@@ -68,6 +68,22 @@ enum IdentityEvidenceKind {
     primary: true,
   ),
 
+  /// Quan sát trực tiếp từ **bản ghi nghiệp vụ của chính người bán** — đơn
+  /// hàng, tồn kho, sổ thu chi (WTM-303).
+  ///
+  /// Cùng nhóm [EvidenceFamily.behaviour] với [orderHistoryMatch], và đó là
+  /// chủ ý: cả hai đều là *"dữ liệu người bán đã ghi"*, nên hai quan sát như
+  /// vậy về cùng một chuyện là **một** tín hiệu, không phải hai. Một đề xuất
+  /// đọc cả lịch sử đơn lẫn tồn kho không được vì thế mà chắc chắn hơn.
+  /// **Không** `primary`: nó nói *"chuyện này có thật"*, không nói *"đây đúng
+  /// là người này"*. Một dòng tồn kho không định danh ai cả — và `primary` là
+  /// một khái niệm của bài toán danh tính, không phải của bằng chứng nói chung.
+  businessRecordObservation(
+    'business_record_observation',
+    EvidenceFamily.behaviour,
+    0.80,
+  ),
+
   /// Trùng email **chính xác**.
   emailExactMatch('email_exact_match', EvidenceFamily.email, 0.65),
 
