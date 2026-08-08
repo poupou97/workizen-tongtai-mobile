@@ -104,7 +104,7 @@ void main() {
     });
 
     test('schema version constant advanced in lock-step', () {
-      expect(kTongtaiSchemaVersion, 21);
+      expect(kTongtaiSchemaVersion, 22);
       // v12 (WTM-209): orders_table rebuilt without the channel_id FK — it
       //                pointed at channels_table, a dead v1 table nothing ever
       //                wrote, so every real channel code failed the constraint.
@@ -127,7 +127,8 @@ void main() {
       //                thay sàn rằng "sàn tài trợ", sai theo hướng tâng bốc.
       // v21 (WTM-299): proposed_changes_table. Không cột điểm — mức tin cậy
       //                tính từ evidence lúc đọc.
-      expect(db.schemaVersion, 21);
+      // v22 (WTM-300): business_actions_table — cửa ghi duy nhất.
+      expect(db.schemaVersion, 22);
     });
   });
 

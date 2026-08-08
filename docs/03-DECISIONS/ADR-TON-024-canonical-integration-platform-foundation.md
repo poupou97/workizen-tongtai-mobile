@@ -124,6 +124,7 @@ persistence, chưa nối UI, chưa connector nào ghi vào các bảng mới).
 | 1 · liên kết ≠ gộp | `consumer/external_identity*.dart` · schema **v19** | WTM-291 | suite quét mã, 3 lớp — lớp quyết định: *"seam không chạm `customersTable`"* |
 | 1b · **confidence TÍNH, không khai** | `consumer/identity_evidence.dart` | **WTM-298** | `identity_confidence_is_derived_governance_test` — 3 lớp |
 | 1c · **thay đổi do AI có vòng đời** | `proposal/` · schema **v21** | **WTM-299** | `proposed_change_lifecycle_governance_test` — 3 lớp |
+| 1d · **cửa ghi DUY NHẤT** | `action/` · schema **v22** | **WTM-300** | `business_action_single_write_boundary_test` — 3 lớp |
 | 2 · settlement | `finance/settlement*.dart` · `true_profit.dart` · schema **v20** | WTM-292 | suite quét mã, 3 lớp — lớp tinh tế nhất: *"phân bổ không trả về `SettlementLine`"* |
 | 3 · catalog/matrix là dữ liệu | `platform/vendor_catalog.dart` · `capability_matrix.dart` | WTM-293 | **kiểu dữ liệu** — `CapabilityClaim` không mang hai cột đầu, constructor private |
 | 4 · canonical event | `platform/canonical_event.dart` | WTM-294 | **kiểu dữ liệu** — `type` là enum, nên mã nền tảng không dựng được envelope |
@@ -232,3 +233,56 @@ Cùng cơ chế `lastEmployerChange()` của COMP AI: giữ bản cũ thì **ph�
 
 Một trường, không phải một bảng. "Câu chuyện của khách này" là một **truy vấn**
 (WTM-296 §10).
+
+---
+
+## Bổ sung WTM-300 — cửa ghi duy nhất (D-3)
+
+`BusinessAction` là **cửa duy nhất** cho mọi side effect của Agent, **kể cả ghi
+vào cơ sở dữ liệu của chính Tổng Tài** (`vendor: internal`). Đó đúng là chỗ
+COMP AI hụt: `set_field_value` ghi DB của chính nó nên không ai nghĩ nó cần đi
+qua action.
+
+Giao thức bốn bước, học nguyên từ `run-runtime.ts`:
+
+1. tra theo `idempotencyKey`; có rồi mà `requestHash` khác ⇒ **ném**
+2. đã `succeeded` ⇒ trả `replayed`, **không làm lại**
+3. nhận bằng **lease** — `approved`/`failed`, hoặc `running` quá hạn
+4. **side effect và trạng thái trong MỘT transaction**
+
+Hai thứ COMP AI thiếu và Tổng Tài cần: `riskLevel` + **bảy hành động tuyệt đối
+không auto** (hằng số trong code kèm assert, không phải mặc định cấu hình).
+
+### `AutonomyRule` — bốn trường, không phải engine
+
+`off` · `suggest` · `confirm` · `auto` khớp đúng bốn mức tự chủ. Không có rule
+⇒ mặc định `suggest`, nên **thêm một loại hành động mới không tự động được
+quyền chạy**. `AUTO` phải có `limits` — assert. `AUTO` không áp được cho bảy
+loại cấm — assert.
+
+---
+
+## 🔴 Lỗi migration phát hiện 2026-08-08 (sửa trong WTM-300)
+
+**`Migrator.createTable()` chỉ tạo BẢNG, không tạo chỉ mục.** Chỉ mục khai bằng
+`@TableIndex` là thực thể riêng trong drift.
+
+Hệ quả là một lỗi **chỉ thấy trên máy nâng cấp**: `onCreate` gọi `createAll()`
+nên máy cài mới có đủ chỉ mục; máy nâng cấp thì thiếu. Với chỉ mục **UNIQUE**
+đó không phải chuyện tốc độ mà là **mất một ràng buộc đúng đắn**:
+
+| Chỉ mục | Luật bị mất |
+|---|---|
+| `external_identities_lookup` (v19) | *"cùng kết nối + nền tảng + externalId là DUY NHẤT"* — mất nó là hai bản ghi cho **cùng một người mua** |
+| `business_actions_idempotency` (v22) | luật chống lặp — mất nó là hai lần `plan()` song song sinh **hai hành động thật** |
+
+Ảnh hưởng: mọi bảng tạo bằng migration từ **v10 tới v22**.
+
+**Sửa:** `_createTableWithIndexes()` tạo bảng **kèm** chỉ mục, và dùng
+`CREATE INDEX IF NOT EXISTS` để bước migration chạy lại được (bài học v11).
+Hàm **ném** nếu không nhận ra hình dạng SQL của drift — bỏ qua im lặng sẽ tái
+tạo đúng lỗi nó sinh ra để sửa.
+
+**Khoá bằng test:** `database_upgrade_test` kiểm `sqlite_master` sau nâng cấp,
+đòi thấy đủ năm chỉ mục quan trọng. Một test hỏi *"bảng có tồn tại không"* sẽ
+không bao giờ thấy lỗi này.

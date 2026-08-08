@@ -80,7 +80,11 @@ void main() {
     // v21 (WTM-299 / D-2): proposed_changes_table — vòng đề xuất. KHÔNG có
     //                cột điểm/confidence: mức tin cậy tính từ `evidence` lúc
     //                đọc (WTM-298). `decided_at` nullable = CHƯA ai quyết.
-    expect(db.schemaVersion, 21);
+    // v22 (WTM-300 / D-3): business_actions_table — cửa ghi duy nhất cho mọi
+    //                side effect, KỂ CẢ ghi vào DB của chính Tổng Tài
+    //                (`vendor = internal`). Khoá duy nhất
+    //                `(business, idempotency_key)` + `request_hash`.
+    expect(db.schemaVersion, 22);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });
