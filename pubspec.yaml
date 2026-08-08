@@ -15,6 +15,14 @@ dependencies:
   # State / DI (ADR-TON-002: Riverpod is the single DI framework)
   flutter_riverpod: ^3.3.2
 
+  # `@immutable` cho code KHÔNG được import Flutter.
+  #
+  # Bình thường annotation này đến kèm `flutter/foundation`, nhưng seam Durable
+  # Agent (WTM-301) có hợp đồng "không phụ thuộc vòng đời mobile" — nó phải
+  # chạy được trên Managed Worker/Oracle VM. Nên nó khai `meta` tường minh
+  # thay vì mượn qua Flutter.
+  meta: ^1.19.0
+
   # Local-first storage (SQLite + Drift)
   drift: ^2.34.0
   sqlite3_flutter_libs: ^0.5.24
@@ -49,6 +57,14 @@ dependencies:
   file_selector: ^1.1.0
 
 dev_dependencies:
+  # `package:test` thuần, KHÔNG qua flutter_test.
+  #
+  # Cần cho `agent_task_pure_dart_test.dart` — bằng chứng cho điều kiện D-4
+  # (WTM-301): logic nhận việc chạy được khi KHÔNG có Flutter binding nào tồn
+  # tại, nên nó chạy được trên Managed Worker/Oracle VM. Một test dùng
+  # `flutter_test` tự dựng binding nên không chứng minh được điều đó.
+  test: ^1.26.2
+
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0

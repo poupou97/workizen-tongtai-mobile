@@ -84,7 +84,10 @@ void main() {
     //                side effect, KỂ CẢ ghi vào DB của chính Tổng Tài
     //                (`vendor = internal`). Khoá duy nhất
     //                `(business, idempotency_key)` + `request_hash`.
-    expect(db.schemaVersion, 22);
+    // v23 (WTM-301 / D-4): agent_tasks_table — hàng đợi việc bền vững. KHÔNG
+    //                cột nào mang nghĩa mobile: đổi runner sang Managed
+    //                Worker/Oracle VM không được là đổi schema.
+    expect(db.schemaVersion, 23);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

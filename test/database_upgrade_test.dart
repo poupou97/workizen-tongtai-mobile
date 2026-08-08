@@ -211,6 +211,7 @@ void main() {
       'payouts_table',
       'proposed_changes_table',
       'business_actions_table',
+      'agent_tasks_table',
     ]) {
       await db.customStatement('DROP TABLE IF EXISTS $t');
     }
@@ -306,6 +307,7 @@ void main() {
       'payouts_table',
       'proposed_changes_table',
       'business_actions_table',
+      'agent_tasks_table',
     ]) {
       expect(
         beforeTables,
@@ -406,6 +408,7 @@ void main() {
       'proposed_changes_subject',
       'settlement_lines_order_id',
       'connections_connector',
+      'agent_tasks_open_subject',
     ]) {
       expect(
         indexes,
@@ -425,6 +428,7 @@ void main() {
       'payouts_table',
       'proposed_changes_table',
       'business_actions_table',
+      'agent_tasks_table',
     ]) {
       expect(afterTables, contains(t), reason: '$t phải được migration tạo ra');
     }
@@ -527,5 +531,42 @@ void main() {
       contains('business_actions_idempotency'),
       reason: 'khoá chống lặp phải là ràng buộc CỦA CƠ SỞ DỮ LIỆU',
     );
+  });
+  test('v22 CÓ DỮ LIỆU → v23: thêm hàng đợi việc, không mất gì', () async {
+    final dir = await Directory.systemTemp.createTemp('tongtai_upgrade23');
+    final file = File('${dir.path}/t.sqlite');
+    addTearDown(() => dir.delete(recursive: true));
+
+    var raw = NativeDatabase(file);
+    var db = AppDatabase.forExecutor(raw);
+    await const LocalWorkspace().ensureBusinessId(db);
+    const businessId = LocalWorkspace.localBusinessId;
+
+    await db.customStatement('DROP TABLE IF EXISTS agent_tasks_table');
+    await db.customStatement(
+      "INSERT INTO customers_table (id, business_id, name, updated_at, "
+      "created_at) VALUES ('c1', '$businessId', 'Chị Hoa', 1, 1)",
+    );
+    await db.customStatement('PRAGMA user_version = 22');
+
+    final before = await db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type = 'table' "
+          "AND name = 'agent_tasks_table'",
+        )
+        .get();
+    expect(before, isEmpty, reason: 'hàng đợi không tồn tại ở v22');
+    await db.close();
+
+    raw = NativeDatabase(file);
+    db = AppDatabase.forExecutor(raw);
+    final version = await db.customSelect('PRAGMA user_version').getSingle();
+    final tasks = await db.select(db.agentTasksTable).get();
+    final customers = await db.select(db.customersTable).get();
+    await db.close();
+
+    expect(version.read<int>('user_version'), kTongtaiSchemaVersion);
+    expect(customers, hasLength(1), reason: 'không mất dòng nào');
+    expect(tasks, isEmpty);
   });
 }
