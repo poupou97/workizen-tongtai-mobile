@@ -77,7 +77,10 @@ void main() {
     //                rằng "sàn tài trợ", sai theo hướng tâng bốc lợi nhuận) và
     //                `reconciled_delta` nullable (null = CHƯA đối soát, 0 = đã
     //                đối soát và khớp).
-    expect(db.schemaVersion, 20);
+    // v21 (WTM-299 / D-2): proposed_changes_table — vòng đề xuất. KHÔNG có
+    //                cột điểm/confidence: mức tin cậy tính từ `evidence` lúc
+    //                đọc (WTM-298). `decided_at` nullable = CHƯA ai quyết.
+    expect(db.schemaVersion, 21);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

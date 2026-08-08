@@ -104,7 +104,7 @@ void main() {
     });
 
     test('schema version constant advanced in lock-step', () {
-      expect(kTongtaiSchemaVersion, 20);
+      expect(kTongtaiSchemaVersion, 21);
       // v12 (WTM-209): orders_table rebuilt without the channel_id FK — it
       //                pointed at channels_table, a dead v1 table nothing ever
       //                wrote, so every real channel code failed the constraint.
@@ -125,7 +125,9 @@ void main() {
       // v20 (WTM-292): settlement_lines_table + payouts_table. `funded_by`
       //                KHÔNG có DEFAULT — một mặc định ở đó là app tự khai
       //                thay sàn rằng "sàn tài trợ", sai theo hướng tâng bốc.
-      expect(db.schemaVersion, 20);
+      // v21 (WTM-299): proposed_changes_table. Không cột điểm — mức tin cậy
+      //                tính từ evidence lúc đọc.
+      expect(db.schemaVersion, 21);
     });
   });
 
