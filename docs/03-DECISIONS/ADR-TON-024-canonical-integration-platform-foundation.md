@@ -125,6 +125,7 @@ persistence, chưa nối UI, chưa connector nào ghi vào các bảng mới).
 | 1b · **confidence TÍNH, không khai** | `consumer/identity_evidence.dart` | **WTM-298** | `identity_confidence_is_derived_governance_test` — 3 lớp |
 | 1c · **thay đổi do AI có vòng đời** | `proposal/` · schema **v21** | **WTM-299** | `proposed_change_lifecycle_governance_test` — 3 lớp |
 | 1d · **cửa ghi DUY NHẤT** | `action/` · schema **v22** | **WTM-300** | `business_action_single_write_boundary_test` — 3 lớp |
+| 1e · **durable agent độc lập nơi chạy** | `agent/` · schema **v23** | **WTM-301** | `durable_task_is_location_independent_test` — 4 lớp |
 | 2 · settlement | `finance/settlement*.dart` · `true_profit.dart` · schema **v20** | WTM-292 | suite quét mã, 3 lớp — lớp tinh tế nhất: *"phân bổ không trả về `SettlementLine`"* |
 | 3 · catalog/matrix là dữ liệu | `platform/vendor_catalog.dart` · `capability_matrix.dart` | WTM-293 | **kiểu dữ liệu** — `CapabilityClaim` không mang hai cột đầu, constructor private |
 | 4 · canonical event | `platform/canonical_event.dart` | WTM-294 | **kiểu dữ liệu** — `type` là enum, nên mã nền tảng không dựng được envelope |
@@ -286,3 +287,43 @@ tạo đúng lỗi nó sinh ra để sửa.
 **Khoá bằng test:** `database_upgrade_test` kiểm `sqlite_master` sau nâng cấp,
 đòi thấy đủ năm chỉ mục quan trọng. Một test hỏi *"bảng có tồn tại không"* sẽ
 không bao giờ thấy lỗi này.
+
+---
+
+## Bổ sung WTM-301 — Durable Agent, độc lập với nơi chạy (D-4)
+
+**Điều kiện Founder duyệt 2026-08-08:** V1 có thể chạy khi Mobile/Compute
+runtime hoạt động, **nhưng domain/task model không được phụ thuộc vòng đời
+mobile**. Cùng một task về sau phải chạy được trên Workizen Managed Worker /
+Oracle VM 24/7 mà **không đổi business model**.
+
+Điều kiện đó dễ thành một câu hay không ai chứng minh được, nên nó được dịch
+thành **bốn phép kiểm**:
+
+| Lớp | Kiểm gì |
+|---|---|
+| 1 | seam **không import Flutter** — `@immutable` lấy từ `meta` khai tường minh, không mượn qua `flutter/foundation` |
+| 2 | không trường nào mang nghĩa mobile (`appSessionId` · `isForeground` · `workManagerId`) — ở **cả model lẫn bảng** |
+| 3 | ⭐ **giao thức nhận việc chạy được trong test thuần Dart** (`package:test`, không `flutter_test`) |
+| 4 | **đúng một** chỗ đóng một việc |
+
+Lớp 3 là lớp quyết định, và nó không kiểm bằng đọc code: `flutter_test` **tự
+dựng binding**, nên một test dùng nó không chứng minh được gì về worker.
+`package:test` thì không có binding nào — logic chạy được ở đó thì chạy được
+trên máy chủ.
+
+### Hệ quả kiểm chứng được
+
+Chuyển sang Managed Worker/Oracle VM về sau **chỉ đổi runner**: không đổi bảng,
+không đổi luật nghiệp vụ. Nếu bốn lớp trên còn xanh thì điều đó còn đúng.
+
+### Vì sao SQLite đủ, không cần `FOR UPDATE SKIP LOCKED`
+
+COMP AI cần nó vì nhiều worker cùng chạy trên một Postgres. Trên máy người bán
+chỉ có một tiến trình, nên `UPDATE … WHERE` có điều kiện lease là đủ — và **hợp
+đồng giữ nguyên**, nên bản Postgres sau này chỉ đổi câu SQL.
+
+### `leased_until` làm "app bị kill" và "worker chết" thành một
+
+Cả hai đều là *giữ việc rồi biến mất*. Một cơ chế cho cả hai — đó chính là lý
+do giao thức này portable, không phải một chi tiết cài đặt.

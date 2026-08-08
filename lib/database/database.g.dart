@@ -15035,6 +15035,932 @@ class BusinessActionsTableCompanion
   }
 }
 
+class $AgentTasksTableTable extends AgentTasksTable
+    with TableInfo<$AgentTasksTableTable, AgentTasksTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AgentTasksTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _correlationIdMeta = const VerificationMeta(
+    'correlationId',
+  );
+  @override
+  late final GeneratedColumn<String> correlationId = GeneratedColumn<String>(
+    'correlation_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectKindMeta = const VerificationMeta(
+    'subjectKind',
+  );
+  @override
+  late final GeneratedColumn<String> subjectKind = GeneratedColumn<String>(
+    'subject_kind',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _subjectIdMeta = const VerificationMeta(
+    'subjectId',
+  );
+  @override
+  late final GeneratedColumn<String> subjectId = GeneratedColumn<String>(
+    'subject_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dueAtMeta = const VerificationMeta('dueAt');
+  @override
+  late final GeneratedColumn<DateTime> dueAt = GeneratedColumn<DateTime>(
+    'due_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<int> priority = GeneratedColumn<int>(
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _budgetMeta = const VerificationMeta('budget');
+  @override
+  late final GeneratedColumn<int> budget = GeneratedColumn<int>(
+    'budget',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(4),
+  );
+  static const VerificationMeta _attemptsMeta = const VerificationMeta(
+    'attempts',
+  );
+  @override
+  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
+    'attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _leasedUntilMeta = const VerificationMeta(
+    'leasedUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> leasedUntil = GeneratedColumn<DateTime>(
+    'leased_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _finishedAtMeta = const VerificationMeta(
+    'finishedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> finishedAt = GeneratedColumn<DateTime>(
+    'finished_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _outcomeMeta = const VerificationMeta(
+    'outcome',
+  );
+  @override
+  late final GeneratedColumn<String> outcome = GeneratedColumn<String>(
+    'outcome',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    correlationId,
+    kind,
+    reason,
+    subjectKind,
+    subjectId,
+    dueAt,
+    priority,
+    budget,
+    attempts,
+    leasedUntil,
+    createdAt,
+    startedAt,
+    finishedAt,
+    outcome,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'agent_tasks_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AgentTasksTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('correlation_id')) {
+      context.handle(
+        _correlationIdMeta,
+        correlationId.isAcceptableOrUnknown(
+          data['correlation_id']!,
+          _correlationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('subject_kind')) {
+      context.handle(
+        _subjectKindMeta,
+        subjectKind.isAcceptableOrUnknown(
+          data['subject_kind']!,
+          _subjectKindMeta,
+        ),
+      );
+    }
+    if (data.containsKey('subject_id')) {
+      context.handle(
+        _subjectIdMeta,
+        subjectId.isAcceptableOrUnknown(data['subject_id']!, _subjectIdMeta),
+      );
+    }
+    if (data.containsKey('due_at')) {
+      context.handle(
+        _dueAtMeta,
+        dueAt.isAcceptableOrUnknown(data['due_at']!, _dueAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueAtMeta);
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    }
+    if (data.containsKey('budget')) {
+      context.handle(
+        _budgetMeta,
+        budget.isAcceptableOrUnknown(data['budget']!, _budgetMeta),
+      );
+    }
+    if (data.containsKey('attempts')) {
+      context.handle(
+        _attemptsMeta,
+        attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta),
+      );
+    }
+    if (data.containsKey('leased_until')) {
+      context.handle(
+        _leasedUntilMeta,
+        leasedUntil.isAcceptableOrUnknown(
+          data['leased_until']!,
+          _leasedUntilMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    }
+    if (data.containsKey('finished_at')) {
+      context.handle(
+        _finishedAtMeta,
+        finishedAt.isAcceptableOrUnknown(data['finished_at']!, _finishedAtMeta),
+      );
+    }
+    if (data.containsKey('outcome')) {
+      context.handle(
+        _outcomeMeta,
+        outcome.isAcceptableOrUnknown(data['outcome']!, _outcomeMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
+  @override
+  AgentTasksTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AgentTasksTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      correlationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}correlation_id'],
+      ),
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      subjectKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_kind'],
+      ),
+      subjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_id'],
+      ),
+      dueAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due_at'],
+      )!,
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}priority'],
+      )!,
+      budget: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}budget'],
+      )!,
+      attempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempts'],
+      )!,
+      leasedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}leased_until'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      ),
+      finishedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}finished_at'],
+      ),
+      outcome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outcome'],
+      ),
+    );
+  }
+
+  @override
+  $AgentTasksTableTable createAlias(String alias) {
+    return $AgentTasksTableTable(attachedDatabase, alias);
+  }
+}
+
+class AgentTasksTableData extends DataClass
+    implements Insertable<AgentTasksTableData> {
+  final String id;
+  final String businessId;
+  final String? correlationId;
+
+  /// Mã canonical `AgentTaskKind`.
+  final String kind;
+
+  /// **Viết cho người đọc** — đi vào lời nhắn cho agent và màn hình người bán.
+  final String reason;
+  final String? subjectKind;
+  final String? subjectId;
+  final DateTime dueAt;
+  final int priority;
+
+  /// Số lượt gọi vendor lần chạy này được tiêu.
+  final int budget;
+  final int attempts;
+
+  /// `null` = **không ai đang giữ việc**.
+  final DateTime? leasedUntil;
+  final DateTime createdAt;
+  final DateTime? startedAt;
+
+  /// `null` = **chưa xong**, không phải "xong lúc 0".
+  final DateTime? finishedAt;
+
+  /// Mã canonical `AgentTaskOutcome`.
+  final String? outcome;
+  const AgentTasksTableData({
+    required this.id,
+    required this.businessId,
+    this.correlationId,
+    required this.kind,
+    required this.reason,
+    this.subjectKind,
+    this.subjectId,
+    required this.dueAt,
+    required this.priority,
+    required this.budget,
+    required this.attempts,
+    this.leasedUntil,
+    required this.createdAt,
+    this.startedAt,
+    this.finishedAt,
+    this.outcome,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    if (!nullToAbsent || correlationId != null) {
+      map['correlation_id'] = Variable<String>(correlationId);
+    }
+    map['kind'] = Variable<String>(kind);
+    map['reason'] = Variable<String>(reason);
+    if (!nullToAbsent || subjectKind != null) {
+      map['subject_kind'] = Variable<String>(subjectKind);
+    }
+    if (!nullToAbsent || subjectId != null) {
+      map['subject_id'] = Variable<String>(subjectId);
+    }
+    map['due_at'] = Variable<DateTime>(dueAt);
+    map['priority'] = Variable<int>(priority);
+    map['budget'] = Variable<int>(budget);
+    map['attempts'] = Variable<int>(attempts);
+    if (!nullToAbsent || leasedUntil != null) {
+      map['leased_until'] = Variable<DateTime>(leasedUntil);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || startedAt != null) {
+      map['started_at'] = Variable<DateTime>(startedAt);
+    }
+    if (!nullToAbsent || finishedAt != null) {
+      map['finished_at'] = Variable<DateTime>(finishedAt);
+    }
+    if (!nullToAbsent || outcome != null) {
+      map['outcome'] = Variable<String>(outcome);
+    }
+    return map;
+  }
+
+  AgentTasksTableCompanion toCompanion(bool nullToAbsent) {
+    return AgentTasksTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      correlationId: correlationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(correlationId),
+      kind: Value(kind),
+      reason: Value(reason),
+      subjectKind: subjectKind == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subjectKind),
+      subjectId: subjectId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subjectId),
+      dueAt: Value(dueAt),
+      priority: Value(priority),
+      budget: Value(budget),
+      attempts: Value(attempts),
+      leasedUntil: leasedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(leasedUntil),
+      createdAt: Value(createdAt),
+      startedAt: startedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startedAt),
+      finishedAt: finishedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finishedAt),
+      outcome: outcome == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outcome),
+    );
+  }
+
+  factory AgentTasksTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AgentTasksTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      correlationId: serializer.fromJson<String?>(json['correlationId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      reason: serializer.fromJson<String>(json['reason']),
+      subjectKind: serializer.fromJson<String?>(json['subjectKind']),
+      subjectId: serializer.fromJson<String?>(json['subjectId']),
+      dueAt: serializer.fromJson<DateTime>(json['dueAt']),
+      priority: serializer.fromJson<int>(json['priority']),
+      budget: serializer.fromJson<int>(json['budget']),
+      attempts: serializer.fromJson<int>(json['attempts']),
+      leasedUntil: serializer.fromJson<DateTime?>(json['leasedUntil']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      startedAt: serializer.fromJson<DateTime?>(json['startedAt']),
+      finishedAt: serializer.fromJson<DateTime?>(json['finishedAt']),
+      outcome: serializer.fromJson<String?>(json['outcome']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'correlationId': serializer.toJson<String?>(correlationId),
+      'kind': serializer.toJson<String>(kind),
+      'reason': serializer.toJson<String>(reason),
+      'subjectKind': serializer.toJson<String?>(subjectKind),
+      'subjectId': serializer.toJson<String?>(subjectId),
+      'dueAt': serializer.toJson<DateTime>(dueAt),
+      'priority': serializer.toJson<int>(priority),
+      'budget': serializer.toJson<int>(budget),
+      'attempts': serializer.toJson<int>(attempts),
+      'leasedUntil': serializer.toJson<DateTime?>(leasedUntil),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'startedAt': serializer.toJson<DateTime?>(startedAt),
+      'finishedAt': serializer.toJson<DateTime?>(finishedAt),
+      'outcome': serializer.toJson<String?>(outcome),
+    };
+  }
+
+  AgentTasksTableData copyWith({
+    String? id,
+    String? businessId,
+    Value<String?> correlationId = const Value.absent(),
+    String? kind,
+    String? reason,
+    Value<String?> subjectKind = const Value.absent(),
+    Value<String?> subjectId = const Value.absent(),
+    DateTime? dueAt,
+    int? priority,
+    int? budget,
+    int? attempts,
+    Value<DateTime?> leasedUntil = const Value.absent(),
+    DateTime? createdAt,
+    Value<DateTime?> startedAt = const Value.absent(),
+    Value<DateTime?> finishedAt = const Value.absent(),
+    Value<String?> outcome = const Value.absent(),
+  }) => AgentTasksTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    correlationId: correlationId.present
+        ? correlationId.value
+        : this.correlationId,
+    kind: kind ?? this.kind,
+    reason: reason ?? this.reason,
+    subjectKind: subjectKind.present ? subjectKind.value : this.subjectKind,
+    subjectId: subjectId.present ? subjectId.value : this.subjectId,
+    dueAt: dueAt ?? this.dueAt,
+    priority: priority ?? this.priority,
+    budget: budget ?? this.budget,
+    attempts: attempts ?? this.attempts,
+    leasedUntil: leasedUntil.present ? leasedUntil.value : this.leasedUntil,
+    createdAt: createdAt ?? this.createdAt,
+    startedAt: startedAt.present ? startedAt.value : this.startedAt,
+    finishedAt: finishedAt.present ? finishedAt.value : this.finishedAt,
+    outcome: outcome.present ? outcome.value : this.outcome,
+  );
+  AgentTasksTableData copyWithCompanion(AgentTasksTableCompanion data) {
+    return AgentTasksTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      correlationId: data.correlationId.present
+          ? data.correlationId.value
+          : this.correlationId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      subjectKind: data.subjectKind.present
+          ? data.subjectKind.value
+          : this.subjectKind,
+      subjectId: data.subjectId.present ? data.subjectId.value : this.subjectId,
+      dueAt: data.dueAt.present ? data.dueAt.value : this.dueAt,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      budget: data.budget.present ? data.budget.value : this.budget,
+      attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      leasedUntil: data.leasedUntil.present
+          ? data.leasedUntil.value
+          : this.leasedUntil,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      finishedAt: data.finishedAt.present
+          ? data.finishedAt.value
+          : this.finishedAt,
+      outcome: data.outcome.present ? data.outcome.value : this.outcome,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AgentTasksTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('correlationId: $correlationId, ')
+          ..write('kind: $kind, ')
+          ..write('reason: $reason, ')
+          ..write('subjectKind: $subjectKind, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('dueAt: $dueAt, ')
+          ..write('priority: $priority, ')
+          ..write('budget: $budget, ')
+          ..write('attempts: $attempts, ')
+          ..write('leasedUntil: $leasedUntil, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('outcome: $outcome')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    correlationId,
+    kind,
+    reason,
+    subjectKind,
+    subjectId,
+    dueAt,
+    priority,
+    budget,
+    attempts,
+    leasedUntil,
+    createdAt,
+    startedAt,
+    finishedAt,
+    outcome,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AgentTasksTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.correlationId == this.correlationId &&
+          other.kind == this.kind &&
+          other.reason == this.reason &&
+          other.subjectKind == this.subjectKind &&
+          other.subjectId == this.subjectId &&
+          other.dueAt == this.dueAt &&
+          other.priority == this.priority &&
+          other.budget == this.budget &&
+          other.attempts == this.attempts &&
+          other.leasedUntil == this.leasedUntil &&
+          other.createdAt == this.createdAt &&
+          other.startedAt == this.startedAt &&
+          other.finishedAt == this.finishedAt &&
+          other.outcome == this.outcome);
+}
+
+class AgentTasksTableCompanion extends UpdateCompanion<AgentTasksTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String?> correlationId;
+  final Value<String> kind;
+  final Value<String> reason;
+  final Value<String?> subjectKind;
+  final Value<String?> subjectId;
+  final Value<DateTime> dueAt;
+  final Value<int> priority;
+  final Value<int> budget;
+  final Value<int> attempts;
+  final Value<DateTime?> leasedUntil;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> startedAt;
+  final Value<DateTime?> finishedAt;
+  final Value<String?> outcome;
+  final Value<int> rowid;
+  const AgentTasksTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.correlationId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.subjectKind = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    this.dueAt = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.budget = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.leasedUntil = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.finishedAt = const Value.absent(),
+    this.outcome = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AgentTasksTableCompanion.insert({
+    required String id,
+    required String businessId,
+    this.correlationId = const Value.absent(),
+    required String kind,
+    required String reason,
+    this.subjectKind = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    required DateTime dueAt,
+    this.priority = const Value.absent(),
+    this.budget = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.leasedUntil = const Value.absent(),
+    required DateTime createdAt,
+    this.startedAt = const Value.absent(),
+    this.finishedAt = const Value.absent(),
+    this.outcome = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       kind = Value(kind),
+       reason = Value(reason),
+       dueAt = Value(dueAt),
+       createdAt = Value(createdAt);
+  static Insertable<AgentTasksTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? correlationId,
+    Expression<String>? kind,
+    Expression<String>? reason,
+    Expression<String>? subjectKind,
+    Expression<String>? subjectId,
+    Expression<DateTime>? dueAt,
+    Expression<int>? priority,
+    Expression<int>? budget,
+    Expression<int>? attempts,
+    Expression<DateTime>? leasedUntil,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? finishedAt,
+    Expression<String>? outcome,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (correlationId != null) 'correlation_id': correlationId,
+      if (kind != null) 'kind': kind,
+      if (reason != null) 'reason': reason,
+      if (subjectKind != null) 'subject_kind': subjectKind,
+      if (subjectId != null) 'subject_id': subjectId,
+      if (dueAt != null) 'due_at': dueAt,
+      if (priority != null) 'priority': priority,
+      if (budget != null) 'budget': budget,
+      if (attempts != null) 'attempts': attempts,
+      if (leasedUntil != null) 'leased_until': leasedUntil,
+      if (createdAt != null) 'created_at': createdAt,
+      if (startedAt != null) 'started_at': startedAt,
+      if (finishedAt != null) 'finished_at': finishedAt,
+      if (outcome != null) 'outcome': outcome,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AgentTasksTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String?>? correlationId,
+    Value<String>? kind,
+    Value<String>? reason,
+    Value<String?>? subjectKind,
+    Value<String?>? subjectId,
+    Value<DateTime>? dueAt,
+    Value<int>? priority,
+    Value<int>? budget,
+    Value<int>? attempts,
+    Value<DateTime?>? leasedUntil,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? startedAt,
+    Value<DateTime?>? finishedAt,
+    Value<String?>? outcome,
+    Value<int>? rowid,
+  }) {
+    return AgentTasksTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      correlationId: correlationId ?? this.correlationId,
+      kind: kind ?? this.kind,
+      reason: reason ?? this.reason,
+      subjectKind: subjectKind ?? this.subjectKind,
+      subjectId: subjectId ?? this.subjectId,
+      dueAt: dueAt ?? this.dueAt,
+      priority: priority ?? this.priority,
+      budget: budget ?? this.budget,
+      attempts: attempts ?? this.attempts,
+      leasedUntil: leasedUntil ?? this.leasedUntil,
+      createdAt: createdAt ?? this.createdAt,
+      startedAt: startedAt ?? this.startedAt,
+      finishedAt: finishedAt ?? this.finishedAt,
+      outcome: outcome ?? this.outcome,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (correlationId.present) {
+      map['correlation_id'] = Variable<String>(correlationId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (subjectKind.present) {
+      map['subject_kind'] = Variable<String>(subjectKind.value);
+    }
+    if (subjectId.present) {
+      map['subject_id'] = Variable<String>(subjectId.value);
+    }
+    if (dueAt.present) {
+      map['due_at'] = Variable<DateTime>(dueAt.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<int>(priority.value);
+    }
+    if (budget.present) {
+      map['budget'] = Variable<int>(budget.value);
+    }
+    if (attempts.present) {
+      map['attempts'] = Variable<int>(attempts.value);
+    }
+    if (leasedUntil.present) {
+      map['leased_until'] = Variable<DateTime>(leasedUntil.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (finishedAt.present) {
+      map['finished_at'] = Variable<DateTime>(finishedAt.value);
+    }
+    if (outcome.present) {
+      map['outcome'] = Variable<String>(outcome.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AgentTasksTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('correlationId: $correlationId, ')
+          ..write('kind: $kind, ')
+          ..write('reason: $reason, ')
+          ..write('subjectKind: $subjectKind, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('dueAt: $dueAt, ')
+          ..write('priority: $priority, ')
+          ..write('budget: $budget, ')
+          ..write('attempts: $attempts, ')
+          ..write('leasedUntil: $leasedUntil, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('outcome: $outcome, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueItemsTableTable extends SyncQueueItemsTable
     with TableInfo<$SyncQueueItemsTableTable, SyncQueueItemsTableData> {
   @override
@@ -19316,6 +20242,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ProposedChangesTableTable(this);
   late final $BusinessActionsTableTable businessActionsTable =
       $BusinessActionsTableTable(this);
+  late final $AgentTasksTableTable agentTasksTable = $AgentTasksTableTable(
+    this,
+  );
   late final $SyncQueueItemsTableTable syncQueueItemsTable =
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
@@ -19466,6 +20395,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'business_actions_idempotency',
     'CREATE UNIQUE INDEX business_actions_idempotency ON business_actions_table (business_id, idempotency_key)',
   );
+  late final Index agentTasksBusinessId = Index(
+    'agent_tasks_business_id',
+    'CREATE INDEX agent_tasks_business_id ON agent_tasks_table (business_id)',
+  );
+  late final Index agentTasksDue = Index(
+    'agent_tasks_due',
+    'CREATE INDEX agent_tasks_due ON agent_tasks_table (due_at)',
+  );
+  late final Index agentTasksCorrelation = Index(
+    'agent_tasks_correlation',
+    'CREATE INDEX agent_tasks_correlation ON agent_tasks_table (correlation_id)',
+  );
+  late final Index agentTasksOpenSubject = Index(
+    'agent_tasks_open_subject',
+    'CREATE INDEX agent_tasks_open_subject ON agent_tasks_table (business_id, kind, subject_kind, subject_id)',
+  );
   late final Index businessJourneyNodesJourney = Index(
     'business_journey_nodes_journey',
     'CREATE INDEX business_journey_nodes_journey ON business_journey_nodes_table (journey_id)',
@@ -19502,6 +20447,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     payoutsTable,
     proposedChangesTable,
     businessActionsTable,
+    agentTasksTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
     businessInputsTable,
@@ -19544,6 +20490,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     businessActionsStatus,
     businessActionsCorrelation,
     businessActionsIdempotency,
+    agentTasksBusinessId,
+    agentTasksDue,
+    agentTasksCorrelation,
+    agentTasksOpenSubject,
     businessJourneyNodesJourney,
     chatMessagesConversation,
     chatMessagesSentAt,
@@ -19688,6 +20638,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('business_actions_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('agent_tasks_table', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -20116,6 +21073,26 @@ final class $$BusinessesTableTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _businessActionsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AgentTasksTableTable, List<AgentTasksTableData>>
+  _agentTasksTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.agentTasksTable,
+    aliasName: 'businesses_table__id__agent_tasks_table__business_id',
+  );
+
+  $$AgentTasksTableTableProcessedTableManager get agentTasksTableRefs {
+    final manager = $$AgentTasksTableTableTableManager(
+      $_db,
+      $_db.agentTasksTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _agentTasksTableRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -20623,6 +21600,31 @@ class $$BusinessesTableTableFilterComposer
           }) => $$BusinessActionsTableTableFilterComposer(
             $db: $db,
             $table: $db.businessActionsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> agentTasksTableRefs(
+    Expression<bool> Function($$AgentTasksTableTableFilterComposer f) f,
+  ) {
+    final $$AgentTasksTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.agentTasksTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AgentTasksTableTableFilterComposer(
+            $db: $db,
+            $table: $db.agentTasksTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -21214,6 +22216,31 @@ class $$BusinessesTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> agentTasksTableRefs<T extends Object>(
+    Expression<T> Function($$AgentTasksTableTableAnnotationComposer a) f,
+  ) {
+    final $$AgentTasksTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.agentTasksTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AgentTasksTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.agentTasksTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$BusinessesTableTableTableManager
@@ -21248,6 +22275,7 @@ class $$BusinessesTableTableTableManager
             bool payoutsTableRefs,
             bool proposedChangesTableRefs,
             bool businessActionsTableRefs,
+            bool agentTasksTableRefs,
           })
         > {
   $$BusinessesTableTableTableManager(
@@ -21347,6 +22375,7 @@ class $$BusinessesTableTableTableManager
                 payoutsTableRefs = false,
                 proposedChangesTableRefs = false,
                 businessActionsTableRefs = false,
+                agentTasksTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -21368,6 +22397,7 @@ class $$BusinessesTableTableTableManager
                     if (payoutsTableRefs) db.payoutsTable,
                     if (proposedChangesTableRefs) db.proposedChangesTable,
                     if (businessActionsTableRefs) db.businessActionsTable,
+                    if (agentTasksTableRefs) db.agentTasksTable,
                   ],
                   addJoins:
                       <
@@ -21762,6 +22792,27 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (agentTasksTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          AgentTasksTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._agentTasksTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).agentTasksTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -21801,6 +22852,7 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool payoutsTableRefs,
         bool proposedChangesTableRefs,
         bool businessActionsTableRefs,
+        bool agentTasksTableRefs,
       })
     >;
 typedef $$UsersTableTableCreateCompanionBuilder =
@@ -31838,6 +32890,554 @@ typedef $$BusinessActionsTableTableProcessedTableManager =
       BusinessActionsTableData,
       PrefetchHooks Function({bool businessId})
     >;
+typedef $$AgentTasksTableTableCreateCompanionBuilder =
+    AgentTasksTableCompanion Function({
+      required String id,
+      required String businessId,
+      Value<String?> correlationId,
+      required String kind,
+      required String reason,
+      Value<String?> subjectKind,
+      Value<String?> subjectId,
+      required DateTime dueAt,
+      Value<int> priority,
+      Value<int> budget,
+      Value<int> attempts,
+      Value<DateTime?> leasedUntil,
+      required DateTime createdAt,
+      Value<DateTime?> startedAt,
+      Value<DateTime?> finishedAt,
+      Value<String?> outcome,
+      Value<int> rowid,
+    });
+typedef $$AgentTasksTableTableUpdateCompanionBuilder =
+    AgentTasksTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String?> correlationId,
+      Value<String> kind,
+      Value<String> reason,
+      Value<String?> subjectKind,
+      Value<String?> subjectId,
+      Value<DateTime> dueAt,
+      Value<int> priority,
+      Value<int> budget,
+      Value<int> attempts,
+      Value<DateTime?> leasedUntil,
+      Value<DateTime> createdAt,
+      Value<DateTime?> startedAt,
+      Value<DateTime?> finishedAt,
+      Value<String?> outcome,
+      Value<int> rowid,
+    });
+
+final class $$AgentTasksTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AgentTasksTableTable,
+          AgentTasksTableData
+        > {
+  $$AgentTasksTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
+      .businessesTable
+      .createAlias('agent_tasks_table__business_id__businesses_table__id');
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AgentTasksTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AgentTasksTableTable> {
+  $$AgentTasksTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dueAt => $composableBuilder(
+    column: $table.dueAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get budget => $composableBuilder(
+    column: $table.budget,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get leasedUntil => $composableBuilder(
+    column: $table.leasedUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get finishedAt => $composableBuilder(
+    column: $table.finishedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AgentTasksTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AgentTasksTableTable> {
+  $$AgentTasksTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dueAt => $composableBuilder(
+    column: $table.dueAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get budget => $composableBuilder(
+    column: $table.budget,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get leasedUntil => $composableBuilder(
+    column: $table.leasedUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get finishedAt => $composableBuilder(
+    column: $table.finishedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AgentTasksTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AgentTasksTableTable> {
+  $$AgentTasksTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subjectId =>
+      $composableBuilder(column: $table.subjectId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dueAt =>
+      $composableBuilder(column: $table.dueAt, builder: (column) => column);
+
+  GeneratedColumn<int> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<int> get budget =>
+      $composableBuilder(column: $table.budget, builder: (column) => column);
+
+  GeneratedColumn<int> get attempts =>
+      $composableBuilder(column: $table.attempts, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get leasedUntil => $composableBuilder(
+    column: $table.leasedUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get finishedAt => $composableBuilder(
+    column: $table.finishedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get outcome =>
+      $composableBuilder(column: $table.outcome, builder: (column) => column);
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AgentTasksTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AgentTasksTableTable,
+          AgentTasksTableData,
+          $$AgentTasksTableTableFilterComposer,
+          $$AgentTasksTableTableOrderingComposer,
+          $$AgentTasksTableTableAnnotationComposer,
+          $$AgentTasksTableTableCreateCompanionBuilder,
+          $$AgentTasksTableTableUpdateCompanionBuilder,
+          (AgentTasksTableData, $$AgentTasksTableTableReferences),
+          AgentTasksTableData,
+          PrefetchHooks Function({bool businessId})
+        > {
+  $$AgentTasksTableTableTableManager(
+    _$AppDatabase db,
+    $AgentTasksTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AgentTasksTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AgentTasksTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AgentTasksTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String?> correlationId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String?> subjectKind = const Value.absent(),
+                Value<String?> subjectId = const Value.absent(),
+                Value<DateTime> dueAt = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<int> budget = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
+                Value<DateTime?> leasedUntil = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> startedAt = const Value.absent(),
+                Value<DateTime?> finishedAt = const Value.absent(),
+                Value<String?> outcome = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AgentTasksTableCompanion(
+                id: id,
+                businessId: businessId,
+                correlationId: correlationId,
+                kind: kind,
+                reason: reason,
+                subjectKind: subjectKind,
+                subjectId: subjectId,
+                dueAt: dueAt,
+                priority: priority,
+                budget: budget,
+                attempts: attempts,
+                leasedUntil: leasedUntil,
+                createdAt: createdAt,
+                startedAt: startedAt,
+                finishedAt: finishedAt,
+                outcome: outcome,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                Value<String?> correlationId = const Value.absent(),
+                required String kind,
+                required String reason,
+                Value<String?> subjectKind = const Value.absent(),
+                Value<String?> subjectId = const Value.absent(),
+                required DateTime dueAt,
+                Value<int> priority = const Value.absent(),
+                Value<int> budget = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
+                Value<DateTime?> leasedUntil = const Value.absent(),
+                required DateTime createdAt,
+                Value<DateTime?> startedAt = const Value.absent(),
+                Value<DateTime?> finishedAt = const Value.absent(),
+                Value<String?> outcome = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AgentTasksTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                correlationId: correlationId,
+                kind: kind,
+                reason: reason,
+                subjectKind: subjectKind,
+                subjectId: subjectId,
+                dueAt: dueAt,
+                priority: priority,
+                budget: budget,
+                attempts: attempts,
+                leasedUntil: leasedUntil,
+                createdAt: createdAt,
+                startedAt: startedAt,
+                finishedAt: finishedAt,
+                outcome: outcome,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AgentTasksTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$AgentTasksTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$AgentTasksTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AgentTasksTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AgentTasksTableTable,
+      AgentTasksTableData,
+      $$AgentTasksTableTableFilterComposer,
+      $$AgentTasksTableTableOrderingComposer,
+      $$AgentTasksTableTableAnnotationComposer,
+      $$AgentTasksTableTableCreateCompanionBuilder,
+      $$AgentTasksTableTableUpdateCompanionBuilder,
+      (AgentTasksTableData, $$AgentTasksTableTableReferences),
+      AgentTasksTableData,
+      PrefetchHooks Function({bool businessId})
+    >;
 typedef $$SyncQueueItemsTableTableCreateCompanionBuilder =
     SyncQueueItemsTableCompanion Function({
       Value<int> id,
@@ -34641,6 +36241,8 @@ class $AppDatabaseManager {
       $$ProposedChangesTableTableTableManager(_db, _db.proposedChangesTable);
   $$BusinessActionsTableTableTableManager get businessActionsTable =>
       $$BusinessActionsTableTableTableManager(_db, _db.businessActionsTable);
+  $$AgentTasksTableTableTableManager get agentTasksTable =>
+      $$AgentTasksTableTableTableManager(_db, _db.agentTasksTable);
   $$SyncQueueItemsTableTableTableManager get syncQueueItemsTable =>
       $$SyncQueueItemsTableTableTableManager(_db, _db.syncQueueItemsTable);
   $$SupplierFavoritesTableTableTableManager get supplierFavoritesTable =>

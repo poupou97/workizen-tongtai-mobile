@@ -38,6 +38,19 @@
 /// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
 /// addresses, notes). Same additive-nullable convention as v5.
 ///
+/// ## Schema v23 (WTM-301 — Durable Agent, D-4)
+/// v23 adds `agent_tasks_table`. Purely additive.
+///
+/// **No column carries mobile meaning** — no `app_session_id`, no
+/// `is_foreground`, no `work_manager_id`. The Founder's condition for D-4 is
+/// that the same task must later run on a Managed Worker or Oracle VM without
+/// changing the business model, and a mobile-shaped column would turn a change
+/// of runner into a change of schema.
+///
+/// `leased_until` is what makes "the app was killed" and "the worker crashed"
+/// the same situation: both are *held the task, then vanished*. One mechanism
+/// covers both, which is precisely why the protocol is portable.
+///
 /// ## Schema v22 (WTM-300 — BusinessAction, D-3)
 /// v22 adds `business_actions_table` — the single write boundary for every
 /// side effect an agent can cause, including writes back into Tổng Tài's own
@@ -125,7 +138,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 22;
+const int kTongtaiSchemaVersion = 23;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -418,6 +431,15 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 23) {
+        // v23 (WTM-301 / D-4 — Durable Agent). Thuần thêm mới.
+        //
+        // KHÔNG cột nào mang nghĩa mobile: không `app_session_id`, không
+        // `is_foreground`. Điều kiện Founder — cùng một task phải chạy được
+        // trên Managed Worker/Oracle VM mà không đổi business model. Một cột
+        // mang nghĩa mobile sẽ biến việc đổi runner thành việc đổi schema.
+        await _createTableWithIndexes(db, m, 'agent_tasks_table');
       }
       if (from < 22) {
         // v22 (WTM-300 / D-3 — BusinessAction). Cửa ghi duy nhất cho mọi side

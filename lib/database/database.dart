@@ -25,6 +25,7 @@ import 'tables/settlement_lines.dart';
 import 'tables/payouts.dart';
 import 'tables/proposed_changes.dart';
 import 'tables/business_actions.dart';
+import 'tables/agent_tasks.dart';
 import 'tables/sync_queue_items.dart';
 import 'tables/supplier_favorites.dart';
 import 'tables/chat_messages.dart';
@@ -87,6 +88,7 @@ part 'database.g.dart';
     PayoutsTable,
     ProposedChangesTable,
     BusinessActionsTable,
+    AgentTasksTable,
     SyncQueueItemsTable,
     SupplierFavoritesTable,
     BusinessInputsTable,
