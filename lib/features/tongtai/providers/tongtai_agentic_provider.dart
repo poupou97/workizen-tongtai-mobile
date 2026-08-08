@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../action/business_action_executor.dart';
 import '../action/demo_action_handlers.dart';
+import '../agent/agent_activity.dart';
 import '../agent/agent_task_queue.dart';
 import '../agent/brief_inbox.dart';
 import '../agent/business_brief.dart';
@@ -126,4 +127,34 @@ final briefDecisionsProvider = FutureProvider<Map<String, BriefDecision>>((
     if (decision != null) out[item.id] = decision;
   }
   return out;
+});
+
+/// **"Tổng Tài đã làm gì"** (WTM-305 · trải nghiệm #5).
+///
+/// Đọc ba bảng vòng đời cộng số bản ghi động cơ brief thật sự đã quét. Con số
+/// "đã xem 26 khách" lấy từ **cùng** repository mà brief đã đọc — nếu lấy từ
+/// một chỗ khác thì một ngày nào đó màn này sẽ khoe một con số mà brief chưa
+/// bao giờ nhìn tới.
+final agentActivityProvider = FutureProvider<List<ActivityEntry>>((ref) async {
+  // Chờ brief xong trước: nó là thứ ghi các bản ghi mà màn này kể lại. Đọc
+  // trước brief thì lần mở app đầu tiên sẽ hiện một dòng thời gian trống rồi
+  // nhảy — người bán đọc cái nhảy đó là app hỏng.
+  await ref.watch(businessBriefProvider.future);
+
+  final proposals = await ref
+      .watch(proposedChangeRepositoryProvider)
+      .loadRecent();
+  final actions = await ref.watch(businessActionExecutorProvider).loadRecent();
+  final tasks = await ref.watch(agentTaskQueueProvider).loadRecent();
+  final customers = await ref.watch(customerRepositoryProvider).loadAll();
+  final products = await ref.watch(productRepositoryProvider).loadAll();
+
+  return const AgentActivityService().build(
+    now: DateTime.now(),
+    proposals: proposals,
+    actions: actions,
+    tasks: tasks,
+    customersScanned: customers.length,
+    productsScanned: products.length,
+  );
 });

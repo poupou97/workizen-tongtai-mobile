@@ -55,6 +55,31 @@ abstract class AppStrings {
   String get titleAgent;
   String get agentSubtitle;
 
+  // ── Tổng Tài · quyết định + hoạt động (WTM-305) ─────────────────────────
+  /// Ba nút của một việc. Động từ, không phải "OK/Cancel".
+  String get briefActionAccept;
+  String get briefActionDismiss;
+  String get briefActionLater;
+
+  String get briefStoryTitle;
+  String get briefStoryHappened;
+  String get briefStoryNext;
+
+  /// ⚠️ Nhãn **diễn tập** — hành động chưa ra khỏi máy này.
+  String get briefDemoExecution;
+  String get briefDemoExecutionBody;
+
+  String get briefAcceptedSnack;
+  String get briefDismissedSnack;
+  String briefLaterSnack(int days);
+
+  String get titleActivity;
+  String get activitySubtitle;
+  String get activityToday;
+  String get activityEarlier;
+  String get activityEmpty;
+  String get activityEmptyBody;
+
   // ── navigation / screen titles (P0 §2 WTM-145: one active locale) ──────
   String get titleReports;
   String get titleFinance;
@@ -1407,6 +1432,43 @@ class AppStringsVi extends AppStrings {
   String get navConsumer => 'Khách hàng';
   @override
   String get navMore => 'Thêm';
+  @override
+  String get briefActionAccept => 'Làm ngay';
+  @override
+  String get briefActionDismiss => 'Bỏ qua';
+  @override
+  String get briefActionLater => 'Để sau';
+  @override
+  String get briefStoryTitle => 'Chuyện gì đã xảy ra';
+  @override
+  String get briefStoryHappened => 'Bạn đã quyết';
+  @override
+  String get briefStoryNext => 'Tiếp theo';
+  @override
+  String get briefDemoExecution => 'Diễn tập — chưa gửi đi đâu';
+  @override
+  String get briefDemoExecutionBody =>
+      'Việc đã được ghi lại đầy đủ trên máy bạn, nhưng chưa có kênh nào thật sự nhận nó. Khi bạn nối Telegram hay sàn bán hàng, đúng việc này sẽ chạy thật.';
+  @override
+  String get briefAcceptedSnack => 'Đã ghi nhận. Tôi sẽ theo dõi kết quả.';
+  @override
+  String get briefDismissedSnack => 'Đã bỏ qua. Tôi sẽ không nhắc lại.';
+  @override
+  String briefLaterSnack(int days) => 'Tôi sẽ nhắc lại sau $days ngày.';
+  @override
+  String get titleActivity => 'Tổng Tài đã làm gì';
+  @override
+  String get activitySubtitle => 'Những việc tôi đã xem và đã làm';
+  @override
+  String get activityToday => 'Hôm nay';
+  @override
+  String get activityEarlier => 'Trước đó';
+  @override
+  String get activityEmpty => 'Chưa có gì để kể';
+  @override
+  String get activityEmptyBody =>
+      'Khi bạn quyết việc đầu tiên, tôi sẽ ghi lại ở đây: đã làm gì, kết quả ra sao, và bước tiếp theo là gì.';
+
   @override
   String get briefGreetingMorning => 'Chào buổi sáng';
   @override
@@ -2970,6 +3032,43 @@ class AppStringsEn extends AppStrings {
   String get navConsumer => 'Consumer';
   @override
   String get navMore => 'More';
+  @override
+  String get briefActionAccept => 'Do it';
+  @override
+  String get briefActionDismiss => 'Dismiss';
+  @override
+  String get briefActionLater => 'Later';
+  @override
+  String get briefStoryTitle => 'What happened';
+  @override
+  String get briefStoryHappened => 'You decided';
+  @override
+  String get briefStoryNext => 'Next';
+  @override
+  String get briefDemoExecution => 'Rehearsal — nothing was sent';
+  @override
+  String get briefDemoExecutionBody =>
+      'The work is fully recorded on your device, but no channel actually received it. Connect Telegram or a marketplace and this exact action runs for real.';
+  @override
+  String get briefAcceptedSnack => 'Recorded. I will watch what comes of it.';
+  @override
+  String get briefDismissedSnack => 'Dismissed. I will not bring it up again.';
+  @override
+  String briefLaterSnack(int days) => 'I will remind you in $days days.';
+  @override
+  String get titleActivity => 'What Tổng Tài did';
+  @override
+  String get activitySubtitle => 'What I looked at and what I did';
+  @override
+  String get activityToday => 'Today';
+  @override
+  String get activityEarlier => 'Earlier';
+  @override
+  String get activityEmpty => 'Nothing to tell yet';
+  @override
+  String get activityEmptyBody =>
+      'The moment you decide your first item, I will record it here: what was done, how it went, and what comes next.';
+
   @override
   String get briefGreetingMorning => 'Good morning';
   @override
