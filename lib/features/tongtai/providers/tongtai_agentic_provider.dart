@@ -1,15 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../action/business_action.dart';
 import '../action/business_action_executor.dart';
 import '../action/demo_action_handlers.dart';
 import '../agent/agent_activity.dart';
 import '../agent/agent_task_queue.dart';
 import '../agent/brief_inbox.dart';
 import '../agent/business_brief.dart';
+import '../agent/autonomy_settings.dart';
+import '../agent/autonomy_settings_store.dart';
 import '../agent/business_brief_service.dart';
 import '../proposal/proposed_change_repository.dart';
 import 'tongtai_capability_provider.dart';
+import '../../../core/prefs.dart';
 import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
 import 'tongtai_consumer_provider.dart';
 import 'tongtai_inventory_provider.dart';
@@ -158,3 +162,29 @@ final agentActivityProvider = FutureProvider<List<ActivityEntry>>((ref) async {
     productsScanned: products.length,
   );
 });
+
+/// Mức tự chủ người bán đã chọn (WTM-306 · trải nghiệm #4).
+final autonomySettingsStoreProvider = Provider<AutonomySettingsStore>(
+  (ref) => AutonomySettingsStore(ref.watch(sharedPreferencesProvider)),
+);
+
+/// Notifier vì màn thiết lập ghi rồi phải thấy ngay — và vì mọi chỗ đọc mức
+/// (thẻ orchestration, về sau là runner) phải thấy **cùng một** giá trị.
+class AutonomySettingsNotifier extends Notifier<AutonomySettings> {
+  @override
+  AutonomySettings build() => ref.watch(autonomySettingsStoreProvider).load();
+
+  Future<void> setMode(AutonomyArea area, AutonomyMode mode) async {
+    final next = state.withMode(area, mode);
+    // `withMode` từ chối mức không hợp lệ bằng cách trả lại chính nó — ghi
+    // xuống đĩa một thứ không đổi chỉ tốn một lần I/O và làm log khó đọc.
+    if (next == state) return;
+    await ref.read(autonomySettingsStoreProvider).save(next);
+    state = next;
+  }
+}
+
+final autonomySettingsProvider =
+    NotifierProvider<AutonomySettingsNotifier, AutonomySettings>(
+      AutonomySettingsNotifier.new,
+    );

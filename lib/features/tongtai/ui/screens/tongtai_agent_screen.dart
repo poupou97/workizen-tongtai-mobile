@@ -11,6 +11,7 @@ import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_more_action.dart';
 import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_activity_screen.dart';
+import 'tongtai_autonomy_screen.dart';
 import 'tongtai_brief_story_screen.dart';
 
 /// **Màn Tổng Tài** — nơi ở của agent (WTM-304 · Epic WTM-302).
@@ -59,6 +60,14 @@ class TongtaiAgentScreen extends ConsumerWidget {
             icon: const Icon(Icons.history),
             onPressed: () => Navigator.of(context).push<void>(
               MaterialPageRoute(builder: (_) => const TongtaiActivityScreen()),
+            ),
+          ),
+          IconButton(
+            key: const Key('agent-open-autonomy'),
+            tooltip: l10n.titleAutonomy,
+            icon: const Icon(Icons.tune),
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(builder: (_) => const TongtaiAutonomyScreen()),
             ),
           ),
           const TongtaiMoreAction(),

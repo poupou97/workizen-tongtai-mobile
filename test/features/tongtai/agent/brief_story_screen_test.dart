@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tongtai/core/prefs.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/action/business_action.dart';
 import 'package:tongtai/features/tongtai/action/business_action_executor.dart';
@@ -25,10 +27,13 @@ import '../../../support/pump_until.dart';
 void main() {
   late AppDatabase db;
   late BriefInbox inbox;
+  late SharedPreferences prefs;
   var seq = 0;
   final clock = DateTime(2026, 8, 8, 9);
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
     db = AppDatabase.forExecutor(NativeDatabase.memory());
     seq = 0;
     inbox = BriefInbox(
@@ -129,7 +134,10 @@ void main() {
     await inbox.publish([item]);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [briefInboxProvider.overrideWithValue(inbox)],
+        overrides: [
+          briefInboxProvider.overrideWithValue(inbox),
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
         child: MaterialApp(
           locale: const Locale('vi'),
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
