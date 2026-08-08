@@ -174,11 +174,15 @@ void main() {
 
     expect(version.read<int>('user_version'), kTongtaiSchemaVersion);
   });
-  test('v16 CÓ DỮ LIỆU → v20: bốn bước liên tiếp, không mất gì', () async {
+  test('v16 CÓ DỮ LIỆU → phiên bản hiện tại: cả chuỗi, không mất gì', () async {
     // ⭐ Đây là chuỗi máy Founder sắp chạy. Dogfood lần cuối 2026-08-02 ở
     // **v16**; từ đó thêm v17 (Provenance) · v18 (Connection) · v19 (Identity)
-    // · v20 (Settlement). Bốn bước đó chưa bao giờ chạy liền nhau trên một cơ
-    // sở dữ liệu có dòng thật.
+    // · v20 (Settlement) · v21 (ProposedChange). Chuỗi đó chưa bao giờ chạy
+    // liền nhau trên một cơ sở dữ liệu có dòng thật.
+    //
+    // Test này KHÔNG khoá một con số phiên bản: nó khẳng định chuỗi chạy tới
+    // **hiện tại**, bất kể hiện tại là bao nhiêu. Mỗi phase mới chỉ cần thêm
+    // tên bảng vào hai danh sách dưới.
     //
     // WTM-227 đã dạy đúng bài này một lần: 1744 test xanh + CI xanh, rồi chết
     // ở lần mở app đầu tiên trên máy Founder.
@@ -205,6 +209,7 @@ void main() {
       'identity_link_events_table',
       'settlement_lines_table',
       'payouts_table',
+      'proposed_changes_table',
     ]) {
       await db.customStatement('DROP TABLE IF EXISTS $t');
     }
@@ -298,6 +303,7 @@ void main() {
       'identity_link_events_table',
       'settlement_lines_table',
       'payouts_table',
+      'proposed_changes_table',
     ]) {
       expect(
         beforeTables,
@@ -346,7 +352,6 @@ void main() {
       kTongtaiSchemaVersion,
       reason: 'dừng giữa chừng là kịch bản tệ nhất — DB kẹt ở phiên bản lai',
     );
-    expect(kTongtaiSchemaVersion, 20);
 
     // 2 · không mất dòng nào
     expect(orders, hasLength(2), reason: 'nâng cấp không được làm mất đơn');
@@ -379,11 +384,60 @@ void main() {
       'identity_link_events_table',
       'settlement_lines_table',
       'payouts_table',
+      'proposed_changes_table',
     ]) {
       expect(afterTables, contains(t), reason: '$t phải được migration tạo ra');
     }
     expect(identities, isEmpty, reason: 'chưa connector nào ghi vào');
     expect(settlements, isEmpty);
     expect(payouts, isEmpty);
+  });
+  test('v20 CÓ DỮ LIỆU → v21: thêm bảng đề xuất, không mất gì', () async {
+    // Mỗi phase của Epic WTM-297 thêm một bảng. Bài học WTM-295: chuỗi nâng
+    // cấp phải được chạy trên DB CÓ DÒNG, không chỉ trên DB mới tạo.
+    final dir = await Directory.systemTemp.createTemp('tongtai_upgrade21');
+    final file = File('${dir.path}/t.sqlite');
+    addTearDown(() => dir.delete(recursive: true));
+
+    var raw = NativeDatabase(file);
+    var db = AppDatabase.forExecutor(raw);
+    await const LocalWorkspace().ensureBusinessId(db);
+    const businessId = LocalWorkspace.localBusinessId;
+
+    // Hạ về hình dạng v21-trừ-một: xoá đúng bảng v21 thêm vào.
+    await db.customStatement('DROP TABLE IF EXISTS proposed_changes_table');
+    await db.customStatement(
+      "INSERT INTO customers_table (id, business_id, name, updated_at, "
+      "created_at) VALUES ('c1', '$businessId', 'Chị Hoa', 1, 1)",
+    );
+    await db.customStatement('PRAGMA user_version = 20');
+
+    // Chống PASS GIẢ: chứng minh điểm xuất phát đúng là v20.
+    final before = await db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type = 'table' "
+          "AND name = 'proposed_changes_table'",
+        )
+        .get();
+    expect(
+      before,
+      isEmpty,
+      reason: 'bảng đề xuất không tồn tại ở v20 — migration phải tạo ra nó',
+    );
+    await db.close();
+
+    // Mở lại ⇒ v21 chạy thật.
+    raw = NativeDatabase(file);
+    db = AppDatabase.forExecutor(raw);
+    final version = await db.customSelect('PRAGMA user_version').getSingle();
+    final proposals = await db.select(db.proposedChangesTable).get();
+    final customers = await db.select(db.customersTable).get();
+    await db.close();
+
+    expect(version.read<int>('user_version'), kTongtaiSchemaVersion);
+    expect(kTongtaiSchemaVersion, 21);
+    expect(customers, hasLength(1), reason: 'không mất dòng nào');
+    expect(customers.single.name, 'Chị Hoa');
+    expect(proposals, isEmpty, reason: 'bảng mới, chưa ai đề xuất gì');
   });
 }

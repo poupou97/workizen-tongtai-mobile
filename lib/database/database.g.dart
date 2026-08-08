@@ -12703,6 +12703,1017 @@ class PayoutsTableCompanion extends UpdateCompanion<PayoutsTableData> {
   }
 }
 
+class $ProposedChangesTableTable extends ProposedChangesTable
+    with TableInfo<$ProposedChangesTableTable, ProposedChangesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProposedChangesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _correlationIdMeta = const VerificationMeta(
+    'correlationId',
+  );
+  @override
+  late final GeneratedColumn<String> correlationId = GeneratedColumn<String>(
+    'correlation_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _domainMeta = const VerificationMeta('domain');
+  @override
+  late final GeneratedColumn<String> domain = GeneratedColumn<String>(
+    'domain',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectKindMeta = const VerificationMeta(
+    'subjectKind',
+  );
+  @override
+  late final GeneratedColumn<String> subjectKind = GeneratedColumn<String>(
+    'subject_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectIdMeta = const VerificationMeta(
+    'subjectId',
+  );
+  @override
+  late final GeneratedColumn<String> subjectId = GeneratedColumn<String>(
+    'subject_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectLabelMeta = const VerificationMeta(
+    'subjectLabel',
+  );
+  @override
+  late final GeneratedColumn<String> subjectLabel = GeneratedColumn<String>(
+    'subject_label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fieldMeta = const VerificationMeta('field');
+  @override
+  late final GeneratedColumn<String> field = GeneratedColumn<String>(
+    'field',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currentValueMeta = const VerificationMeta(
+    'currentValue',
+  );
+  @override
+  late final GeneratedColumn<String> currentValue = GeneratedColumn<String>(
+    'current_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _proposedValueMeta = const VerificationMeta(
+    'proposedValue',
+  );
+  @override
+  late final GeneratedColumn<String> proposedValue = GeneratedColumn<String>(
+    'proposed_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _evidenceMeta = const VerificationMeta(
+    'evidence',
+  );
+  @override
+  late final GeneratedColumn<String> evidence = GeneratedColumn<String>(
+    'evidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _proposedByMeta = const VerificationMeta(
+    'proposedBy',
+  );
+  @override
+  late final GeneratedColumn<String> proposedBy = GeneratedColumn<String>(
+    'proposed_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _summaryMeta = const VerificationMeta(
+    'summary',
+  );
+  @override
+  late final GeneratedColumn<String> summary = GeneratedColumn<String>(
+    'summary',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _decidedAtMeta = const VerificationMeta(
+    'decidedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> decidedAt = GeneratedColumn<DateTime>(
+    'decided_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _provenanceCodeMeta = const VerificationMeta(
+    'provenanceCode',
+  );
+  @override
+  late final GeneratedColumn<String> provenanceCode = GeneratedColumn<String>(
+    'provenance_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    correlationId,
+    domain,
+    subjectKind,
+    subjectId,
+    subjectLabel,
+    field,
+    currentValue,
+    proposedValue,
+    evidence,
+    proposedBy,
+    summary,
+    status,
+    createdAt,
+    decidedAt,
+    provenanceCode,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'proposed_changes_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProposedChangesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('correlation_id')) {
+      context.handle(
+        _correlationIdMeta,
+        correlationId.isAcceptableOrUnknown(
+          data['correlation_id']!,
+          _correlationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('domain')) {
+      context.handle(
+        _domainMeta,
+        domain.isAcceptableOrUnknown(data['domain']!, _domainMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_domainMeta);
+    }
+    if (data.containsKey('subject_kind')) {
+      context.handle(
+        _subjectKindMeta,
+        subjectKind.isAcceptableOrUnknown(
+          data['subject_kind']!,
+          _subjectKindMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectKindMeta);
+    }
+    if (data.containsKey('subject_id')) {
+      context.handle(
+        _subjectIdMeta,
+        subjectId.isAcceptableOrUnknown(data['subject_id']!, _subjectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectIdMeta);
+    }
+    if (data.containsKey('subject_label')) {
+      context.handle(
+        _subjectLabelMeta,
+        subjectLabel.isAcceptableOrUnknown(
+          data['subject_label']!,
+          _subjectLabelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('field')) {
+      context.handle(
+        _fieldMeta,
+        field.isAcceptableOrUnknown(data['field']!, _fieldMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fieldMeta);
+    }
+    if (data.containsKey('current_value')) {
+      context.handle(
+        _currentValueMeta,
+        currentValue.isAcceptableOrUnknown(
+          data['current_value']!,
+          _currentValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('proposed_value')) {
+      context.handle(
+        _proposedValueMeta,
+        proposedValue.isAcceptableOrUnknown(
+          data['proposed_value']!,
+          _proposedValueMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_proposedValueMeta);
+    }
+    if (data.containsKey('evidence')) {
+      context.handle(
+        _evidenceMeta,
+        evidence.isAcceptableOrUnknown(data['evidence']!, _evidenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_evidenceMeta);
+    }
+    if (data.containsKey('proposed_by')) {
+      context.handle(
+        _proposedByMeta,
+        proposedBy.isAcceptableOrUnknown(data['proposed_by']!, _proposedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_proposedByMeta);
+    }
+    if (data.containsKey('summary')) {
+      context.handle(
+        _summaryMeta,
+        summary.isAcceptableOrUnknown(data['summary']!, _summaryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_summaryMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('decided_at')) {
+      context.handle(
+        _decidedAtMeta,
+        decidedAt.isAcceptableOrUnknown(data['decided_at']!, _decidedAtMeta),
+      );
+    }
+    if (data.containsKey('provenance_code')) {
+      context.handle(
+        _provenanceCodeMeta,
+        provenanceCode.isAcceptableOrUnknown(
+          data['provenance_code']!,
+          _provenanceCodeMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
+  @override
+  ProposedChangesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProposedChangesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      correlationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}correlation_id'],
+      ),
+      domain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}domain'],
+      )!,
+      subjectKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_kind'],
+      )!,
+      subjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_id'],
+      )!,
+      subjectLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_label'],
+      ),
+      field: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}field'],
+      )!,
+      currentValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}current_value'],
+      ),
+      proposedValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}proposed_value'],
+      )!,
+      evidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}evidence'],
+      )!,
+      proposedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}proposed_by'],
+      )!,
+      summary: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summary'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      decidedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}decided_at'],
+      ),
+      provenanceCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provenance_code'],
+      ),
+    );
+  }
+
+  @override
+  $ProposedChangesTableTable createAlias(String alias) {
+    return $ProposedChangesTableTable(attachedDatabase, alias);
+  }
+}
+
+class ProposedChangesTableData extends DataClass
+    implements Insertable<ProposedChangesTableData> {
+  final String id;
+  final String businessId;
+
+  /// Nối các bản ghi cùng một chuỗi việc. `null` = việc đứng một mình.
+  ///
+  /// Đây là thứ thay cho entity `BusinessConversation`: câu chuyện là một
+  /// **truy vấn** theo cột này (WTM-296 §10).
+  final String? correlationId;
+
+  /// Mã canonical `ProposalDomain` — quyết định luật xét lại.
+  final String domain;
+  final String subjectKind;
+  final String subjectId;
+  final String? subjectLabel;
+  final String field;
+
+  /// `null` = ô đang **trống**, không phải "bằng không".
+  final String? currentValue;
+  final String proposedValue;
+
+  /// Bằng chứng, JSON. Mức tin cậy tính từ đây lúc đọc — **không** lưu điểm.
+  final String evidence;
+
+  /// `seller` · `agent` · `rule:<tên>`. Dùng để gỡ hàng loạt khi một luật sai.
+  final String proposedBy;
+
+  /// Câu tiếng Việt người bán đọc. Lưu cùng bản ghi để lời giải thích không
+  /// lệch khỏi dữ liệu.
+  final String summary;
+
+  /// Mã canonical `ProposalStatus`.
+  final String status;
+  final DateTime createdAt;
+
+  /// `null` = **chưa ai quyết**, không phải "quyết lúc 0".
+  final DateTime? decidedAt;
+  final String? provenanceCode;
+  const ProposedChangesTableData({
+    required this.id,
+    required this.businessId,
+    this.correlationId,
+    required this.domain,
+    required this.subjectKind,
+    required this.subjectId,
+    this.subjectLabel,
+    required this.field,
+    this.currentValue,
+    required this.proposedValue,
+    required this.evidence,
+    required this.proposedBy,
+    required this.summary,
+    required this.status,
+    required this.createdAt,
+    this.decidedAt,
+    this.provenanceCode,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    if (!nullToAbsent || correlationId != null) {
+      map['correlation_id'] = Variable<String>(correlationId);
+    }
+    map['domain'] = Variable<String>(domain);
+    map['subject_kind'] = Variable<String>(subjectKind);
+    map['subject_id'] = Variable<String>(subjectId);
+    if (!nullToAbsent || subjectLabel != null) {
+      map['subject_label'] = Variable<String>(subjectLabel);
+    }
+    map['field'] = Variable<String>(field);
+    if (!nullToAbsent || currentValue != null) {
+      map['current_value'] = Variable<String>(currentValue);
+    }
+    map['proposed_value'] = Variable<String>(proposedValue);
+    map['evidence'] = Variable<String>(evidence);
+    map['proposed_by'] = Variable<String>(proposedBy);
+    map['summary'] = Variable<String>(summary);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || decidedAt != null) {
+      map['decided_at'] = Variable<DateTime>(decidedAt);
+    }
+    if (!nullToAbsent || provenanceCode != null) {
+      map['provenance_code'] = Variable<String>(provenanceCode);
+    }
+    return map;
+  }
+
+  ProposedChangesTableCompanion toCompanion(bool nullToAbsent) {
+    return ProposedChangesTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      correlationId: correlationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(correlationId),
+      domain: Value(domain),
+      subjectKind: Value(subjectKind),
+      subjectId: Value(subjectId),
+      subjectLabel: subjectLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subjectLabel),
+      field: Value(field),
+      currentValue: currentValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentValue),
+      proposedValue: Value(proposedValue),
+      evidence: Value(evidence),
+      proposedBy: Value(proposedBy),
+      summary: Value(summary),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      decidedAt: decidedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedAt),
+      provenanceCode: provenanceCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(provenanceCode),
+    );
+  }
+
+  factory ProposedChangesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProposedChangesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      correlationId: serializer.fromJson<String?>(json['correlationId']),
+      domain: serializer.fromJson<String>(json['domain']),
+      subjectKind: serializer.fromJson<String>(json['subjectKind']),
+      subjectId: serializer.fromJson<String>(json['subjectId']),
+      subjectLabel: serializer.fromJson<String?>(json['subjectLabel']),
+      field: serializer.fromJson<String>(json['field']),
+      currentValue: serializer.fromJson<String?>(json['currentValue']),
+      proposedValue: serializer.fromJson<String>(json['proposedValue']),
+      evidence: serializer.fromJson<String>(json['evidence']),
+      proposedBy: serializer.fromJson<String>(json['proposedBy']),
+      summary: serializer.fromJson<String>(json['summary']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      decidedAt: serializer.fromJson<DateTime?>(json['decidedAt']),
+      provenanceCode: serializer.fromJson<String?>(json['provenanceCode']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'correlationId': serializer.toJson<String?>(correlationId),
+      'domain': serializer.toJson<String>(domain),
+      'subjectKind': serializer.toJson<String>(subjectKind),
+      'subjectId': serializer.toJson<String>(subjectId),
+      'subjectLabel': serializer.toJson<String?>(subjectLabel),
+      'field': serializer.toJson<String>(field),
+      'currentValue': serializer.toJson<String?>(currentValue),
+      'proposedValue': serializer.toJson<String>(proposedValue),
+      'evidence': serializer.toJson<String>(evidence),
+      'proposedBy': serializer.toJson<String>(proposedBy),
+      'summary': serializer.toJson<String>(summary),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'decidedAt': serializer.toJson<DateTime?>(decidedAt),
+      'provenanceCode': serializer.toJson<String?>(provenanceCode),
+    };
+  }
+
+  ProposedChangesTableData copyWith({
+    String? id,
+    String? businessId,
+    Value<String?> correlationId = const Value.absent(),
+    String? domain,
+    String? subjectKind,
+    String? subjectId,
+    Value<String?> subjectLabel = const Value.absent(),
+    String? field,
+    Value<String?> currentValue = const Value.absent(),
+    String? proposedValue,
+    String? evidence,
+    String? proposedBy,
+    String? summary,
+    String? status,
+    DateTime? createdAt,
+    Value<DateTime?> decidedAt = const Value.absent(),
+    Value<String?> provenanceCode = const Value.absent(),
+  }) => ProposedChangesTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    correlationId: correlationId.present
+        ? correlationId.value
+        : this.correlationId,
+    domain: domain ?? this.domain,
+    subjectKind: subjectKind ?? this.subjectKind,
+    subjectId: subjectId ?? this.subjectId,
+    subjectLabel: subjectLabel.present ? subjectLabel.value : this.subjectLabel,
+    field: field ?? this.field,
+    currentValue: currentValue.present ? currentValue.value : this.currentValue,
+    proposedValue: proposedValue ?? this.proposedValue,
+    evidence: evidence ?? this.evidence,
+    proposedBy: proposedBy ?? this.proposedBy,
+    summary: summary ?? this.summary,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    decidedAt: decidedAt.present ? decidedAt.value : this.decidedAt,
+    provenanceCode: provenanceCode.present
+        ? provenanceCode.value
+        : this.provenanceCode,
+  );
+  ProposedChangesTableData copyWithCompanion(
+    ProposedChangesTableCompanion data,
+  ) {
+    return ProposedChangesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      correlationId: data.correlationId.present
+          ? data.correlationId.value
+          : this.correlationId,
+      domain: data.domain.present ? data.domain.value : this.domain,
+      subjectKind: data.subjectKind.present
+          ? data.subjectKind.value
+          : this.subjectKind,
+      subjectId: data.subjectId.present ? data.subjectId.value : this.subjectId,
+      subjectLabel: data.subjectLabel.present
+          ? data.subjectLabel.value
+          : this.subjectLabel,
+      field: data.field.present ? data.field.value : this.field,
+      currentValue: data.currentValue.present
+          ? data.currentValue.value
+          : this.currentValue,
+      proposedValue: data.proposedValue.present
+          ? data.proposedValue.value
+          : this.proposedValue,
+      evidence: data.evidence.present ? data.evidence.value : this.evidence,
+      proposedBy: data.proposedBy.present
+          ? data.proposedBy.value
+          : this.proposedBy,
+      summary: data.summary.present ? data.summary.value : this.summary,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      decidedAt: data.decidedAt.present ? data.decidedAt.value : this.decidedAt,
+      provenanceCode: data.provenanceCode.present
+          ? data.provenanceCode.value
+          : this.provenanceCode,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProposedChangesTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('correlationId: $correlationId, ')
+          ..write('domain: $domain, ')
+          ..write('subjectKind: $subjectKind, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('subjectLabel: $subjectLabel, ')
+          ..write('field: $field, ')
+          ..write('currentValue: $currentValue, ')
+          ..write('proposedValue: $proposedValue, ')
+          ..write('evidence: $evidence, ')
+          ..write('proposedBy: $proposedBy, ')
+          ..write('summary: $summary, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('provenanceCode: $provenanceCode')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    correlationId,
+    domain,
+    subjectKind,
+    subjectId,
+    subjectLabel,
+    field,
+    currentValue,
+    proposedValue,
+    evidence,
+    proposedBy,
+    summary,
+    status,
+    createdAt,
+    decidedAt,
+    provenanceCode,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProposedChangesTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.correlationId == this.correlationId &&
+          other.domain == this.domain &&
+          other.subjectKind == this.subjectKind &&
+          other.subjectId == this.subjectId &&
+          other.subjectLabel == this.subjectLabel &&
+          other.field == this.field &&
+          other.currentValue == this.currentValue &&
+          other.proposedValue == this.proposedValue &&
+          other.evidence == this.evidence &&
+          other.proposedBy == this.proposedBy &&
+          other.summary == this.summary &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.decidedAt == this.decidedAt &&
+          other.provenanceCode == this.provenanceCode);
+}
+
+class ProposedChangesTableCompanion
+    extends UpdateCompanion<ProposedChangesTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String?> correlationId;
+  final Value<String> domain;
+  final Value<String> subjectKind;
+  final Value<String> subjectId;
+  final Value<String?> subjectLabel;
+  final Value<String> field;
+  final Value<String?> currentValue;
+  final Value<String> proposedValue;
+  final Value<String> evidence;
+  final Value<String> proposedBy;
+  final Value<String> summary;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> decidedAt;
+  final Value<String?> provenanceCode;
+  final Value<int> rowid;
+  const ProposedChangesTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.correlationId = const Value.absent(),
+    this.domain = const Value.absent(),
+    this.subjectKind = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    this.subjectLabel = const Value.absent(),
+    this.field = const Value.absent(),
+    this.currentValue = const Value.absent(),
+    this.proposedValue = const Value.absent(),
+    this.evidence = const Value.absent(),
+    this.proposedBy = const Value.absent(),
+    this.summary = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.decidedAt = const Value.absent(),
+    this.provenanceCode = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProposedChangesTableCompanion.insert({
+    required String id,
+    required String businessId,
+    this.correlationId = const Value.absent(),
+    required String domain,
+    required String subjectKind,
+    required String subjectId,
+    this.subjectLabel = const Value.absent(),
+    required String field,
+    this.currentValue = const Value.absent(),
+    required String proposedValue,
+    required String evidence,
+    required String proposedBy,
+    required String summary,
+    required String status,
+    required DateTime createdAt,
+    this.decidedAt = const Value.absent(),
+    this.provenanceCode = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       domain = Value(domain),
+       subjectKind = Value(subjectKind),
+       subjectId = Value(subjectId),
+       field = Value(field),
+       proposedValue = Value(proposedValue),
+       evidence = Value(evidence),
+       proposedBy = Value(proposedBy),
+       summary = Value(summary),
+       status = Value(status),
+       createdAt = Value(createdAt);
+  static Insertable<ProposedChangesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? correlationId,
+    Expression<String>? domain,
+    Expression<String>? subjectKind,
+    Expression<String>? subjectId,
+    Expression<String>? subjectLabel,
+    Expression<String>? field,
+    Expression<String>? currentValue,
+    Expression<String>? proposedValue,
+    Expression<String>? evidence,
+    Expression<String>? proposedBy,
+    Expression<String>? summary,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? decidedAt,
+    Expression<String>? provenanceCode,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (correlationId != null) 'correlation_id': correlationId,
+      if (domain != null) 'domain': domain,
+      if (subjectKind != null) 'subject_kind': subjectKind,
+      if (subjectId != null) 'subject_id': subjectId,
+      if (subjectLabel != null) 'subject_label': subjectLabel,
+      if (field != null) 'field': field,
+      if (currentValue != null) 'current_value': currentValue,
+      if (proposedValue != null) 'proposed_value': proposedValue,
+      if (evidence != null) 'evidence': evidence,
+      if (proposedBy != null) 'proposed_by': proposedBy,
+      if (summary != null) 'summary': summary,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (decidedAt != null) 'decided_at': decidedAt,
+      if (provenanceCode != null) 'provenance_code': provenanceCode,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProposedChangesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String?>? correlationId,
+    Value<String>? domain,
+    Value<String>? subjectKind,
+    Value<String>? subjectId,
+    Value<String?>? subjectLabel,
+    Value<String>? field,
+    Value<String?>? currentValue,
+    Value<String>? proposedValue,
+    Value<String>? evidence,
+    Value<String>? proposedBy,
+    Value<String>? summary,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? decidedAt,
+    Value<String?>? provenanceCode,
+    Value<int>? rowid,
+  }) {
+    return ProposedChangesTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      correlationId: correlationId ?? this.correlationId,
+      domain: domain ?? this.domain,
+      subjectKind: subjectKind ?? this.subjectKind,
+      subjectId: subjectId ?? this.subjectId,
+      subjectLabel: subjectLabel ?? this.subjectLabel,
+      field: field ?? this.field,
+      currentValue: currentValue ?? this.currentValue,
+      proposedValue: proposedValue ?? this.proposedValue,
+      evidence: evidence ?? this.evidence,
+      proposedBy: proposedBy ?? this.proposedBy,
+      summary: summary ?? this.summary,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      decidedAt: decidedAt ?? this.decidedAt,
+      provenanceCode: provenanceCode ?? this.provenanceCode,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (correlationId.present) {
+      map['correlation_id'] = Variable<String>(correlationId.value);
+    }
+    if (domain.present) {
+      map['domain'] = Variable<String>(domain.value);
+    }
+    if (subjectKind.present) {
+      map['subject_kind'] = Variable<String>(subjectKind.value);
+    }
+    if (subjectId.present) {
+      map['subject_id'] = Variable<String>(subjectId.value);
+    }
+    if (subjectLabel.present) {
+      map['subject_label'] = Variable<String>(subjectLabel.value);
+    }
+    if (field.present) {
+      map['field'] = Variable<String>(field.value);
+    }
+    if (currentValue.present) {
+      map['current_value'] = Variable<String>(currentValue.value);
+    }
+    if (proposedValue.present) {
+      map['proposed_value'] = Variable<String>(proposedValue.value);
+    }
+    if (evidence.present) {
+      map['evidence'] = Variable<String>(evidence.value);
+    }
+    if (proposedBy.present) {
+      map['proposed_by'] = Variable<String>(proposedBy.value);
+    }
+    if (summary.present) {
+      map['summary'] = Variable<String>(summary.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (decidedAt.present) {
+      map['decided_at'] = Variable<DateTime>(decidedAt.value);
+    }
+    if (provenanceCode.present) {
+      map['provenance_code'] = Variable<String>(provenanceCode.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProposedChangesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('correlationId: $correlationId, ')
+          ..write('domain: $domain, ')
+          ..write('subjectKind: $subjectKind, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('subjectLabel: $subjectLabel, ')
+          ..write('field: $field, ')
+          ..write('currentValue: $currentValue, ')
+          ..write('proposedValue: $proposedValue, ')
+          ..write('evidence: $evidence, ')
+          ..write('proposedBy: $proposedBy, ')
+          ..write('summary: $summary, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('provenanceCode: $provenanceCode, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueItemsTableTable extends SyncQueueItemsTable
     with TableInfo<$SyncQueueItemsTableTable, SyncQueueItemsTableData> {
   @override
@@ -16980,6 +17991,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SettlementLinesTableTable settlementLinesTable =
       $SettlementLinesTableTable(this);
   late final $PayoutsTableTable payoutsTable = $PayoutsTableTable(this);
+  late final $ProposedChangesTableTable proposedChangesTable =
+      $ProposedChangesTableTable(this);
   late final $SyncQueueItemsTableTable syncQueueItemsTable =
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
@@ -17098,6 +18111,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'payouts_connection_id',
     'CREATE INDEX payouts_connection_id ON payouts_table (connection_id)',
   );
+  late final Index proposedChangesBusinessId = Index(
+    'proposed_changes_business_id',
+    'CREATE INDEX proposed_changes_business_id ON proposed_changes_table (business_id)',
+  );
+  late final Index proposedChangesStatus = Index(
+    'proposed_changes_status',
+    'CREATE INDEX proposed_changes_status ON proposed_changes_table (status)',
+  );
+  late final Index proposedChangesSubject = Index(
+    'proposed_changes_subject',
+    'CREATE INDEX proposed_changes_subject ON proposed_changes_table (subject_kind, subject_id)',
+  );
+  late final Index proposedChangesCorrelation = Index(
+    'proposed_changes_correlation',
+    'CREATE INDEX proposed_changes_correlation ON proposed_changes_table (correlation_id)',
+  );
   late final Index businessJourneyNodesJourney = Index(
     'business_journey_nodes_journey',
     'CREATE INDEX business_journey_nodes_journey ON business_journey_nodes_table (journey_id)',
@@ -17132,6 +18161,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     identityLinkEventsTable,
     settlementLinesTable,
     payoutsTable,
+    proposedChangesTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
     businessInputsTable,
@@ -17166,6 +18196,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     settlementLinesPayoutId,
     payoutsBusinessId,
     payoutsConnectionId,
+    proposedChangesBusinessId,
+    proposedChangesStatus,
+    proposedChangesSubject,
+    proposedChangesCorrelation,
     businessJourneyNodesJourney,
     chatMessagesConversation,
     chatMessagesSentAt,
@@ -17296,6 +18330,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('payouts_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('proposed_changes_table', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -17675,6 +18716,31 @@ final class $$BusinessesTableTableReferences
     ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_payoutsTableRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ProposedChangesTableTable,
+    List<ProposedChangesTableData>
+  >
+  _proposedChangesTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.proposedChangesTable,
+        aliasName: 'businesses_table__id__proposed_changes_table__business_id',
+      );
+
+  $$ProposedChangesTableTableProcessedTableManager
+  get proposedChangesTableRefs {
+    final manager = $$ProposedChangesTableTableTableManager(
+      $_db,
+      $_db.proposedChangesTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _proposedChangesTableRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -18131,6 +19197,31 @@ class $$BusinessesTableTableFilterComposer
           }) => $$PayoutsTableTableFilterComposer(
             $db: $db,
             $table: $db.payoutsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> proposedChangesTableRefs(
+    Expression<bool> Function($$ProposedChangesTableTableFilterComposer f) f,
+  ) {
+    final $$ProposedChangesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.proposedChangesTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProposedChangesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.proposedChangesTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -18670,6 +19761,32 @@ class $$BusinessesTableTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> proposedChangesTableRefs<T extends Object>(
+    Expression<T> Function($$ProposedChangesTableTableAnnotationComposer a) f,
+  ) {
+    final $$ProposedChangesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.proposedChangesTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ProposedChangesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.proposedChangesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$BusinessesTableTableTableManager
@@ -18702,6 +19819,7 @@ class $$BusinessesTableTableTableManager
             bool identityLinkEventsTableRefs,
             bool settlementLinesTableRefs,
             bool payoutsTableRefs,
+            bool proposedChangesTableRefs,
           })
         > {
   $$BusinessesTableTableTableManager(
@@ -18799,6 +19917,7 @@ class $$BusinessesTableTableTableManager
                 identityLinkEventsTableRefs = false,
                 settlementLinesTableRefs = false,
                 payoutsTableRefs = false,
+                proposedChangesTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -18818,6 +19937,7 @@ class $$BusinessesTableTableTableManager
                     if (identityLinkEventsTableRefs) db.identityLinkEventsTable,
                     if (settlementLinesTableRefs) db.settlementLinesTable,
                     if (payoutsTableRefs) db.payoutsTable,
+                    if (proposedChangesTableRefs) db.proposedChangesTable,
                   ],
                   addJoins:
                       <
@@ -19170,6 +20290,27 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (proposedChangesTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          ProposedChangesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._proposedChangesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).proposedChangesTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -19207,6 +20348,7 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool identityLinkEventsTableRefs,
         bool settlementLinesTableRefs,
         bool payoutsTableRefs,
+        bool proposedChangesTableRefs,
       })
     >;
 typedef $$UsersTableTableCreateCompanionBuilder =
@@ -27960,6 +29102,585 @@ typedef $$PayoutsTableTableProcessedTableManager =
       PayoutsTableData,
       PrefetchHooks Function({bool businessId})
     >;
+typedef $$ProposedChangesTableTableCreateCompanionBuilder =
+    ProposedChangesTableCompanion Function({
+      required String id,
+      required String businessId,
+      Value<String?> correlationId,
+      required String domain,
+      required String subjectKind,
+      required String subjectId,
+      Value<String?> subjectLabel,
+      required String field,
+      Value<String?> currentValue,
+      required String proposedValue,
+      required String evidence,
+      required String proposedBy,
+      required String summary,
+      required String status,
+      required DateTime createdAt,
+      Value<DateTime?> decidedAt,
+      Value<String?> provenanceCode,
+      Value<int> rowid,
+    });
+typedef $$ProposedChangesTableTableUpdateCompanionBuilder =
+    ProposedChangesTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String?> correlationId,
+      Value<String> domain,
+      Value<String> subjectKind,
+      Value<String> subjectId,
+      Value<String?> subjectLabel,
+      Value<String> field,
+      Value<String?> currentValue,
+      Value<String> proposedValue,
+      Value<String> evidence,
+      Value<String> proposedBy,
+      Value<String> summary,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<DateTime?> decidedAt,
+      Value<String?> provenanceCode,
+      Value<int> rowid,
+    });
+
+final class $$ProposedChangesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ProposedChangesTableTable,
+          ProposedChangesTableData
+        > {
+  $$ProposedChangesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
+      .businessesTable
+      .createAlias('proposed_changes_table__business_id__businesses_table__id');
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ProposedChangesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ProposedChangesTableTable> {
+  $$ProposedChangesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get domain => $composableBuilder(
+    column: $table.domain,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectLabel => $composableBuilder(
+    column: $table.subjectLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get field => $composableBuilder(
+    column: $table.field,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currentValue => $composableBuilder(
+    column: $table.currentValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get proposedValue => $composableBuilder(
+    column: $table.proposedValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get evidence => $composableBuilder(
+    column: $table.evidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get proposedBy => $composableBuilder(
+    column: $table.proposedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProposedChangesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProposedChangesTableTable> {
+  $$ProposedChangesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get domain => $composableBuilder(
+    column: $table.domain,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectLabel => $composableBuilder(
+    column: $table.subjectLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get field => $composableBuilder(
+    column: $table.field,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currentValue => $composableBuilder(
+    column: $table.currentValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get proposedValue => $composableBuilder(
+    column: $table.proposedValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get evidence => $composableBuilder(
+    column: $table.evidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get proposedBy => $composableBuilder(
+    column: $table.proposedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProposedChangesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProposedChangesTableTable> {
+  $$ProposedChangesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get domain =>
+      $composableBuilder(column: $table.domain, builder: (column) => column);
+
+  GeneratedColumn<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subjectId =>
+      $composableBuilder(column: $table.subjectId, builder: (column) => column);
+
+  GeneratedColumn<String> get subjectLabel => $composableBuilder(
+    column: $table.subjectLabel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get field =>
+      $composableBuilder(column: $table.field, builder: (column) => column);
+
+  GeneratedColumn<String> get currentValue => $composableBuilder(
+    column: $table.currentValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get proposedValue => $composableBuilder(
+    column: $table.proposedValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get evidence =>
+      $composableBuilder(column: $table.evidence, builder: (column) => column);
+
+  GeneratedColumn<String> get proposedBy => $composableBuilder(
+    column: $table.proposedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get summary =>
+      $composableBuilder(column: $table.summary, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get decidedAt =>
+      $composableBuilder(column: $table.decidedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get provenanceCode => $composableBuilder(
+    column: $table.provenanceCode,
+    builder: (column) => column,
+  );
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProposedChangesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProposedChangesTableTable,
+          ProposedChangesTableData,
+          $$ProposedChangesTableTableFilterComposer,
+          $$ProposedChangesTableTableOrderingComposer,
+          $$ProposedChangesTableTableAnnotationComposer,
+          $$ProposedChangesTableTableCreateCompanionBuilder,
+          $$ProposedChangesTableTableUpdateCompanionBuilder,
+          (ProposedChangesTableData, $$ProposedChangesTableTableReferences),
+          ProposedChangesTableData,
+          PrefetchHooks Function({bool businessId})
+        > {
+  $$ProposedChangesTableTableTableManager(
+    _$AppDatabase db,
+    $ProposedChangesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProposedChangesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProposedChangesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ProposedChangesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String?> correlationId = const Value.absent(),
+                Value<String> domain = const Value.absent(),
+                Value<String> subjectKind = const Value.absent(),
+                Value<String> subjectId = const Value.absent(),
+                Value<String?> subjectLabel = const Value.absent(),
+                Value<String> field = const Value.absent(),
+                Value<String?> currentValue = const Value.absent(),
+                Value<String> proposedValue = const Value.absent(),
+                Value<String> evidence = const Value.absent(),
+                Value<String> proposedBy = const Value.absent(),
+                Value<String> summary = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> decidedAt = const Value.absent(),
+                Value<String?> provenanceCode = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProposedChangesTableCompanion(
+                id: id,
+                businessId: businessId,
+                correlationId: correlationId,
+                domain: domain,
+                subjectKind: subjectKind,
+                subjectId: subjectId,
+                subjectLabel: subjectLabel,
+                field: field,
+                currentValue: currentValue,
+                proposedValue: proposedValue,
+                evidence: evidence,
+                proposedBy: proposedBy,
+                summary: summary,
+                status: status,
+                createdAt: createdAt,
+                decidedAt: decidedAt,
+                provenanceCode: provenanceCode,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                Value<String?> correlationId = const Value.absent(),
+                required String domain,
+                required String subjectKind,
+                required String subjectId,
+                Value<String?> subjectLabel = const Value.absent(),
+                required String field,
+                Value<String?> currentValue = const Value.absent(),
+                required String proposedValue,
+                required String evidence,
+                required String proposedBy,
+                required String summary,
+                required String status,
+                required DateTime createdAt,
+                Value<DateTime?> decidedAt = const Value.absent(),
+                Value<String?> provenanceCode = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProposedChangesTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                correlationId: correlationId,
+                domain: domain,
+                subjectKind: subjectKind,
+                subjectId: subjectId,
+                subjectLabel: subjectLabel,
+                field: field,
+                currentValue: currentValue,
+                proposedValue: proposedValue,
+                evidence: evidence,
+                proposedBy: proposedBy,
+                summary: summary,
+                status: status,
+                createdAt: createdAt,
+                decidedAt: decidedAt,
+                provenanceCode: provenanceCode,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ProposedChangesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$ProposedChangesTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$ProposedChangesTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ProposedChangesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProposedChangesTableTable,
+      ProposedChangesTableData,
+      $$ProposedChangesTableTableFilterComposer,
+      $$ProposedChangesTableTableOrderingComposer,
+      $$ProposedChangesTableTableAnnotationComposer,
+      $$ProposedChangesTableTableCreateCompanionBuilder,
+      $$ProposedChangesTableTableUpdateCompanionBuilder,
+      (ProposedChangesTableData, $$ProposedChangesTableTableReferences),
+      ProposedChangesTableData,
+      PrefetchHooks Function({bool businessId})
+    >;
 typedef $$SyncQueueItemsTableTableCreateCompanionBuilder =
     SyncQueueItemsTableCompanion Function({
       Value<int> id,
@@ -30759,6 +32480,8 @@ class $AppDatabaseManager {
       $$SettlementLinesTableTableTableManager(_db, _db.settlementLinesTable);
   $$PayoutsTableTableTableManager get payoutsTable =>
       $$PayoutsTableTableTableManager(_db, _db.payoutsTable);
+  $$ProposedChangesTableTableTableManager get proposedChangesTable =>
+      $$ProposedChangesTableTableTableManager(_db, _db.proposedChangesTable);
   $$SyncQueueItemsTableTableTableManager get syncQueueItemsTable =>
       $$SyncQueueItemsTableTableTableManager(_db, _db.syncQueueItemsTable);
   $$SupplierFavoritesTableTableTableManager get supplierFavoritesTable =>

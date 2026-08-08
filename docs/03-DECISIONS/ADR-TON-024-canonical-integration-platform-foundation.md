@@ -123,6 +123,7 @@ persistence, chưa nối UI, chưa connector nào ghi vào các bảng mới).
 |---|---|---|---|
 | 1 · liên kết ≠ gộp | `consumer/external_identity*.dart` · schema **v19** | WTM-291 | suite quét mã, 3 lớp — lớp quyết định: *"seam không chạm `customersTable`"* |
 | 1b · **confidence TÍNH, không khai** | `consumer/identity_evidence.dart` | **WTM-298** | `identity_confidence_is_derived_governance_test` — 3 lớp |
+| 1c · **thay đổi do AI có vòng đời** | `proposal/` · schema **v21** | **WTM-299** | `proposed_change_lifecycle_governance_test` — 3 lớp |
 | 2 · settlement | `finance/settlement*.dart` · `true_profit.dart` · schema **v20** | WTM-292 | suite quét mã, 3 lớp — lớp tinh tế nhất: *"phân bổ không trả về `SettlementLine`"* |
 | 3 · catalog/matrix là dữ liệu | `platform/vendor_catalog.dart` · `capability_matrix.dart` | WTM-293 | **kiểu dữ liệu** — `CapabilityClaim` không mang hai cột đầu, constructor private |
 | 4 · canonical event | `platform/canonical_event.dart` | WTM-294 | **kiểu dữ liệu** — `type` là enum, nên mã nền tảng không dựng được envelope |
@@ -184,3 +185,50 @@ như vô giá trị (chung cư, toà nhà).
 **Thiếu dữ liệu không phải bằng chứng ngược:** từ vựng **không có** cách nào
 diễn đạt *"thiếu số điện thoại"*. Một khách không có email là bình thường ở
 Việt Nam, không phải dấu hiệu họ là người khác.
+
+
+---
+
+## Bổ sung WTM-299 — vòng đề xuất (D-2)
+
+Trước phase này, một đề xuất của AI (`SuggestLink`) chỉ là **giá trị trả về
+trong bộ nhớ**: không sống qua một lần đóng app. Hệ quả là Tổng Tài **không thể**
+lên mức **L2 · Prepare** — AI chuẩn bị sẵn, người bán bấm xác nhận — vì không
+có chỗ nào giữ cái "đã chuẩn bị sẵn".
+
+`ProposedChange` (schema v21) có bốn trạng thái: `proposed` · `applied` ·
+`dismissed` · `superseded`. Bốn cổng theo thứ tự, tất cả trong một **hàm thuần**
+không chạm cơ sở dữ liệu:
+
+1. dưới sàn ⇒ **không lưu gì** (không phải lưu rồi ẩn)
+2. đã bỏ qua ⇒ xem luật xét lại
+3. **người bán đã tự điền ⇒ thắng mọi bằng chứng**
+4. đã áp dụng đúng giá trị này rồi ⇒ không đề nghị lại
+
+Một đề xuất **không bao giờ tự chuyển `applied`**, kể cả khi bằng chứng rất
+mạnh. Tự áp dụng là bước sang **L3 · Policy Automation**, và L3 cần
+`AutonomyRule` (WTM-300), không phải một ngưỡng điểm.
+
+### `DISMISSED` không vĩnh viễn cho mọi miền (Founder chỉ đạo 2026-08-08)
+
+COMP AI cấm vĩnh viễn — đúng cho *tên một người*, **sai** cho giá nhà cung cấp.
+Luật nằm **trên miền**, đọc được, không nằm trong đầu ai:
+
+| Miền | Xét lại sau |
+|---|---|
+| `identity` | **không bao giờ** |
+| `pricing` · `supplier` · `forecast` · `inventory` | 30 ngày |
+| `customerProfile` | 90 ngày |
+
+Cộng một đường thứ hai cho **mọi miền**: bằng chứng **mạnh hơn** lần bị bỏ qua
+mở lại được ngay — kể cả `identity`. Bằng chứng ngang hoặc yếu hơn thì không.
+
+### `superseded` không xoá dòng cũ
+
+Cùng cơ chế `lastEmployerChange()` của COMP AI: giữ bản cũ thì **phát hiện thay
+đổi là hệ quả miễn phí**, không cần cơ chế riêng.
+
+### `correlationId` thay cho `BusinessConversation`
+
+Một trường, không phải một bảng. "Câu chuyện của khách này" là một **truy vấn**
+(WTM-296 §10).

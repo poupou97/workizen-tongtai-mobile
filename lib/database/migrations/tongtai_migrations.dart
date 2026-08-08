@@ -38,6 +38,18 @@
 /// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
 /// addresses, notes). Same additive-nullable convention as v5.
 ///
+/// ## Schema v21 (WTM-299 — ProposedChange, D-2)
+/// v21 adds `proposed_changes_table`. Purely additive.
+///
+/// The table stores `evidence` (JSON) but **no confidence or score column**:
+/// the level is computed from the evidence at read time (WTM-298). Storing a
+/// declared number here would reopen the exact back door the previous phase
+/// closed — a caller could write whatever level it liked.
+///
+/// `decided_at` is nullable because `null` means **nobody has decided yet**,
+/// which is not the same as "decided at zero" — the `null` ≠ `0` discipline
+/// applied since v14.
+///
 /// ## Schema v20 (WTM-292 — Settlement Domain, N0.4 · ADR-TON-024)
 /// v20 adds `settlement_lines_table` and `payouts_table`. Purely additive.
 ///
@@ -100,7 +112,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 20;
+const int kTongtaiSchemaVersion = 21;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -328,6 +340,20 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 21) {
+        // v21 (WTM-299 / D-2 — ProposedChange). Một bảng mới, thuần thêm mới.
+        //
+        // KHÔNG có cột điểm/confidence: mức tin cậy tính từ `evidence` lúc đọc
+        // (WTM-298). Lưu một con số khai sẵn ở đây là mở lại đúng cửa sau vừa
+        // đóng ở phase trước.
+        //
+        // `decided_at` nullable: `null` = CHƯA ai quyết, khác hẳn "quyết lúc
+        // 0" — cùng kỷ luật `null` ≠ `0` đã áp từ v14.
+        final proposals = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'proposed_changes_table',
+        );
+        await m.createTable(proposals);
       }
       if (from < 20) {
         // v20 (WTM-292 / N0.4 — Settlement Domain, ADR-TON-024 luật 2). Hai
