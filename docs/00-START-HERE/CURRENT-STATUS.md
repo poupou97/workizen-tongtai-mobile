@@ -1,4 +1,44 @@
-# Current Status — 2026-08-01
+# Current Status — 2026-08-08
+
+## 🎯 Wave đang chạy: AGENTIC EXPERIENCE BUILD (Epic WTM-302)
+
+> Founder Task Order 2026-08-08: **research/architecture PAUSED**.
+> `BUILD → INSTALL → EXPERIENCE → DOGFOOD → FEEDBACK`
+
+Epic WTM-297 dựng xong năm tầng agentic nhưng để **tất cả ở L0** — có bảng, có
+luật, có test, và không màn hình nào chạm được. Wave này biến chúng thành UX.
+
+| Story | Trải nghiệm | Trạng thái |
+|---|---|---|
+| WTM-303 | động cơ Brief + nối Riverpod (L0) | ✅ #180 |
+| WTM-304 | **#1** AI Morning Brief + màn Tổng Tài (L3) | ✅ #181 |
+| WTM-305 | **#2** Business Story + **#5** Agent Activity (L3) | ✅ #182 |
+| WTM-306 | **#3** Orchestration Card + **#4** Autonomy (L2) | ✅ #183 |
+| WTM-307 | Runner V1 + Đặt lại dữ liệu mẫu (L3) | ✅ #184 · ⛔ device test chặn |
+
+`main` @ `d4ec368` · **2244 test xanh** · analyze sạch.
+
+### ⛔ Đang chờ Founder — cài lên máy thật
+
+APK ký bằng keystore hiện tại **không cài đè được** bản trên SM S928B: bản đó
+ký bằng khoá cũ (cài 24/7, cập nhật 2/8; keystore hiện tại tạo 7/8). Gỡ app
+sẽ **xoá dữ liệu nghiệp vụ thật** — stop condition §17.
+
+Đường an toàn: **Sao lưu `.ttbk`** trong app → gỡ → cài bản mới → **Khôi phục**.
+APK sẵn ở `~/Desktop/TongTai-AgenticExperience-d4ec368.apk`.
+
+### Chỗ nào THẬT, chỗ nào còn diễn tập
+
+| Thật | Diễn tập |
+|---|---|
+| Rule Twin sinh việc từ sổ sách thật | gửi tin ra ngoài (`ActionVendor.demo`) |
+| Đề xuất/hành động/lời hẹn có vòng đời, sống qua tắt app | mức `Tự động` (nhãn **Xem trước**) |
+| Duyệt đề xuất giá ⇒ **giá sản phẩm đổi thật** | dựng phiếu nhập hàng |
+| Runner đóng việc, hẹn lại | — |
+
+---
+
+# Current Status — 2026-08-01 (giữ lại bên dưới)
 
 ## 🧭 Hướng sản phẩm đã chốt (Founder 2026-08-01 · ADR-TON-020)
 
