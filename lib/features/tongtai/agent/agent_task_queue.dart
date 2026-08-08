@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../database/database.dart';
 import '../core/local_workspace.dart';
+import '../core/provenance.dart';
 import 'agent_task.dart';
 
 /// Hàng đợi việc bền vững (WTM-301 · D-4).
@@ -240,6 +241,20 @@ class AgentTaskQueue {
               ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
             .get();
     return rows.map(_toTask).nonNulls.toList();
+  }
+
+  /// Xoá việc thuộc **đối tượng mẫu** — WTM-307.
+  ///
+  /// `subjectId` có thể `null` (việc toàn doanh nghiệp) — những việc đó KHÔNG
+  /// bị xoá: chúng không thuộc về dữ liệu mẫu nào cả.
+  Future<int> deleteForSampleSubjects() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    return (_db.delete(_db.agentTasksTable)..where(
+          (t) =>
+              t.businessId.equals(businessId) &
+              t.subjectId.like('$kSampleIdPrefix%'),
+        ))
+        .go();
   }
 
   Future<void> deleteAll() async {

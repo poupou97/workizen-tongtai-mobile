@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
+import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../agent/agent_activity.dart';
+import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../agent/agent_runner.dart';
 import '../../providers/tongtai_agentic_provider.dart';
+import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_screen_data.dart';
 
@@ -20,13 +24,76 @@ import '../widgets/tongtai_screen_data.dart';
 /// Người bán nhớ theo *"hôm nay tôi đã làm gì"*, không theo *"đề xuất của tôi
 /// đang ở trạng thái nào"*. Gộp theo loại sẽ dựng lại đúng cái bảng quản trị
 /// mà màn này sinh ra để thay thế.
-class TongtaiActivityScreen extends ConsumerWidget {
-  const TongtaiActivityScreen({super.key, this.clock});
+class TongtaiActivityScreen extends ConsumerStatefulWidget {
+  const TongtaiActivityScreen({super.key, this.clock, this.autoRun = true});
 
   final DateTime Function()? clock;
 
+  /// Chạy một lượt runner ngay khi mở màn. Tắt trong test muốn xem trạng thái
+  /// **trước** khi runner đụng vào.
+  final bool autoRun;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TongtaiActivityScreen> createState() =>
+      _TongtaiActivityScreenState();
+}
+
+class _TongtaiActivityScreenState extends ConsumerState<TongtaiActivityScreen> {
+  bool _running = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Runner V1 chạy **khi app đang mở** (Task Order §12). Mở đúng màn kể lại
+    // việc agent đã làm là thời điểm tự nhiên nhất: người bán vào đây để xem
+    // nó đã làm gì, nên để nó làm nốt phần đến hạn trước khi kể là hợp lý.
+    if (widget.autoRun) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _run(silent: true));
+    }
+  }
+
+  /// Một lượt chạy. [silent] cho lượt tự động — không bắn snack khi không có
+  /// gì đến hạn, vì mở màn nào cũng thấy một thông báo là phiền.
+  Future<void> _run({bool silent = false}) async {
+    if (_running) return;
+    setState(() => _running = true);
+
+    AgentRunReport report = AgentRunReport.none;
+    final failure = await runTongtaiAction(
+      () async => report = await ref.read(agentRunnerProvider).runOnce(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'activity',
+    );
+
+    if (!mounted) return;
+    setState(() => _running = false);
+    if (failure != null) {
+      if (!silent) showTongtaiFailure(context, failure);
+      return;
+    }
+
+    // Một lượt runner ĐÓNG việc — tức là đổi thứ Home, brief và hành trình
+    // đang hiện. Chỉ làm mới màn này sẽ để mọi màn khác nói con số cũ
+    // (WTM-149 device defect 1).
+    if (report.didSomething) invalidateBusinessDataProviders(ref);
+    if (silent && !report.didSomething) return;
+
+    final l10n = context.l10n;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            report.didSomething
+                ? l10n.agentRunDone(report.claimed)
+                : l10n.agentRunNothing,
+          ),
+        ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final activity = ref.watch(agentActivityProvider);
 
@@ -37,6 +104,14 @@ class TongtaiActivityScreen extends ConsumerWidget {
         elevation: 0,
         backgroundColor: TongtaiDesignTokens.lightBackground,
         foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        actions: [
+          IconButton(
+            key: const Key('activity-run'),
+            tooltip: l10n.agentRunNow,
+            icon: const Icon(Icons.play_circle_outline),
+            onPressed: _running ? null : _run,
+          ),
+        ],
       ),
       body: SafeArea(
         child: TongtaiAsyncScreenData<List<ActivityEntry>>(
@@ -46,7 +121,7 @@ class TongtaiActivityScreen extends ConsumerWidget {
           isEmpty: (entries) => entries.isEmpty,
           emptyBuilder: (context) => const _ActivityEmpty(),
           builder: (context, entries) =>
-              _ActivityBody(entries: entries, clock: clock),
+              _ActivityBody(entries: entries, clock: widget.clock),
         ),
       ),
     );

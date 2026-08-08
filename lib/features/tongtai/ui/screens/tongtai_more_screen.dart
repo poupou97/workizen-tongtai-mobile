@@ -8,6 +8,7 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../../core/screen_data_controller.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../../providers/tongtai_agentic_provider.dart';
 import '../../providers/tongtai_sample_provider.dart';
 import '../../sample/historical_data_generator.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
@@ -119,6 +120,56 @@ class TongtaiMoreScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(l10n.moreSampleLoadedSnack)));
+  }
+
+  /// **Đặt lại dữ liệu mẫu** (WTM-307 · Task Order §14) — một thao tác, không
+  /// phải gỡ cài đặt app.
+  ///
+  /// Khác "Xem thử Demo" ở chỗ nó cũng dọn **quyết định** đã ra cho dữ liệu
+  /// mẫu. Gieo lại mà giữ quyết định thì lần thử thứ hai mở ra với *"bạn đã bỏ
+  /// qua việc này"*, và Founder không bao giờ xem lại được flow từ đầu.
+  Future<void> _resetDemo(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.moreResetDemoConfirmTitle),
+        content: Text(dialogContext.l10n.moreResetDemoConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(dialogContext.l10n.actionCancel),
+          ),
+          FilledButton(
+            key: const Key('more-reset-demo-confirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(dialogContext.l10n.moreResetDemo),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    var removed = 0;
+    final failure = await runTongtaiAction(
+      () async => removed =
+          (await ref.read(demoResetServiceProvider).reset()).decisions,
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'more',
+    );
+    if (!context.mounted) return;
+    if (failure != null) {
+      showTongtaiFailure(
+        context,
+        failure,
+        onRetry: () => _resetDemo(context, ref),
+      );
+      return;
+    }
+    invalidateBusinessDataProviders(ref);
+    final l10n = context.l10n;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l10n.moreResetDemoSnack(removed))));
   }
 
   /// WTM-149/ADR-TON-016: seeds 12 consecutive months of history so the
@@ -298,6 +349,12 @@ class TongtaiMoreScreen extends ConsumerWidget {
                       builder: (_) => const TongtaiAgentScreen(),
                     ),
                   ),
+                ),
+                _SettingsItem(
+                  key: const Key('more-reset-demo'),
+                  icon: Icons.restart_alt,
+                  label: context.l10n.moreResetDemo,
+                  onTap: () => _resetDemo(context, ref),
                 ),
                 _SettingsItem(
                   key: const Key('more-autonomy'),

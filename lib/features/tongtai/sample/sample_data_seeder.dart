@@ -1,4 +1,5 @@
 import '../consumer/customer.dart';
+import '../core/provenance.dart';
 import '../consumer/customer_directory_service.dart' show kSampleCustomers;
 import '../consumer/customer_repository.dart';
 import '../finance/finance_repository.dart';
@@ -13,7 +14,12 @@ import '../orders/order_repository.dart';
 /// Every seeded sample record carries this id prefix (WTM-144/ADR-TON-014) —
 /// user-created records use UUIDs, so the prefix can never collide and
 /// [SampleDataSeeder.removeAll] can delete samples without touching user data.
-const String kSampleIdPrefix = 'sample-';
+///
+/// WTM-307 moved the constant itself to `core/provenance.dart`: three layers
+/// need it now (seeding, provenance inference, agentic demo-reset), and a
+/// second hand-written copy is exactly the shape of bug `Provenance` exists
+/// to clean up. Re-exported so every existing importer keeps working.
+export '../core/provenance.dart' show kSampleIdPrefix;
 
 /// Seeds the built-in sample fixtures INTO the production repositories
 /// (WTM-144, P0 Regression Audit §1 → ADR-TON-014).

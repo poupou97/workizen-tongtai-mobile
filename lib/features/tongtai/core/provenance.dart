@@ -12,6 +12,14 @@ import 'package:flutter/foundation.dart';
 /// Nó đã gây một lỗi thật: Founder nhầm màn demo với dashboard thật (WTM-143).
 /// Bản vá lúc đó là một banner; nguyên nhân gốc là ranh giới nguồn gốc **không
 /// tồn tại trong model**.
+/// Tiền tố id của mọi bản ghi mẫu (ADR-TON-014).
+///
+/// Sống ở đây chứ không ở lớp gieo dữ liệu vì **ba** tầng cần nó: lớp gieo,
+/// [Provenance.inferFromId], và các kho của tầng agentic khi đặt lại demo.
+/// Trước WTM-307 nó được viết tay ở hai chỗ — đúng hình dạng lỗi mà chính
+/// `Provenance` sinh ra để dọn.
+const String kSampleIdPrefix = 'sample-';
+
 enum ProvenanceSource {
   /// Người bán tự nhập. Đây là dữ liệu có thẩm quyền cao nhất — mọi thứ khác
   /// nhường nó khi xung đột (bài học FK 787: user data thắng).
@@ -86,7 +94,7 @@ class Provenance {
   /// Chỉ có hai tiền tố từng được dùng làm dấu hiệu nguồn gốc; mọi id khác là
   /// người bán tự tạo (UUID, theo ADR-TON-014 nên không đụng hai tiền tố này).
   static Provenance inferFromId(String id) {
-    if (id.startsWith('sample-')) {
+    if (id.startsWith(kSampleIdPrefix)) {
       return const Provenance.inferred(ProvenanceSource.sample);
     }
     if (id.startsWith('gen-')) {
