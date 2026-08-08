@@ -21,6 +21,7 @@ import 'tongtai_finance_screen.dart';
 import 'tongtai_forecast_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
+import 'tongtai_agent_screen.dart';
 import 'tongtai_timeline_screen.dart';
 import 'tongtai_privacy_policy_screen.dart';
 import 'tongtai_about_screen.dart';
@@ -283,6 +284,19 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   icon: Icons.delete_sweep_outlined,
                   label: context.l10n.moreRemoveSample,
                   onTap: () => _removeSamples(context, ref),
+                ),
+                // Màn Tổng Tài (WTM-304) — nơi ở của agent. Cũng tới được
+                // từ thẻ brief trên Home; ở đây là lối thứ hai, cho lúc thẻ
+                // trống vì hôm nay không có việc nào.
+                _SettingsItem(
+                  key: const Key('more-agent'),
+                  icon: Icons.auto_awesome_outlined,
+                  label: context.l10n.titleAgent,
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiAgentScreen(),
+                    ),
+                  ),
                 ),
                 _SettingsItem(
                   key: const Key('more-timeline'),

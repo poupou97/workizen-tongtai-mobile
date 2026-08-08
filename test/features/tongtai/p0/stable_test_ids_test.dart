@@ -30,6 +30,7 @@ void main() {
     'tongtai_reports_screen.dart': 'reports',
     'tongtai_forecast_screen.dart': 'forecast',
     'tongtai_customer_risk_screen.dart': 'risk',
+    'tongtai_agent_screen.dart': 'agent',
     'tongtai_export_screen.dart': 'export',
     'tongtai_backup_screen.dart': 'backup',
     'tongtai_more_screen.dart': 'more',
@@ -73,6 +74,19 @@ void main() {
     'tongtai_forecast_screen.dart',
   };
 
+  /// Màn hiện danh sách bản ghi bằng một **widget dùng chung**.
+  ///
+  /// Màn Tổng Tài và thẻ brief trên Home hiện CÙNG một việc, nên hàng được
+  /// dựng ở `widgets/tongtai_brief_widgets.dart` chứ không ở file màn. Viết
+  /// hai lần thì hai bề mặt sẽ nói khác nhau về cùng một khách (P-27).
+  ///
+  /// Luật "mỗi hàng có key theo id" vẫn phải đúng — chỉ là phải tìm ở đúng
+  /// chỗ. Bỏ qua ở đây sẽ là một lỗ mà màn tiếp theo chui lọt.
+  const sharedRowWidgets = <String>[
+    'lib/features/tongtai/ui/widgets/tongtai_brief_widgets.dart',
+    'lib/features/tongtai/ui/widgets/tongtai_brief_card.dart',
+  ];
+
   final keyLiteral = RegExp(r"Key\(\s*'([^']+)'");
 
   Map<String, List<String>> keysPerScreen() {
@@ -115,6 +129,26 @@ void main() {
           '<screen>-<role> — xem docs/04-DELIVERY/TESTING-BIBLE.md:\n'
           '${offenders.join('\n')}',
     );
+  });
+
+  test('widget hàng dùng chung vẫn key theo id bản ghi', () {
+    // Tìm `…-item-$item.id` bất kể tiền tố là hằng (`home-brief-item-`) hay
+    // biến (`$keyPrefix-item-`). Kiểm cái CÓ MẶT trong key, không kiểm cách
+    // viết chuỗi — một luật bám vào cú pháp sẽ đỏ oan ở lần đổi tên biến đầu
+    // tiên, và một luật hay đỏ oan sẽ bị tắt đi.
+    final rowKey = RegExp(r"Key\(\s*'[^']*-item-\$\{?item\.id");
+    for (final path in sharedRowWidgets) {
+      final file = File(path);
+      expect(file.existsSync(), isTrue, reason: '$path biến mất');
+      expect(
+        rowKey.hasMatch(file.readAsStringSync()),
+        isTrue,
+        reason:
+            '$path: hàng phải mang key "<prefix>-item-<id>" — nếu không thì '
+            'không test nào chứng minh được hàng người dùng thấy đúng là hàng '
+            'bản tóm tắt đã đếm',
+      );
+    }
   });
 
   test('list screens key each row with the record id (<prefix>-item-)', () {

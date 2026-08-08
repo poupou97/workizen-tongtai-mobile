@@ -26,6 +26,35 @@ abstract class AppStrings {
   String get settingsLanguage;
   String get languagePickerTitle;
 
+  // ── Tổng Tài · brief hằng ngày (WTM-304, Epic WTM-302) ─────────────────
+  /// Lời chào theo buổi — thứ đầu tiên người bán đọc khi mở app.
+  String get briefGreetingMorning;
+  String get briefGreetingAfternoon;
+  String get briefGreetingEvening;
+
+  /// "Có N việc đáng chú ý hôm nay".
+  String briefHeadline(int count);
+
+  String get briefNothingTitle;
+  String get briefNothingBody;
+  String get briefSeeAll;
+  String get briefSectionDecide;
+  String get briefSectionKnow;
+
+  /// Nhãn nguồn gốc — dữ liệu mẫu phải NHÌN RA ĐƯỢC (WTM-143).
+  String get briefDemoBadge;
+
+  String get briefWhyTitle;
+  String get briefSuggestTitle;
+
+  String get briefStatusPending;
+  String get briefStatusAccepted;
+  String get briefStatusDismissed;
+  String get briefStatusPostponed;
+
+  String get titleAgent;
+  String get agentSubtitle;
+
   // ── navigation / screen titles (P0 §2 WTM-145: one active locale) ──────
   String get titleReports;
   String get titleFinance;
@@ -1379,6 +1408,44 @@ class AppStringsVi extends AppStrings {
   @override
   String get navMore => 'Thêm';
   @override
+  String get briefGreetingMorning => 'Chào buổi sáng';
+  @override
+  String get briefGreetingAfternoon => 'Chào buổi chiều';
+  @override
+  String get briefGreetingEvening => 'Chào buổi tối';
+  @override
+  String briefHeadline(int count) => 'Có $count việc đáng chú ý hôm nay';
+  @override
+  String get briefNothingTitle => 'Chưa có việc nào cần bạn quyết';
+  @override
+  String get briefNothingBody =>
+      'Tôi vẫn đang theo dõi khách, kho và dòng tiền. Có gì đáng chú ý tôi báo ngay.';
+  @override
+  String get briefSeeAll => 'Xem tất cả';
+  @override
+  String get briefSectionDecide => 'Đang chờ bạn quyết';
+  @override
+  String get briefSectionKnow => 'Chỉ để bạn biết';
+  @override
+  String get briefDemoBadge => 'Dữ liệu mẫu';
+  @override
+  String get briefWhyTitle => 'Vì sao tôi nghĩ vậy';
+  @override
+  String get briefSuggestTitle => 'Nên làm';
+  @override
+  String get briefStatusPending => 'Đang chờ bạn';
+  @override
+  String get briefStatusAccepted => 'Bạn đã duyệt';
+  @override
+  String get briefStatusDismissed => 'Bạn đã bỏ qua';
+  @override
+  String get briefStatusPostponed => 'Đã hẹn xem lại';
+  @override
+  String get titleAgent => 'Tổng Tài';
+  @override
+  String get agentSubtitle => 'Tôi đang trông doanh nghiệp cùng bạn';
+
+  @override
   String get navOpportunity => 'Cơ hội';
 
   @override
@@ -1521,7 +1588,6 @@ class AppStringsVi extends AppStrings {
   String get invView => 'Xem';
   @override
   String get invSearchHint => 'Tìm sản phẩm hoặc danh mục';
-  @override
   @override
   String invStockAlerts(String parts) => 'Cảnh báo tồn kho: $parts';
   @override
@@ -1814,7 +1880,6 @@ class AppStringsVi extends AppStrings {
     _ => 'Kênh khác',
   };
   @override
-  @override
   String get obGreeting => 'Chào bạn 👋';
   @override
   String get obGreetingBody =>
@@ -1885,7 +1950,6 @@ class AppStringsVi extends AppStrings {
   @override
   String get morePrivacy => 'Chính sách quyền riêng tư';
 
-  @override
   @override
   String aboutVersion(String version) => 'Phiên bản $version';
   @override
@@ -2907,6 +2971,44 @@ class AppStringsEn extends AppStrings {
   @override
   String get navMore => 'More';
   @override
+  String get briefGreetingMorning => 'Good morning';
+  @override
+  String get briefGreetingAfternoon => 'Good afternoon';
+  @override
+  String get briefGreetingEvening => 'Good evening';
+  @override
+  String briefHeadline(int count) => '$count things worth your attention today';
+  @override
+  String get briefNothingTitle => 'Nothing needs your decision yet';
+  @override
+  String get briefNothingBody =>
+      'I am still watching customers, stock and cash. I will tell you the moment something matters.';
+  @override
+  String get briefSeeAll => 'See all';
+  @override
+  String get briefSectionDecide => 'Waiting on you';
+  @override
+  String get briefSectionKnow => 'Just so you know';
+  @override
+  String get briefDemoBadge => 'Sample data';
+  @override
+  String get briefWhyTitle => 'Why I think so';
+  @override
+  String get briefSuggestTitle => 'Suggested';
+  @override
+  String get briefStatusPending => 'Waiting on you';
+  @override
+  String get briefStatusAccepted => 'You approved';
+  @override
+  String get briefStatusDismissed => 'You dismissed';
+  @override
+  String get briefStatusPostponed => 'Scheduled to revisit';
+  @override
+  String get titleAgent => 'Tổng Tài';
+  @override
+  String get agentSubtitle => 'I am watching the business with you';
+
+  @override
   String get navOpportunity => 'Opportunity';
 
   @override
@@ -3051,7 +3153,6 @@ class AppStringsEn extends AppStrings {
   String get invView => 'View';
   @override
   String get invSearchHint => 'Search products or categories';
-  @override
   @override
   String invStockAlerts(String parts) => 'Stock alerts: $parts';
   @override
@@ -3345,7 +3446,6 @@ class AppStringsEn extends AppStrings {
     _ => 'Other channel',
   };
   @override
-  @override
   String get obGreeting => 'Hello 👋';
   @override
   String get obGreetingBody =>
@@ -3416,7 +3516,6 @@ class AppStringsEn extends AppStrings {
   @override
   String get morePrivacy => 'Privacy Policy';
 
-  @override
   @override
   String aboutVersion(String version) => 'Version $version';
   @override
