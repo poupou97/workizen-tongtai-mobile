@@ -118,6 +118,16 @@ abstract class AppStrings {
   /// Thẻ orchestration — sáu dòng.
   String get automationTitle;
 
+  // ── Tổng Tài · runner + đặt lại demo (WTM-307) ─────────────────────────
+  String get agentRunNow;
+  String get agentRunNothing;
+  String agentRunDone(int count);
+
+  String get moreResetDemo;
+  String get moreResetDemoConfirmTitle;
+  String get moreResetDemoConfirmBody;
+  String moreResetDemoSnack(int decisions);
+
   // ── navigation / screen titles (P0 §2 WTM-145: one active locale) ──────
   String get titleReports;
   String get titleFinance;
@@ -1470,6 +1480,23 @@ class AppStringsVi extends AppStrings {
   String get navConsumer => 'Khách hàng';
   @override
   String get navMore => 'Thêm';
+  @override
+  String get agentRunNow => 'Chạy việc đến hạn';
+  @override
+  String get agentRunNothing => 'Chưa có việc nào đến hạn.';
+  @override
+  String agentRunDone(int count) => 'Đã xử lý $count việc đến hạn.';
+  @override
+  String get moreResetDemo => 'Đặt lại dữ liệu mẫu';
+  @override
+  String get moreResetDemoConfirmTitle => 'Đặt lại dữ liệu mẫu?';
+  @override
+  String get moreResetDemoConfirmBody =>
+      'Dữ liệu mẫu sẽ về đúng trạng thái ban đầu, và mọi quyết định bạn đã ra cho dữ liệu mẫu sẽ bị xoá. Dữ liệu thật của bạn không bị đụng tới.';
+  @override
+  String moreResetDemoSnack(int decisions) =>
+      'Đã đặt lại dữ liệu mẫu và xoá $decisions quyết định cũ.';
+
   @override
   String get titleAutonomy => 'Tôi được làm tới đâu';
   @override
@@ -3128,6 +3155,23 @@ class AppStringsEn extends AppStrings {
   String get navConsumer => 'Consumer';
   @override
   String get navMore => 'More';
+  @override
+  String get agentRunNow => 'Run what is due';
+  @override
+  String get agentRunNothing => 'Nothing is due yet.';
+  @override
+  String agentRunDone(int count) => 'Handled $count due items.';
+  @override
+  String get moreResetDemo => 'Reset sample data';
+  @override
+  String get moreResetDemoConfirmTitle => 'Reset sample data?';
+  @override
+  String get moreResetDemoConfirmBody =>
+      'Sample data returns to its starting state, and every decision you made about sample data is removed. Your real data is untouched.';
+  @override
+  String moreResetDemoSnack(int decisions) =>
+      'Sample data reset; $decisions old decisions removed.';
+
   @override
   String get titleAutonomy => 'How far I may go';
   @override

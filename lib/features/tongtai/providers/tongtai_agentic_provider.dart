@@ -5,12 +5,14 @@ import '../action/business_action.dart';
 import '../action/business_action_executor.dart';
 import '../action/demo_action_handlers.dart';
 import '../agent/agent_activity.dart';
+import '../agent/agent_runner.dart';
 import '../agent/agent_task_queue.dart';
 import '../agent/brief_inbox.dart';
 import '../agent/business_brief.dart';
 import '../agent/autonomy_settings.dart';
 import '../agent/autonomy_settings_store.dart';
 import '../agent/business_brief_service.dart';
+import '../agent/demo_reset.dart';
 import '../proposal/proposed_change_repository.dart';
 import 'tongtai_capability_provider.dart';
 import '../../../core/prefs.dart';
@@ -18,6 +20,7 @@ import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
 import 'tongtai_consumer_provider.dart';
 import 'tongtai_inventory_provider.dart';
 import 'tongtai_predictive_provider.dart';
+import 'tongtai_sample_provider.dart';
 
 /// **Nền Agentic, nối vào app** — WTM-303 (Epic WTM-302).
 ///
@@ -188,3 +191,18 @@ final autonomySettingsProvider =
     NotifierProvider<AutonomySettingsNotifier, AutonomySettings>(
       AutonomySettingsNotifier.new,
     );
+
+/// **Runner V1** (WTM-307) — chạy khi app đang mở, không chạy nền.
+final agentRunnerProvider = Provider<AgentRunner>(
+  (ref) => AgentRunner(ref.watch(agentTaskQueueProvider)),
+);
+
+/// Đặt lại dữ liệu mẫu **cùng các quyết định nói về nó** (WTM-307 · §14).
+final demoResetServiceProvider = Provider<DemoResetService>(
+  (ref) => DemoResetService(
+    history: ref.watch(historicalDataSeederProvider),
+    proposals: ref.watch(proposedChangeRepositoryProvider),
+    actions: ref.watch(businessActionExecutorProvider),
+    tasks: ref.watch(agentTaskQueueProvider),
+  ),
+);

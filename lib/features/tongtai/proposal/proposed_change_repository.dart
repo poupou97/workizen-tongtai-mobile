@@ -68,6 +68,13 @@ abstract class ProposedChangeRepository {
     required String keepId,
   });
 
+  /// Xoá bản ghi thuộc **đối tượng mẫu** (`sample-`) — WTM-307.
+  ///
+  /// Không dùng `deleteAll`: người bán có thể vừa có dữ liệu mẫu vừa có dữ
+  /// liệu thật, và đặt lại demo không được đụng vào quyết định họ đã ra cho
+  /// khách thật của mình.
+  Future<int> deleteForSampleSubjects();
+
   Future<void> deleteAll();
 }
 
@@ -192,6 +199,17 @@ class DriftProposedChangeRepository implements ProposedChangeRepository {
             decidedAt: Value(_now()),
           ),
         );
+  }
+
+  @override
+  Future<int> deleteForSampleSubjects() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    return (_db.delete(_db.proposedChangesTable)..where(
+          (t) =>
+              t.businessId.equals(businessId) &
+              t.subjectId.like('$kSampleIdPrefix%'),
+        ))
+        .go();
   }
 
   @override

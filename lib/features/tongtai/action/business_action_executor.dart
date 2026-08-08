@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 
 import '../../../database/database.dart';
 import '../core/local_workspace.dart';
+import '../core/provenance.dart';
 import 'business_action.dart';
 
 /// Việc thật sự làm ra bên ngoài — hoặc vào chính DB Tổng Tài.
@@ -309,6 +310,18 @@ class BusinessActionExecutor {
 
   Future<BusinessAction?> byId(String id) async =>
       _byId(await _workspace.ensureBusinessId(_db), id);
+
+  /// Xoá hành động thuộc **đối tượng mẫu** — WTM-307. Xem
+  /// `ProposedChangeRepository.deleteForSampleSubjects`.
+  Future<int> deleteForSampleSubjects() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    return (_db.delete(_db.businessActionsTable)..where(
+          (t) =>
+              t.businessId.equals(businessId) &
+              t.subjectId.like('$kSampleIdPrefix%'),
+        ))
+        .go();
+  }
 
   Future<void> deleteAll() async {
     final businessId = await _workspace.ensureBusinessId(_db);

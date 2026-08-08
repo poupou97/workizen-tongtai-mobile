@@ -162,17 +162,45 @@ void main() {
     expect(body, contains('ProposalStatus.superseded.code'));
   });
 
-  test('lớp 3b · chỉ MỘT chỗ được xoá, và nó là restore Replace', () {
+  test('lớp 3b · MỌI đường xoá đều có phạm vi khai rõ', () {
+    // Luật gốc (WTM-299) là "chỉ `deleteAll` được xoá". WTM-307 thêm một
+    // đường thứ hai — đặt lại dữ liệu mẫu — và đó là một nhu cầu thật: gieo
+    // lại dữ liệu mẫu mà giữ quyết định cũ thì Founder không xem lại được
+    // flow từ đầu.
+    //
+    // Nới luật thành "xoá thoải mái" sẽ mất đúng thứ nó bảo vệ. Nên luật đổi
+    // thành: **mỗi đường xoá phải nói được nó xoá tới đâu**, và chỉ có hai
+    // phạm vi hợp lệ.
     final repo = code[repoFile]!;
     final deletes = RegExp(r'_db\.delete\(').allMatches(repo).length;
     expect(
       deletes,
-      1,
+      2,
       reason:
-          'chỉ `deleteAll` (WTM-164 restore Replace) được xoá. Thấy $deletes',
+          'hai đường: `deleteAll` (restore Replace) và '
+          '`deleteForSampleSubjects` (đặt lại demo). Thấy $deletes — đường thứ '
+          'ba phải khai phạm vi ở đây trước',
     );
-    final deleteAll = methodBody(repo, 'Future<void> deleteAll(');
-    expect(deleteAll, contains('_db.delete('));
+
+    // Đường 1 — toàn bộ, và chỉ dùng cho restore Replace (WTM-164).
+    expect(
+      methodBody(repo, 'Future<void> deleteAll('),
+      contains('_db.delete('),
+    );
+
+    // Đường 2 — CHẶN bằng tiền tố mẫu. Thiếu mệnh đề này thì "đặt lại demo"
+    // sẽ cuốn theo mọi quyết định người bán đã ra cho khách thật của họ.
+    final sampleOnly = methodBody(repo, 'Future<int> deleteForSampleSubjects(');
+    expect(
+      sampleOnly,
+      contains('kSampleIdPrefix'),
+      reason: 'xoá theo phạm vi mẫu phải dùng HẰNG SỐ tiền tố, không viết tay',
+    );
+    expect(
+      sampleOnly,
+      contains('subjectId.like('),
+      reason: 'thiếu mệnh đề chặn ⇒ xoá sạch dưới cái tên "đặt lại demo"',
+    );
   });
 
   test('bảng KHÔNG có cột điểm/confidence thô', () {
