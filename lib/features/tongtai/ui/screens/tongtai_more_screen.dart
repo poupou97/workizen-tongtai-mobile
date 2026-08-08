@@ -22,6 +22,7 @@ import 'tongtai_forecast_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_agent_screen.dart';
+import 'tongtai_autonomy_screen.dart';
 import 'tongtai_timeline_screen.dart';
 import 'tongtai_privacy_policy_screen.dart';
 import 'tongtai_about_screen.dart';
@@ -295,6 +296,16 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiAgentScreen(),
+                    ),
+                  ),
+                ),
+                _SettingsItem(
+                  key: const Key('more-autonomy'),
+                  icon: Icons.tune,
+                  label: context.l10n.titleAutonomy,
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiAutonomyScreen(),
                     ),
                   ),
                 ),

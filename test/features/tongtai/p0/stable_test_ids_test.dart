@@ -33,6 +33,7 @@ void main() {
     'tongtai_agent_screen.dart': 'agent',
     'tongtai_brief_story_screen.dart': 'story',
     'tongtai_activity_screen.dart': 'activity',
+    'tongtai_autonomy_screen.dart': 'autonomy',
     'tongtai_export_screen.dart': 'export',
     'tongtai_backup_screen.dart': 'backup',
     'tongtai_more_screen.dart': 'more',

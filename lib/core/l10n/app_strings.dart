@@ -80,6 +80,44 @@ abstract class AppStrings {
   String get activityEmpty;
   String get activityEmptyBody;
 
+  // ── Tổng Tài · mức tự động + orchestration (WTM-306) ───────────────────
+  String get titleAutonomy;
+  String get autonomySubtitle;
+
+  String get autonomyAreaCustomerCare;
+  String get autonomyAreaInventory;
+  String get autonomyAreaMarketing;
+
+  String get autonomyModeSuggest;
+  String get autonomyModeConfirm;
+  String get autonomyModeAuto;
+  String get autonomyModeSuggestBody;
+  String get autonomyModeConfirmBody;
+  String get autonomyModeAutoBody;
+
+  /// Nhãn **Xem trước** — `Tự động` chưa production-ready (Task Order §9).
+  String get autonomyPreviewBadge;
+  String get autonomyPreviewBody;
+
+  /// ⛔ Việc **luôn hỏi người bán**, bất kể mức nào được chọn.
+  String get autonomyAlwaysAsk;
+  String get autonomyAlwaysAskBody;
+  String get autonomyNoAuto;
+
+  /// Nhãn nghiệp vụ cho từng loại hành động — người bán không đọc mã.
+  String get actLabelSendMessage;
+  String get actLabelColdMessage;
+  String get actLabelContactOutside;
+  String get actLabelMergeCustomers;
+  String get actLabelPurchaseOrder;
+  String get actLabelOrderAboveLimit;
+  String get actLabelUpdatePrice;
+  String get actLabelCampaignPause;
+  String get actLabelCampaignBudget;
+
+  /// Thẻ orchestration — sáu dòng.
+  String get automationTitle;
+
   // ── navigation / screen titles (P0 §2 WTM-145: one active locale) ──────
   String get titleReports;
   String get titleFinance;
@@ -1432,6 +1470,64 @@ class AppStringsVi extends AppStrings {
   String get navConsumer => 'Khách hàng';
   @override
   String get navMore => 'Thêm';
+  @override
+  String get titleAutonomy => 'Tôi được làm tới đâu';
+  @override
+  String get autonomySubtitle =>
+      'Chọn mức cho từng mảng việc. Bạn đổi được bất cứ lúc nào.';
+  @override
+  String get autonomyAreaCustomerCare => 'Chăm sóc khách';
+  @override
+  String get autonomyAreaInventory => 'Kho và giá';
+  @override
+  String get autonomyAreaMarketing => 'Quảng cáo';
+  @override
+  String get autonomyModeSuggest => 'Gợi ý';
+  @override
+  String get autonomyModeConfirm => 'Hỏi trước khi làm';
+  @override
+  String get autonomyModeAuto => 'Tự động';
+  @override
+  String get autonomyModeSuggestBody => 'Tôi nói cho bạn biết, bạn tự làm.';
+  @override
+  String get autonomyModeConfirmBody => 'Tôi chuẩn bị sẵn và chờ bạn bấm.';
+  @override
+  String get autonomyModeAutoBody =>
+      'Tôi tự làm trong hạn mức, rồi báo lại cho bạn.';
+  @override
+  String get autonomyPreviewBadge => 'Xem trước';
+  @override
+  String get autonomyPreviewBody =>
+      'Mức tự động chưa chạy thật trong bản này. Bạn bật được để xem câu chuyện đổi thế nào, nhưng tôi vẫn hỏi bạn trước khi làm.';
+  @override
+  String get autonomyAlwaysAsk => 'Luôn hỏi bạn';
+  @override
+  String get autonomyAlwaysAskBody =>
+      'Những việc này tôi không bao giờ tự làm, kể cả khi bạn chọn Tự động.';
+  @override
+  String get autonomyNoAuto =>
+      'Mảng này chưa có việc nào tôi được phép tự làm.';
+  @override
+  String get actLabelSendMessage => 'Nhắn cho khách đã mua';
+  @override
+  String get actLabelColdMessage => 'Nhắn cho người chưa từng mua';
+  @override
+  String get actLabelContactOutside => 'Liên hệ người ngoài danh bạ';
+  @override
+  String get actLabelMergeCustomers => 'Gộp hai bản ghi khách';
+  @override
+  String get actLabelPurchaseOrder => 'Dựng phiếu nhập hàng';
+  @override
+  String get actLabelOrderAboveLimit => 'Nhập vượt hạn mức chi';
+  @override
+  String get actLabelUpdatePrice => 'Đổi giá bán';
+  @override
+  String get actLabelCampaignPause => 'Tạm dừng chiến dịch';
+  @override
+  String get actLabelCampaignBudget => 'Đổi ngân sách chiến dịch';
+  @override
+  String get automationTitle => 'Tôi làm việc này thế nào';
+
   @override
   String get briefActionAccept => 'Làm ngay';
   @override
@@ -3032,6 +3128,63 @@ class AppStringsEn extends AppStrings {
   String get navConsumer => 'Consumer';
   @override
   String get navMore => 'More';
+  @override
+  String get titleAutonomy => 'How far I may go';
+  @override
+  String get autonomySubtitle =>
+      'Pick a level for each area. You can change it any time.';
+  @override
+  String get autonomyAreaCustomerCare => 'Customer care';
+  @override
+  String get autonomyAreaInventory => 'Stock and pricing';
+  @override
+  String get autonomyAreaMarketing => 'Advertising';
+  @override
+  String get autonomyModeSuggest => 'Suggest';
+  @override
+  String get autonomyModeConfirm => 'Ask before acting';
+  @override
+  String get autonomyModeAuto => 'Automatic';
+  @override
+  String get autonomyModeSuggestBody => 'I tell you; you do it.';
+  @override
+  String get autonomyModeConfirmBody => 'I prepare it and wait for your tap.';
+  @override
+  String get autonomyModeAutoBody =>
+      'I act within your limits, then report back.';
+  @override
+  String get autonomyPreviewBadge => 'Preview';
+  @override
+  String get autonomyPreviewBody =>
+      'Automatic does not run for real in this build. Turn it on to see how the story changes — I will still ask you before acting.';
+  @override
+  String get autonomyAlwaysAsk => 'Always ask me';
+  @override
+  String get autonomyAlwaysAskBody =>
+      'I never do these on my own, even when you choose Automatic.';
+  @override
+  String get autonomyNoAuto => 'Nothing in this area may run on its own yet.';
+  @override
+  String get actLabelSendMessage => 'Message an existing customer';
+  @override
+  String get actLabelColdMessage => 'Message someone who never bought';
+  @override
+  String get actLabelContactOutside => 'Contact someone outside the book';
+  @override
+  String get actLabelMergeCustomers => 'Merge two customer records';
+  @override
+  String get actLabelPurchaseOrder => 'Draft a purchase order';
+  @override
+  String get actLabelOrderAboveLimit => 'Order above your spend limit';
+  @override
+  String get actLabelUpdatePrice => 'Change a selling price';
+  @override
+  String get actLabelCampaignPause => 'Pause a campaign';
+  @override
+  String get actLabelCampaignBudget => 'Change a campaign budget';
+  @override
+  String get automationTitle => 'How I handle this';
+
   @override
   String get briefActionAccept => 'Do it';
   @override

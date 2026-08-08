@@ -11,6 +11,8 @@ import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_agentic_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
+import '../../agent/automation_card.dart';
+import '../widgets/tongtai_automation_card.dart';
 import '../widgets/tongtai_brief_widgets.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_screen_data.dart';
@@ -231,6 +233,19 @@ class _TongtaiBriefStoryScreenState
                     : l10n.briefAcceptedSnack,
               ),
             ],
+            // ── Tôi làm việc này thế nào (trải nghiệm #3) ─────────────────
+            //
+            // Dưới cùng, không phải trên đầu: người bán tới đây để QUYẾT một
+            // việc cụ thể. Hình dạng của luật là câu hỏi thứ hai, và chỉ một
+            // số người hỏi.
+            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            TongtaiAutomationCard(
+              keyPrefix: 'story-automation',
+              card: AutomationCard.forKind(
+                _item.kind,
+                settings: ref.watch(autonomySettingsProvider),
+              ),
+            ),
             const SizedBox(height: TongtaiDesignTokens.spacing5),
           ],
         ),
