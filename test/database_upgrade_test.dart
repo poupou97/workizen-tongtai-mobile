@@ -210,6 +210,7 @@ void main() {
       'settlement_lines_table',
       'payouts_table',
       'proposed_changes_table',
+      'business_actions_table',
     ]) {
       await db.customStatement('DROP TABLE IF EXISTS $t');
     }
@@ -304,6 +305,7 @@ void main() {
       'settlement_lines_table',
       'payouts_table',
       'proposed_changes_table',
+      'business_actions_table',
     ]) {
       expect(
         beforeTables,
@@ -327,6 +329,12 @@ void main() {
     final orders = await db
         .customSelect(
           'SELECT id, provenance_code FROM orders_table ORDER BY id',
+        )
+        .get();
+    final indexRows = await db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type = 'index' "
+          "AND name NOT LIKE 'sqlite_autoindex%'",
         )
         .get();
 
@@ -377,6 +385,37 @@ void main() {
       reason: 'bảng mang 4 cột token phải biến mất cùng mọi dòng trong nó',
     );
 
+    // 4b · ⭐ CHỈ MỤC UNIQUE phải có mặt — không chỉ bảng.
+    //
+    // Lỗi thật phát hiện 2026-08-08: `Migrator.createTable()` chỉ tạo BẢNG.
+    // Chỉ mục khai bằng `@TableIndex` là thực thể riêng, và `createTable`
+    // không đụng tới. Máy cài mới có đủ (onCreate gọi `createAll`), máy NÂNG
+    // CẤP thì thiếu — và với chỉ mục UNIQUE thì đó là mất một ràng buộc đúng
+    // đắn, không phải mất tốc độ:
+    //
+    // • `external_identities_lookup` giữ luật "cùng kết nối + nền tảng +
+    //   externalId là DUY NHẤT" — mất nó là hai bản ghi cho một người mua.
+    // • `business_actions_idempotency` giữ luật chống lặp — mất nó là hai lần
+    //   `plan()` song song sinh hai hành động THẬT.
+    //
+    // Test hỏi "bảng có tồn tại không" sẽ không bao giờ thấy lỗi này.
+    final indexes = indexRows.map((r) => r.read<String>('name')).toSet();
+    for (final required in [
+      'external_identities_lookup',
+      'business_actions_idempotency',
+      'proposed_changes_subject',
+      'settlement_lines_order_id',
+      'connections_connector',
+    ]) {
+      expect(
+        indexes,
+        contains(required),
+        reason:
+            '$required thiếu sau nâng cấp — `createTable` không tạo chỉ mục; '
+            'dùng `_createTableWithIndexes`',
+      );
+    }
+
     // 5 · v18/v19/v20 tạo đủ năm bảng mới, và chúng RỖNG
     for (final t in [
       'connections_table',
@@ -385,6 +424,7 @@ void main() {
       'settlement_lines_table',
       'payouts_table',
       'proposed_changes_table',
+      'business_actions_table',
     ]) {
       expect(afterTables, contains(t), reason: '$t phải được migration tạo ra');
     }
@@ -435,9 +475,57 @@ void main() {
     await db.close();
 
     expect(version.read<int>('user_version'), kTongtaiSchemaVersion);
-    expect(kTongtaiSchemaVersion, 21);
     expect(customers, hasLength(1), reason: 'không mất dòng nào');
     expect(customers.single.name, 'Chị Hoa');
     expect(proposals, isEmpty, reason: 'bảng mới, chưa ai đề xuất gì');
+  });
+  test('v21 CÓ DỮ LIỆU → v22: thêm cửa ghi, không mất gì', () async {
+    final dir = await Directory.systemTemp.createTemp('tongtai_upgrade22');
+    final file = File('${dir.path}/t.sqlite');
+    addTearDown(() => dir.delete(recursive: true));
+
+    var raw = NativeDatabase(file);
+    var db = AppDatabase.forExecutor(raw);
+    await const LocalWorkspace().ensureBusinessId(db);
+    const businessId = LocalWorkspace.localBusinessId;
+
+    await db.customStatement('DROP TABLE IF EXISTS business_actions_table');
+    await db.customStatement(
+      "INSERT INTO customers_table (id, business_id, name, updated_at, "
+      "created_at) VALUES ('c1', '$businessId', 'Chị Hoa', 1, 1)",
+    );
+    await db.customStatement('PRAGMA user_version = 21');
+
+    final before = await db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type = 'table' "
+          "AND name = 'business_actions_table'",
+        )
+        .get();
+    expect(before, isEmpty, reason: 'bảng hành động không tồn tại ở v21');
+    await db.close();
+
+    raw = NativeDatabase(file);
+    db = AppDatabase.forExecutor(raw);
+    final version = await db.customSelect('PRAGMA user_version').getSingle();
+    final actions = await db.select(db.businessActionsTable).get();
+    final customers = await db.select(db.customersTable).get();
+    // Ràng buộc duy nhất phải tồn tại thật, không chỉ nằm trong khai báo Dart.
+    final indexes = await db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type = 'index' "
+          "AND tbl_name = 'business_actions_table'",
+        )
+        .get();
+    await db.close();
+
+    expect(version.read<int>('user_version'), kTongtaiSchemaVersion);
+    expect(customers, hasLength(1), reason: 'không mất dòng nào');
+    expect(actions, isEmpty);
+    expect(
+      indexes.map((r) => r.read<String>('name')),
+      contains('business_actions_idempotency'),
+      reason: 'khoá chống lặp phải là ràng buộc CỦA CƠ SỞ DỮ LIỆU',
+    );
   });
 }

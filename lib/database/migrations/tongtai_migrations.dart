@@ -38,6 +38,19 @@
 /// v6 adds the nullable `customers_table.domain_snapshot` column (tags,
 /// addresses, notes). Same additive-nullable convention as v5.
 ///
+/// ## Schema v22 (WTM-300 — BusinessAction, D-3)
+/// v22 adds `business_actions_table` — the single write boundary for every
+/// side effect an agent can cause, including writes back into Tổng Tài's own
+/// database (`vendor = internal`). Purely additive.
+///
+/// The unique key is `(business, idempotency_key)` so replaying an action can
+/// never produce a second real-world effect. `request_hash` guards the subtler
+/// failure: two *different* actions that happen to collide on a key would
+/// otherwise swallow each other silently.
+///
+/// No foreign key to the subject: actions point at several entity types, and
+/// "we sent this customer a message" stays true after the customer is deleted.
+///
 /// ## Schema v21 (WTM-299 — ProposedChange, D-2)
 /// v21 adds `proposed_changes_table`. Purely additive.
 ///
@@ -112,7 +125,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 21;
+const int kTongtaiSchemaVersion = 22;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -203,6 +216,74 @@ const String kDroppedOpportunitiesTableName = 'opportunities_table';
 ///
 /// [db] is the opening database; it is captured so [beforeOpen] can issue the
 /// `PRAGMA` on the same connection.
+/// Tạo một bảng **kèm chỉ mục của nó**.
+///
+/// ## ⚠️ Vì sao không dùng thẳng `m.createTable`
+///
+/// `Migrator.createTable()` chỉ tạo **bảng**. Chỉ mục khai bằng `@TableIndex`
+/// là **thực thể riêng** trong drift, và `createTable` không đụng tới chúng.
+///
+/// Hệ quả là một lỗi chỉ thấy trên **máy nâng cấp**, không bao giờ thấy khi
+/// cài mới: `onCreate` gọi `createAll()` nên máy mới có đủ chỉ mục, còn máy
+/// nâng cấp thì thiếu. Và với chỉ mục **UNIQUE** thì đó không phải chuyện tốc
+/// độ — đó là mất một ràng buộc đúng đắn:
+///
+/// - `external_identities_lookup` (v19) giữ luật *"cùng kết nối + nền tảng +
+///   externalId là DUY NHẤT"* — mất nó là mở đường cho hai bản ghi cho cùng
+///   một người mua.
+/// - `business_actions_idempotency` (v22) giữ luật chống lặp — mất nó là hai
+///   lần `plan()` chạy song song có thể sinh hai hành động thật.
+///
+/// Phát hiện 2026-08-08 khi test nâng cấp v21→v22 hỏi `sqlite_master` xem chỉ
+/// mục có thật không. Test hỏi "bảng có tồn tại không" sẽ không bao giờ thấy.
+Future<void> _createTableWithIndexes(
+  GeneratedDatabase db,
+  Migrator m,
+  String tableName,
+) async {
+  final table = db.allTables.firstWhere((t) => t.actualTableName == tableName);
+  await m.createTable(table);
+
+  for (final index in db.allSchemaEntities.whereType<Index>()) {
+    // Nhận diện chỉ mục thuộc bảng nào bằng chính câu `CREATE INDEX` của nó —
+    // drift không cho biết quan hệ index↔table theo cách nào khác.
+    final sql = index.createStatementsByDialect.values.first;
+    if (!sql.contains('ON $tableName ')) continue;
+    await db.customStatement(_idempotentIndexSql(sql));
+  }
+}
+
+/// Biến `CREATE [UNIQUE] INDEX …` thành bản có `IF NOT EXISTS`.
+///
+/// Cần vì `Migrator.create(index)` **không** chịu được chỉ mục đã tồn tại, còn
+/// một bước migration thì phải chạy lại được: `onUpgrade` chạy cả chuỗi rồi
+/// mới ghi `user_version`, nên một bước ở cuối hỏng khiến lần mở sau chạy lại
+/// **từ đầu** (bài học v11 → `_addColumnIfMissing`).
+///
+/// **Ném nếu không nhận ra hình dạng SQL.** Bỏ qua im lặng sẽ tái tạo đúng lỗi
+/// hàm này sinh ra để sửa — chỉ mục thiếu trên máy nâng cấp mà không ai biết.
+String _idempotentIndexSql(String createIndexSql) {
+  const unique = 'CREATE UNIQUE INDEX ';
+  const plain = 'CREATE INDEX ';
+
+  if (createIndexSql.startsWith('$unique IF NOT EXISTS') ||
+      createIndexSql.startsWith('$plain IF NOT EXISTS')) {
+    return createIndexSql;
+  }
+  if (createIndexSql.startsWith(unique)) {
+    return createIndexSql.replaceFirst(unique, '${unique}IF NOT EXISTS ');
+  }
+  if (createIndexSql.startsWith(plain)) {
+    return createIndexSql.replaceFirst(plain, '${plain}IF NOT EXISTS ');
+  }
+
+  throw StateError(
+    'không nhận ra câu tạo chỉ mục: "$createIndexSql". Drift có thể đã đổi '
+    'hình dạng SQL — sửa `_idempotentIndexSql` thay vì bỏ qua, nếu không chỉ '
+    'mục sẽ lại thiếu trên máy nâng cấp mà không ai biết.',
+  );
+}
+
 MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
   return MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -329,10 +410,7 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         // v10 (WTM-190 — opportunity reactions). Additive: one new table.
         // Before this, every "save" and every "dismiss" was lost when the app
         // closed — the seller pressed a button that had no lasting effect.
-        final reactions = db.allTables.firstWhere(
-          (t) => t.actualTableName == kOpportunityReactionsTableName,
-        );
-        await m.createTable(reactions);
+        await _createTableWithIndexes(db, m, kOpportunityReactionsTableName);
         // …and drop the table that never held anything. Safe to do here rather
         // than leave behind: nothing in the app has ever inserted into it, so
         // there is no row to lose. `IF EXISTS` because a database created by a
@@ -340,6 +418,19 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 22) {
+        // v22 (WTM-300 / D-3 — BusinessAction). Cửa ghi duy nhất cho mọi side
+        // effect của Agent. Thuần thêm mới.
+        //
+        // Khoá duy nhất `(business, idempotency_key)`: chạy lại không được
+        // sinh việc thứ hai. Và `request_hash` chặn lỗi tinh vi hơn — hai việc
+        // KHÁC NHAU lỡ trùng khoá sẽ lặng lẽ nuốt nhau nếu chỉ có khoá.
+        //
+        // KHÔNG khoá ngoại tới subject: hành động trỏ tới nhiều loại đối
+        // tượng, và "đã gửi tin cho khách này" vẫn là sự thật sau khi khách
+        // bị xoá.
+        await _createTableWithIndexes(db, m, 'business_actions_table');
       }
       if (from < 21) {
         // v21 (WTM-299 / D-2 — ProposedChange). Một bảng mới, thuần thêm mới.
@@ -350,10 +441,7 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         //
         // `decided_at` nullable: `null` = CHƯA ai quyết, khác hẳn "quyết lúc
         // 0" — cùng kỷ luật `null` ≠ `0` đã áp từ v14.
-        final proposals = db.allTables.firstWhere(
-          (t) => t.actualTableName == 'proposed_changes_table',
-        );
-        await m.createTable(proposals);
+        await _createTableWithIndexes(db, m, 'proposed_changes_table');
       }
       if (from < 20) {
         // v20 (WTM-292 / N0.4 — Settlement Domain, ADR-TON-024 luật 2). Hai
@@ -371,10 +459,7 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         // Giao dịch phí sàn người bán đã tự nhập GIỮ NGUYÊN trong Finance —
         // di chuyển chúng sang đây là đoán ý người bán.
         for (final name in ['settlement_lines_table', 'payouts_table']) {
-          final table = db.allTables.firstWhere(
-            (t) => t.actualTableName == name,
-          );
-          await m.createTable(table);
+          await _createTableWithIndexes(db, m, name);
         }
       }
       if (from < 19) {
@@ -391,18 +476,12 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
           'external_identities_table',
           'identity_link_events_table',
         ]) {
-          final table = db.allTables.firstWhere(
-            (t) => t.actualTableName == name,
-          );
-          await m.createTable(table);
+          await _createTableWithIndexes(db, m, name);
         }
       }
       if (from < 18) {
         // v18 (WTM-283 / N0.2 — Connection). Bảng mới cho metadata kết nối…
-        final conns = db.allTables.firstWhere(
-          (t) => t.actualTableName == 'connections_table',
-        );
-        await m.createTable(conns);
+        await _createTableWithIndexes(db, m, 'connections_table');
         // …và xoá `integrations_table`: có từ bootstrap v1, CHƯA TỪNG có dòng
         // nào, nhưng mang bốn cột `*Encrypted` — tức mã hoá sẵn quyết định
         // "token nằm trong SQLite nghiệp vụ", trái luật credential của Founder.

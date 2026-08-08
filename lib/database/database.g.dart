@@ -13714,6 +13714,1327 @@ class ProposedChangesTableCompanion
   }
 }
 
+class $BusinessActionsTableTable extends BusinessActionsTable
+    with TableInfo<$BusinessActionsTableTable, BusinessActionsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BusinessActionsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _correlationIdMeta = const VerificationMeta(
+    'correlationId',
+  );
+  @override
+  late final GeneratedColumn<String> correlationId = GeneratedColumn<String>(
+    'correlation_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
+  @override
+  late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
+    'vendor',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectKindMeta = const VerificationMeta(
+    'subjectKind',
+  );
+  @override
+  late final GeneratedColumn<String> subjectKind = GeneratedColumn<String>(
+    'subject_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectIdMeta = const VerificationMeta(
+    'subjectId',
+  );
+  @override
+  late final GeneratedColumn<String> subjectId = GeneratedColumn<String>(
+    'subject_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectLabelMeta = const VerificationMeta(
+    'subjectLabel',
+  );
+  @override
+  late final GeneratedColumn<String> subjectLabel = GeneratedColumn<String>(
+    'subject_label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _summaryMeta = const VerificationMeta(
+    'summary',
+  );
+  @override
+  late final GeneratedColumn<String> summary = GeneratedColumn<String>(
+    'summary',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _parametersMeta = const VerificationMeta(
+    'parameters',
+  );
+  @override
+  late final GeneratedColumn<String> parameters = GeneratedColumn<String>(
+    'parameters',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _proposedByMeta = const VerificationMeta(
+    'proposedBy',
+  );
+  @override
+  late final GeneratedColumn<String> proposedBy = GeneratedColumn<String>(
+    'proposed_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _requestedByMeta = const VerificationMeta(
+    'requestedBy',
+  );
+  @override
+  late final GeneratedColumn<String> requestedBy = GeneratedColumn<String>(
+    'requested_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
+  );
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _requestHashMeta = const VerificationMeta(
+    'requestHash',
+  );
+  @override
+  late final GeneratedColumn<String> requestHash = GeneratedColumn<String>(
+    'request_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _attemptCountMeta = const VerificationMeta(
+    'attemptCount',
+  );
+  @override
+  late final GeneratedColumn<int> attemptCount = GeneratedColumn<int>(
+    'attempt_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _leasedUntilMeta = const VerificationMeta(
+    'leasedUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> leasedUntil = GeneratedColumn<DateTime>(
+    'leased_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _plannedAtMeta = const VerificationMeta(
+    'plannedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> plannedAt = GeneratedColumn<DateTime>(
+    'planned_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _externalIdMeta = const VerificationMeta(
+    'externalId',
+  );
+  @override
+  late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
+    'external_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _errorCodeMeta = const VerificationMeta(
+    'errorCode',
+  );
+  @override
+  late final GeneratedColumn<String> errorCode = GeneratedColumn<String>(
+    'error_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _errorMessageMeta = const VerificationMeta(
+    'errorMessage',
+  );
+  @override
+  late final GeneratedColumn<String> errorMessage = GeneratedColumn<String>(
+    'error_message',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    correlationId,
+    type,
+    vendor,
+    subjectKind,
+    subjectId,
+    subjectLabel,
+    summary,
+    parameters,
+    proposedBy,
+    requestedBy,
+    idempotencyKey,
+    requestHash,
+    status,
+    attemptCount,
+    leasedUntil,
+    plannedAt,
+    startedAt,
+    completedAt,
+    externalId,
+    errorCode,
+    errorMessage,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'business_actions_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BusinessActionsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('correlation_id')) {
+      context.handle(
+        _correlationIdMeta,
+        correlationId.isAcceptableOrUnknown(
+          data['correlation_id']!,
+          _correlationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('vendor')) {
+      context.handle(
+        _vendorMeta,
+        vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_vendorMeta);
+    }
+    if (data.containsKey('subject_kind')) {
+      context.handle(
+        _subjectKindMeta,
+        subjectKind.isAcceptableOrUnknown(
+          data['subject_kind']!,
+          _subjectKindMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectKindMeta);
+    }
+    if (data.containsKey('subject_id')) {
+      context.handle(
+        _subjectIdMeta,
+        subjectId.isAcceptableOrUnknown(data['subject_id']!, _subjectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectIdMeta);
+    }
+    if (data.containsKey('subject_label')) {
+      context.handle(
+        _subjectLabelMeta,
+        subjectLabel.isAcceptableOrUnknown(
+          data['subject_label']!,
+          _subjectLabelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('summary')) {
+      context.handle(
+        _summaryMeta,
+        summary.isAcceptableOrUnknown(data['summary']!, _summaryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_summaryMeta);
+    }
+    if (data.containsKey('parameters')) {
+      context.handle(
+        _parametersMeta,
+        parameters.isAcceptableOrUnknown(data['parameters']!, _parametersMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_parametersMeta);
+    }
+    if (data.containsKey('proposed_by')) {
+      context.handle(
+        _proposedByMeta,
+        proposedBy.isAcceptableOrUnknown(data['proposed_by']!, _proposedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_proposedByMeta);
+    }
+    if (data.containsKey('requested_by')) {
+      context.handle(
+        _requestedByMeta,
+        requestedBy.isAcceptableOrUnknown(
+          data['requested_by']!,
+          _requestedByMeta,
+        ),
+      );
+    }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_idempotencyKeyMeta);
+    }
+    if (data.containsKey('request_hash')) {
+      context.handle(
+        _requestHashMeta,
+        requestHash.isAcceptableOrUnknown(
+          data['request_hash']!,
+          _requestHashMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_requestHashMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('attempt_count')) {
+      context.handle(
+        _attemptCountMeta,
+        attemptCount.isAcceptableOrUnknown(
+          data['attempt_count']!,
+          _attemptCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('leased_until')) {
+      context.handle(
+        _leasedUntilMeta,
+        leasedUntil.isAcceptableOrUnknown(
+          data['leased_until']!,
+          _leasedUntilMeta,
+        ),
+      );
+    }
+    if (data.containsKey('planned_at')) {
+      context.handle(
+        _plannedAtMeta,
+        plannedAt.isAcceptableOrUnknown(data['planned_at']!, _plannedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_plannedAtMeta);
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('external_id')) {
+      context.handle(
+        _externalIdMeta,
+        externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
+      );
+    }
+    if (data.containsKey('error_code')) {
+      context.handle(
+        _errorCodeMeta,
+        errorCode.isAcceptableOrUnknown(data['error_code']!, _errorCodeMeta),
+      );
+    }
+    if (data.containsKey('error_message')) {
+      context.handle(
+        _errorMessageMeta,
+        errorMessage.isAcceptableOrUnknown(
+          data['error_message']!,
+          _errorMessageMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, id};
+  @override
+  BusinessActionsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BusinessActionsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      correlationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}correlation_id'],
+      ),
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      vendor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vendor'],
+      )!,
+      subjectKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_kind'],
+      )!,
+      subjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_id'],
+      )!,
+      subjectLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_label'],
+      ),
+      summary: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summary'],
+      )!,
+      parameters: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parameters'],
+      )!,
+      proposedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}proposed_by'],
+      )!,
+      requestedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}requested_by'],
+      ),
+      idempotencyKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_key'],
+      )!,
+      requestHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}request_hash'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      attemptCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempt_count'],
+      )!,
+      leasedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}leased_until'],
+      ),
+      plannedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}planned_at'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      ),
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      ),
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      ),
+      errorCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error_code'],
+      ),
+      errorMessage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error_message'],
+      ),
+    );
+  }
+
+  @override
+  $BusinessActionsTableTable createAlias(String alias) {
+    return $BusinessActionsTableTable(attachedDatabase, alias);
+  }
+}
+
+class BusinessActionsTableData extends DataClass
+    implements Insertable<BusinessActionsTableData> {
+  final String id;
+  final String businessId;
+  final String? correlationId;
+
+  /// Mã canonical `BusinessActionType`.
+  final String type;
+
+  /// Mã canonical `ActionVendor` — kể cả `internal`.
+  final String vendor;
+  final String subjectKind;
+  final String subjectId;
+  final String? subjectLabel;
+
+  /// Câu tiếng Việt người bán đọc được.
+  final String summary;
+
+  /// Tham số, JSON.
+  final String parameters;
+  final String proposedBy;
+
+  /// `null` = **chưa ai duyệt**.
+  final String? requestedBy;
+  final String idempotencyKey;
+
+  /// Vân tay payload — cùng khoá mà khác vân tay ⇒ từ chối.
+  final String requestHash;
+
+  /// Mã canonical `ActionStatus`.
+  final String status;
+  final int attemptCount;
+
+  /// Hết hạn ⇒ ai đó nhận lại được, kể cả khi tiến trình trước đã chết.
+  final DateTime? leasedUntil;
+  final DateTime plannedAt;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
+
+  /// Mã kết quả ở hệ ngoài. `null` = **chưa có kết quả**.
+  final String? externalId;
+  final String? errorCode;
+  final String? errorMessage;
+  const BusinessActionsTableData({
+    required this.id,
+    required this.businessId,
+    this.correlationId,
+    required this.type,
+    required this.vendor,
+    required this.subjectKind,
+    required this.subjectId,
+    this.subjectLabel,
+    required this.summary,
+    required this.parameters,
+    required this.proposedBy,
+    this.requestedBy,
+    required this.idempotencyKey,
+    required this.requestHash,
+    required this.status,
+    required this.attemptCount,
+    this.leasedUntil,
+    required this.plannedAt,
+    this.startedAt,
+    this.completedAt,
+    this.externalId,
+    this.errorCode,
+    this.errorMessage,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    if (!nullToAbsent || correlationId != null) {
+      map['correlation_id'] = Variable<String>(correlationId);
+    }
+    map['type'] = Variable<String>(type);
+    map['vendor'] = Variable<String>(vendor);
+    map['subject_kind'] = Variable<String>(subjectKind);
+    map['subject_id'] = Variable<String>(subjectId);
+    if (!nullToAbsent || subjectLabel != null) {
+      map['subject_label'] = Variable<String>(subjectLabel);
+    }
+    map['summary'] = Variable<String>(summary);
+    map['parameters'] = Variable<String>(parameters);
+    map['proposed_by'] = Variable<String>(proposedBy);
+    if (!nullToAbsent || requestedBy != null) {
+      map['requested_by'] = Variable<String>(requestedBy);
+    }
+    map['idempotency_key'] = Variable<String>(idempotencyKey);
+    map['request_hash'] = Variable<String>(requestHash);
+    map['status'] = Variable<String>(status);
+    map['attempt_count'] = Variable<int>(attemptCount);
+    if (!nullToAbsent || leasedUntil != null) {
+      map['leased_until'] = Variable<DateTime>(leasedUntil);
+    }
+    map['planned_at'] = Variable<DateTime>(plannedAt);
+    if (!nullToAbsent || startedAt != null) {
+      map['started_at'] = Variable<DateTime>(startedAt);
+    }
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    if (!nullToAbsent || externalId != null) {
+      map['external_id'] = Variable<String>(externalId);
+    }
+    if (!nullToAbsent || errorCode != null) {
+      map['error_code'] = Variable<String>(errorCode);
+    }
+    if (!nullToAbsent || errorMessage != null) {
+      map['error_message'] = Variable<String>(errorMessage);
+    }
+    return map;
+  }
+
+  BusinessActionsTableCompanion toCompanion(bool nullToAbsent) {
+    return BusinessActionsTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      correlationId: correlationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(correlationId),
+      type: Value(type),
+      vendor: Value(vendor),
+      subjectKind: Value(subjectKind),
+      subjectId: Value(subjectId),
+      subjectLabel: subjectLabel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subjectLabel),
+      summary: Value(summary),
+      parameters: Value(parameters),
+      proposedBy: Value(proposedBy),
+      requestedBy: requestedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(requestedBy),
+      idempotencyKey: Value(idempotencyKey),
+      requestHash: Value(requestHash),
+      status: Value(status),
+      attemptCount: Value(attemptCount),
+      leasedUntil: leasedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(leasedUntil),
+      plannedAt: Value(plannedAt),
+      startedAt: startedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startedAt),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+      externalId: externalId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(externalId),
+      errorCode: errorCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(errorCode),
+      errorMessage: errorMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(errorMessage),
+    );
+  }
+
+  factory BusinessActionsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BusinessActionsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      correlationId: serializer.fromJson<String?>(json['correlationId']),
+      type: serializer.fromJson<String>(json['type']),
+      vendor: serializer.fromJson<String>(json['vendor']),
+      subjectKind: serializer.fromJson<String>(json['subjectKind']),
+      subjectId: serializer.fromJson<String>(json['subjectId']),
+      subjectLabel: serializer.fromJson<String?>(json['subjectLabel']),
+      summary: serializer.fromJson<String>(json['summary']),
+      parameters: serializer.fromJson<String>(json['parameters']),
+      proposedBy: serializer.fromJson<String>(json['proposedBy']),
+      requestedBy: serializer.fromJson<String?>(json['requestedBy']),
+      idempotencyKey: serializer.fromJson<String>(json['idempotencyKey']),
+      requestHash: serializer.fromJson<String>(json['requestHash']),
+      status: serializer.fromJson<String>(json['status']),
+      attemptCount: serializer.fromJson<int>(json['attemptCount']),
+      leasedUntil: serializer.fromJson<DateTime?>(json['leasedUntil']),
+      plannedAt: serializer.fromJson<DateTime>(json['plannedAt']),
+      startedAt: serializer.fromJson<DateTime?>(json['startedAt']),
+      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      externalId: serializer.fromJson<String?>(json['externalId']),
+      errorCode: serializer.fromJson<String?>(json['errorCode']),
+      errorMessage: serializer.fromJson<String?>(json['errorMessage']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'correlationId': serializer.toJson<String?>(correlationId),
+      'type': serializer.toJson<String>(type),
+      'vendor': serializer.toJson<String>(vendor),
+      'subjectKind': serializer.toJson<String>(subjectKind),
+      'subjectId': serializer.toJson<String>(subjectId),
+      'subjectLabel': serializer.toJson<String?>(subjectLabel),
+      'summary': serializer.toJson<String>(summary),
+      'parameters': serializer.toJson<String>(parameters),
+      'proposedBy': serializer.toJson<String>(proposedBy),
+      'requestedBy': serializer.toJson<String?>(requestedBy),
+      'idempotencyKey': serializer.toJson<String>(idempotencyKey),
+      'requestHash': serializer.toJson<String>(requestHash),
+      'status': serializer.toJson<String>(status),
+      'attemptCount': serializer.toJson<int>(attemptCount),
+      'leasedUntil': serializer.toJson<DateTime?>(leasedUntil),
+      'plannedAt': serializer.toJson<DateTime>(plannedAt),
+      'startedAt': serializer.toJson<DateTime?>(startedAt),
+      'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'externalId': serializer.toJson<String?>(externalId),
+      'errorCode': serializer.toJson<String?>(errorCode),
+      'errorMessage': serializer.toJson<String?>(errorMessage),
+    };
+  }
+
+  BusinessActionsTableData copyWith({
+    String? id,
+    String? businessId,
+    Value<String?> correlationId = const Value.absent(),
+    String? type,
+    String? vendor,
+    String? subjectKind,
+    String? subjectId,
+    Value<String?> subjectLabel = const Value.absent(),
+    String? summary,
+    String? parameters,
+    String? proposedBy,
+    Value<String?> requestedBy = const Value.absent(),
+    String? idempotencyKey,
+    String? requestHash,
+    String? status,
+    int? attemptCount,
+    Value<DateTime?> leasedUntil = const Value.absent(),
+    DateTime? plannedAt,
+    Value<DateTime?> startedAt = const Value.absent(),
+    Value<DateTime?> completedAt = const Value.absent(),
+    Value<String?> externalId = const Value.absent(),
+    Value<String?> errorCode = const Value.absent(),
+    Value<String?> errorMessage = const Value.absent(),
+  }) => BusinessActionsTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    correlationId: correlationId.present
+        ? correlationId.value
+        : this.correlationId,
+    type: type ?? this.type,
+    vendor: vendor ?? this.vendor,
+    subjectKind: subjectKind ?? this.subjectKind,
+    subjectId: subjectId ?? this.subjectId,
+    subjectLabel: subjectLabel.present ? subjectLabel.value : this.subjectLabel,
+    summary: summary ?? this.summary,
+    parameters: parameters ?? this.parameters,
+    proposedBy: proposedBy ?? this.proposedBy,
+    requestedBy: requestedBy.present ? requestedBy.value : this.requestedBy,
+    idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+    requestHash: requestHash ?? this.requestHash,
+    status: status ?? this.status,
+    attemptCount: attemptCount ?? this.attemptCount,
+    leasedUntil: leasedUntil.present ? leasedUntil.value : this.leasedUntil,
+    plannedAt: plannedAt ?? this.plannedAt,
+    startedAt: startedAt.present ? startedAt.value : this.startedAt,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    externalId: externalId.present ? externalId.value : this.externalId,
+    errorCode: errorCode.present ? errorCode.value : this.errorCode,
+    errorMessage: errorMessage.present ? errorMessage.value : this.errorMessage,
+  );
+  BusinessActionsTableData copyWithCompanion(
+    BusinessActionsTableCompanion data,
+  ) {
+    return BusinessActionsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      correlationId: data.correlationId.present
+          ? data.correlationId.value
+          : this.correlationId,
+      type: data.type.present ? data.type.value : this.type,
+      vendor: data.vendor.present ? data.vendor.value : this.vendor,
+      subjectKind: data.subjectKind.present
+          ? data.subjectKind.value
+          : this.subjectKind,
+      subjectId: data.subjectId.present ? data.subjectId.value : this.subjectId,
+      subjectLabel: data.subjectLabel.present
+          ? data.subjectLabel.value
+          : this.subjectLabel,
+      summary: data.summary.present ? data.summary.value : this.summary,
+      parameters: data.parameters.present
+          ? data.parameters.value
+          : this.parameters,
+      proposedBy: data.proposedBy.present
+          ? data.proposedBy.value
+          : this.proposedBy,
+      requestedBy: data.requestedBy.present
+          ? data.requestedBy.value
+          : this.requestedBy,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
+      requestHash: data.requestHash.present
+          ? data.requestHash.value
+          : this.requestHash,
+      status: data.status.present ? data.status.value : this.status,
+      attemptCount: data.attemptCount.present
+          ? data.attemptCount.value
+          : this.attemptCount,
+      leasedUntil: data.leasedUntil.present
+          ? data.leasedUntil.value
+          : this.leasedUntil,
+      plannedAt: data.plannedAt.present ? data.plannedAt.value : this.plannedAt,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
+      errorCode: data.errorCode.present ? data.errorCode.value : this.errorCode,
+      errorMessage: data.errorMessage.present
+          ? data.errorMessage.value
+          : this.errorMessage,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessActionsTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('correlationId: $correlationId, ')
+          ..write('type: $type, ')
+          ..write('vendor: $vendor, ')
+          ..write('subjectKind: $subjectKind, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('subjectLabel: $subjectLabel, ')
+          ..write('summary: $summary, ')
+          ..write('parameters: $parameters, ')
+          ..write('proposedBy: $proposedBy, ')
+          ..write('requestedBy: $requestedBy, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('requestHash: $requestHash, ')
+          ..write('status: $status, ')
+          ..write('attemptCount: $attemptCount, ')
+          ..write('leasedUntil: $leasedUntil, ')
+          ..write('plannedAt: $plannedAt, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('externalId: $externalId, ')
+          ..write('errorCode: $errorCode, ')
+          ..write('errorMessage: $errorMessage')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    businessId,
+    correlationId,
+    type,
+    vendor,
+    subjectKind,
+    subjectId,
+    subjectLabel,
+    summary,
+    parameters,
+    proposedBy,
+    requestedBy,
+    idempotencyKey,
+    requestHash,
+    status,
+    attemptCount,
+    leasedUntil,
+    plannedAt,
+    startedAt,
+    completedAt,
+    externalId,
+    errorCode,
+    errorMessage,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BusinessActionsTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.correlationId == this.correlationId &&
+          other.type == this.type &&
+          other.vendor == this.vendor &&
+          other.subjectKind == this.subjectKind &&
+          other.subjectId == this.subjectId &&
+          other.subjectLabel == this.subjectLabel &&
+          other.summary == this.summary &&
+          other.parameters == this.parameters &&
+          other.proposedBy == this.proposedBy &&
+          other.requestedBy == this.requestedBy &&
+          other.idempotencyKey == this.idempotencyKey &&
+          other.requestHash == this.requestHash &&
+          other.status == this.status &&
+          other.attemptCount == this.attemptCount &&
+          other.leasedUntil == this.leasedUntil &&
+          other.plannedAt == this.plannedAt &&
+          other.startedAt == this.startedAt &&
+          other.completedAt == this.completedAt &&
+          other.externalId == this.externalId &&
+          other.errorCode == this.errorCode &&
+          other.errorMessage == this.errorMessage);
+}
+
+class BusinessActionsTableCompanion
+    extends UpdateCompanion<BusinessActionsTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String?> correlationId;
+  final Value<String> type;
+  final Value<String> vendor;
+  final Value<String> subjectKind;
+  final Value<String> subjectId;
+  final Value<String?> subjectLabel;
+  final Value<String> summary;
+  final Value<String> parameters;
+  final Value<String> proposedBy;
+  final Value<String?> requestedBy;
+  final Value<String> idempotencyKey;
+  final Value<String> requestHash;
+  final Value<String> status;
+  final Value<int> attemptCount;
+  final Value<DateTime?> leasedUntil;
+  final Value<DateTime> plannedAt;
+  final Value<DateTime?> startedAt;
+  final Value<DateTime?> completedAt;
+  final Value<String?> externalId;
+  final Value<String?> errorCode;
+  final Value<String?> errorMessage;
+  final Value<int> rowid;
+  const BusinessActionsTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.correlationId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.vendor = const Value.absent(),
+    this.subjectKind = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    this.subjectLabel = const Value.absent(),
+    this.summary = const Value.absent(),
+    this.parameters = const Value.absent(),
+    this.proposedBy = const Value.absent(),
+    this.requestedBy = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.requestHash = const Value.absent(),
+    this.status = const Value.absent(),
+    this.attemptCount = const Value.absent(),
+    this.leasedUntil = const Value.absent(),
+    this.plannedAt = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.externalId = const Value.absent(),
+    this.errorCode = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BusinessActionsTableCompanion.insert({
+    required String id,
+    required String businessId,
+    this.correlationId = const Value.absent(),
+    required String type,
+    required String vendor,
+    required String subjectKind,
+    required String subjectId,
+    this.subjectLabel = const Value.absent(),
+    required String summary,
+    required String parameters,
+    required String proposedBy,
+    this.requestedBy = const Value.absent(),
+    required String idempotencyKey,
+    required String requestHash,
+    required String status,
+    this.attemptCount = const Value.absent(),
+    this.leasedUntil = const Value.absent(),
+    required DateTime plannedAt,
+    this.startedAt = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.externalId = const Value.absent(),
+    this.errorCode = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       type = Value(type),
+       vendor = Value(vendor),
+       subjectKind = Value(subjectKind),
+       subjectId = Value(subjectId),
+       summary = Value(summary),
+       parameters = Value(parameters),
+       proposedBy = Value(proposedBy),
+       idempotencyKey = Value(idempotencyKey),
+       requestHash = Value(requestHash),
+       status = Value(status),
+       plannedAt = Value(plannedAt);
+  static Insertable<BusinessActionsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? correlationId,
+    Expression<String>? type,
+    Expression<String>? vendor,
+    Expression<String>? subjectKind,
+    Expression<String>? subjectId,
+    Expression<String>? subjectLabel,
+    Expression<String>? summary,
+    Expression<String>? parameters,
+    Expression<String>? proposedBy,
+    Expression<String>? requestedBy,
+    Expression<String>? idempotencyKey,
+    Expression<String>? requestHash,
+    Expression<String>? status,
+    Expression<int>? attemptCount,
+    Expression<DateTime>? leasedUntil,
+    Expression<DateTime>? plannedAt,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? completedAt,
+    Expression<String>? externalId,
+    Expression<String>? errorCode,
+    Expression<String>? errorMessage,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (correlationId != null) 'correlation_id': correlationId,
+      if (type != null) 'type': type,
+      if (vendor != null) 'vendor': vendor,
+      if (subjectKind != null) 'subject_kind': subjectKind,
+      if (subjectId != null) 'subject_id': subjectId,
+      if (subjectLabel != null) 'subject_label': subjectLabel,
+      if (summary != null) 'summary': summary,
+      if (parameters != null) 'parameters': parameters,
+      if (proposedBy != null) 'proposed_by': proposedBy,
+      if (requestedBy != null) 'requested_by': requestedBy,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+      if (requestHash != null) 'request_hash': requestHash,
+      if (status != null) 'status': status,
+      if (attemptCount != null) 'attempt_count': attemptCount,
+      if (leasedUntil != null) 'leased_until': leasedUntil,
+      if (plannedAt != null) 'planned_at': plannedAt,
+      if (startedAt != null) 'started_at': startedAt,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (externalId != null) 'external_id': externalId,
+      if (errorCode != null) 'error_code': errorCode,
+      if (errorMessage != null) 'error_message': errorMessage,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BusinessActionsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String?>? correlationId,
+    Value<String>? type,
+    Value<String>? vendor,
+    Value<String>? subjectKind,
+    Value<String>? subjectId,
+    Value<String?>? subjectLabel,
+    Value<String>? summary,
+    Value<String>? parameters,
+    Value<String>? proposedBy,
+    Value<String?>? requestedBy,
+    Value<String>? idempotencyKey,
+    Value<String>? requestHash,
+    Value<String>? status,
+    Value<int>? attemptCount,
+    Value<DateTime?>? leasedUntil,
+    Value<DateTime>? plannedAt,
+    Value<DateTime?>? startedAt,
+    Value<DateTime?>? completedAt,
+    Value<String?>? externalId,
+    Value<String?>? errorCode,
+    Value<String?>? errorMessage,
+    Value<int>? rowid,
+  }) {
+    return BusinessActionsTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      correlationId: correlationId ?? this.correlationId,
+      type: type ?? this.type,
+      vendor: vendor ?? this.vendor,
+      subjectKind: subjectKind ?? this.subjectKind,
+      subjectId: subjectId ?? this.subjectId,
+      subjectLabel: subjectLabel ?? this.subjectLabel,
+      summary: summary ?? this.summary,
+      parameters: parameters ?? this.parameters,
+      proposedBy: proposedBy ?? this.proposedBy,
+      requestedBy: requestedBy ?? this.requestedBy,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      requestHash: requestHash ?? this.requestHash,
+      status: status ?? this.status,
+      attemptCount: attemptCount ?? this.attemptCount,
+      leasedUntil: leasedUntil ?? this.leasedUntil,
+      plannedAt: plannedAt ?? this.plannedAt,
+      startedAt: startedAt ?? this.startedAt,
+      completedAt: completedAt ?? this.completedAt,
+      externalId: externalId ?? this.externalId,
+      errorCode: errorCode ?? this.errorCode,
+      errorMessage: errorMessage ?? this.errorMessage,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (correlationId.present) {
+      map['correlation_id'] = Variable<String>(correlationId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (vendor.present) {
+      map['vendor'] = Variable<String>(vendor.value);
+    }
+    if (subjectKind.present) {
+      map['subject_kind'] = Variable<String>(subjectKind.value);
+    }
+    if (subjectId.present) {
+      map['subject_id'] = Variable<String>(subjectId.value);
+    }
+    if (subjectLabel.present) {
+      map['subject_label'] = Variable<String>(subjectLabel.value);
+    }
+    if (summary.present) {
+      map['summary'] = Variable<String>(summary.value);
+    }
+    if (parameters.present) {
+      map['parameters'] = Variable<String>(parameters.value);
+    }
+    if (proposedBy.present) {
+      map['proposed_by'] = Variable<String>(proposedBy.value);
+    }
+    if (requestedBy.present) {
+      map['requested_by'] = Variable<String>(requestedBy.value);
+    }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
+    }
+    if (requestHash.present) {
+      map['request_hash'] = Variable<String>(requestHash.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (attemptCount.present) {
+      map['attempt_count'] = Variable<int>(attemptCount.value);
+    }
+    if (leasedUntil.present) {
+      map['leased_until'] = Variable<DateTime>(leasedUntil.value);
+    }
+    if (plannedAt.present) {
+      map['planned_at'] = Variable<DateTime>(plannedAt.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    }
+    if (externalId.present) {
+      map['external_id'] = Variable<String>(externalId.value);
+    }
+    if (errorCode.present) {
+      map['error_code'] = Variable<String>(errorCode.value);
+    }
+    if (errorMessage.present) {
+      map['error_message'] = Variable<String>(errorMessage.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BusinessActionsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('correlationId: $correlationId, ')
+          ..write('type: $type, ')
+          ..write('vendor: $vendor, ')
+          ..write('subjectKind: $subjectKind, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('subjectLabel: $subjectLabel, ')
+          ..write('summary: $summary, ')
+          ..write('parameters: $parameters, ')
+          ..write('proposedBy: $proposedBy, ')
+          ..write('requestedBy: $requestedBy, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('requestHash: $requestHash, ')
+          ..write('status: $status, ')
+          ..write('attemptCount: $attemptCount, ')
+          ..write('leasedUntil: $leasedUntil, ')
+          ..write('plannedAt: $plannedAt, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('externalId: $externalId, ')
+          ..write('errorCode: $errorCode, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueItemsTableTable extends SyncQueueItemsTable
     with TableInfo<$SyncQueueItemsTableTable, SyncQueueItemsTableData> {
   @override
@@ -17993,6 +19314,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PayoutsTableTable payoutsTable = $PayoutsTableTable(this);
   late final $ProposedChangesTableTable proposedChangesTable =
       $ProposedChangesTableTable(this);
+  late final $BusinessActionsTableTable businessActionsTable =
+      $BusinessActionsTableTable(this);
   late final $SyncQueueItemsTableTable syncQueueItemsTable =
       $SyncQueueItemsTableTable(this);
   late final $SupplierFavoritesTableTable supplierFavoritesTable =
@@ -18127,6 +19450,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'proposed_changes_correlation',
     'CREATE INDEX proposed_changes_correlation ON proposed_changes_table (correlation_id)',
   );
+  late final Index businessActionsBusinessId = Index(
+    'business_actions_business_id',
+    'CREATE INDEX business_actions_business_id ON business_actions_table (business_id)',
+  );
+  late final Index businessActionsStatus = Index(
+    'business_actions_status',
+    'CREATE INDEX business_actions_status ON business_actions_table (status)',
+  );
+  late final Index businessActionsCorrelation = Index(
+    'business_actions_correlation',
+    'CREATE INDEX business_actions_correlation ON business_actions_table (correlation_id)',
+  );
+  late final Index businessActionsIdempotency = Index(
+    'business_actions_idempotency',
+    'CREATE UNIQUE INDEX business_actions_idempotency ON business_actions_table (business_id, idempotency_key)',
+  );
   late final Index businessJourneyNodesJourney = Index(
     'business_journey_nodes_journey',
     'CREATE INDEX business_journey_nodes_journey ON business_journey_nodes_table (journey_id)',
@@ -18162,6 +19501,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     settlementLinesTable,
     payoutsTable,
     proposedChangesTable,
+    businessActionsTable,
     syncQueueItemsTable,
     supplierFavoritesTable,
     businessInputsTable,
@@ -18200,6 +19540,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     proposedChangesStatus,
     proposedChangesSubject,
     proposedChangesCorrelation,
+    businessActionsBusinessId,
+    businessActionsStatus,
+    businessActionsCorrelation,
+    businessActionsIdempotency,
     businessJourneyNodesJourney,
     chatMessagesConversation,
     chatMessagesSentAt,
@@ -18337,6 +19681,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('proposed_changes_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('business_actions_table', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -18740,6 +20091,31 @@ final class $$BusinessesTableTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _proposedChangesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $BusinessActionsTableTable,
+    List<BusinessActionsTableData>
+  >
+  _businessActionsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.businessActionsTable,
+        aliasName: 'businesses_table__id__business_actions_table__business_id',
+      );
+
+  $$BusinessActionsTableTableProcessedTableManager
+  get businessActionsTableRefs {
+    final manager = $$BusinessActionsTableTableTableManager(
+      $_db,
+      $_db.businessActionsTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _businessActionsTableRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -19222,6 +20598,31 @@ class $$BusinessesTableTableFilterComposer
           }) => $$ProposedChangesTableTableFilterComposer(
             $db: $db,
             $table: $db.proposedChangesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> businessActionsTableRefs(
+    Expression<bool> Function($$BusinessActionsTableTableFilterComposer f) f,
+  ) {
+    final $$BusinessActionsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.businessActionsTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessActionsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessActionsTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -19787,6 +21188,32 @@ class $$BusinessesTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> businessActionsTableRefs<T extends Object>(
+    Expression<T> Function($$BusinessActionsTableTableAnnotationComposer a) f,
+  ) {
+    final $$BusinessActionsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.businessActionsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$BusinessActionsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.businessActionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$BusinessesTableTableTableManager
@@ -19820,6 +21247,7 @@ class $$BusinessesTableTableTableManager
             bool settlementLinesTableRefs,
             bool payoutsTableRefs,
             bool proposedChangesTableRefs,
+            bool businessActionsTableRefs,
           })
         > {
   $$BusinessesTableTableTableManager(
@@ -19918,6 +21346,7 @@ class $$BusinessesTableTableTableManager
                 settlementLinesTableRefs = false,
                 payoutsTableRefs = false,
                 proposedChangesTableRefs = false,
+                businessActionsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -19938,6 +21367,7 @@ class $$BusinessesTableTableTableManager
                     if (settlementLinesTableRefs) db.settlementLinesTable,
                     if (payoutsTableRefs) db.payoutsTable,
                     if (proposedChangesTableRefs) db.proposedChangesTable,
+                    if (businessActionsTableRefs) db.businessActionsTable,
                   ],
                   addJoins:
                       <
@@ -20311,6 +21741,27 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (businessActionsTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          BusinessActionsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._businessActionsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).businessActionsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -20349,6 +21800,7 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool settlementLinesTableRefs,
         bool payoutsTableRefs,
         bool proposedChangesTableRefs,
+        bool businessActionsTableRefs,
       })
     >;
 typedef $$UsersTableTableCreateCompanionBuilder =
@@ -29681,6 +31133,711 @@ typedef $$ProposedChangesTableTableProcessedTableManager =
       ProposedChangesTableData,
       PrefetchHooks Function({bool businessId})
     >;
+typedef $$BusinessActionsTableTableCreateCompanionBuilder =
+    BusinessActionsTableCompanion Function({
+      required String id,
+      required String businessId,
+      Value<String?> correlationId,
+      required String type,
+      required String vendor,
+      required String subjectKind,
+      required String subjectId,
+      Value<String?> subjectLabel,
+      required String summary,
+      required String parameters,
+      required String proposedBy,
+      Value<String?> requestedBy,
+      required String idempotencyKey,
+      required String requestHash,
+      required String status,
+      Value<int> attemptCount,
+      Value<DateTime?> leasedUntil,
+      required DateTime plannedAt,
+      Value<DateTime?> startedAt,
+      Value<DateTime?> completedAt,
+      Value<String?> externalId,
+      Value<String?> errorCode,
+      Value<String?> errorMessage,
+      Value<int> rowid,
+    });
+typedef $$BusinessActionsTableTableUpdateCompanionBuilder =
+    BusinessActionsTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String?> correlationId,
+      Value<String> type,
+      Value<String> vendor,
+      Value<String> subjectKind,
+      Value<String> subjectId,
+      Value<String?> subjectLabel,
+      Value<String> summary,
+      Value<String> parameters,
+      Value<String> proposedBy,
+      Value<String?> requestedBy,
+      Value<String> idempotencyKey,
+      Value<String> requestHash,
+      Value<String> status,
+      Value<int> attemptCount,
+      Value<DateTime?> leasedUntil,
+      Value<DateTime> plannedAt,
+      Value<DateTime?> startedAt,
+      Value<DateTime?> completedAt,
+      Value<String?> externalId,
+      Value<String?> errorCode,
+      Value<String?> errorMessage,
+      Value<int> rowid,
+    });
+
+final class $$BusinessActionsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $BusinessActionsTableTable,
+          BusinessActionsTableData
+        > {
+  $$BusinessActionsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
+      .businessesTable
+      .createAlias('business_actions_table__business_id__businesses_table__id');
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$BusinessActionsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $BusinessActionsTableTable> {
+  $$BusinessActionsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vendor => $composableBuilder(
+    column: $table.vendor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectLabel => $composableBuilder(
+    column: $table.subjectLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parameters => $composableBuilder(
+    column: $table.parameters,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get proposedBy => $composableBuilder(
+    column: $table.proposedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requestedBy => $composableBuilder(
+    column: $table.requestedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requestHash => $composableBuilder(
+    column: $table.requestHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get leasedUntil => $composableBuilder(
+    column: $table.leasedUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get plannedAt => $composableBuilder(
+    column: $table.plannedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get errorCode => $composableBuilder(
+    column: $table.errorCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BusinessActionsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $BusinessActionsTableTable> {
+  $$BusinessActionsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get vendor => $composableBuilder(
+    column: $table.vendor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectLabel => $composableBuilder(
+    column: $table.subjectLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get parameters => $composableBuilder(
+    column: $table.parameters,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get proposedBy => $composableBuilder(
+    column: $table.proposedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requestedBy => $composableBuilder(
+    column: $table.requestedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requestHash => $composableBuilder(
+    column: $table.requestHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get leasedUntil => $composableBuilder(
+    column: $table.leasedUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get plannedAt => $composableBuilder(
+    column: $table.plannedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get errorCode => $composableBuilder(
+    column: $table.errorCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BusinessActionsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BusinessActionsTableTable> {
+  $$BusinessActionsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get vendor =>
+      $composableBuilder(column: $table.vendor, builder: (column) => column);
+
+  GeneratedColumn<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subjectId =>
+      $composableBuilder(column: $table.subjectId, builder: (column) => column);
+
+  GeneratedColumn<String> get subjectLabel => $composableBuilder(
+    column: $table.subjectLabel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get summary =>
+      $composableBuilder(column: $table.summary, builder: (column) => column);
+
+  GeneratedColumn<String> get parameters => $composableBuilder(
+    column: $table.parameters,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get proposedBy => $composableBuilder(
+    column: $table.proposedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get requestedBy => $composableBuilder(
+    column: $table.requestedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get requestHash => $composableBuilder(
+    column: $table.requestHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get leasedUntil => $composableBuilder(
+    column: $table.leasedUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get plannedAt =>
+      $composableBuilder(column: $table.plannedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get errorCode =>
+      $composableBuilder(column: $table.errorCode, builder: (column) => column);
+
+  GeneratedColumn<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => column,
+  );
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BusinessActionsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BusinessActionsTableTable,
+          BusinessActionsTableData,
+          $$BusinessActionsTableTableFilterComposer,
+          $$BusinessActionsTableTableOrderingComposer,
+          $$BusinessActionsTableTableAnnotationComposer,
+          $$BusinessActionsTableTableCreateCompanionBuilder,
+          $$BusinessActionsTableTableUpdateCompanionBuilder,
+          (BusinessActionsTableData, $$BusinessActionsTableTableReferences),
+          BusinessActionsTableData,
+          PrefetchHooks Function({bool businessId})
+        > {
+  $$BusinessActionsTableTableTableManager(
+    _$AppDatabase db,
+    $BusinessActionsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BusinessActionsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BusinessActionsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$BusinessActionsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String?> correlationId = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String> vendor = const Value.absent(),
+                Value<String> subjectKind = const Value.absent(),
+                Value<String> subjectId = const Value.absent(),
+                Value<String?> subjectLabel = const Value.absent(),
+                Value<String> summary = const Value.absent(),
+                Value<String> parameters = const Value.absent(),
+                Value<String> proposedBy = const Value.absent(),
+                Value<String?> requestedBy = const Value.absent(),
+                Value<String> idempotencyKey = const Value.absent(),
+                Value<String> requestHash = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> attemptCount = const Value.absent(),
+                Value<DateTime?> leasedUntil = const Value.absent(),
+                Value<DateTime> plannedAt = const Value.absent(),
+                Value<DateTime?> startedAt = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<String?> externalId = const Value.absent(),
+                Value<String?> errorCode = const Value.absent(),
+                Value<String?> errorMessage = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessActionsTableCompanion(
+                id: id,
+                businessId: businessId,
+                correlationId: correlationId,
+                type: type,
+                vendor: vendor,
+                subjectKind: subjectKind,
+                subjectId: subjectId,
+                subjectLabel: subjectLabel,
+                summary: summary,
+                parameters: parameters,
+                proposedBy: proposedBy,
+                requestedBy: requestedBy,
+                idempotencyKey: idempotencyKey,
+                requestHash: requestHash,
+                status: status,
+                attemptCount: attemptCount,
+                leasedUntil: leasedUntil,
+                plannedAt: plannedAt,
+                startedAt: startedAt,
+                completedAt: completedAt,
+                externalId: externalId,
+                errorCode: errorCode,
+                errorMessage: errorMessage,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                Value<String?> correlationId = const Value.absent(),
+                required String type,
+                required String vendor,
+                required String subjectKind,
+                required String subjectId,
+                Value<String?> subjectLabel = const Value.absent(),
+                required String summary,
+                required String parameters,
+                required String proposedBy,
+                Value<String?> requestedBy = const Value.absent(),
+                required String idempotencyKey,
+                required String requestHash,
+                required String status,
+                Value<int> attemptCount = const Value.absent(),
+                Value<DateTime?> leasedUntil = const Value.absent(),
+                required DateTime plannedAt,
+                Value<DateTime?> startedAt = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<String?> externalId = const Value.absent(),
+                Value<String?> errorCode = const Value.absent(),
+                Value<String?> errorMessage = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BusinessActionsTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                correlationId: correlationId,
+                type: type,
+                vendor: vendor,
+                subjectKind: subjectKind,
+                subjectId: subjectId,
+                subjectLabel: subjectLabel,
+                summary: summary,
+                parameters: parameters,
+                proposedBy: proposedBy,
+                requestedBy: requestedBy,
+                idempotencyKey: idempotencyKey,
+                requestHash: requestHash,
+                status: status,
+                attemptCount: attemptCount,
+                leasedUntil: leasedUntil,
+                plannedAt: plannedAt,
+                startedAt: startedAt,
+                completedAt: completedAt,
+                externalId: externalId,
+                errorCode: errorCode,
+                errorMessage: errorMessage,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$BusinessActionsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$BusinessActionsTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$BusinessActionsTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$BusinessActionsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BusinessActionsTableTable,
+      BusinessActionsTableData,
+      $$BusinessActionsTableTableFilterComposer,
+      $$BusinessActionsTableTableOrderingComposer,
+      $$BusinessActionsTableTableAnnotationComposer,
+      $$BusinessActionsTableTableCreateCompanionBuilder,
+      $$BusinessActionsTableTableUpdateCompanionBuilder,
+      (BusinessActionsTableData, $$BusinessActionsTableTableReferences),
+      BusinessActionsTableData,
+      PrefetchHooks Function({bool businessId})
+    >;
 typedef $$SyncQueueItemsTableTableCreateCompanionBuilder =
     SyncQueueItemsTableCompanion Function({
       Value<int> id,
@@ -32482,6 +34639,8 @@ class $AppDatabaseManager {
       $$PayoutsTableTableTableManager(_db, _db.payoutsTable);
   $$ProposedChangesTableTableTableManager get proposedChangesTable =>
       $$ProposedChangesTableTableTableManager(_db, _db.proposedChangesTable);
+  $$BusinessActionsTableTableTableManager get businessActionsTable =>
+      $$BusinessActionsTableTableTableManager(_db, _db.businessActionsTable);
   $$SyncQueueItemsTableTableTableManager get syncQueueItemsTable =>
       $$SyncQueueItemsTableTableTableManager(_db, _db.syncQueueItemsTable);
   $$SupplierFavoritesTableTableTableManager get supplierFavoritesTable =>
