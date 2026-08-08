@@ -1,45 +1,49 @@
 import 'package:flutter/foundation.dart';
 
 import 'external_identity.dart';
+import 'identity_evidence.dart';
 
-/// Dấu hiệu khiến một khách trở thành ứng viên.
+/// Một khách **có thể** là người này, kèm **bằng chứng** — không kèm mức tin cậy.
 ///
-/// Enum, không phải chuỗi mô tả: chuỗi mô tả sẽ là tiếng Việt nằm trong tầng
-/// domain (trái ADR-TON-007 — mọi chuỗi hiển thị đi qua `AppStrings`), và
-/// không so sánh được. Tầng UI dịch mã này ra câu người bán đọc.
-enum IdentityMatchSignal {
-  phone('phone'),
-  email('email');
-
-  const IdentityMatchSignal(this.code);
-
-  final String code;
-
-  static IdentityMatchSignal? fromCode(String? code) {
-    for (final s in IdentityMatchSignal.values) {
-      if (s.code == code) return s;
-    }
-    return null;
-  }
-}
-
-/// Một khách **có thể** là người này, kèm lý do và mức tin cậy.
+/// ## ⭐ Không có trường `confidence`, và đó là điểm chính của WTM-298
 ///
-/// Gói lại thành một kiểu thay vì rải thành nhiều tham số `…CustomerId` là có
-/// chủ ý: nhờ đó `IdentityResolver.resolve` **không có tham số customerId
-/// nào**, và luật 4 của ADR-TON-024 kiểm được bằng máy mà không cần ngoại lệ
-/// (`identity_no_auto_merge_governance_test`).
+/// Bản trước có `confidence` do **chỗ gọi khai**, và ta đã phải thêm một lớp
+/// phòng thủ (ứng viên tự nhận `exact` bị hạ về `strong`) chính vì chỗ gọi có
+/// thể nói dối. Lớp phòng thủ đó là dấu hiệu API sai hình dạng.
+///
+/// Giờ chỗ gọi chỉ khai **cái nó thấy** (`IdentityEvidence`); mức tin cậy do
+/// [scoreIdentity] — một hàm thuần, tất định — tính ra. **Nói dối không viết
+/// ra được**, nên không cần lớp phòng thủ nào.
 @immutable
 class IdentityCandidate {
-  const IdentityCandidate({
-    required this.customerId,
-    required this.signal,
-    required this.confidence,
-  });
+  IdentityCandidate({required this.customerId, required this.evidence})
+    : assert(
+        evidence.isNotEmpty,
+        'một ứng viên không bằng chứng là một phỏng đoán',
+      ),
+      scored = scoreIdentity(evidence);
 
   final String customerId;
-  final IdentityMatchSignal signal;
-  final IdentityConfidence confidence;
+
+  /// Những gì đã quan sát được. Mỗi mục mang `source` để hai quan sát cùng
+  /// nguồn không bị đếm hai lần — xem [scoreIdentity].
+  final List<IdentityEvidence> evidence;
+
+  /// **Tính ra**, không khai. Chỉ đọc.
+  final ScoredIdentity scored;
+
+  IdentityConfidence get confidence => scored.confidence;
+
+  /// Nhóm tín hiệu mạnh nhất đã đóng góp — để UI nói *vì sao nghi là một
+  /// người*, thay cho `IdentityMatchSignal` cũ.
+  EvidenceFamily? get strongestFamily {
+    IdentityEvidence? best;
+    for (final e in evidence) {
+      if (e.kind == IdentityEvidenceKind.contradiction) continue;
+      if (best == null || e.kind.weight > best.kind.weight) best = e;
+    }
+    return best?.kind.family;
+  }
 }
 
 /// Kết quả của việc đối chiếu một danh tính ngoài với danh bạ khách.
@@ -86,7 +90,7 @@ class SuggestLink extends IdentityDecision {
   IdentityConfidence get confidence => candidate.confidence;
 
   /// Vì sao nghi là cùng một người. Tầng UI dịch ra câu người bán đọc.
-  IdentityMatchSignal get signal => candidate.signal;
+  EvidenceFamily? get signal => candidate.strongestFamily;
 }
 
 /// Không đủ cơ sở. **Không đề xuất gì**, kể cả dưới dạng gợi ý mờ.
@@ -157,22 +161,13 @@ class IdentityResolver {
     // điện thoại — vợ chồng, mẹ con, số cửa hàng. Ở Việt Nam đó là chuyện phổ
     // biến, không phải trường hợp biên.
     //
-    // ⚠️ `exact` từ một ứng viên KHÔNG được tự gắn ở đây. Tự động chỉ dành cho
-    // khoá do chính nền tảng cấp (nhánh 1); một luật khớp tự nhận là `exact`
-    // vẫn phải qua mắt người bán.
+    // Bản trước phải hạ `exact` của ứng viên về `strong` bằng tay, vì chỗ gọi
+    // khai được mức. Nay không cần: `exact` chỉ đến từ khoá do nền tảng cấp
+    // (`platformAccountId`), và một khoá như vậy đã được nhánh 1 xử lý. Ứng
+    // viên khớp theo số điện thoại/email **không có đường nào** lên `exact`.
     for (final c in candidates) {
       if (c.confidence.canSuggest) {
-        return SuggestLink(
-          candidate: c.confidence == IdentityConfidence.exact
-              // Hạ về `strong`: đề xuất thì mức cao nhất là `strong`, để
-              // không có đường nào biến một đề xuất thành `AutoLink` về sau.
-              ? IdentityCandidate(
-                  customerId: c.customerId,
-                  signal: c.signal,
-                  confidence: IdentityConfidence.strong,
-                )
-              : c,
-        );
+        return SuggestLink(candidate: c);
       }
     }
 

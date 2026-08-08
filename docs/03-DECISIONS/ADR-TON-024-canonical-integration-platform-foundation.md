@@ -122,6 +122,7 @@ persistence, chưa nối UI, chưa connector nào ghi vào các bảng mới).
 | Luật | Cài ở đâu | Story | Cách khoá |
 |---|---|---|---|
 | 1 · liên kết ≠ gộp | `consumer/external_identity*.dart` · schema **v19** | WTM-291 | suite quét mã, 3 lớp — lớp quyết định: *"seam không chạm `customersTable`"* |
+| 1b · **confidence TÍNH, không khai** | `consumer/identity_evidence.dart` | **WTM-298** | `identity_confidence_is_derived_governance_test` — 3 lớp |
 | 2 · settlement | `finance/settlement*.dart` · `true_profit.dart` · schema **v20** | WTM-292 | suite quét mã, 3 lớp — lớp tinh tế nhất: *"phân bổ không trả về `SettlementLine`"* |
 | 3 · catalog/matrix là dữ liệu | `platform/vendor_catalog.dart` · `capability_matrix.dart` | WTM-293 | **kiểu dữ liệu** — `CapabilityClaim` không mang hai cột đầu, constructor private |
 | 4 · canonical event | `platform/canonical_event.dart` | WTM-294 | **kiểu dữ liệu** — `type` là enum, nên mã nền tảng không dựng được envelope |
@@ -149,3 +150,37 @@ Chọn kiểu khi diễn đạt được; quét mã khi không.
   lời khuyên bị bỏ qua đúng vào ngày ai đó vội.
 
 Chi tiết trong §"Đã cài đặt" của bốn tài liệu `docs/08-PLATFORM/14`–`18`.
+
+---
+
+## Sửa đổi sau nghiên cứu WTM-296 (Founder + GPT duyệt 2026-08-08)
+
+Nghiên cứu source COMP AI CRM lộ ra rằng luật 1 **thiếu một nửa**: ADR này quy
+định *mức nào làm được gì*, nhưng không quy định **ai được định ra mức**. Hệ
+quả là `IdentityCandidate` cho **chỗ gọi khai** `confidence`, và ta đã phải
+thêm một lớp phòng thủ (hạ `exact` của ứng viên về `strong`) — dấu hiệu API
+sai hình dạng.
+
+**WTM-298 sửa:** chỗ gọi khai `IdentityEvidence` (loại + nguồn quan sát); mức
+tin cậy do `scoreIdentity()` — hàm thuần, tất định — tính ra. `IdentityCandidate`
+**không còn trường `confidence`**, nên lớp phòng thủ đã được gỡ: nói dối không
+viết ra được.
+
+Ba luật chống cộng dồn giả, tất cả là **cấu trúc**:
+
+1. **Cùng `source` ⇒ một quan sát.** Một thẻ liên hệ cho tên + số + email là
+   *một* lần nhìn, không phải ba.
+2. **Cùng `EvidenceFamily` ⇒ một tín hiệu.** "Tên khớp" và "tên gần giống" là
+   cùng một thứ nhìn hai lần.
+3. **`exact` chỉ đến từ `platformAccountId`.** Gộp bao nhiêu bằng chứng khác
+   cũng không tới `exact`, vì `exact` nghĩa là *"nền tảng bảo đảm duy nhất"*,
+   không phải *"tôi rất chắc"*.
+
+**Trọng số rút từ thực tế bán lẻ Việt Nam, không chép COMP AI:** `phoneExactMatch`
+nhẹ hơn `emailExactMatch` (hai người thật dùng chung số là chuyện phổ biến);
+`nameExactMatch` chỉ 0.20 (trùng tên là chuyện thường); `addressSimilar` gần
+như vô giá trị (chung cư, toà nhà).
+
+**Thiếu dữ liệu không phải bằng chứng ngược:** từ vựng **không có** cách nào
+diễn đạt *"thiếu số điện thoại"*. Một khách không có email là bình thường ở
+Việt Nam, không phải dấu hiệu họ là người khác.
