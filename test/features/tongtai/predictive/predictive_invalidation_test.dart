@@ -332,6 +332,11 @@ void main() {
       const allowlist = {
         'tongtaiUserIdProvider', // install identity
         'tongtaiHasAiKeyProvider', // BYOK key presence
+        // WTM-317: đọc danh sách file trên **Drive**, không đọc DB. Gieo hay
+        // xoá dữ liệu mẫu không đổi được thứ đang nằm trên Drive của người
+        // bán. Nó được làm mới bởi chính hành động sinh ra file mới
+        // (`backupNow` → `ref.invalidate`), đúng nhịp của nó.
+        'driveBackupListProvider',
       };
 
       final declaration = RegExp(r'^final (\w+) = FutureProvider');

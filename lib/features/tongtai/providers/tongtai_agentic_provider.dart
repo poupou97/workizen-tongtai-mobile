@@ -3,7 +3,6 @@ import 'package:uuid/uuid.dart';
 
 import '../action/business_action.dart';
 import '../action/business_action_executor.dart';
-import '../action/demo_action_handlers.dart';
 import '../agent/agent_activity.dart';
 import '../agent/agent_runner.dart';
 import '../agent/agent_task_queue.dart';
@@ -15,6 +14,7 @@ import '../agent/business_brief_service.dart';
 import '../agent/demo_reset.dart';
 import '../proposal/proposed_change_repository.dart';
 import 'tongtai_capability_provider.dart';
+import 'tongtai_connection_provider.dart';
 import '../../../core/prefs.dart';
 import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
 import 'tongtai_consumer_provider.dart';
@@ -61,11 +61,15 @@ final agentTaskQueueProvider = Provider<AgentTaskQueue>((ref) {
 /// không phải màn hình, không phải bảng, không phải luật duyệt. Nếu thay vào
 /// đó ta bỏ qua `run` ở chế độ demo, thì đường chạy thật sẽ là đường **chưa ai
 /// từng chạy**, và nó sẽ hỏng đúng vào ngày đầu tiên có người dùng.
+///
+/// **WTM-317 xác nhận dự đoán đó.** Sao lưu lên Drive là hành động thật đầu
+/// tiên, và thứ phải đổi đúng là một dòng trong
+/// [tongtaiActionHandlersProvider] — không màn hình, không bảng, không luật.
 final businessActionExecutorProvider = Provider<BusinessActionExecutor>(
   (ref) => BusinessActionExecutor(
     ref.watch(tongtaiDatabaseProvider),
     now: DateTime.now,
-    handlers: demoActionHandlers,
+    handlers: ref.watch(tongtaiActionHandlersProvider),
   ),
 );
 
