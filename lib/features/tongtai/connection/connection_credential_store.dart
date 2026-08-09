@@ -131,4 +131,15 @@ abstract final class CredentialField {
 
   /// Không bí mật: chat id mặc định (Telegram).
   static const String chatId = 'chat_id';
+
+  /// Không bí mật: project Jira người dùng **chọn** (WTM-319).
+  ///
+  /// Nằm cùng cụm credential chứ không phải một cột trong DB, vì nó chỉ có
+  /// nghĩa khi cụm khoá còn sống: xoá kết nối là xoá luôn lựa chọn, không để
+  /// lại một mã project mồ côi trỏ tới một instance không còn truy cập được.
+  static const String projectKey = 'project_key';
+
+  /// Không bí mật: space Confluence người dùng chọn.
+  static const String spaceId = 'space_id';
+  static const String spaceKey = 'space_key';
 }

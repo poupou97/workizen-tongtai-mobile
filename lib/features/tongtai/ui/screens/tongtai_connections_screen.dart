@@ -11,6 +11,8 @@ import '../../core/connection.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
+import '../../connection/atlassian/atlassian_client.dart';
+import '../../connection/atlassian/atlassian_connection.dart';
 import '../../connection/google/google_connection.dart';
 import '../../connection/telegram/telegram_client.dart';
 import '../../connection/telegram/telegram_connection.dart';
@@ -45,6 +47,90 @@ class _TongtaiConnectionsScreenState
   /// Các cuộc trò chuyện tìm được ở lần bấm gần nhất. `null` = **chưa tìm**,
   /// khác hẳn danh sách rỗng = *đã tìm và chưa thấy ai* (kỷ luật `null` ≠ 0).
   List<TelegramChat>? _chats;
+
+  /// `null` = chưa nhập khoá xong. Rỗng = đã hỏi, tài khoản không có dự án nào.
+  List<AtlassianProject>? _projects;
+
+  /// Space Confluence. Cùng kỷ luật `null` ≠ rỗng như [_projects].
+  List<AtlassianSpace>? _spaces;
+
+  Future<void> _saveAtlassian({
+    required String instanceUrl,
+    required String email,
+    required String token,
+  }) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+
+    AtlassianSetup? setup;
+    var projects = <AtlassianProject>[];
+    var spaces = <AtlassianSpace>[];
+    final failure = await runTongtaiAction(
+      () async {
+        final connection = ref.read(atlassianConnectionProvider);
+        setup = await connection.attachCredentials(
+          instanceUrl: instanceUrl,
+          email: email,
+          token: token,
+        );
+        // Chỉ hỏi dự án khi khoá đã được Atlassian xác nhận — hỏi trước là
+        // chắc chắn nhận về 401 và một danh sách rỗng khó hiểu.
+        if (setup!.succeeded) {
+          projects = await connection.projects();
+          spaces = await connection.spaces();
+        }
+      },
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'connections',
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      final ok = setup?.succeeded ?? false;
+      _projects = ok ? projects : null;
+      _spaces = ok ? spaces : null;
+    });
+    ref.invalidate(connectorCatalogProvider);
+    ref.invalidate(atlassianReadyProvider);
+    if (failure != null) {
+      showTongtaiFailure(context, failure);
+      return;
+    }
+    if (!(setup?.succeeded ?? false)) _say(context.l10n.atlassianBad);
+  }
+
+  Future<void> _pickSpace(AtlassianSpace space) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final failure = await runTongtaiAction(
+      () => ref.read(atlassianConnectionProvider).selectSpace(space),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'connections',
+    );
+
+    if (!mounted) return;
+    setState(() => _busy = false);
+    ref.invalidate(knowledgeReferencesProvider);
+    if (failure != null) showTongtaiFailure(context, failure);
+  }
+
+  Future<void> _pickProject(AtlassianProject project) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final failure = await runTongtaiAction(
+      () => ref.read(atlassianConnectionProvider).selectProject(project.key),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'connections',
+    );
+
+    if (!mounted) return;
+    setState(() => _busy = false);
+    ref.invalidate(connectorCatalogProvider);
+    ref.invalidate(atlassianReadyProvider);
+    ref.invalidate(workContextProvider);
+    if (failure != null) showTongtaiFailure(context, failure);
+  }
 
   Future<void> _saveTelegramToken(String token) async {
     if (_busy) return;
@@ -316,6 +402,15 @@ class _TongtaiConnectionsScreenState
                 onFindChats: _findTelegramChats,
                 onPickChat: _pickTelegramChat,
                 onSendTest: _sendTelegramTest,
+              ),
+              const SizedBox(height: 12),
+              _AtlassianCard(
+                busy: _busy,
+                projects: _projects,
+                spaces: _spaces,
+                onSave: _saveAtlassian,
+                onPickProject: _pickProject,
+                onPickSpace: _pickSpace,
               ),
             ],
           ),
@@ -778,6 +873,216 @@ class _TelegramCardState extends ConsumerState<_TelegramCard> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Jira + Confluence: nhập khoá → chọn dự án → thấy một câu tóm tắt.
+///
+/// ⛔ **Không** phải Jira mobile: không board, không sprint, không backlog.
+/// Thứ hiện ra là **một dòng** trả lời "công việc đang thế nào".
+class _AtlassianCard extends ConsumerStatefulWidget {
+  const _AtlassianCard({
+    required this.busy,
+    required this.projects,
+    required this.spaces,
+    required this.onSave,
+    required this.onPickProject,
+    required this.onPickSpace,
+  });
+
+  final bool busy;
+  final List<AtlassianProject>? projects;
+  final List<AtlassianSpace>? spaces;
+  final Future<void> Function(AtlassianSpace) onPickSpace;
+  final Future<void> Function({
+    required String instanceUrl,
+    required String email,
+    required String token,
+  })
+  onSave;
+  final Future<void> Function(AtlassianProject) onPickProject;
+
+  @override
+  ConsumerState<_AtlassianCard> createState() => _AtlassianCardState();
+}
+
+class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
+  final TextEditingController _url = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _token = TextEditingController();
+
+  @override
+  void dispose() {
+    _url.dispose();
+    _email.dispose();
+    _token.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final work = ref.watch(workContextProvider);
+    final projects = widget.projects;
+
+    return Container(
+      key: const Key('connections-atlassian'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.atlassianTitle,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.atlassianHint,
+            style: const TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            key: const Key('connections-atlassian-url'),
+            controller: _url,
+            enabled: !widget.busy,
+            keyboardType: TextInputType.url,
+            decoration: InputDecoration(
+              labelText: l10n.atlassianUrlLabel,
+              hintText: l10n.atlassianUrlHint,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            key: const Key('connections-atlassian-email'),
+            controller: _email,
+            enabled: !widget.busy,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: l10n.atlassianEmailLabel,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            key: const Key('connections-atlassian-token'),
+            controller: _token,
+            enabled: !widget.busy,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: l10n.atlassianTokenLabel,
+              helperText: l10n.atlassianTokenHint,
+              helperMaxLines: 2,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              key: const Key('connections-atlassian-save'),
+              onPressed: widget.busy
+                  ? null
+                  : () => widget.onSave(
+                      instanceUrl: _url.text,
+                      email: _email.text,
+                      token: _token.text,
+                    ),
+              child: Text(l10n.atlassianSave),
+            ),
+          ),
+          if (projects != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              l10n.atlassianPickProject,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: TongtaiDesignTokens.lightTextPrimary,
+              ),
+            ),
+            if (projects.isEmpty)
+              Text(
+                l10n.atlassianNoProjects,
+                key: const Key('connections-atlassian-no-projects'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: TongtaiDesignTokens.lightTextSecondary,
+                ),
+              )
+            else
+              for (final project in projects)
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: TextButton(
+                    key: Key('connections-atlassian-project-${project.key}'),
+                    onPressed: widget.busy
+                        ? null
+                        : () => widget.onPickProject(project),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('${project.key} · ${project.name}'),
+                    ),
+                  ),
+                ),
+          ],
+          if (widget.spaces != null && widget.spaces!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              l10n.atlassianPickSpace,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: TongtaiDesignTokens.lightTextPrimary,
+              ),
+            ),
+            for (final space in widget.spaces!)
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: TextButton(
+                  key: Key('connections-atlassian-space-${space.key}'),
+                  onPressed: widget.busy
+                      ? null
+                      : () => widget.onPickSpace(space),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(space.name),
+                  ),
+                ),
+              ),
+          ],
+          // Một dòng, không một cái board. `null` và "chưa đủ dữ liệu" nói
+          // cùng một câu vì với người đọc chúng giống nhau: chưa trả lời được.
+          const SizedBox(height: 12),
+          Text(
+            work.asData?.value?.headline ?? l10n.atlassianNoData,
+            key: const Key('connections-atlassian-headline'),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              height: 1.5,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
         ],
       ),
     );
