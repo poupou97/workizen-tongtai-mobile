@@ -116,6 +116,17 @@ class BackupDatasets {
   /// xem [optional]: mọi file `.ttbk` đã phát hành đều không có nó.
   static const String businessInputs = 'businessInputs';
 
+  /// Miền thương mại chuẩn hoá (WTM-327). **Optional on purpose** — mọi file
+  /// `.ttbk` phát hành trước v24 đều không có chúng.
+  ///
+  /// Phải có mặt ở đây: `products` đã nằm trong backup, và xoá sản phẩm lúc
+  /// Replace sẽ **cascade xoá luôn** phiên bản và báo giá. Không khôi phục
+  /// chúng lại thì một lần restore âm thầm nuốt mất chúng — đúng hình dạng lỗ
+  /// hổng WTM-190 (`opportunityReactions` quên vào gói).
+  static const String productVariants = 'productVariants';
+  static const String supplierQuotes = 'supplierQuotes';
+  static const String importJobs = 'importJobs';
+
   /// Every dataset a v2 backup must carry. A file missing any of these is
   /// **not** a complete snapshot and is rejected rather than partially applied.
   ///
@@ -144,6 +155,9 @@ class BackupDatasets {
     journeys,
     opportunityReactions,
     businessInputs,
+    productVariants,
+    supplierQuotes,
+    importJobs,
   ];
 }
 

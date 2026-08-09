@@ -12,6 +12,8 @@ import '../profile/business_profile.dart';
 import '../profile/business_profile_repository.dart';
 import '../journey/journey.dart';
 import '../journey/journey_repository.dart';
+import '../commerce/commerce_models.dart';
+import '../commerce/commerce_repository.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_repository.dart';
 import '../finance/finance_repository.dart';
@@ -67,6 +69,7 @@ class TongtaiBackupRepositories {
     this.journeys,
     this.opportunityReactions,
     this.businessInputs,
+    this.commerce,
   });
 
   /// Needed for the single transaction that makes Replace atomic — the one
@@ -97,6 +100,10 @@ class TongtaiBackupRepositories {
   /// Nguồn đầu vào (WTM-229). Nullable như [journeys]: `null` nghĩa là không
   /// sao lưu và không khôi phục phần này.
   final BusinessInputRepository? businessInputs;
+
+  /// Miền thương mại chuẩn hoá (WTM-327). Nullable như [businessInputs]:
+  /// `null` nghĩa là phần này không được sao lưu và không được khôi phục.
+  final CommerceRepository? commerce;
 }
 
 /// The decoded, type-checked contents of a backup.
@@ -113,6 +120,9 @@ class BackupContents {
     this.journeys = const [],
     this.opportunityReactions = const {},
     this.businessInputs = const [],
+    this.productVariants = const [],
+    this.supplierQuotes = const [],
+    this.importJobs = const [],
   });
 
   final List<Customer> customers;
@@ -139,6 +149,9 @@ class BackupContents {
   /// Nguồn đầu vào (WTM-229/230). Rỗng nghĩa là gói không mang phần này — hoặc
   /// nó có trước tính năng, hoặc người bán chưa khai nguồn nào.
   final List<BusinessInput> businessInputs;
+  final List<ProductVariant> productVariants;
+  final List<SupplierQuote> supplierQuotes;
+  final List<ImportJob> importJobs;
 
   Map<String, int> get counts => {
     BackupDatasets.customers: customers.length,
@@ -406,6 +419,20 @@ class TongtaiBackupService {
             for (final i in contents.businessInputs)
               BackupCodec.encodeBusinessInput(i),
           ],
+        if (contents.productVariants.isNotEmpty)
+          BackupDatasets.productVariants: [
+            for (final v in contents.productVariants)
+              BackupCodec.encodeProductVariant(v),
+          ],
+        if (contents.supplierQuotes.isNotEmpty)
+          BackupDatasets.supplierQuotes: [
+            for (final q in contents.supplierQuotes)
+              BackupCodec.encodeSupplierQuote(q),
+          ],
+        if (contents.importJobs.isNotEmpty)
+          BackupDatasets.importJobs: [
+            for (final j in contents.importJobs) BackupCodec.encodeImportJob(j),
+          ],
         BackupDatasets.favourites: [
           for (final f in contents.favourites) BackupCodec.encodeFavourite(f),
         ],
@@ -440,6 +467,9 @@ class TongtaiBackupService {
         if (contents.opportunityReactions.isNotEmpty)
           BackupDatasets.opportunityReactions,
         if (contents.businessInputs.isNotEmpty) BackupDatasets.businessInputs,
+        if (contents.productVariants.isNotEmpty) BackupDatasets.productVariants,
+        if (contents.supplierQuotes.isNotEmpty) BackupDatasets.supplierQuotes,
+        if (contents.importJobs.isNotEmpty) BackupDatasets.importJobs,
       ],
       redaction: BackupRedaction.none,
     );
@@ -458,6 +488,9 @@ class TongtaiBackupService {
     opportunityReactions:
         await repositories.opportunityReactions?.loadAll() ?? const {},
     businessInputs: await repositories.businessInputs?.loadAll() ?? const [],
+    productVariants: await repositories.commerce?.loadVariants() ?? const [],
+    supplierQuotes: await repositories.commerce?.loadQuotes() ?? const [],
+    importJobs: await repositories.commerce?.loadImportJobs() ?? const [],
   );
 
   // ── validate ─────────────────────────────────────────────────────────────
@@ -704,6 +737,24 @@ class TongtaiBackupService {
       journeys: journeys,
       opportunityReactions: reactions,
       businessInputs: businessInputs,
+      productVariants: [
+        for (final raw
+            in payload.datasets[BackupDatasets.productVariants] ??
+                const <Map<String, Object?>>[])
+          ?BackupCodec.decodeProductVariant(raw),
+      ],
+      supplierQuotes: [
+        for (final raw
+            in payload.datasets[BackupDatasets.supplierQuotes] ??
+                const <Map<String, Object?>>[])
+          ?BackupCodec.decodeSupplierQuote(raw),
+      ],
+      importJobs: [
+        for (final raw
+            in payload.datasets[BackupDatasets.importJobs] ??
+                const <Map<String, Object?>>[])
+          ?BackupCodec.decodeImportJob(raw),
+      ],
     );
   }
 
@@ -812,6 +863,7 @@ class TongtaiBackupService {
         await repositories.journeys?.deleteAll();
         await repositories.opportunityReactions?.deleteAll();
         await repositories.businessInputs?.deleteAll();
+        await repositories.commerce?.deleteAll();
 
         // …and back in dependency order: a customer must exist before an order
         // may reference it.
@@ -830,6 +882,13 @@ class TongtaiBackupService {
           await repositories.journeys?.save(journey);
         }
         await repositories.businessInputs?.upsertAll(contents.businessInputs);
+        // Sau `products` — phiên bản và báo giá có khoá ngoại tới sản phẩm,
+        // nên chèn trước thì chúng bị từ chối và mất im lặng.
+        for (final job in contents.importJobs) {
+          await repositories.commerce?.saveImportJob(job);
+        }
+        await repositories.commerce?.upsertVariants(contents.productVariants);
+        await repositories.commerce?.upsertQuotes(contents.supplierQuotes);
         await repositories.opportunityReactions?.replaceAll(
           contents.opportunityReactions,
         );

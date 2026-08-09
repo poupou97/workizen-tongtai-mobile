@@ -37,7 +37,23 @@ enum ProvenanceSource {
 
   /// Về từ một nền tảng ngoài qua connector. Khớp `provenance.source` trong
   /// canonical event envelope (`docs/08-PLATFORM/09-MOBILE-BACKEND-CONTRACT.md`).
-  connector('connector');
+  connector('connector'),
+
+  /// ⭐ Nhập từ **một file** người bán đưa vào — WTM-327 (Epic WTM-324).
+  ///
+  /// ## Vì sao không gộp vào `connector`
+  ///
+  /// `connector` nghĩa là *về từ một nền tảng ngoài qua API, có credential,
+  /// đồng bộ lại được*. Một file XLSX không như vậy: không API, không
+  /// credential, không sync — và quan trọng nhất, **nó không tự cập nhật**.
+  ///
+  /// Gộp hai thứ lại sẽ khiến một con số đọc từ file tháng trước trông y hệt
+  /// một con số vừa đồng bộ sáng nay. Đó đúng là kiểu nói dối mà enum này sinh
+  /// ra để chặn.
+  ///
+  /// Cũng không phải `manual` (người bán không gõ từng dòng) và không phải
+  /// `sample` (đây là dữ liệu của chính họ, dù lần đầu là bộ demo).
+  fileBridge('file_bridge');
 
   const ProvenanceSource(this.code);
 

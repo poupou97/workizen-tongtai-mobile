@@ -49,6 +49,29 @@ class ProductsTable extends Table {
   /// Fields graduate out of here to structured columns/child tables on demand.
   TextColumn get domainSnapshot => text().nullable()();
 
+  // ── nguồn ngoài (v24 · WTM-327) ────────────────────────────────────────
+
+  /// Mã ở nguồn: `sku` trong file Excel, id Shopify, item_id Shopee…
+  ///
+  /// Nhập lại **cùng** một file phải nhận ra bản ghi cũ chứ không sinh bản thứ
+  /// hai. Không có cột này thì cách duy nhất là so tên — và tên thì đổi.
+  TextColumn get externalId => text().nullable()();
+
+  /// Bản ghi này từ đâu tới — mã canonical `ProvenanceSource`. `null` = dòng
+  /// có trước v24, tức là người bán tự nhập; suy ra chứ không đoán.
+  TextColumn get provenanceCode => text().nullable()();
+
+  /// Lần nhập nào tạo ra nó (`import_jobs.id`). Đây là thứ cho phép xoá đúng
+  /// một lần nhập mà không đụng dữ liệu tự nhập.
+  TextColumn get importJobId => text().nullable()();
+
+  TextColumn get brand => text().nullable()();
+
+  /// Ảnh **theo URL**, không nhét binary (§10). `domainSnapshot.imagePaths`
+  /// vẫn giữ ảnh cục bộ người bán tự chụp — hai nguồn ảnh khác nhau, và trộn
+  /// chúng sẽ làm một lần nhập lại xoá mất ảnh người bán tự thêm.
+  TextColumn get imageUrl => text().nullable()();
+
   DateTimeColumn get createdAt =>
       dateTime().withDefault(Constant(DateTime.now()))();
   DateTimeColumn get updatedAt =>

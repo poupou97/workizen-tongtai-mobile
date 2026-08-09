@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../core/provenance.dart';
 import 'product_history.dart';
 
 /// Stock-level health of a product, derived from on-hand quantity against its
@@ -86,10 +87,34 @@ class Product {
     this.description = '',
     this.imagePaths = const [],
     this.history = const [],
+    this.externalId,
+    this.brand,
+    this.imageUrl,
+    this.provenance = ProvenanceSource.manual,
+    this.importJobId,
   });
 
   /// Stable identifier.
   final String id;
+
+  // ── nguồn ngoài (v24 · WTM-327) ────────────────────────────────────────
+
+  /// Mã ở nguồn: dòng Excel, id Shopify, item_id Shopee… `null` = người bán
+  /// tự tạo.
+  final String? externalId;
+
+  final String? brand;
+
+  /// Ảnh **theo URL** từ nguồn ngoài (§10). Khác [imagePaths] — ảnh cục bộ do
+  /// người bán tự chụp. Trộn hai thứ sẽ làm một lần nhập lại xoá mất ảnh họ
+  /// tự thêm.
+  final String? imageUrl;
+
+  /// Bản ghi này từ đâu tới.
+  final ProvenanceSource provenance;
+
+  /// Lần nhập nào tạo ra nó — thứ cho phép xoá đúng một lần nhập (§22).
+  final String? importJobId;
 
   /// Stock-keeping unit code, e.g. "SKU-EL-001".
   final String sku;
@@ -149,6 +174,11 @@ class Product {
     List<String>? imagePaths,
     List<ProductRevision>? history,
     ProductKind? kind,
+    String? externalId,
+    String? brand,
+    String? imageUrl,
+    ProvenanceSource? provenance,
+    String? importJobId,
   }) {
     return Product(
       id: id ?? this.id,
@@ -164,6 +194,11 @@ class Product {
       description: description ?? this.description,
       imagePaths: imagePaths ?? this.imagePaths,
       history: history ?? this.history,
+      externalId: externalId ?? this.externalId,
+      brand: brand ?? this.brand,
+      imageUrl: imageUrl ?? this.imageUrl,
+      provenance: provenance ?? this.provenance,
+      importJobId: importJobId ?? this.importJobId,
     );
   }
 

@@ -9,7 +9,10 @@ import '../core/perf/startup_trace.dart';
 import 'tables/users.dart';
 import 'tables/businesses.dart';
 import 'tables/producers.dart';
+import 'tables/import_jobs.dart';
+import 'tables/product_variants.dart';
 import 'tables/products.dart';
+import 'tables/supplier_quotes.dart';
 import 'tables/customers.dart';
 import 'tables/orders.dart';
 import 'tables/journeys.dart';
@@ -73,6 +76,8 @@ part 'database.g.dart';
     BusinessesTable,
     ProducersTable,
     ProductsTable,
+    ProductVariantsTable,
+    SupplierQuotesTable,
     CustomersTable,
     OrdersTable,
     JourneysTable,
@@ -98,6 +103,7 @@ part 'database.g.dart';
     BusinessJourneyPlansTable,
     OpportunityReactionsTable,
     ChatMessagesTable,
+    ImportJobsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {

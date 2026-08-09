@@ -6,6 +6,8 @@ import '../consumer/customer.dart';
 import '../consumer/customer_history.dart';
 import '../core/tongtai_enums.dart';
 import '../finance/finance_transaction.dart';
+import '../commerce/commerce_models.dart';
+import '../core/provenance.dart';
 import '../inventory/product.dart';
 import '../inventory/product_history.dart';
 import '../journey/business_goal.dart';
@@ -233,6 +235,15 @@ class BackupCodec {
     'reorderLevel': p.reorderLevel,
     'updatedAt': _iso(p.updatedAt),
     'imagePaths': p.imagePaths,
+    // v24 (WTM-327) — nguồn ngoài. Thiếu chúng ở đây thì một lần khôi phục sẽ
+    // âm thầm cắt đứt sản phẩm khỏi lần nhập sinh ra nó, và "Đặt lại dữ liệu
+    // demo" sau đó không tìm thấy gì để xoá. Đúng hình dạng lỗ hổng WTM-211
+    // (`paymentStatus` quên vào codec).
+    'externalId': p.externalId,
+    'brand': p.brand,
+    'imageUrl': p.imageUrl,
+    'provenance': p.provenance.code,
+    'importJobId': p.importJobId,
     'history': [
       for (final revision in p.history)
         {
@@ -281,6 +292,16 @@ class BackupCodec {
       name: name,
       category: category,
       quantity: quantity,
+      externalId: _str(json['externalId']),
+      brand: _str(json['brand']),
+      imageUrl: _str(json['imageUrl']),
+      // File ghi trước v24 không có khoá này, và sản phẩm trong đó đúng là do
+      // người bán tự nhập — nên `manual` là sự thật, không phải mặc định cho
+      // tiện.
+      provenance:
+          ProvenanceSource.fromCode(_str(json['provenance'])) ??
+          ProvenanceSource.manual,
+      importJobId: _str(json['importJobId']),
       // Mã lạ ⇒ `physical`, và mọi file ghi TRƯỚC ADR-TON-023 đều thiếu khoá
       // này — chúng thật sự là hàng vật lý, nên đây là sự thật chứ không phải
       // giá trị mặc định cho tiện.
@@ -632,5 +653,159 @@ class BackupCodec {
       if (value.name == code) return MapEntry(id, value);
     }
     return null;
+  }
+
+  // ── miền thương mại (WTM-327 · v24) ──────────────────────────────────────
+
+  /// Enum lưu bằng **mã canonical**, không bằng nhãn hiển thị (ADR-TON-018).
+  static Map<String, Object?> encodeProductVariant(ProductVariant v) => {
+    'id': v.id,
+    'productId': v.productId,
+    'name': v.name,
+    'sku': v.sku,
+    'option1Name': v.option1Name,
+    'option1Value': v.option1Value,
+    'option2Name': v.option2Name,
+    'option2Value': v.option2Value,
+    // `null` = kế thừa giá sản phẩm mẹ. Phải sống sót — restore biến nó thành
+    // 0 sẽ khiến mọi phiên bản bán 0 đồng.
+    'costPrice': v.costPrice,
+    'sellingPrice': v.sellingPrice,
+    'quantity': v.quantity,
+    'externalId': v.externalId,
+    'provenance': v.provenance.code,
+    'importJobId': v.importJobId,
+  };
+
+  static ProductVariant? decodeProductVariant(Map<String, Object?> json) {
+    final id = _str(json['id']);
+    final productId = _str(json['productId']);
+    final name = _str(json['name']);
+    final sku = _str(json['sku']);
+    if (id == null || productId == null || name == null || sku == null) {
+      return null;
+    }
+    return ProductVariant(
+      id: id,
+      productId: productId,
+      name: name,
+      sku: sku,
+      option1Name: _str(json['option1Name']),
+      option1Value: _str(json['option1Value']),
+      option2Name: _str(json['option2Name']),
+      option2Value: _str(json['option2Value']),
+      costPrice: _double(json['costPrice']),
+      sellingPrice: _double(json['sellingPrice']),
+      quantity: _double(json['quantity']),
+      externalId: _str(json['externalId']),
+      provenance:
+          ProvenanceSource.fromCode(_str(json['provenance'])) ??
+          ProvenanceSource.manual,
+      importJobId: _str(json['importJobId']),
+    );
+  }
+
+  static Map<String, Object?> encodeSupplierQuote(SupplierQuote q) => {
+    'id': q.id,
+    'productId': q.productId,
+    'supplierId': q.supplierId,
+    'supplierName': q.supplierName,
+    'platform': q.platform?.code,
+    'country': q.country,
+    'sourceUrl': q.sourceUrl,
+    'rating': q.rating,
+    'unitCost': q.unitCost,
+    'currency': q.currency,
+    'minimumOrderQuantity': q.minimumOrderQuantity,
+    // `null` = chưa biết giao bao lâu. Restore biến nó thành 0 sẽ khiến so
+    // sánh nói "giao ngay hôm nay" cho một nguồn chưa ai hỏi.
+    'leadTimeDays': q.leadTimeDays,
+    'paymentTerms': q.paymentTerms,
+    'shippingMethod': q.shippingMethod,
+    'notes': q.notes,
+    'externalId': q.externalId,
+    'provenance': q.provenance.code,
+    'importJobId': q.importJobId,
+    'quotedAt': _iso(q.quotedAt),
+  };
+
+  static SupplierQuote? decodeSupplierQuote(Map<String, Object?> json) {
+    final id = _str(json['id']);
+    final productId = _str(json['productId']);
+    final supplierName = _str(json['supplierName']);
+    final unitCost = _double(json['unitCost']);
+    final quotedAt = _date(json['quotedAt']);
+    if (id == null ||
+        productId == null ||
+        supplierName == null ||
+        unitCost == null ||
+        quotedAt == null) {
+      return null;
+    }
+    return SupplierQuote(
+      id: id,
+      productId: productId,
+      supplierId: _str(json['supplierId']),
+      supplierName: supplierName,
+      platform: SupplierPlatform.fromCode(_str(json['platform'])),
+      country: _str(json['country']),
+      sourceUrl: _str(json['sourceUrl']),
+      rating: _double(json['rating']),
+      unitCost: unitCost,
+      currency: _str(json['currency']) ?? 'VND',
+      minimumOrderQuantity: _double(json['minimumOrderQuantity']),
+      leadTimeDays: _int(json['leadTimeDays']),
+      paymentTerms: _str(json['paymentTerms']),
+      shippingMethod: _str(json['shippingMethod']),
+      notes: _str(json['notes']),
+      externalId: _str(json['externalId']),
+      provenance:
+          ProvenanceSource.fromCode(_str(json['provenance'])) ??
+          ProvenanceSource.manual,
+      importJobId: _str(json['importJobId']),
+      quotedAt: quotedAt,
+    );
+  }
+
+  static Map<String, Object?> encodeImportJob(ImportJob j) => {
+    'id': j.id,
+    'source': j.source.code,
+    'sourceVendor': j.sourceVendor,
+    'sourceFile': j.sourceFile,
+    'sourceAccount': j.sourceAccount,
+    'sourceChecksum': j.sourceChecksum,
+    'recordCounts': j.recordCounts,
+    'warnings': j.warnings,
+    'isDemo': j.isDemo,
+    'importedAt': _iso(j.importedAt),
+  };
+
+  static ImportJob? decodeImportJob(Map<String, Object?> json) {
+    final id = _str(json['id']);
+    final source = ProvenanceSource.fromCode(_str(json['source']));
+    final importedAt = _date(json['importedAt']);
+    // Mã nguồn lạ ⇒ **bỏ dòng**. Một lần nhập không biết từ đâu tới là một lần
+    // nhập không giải thích được cho ai — và nó vẫn sẽ được dùng làm phạm vi
+    // xoá, nên đoán ở đây là đoán về việc xoá cái gì.
+    if (id == null || source == null || importedAt == null) return null;
+    return ImportJob(
+      id: id,
+      source: source,
+      sourceVendor: _str(json['sourceVendor']),
+      sourceFile: _str(json['sourceFile']),
+      sourceAccount: _str(json['sourceAccount']),
+      sourceChecksum: _str(json['sourceChecksum']),
+      recordCounts: switch (json['recordCounts']) {
+        final Map<Object?, Object?> m => {
+          for (final e in m.entries)
+            if (e.key is String && e.value is int)
+              e.key! as String: e.value! as int,
+        },
+        _ => const <String, int>{},
+      },
+      warnings: _strings(json['warnings']) ?? const [],
+      isDemo: json['isDemo'] == true,
+      importedAt: importedAt,
+    );
   }
 }
