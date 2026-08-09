@@ -5,6 +5,7 @@ import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../action/business_action_executor.dart';
 import '../../connection/connection_capability.dart';
+import '../../connection/connection_catalog.dart';
 import '../../connection/connection_service.dart';
 import '../../connection/google/drive_backup_service.dart';
 import '../../core/connection.dart';
@@ -403,6 +404,8 @@ class _TongtaiConnectionsScreenState
                 onPickChat: _pickTelegramChat,
                 onSendTest: _sendTelegramTest,
               ),
+              const SizedBox(height: 12),
+              const _SourceCatalogCard(),
               const SizedBox(height: 12),
               _AtlassianCard(
                 busy: _busy,
@@ -1084,6 +1087,150 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Danh sách nguồn dữ liệu — **đọc từ catalog**, không dựng bằng tay.
+///
+/// §24: trạng thái phải nói thật. Một danh sách mà mọi dòng trông như nhau sẽ
+/// khiến người bán tin app đang đồng bộ với sàn, trong khi thứ họ có là một
+/// file Excel họ tự tải về.
+class _SourceCatalogCard extends StatelessWidget {
+  const _SourceCatalogCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Container(
+      key: const Key('connections-sources'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.sourcesHonestNote,
+            style: const TextStyle(
+              fontSize: 12,
+              height: 1.5,
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _SourceGroup(
+            title: l10n.sourcesCommerce,
+            sources: ConnectionCatalog.commerce,
+          ),
+          const SizedBox(height: 12),
+          _SourceGroup(
+            title: l10n.sourcesSourcing,
+            sources: ConnectionCatalog.sourcing,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SourceGroup extends StatelessWidget {
+  const _SourceGroup({required this.title, required this.sources});
+
+  final String title;
+  final List<ConnectionSource> sources;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: TongtaiDesignTokens.lightTextPrimary,
+        ),
+      ),
+      const SizedBox(height: 6),
+      for (final source in sources)
+        Padding(
+          key: Key('connections-source-${source.id}'),
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  source.name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: TongtaiDesignTokens.lightTextPrimary,
+                  ),
+                ),
+              ),
+              _ReadinessChip(readiness: source.readiness),
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
+class _ReadinessChip extends StatelessWidget {
+  const _ReadinessChip({required this.readiness});
+
+  final ConnectionReadiness readiness;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    // Chỉ `connected` được màu xanh. `fileBridge` là màu trung tính chứ không
+    // phải xanh nhạt: "nhập qua file" là một cách dùng thật, nhưng nó không
+    // phải "đã nối", và màu không được nói khác chữ.
+    final (label, color) = switch (readiness) {
+      ConnectionReadiness.connected => (l10n.readinessConnected, Colors.green),
+      ConnectionReadiness.fileBridge => (
+        l10n.readinessFileBridge,
+        TongtaiDesignTokens.lightTextPrimary,
+      ),
+      ConnectionReadiness.demo => (
+        l10n.readinessDemo,
+        TongtaiDesignTokens.lightTextSecondary,
+      ),
+      ConnectionReadiness.researched => (
+        l10n.readinessResearched,
+        TongtaiDesignTokens.lightTextSecondary,
+      ),
+      ConnectionReadiness.partnerRequired => (
+        l10n.readinessPartnerRequired,
+        Colors.orange,
+      ),
+      ConnectionReadiness.apiFuture => (
+        l10n.readinessApiFuture,
+        TongtaiDesignTokens.lightTextSecondary,
+      ),
+    };
+
+    return Container(
+      key: Key('connections-readiness-${readiness.code}'),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
       ),
     );
   }
