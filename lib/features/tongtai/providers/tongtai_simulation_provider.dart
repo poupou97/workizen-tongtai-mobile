@@ -76,3 +76,15 @@ final conversationReplyServiceProvider = Provider<ConversationReplyService>(
     events: ref.watch(demoEventRepositoryProvider),
   ),
 );
+
+/// Nền tảng nào **đang phát dữ liệu** trong bản mô phỏng — WTM-340.
+///
+/// Suy ra từ chính sổ sự kiện đã áp, không từ một danh sách viết tay: một
+/// danh sách viết tay sẽ khai "Instagram đang phát" vào đúng ngày ai đó gỡ
+/// Instagram khỏi kịch bản, và không có gì đỏ lên.
+final liveDemoVendorsProvider = FutureProvider<Set<String>>((ref) async {
+  final events = await ref
+      .watch(demoEventRepositoryProvider)
+      .loadTimeline(limit: 1000);
+  return {for (final e in events) ?e.vendor};
+});

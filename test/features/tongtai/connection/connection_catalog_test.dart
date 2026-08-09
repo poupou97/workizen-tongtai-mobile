@@ -155,6 +155,9 @@ void main() {
         'connected',
         'file_bridge',
         'demo',
+        // ⭐ Trạng thái thứ bảy (WTM-340). Nó có mã RIÊNG chứ không mượn
+        // `connected`: mượn nhãn là cách một bản demo biến thành lời nói dối.
+        'demo_connected',
         'researched',
         'partner_required',
         'api_future',

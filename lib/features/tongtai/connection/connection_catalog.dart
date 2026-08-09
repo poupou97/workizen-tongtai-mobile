@@ -34,8 +34,21 @@ enum ConnectionReadiness {
   /// Dữ liệu vào qua **file**, không qua API. Không tự cập nhật.
   fileBridge('file_bridge'),
 
-  /// Chỉ có dữ liệu mẫu — chưa nối gì cả.
+  /// Chỉ có dữ liệu mẫu **tĩnh** — chưa nối gì, và không có gì đang chạy.
   demo('demo'),
+
+  /// ⭐ Nguồn này **đang phát dữ liệu vào bản mô phỏng** (WTM-340 · §40).
+  ///
+  /// Khác [demo] ở chỗ có thứ đang chạy: đồng hồ mô phỏng đẩy tới đâu thì
+  /// nguồn này sinh việc tới đó. Khác [connected] ở chỗ **không có kết nối
+  /// nào cả** — không token, không request, không byte nào rời máy.
+  ///
+  /// Đây là trạng thái **thứ bảy**, cố ý không mượn [connected]. Founder §40:
+  /// *"fake dữ liệu được, fake trạng thái engineering thì không."* Cách rẻ
+  /// hơn — cho nguồn demo mượn nhãn `connected` rồi ghi chú ở đâu đó — chính
+  /// là cách một bản demo biến thành một lời nói dối, vì ghi chú thì rơi
+  /// rụng còn nhãn thì ở lại.
+  demoConnected('demo_connected'),
 
   /// Đã đọc mã/tài liệu, biết làm thế nào, **chưa dựng**.
   researched('researched'),
@@ -66,7 +79,16 @@ enum SourceKind {
   commerce('commerce'),
 
   /// Nhà cung cấp, báo giá, MOQ — **cái sắp nhập**.
-  sourcing('sourcing');
+  sourcing('sourcing'),
+
+  /// Khách nhắn gì, quảng cáo chạy ra sao — **cái đang nói chuyện**.
+  messaging('messaging'),
+
+  /// Kiện hàng đi tới đâu — **cái đang trên đường**.
+  logistics('logistics'),
+
+  /// Tiền về hay chưa — **cái đã vào tài khoản**.
+  finance('finance');
 
   const SourceKind(this.code);
 
@@ -249,7 +271,104 @@ abstract final class ConnectionCatalog {
     ),
   ];
 
-  static List<ConnectionSource> get all => [...commerce, ...sourcing];
+  /// Kênh khách nhắn + kênh quảng cáo.
+  static const List<ConnectionSource> messaging = [
+    ConnectionSource(
+      id: 'facebook_page',
+      name: 'Facebook Page',
+      kind: SourceKind.messaging,
+      readiness: ConnectionReadiness.partnerRequired,
+      evidence:
+          'Có connector Messenger trong bộ mã đã đọc (WTM-309); mọi bản đều '
+          'cần Page access token của một app đã duyệt.',
+      vendorClaim:
+          'Messenger Platform API — quyền nhắn tin phải được Meta **duyệt** '
+          'qua App Review; ngoài ra còn cửa sổ trả lời 24 giờ.',
+    ),
+    ConnectionSource(
+      id: 'instagram',
+      name: 'Instagram',
+      kind: SourceKind.messaging,
+      readiness: ConnectionReadiness.partnerRequired,
+      evidence: 'Đi cùng Facebook trong bộ mã đã đọc — chung tầng xác thực.',
+      vendorClaim:
+          'Instagram Graph API — phải đăng ký tài khoản Business, nối với '
+          'một Page, và qua cùng vòng duyệt của Meta.',
+    ),
+    ConnectionSource(
+      id: 'facebook_ads',
+      name: 'Facebook Ads',
+      kind: SourceKind.messaging,
+      readiness: ConnectionReadiness.researched,
+      evidence: 'Có connector Insights trong bộ mã đã đọc (WTM-309).',
+      vendorClaim: 'Marketing API — đọc chỉ số chiến dịch bằng access token.',
+    ),
+    ConnectionSource(
+      id: 'telegram',
+      name: 'Telegram',
+      kind: SourceKind.messaging,
+      readiness: ConnectionReadiness.connected,
+      connectorId: kTelegramConnectorId,
+      entryPattern: 'bot_token',
+      evidence:
+          'Đã dựng và chạy thật: getMe / sendMessage / dò nơi nhận '
+          '(WTM-318).',
+      vendorClaim: 'Bot API — không cần duyệt, chỉ cần một bot token.',
+    ),
+  ];
+
+  /// Hãng vận chuyển.
+  static const List<ConnectionSource> logistics = [
+    ConnectionSource(
+      id: 'ghn',
+      name: 'GHN',
+      kind: SourceKind.logistics,
+      readiness: ConnectionReadiness.researched,
+      evidence: 'Không tìm thấy implementation trong bộ mã đã đọc (WTM-309).',
+      vendorClaim: 'API công khai cho shop, xác thực bằng token tài khoản.',
+    ),
+    ConnectionSource(
+      id: 'ghtk',
+      name: 'GHTK',
+      kind: SourceKind.logistics,
+      readiness: ConnectionReadiness.researched,
+      evidence: 'Không tìm thấy implementation trong bộ mã đã đọc (WTM-309).',
+      vendorClaim: 'API tạo đơn + tra vận đơn, cần token đối tác.',
+    ),
+    ConnectionSource(
+      id: 'viettel_post',
+      name: 'Viettel Post',
+      kind: SourceKind.logistics,
+      readiness: ConnectionReadiness.apiFuture,
+      evidence: 'Không tìm thấy implementation trong bộ mã đã đọc (WTM-309).',
+      vendorClaim: 'API cho khách doanh nghiệp, đăng ký qua bưu cục.',
+    ),
+  ];
+
+  /// Tiền về.
+  static const List<ConnectionSource> finance = [
+    ConnectionSource(
+      id: 'bank',
+      name: 'Ngân hàng',
+      kind: SourceKind.finance,
+      readiness: ConnectionReadiness.apiFuture,
+      // ⭐ Đây là vùng nhạy cảm nhất, và câu này phải nói thẳng lý do dừng.
+      evidence:
+          'Chưa dựng, và **chưa nên dựng**: đọc tài khoản ngân hàng là quyết '
+          'định pháp lý/bảo mật của Founder (G-3), không phải một task.',
+      vendorClaim:
+          'Open Banking Việt Nam chưa có chuẩn chung cho cá nhân; hầu hết '
+          'đi qua trung gian.',
+    ),
+  ];
+
+  static List<ConnectionSource> get all => [
+    ...commerce,
+    ...sourcing,
+    ...messaging,
+    ...logistics,
+    ...finance,
+  ];
 
   static ConnectionSource? byId(String id) {
     for (final s in all) {
@@ -263,4 +382,28 @@ abstract final class ConnectionCatalog {
         for (final s in all)
           if (s.readiness == readiness) s,
       ];
+}
+
+/// Trạng thái **hiển thị** của một nguồn, sau khi tính tới bản mô phỏng —
+/// WTM-340 (E4 · Epic WTM-336).
+///
+/// ## ⛔ Mô phỏng không được che sự thật đã có
+///
+/// Nguồn đã nối thật ([ConnectionReadiness.connected]) hoặc đã có đường nhập
+/// file thật ([ConnectionReadiness.fileBridge]) thì **giữ nguyên nhãn**, kể cả
+/// khi đồng hồ demo đang phát dữ liệu mang tên nó.
+///
+/// Chiều ngược lại mới là chiều nguy hiểm: nếu demo được phép đè lên, thì bật
+/// mô phỏng lên là mọi nguồn đều "đang chạy", và người bán mất luôn cách phân
+/// biệt thứ mình đã nối với thứ mình chỉ đang xem.
+ConnectionReadiness readinessWithDemo(
+  ConnectionSource source,
+  Set<String> liveDemoVendors,
+) {
+  if (!liveDemoVendors.contains(source.id)) return source.readiness;
+  return switch (source.readiness) {
+    ConnectionReadiness.connected ||
+    ConnectionReadiness.fileBridge => source.readiness,
+    _ => ConnectionReadiness.demoConnected,
+  };
 }

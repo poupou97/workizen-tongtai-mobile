@@ -18,6 +18,8 @@ import '../../connection/google/google_connection.dart';
 import '../../connection/telegram/telegram_client.dart';
 import '../../connection/telegram/telegram_connection.dart';
 import '../../providers/tongtai_connection_provider.dart';
+import '../../providers/tongtai_simulation_provider.dart';
+import 'tongtai_business_life_screen.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
 import 'tongtai_backup_screen.dart';
@@ -1097,12 +1099,21 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
 /// §24: trạng thái phải nói thật. Một danh sách mà mọi dòng trông như nhau sẽ
 /// khiến người bán tin app đang đồng bộ với sàn, trong khi thứ họ có là một
 /// file Excel họ tự tải về.
-class _SourceCatalogCard extends StatelessWidget {
+class _SourceCatalogCard extends ConsumerWidget {
   const _SourceCatalogCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    // Rỗng khi chưa bật mô phỏng — và rỗng là câu trả lời đúng, không phải
+    // trạng thái chờ: chưa bật thì không nền tảng nào đang phát.
+    final live = ref.watch(liveDemoVendorsProvider).asData?.value ?? const {};
+    final demoCount = [
+      for (final source in ConnectionCatalog.all)
+        if (readinessWithDemo(source, live) ==
+            ConnectionReadiness.demoConnected)
+          source,
+    ].length;
 
     return Container(
       key: const Key('connections-sources'),
@@ -1123,15 +1134,74 @@ class _SourceCatalogCard extends StatelessWidget {
               color: TongtaiDesignTokens.lightTextSecondary,
             ),
           ),
+          if (demoCount > 0) ...[
+            const SizedBox(height: 8),
+            Container(
+              key: const Key('connections-demo-live'),
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF7A4FCF).withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                l10n.sourcesDemoLive(demoCount),
+                style: const TextStyle(
+                  fontSize: 12,
+                  height: 1.45,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF5B3AA6),
+                ),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: FilledButton(
+                key: const Key('connections-start-demo'),
+                // Không tự khởi động ở đây: đồng hồ mô phỏng có **một** chủ,
+                // là màn Doanh nghiệp của bạn. Hai nút cùng gọi `start()` là
+                // hai đường ghi cho một khái niệm (P-27).
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => const TongtaiBusinessLifeScreen(),
+                  ),
+                ),
+                child: Text(l10n.sourcesStartDemo),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           _SourceGroup(
             title: l10n.sourcesCommerce,
             sources: ConnectionCatalog.commerce,
+            live: live,
+          ),
+          const SizedBox(height: 12),
+          _SourceGroup(
+            title: l10n.sourcesMessaging,
+            sources: ConnectionCatalog.messaging,
+            live: live,
+          ),
+          const SizedBox(height: 12),
+          _SourceGroup(
+            title: l10n.sourcesLogistics,
+            sources: ConnectionCatalog.logistics,
+            live: live,
           ),
           const SizedBox(height: 12),
           _SourceGroup(
             title: l10n.sourcesSourcing,
             sources: ConnectionCatalog.sourcing,
+            live: live,
+          ),
+          const SizedBox(height: 12),
+          _SourceGroup(
+            title: l10n.sourcesFinance,
+            sources: ConnectionCatalog.finance,
+            live: live,
           ),
         ],
       ),
@@ -1140,10 +1210,17 @@ class _SourceCatalogCard extends StatelessWidget {
 }
 
 class _SourceGroup extends StatelessWidget {
-  const _SourceGroup({required this.title, required this.sources});
+  const _SourceGroup({
+    required this.title,
+    required this.sources,
+    required this.live,
+  });
 
   final String title;
   final List<ConnectionSource> sources;
+
+  /// Nền tảng đang phát trong bản mô phỏng.
+  final Set<String> live;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -1174,7 +1251,7 @@ class _SourceGroup extends StatelessWidget {
                   ),
                 ),
               ),
-              _ReadinessChip(readiness: source.readiness),
+              _ReadinessChip(readiness: readinessWithDemo(source, live)),
             ],
           ),
         ),
@@ -1202,6 +1279,12 @@ class _ReadinessChip extends StatelessWidget {
       ConnectionReadiness.demo => (
         l10n.readinessDemo,
         TongtaiDesignTokens.lightTextSecondary,
+      ),
+      // Tím, KHÔNG xanh. Màu là thứ người ta đọc trước chữ, nên một nhãn demo
+      // màu xanh lá đã nói dối xong trước khi ai kịp đọc nó.
+      ConnectionReadiness.demoConnected => (
+        l10n.readinessDemoConnected,
+        const Color(0xFF7A4FCF),
       ),
       ConnectionReadiness.researched => (
         l10n.readinessResearched,

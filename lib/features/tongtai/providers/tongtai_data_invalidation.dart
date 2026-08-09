@@ -113,6 +113,10 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // nó cũ đi vào đúng những lúc dòng thời gian cũ đi. Thiếu ở đây thì người
   // bán bấm "Gửi", tin nhắn vào sổ, mà khung chat vẫn còn nút "Gửi".
   customerConversationsProvider,
+  // Nền tảng đang phát trong bản mô phỏng (WTM-340) — cùng sổ sự kiện, nên nó
+  // cũ đi cùng lúc. Thiếu ở đây thì "Bắt đầu lại" xong màn nguồn dữ liệu vẫn
+  // khai mười nền tảng đang phát trong khi sổ đã trống.
+  liveDemoVendorsProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).

@@ -228,6 +228,95 @@ class DemoScenario {
         );
     }
 
+    // ── Câu chuyện 4: cùng một câu hỏi, kênh khác ─────────────────────────
+    //
+    // Người bán Việt Nam hiếm khi bán một kênh. Một khách hỏi trên Instagram
+    // trong khi khách khác hỏi trên Facebook là **bình thường**, và nó là thứ
+    // duy nhất chứng minh hộp thư gom được nhiều kênh chứ không phải một kênh
+    // đổi tên.
+    {
+      final story = 'story-instagram-ask';
+      final item = product(11);
+      final buyer = customer(5);
+
+      events
+        ..add(
+          DemoEvent(
+            id: nextId('cmt'),
+            kind: DemoEventKind.commentReceived,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.instagram,
+            subjectKind: 'customer',
+            subjectId: buyer?.id,
+            correlationId: story,
+            headline:
+                '${buyer?.name ?? "Một khách"} hỏi trên Instagram: '
+                '"${item.name} ship Đà Nẵng mấy ngày ạ?"',
+            payload: {
+              'message': '${item.name} ship Đà Nẵng mấy ngày ạ?',
+              'productId': item.id,
+              'channel': 'instagram',
+              'needsReply': true,
+            },
+            occurredAt: at(3, 20, 12),
+          ),
+        )
+        ..add(
+          DemoEvent(
+            id: nextId('draft'),
+            kind: DemoEventKind.messageReceived,
+            actor: DemoActor.agent,
+            subjectKind: 'customer',
+            subjectId: buyer?.id,
+            correlationId: story,
+            headline: 'Tổng Tài soạn xong câu trả lời cho Instagram',
+            payload: {
+              'draft':
+                  'Dạ ${item.name} bên em gửi Đà Nẵng khoảng 2–3 ngày ạ. '
+                  'Chị đặt trước 15h thì em gửi trong ngày nhé.',
+              'productId': item.id,
+              'needsApproval': false,
+            },
+            occurredAt: at(3, 20, 14),
+          ),
+        );
+    }
+
+    // ── Câu chuyện 5: hai hãng vận chuyển, cùng một tuyến ─────────────────
+    //
+    // Luật so sánh của WTM-323 cần **hàng xóm**: cùng tuyến, cùng hãng, cùng
+    // khoảng thời gian. Một hãng duy nhất trong cả tháng thì luật đó không bao
+    // giờ có gì để so, và người bán sẽ kết luận tính năng hỏng.
+    {
+      events
+        ..add(
+          DemoEvent(
+            id: nextId('shp'),
+            kind: DemoEventKind.shipmentDelayed,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.ghtk,
+            subjectKind: 'shipment',
+            correlationId: 'story-carrier-compare',
+            headline: 'GHTK báo một kiện TP.HCM → Hà Nội chậm',
+            payload: {'carrier': 'ghtk', 'delayDays': 3},
+            occurredAt: at(9, 11, 0),
+          ),
+        )
+        ..add(
+          DemoEvent(
+            id: nextId('shp'),
+            kind: DemoEventKind.shipmentDelayed,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.viettelPost,
+            subjectKind: 'shipment',
+            correlationId: 'story-carrier-compare',
+            headline: 'Viettel Post báo một kiện TP.HCM → Hà Nội chậm',
+            payload: {'carrier': 'viettel_post', 'delayDays': 2},
+            occurredAt: at(11, 15, 30),
+          ),
+        );
+    }
+
     // ── Câu chuyện 3: hết hàng → tìm nguồn → nhập ─────────────────────────
     {
       final story = 'story-sourcing';
@@ -316,6 +405,23 @@ class DemoScenario {
             headline: 'Shopee đã đối soát tuần ${day ~/ 7} — phí sàn đã vào sổ',
             payload: {'week': day ~/ 7},
             occurredAt: at(day, 7, 0),
+          ),
+        );
+        // Đối soát và **tiền thực sự về tài khoản** là hai việc khác nhau, và
+        // khoảng cách giữa chúng là thứ người bán sống cùng mỗi tuần. Gộp làm
+        // một là xoá mất đúng chỗ dòng tiền bị kẹt.
+        events.add(
+          DemoEvent(
+            id: nextId('bank'),
+            kind: DemoEventKind.paymentSucceeded,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.bank,
+            correlationId: 'settlement-week${day ~/ 7}',
+            headline:
+                'Ngân hàng báo có: tiền đối soát tuần ${day ~/ 7} đã về tài '
+                'khoản',
+            payload: {'week': day ~/ 7, 'source': 'shopee'},
+            occurredAt: at(day, 9, 30),
           ),
         );
       }
