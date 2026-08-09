@@ -946,6 +946,29 @@ abstract class AppStrings {
   /// Nhãn hành động sao lưu trong màn Hoạt động.
   String get actLabelBackupUpload;
 
+  /// Nhãn hành động báo cho chính chủ shop.
+  String get actLabelOwnerNotify;
+
+  // ── Telegram (WTM-318) ──────────────────────────────────────────────────
+  String get telegramTitle;
+
+  /// ⭐ Sự thật quan trọng nhất về Telegram bot, nói ngay chỗ thiết lập.
+  String get telegramHint;
+
+  String get telegramTokenLabel;
+  String get telegramTokenHint;
+  String get telegramSaveToken;
+  String get telegramTokenBad;
+
+  /// "Đã nhận @tongtai_bot" — xác nhận bằng thứ người bán nhìn thấy.
+  String telegramBotFound(String username);
+
+  String get telegramStartHint;
+  String get telegramFindChats;
+  String get telegramNoChats;
+  String get telegramSendTest;
+  String get telegramTestSent;
+
   // ── backup & restore (WTM-164 / ADR-TON-018) ────────────────────────────
   String get titleBackup;
   String get backupCreate;
@@ -2622,6 +2645,39 @@ class AppStringsVi extends AppStrings {
   String get capabilityConfluenceKnowledge => 'Đọc tài liệu Confluence';
   @override
   String get actLabelBackupUpload => 'Sao lưu dữ liệu';
+  @override
+  String get actLabelOwnerNotify => 'Báo cho bạn';
+
+  @override
+  String get telegramTitle => 'Nhận bản tin qua Telegram';
+  @override
+  String get telegramHint =>
+      'Tổng Tài sẽ nhắn bản tin sáng cho bạn. Bot Telegram không nhắn trước '
+      'được cho ai, nên bạn phải mở chat với bot một lần — cũng vì vậy bot '
+      'không thể nhắn cho khách hàng của bạn.';
+  @override
+  String get telegramTokenLabel => 'Bot token';
+  @override
+  String get telegramTokenHint => 'Nhắn @BotFather trên Telegram để tạo bot.';
+  @override
+  String get telegramSaveToken => 'Lưu token';
+  @override
+  String get telegramTokenBad =>
+      'Telegram không nhận token này. Kiểm tra lại chuỗi BotFather đưa.';
+  @override
+  String telegramBotFound(String username) => 'Đã nhận $username';
+  @override
+  String get telegramStartHint =>
+      'Mở Telegram, nhắn /start cho bot, rồi bấm Tìm cuộc trò chuyện.';
+  @override
+  String get telegramFindChats => 'Tìm cuộc trò chuyện';
+  @override
+  String get telegramNoChats =>
+      'Chưa thấy ai nhắn cho bot. Nhắn /start rồi thử lại.';
+  @override
+  String get telegramSendTest => 'Gửi tin thử';
+  @override
+  String get telegramTestSent => 'Đã gửi. Mở Telegram xem thử.';
 
   @override
   String get titleBackup => 'Sao lưu & khôi phục';
@@ -4364,6 +4420,40 @@ class AppStringsEn extends AppStrings {
   String get capabilityConfluenceKnowledge => 'Read Confluence pages';
   @override
   String get actLabelBackupUpload => 'Back up your data';
+  @override
+  String get actLabelOwnerNotify => 'Notify you';
+
+  @override
+  String get telegramTitle => 'Get your brief on Telegram';
+  @override
+  String get telegramHint =>
+      'Tổng Tài will send you the morning brief. A Telegram bot cannot message '
+      'anyone first, so you need to open a chat with it once — and for the same '
+      'reason it cannot message your customers.';
+  @override
+  String get telegramTokenLabel => 'Bot token';
+  @override
+  String get telegramTokenHint =>
+      'Message @BotFather on Telegram to create a bot.';
+  @override
+  String get telegramSaveToken => 'Save token';
+  @override
+  String get telegramTokenBad =>
+      'Telegram rejected this token. Check the string BotFather gave you.';
+  @override
+  String telegramBotFound(String username) => 'Connected to $username';
+  @override
+  String get telegramStartHint =>
+      'Open Telegram, send /start to the bot, then tap Find chats.';
+  @override
+  String get telegramFindChats => 'Find chats';
+  @override
+  String get telegramNoChats =>
+      'No one has messaged the bot yet. Send /start and try again.';
+  @override
+  String get telegramSendTest => 'Send a test message';
+  @override
+  String get telegramTestSent => 'Sent. Check Telegram.';
 
   @override
   String get titleBackup => 'Backup & restore';

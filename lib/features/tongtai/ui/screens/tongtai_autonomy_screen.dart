@@ -411,6 +411,7 @@ String tongtaiActionLabel(
   // liệt kê tường minh: một `_ =>` sẽ nuốt luôn loại hành động TIẾP THEO
   // ai đó thêm vào, và loại đó có thể là loại cần nhãn nhất.
   BusinessActionType.storageBackupUpload => l10n.actLabelBackupUpload,
+  BusinessActionType.ownerNotify => l10n.actLabelOwnerNotify,
   BusinessActionType.applyProposedChange ||
   BusinessActionType.financeTransferMoney ||
   BusinessActionType.overwriteSellerEnteredData => l10n.autonomyAlwaysAsk,
