@@ -996,6 +996,20 @@ abstract class AppStrings {
   /// "196 bản ghi" — tổng của một lần nhập.
   String importRecordCount(int count);
 
+  // ── catalog nguồn dữ liệu (WTM-331 · §24) ───────────────────────────────
+  String get sourcesCommerce;
+  String get sourcesSourcing;
+
+  /// Câu nhắc rằng danh sách này nói **trạng thái thật**, không phải quảng cáo.
+  String get sourcesHonestNote;
+
+  String get readinessConnected;
+  String get readinessFileBridge;
+  String get readinessDemo;
+  String get readinessResearched;
+  String get readinessPartnerRequired;
+  String get readinessApiFuture;
+
   // ── Telegram (WTM-318) ──────────────────────────────────────────────────
   String get telegramTitle;
 
@@ -2763,6 +2777,26 @@ class AppStringsVi extends AppStrings {
   String importMoreIssues(int count) => '… và $count dòng nữa';
   @override
   String importRecordCount(int count) => '$count bản ghi';
+  @override
+  String get sourcesCommerce => 'Nguồn đơn hàng';
+  @override
+  String get sourcesSourcing => 'Nguồn nhập hàng';
+  @override
+  String get sourcesHonestNote =>
+      'Danh sách này nói đúng trạng thái hiện tại. Nguồn chưa nối thì ghi là '
+      'chưa nối — dữ liệu mẫu không được trình bày như dữ liệu từ sàn.';
+  @override
+  String get readinessConnected => 'Đang dùng';
+  @override
+  String get readinessFileBridge => 'Nhập qua file';
+  @override
+  String get readinessDemo => 'Dữ liệu mẫu';
+  @override
+  String get readinessResearched => 'Đã nghiên cứu';
+  @override
+  String get readinessPartnerRequired => 'Chờ sàn duyệt';
+  @override
+  String get readinessApiFuture => 'Để sau';
 
   @override
   String get telegramTitle => 'Nhận bản tin qua Telegram';
@@ -4622,6 +4656,26 @@ class AppStringsEn extends AppStrings {
   String importMoreIssues(int count) => '… and $count more rows';
   @override
   String importRecordCount(int count) => '$count records';
+  @override
+  String get sourcesCommerce => 'Where orders come from';
+  @override
+  String get sourcesSourcing => 'Where stock comes from';
+  @override
+  String get sourcesHonestNote =>
+      'This list states the real current status. A source that is not '
+      'connected says so — sample data is never presented as marketplace data.';
+  @override
+  String get readinessConnected => 'In use';
+  @override
+  String get readinessFileBridge => 'Via file import';
+  @override
+  String get readinessDemo => 'Sample data only';
+  @override
+  String get readinessResearched => 'Researched';
+  @override
+  String get readinessPartnerRequired => 'Awaiting marketplace approval';
+  @override
+  String get readinessApiFuture => 'Later';
 
   @override
   String get telegramTitle => 'Get your brief on Telegram';
