@@ -131,7 +131,7 @@ Chúng tôi không cố ý thu thập dữ liệu của trẻ em.
 Chính sách này thay đổi khi hành vi của app thay đổi — không thay đổi trước.
 Ngày cập nhật ở đầu trang.
 
-**Liên hệ:** privacy@workizen.net
+**Liên hệ:** workizen.labs@gmail.com
 
 Địa chỉ này đã được công bố sẵn tại
 [workizen.net/privacy](https://workizen.net/privacy) — dùng chung cho toàn bộ

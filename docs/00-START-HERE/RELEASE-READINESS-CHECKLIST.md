@@ -83,7 +83,7 @@ Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không ph�
 | Quyền iOS | ✅ | Chỉ `NSCameraUsageDescription` (quét QR key) |
 | Telemetry | ✅ | WTM-108, verified live trên S24. Catalogue `TELEMETRY-EVENTS.md`: chỉ `app_open` · `screen_view` · `flow_error` · `screen_error` |
 | **Khai báo Data Safety** | ✅ | `docs/05-OPERATIONS/STORE-DATA-SAFETY.md` (107 dòng), khớp `TELEMETRY-EVENTS.md` + `PRIVACY-POLICY.md` |
-| **Privacy policy** | ✅ | Văn bản + màn trong app (WTM-37) · liên hệ **privacy@workizen.net** (Founder xác nhận 2026-08-07, đã công bố sẵn ở workizen.net/privacy) · trang publish dựng sẵn cho `workizen.net/privacy/tongtai`. ⚠️ **Không** dùng `workizen.net/privacy` — trang đó không khai Firebase/Crashlytics và mô tả app có tài khoản |
+| **Privacy policy** | ✅ | Văn bản + màn trong app (WTM-37) · liên hệ **workizen.labs@gmail.com** (Founder xác nhận 2026-08-07, đã công bố sẵn ở workizen.net/privacy) · trang publish dựng sẵn cho `workizen.net/privacy/tongtai`. ⚠️ **Không** dùng `workizen.net/privacy` — trang đó không khai Firebase/Crashlytics và mô tả app có tài khoản |
 | **Điều khoản dịch vụ** | ⚪ | **KHÔNG bắt buộc để lên store** (đính chính 2026-08-05). Apple có EULA chuẩn tự áp dụng nếu không nộp bản riêng; Play chỉ bắt với vài nhóm đặc thù. **Thành bắt buộc khi bật thuê bao tự gia hạn** — Apple đòi link Terms of Use trong app. Hiện `pubspec.yaml` không có dependency mua bán nào |
 | **Câu miễn trừ cho số AI dự báo** | ✅ | **WTM-280 đã ship** — `AppStrings.estimateDisclaimer` render **bên trong thẻ chứa con số** ở màn dự báo · màn rủi ro khách hàng · card AI trên Reports. Test khoá **luật đặt chỗ**: có số ⇒ có dòng (`find.descendant`); twin từ chối ⇒ **không** có dòng (absence) |
 | Backup / Restore | ✅ | **WTM-164 ADR-TON-018** `.ttbk` v2 lossless 6 repo + Restore=Replace; apply + hoàn tác **đã kiểm trên thiết bị** 2026-08-01 |
@@ -99,7 +99,7 @@ Bốn dòng bị đánh giá **thấp hơn** thực tế. Hệ quả không ph�
 
 | # | Mục | Ai | Chặn cứng? |
 |---|---|---|:--:|
-| 1 | ~~Địa chỉ liên hệ cho privacy §10~~ | — | ✅ **xong** (privacy@workizen.net) |
+| 1 | ~~Địa chỉ liên hệ cho privacy §10~~ | — | ✅ **xong** (workizen.labs@gmail.com) |
 | 2 | ~~Câu miễn trừ cho số AI dự báo~~ | — | ✅ **xong** (WTM-280) |
 | 3 | ~~Keystore release~~ | — | ✅ **xong 2026-08-07** (upload key, đã ký AAB) |
 | 3b | Tải AAB lên Play Console | **Founder** | ✅ |

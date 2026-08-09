@@ -136,7 +136,7 @@ Gỡ app là xoá toàn bộ dữ liệu trên máy. Không có bản sao nào �
 để yêu cầu xoá, vì chúng tôi chưa từng nhận. Bạn có thể xuất dữ liệu ra CSV
 hoặc tạo bản sao lưu bất cứ lúc nào.
 
-**Liên hệ:** privacy@workizen.net
+**Liên hệ:** workizen.labs@gmail.com
 
 ---
 
@@ -195,7 +195,7 @@ Uninstalling the app deletes all data on the device. There is no copy on our
 side to request deletion of, because we never received one. You can export to
 CSV or create a backup at any time.
 
-**Contact:** privacy@workizen.net
+**Contact:** workizen.labs@gmail.com
 
 ---
 
@@ -213,7 +213,12 @@ tư công khai"*.
 
 ## Một mục đã gạch được ngay
 
-Trang hiện tại **đã có** `privacy@workizen.net`. Đó là **địa chỉ liên hệ** — một
+> **Đổi 2026-08-09:** Founder chốt `workizen.labs@gmail.com`. Địa chỉ trước đó
+> (`privacy@workizen.net`) **chưa bao giờ tồn tại** — không có email công ty. Ba
+> trang đang hứa quyền yêu cầu xoá dữ liệu qua một hộp thư không nhận được thư;
+> đó là cam kết không thực hiện được, không phải lỗi hiển thị.
+
+Trang hiện tại **đã có** `workizen.labs@gmail.com`. Đó là **địa chỉ liên hệ** — một
 trong ba hạng mục Founder Gate của WTM-175. ✅
 
 Còn lại: **Điều khoản dịch vụ** (`moreTerms` trong app vẫn *"sắp có"*).

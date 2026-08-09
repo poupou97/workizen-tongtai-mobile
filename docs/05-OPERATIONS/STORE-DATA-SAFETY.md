@@ -118,5 +118,5 @@ không phải sơ suất giấy tờ.
       (Founder chốt 2026-08-01). ⚠️ **Public + HTTPS đạt, nội dung CHƯA đủ cho
       Tổng Tài** — trang không nhắc telemetry/crash reporting mà app có dùng.
       Nội dung bổ sung soạn sẵn: `PRIVACY-POLICY-WEB-CONTENT.md`
-- [x] **Địa chỉ liên hệ nhà phát triển** — `privacy@workizen.net` ✅
+- [x] **Địa chỉ liên hệ nhà phát triển** — `workizen.labs@gmail.com` ✅
 - [ ] Điều khoản dịch vụ — ⚠️ **Founder gate**: `moreTerms` vẫn *coming soon*
