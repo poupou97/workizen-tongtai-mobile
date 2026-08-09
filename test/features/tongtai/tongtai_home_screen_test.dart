@@ -123,21 +123,22 @@ void main() {
       );
     });
 
-    testWidgets('the sample banner shows while samples exist — and only then', (
+    testWidgets('⛔ KHÔNG có băng-rôn "dữ liệu mẫu" — Founder chốt 2026-08-09', (
       tester,
     ) async {
       await seeder().seed();
       await tester.pumpWidget(realHost());
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('home-sample-banner')), findsOneWidget);
 
-      // Remove the samples → a fresh Home shows no banner.
-      await seeder().removeAll();
-      await tester.pumpWidget(
-        wrap(TongtaiHomeScreen(key: const Key('fresh'), clock: fixedNow)),
-      );
-      await tester.pumpAndSettle();
+      // Bản demo phải trông như thật. Băng-rôn nói về **dữ liệu**, không nói
+      // về trạng thái kỹ thuật, nên bỏ nó không phạm §40.
       expect(find.byKey(const Key('home-sample-banner')), findsNothing);
+
+      // …nhưng dấu vết thì KHÔNG được mất: bản ghi mẫu vẫn nhận ra được, nên
+      // "Xóa dữ liệu mẫu" vẫn xoá đúng chúng.
+      expect(await seeder().hasSamples(), isTrue);
+      await seeder().removeAll();
+      expect(await seeder().hasSamples(), isFalse);
     });
 
     testWidgets('quick actions show with data; Get-started without', (
@@ -201,14 +202,16 @@ void main() {
         await tester.tap(demo);
         await tester.pumpAndSettle();
 
-        // SAME screen (no push), now showing the seeded data + banner…
-        expect(find.text('26'), findsOneWidget);
-        expect(find.byKey(const Key('home-sample-banner')), findsOneWidget);
-        // …and the repositories REALLY contain the sample rows (one source).
+        // Cùng một màn (không push), và kho dữ liệu THẬT sự có bản ghi mẫu.
+        //
+        // WTM-343: Home và More nay dùng **cùng một seeder**, nên không kiểm
+        // một con số cứng nữa — con số đó là của bộ viết tay cũ, và nó sẽ đỏ
+        // mỗi lần bộ mẫu đổi mà chẳng nói lên điều gì. Thứ đáng khoá là
+        // *"gieo vào chính kho dữ liệu production"*.
         final customers = await customerRepo.loadAll();
         expect(
-          customers.where((c) => c.id.startsWith(kSampleIdPrefix)).length,
-          26,
+          customers.where((c) => c.id.startsWith(kSampleIdPrefix)),
+          isNotEmpty,
         );
       },
     );
@@ -246,7 +249,17 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('more-demo-confirm')));
         await tester.pumpAndSettle();
-        expect((await customerRepo.loadAll()).length, 27); // 26 sample + 1 user
+        // WTM-343 — không kiểm con số cứng: bộ mẫu nay gồm cả lịch sử 12
+        // tháng lẫn 100 sản phẩm, và con số đó sẽ đổi mỗi lần bộ mẫu đổi mà
+        // chẳng nói lên điều gì. Thứ đáng khoá là **luật**: gieo thì có mẫu,
+        // xoá thì chỉ mất mẫu.
+        final afterSeed = await customerRepo.loadAll();
+        expect(
+          afterSeed.where((c) => c.id.startsWith(kSampleIdPrefix)),
+          isNotEmpty,
+        );
+        expect(afterSeed.where((c) => c.id == 'f47ac10b-user'), hasLength(1));
+        expect(await productRepo.loadAll(), isNotEmpty);
 
         // Remove via the More entry (confirm dialog).
         final removeEntry = find.byKey(const Key('more-remove-sample'));
@@ -257,10 +270,14 @@ void main() {
 
         final remaining = await customerRepo.loadAll();
         expect(remaining.single.name, 'Khách Của Tôi'); // user data intact
-        expect(await productRepo.loadAll(), isEmpty);
         expect(await orderRepo.loadAll(), isEmpty);
         expect(await goalRepo.loadAll(), isEmpty);
         expect(await financeRepo.loadAll(), isEmpty);
+        // Lớp thương mại (bộ 100 sản phẩm) KHÔNG kiểm được ở đây: harness này
+        // dùng repository giả cho sản phẩm nhưng Drift thật cho lần nhập, nên
+        // `deleteImport` xoá bảng Drift mà repository giả không thấy. Vòng đời
+        // đầy đủ trên một cơ sở dữ liệu thật nằm ở
+        // `test/features/tongtai/sample/sample_business_seeder_test.dart`.
       },
     );
   });

@@ -145,26 +145,16 @@ void main() {
     expect(await CommerceRepository(db).loadImportJobs(), isEmpty);
   });
 
-  testWidgets('bộ dữ liệu mẫu đóng gói sẵn nhập được, không cần file ngoài', (
+  testWidgets('⛔ màn này chỉ nhận file CỦA NGƯỜI BÁN — WTM-343', (
     tester,
   ) async {
     await pumpImport(tester);
 
-    final demo = find.byKey(const Key('import-use-demo'));
-    await reveal(tester, demo);
-    await tester.tap(demo);
-    await pumpUntilFound(tester, find.byKey(const Key('import-preview')));
-
-    final confirm = find.byKey(const Key('import-confirm'));
-    await reveal(tester, confirm);
-    await tester.tap(confirm);
-    await pumpUntilFound(tester, find.byKey(const Key('import-result')));
-
-    expect(await DriftProductRepository(db).loadAll(), hasLength(100));
-    // Cờ demo nằm ở **lần nhập**, không ở từng dòng.
-    expect(
-      (await CommerceRepository(db).loadImportJobs()).single.isDemo,
-      isTrue,
-    );
+    // Bộ 100 sản phẩm là **dữ liệu mẫu**, và dữ liệu mẫu có đúng một chủ:
+    // "Nạp dữ liệu mẫu" trong Thêm. Hai lối vào cho một khái niệm là hai chỗ
+    // để chọn nhầm (P-27). Vòng đời của bộ đóng kèm được kiểm ở
+    // `test/features/tongtai/sample/sample_business_seeder_test.dart`.
+    expect(find.byKey(const Key('import-use-demo')), findsNothing);
+    expect(find.byKey(const Key('import-pick-file')), findsOneWidget);
   });
 }
