@@ -39,10 +39,10 @@ class TongtaiConversationsScreen extends ConsumerWidget {
           prefix: 'conversations',
           async: async,
           onRetry: () async => ref.invalidate(customerConversationsProvider),
-          isEmpty: (list) => list.isEmpty,
+          isEmpty: (list) => conversationsForInbox(list).isEmpty,
           emptyMessage: l10n.conversationsEmpty,
           builder: (context, all) {
-            final sorted = sortConversationsForInbox(all);
+            final sorted = conversationsForInbox(all);
             return ListView.separated(
               key: const Key('conversations-list'),
               itemCount: sorted.length,
@@ -56,10 +56,15 @@ class TongtaiConversationsScreen extends ConsumerWidget {
   }
 }
 
-/// Việc đang chờ trước, rồi mới tới mới nhất.
+/// Hội thoại cho hộp thư: **việc đang chờ trước**, rồi mới tới mới nhất.
+///
+/// Lọc bỏ khách chưa hề nhắn gì. Chiếu gom mọi việc chạm tới khách — kể cả
+/// đơn hàng — vì Khách hàng 360 cần thế; nhưng một hộp thư liệt kê cả người
+/// chưa từng nói câu nào thì mọi khách có đơn đều thành một dòng trống, và
+/// đúng ba hội thoại thật bị chôn giữa bốn mươi dòng như vậy.
 ///
 /// Hàm thuần, tách khỏi widget để kiểm được thứ tự mà không phải dựng màn.
-List<CustomerConversation> sortConversationsForInbox(
+List<CustomerConversation> conversationsForInbox(
   List<CustomerConversation> all,
 ) {
   int weight(CustomerConversation c) {
@@ -69,7 +74,10 @@ List<CustomerConversation> sortConversationsForInbox(
     return 3;
   }
 
-  return all.toList()..sort((a, b) {
+  return [
+    for (final c in all)
+      if (c.messages.isNotEmpty) c,
+  ]..sort((a, b) {
     final byWeight = weight(a).compareTo(weight(b));
     return byWeight != 0 ? byWeight : b.lastAt.compareTo(a.lastAt);
   });

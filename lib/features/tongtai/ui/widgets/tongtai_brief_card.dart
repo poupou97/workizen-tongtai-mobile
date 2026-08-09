@@ -229,7 +229,11 @@ class _BriefFailed extends StatelessWidget {
         const SizedBox(width: TongtaiDesignTokens.spacing2),
         Expanded(
           child: Text(
-            context.l10n.stateInsufficientTitle,
+            // WTM-342 — **hỏng** và **thiếu dữ liệu** là hai trạng thái khác
+            // nhau của ADR-TON-017, và câu chữ phải khác nhau. Dùng câu
+            // "chưa đủ dữ liệu" cho một lần đọc HỎNG là đổ lỗi cho người bán
+            // về một lỗi của máy — và giấu mất thứ duy nhất đáng sửa.
+            context.l10n.briefFailedTitle,
             style: const TextStyle(
               fontSize: 13,
               color: TongtaiDesignTokens.lightTextPrimary,

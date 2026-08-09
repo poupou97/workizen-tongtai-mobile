@@ -142,6 +142,17 @@ class _TongtaiBusinessLifeScreenState
                   itemCount: events.length,
                   itemBuilder: (context, i) => _TimelineRow(
                     event: events[i],
+                    // Vạch ngày. Cột giờ chỉ có `hh:mm`, nên một tháng dồn
+                    // lại đọc ra "10:03 · 08:50 · 13:38" và trông như sắp
+                    // xếp hỏng — trong khi thứ tự vẫn đúng, chỉ là đã sang
+                    // ngày khác. Thiếu vạch này thì màn hình tự tố cáo mình
+                    // một lỗi không có thật.
+                    startsDay:
+                        i == 0 ||
+                        !_sameDay(
+                          events[i].occurredAt,
+                          events[i - 1].occurredAt,
+                        ),
                     // Gạch nối giữa hai dòng cùng một câu chuyện — mắt bắt
                     // được chuỗi sự việc trước khi đọc chữ.
                     continuesStory:
@@ -297,11 +308,21 @@ class _Controls extends StatelessWidget {
   }
 }
 
+bool _sameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
 class _TimelineRow extends StatelessWidget {
-  const _TimelineRow({required this.event, required this.continuesStory});
+  const _TimelineRow({
+    required this.event,
+    required this.continuesStory,
+    this.startsDay = false,
+  });
 
   final DemoEvent event;
   final bool continuesStory;
+
+  /// Dòng đầu tiên của một ngày ⇒ có vạch ngày phía trên.
+  final bool startsDay;
 
   @override
   Widget build(BuildContext context) {
@@ -319,7 +340,7 @@ class _TimelineRow extends StatelessWidget {
       DemoActor.seller => (l10n.actorSeller, const Color(0xFF2E7D4F)),
     };
 
-    return IntrinsicHeight(
+    final row = IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -381,6 +402,26 @@ class _TimelineRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (!startsDay) return row;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            '${event.occurredAt.day}/${event.occurredAt.month}',
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+        ),
+        row,
+      ],
     );
   }
 

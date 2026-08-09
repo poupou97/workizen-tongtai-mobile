@@ -883,6 +883,9 @@ abstract class AppStrings {
   String get stateEmpty;
   String get stateRetry;
   String get stateInsufficientTitle;
+
+  /// ⛔ Brief **hỏng** — khác hẳn "chưa đủ dữ liệu" (WTM-342).
+  String get briefFailedTitle;
   String get stateInsufficientBody;
   String get stateStaleTitle;
   String get stateTechnicalDetail;
@@ -2706,6 +2709,8 @@ class AppStringsVi extends AppStrings {
   String get stateRetry => 'Thử lại';
   @override
   String get stateInsufficientTitle => 'Chưa đủ dữ liệu để kết luận';
+  @override
+  String get briefFailedTitle => 'Chưa dựng được việc hôm nay';
   @override
   String get stateInsufficientBody =>
       'Ghi thêm dữ liệu thật rồi quay lại — hệ thống sẽ không đoán bừa.';
@@ -4660,6 +4665,8 @@ class AppStringsEn extends AppStrings {
   String get stateRetry => 'Try again';
   @override
   String get stateInsufficientTitle => 'Not enough data to conclude';
+  @override
+  String get briefFailedTitle => "Could not build today's work";
   @override
   String get stateInsufficientBody =>
       'Record more real data and come back — this will not guess.';
