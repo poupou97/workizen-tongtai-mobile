@@ -7,6 +7,7 @@ import '../../core/provenance.dart';
 import '../../core/tongtai_enums.dart';
 import '../../finance/settlement.dart';
 import '../../inventory/product.dart';
+import '../../logistics/shipment.dart';
 import '../../orders/order.dart';
 import '../../profile/business_profile.dart' show SalesChannel;
 import '../commerce_models.dart';
@@ -128,10 +129,17 @@ class XlsxCommerceSource implements CommerceImportSource {
       issues,
     );
 
+    final shipments = _readShipments(
+      _table(sheets, 'SHIPMENTS'),
+      orderIds,
+      issues,
+    );
+
     return CommerceImportPreview(
       sourceName: fileName,
       checksum: checksum,
       products: products,
+      shipments: shipments,
       variants: variants,
       quotes: quotes,
       customers: customers,
@@ -565,6 +573,102 @@ class XlsxCommerceSource implements CommerceImportSource {
       );
     }
     return out;
+  }
+
+  // ── vận chuyển ───────────────────────────────────────────────────────────
+
+  List<Shipment> _readShipments(
+    SheetTable? sheet,
+    Set<String> orderIds,
+    List<ImportIssue> issues,
+  ) {
+    if (sheet == null || sheet.isEmpty) return const [];
+    final out = <Shipment>[];
+
+    for (var i = 0; i < sheet.dataRows.length; i++) {
+      final row = sheet.dataRows[i];
+      final tracking = sheet.cell(row, 'tracking_number');
+      if (tracking.isEmpty) continue;
+
+      final status = _shipmentStatus(sheet.cell(row, 'shipment_status'));
+      if (status == null) {
+        // Trạng thái lạ ⇒ bỏ dòng. Rơi về "đang giao" sẽ khiến một kiện đã
+        // hoàn về kho trông như đang trên đường tới khách.
+        issues.add(
+          ImportIssue(
+            level: ImportIssueLevel.warning,
+            code: 'unknown_shipment_status',
+            subject: tracking,
+            detail:
+                'Trạng thái "${sheet.cell(row, "shipment_status")}" chưa biết '
+                '— bỏ qua chuyến này.',
+            sheet: 'SHIPMENTS',
+            rowNumber: i + 2,
+          ),
+        );
+        continue;
+      }
+
+      final orderRef = sheet.cell(row, 'order_id');
+      final orderId = orderRef.isEmpty ? null : 'import-$orderRef';
+      if (orderId != null && !orderIds.contains(orderId)) {
+        issues.add(
+          ImportIssue(
+            level: ImportIssueLevel.warning,
+            code: 'shipment_without_order',
+            subject: tracking,
+            detail: 'Chuyến này không gắn được vào đơn nào trong file.',
+            sheet: 'SHIPMENTS',
+            rowNumber: i + 2,
+          ),
+        );
+      }
+
+      out.add(
+        Shipment(
+          id: 'import-${sheet.cell(row, "shipment_id")}',
+          orderId: orderId,
+          trackingNumber: tracking,
+          // Tên hãng trong file là nhãn hiển thị; mã canonical suy ra từ nó,
+          // và không suy ra được thì để `null` chứ không đoán.
+          carrier: _carrier(sheet.cell(row, 'carrier'), tracking),
+          status: status,
+          lastUpdate: sheet.date(row, 'last_update'),
+          eta: sheet.date(row, 'eta'),
+          origin: _blankToNull(sheet.cell(row, 'origin')),
+          destination: _blankToNull(sheet.cell(row, 'destination')),
+          notes: _blankToNull(sheet.cell(row, 'notes')),
+          externalId: sheet.cell(row, 'shipment_id'),
+          provenance: ProvenanceSource.fileBridge,
+        ),
+      );
+    }
+    return out;
+  }
+
+  static ShipmentStatus? _shipmentStatus(String raw) =>
+      switch (raw.toLowerCase()) {
+        'delivered' || 'đã giao' => ShipmentStatus.delivered,
+        'in_transit' || 'đang giao' => ShipmentStatus.inTransit,
+        // Chậm **không phải** một trạng thái riêng: kiện vẫn đang trên đường.
+        // Việc nó chậm là kết luận của Rule Twin, không phải một ô trong file.
+        'delayed' => ShipmentStatus.inTransit,
+        'failed' => ShipmentStatus.failed,
+        'created' || 'chờ lấy hàng' => ShipmentStatus.created,
+        'returning' || 'hoàn hàng' => ShipmentStatus.returning,
+        _ => null,
+      };
+
+  static Carrier? _carrier(String label, String tracking) {
+    final normalised = label.toLowerCase().replaceAll(RegExp(r'[\s&]+'), '');
+    for (final carrier in Carrier.values) {
+      final name = carrier.displayName.toLowerCase().replaceAll(
+        RegExp(r'[\s&]+'),
+        '',
+      );
+      if (normalised == carrier.code || normalised == name) return carrier;
+    }
+    return Carrier.guessFrom(tracking);
   }
 
   static OrderStatus _orderStatus(String raw) => switch (raw.toLowerCase()) {

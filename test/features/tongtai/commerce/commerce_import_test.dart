@@ -15,6 +15,7 @@ import 'package:tongtai/features/tongtai/core/provenance.dart';
 import 'package:tongtai/features/tongtai/finance/settlement_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+import 'package:tongtai/features/tongtai/logistics/shipment_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 
 /// WTM-325 + WTM-326 — dataset thật đi qua **đường production** (§15).
@@ -49,6 +50,7 @@ void main() {
     orders: DriftOrderRepository(db),
     settlements: DriftSettlementRepository(db),
     commerce: CommerceRepository(db),
+    shipments: ShipmentRepository(db),
     now: () => now,
     newId: () => 'test',
   );

@@ -138,7 +138,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 24;
+const int kTongtaiSchemaVersion = 25;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -431,6 +431,14 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 25) {
+        // v25 (WTM-323 — Logistics). Một bảng mới, thuần thêm mới.
+        //
+        // Bảng riêng chứ không phải cột trên `orders`: một đơn tách được thành
+        // nhiều kiện và một kiện gộp được nhiều đơn. Nhét mã vận đơn thành một
+        // cột sẽ hỏng ở cả hai chiều — và hỏng im lặng, vì cột vẫn nhận giá trị.
+        await _createTableWithIndexes(db, m, 'shipments_table');
       }
       if (from < 24) {
         // v24 (WTM-327 · Epic WTM-324 — Canonical Commerce Model). Thuần thêm

@@ -12,6 +12,7 @@ import 'tables/producers.dart';
 import 'tables/import_jobs.dart';
 import 'tables/product_variants.dart';
 import 'tables/products.dart';
+import 'tables/shipments.dart';
 import 'tables/supplier_quotes.dart';
 import 'tables/customers.dart';
 import 'tables/orders.dart';
@@ -104,6 +105,7 @@ part 'database.g.dart';
     OpportunityReactionsTable,
     ChatMessagesTable,
     ImportJobsTable,
+    ShipmentsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {

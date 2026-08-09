@@ -87,7 +87,7 @@ void main() {
     // v23 (WTM-301 / D-4): agent_tasks_table — hàng đợi việc bền vững. KHÔNG
     //                cột nào mang nghĩa mobile: đổi runner sang Managed
     //                Worker/Oracle VM không được là đổi schema.
-    expect(db.schemaVersion, 24);
+    expect(db.schemaVersion, 25);
     final businesses = await db.select(db.businessesTable).get();
     expect(businesses, isEmpty);
   });

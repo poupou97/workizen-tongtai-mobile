@@ -100,6 +100,9 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // chú ý" cho tới lần mở app sau.
   commerceProfitProvider,
   commerceOpportunitiesProvider,
+  // Chuyến giao hàng (WTM-323) — một lần nhập hoặc một lần đặt lại demo đổi
+  // hết. Thiếu ở đây thì sau khi nhập, brief vẫn nói kiện cũ đứng im.
+  shipmentConcernsProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).
