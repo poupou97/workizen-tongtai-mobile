@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 
 import 'tongtai_agentic_provider.dart';
+import 'tongtai_commerce_provider.dart';
 import 'tongtai_connection_provider.dart';
 import 'tongtai_capability_provider.dart';
 import 'tongtai_profile_provider.dart';
@@ -90,6 +91,9 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // nghiệp trước** — và tệ hơn: hiện nó ở trạng thái `ACTIVE` trong khi khoá
   // tương ứng không tồn tại trên máy này.
   connectorCatalogProvider,
+  // Lịch sử nhập (WTM-326). Restore = Replace chép đè cả bảng, và một lần nhập
+  // hiện ra sau khi đã bị xoá là một nút "Bỏ lần nhập" không xoá được gì.
+  importJobsProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).

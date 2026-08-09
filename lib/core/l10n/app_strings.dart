@@ -949,6 +949,53 @@ abstract class AppStrings {
   /// Nhãn hành động báo cho chính chủ shop.
   String get actLabelOwnerNotify;
 
+  // ── nhập dữ liệu cửa hàng (WTM-326 · Epic WTM-324) ──────────────────────
+  String get titleImport;
+
+  /// Câu mở màn — nói app **đọc** file của người bán, không gửi đi đâu.
+  String get importIntro;
+
+  String get importUseDemo;
+  String get importPickFile;
+  String get importReading;
+
+  /// "100 sản phẩm đã sẵn sàng" — ngôn ngữ nghiệp vụ, không phải "parsed 100 rows".
+  String importReadyProducts(int count);
+
+  String importReadyVariants(int count);
+  String importReadySuppliers(int count);
+  String importReadyOrders(int count);
+  String importReadyCustomers(int count);
+
+  /// "3 dòng cần xem lại trước khi nhập" — chặn.
+  String importBlocked(int count);
+
+  /// "5 dòng có cảnh báo — vẫn nhập được".
+  String importWarned(int count);
+
+  String get importConfirm;
+  String get importRunning;
+
+  /// "Đã nhập 100 sản phẩm vào cửa hàng của bạn."
+  String importDone(int count);
+
+  String get importNothing;
+  String get importHistory;
+  String get importReset;
+  String get importResetConfirm;
+
+  /// "Đã bỏ 100 sản phẩm của lần nhập ngày 9/8."
+  String importResetDone(int count);
+
+  /// "PRODUCTS · dòng 42" — chỗ mở Excel ra sửa, hiện nhỏ dưới câu tiếng Việt.
+  String importIssueLocation(String sheet, int row);
+
+  /// "… và 12 dòng nữa".
+  String importMoreIssues(int count);
+
+  /// "196 bản ghi" — tổng của một lần nhập.
+  String importRecordCount(int count);
+
   // ── Telegram (WTM-318) ──────────────────────────────────────────────────
   String get telegramTitle;
 
@@ -2666,6 +2713,56 @@ class AppStringsVi extends AppStrings {
   String get actLabelBackupUpload => 'Sao lưu dữ liệu';
   @override
   String get actLabelOwnerNotify => 'Báo cho bạn';
+
+  @override
+  String get titleImport => 'Nhập dữ liệu cửa hàng';
+  @override
+  String get importIntro =>
+      'Tổng Tài đọc file của bạn ngay trên máy này. Bạn xem trước rồi mới '
+      'quyết định có nhập hay không.';
+  @override
+  String get importUseDemo => 'Dùng bộ dữ liệu mẫu (100 sản phẩm)';
+  @override
+  String get importPickFile => 'Chọn file Excel của tôi';
+  @override
+  String get importReading => 'Đang đọc file…';
+  @override
+  String importReadyProducts(int count) => '$count sản phẩm đã sẵn sàng';
+  @override
+  String importReadyVariants(int count) => '$count phiên bản';
+  @override
+  String importReadySuppliers(int count) => '$count báo giá nhà cung cấp';
+  @override
+  String importReadyOrders(int count) => '$count đơn hàng';
+  @override
+  String importReadyCustomers(int count) => '$count khách hàng';
+  @override
+  String importBlocked(int count) => '$count dòng cần xem lại — sẽ bỏ qua';
+  @override
+  String importWarned(int count) => '$count dòng có cảnh báo — vẫn nhập được';
+  @override
+  String get importConfirm => 'Nhập vào cửa hàng';
+  @override
+  String get importRunning => 'Đang nhập…';
+  @override
+  String importDone(int count) => 'Đã nhập $count sản phẩm vào cửa hàng.';
+  @override
+  String get importNothing => 'Không có gì để nhập từ file này.';
+  @override
+  String get importHistory => 'Đã nhập trước đây';
+  @override
+  String get importReset => 'Bỏ lần nhập này';
+  @override
+  String get importResetConfirm =>
+      'Chỉ xoá những gì lần nhập này mang vào. Dữ liệu bạn tự nhập giữ nguyên.';
+  @override
+  String importResetDone(int count) => 'Đã bỏ $count bản ghi.';
+  @override
+  String importIssueLocation(String sheet, int row) => '$sheet · dòng $row';
+  @override
+  String importMoreIssues(int count) => '… và $count dòng nữa';
+  @override
+  String importRecordCount(int count) => '$count bản ghi';
 
   @override
   String get telegramTitle => 'Nhận bản tin qua Telegram';
@@ -4473,6 +4570,58 @@ class AppStringsEn extends AppStrings {
   String get actLabelBackupUpload => 'Back up your data';
   @override
   String get actLabelOwnerNotify => 'Notify you';
+
+  @override
+  String get titleImport => 'Import shop data';
+  @override
+  String get importIntro =>
+      'Tổng Tài reads your file right on this device. You see what is in it '
+      'before deciding to import.';
+  @override
+  String get importUseDemo => 'Use the sample dataset (100 products)';
+  @override
+  String get importPickFile => 'Choose my Excel file';
+  @override
+  String get importReading => 'Reading the file…';
+  @override
+  String importReadyProducts(int count) => '$count products ready';
+  @override
+  String importReadyVariants(int count) => '$count variants';
+  @override
+  String importReadySuppliers(int count) => '$count supplier quotes';
+  @override
+  String importReadyOrders(int count) => '$count orders';
+  @override
+  String importReadyCustomers(int count) => '$count customers';
+  @override
+  String importBlocked(int count) =>
+      '$count rows need a look — will be skipped';
+  @override
+  String importWarned(int count) =>
+      '$count rows have warnings — still importable';
+  @override
+  String get importConfirm => 'Import into my shop';
+  @override
+  String get importRunning => 'Importing…';
+  @override
+  String importDone(int count) => 'Imported $count products into your shop.';
+  @override
+  String get importNothing => 'Nothing to import from this file.';
+  @override
+  String get importHistory => 'Imported before';
+  @override
+  String get importReset => 'Undo this import';
+  @override
+  String get importResetConfirm =>
+      'Removes only what this import brought in. Anything you entered stays.';
+  @override
+  String importResetDone(int count) => 'Removed $count records.';
+  @override
+  String importIssueLocation(String sheet, int row) => '$sheet · row $row';
+  @override
+  String importMoreIssues(int count) => '… and $count more rows';
+  @override
+  String importRecordCount(int count) => '$count records';
 
   @override
   String get telegramTitle => 'Get your brief on Telegram';

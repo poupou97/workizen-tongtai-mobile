@@ -55,6 +55,8 @@ dependencies:
   firebase_crashlytics: ^5.2.6
   crypto: ^3.0.7
   file_selector: ^1.1.0
+  archive: ^4.0.9
+  xml: ^7.0.1
 
 dev_dependencies:
   # `package:test` thuần, KHÔNG qua flutter_test.
@@ -82,6 +84,9 @@ flutter:
   uses-material-design: true
   assets:
     - assets/mascot/
+    # Bộ dữ liệu thương mại demo (WTM-325). Đóng gói vào app để Founder nhập
+    # được ngay cả khi chưa nối Google Drive — cùng file, cùng đường import.
+    - assets/demo/
 
 # App launcher icon (WTM-110). Source rendered from
 # assets/branding/app_icon.svg (08a Origami on navy). iOS strips alpha;
