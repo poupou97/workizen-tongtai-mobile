@@ -1010,6 +1010,37 @@ abstract class AppStrings {
   String get readinessPartnerRequired;
   String get readinessApiFuture;
 
+  // ── doanh nghiệp demo (WTM-338 · Epic WTM-336) ──────────────────────────
+  String get titleBusinessLife;
+
+  /// Câu nói rõ đây là mô phỏng — §40 cấm fake trạng thái kỹ thuật.
+  String get demoBanner;
+
+  String get demoStart;
+  String get demoNextEvent;
+  String get demoNextDay;
+  String get demoNextWeek;
+  String get demoReset;
+
+  /// "Ngày 12 / 30".
+  String demoDayOf(int day, int total);
+
+  String get demoNeedsCatalogue;
+  String get demoFinished;
+  String get demoNotStarted;
+
+  /// "Đã đi tới 6 việc mới".
+  String demoAdvanced(int count);
+
+  /// Nhãn ngắn gắn trên mọi bề mặt mô phỏng.
+  String get demoTag;
+
+  /// Ba chủ thể trên dòng thời gian. `actorPlatform` là nhãn dự phòng khi
+  /// không biết sàn nào — tên sàn đã biết thì hiện tên riêng của nó.
+  String get actorPlatform;
+  String get actorAgent;
+  String get actorSeller;
+
   // ── Telegram (WTM-318) ──────────────────────────────────────────────────
   String get telegramTitle;
 
@@ -2797,6 +2828,42 @@ class AppStringsVi extends AppStrings {
   String get readinessPartnerRequired => 'Chờ sàn duyệt';
   @override
   String get readinessApiFuture => 'Để sau';
+
+  @override
+  String get titleBusinessLife => 'Doanh nghiệp của bạn';
+  @override
+  String get demoBanner =>
+      'Đây là doanh nghiệp mô phỏng. Dữ liệu và kết nối đều là demo — không có '
+      'gì gửi ra ngoài máy này.';
+  @override
+  String get demoStart => 'Bắt đầu doanh nghiệp demo';
+  @override
+  String get demoNextEvent => 'Việc tiếp';
+  @override
+  String get demoNextDay => 'Ngày tiếp';
+  @override
+  String get demoNextWeek => 'Tuần tiếp';
+  @override
+  String get demoReset => 'Bắt đầu lại';
+  @override
+  String demoDayOf(int day, int total) => 'Ngày $day / $total';
+  @override
+  String get demoNeedsCatalogue =>
+      'Cần có danh mục sản phẩm trước. Vào Nhập dữ liệu cửa hàng và dùng bộ mẫu.';
+  @override
+  String get demoFinished => 'Đã hết 30 ngày. Bắt đầu lại để chạy vòng mới.';
+  @override
+  String get demoNotStarted => 'Chưa bắt đầu doanh nghiệp demo.';
+  @override
+  String demoAdvanced(int count) => 'Đã đi tới $count việc mới';
+  @override
+  String get demoTag => 'DEMO';
+  @override
+  String get actorPlatform => 'Sàn';
+  @override
+  String get actorAgent => 'Tổng Tài';
+  @override
+  String get actorSeller => 'Bạn';
 
   @override
   String get telegramTitle => 'Nhận bản tin qua Telegram';
@@ -4676,6 +4743,43 @@ class AppStringsEn extends AppStrings {
   String get readinessPartnerRequired => 'Awaiting marketplace approval';
   @override
   String get readinessApiFuture => 'Later';
+
+  @override
+  String get titleBusinessLife => 'Your business';
+  @override
+  String get demoBanner =>
+      'This is a simulated business. Data and connections are demo — nothing '
+      'leaves this device.';
+  @override
+  String get demoStart => 'Start the demo business';
+  @override
+  String get demoNextEvent => 'Next event';
+  @override
+  String get demoNextDay => 'Next day';
+  @override
+  String get demoNextWeek => 'Next week';
+  @override
+  String get demoReset => 'Start over';
+  @override
+  String demoDayOf(int day, int total) => 'Day $day / $total';
+  @override
+  String get demoNeedsCatalogue =>
+      'You need a product catalogue first. Go to Import shop data and use the '
+      'sample dataset.';
+  @override
+  String get demoFinished => 'The 30 days are done. Start over for a new run.';
+  @override
+  String get demoNotStarted => 'The demo business has not started.';
+  @override
+  String demoAdvanced(int count) => 'Advanced through $count new events';
+  @override
+  String get demoTag => 'DEMO';
+  @override
+  String get actorPlatform => 'Marketplace';
+  @override
+  String get actorAgent => 'Tổng Tài';
+  @override
+  String get actorSeller => 'You';
 
   @override
   String get telegramTitle => 'Get your brief on Telegram';

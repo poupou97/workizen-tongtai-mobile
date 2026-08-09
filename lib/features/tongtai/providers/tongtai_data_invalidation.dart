@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 import 'tongtai_agentic_provider.dart';
 import 'tongtai_commerce_provider.dart';
 import 'tongtai_connection_provider.dart';
+import 'tongtai_simulation_provider.dart';
 import 'tongtai_capability_provider.dart';
 import 'tongtai_profile_provider.dart';
 import 'tongtai_journey_provider.dart';
@@ -103,6 +104,11 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // Chuyến giao hàng (WTM-323) — một lần nhập hoặc một lần đặt lại demo đổi
   // hết. Thiếu ở đây thì sau khi nhập, brief vẫn nói kiện cũ đứng im.
   shipmentConcernsProvider,
+  // Dòng thời gian doanh nghiệp (WTM-338). Mỗi lần đẩy đồng hồ là thế giới
+  // đổi — không làm mới thì Founder bấm "Ngày tiếp" mà màn hình đứng im, và
+  // đó đúng là thứ phá cảm giác "doanh nghiệp đang sống".
+  businessTimelineProvider,
+  simulationDayProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).
