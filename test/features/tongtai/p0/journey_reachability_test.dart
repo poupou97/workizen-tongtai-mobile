@@ -52,6 +52,8 @@ void main() {
     'tongtai_connections_screen.dart': 3,
     'tongtai_import_screen.dart': 3,
     'tongtai_business_life_screen.dart': 3,
+    'tongtai_conversations_screen.dart': 3,
+    'tongtai_conversation_screen.dart': 3,
     'tongtai_home_screen.dart': 3,
     'tongtai_consumer_screen.dart': 3,
     'tongtai_producer_screen.dart': 3,

@@ -10,6 +10,8 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../orders/order.dart';
 import '../../orders/order_controller.dart';
+import '../../providers/tongtai_simulation_provider.dart';
+import 'tongtai_conversation_screen.dart';
 import 'tongtai_create_order_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -174,6 +176,7 @@ class _TongtaiCustomerHistoryScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _MetricsHeader(metrics: metrics),
+            _CustomerStorySection(customerId: customerId),
             _FilterRow(
               label: context.l10n.labelPeriod,
               children: [
@@ -508,6 +511,101 @@ class _EmptyState extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// **Khách hàng 360** — câu chuyện, không chỉ danh sách đơn (WTM-339 · §38).
+///
+/// Một màn lịch sử mua hàng trả lời được *"khách này mua bao nhiêu"*. Nó
+/// **không** trả lời được *"vì sao khách này giận"* — mà đó mới là câu người
+/// bán cần trước khi bấm gửi bất cứ thứ gì. Ba việc gần nhất trong sổ, cộng
+/// lối vào khung hội thoại, đóng đúng khoảng trống đó.
+///
+/// Đọc qua `customerConversationProvider` — cùng một chiếu với hộp thư, nên
+/// hai màn không thể kể hai câu chuyện khác nhau (ADR-TON-015 One Data Path).
+class _CustomerStorySection extends ConsumerWidget {
+  const _CustomerStorySection({required this.customerId});
+
+  final String customerId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final conversation = ref
+        .watch(customerConversationProvider(customerId))
+        .asData
+        ?.value;
+
+    // Chưa có gì trong sổ ⇒ không chiếm chỗ. Một khung rỗng nói "chưa có việc
+    // nào" trên mọi khách của một doanh nghiệp chưa bật demo là nhiễu thuần.
+    if (conversation == null || conversation.events.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final recent = conversation.events.take(3).toList(growable: false);
+
+    return Container(
+      key: const Key('history-story'),
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(
+        TongtaiDesignTokens.spacing4,
+        0,
+        TongtaiDesignTokens.spacing4,
+        TongtaiDesignTokens.spacing3,
+      ),
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
+        border: Border.all(color: const Color(0x14000000)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.customer360Story,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              fontWeight: FontWeight.w800,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          for (final event in recent)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                event.headline,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TongtaiDesignTokens.smallStyle.copyWith(
+                  color: TongtaiDesignTokens.lightTextSecondary,
+                ),
+              ),
+            ),
+          if (conversation.messages.isNotEmpty)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                key: const Key('history-open-conversation'),
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        TongtaiConversationScreen(customerId: customerId),
+                  ),
+                ),
+                child: Text(
+                  conversation.pendingDraft != null
+                      ? '${l10n.customer360OpenConversation} · '
+                            '${l10n.conversationDraftReady}'
+                      : l10n.customer360OpenConversation,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

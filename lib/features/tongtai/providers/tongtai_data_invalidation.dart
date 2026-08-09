@@ -109,6 +109,10 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // đó đúng là thứ phá cảm giác "doanh nghiệp đang sống".
   businessTimelineProvider,
   simulationDayProvider,
+  // Hội thoại khách hàng (WTM-339) — là **chiếu** của cùng sổ sự kiện đó, nên
+  // nó cũ đi vào đúng những lúc dòng thời gian cũ đi. Thiếu ở đây thì người
+  // bán bấm "Gửi", tin nhắn vào sổ, mà khung chat vẫn còn nút "Gửi".
+  customerConversationsProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).

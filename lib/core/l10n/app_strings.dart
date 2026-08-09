@@ -1041,6 +1041,42 @@ abstract class AppStrings {
   String get actorAgent;
   String get actorSeller;
 
+  // ── hội thoại khách hàng (WTM-339 · Epic WTM-336) ───────────────────────
+  String get titleConversations;
+
+  /// Chưa có hội thoại nào — nói phải làm gì, không để màn trắng.
+  String get conversationsEmpty;
+
+  /// Khách đang chờ trả lời.
+  String get conversationAwaiting;
+
+  /// Tổng Tài đã soạn sẵn, chưa gửi.
+  String get conversationDraftReady;
+
+  /// ⭐ Rủi ro cao ⇒ bắt buộc duyệt.
+  String get conversationNeedsApproval;
+
+  /// Nhãn trên khung nháp — nói thẳng là CHƯA gửi.
+  String get conversationDraftLabel;
+
+  String get conversationSend;
+  String get conversationEdit;
+  String get conversationSent;
+  String get conversationSendFailed;
+
+  /// Nhãn "Bạn đã gửi" trên một tin của người bán.
+  String get conversationYouSent;
+
+  /// Tiêu đề phần câu chuyện khách hàng trong Khách hàng 360.
+  String get customer360Story;
+
+  /// Nút mở khung hội thoại từ Khách hàng 360.
+  ///
+  /// Không có khoá "chưa có việc nào": khách chưa có gì trong sổ thì phần này
+  /// **ẩn hẳn**. Một dòng "chưa có việc nào" trên mọi khách của một doanh
+  /// nghiệp chưa bật demo là nhiễu thuần.
+  String get customer360OpenConversation;
+
   // ── Telegram (WTM-318) ──────────────────────────────────────────────────
   String get telegramTitle;
 
@@ -2864,6 +2900,35 @@ class AppStringsVi extends AppStrings {
   String get actorAgent => 'Tổng Tài';
   @override
   String get actorSeller => 'Bạn';
+
+  @override
+  String get titleConversations => 'Hội thoại khách hàng';
+  @override
+  String get conversationsEmpty =>
+      'Chưa có hội thoại nào. Bắt đầu doanh nghiệp demo ở màn Doanh nghiệp của '
+      'bạn để khách bắt đầu nhắn tin.';
+  @override
+  String get conversationAwaiting => 'Khách đang chờ';
+  @override
+  String get conversationDraftReady => 'Tổng Tài đã soạn';
+  @override
+  String get conversationNeedsApproval => 'Cần bạn duyệt';
+  @override
+  String get conversationDraftLabel => 'Tổng Tài soạn — chưa gửi';
+  @override
+  String get conversationSend => 'Gửi';
+  @override
+  String get conversationEdit => 'Sửa lời';
+  @override
+  String get conversationSent => 'Đã gửi (mô phỏng — không ra khỏi máy này)';
+  @override
+  String get conversationSendFailed => 'Chưa gửi được. Thử lại.';
+  @override
+  String get conversationYouSent => 'Bạn đã gửi';
+  @override
+  String get customer360Story => 'Câu chuyện khách hàng';
+  @override
+  String get customer360OpenConversation => 'Mở hội thoại';
 
   @override
   String get telegramTitle => 'Nhận bản tin qua Telegram';
@@ -4780,6 +4845,35 @@ class AppStringsEn extends AppStrings {
   String get actorAgent => 'Tổng Tài';
   @override
   String get actorSeller => 'You';
+
+  @override
+  String get titleConversations => 'Customer conversations';
+  @override
+  String get conversationsEmpty =>
+      'No conversations yet. Start the demo business from Your business so '
+      'customers begin messaging.';
+  @override
+  String get conversationAwaiting => 'Customer waiting';
+  @override
+  String get conversationDraftReady => 'Draft ready';
+  @override
+  String get conversationNeedsApproval => 'Needs your approval';
+  @override
+  String get conversationDraftLabel => 'Drafted by Tổng Tài — not sent';
+  @override
+  String get conversationSend => 'Send';
+  @override
+  String get conversationEdit => 'Edit';
+  @override
+  String get conversationSent => 'Sent (simulated — nothing left this device)';
+  @override
+  String get conversationSendFailed => 'Could not send. Try again.';
+  @override
+  String get conversationYouSent => 'You sent';
+  @override
+  String get customer360Story => 'Customer story';
+  @override
+  String get customer360OpenConversation => 'Open conversation';
 
   @override
   String get telegramTitle => 'Get your brief on Telegram';

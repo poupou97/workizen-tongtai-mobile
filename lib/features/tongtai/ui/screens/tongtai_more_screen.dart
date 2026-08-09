@@ -19,6 +19,7 @@ import 'tongtai_feedback_screen.dart';
 import 'tongtai_backup_screen.dart';
 import 'tongtai_connections_screen.dart';
 import 'tongtai_business_life_screen.dart';
+import 'tongtai_conversations_screen.dart';
 import 'tongtai_import_screen.dart';
 import 'tongtai_export_screen.dart';
 import 'tongtai_finance_screen.dart';
@@ -439,6 +440,16 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiExportScreen(),
+                    ),
+                  ),
+                ),
+                _SettingsItem(
+                  key: const Key('more-conversations'),
+                  icon: Icons.forum_outlined,
+                  label: context.l10n.titleConversations,
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiConversationsScreen(),
                     ),
                   ),
                 ),
