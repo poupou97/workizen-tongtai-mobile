@@ -193,7 +193,6 @@ void main() {
     Future<void> expectMoreEntries(WidgetTester tester) async {
       for (final key in const [
         'more-demo-mode',
-        'more-load-history',
         'more-export',
         'more-reports',
         'more-timeline',

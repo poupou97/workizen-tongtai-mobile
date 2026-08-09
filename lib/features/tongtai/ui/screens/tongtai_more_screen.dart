@@ -10,7 +10,7 @@ import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../providers/tongtai_agentic_provider.dart';
 import '../../providers/tongtai_sample_provider.dart';
-import '../../sample/historical_data_generator.dart';
+import '../../sample/sample_business_seeder.dart';
 import '../../providers/tongtai_onboarding_provider.dart';
 import 'tongtai_ai_key_screen.dart';
 import 'tongtai_customer_risk_screen.dart';
@@ -102,11 +102,12 @@ class TongtaiMoreScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    // WTM-148: seeding writes to five repositories. A failure here used to
-    // throw into the void (the FK-787 "Reset sample data" crash) — now it is
-    // reported, retryable, and the caches are only invalidated on success.
+    // WTM-148: gieo dữ liệu ghi vào nhiều repository. Hỏng ở đây từng ném vào
+    // hư không (crash FK-787 của "Đặt lại dữ liệu mẫu") — nay được báo, thử
+    // lại được, và cache chỉ bị dọn khi thành công.
+    SampleBusinessReport? report;
     final failure = await runTongtaiAction(
-      () => ref.read(sampleDataSeederProvider).seed(),
+      () async => report = await ref.read(sampleBusinessSeederProvider).seed(),
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'more',
     );
@@ -123,7 +124,16 @@ class TongtaiMoreScreen extends ConsumerWidget {
     final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(l10n.moreSampleLoadedSnack)));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.moreSampleLoadedSnack(
+              report?.products ?? 0,
+              report?.months ?? 0,
+            ),
+          ),
+        ),
+      );
   }
 
   /// **Đặt lại dữ liệu mẫu** (WTM-307 · Task Order §14) — một thao tác, không
@@ -176,53 +186,6 @@ class TongtaiMoreScreen extends ConsumerWidget {
       ..showSnackBar(SnackBar(content: Text(l10n.moreResetDemoSnack(removed))));
   }
 
-  /// WTM-149/ADR-TON-016: seeds 12 consecutive months of history so the
-  /// seller can try Revenue forecast + Customer risk on realistic data.
-  /// Same sample lifecycle as [_seedSamples] — ordinary rows, `sample-`
-  /// prefixed, removed by "Xóa dữ liệu mẫu"; user data untouched.
-  Future<void> _seedHistory(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(dialogContext.l10n.moreLoadHistoryConfirmTitle),
-        content: Text(dialogContext.l10n.moreLoadHistoryConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(dialogContext.l10n.actionCancel),
-          ),
-          FilledButton(
-            key: const Key('more-history-confirm'),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(dialogContext.l10n.moreLoadSampleAction),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !context.mounted) return;
-    final failure = await runTongtaiAction(
-      () => ref
-          .read(historicalDataSeederProvider)
-          .seed(const HistoricalDataSpec()),
-      telemetry: () => ref.read(tongtaiTelemetryProvider),
-      screen: 'more',
-    );
-    if (!context.mounted) return;
-    if (failure != null) {
-      showTongtaiFailure(
-        context,
-        failure,
-        onRetry: () => _seedHistory(context, ref),
-      );
-      return;
-    }
-    invalidateBusinessDataProviders(ref);
-    final l10n = context.l10n;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(l10n.moreHistoryLoadedSnack)));
-  }
-
   /// Removes ONLY the `sample-` prefixed rows — user data stays (tested).
   Future<void> _removeSamples(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -245,7 +208,7 @@ class TongtaiMoreScreen extends ConsumerWidget {
     );
     if (confirmed != true || !context.mounted) return;
     final failure = await runTongtaiAction(
-      () => ref.read(sampleDataSeederProvider).removeAll(),
+      () => ref.read(sampleBusinessSeederProvider).removeAll(),
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'more',
     );
@@ -328,12 +291,6 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   icon: Icons.science_outlined,
                   label: context.l10n.moreLoadSample,
                   onTap: () => _seedSamples(context, ref),
-                ),
-                _SettingsItem(
-                  key: const Key('more-load-history'),
-                  icon: Icons.timeline,
-                  label: context.l10n.moreLoadHistory,
-                  onTap: () => _seedHistory(context, ref),
                 ),
                 _SettingsItem(
                   key: const Key('more-remove-sample'),

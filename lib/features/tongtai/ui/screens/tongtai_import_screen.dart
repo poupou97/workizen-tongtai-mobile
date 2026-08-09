@@ -64,38 +64,11 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
 
   /// `true` khi bộ đang xem trước là bộ mẫu — quyết định cờ `isDemo` của lần
   /// nhập. Cờ nằm ở **lần nhập**, không ở từng dòng.
-  bool _isDemo = false;
 
   Future<PickedImportFile?> _defaultPick() async {
     final file = await openFile();
     if (file == null) return null;
     return PickedImportFile(name: file.name, bytes: await file.readAsBytes());
-  }
-
-  Future<void> _readDemo() async {
-    if (_busy) return;
-    setState(() {
-      _busy = true;
-      _result = null;
-    });
-
-    CommerceImportPreview? preview;
-    final failure = await runTongtaiAction(
-      () async {
-        final source = await ref.read(bundledDemoSourceProvider);
-        preview = await source.read();
-      },
-      telemetry: () => ref.read(tongtaiTelemetryProvider),
-      screen: 'import',
-    );
-
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      _preview = preview;
-      _isDemo = true;
-    });
-    if (failure != null) showTongtaiFailure(context, failure);
   }
 
   Future<void> _readPicked() async {
@@ -135,7 +108,6 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
       _busy = false;
       if (preview != null) {
         _preview = preview;
-        _isDemo = false;
       }
     });
     if (failure != null) showTongtaiFailure(context, failure);
@@ -152,10 +124,9 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
           .read(commerceImporterProvider)
           .apply(
             preview,
-            sourceVendor: _isDemo
-                ? ImportVendor.bundledDemo
-                : ImportVendor.localFile,
-            isDemo: _isDemo,
+            // Màn này chỉ nhận file của người bán. Bộ đóng kèm đi đường
+            // "Nạp dữ liệu mẫu" và tự khai `bundledDemo` ở đó.
+            sourceVendor: ImportVendor.localFile,
           ),
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'import',
@@ -248,20 +219,16 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            // ⛔ WTM-343 — KHÔNG còn nút "Dùng bộ dữ liệu mẫu" ở đây.
+            //
+            // Bộ 100 sản phẩm là **dữ liệu mẫu**, và dữ liệu mẫu có đúng một
+            // chủ: "Nạp dữ liệu mẫu" trong Thêm. Màn này chỉ làm một việc —
+            // nhận file Excel **của người bán**. Hai lối vào cho một khái niệm
+            // là hai chỗ để chọn nhầm (P-27).
             SizedBox(
               width: double.infinity,
               height: 48,
               child: FilledButton(
-                key: const Key('import-use-demo'),
-                onPressed: _busy ? null : _readDemo,
-                child: Text(_busy ? l10n.importReading : l10n.importUseDemo),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton(
                 key: const Key('import-pick-file'),
                 onPressed: _busy ? null : _readPicked,
                 child: Text(l10n.importPickFile),

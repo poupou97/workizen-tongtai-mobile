@@ -136,10 +136,6 @@ abstract class AppStrings {
 
   // ── More menu ───────────────────────────────────────────────────────────
   String get moreLoadSample;
-  String get moreLoadHistory;
-  String get moreLoadHistoryConfirmTitle;
-  String get moreLoadHistoryConfirmBody;
-  String get moreHistoryLoadedSnack;
   String get moreRemoveSample;
 
   // ── KPI labels ──────────────────────────────────────────────────────────
@@ -232,7 +228,6 @@ abstract class AppStrings {
   String get homeWelcome;
   String get homeEmptyBody;
   String get homeSampleLoadedSnack;
-  String get homeSampleBanner;
   String get homeAddCustomer;
   String get homeAddProduct;
   String get homeAddOrder;
@@ -245,7 +240,9 @@ abstract class AppStrings {
   String get moreLoadSampleConfirmTitle;
   String get moreLoadSampleConfirmBody;
   String get moreLoadSampleAction;
-  String get moreSampleLoadedSnack;
+
+  /// "Đã nạp 100 sản phẩm và 12 tháng lịch sử." — nói bằng con số thật.
+  String moreSampleLoadedSnack(int products, int months);
   String get moreRemoveSampleConfirmTitle;
   String get moreRemoveSampleConfirmBody;
   String get moreRemoveSampleAction;
@@ -958,9 +955,7 @@ abstract class AppStrings {
   /// Câu mở màn — nói app **đọc** file của người bán, không gửi đi đâu.
   String get importIntro;
 
-  String get importUseDemo;
   String get importPickFile;
-  String get importReading;
 
   /// "100 sản phẩm đã sẵn sàng" — ngôn ngữ nghiệp vụ, không phải "parsed 100 rows".
   String importReadyProducts(int count);
@@ -1201,19 +1196,6 @@ class AppStringsVi extends AppStrings {
   @override
   String get moreLoadSample => 'Nạp dữ liệu mẫu';
   @override
-  String get moreLoadHistory => 'Nạp dữ liệu mẫu 12 tháng';
-  @override
-  String get moreLoadHistoryConfirmTitle => 'Nạp lịch sử 12 tháng?';
-  @override
-  String get moreLoadHistoryConfirmBody =>
-      'Sinh 12 tháng đơn hàng, thu chi và khách hàng liên tiếp (có mùa vụ Tết, '
-      'hè, cuối năm) để thử Dự báo doanh thu và Rủi ro khách hàng. Dữ liệu này '
-      'là bản ghi mẫu bình thường — xoá bất cứ lúc nào bằng "Xóa dữ liệu mẫu"; '
-      'dữ liệu bạn tự nhập không bị ảnh hưởng.';
-  @override
-  String get moreHistoryLoadedSnack =>
-      'Đã nạp 12 tháng dữ liệu mẫu — mở Dự báo doanh thu để xem.';
-  @override
   String get moreRemoveSample => 'Xóa dữ liệu mẫu';
 
   @override
@@ -1352,10 +1334,6 @@ class AppStringsVi extends AppStrings {
       'Đã nạp dữ liệu mẫu — tất cả màn hình đang dùng chung dữ liệu này. '
       'Xóa trong More khi không cần nữa.';
   @override
-  String get homeSampleBanner =>
-      'Đang hiển thị kèm DỮ LIỆU MẪU (mọi màn hình dùng chung dữ liệu này). '
-      'Bạn có thể sửa/xóa từng dòng, hoặc xóa toàn bộ mẫu trong More.';
-  @override
   String get homeAddCustomer => '+ Khách hàng';
   @override
   String get homeAddProduct => '+ Sản phẩm';
@@ -1374,15 +1352,17 @@ class AppStringsVi extends AppStrings {
   String get moreLoadSampleConfirmTitle => 'Nạp dữ liệu mẫu?';
   @override
   String get moreLoadSampleConfirmBody =>
-      'Dữ liệu mẫu sẽ được thêm vào ứng dụng như dữ liệu bình thường — '
-      'mọi màn hình (Home, Kho, Khách hàng, Báo cáo, Cơ hội…) cùng hiển '
-      'thị. Bạn có thể sửa từng dòng hoặc xóa toàn bộ mẫu bất cứ lúc nào; '
-      'dữ liệu bạn tự nhập không bị ảnh hưởng.';
+      'Nạp một cửa hàng mẫu đầy đủ: 100 sản phẩm với báo giá nhà cung cấp và '
+      'đối soát sàn, cộng 12 tháng lịch sử đơn hàng và thu chi (có mùa vụ Tết, '
+      'hè, cuối năm) để Dự báo doanh thu và Rủi ro khách hàng có gì để nói. '
+      'Nó vào ứng dụng như dữ liệu bình thường — mọi màn hình cùng hiển thị. '
+      'Xoá bất cứ lúc nào bằng "Xóa dữ liệu mẫu"; dữ liệu bạn tự nhập không bị '
+      'ảnh hưởng.';
   @override
   String get moreLoadSampleAction => 'Nạp mẫu';
   @override
-  String get moreSampleLoadedSnack =>
-      'Đã nạp dữ liệu mẫu — xem ở mọi màn hình.';
+  String moreSampleLoadedSnack(int products, int months) =>
+      'Đã nạp $products sản phẩm và $months tháng lịch sử.';
   @override
   String get moreRemoveSampleConfirmTitle => 'Xóa toàn bộ dữ liệu mẫu?';
   @override
@@ -2820,11 +2800,7 @@ class AppStringsVi extends AppStrings {
       'Tổng Tài đọc file của bạn ngay trên máy này. Bạn xem trước rồi mới '
       'quyết định có nhập hay không.';
   @override
-  String get importUseDemo => 'Dùng bộ dữ liệu mẫu (100 sản phẩm)';
-  @override
   String get importPickFile => 'Chọn file Excel của tôi';
-  @override
-  String get importReading => 'Đang đọc file…';
   @override
   String importReadyProducts(int count) => '$count sản phẩm đã sẵn sàng';
   @override
@@ -3154,19 +3130,6 @@ class AppStringsEn extends AppStrings {
   @override
   String get moreLoadSample => 'Load sample data';
   @override
-  String get moreLoadHistory => 'Load 12 months of sample data';
-  @override
-  String get moreLoadHistoryConfirmTitle => 'Load 12 months of history?';
-  @override
-  String get moreLoadHistoryConfirmBody =>
-      'Generates 12 consecutive months of orders, cash flow and customers '
-      '(with Tết, summer and year-end seasonality) so you can try Revenue '
-      'forecast and Customer risk. These are ordinary sample rows — remove '
-      'them any time with "Remove sample data"; your own data is untouched.';
-  @override
-  String get moreHistoryLoadedSnack =>
-      'Loaded 12 months of sample data — open Revenue forecast to see it.';
-  @override
   String get moreRemoveSample => 'Remove sample data';
 
   @override
@@ -3306,10 +3269,6 @@ class AppStringsEn extends AppStrings {
       'Sample data loaded — every screen now shares this data. '
       'Remove it in More when you no longer need it.';
   @override
-  String get homeSampleBanner =>
-      'Showing SAMPLE DATA alongside your data (every screen shares it). '
-      'You can edit/delete individual rows, or remove all samples in More.';
-  @override
   String get homeAddCustomer => '+ Customer';
   @override
   String get homeAddProduct => '+ Product';
@@ -3328,15 +3287,17 @@ class AppStringsEn extends AppStrings {
   String get moreLoadSampleConfirmTitle => 'Load sample data?';
   @override
   String get moreLoadSampleConfirmBody =>
-      'Sample data is added to the app as ordinary data — every screen '
-      '(Home, Inventory, Customers, Reports, Opportunities…) shows it. '
-      'You can edit individual rows or remove all samples at any time; '
-      'data you entered yourself is never touched.';
+      'Loads a complete sample shop: 100 products with supplier quotes and '
+      'marketplace settlements, plus 12 months of order and cash history (with '
+      'Tết, summer and year-end seasonality) so Revenue forecast and Customer '
+      'risk have something to say. It enters the app as ordinary data — every '
+      'screen shows it. Remove it any time with "Remove sample data"; data you '
+      'entered yourself is never touched.';
   @override
   String get moreLoadSampleAction => 'Load samples';
   @override
-  String get moreSampleLoadedSnack =>
-      'Sample data loaded — visible on every screen.';
+  String moreSampleLoadedSnack(int products, int months) =>
+      'Loaded $products products and $months months of history.';
   @override
   String get moreRemoveSampleConfirmTitle => 'Remove all sample data?';
   @override
@@ -4778,11 +4739,7 @@ class AppStringsEn extends AppStrings {
       'Tổng Tài reads your file right on this device. You see what is in it '
       'before deciding to import.';
   @override
-  String get importUseDemo => 'Use the sample dataset (100 products)';
-  @override
   String get importPickFile => 'Choose my Excel file';
-  @override
-  String get importReading => 'Reading the file…';
   @override
   String importReadyProducts(int count) => '$count products ready';
   @override

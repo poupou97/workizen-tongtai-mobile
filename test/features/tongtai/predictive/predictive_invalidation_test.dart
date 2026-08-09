@@ -277,9 +277,10 @@ void main() {
 
       expect(
         checked,
-        greaterThanOrEqualTo(4),
+        greaterThanOrEqualTo(3),
+        // WTM-343 gộp ba lối nạp mẫu làm một, nên More còn ×2 (nạp · xoá).
         reason:
-            'quét phải tìm thấy các handler seed/remove thật (More ×3, '
+            'quét phải tìm thấy các handler seed/remove thật (More ×2, '
             'Home ×1) — nếu không, chính bài test này đã hỏng',
       );
       expect(
@@ -310,11 +311,8 @@ void main() {
         return end < 0 ? rest : rest.take(end).toList();
       }
 
-      for (final handler in const [
-        '_seedSamples',
-        '_seedHistory',
-        '_removeSamples',
-      ]) {
+      // WTM-343: `_seedHistory` không còn — một lối nạp mẫu duy nhất.
+      for (final handler in const ['_seedSamples', '_removeSamples']) {
         expect(
           bodyOf(handler).any((l) => l.contains(helperCall)),
           isTrue,

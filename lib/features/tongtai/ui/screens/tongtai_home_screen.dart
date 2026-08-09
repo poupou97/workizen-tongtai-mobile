@@ -104,7 +104,6 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
   int get _consumer => _d.consumer;
   int get _journey => _d.goals.length;
   List<Opportunity> get _loadedOpportunities => _d.opportunities;
-  bool get _hasSamples => _d.hasSamples;
 
   /// Injected / demo mode — everything is known synchronously.
   _HomeData? _injected() {
@@ -197,10 +196,15 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
   /// "Xem thử Demo" (WTM-144/ADR-TON-014): seeds the sample fixtures into the
   /// PRODUCTION repositories — no parallel demo screen — then reloads so this
   /// same dashboard (and every other screen) shows them.
+  ///
+  /// WTM-343: **cùng một seeder với More.** Trước đây Home gieo bộ viết tay
+  /// còn More gieo 12 tháng, nên hai nút cùng tên "xem thử" cho ra hai doanh
+  /// nghiệp khác nhau — và người bán không có cách nào biết mình đang xem cái
+  /// nào.
   Future<void> _seedSamples() async {
     setState(() => _seeding = true);
     final failure = await runTongtaiAction(
-      () => ref.read(sampleDataSeederProvider).seed(),
+      () => ref.read(sampleBusinessSeederProvider).seed(),
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'home',
     );
@@ -492,44 +496,15 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           ..._missionBlock(context),
           const SizedBox(height: 24),
 
-          // ── Sample-data banner (WTM-144/ADR-TON-014): when sample rows
-          //    are present, every screen shows them as ordinary data — this
-          //    banner is the one reminder + pointer to the remover in More. ─
-          if (_hasSamples) ...[
-            Container(
-              key: const Key('home-sample-banner'),
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: TongtaiDesignTokens.warning.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: TongtaiDesignTokens.warning.withValues(alpha: 0.5),
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.science_outlined,
-                    size: 20,
-                    color: TongtaiDesignTokens.warning,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      context.l10n.homeSampleBanner,
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextPrimary,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
+          // ⛔ WTM-343 — KHÔNG còn băng-rôn "đang hiển thị dữ liệu mẫu".
+          //
+          // Founder chốt 2026-08-09: bản demo phải trông như thật. Băng-rôn
+          // nói về **dữ liệu**, không nói về trạng thái kỹ thuật, nên bỏ nó
+          // không phạm luật "cấm fake trạng thái engineering" (§40).
+          //
+          // Hai thứ giữ lại để rủi ro "nhầm mẫu là số của mình" không thành
+          // mất mát: mỗi bản ghi vẫn mang dấu `sample-` / `importJobId`, và
+          // "Xóa dữ liệu mẫu" vẫn xoá đúng chúng mà không đụng dữ liệu thật.
           // ── Welcome + health + module counts ──────────────────────
           Card(
             elevation: 1,

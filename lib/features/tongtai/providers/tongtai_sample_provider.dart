@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../sample/historical_data_generator.dart';
+import 'tongtai_commerce_provider.dart';
+import '../sample/sample_business_seeder.dart';
 import '../sample/sample_data_seeder.dart';
 import 'tongtai_consumer_provider.dart';
 import 'tongtai_finance_provider.dart';
@@ -31,4 +33,21 @@ final sampleDataSeederProvider = Provider<SampleDataSeeder>(
 final historicalDataSeederProvider = Provider<HistoricalDataSeeder>(
   (ref) =>
       HistoricalDataSeeder(sampleSeeder: ref.watch(sampleDataSeederProvider)),
+);
+
+/// **Một doanh nghiệp mẫu, một nút** — WTM-343.
+///
+/// Gộp ba đường nạp mẫu cũ (viết tay · 12 tháng · bộ 100 sản phẩm) làm một.
+/// Xem `SampleBusinessSeeder` để biết vì sao phải cả hai lớp.
+final sampleBusinessSeederProvider = Provider<SampleBusinessSeeder>(
+  (ref) => SampleBusinessSeeder(
+    history: ref.watch(historicalDataSeederProvider),
+    importer: ref.watch(commerceImporterProvider),
+    commerce: ref.watch(commerceRepositoryProvider),
+    samples: ref.watch(sampleDataSeederProvider),
+    customers: ref.watch(customerRepositoryProvider),
+    orders: ref.watch(orderRepositoryProvider),
+    settlements: ref.watch(settlementRepositoryProvider),
+    bundledSource: () => ref.read(bundledDemoSourceProvider),
+  ),
 );
