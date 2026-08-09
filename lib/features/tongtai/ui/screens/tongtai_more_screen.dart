@@ -18,6 +18,7 @@ import 'tongtai_business_profile_screen.dart';
 import 'tongtai_feedback_screen.dart';
 import 'tongtai_backup_screen.dart';
 import 'tongtai_connections_screen.dart';
+import 'tongtai_business_life_screen.dart';
 import 'tongtai_import_screen.dart';
 import 'tongtai_export_screen.dart';
 import 'tongtai_finance_screen.dart';
@@ -438,6 +439,16 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(
                       builder: (_) => const TongtaiExportScreen(),
+                    ),
+                  ),
+                ),
+                _SettingsItem(
+                  key: const Key('more-business-life'),
+                  icon: Icons.auto_graph,
+                  label: context.l10n.titleBusinessLife,
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiBusinessLifeScreen(),
                     ),
                   ),
                 ),
