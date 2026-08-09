@@ -2,7 +2,7 @@
 
 Chuẩn: [ADR-TON-015](../03-DECISIONS/ADR-TON-015-ui-maturity-and-one-data-path.md).
 Cập nhật **cùng PR** mỗi khi một màn đổi level. Level = sự thật đo được từ
-code, không phải ý định. Audit gần nhất: **2026-08-09** (WTM-317 thêm `tongtai_connections_screen` (L3) — màn Kết nối nền tảng ngoài đầu tiên) · trước đó **2026-08-01** (38 màn + 3 shell — WTM-187 thêm `tongtai_journey_screen` (L3) — WTM-175 thêm `tongtai_feedback_screen`, WTM-177 thêm `tongtai_business_profile_screen`, WTM-178 thay onboarding slide bằng `tongtai_onboarding_conversation_screen`; cả ba L3).
+code, không phải ý định. Audit gần nhất: **2026-08-09** (WTM-326 thêm `tongtai_import_screen` (L3) · WTM-317 thêm `tongtai_connections_screen` (L3) — màn Kết nối nền tảng ngoài đầu tiên) · trước đó **2026-08-01** (38 màn + 3 shell — WTM-187 thêm `tongtai_journey_screen` (L3) — WTM-175 thêm `tongtai_feedback_screen`, WTM-177 thêm `tongtai_business_profile_screen`, WTM-178 thay onboarding slide bằng `tongtai_onboarding_conversation_screen`; cả ba L3).
 
 ## ⛔ Điều kiện đứng trước mọi level — Journey Reachability (Founder 2026-08-02)
 
@@ -66,6 +66,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | `tongtai_opportunity_feed_screen` | generated opportunities **+ phản ứng đã lưu** | `ScreenDataController` | WTM-190: lưu/gạt bỏ sống sót qua lần đóng app. **WTM-192: là TAB thứ 5** (Founder chọn phương án B) — Home/Reports **chuyển tab** chứ không push bản sao |
 | `tongtai_forecast_screen` | RevenueCapabilityContext + Rule Twin | `TongtaiAsyncScreenData` | `insufficient` ≠ `failed` ≠ `empty` |
 | `tongtai_customer_risk_screen` | CustomerCapabilityContext + Rule Twin + customer repo | `TongtaiAsyncScreenData` | khách rỗng = **empty**, không phải từ chối |
+| `tongtai_import_screen` | `bundledDemoSourceProvider` / file người bán chọn → `XlsxCommerceSource` → `CommerceImporter` (repository production) + `importJobsProvider` | `runTongtaiAction` ×4 | **WTM-326 · C2 · Epic WTM-324.** Xem trước là **một bước riêng**, không phải hộp thoại xác nhận — gộp lại sẽ biến việc xem xét thành việc bấm OK. Có lỗi **không** chặn cả file: 100 sản phẩm không đáng bị từ chối vì một đơn hỏng; nút chỉ tắt khi không còn gì hợp lệ. Ngôn ngữ nghiệp vụ (*"100 sản phẩm đã sẵn sàng"*), số dòng/tên bảng hiện **nhỏ** bên dưới cho ai muốn mở Excel ra sửa |
 | `tongtai_connections_screen` | `connectorCatalogProvider` (catalog + credential store) + `driveBackupListProvider` (Drive) | `TongtaiAsyncScreenData` + `runTongtaiAction` ×3 | **WTM-317 · C1 · Epic WTM-315.** Trạng thái hiển thị **hợp nhất** bản ghi và credential thật: có dòng `ACTIVE` mà mất khoá ⇒ nói `Chưa thiết lập`, vì đó là sự thật. Danh sách bản sao lưu trên Drive hỏng **không** che nút *Sao lưu ngay* — không đọc được bản cũ ≠ không tạo được bản mới. Nút *Ngắt kết nối* chỉ hiện khi có khoá thật để xoá. **WTM-318:** thêm Telegram — ba bước (token · nơi nhận · gửi thử) hiện **cùng lúc**, không phải wizard ba màn; nút *Gửi tin thử* chỉ hiện khi đã `ACTIVE`. **WTM-319:** thêm Jira & Confluence — `validate` gọi API **thật lúc dán khoá**; chưa chọn dự án ⇒ `workContext` là `null` và màn nói *chưa đủ dữ liệu*, **không** nói "0 việc đang mở" |
 | `tongtai_agent_screen` | `businessBriefProvider` (Rule Twin → BriefItem) + `briefDecisionsProvider` | `TongtaiAsyncScreenData` | **WTM-304 · Epic WTM-302.** Nơi ở của agent. `empty` = *chưa có việc nào cần bạn quyết* (một **tin tốt**, không phải lỗi) ≠ `failed` = *chưa tính được*. Hàng dựng bằng widget dùng chung với thẻ brief trên Home — một khách không thể được hai bề mặt mô tả khác nhau |
 | `tongtai_brief_story_screen` | `BriefItem` truyền vào + `briefInboxProvider` (ghi) | `runTongtaiAction` ×3 | **WTM-305 · trải nghiệm #2.** `WHAT → WHY → SUGGEST → DECIDED → NEXT` trên một màn. **Ba** nút, không hai: *Để sau* tạo `AgentTask` thật, nên một việc chưa nghĩ xong không bị ép thành "bỏ qua". Nhãn **diễn tập** đọc từ chính `vendor`+kết quả, không từ một cờ riêng của màn |
@@ -125,7 +126,7 @@ persistence do RootGate giữ).
 | Level thật | Story Jira liên quan (label `IMPLEMENTATION_LEVEL`) |
 |---|---|
 | L4 | WTM-95/96/97 (Reports) · WTM-91/92 (Opportunity detail) |
-| L3 | WTM-317 (Kết nối · Google Drive) · WTM-24 (Producer) · WTM-26 (Consumer) · WTM-25/68 (Inventory) · WTM-75 (Customer list) · WTM-87/89 (Journey) · WTM-27/113 (Finance) · WTM-99/100 (Export) · WTM-80/84 (Chat) · WTM-73 (Search) · WTM-63/64/65 (Supplier) · WTM-114 (Timeline) · WTM-160/161 (Forecast/Risk) · WTM-61/83 (AI key BYOK) |
+| L3 | WTM-326 (Nhập dữ liệu cửa hàng) · WTM-317 (Kết nối · Google Drive) · WTM-24 (Producer) · WTM-26 (Consumer) · WTM-25/68 (Inventory) · WTM-75 (Customer list) · WTM-87/89 (Journey) · WTM-27/113 (Finance) · WTM-99/100 (Export) · WTM-80/84 (Chat) · WTM-73 (Search) · WTM-63/64/65 (Supplier) · WTM-114 (Timeline) · WTM-160/161 (Forecast/Risk) · WTM-61/83 (AI key BYOK) |
 | L2 | form/picker/detail screens — nhận dữ liệu qua constructor, không tự chạm IO |
 | L1 | WTM-12/13/17/18/20/22/23 (component design stories — chưa production) |
 
