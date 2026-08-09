@@ -351,6 +351,11 @@ void main() {
         // được `ref.watch` lại mỗi lần mở. Đưa vào `kBusinessDataProviders`
         // sẽ phải liệt kê từng sản phẩm một, tức là không đưa được.
         'supplierComparisonProvider',
+        // WTM-339: `family` theo khách. Nó `ref.watch`
+        // `customerConversationsProvider.future` — cái đã nằm trong
+        // `kBusinessDataProviders` — nên làm mới cái cha là làm mới cả họ.
+        // Liệt kê từng khách một thì không liệt kê được.
+        'customerConversationProvider',
       };
 
       final declaration = RegExp(r'^final (\w+) = FutureProvider');

@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/prefs.dart';
+import '../simulation/conversation_reply.dart';
+import '../simulation/customer_conversation.dart';
 import '../simulation/demo_event.dart';
 import '../simulation/demo_event_repository.dart';
 import '../simulation/simulation_engine.dart';
+import 'tongtai_agentic_provider.dart';
 import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
 import 'tongtai_commerce_provider.dart';
 import 'tongtai_consumer_provider.dart';
@@ -41,3 +44,35 @@ final simulationDayProvider = FutureProvider<int?>((ref) async {
   if (await engine.startedAt() == null) return null;
   return engine.currentDay();
 });
+
+/// Hội thoại khách hàng — **chiếu** của sổ sự kiện, không phải bảng thứ hai
+/// (WTM-339 · WTM-296 §10).
+final customerConversationsProvider =
+    FutureProvider<List<CustomerConversation>>((ref) async {
+      final events = await ref
+          .watch(demoEventRepositoryProvider)
+          .loadTimeline(limit: 500);
+      final customers = await ref.watch(customerRepositoryProvider).loadAll();
+      return projectConversations(events: events, customers: customers);
+    });
+
+/// Một hội thoại. Đọc lại từ danh sách để chỉ có **một** đường dựng dữ liệu
+/// (ADR-TON-015 One Data Path) — màn chi tiết không tự truy vấn kiểu riêng.
+final customerConversationProvider =
+    FutureProvider.family<CustomerConversation?, String>((
+      ref,
+      customerId,
+    ) async {
+      final all = await ref.watch(customerConversationsProvider.future);
+      for (final c in all) {
+        if (c.customerId == customerId) return c;
+      }
+      return null;
+    });
+
+final conversationReplyServiceProvider = Provider<ConversationReplyService>(
+  (ref) => ConversationReplyService(
+    actions: ref.watch(businessActionExecutorProvider),
+    events: ref.watch(demoEventRepositoryProvider),
+  ),
+);
