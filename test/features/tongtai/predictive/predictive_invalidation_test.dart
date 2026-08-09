@@ -341,6 +341,12 @@ void main() {
         // Nó được làm mới bởi chính các bước thiết lập Telegram, đúng nhịp
         // của nó — gieo/xoá dữ liệu mẫu không đổi được câu trả lời.
         'telegramReadyProvider',
+        // WTM-319: ba cái này đọc **Atlassian**, không đọc DB nghiệp vụ. Gieo
+        // hay xoá dữ liệu mẫu của Tổng Tài không đổi được issue trong Jira.
+        // Chúng được làm mới bởi chính các bước chọn dự án/space.
+        'workContextProvider',
+        'knowledgeReferencesProvider',
+        'atlassianReadyProvider',
       };
 
       final declaration = RegExp(r'^final (\w+) = FutureProvider');

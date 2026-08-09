@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../action/business_action.dart';
 import '../action/business_action_executor.dart';
 import '../action/demo_action_handlers.dart';
+import '../connection/atlassian/atlassian_client.dart';
+import '../connection/atlassian/atlassian_connection.dart';
+import '../connection/atlassian/work_context.dart';
 import '../connection/connection_credential_store.dart';
 import '../connection/connection_repository.dart';
 import '../connection/connection_service.dart';
@@ -129,4 +132,37 @@ final driveBackupListProvider = FutureProvider<List<DriveBackupFile>>(
 /// dữ liệu nghiệp vụ, nên gieo hay xoá dữ liệu mẫu không đổi được câu trả lời.
 final telegramReadyProvider = FutureProvider<bool>(
   (ref) => ref.watch(telegramConnectionProvider).isReady,
+);
+
+// ── Atlassian (WTM-319) ────────────────────────────────────────────────────
+
+final atlassianClientProvider = Provider<AtlassianClient>(
+  (ref) => AtlassianClient(),
+);
+
+/// **Một** connection cho cả Jira lẫn Confluence — cùng một API token.
+final atlassianConnectionProvider = Provider<AtlassianConnection>(
+  (ref) => AtlassianConnection(
+    connections: ref.watch(connectionServiceProvider),
+    client: ref.watch(atlassianClientProvider),
+  ),
+);
+
+/// Công việc đang thế nào — Capability Context, tải **on-demand**
+/// (ADR-TON-016: BusinessContext chỉ giữ summary nhẹ, cấm God Object).
+///
+/// `null` = chưa nối hoặc chưa chọn project. Khác một `WorkContext` rỗng: cái
+/// đầu là *chưa hỏi được*, cái sau là *đã hỏi và không có việc nào*.
+final workContextProvider = FutureProvider<WorkContext?>(
+  (ref) =>
+      ref.watch(atlassianConnectionProvider).workContext(now: DateTime.now()),
+);
+
+/// Tiêu đề trang Confluence — **tham chiếu**, không phải nội dung.
+final knowledgeReferencesProvider = FutureProvider<List<AtlassianPage>>(
+  (ref) => ref.watch(atlassianConnectionProvider).knowledgeReferences(),
+);
+
+final atlassianReadyProvider = FutureProvider<bool>(
+  (ref) => ref.watch(atlassianConnectionProvider).isReady,
 );

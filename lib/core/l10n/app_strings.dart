@@ -969,6 +969,25 @@ abstract class AppStrings {
   String get telegramSendTest;
   String get telegramTestSent;
 
+  // ── Jira + Confluence (WTM-319) ─────────────────────────────────────────
+  String get atlassianTitle;
+  String get atlassianHint;
+  String get atlassianUrlLabel;
+
+  /// Ví dụ địa chỉ — đi qua key vì nó là chuỗi hiển thị (ADR-TON-007).
+  String get atlassianUrlHint;
+  String get atlassianEmailLabel;
+  String get atlassianTokenLabel;
+  String get atlassianTokenHint;
+  String get atlassianSave;
+  String get atlassianBad;
+  String get atlassianPickProject;
+  String get atlassianPickSpace;
+  String get atlassianNoProjects;
+
+  /// Chưa chọn project ⇒ chưa kết luận được, KHÁC "không có việc nào".
+  String get atlassianNoData;
+
   // ── backup & restore (WTM-164 / ADR-TON-018) ────────────────────────────
   String get titleBackup;
   String get backupCreate;
@@ -2678,6 +2697,38 @@ class AppStringsVi extends AppStrings {
   String get telegramSendTest => 'Gửi tin thử';
   @override
   String get telegramTestSent => 'Đã gửi. Mở Telegram xem thử.';
+
+  @override
+  String get atlassianTitle => 'Công việc trong Jira & Confluence';
+  @override
+  String get atlassianHint =>
+      'Tổng Tài chỉ đọc, và chỉ đọc đúng dự án bạn chọn. Không phải để thay '
+      'Jira — chỉ để trả lời "công việc đang thế nào".';
+  @override
+  String get atlassianUrlLabel => 'Địa chỉ Atlassian';
+  @override
+  String get atlassianUrlHint => 'https://ten-cua-ban.atlassian.net';
+  @override
+  String get atlassianEmailLabel => 'Email tài khoản';
+  @override
+  String get atlassianTokenLabel => 'API token';
+  @override
+  String get atlassianTokenHint =>
+      'Tạo tại id.atlassian.com → Security → API tokens.';
+  @override
+  String get atlassianSave => 'Kiểm tra và lưu';
+  @override
+  String get atlassianBad =>
+      'Atlassian không nhận khoá này. Kiểm tra lại địa chỉ, email và token.';
+  @override
+  String get atlassianPickProject => 'Chọn dự án';
+  @override
+  String get atlassianPickSpace => 'Chọn không gian tài liệu';
+  @override
+  String get atlassianNoProjects => 'Chưa thấy dự án nào trong tài khoản này.';
+  @override
+  String get atlassianNoData =>
+      'Chưa đủ dữ liệu để nói công việc đang thế nào.';
 
   @override
   String get titleBackup => 'Sao lưu & khôi phục';
@@ -4454,6 +4505,37 @@ class AppStringsEn extends AppStrings {
   String get telegramSendTest => 'Send a test message';
   @override
   String get telegramTestSent => 'Sent. Check Telegram.';
+
+  @override
+  String get atlassianTitle => 'Work in Jira & Confluence';
+  @override
+  String get atlassianHint =>
+      'Tổng Tài only reads, and only the project you pick. Not a Jira '
+      'replacement — just an answer to "how is the work going".';
+  @override
+  String get atlassianUrlLabel => 'Atlassian address';
+  @override
+  String get atlassianUrlHint => 'https://your-name.atlassian.net';
+  @override
+  String get atlassianEmailLabel => 'Account email';
+  @override
+  String get atlassianTokenLabel => 'API token';
+  @override
+  String get atlassianTokenHint =>
+      'Create one at id.atlassian.com → Security → API tokens.';
+  @override
+  String get atlassianSave => 'Check and save';
+  @override
+  String get atlassianBad =>
+      'Atlassian rejected these details. Check the address, email and token.';
+  @override
+  String get atlassianPickProject => 'Pick a project';
+  @override
+  String get atlassianPickSpace => 'Pick a documentation space';
+  @override
+  String get atlassianNoProjects => 'No projects found for this account.';
+  @override
+  String get atlassianNoData => 'Not enough data to say how the work is going.';
 
   @override
   String get titleBackup => 'Backup & restore';
