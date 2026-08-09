@@ -1,5 +1,19 @@
 # Giám sát và cảnh báo — n8n Integration Runtime
 
+> ## 🗄️ TÀI LIỆU LỊCH SỬ — hệ mô tả ở đây KHÔNG còn tồn tại
+>
+> **Founder gỡ Grafana và Prometheus ngày 2026-08-09 để giảm tải hệ thống.**
+> Đây là quyết định đã chốt.
+>
+> Kiểm trên VM chạy n8n cùng ngày: `tcpdump` cổng 9115 trong 100 giây **không
+> một kết nối nào**; `iptables` không có luật mở 9115; **không có**
+> `node_exporter`. Container `n8n-blackbox` vẫn chạy nhưng không ai gọi tới.
+>
+> ⇒ Không còn cảnh báo tự động cho n8n. Giữ tài liệu này để hiểu **đã từng dựng
+> gì và vì sao**, không để làm hiện trạng. **Không** đề xuất dựng lại.
+
+
+
 > **WTM-267 (K · Monitoring and Operations) · Epic WTM-256 (PLATFORM-002).**
 > Ngày **2026-08-02**. Đo thật qua SSH, không ước lượng.
 > ⚠️ Không chứa secret.

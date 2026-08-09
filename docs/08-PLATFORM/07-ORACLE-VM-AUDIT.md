@@ -1,5 +1,28 @@
 # Oracle VM Audit — hai máy, và n8n thuộc về máy thứ hai
 
+> ## ⚠️ ĐÍNH CHÍNH 2026-08-09 — đọc trước khi tin bảng dưới
+>
+> **n8n KHÔNG chạy trên VM usecase.** Kiểm bằng hệ thật hôm 2026-08-09:
+>
+> | | |
+> |---|---|
+> | `tongtai.workizen.net` phân giải về | **`137.131.33.103`** |
+> | Hostname | **`workizen-tongtai-be-volume`** |
+> | Private IP | `10.0.0.235` |
+> | OS / user SSH | **Oracle Linux 9.8** · **`opc`** (không phải `ubuntu`) |
+> | Container | `n8n` · `n8n-worker` · `n8n-caddy` · `postgres` · `redis` · `n8n-blackbox` |
+> | Khoá | `key-vm/ssh-key-2026-08-05.key` (gitignored) |
+>
+> **`144.24.8.35` không còn tới được** (cổng 22 timeout).
+>
+> **Grafana và Prometheus đã bị gỡ** — Founder quyết định 2026-08-09 để giảm tải.
+> Mọi câu trong tài liệu này nói về scrape / node_exporter / cảnh báo là **lịch
+> sử**, không phải hiện trạng.
+>
+> Bảng bên dưới giữ nguyên làm bản ghi của lần khảo sát 2026-08-02.
+
+
+
 > **WTM-256 (PLATFORM-002) · Wave 1.** Đo thật qua SSH ngày 2026-08-02, không
 > phải ước lượng.
 > ⚠️ Repo private. Không ghi private key, không ghi nội dung secret.
