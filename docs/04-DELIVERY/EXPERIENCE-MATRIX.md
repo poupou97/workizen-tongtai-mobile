@@ -1,0 +1,106 @@
+# Ma trận trải nghiệm — Tổng Tài
+
+> WTM-341 (E5 · Epic WTM-336) · cập nhật **2026-08-09** · nguồn: `main` sau PR #204.
+> Founder Task Order EXPERIENCE-FIRST BUSINESS SIMULATION §39.
+
+Ma trận này trả lời **một** câu hỏi: *hành trình nào thật sự chạy trọn, và hành
+trình nào mới có dữ liệu mà chưa có màn?*
+
+**Ô trống là thông tin, không phải thất bại.** Tô đầy bằng ô "có" giả sẽ phá
+đúng cái mà ma trận sinh ra để đo.
+
+---
+
+## Ký hiệu
+
+| | Nghĩa |
+|---|---|
+| **✅** | Chạy thật, có test khoá |
+| **◐** | Có, nhưng **là kịch bản viết sẵn** hoặc mới một phần — đọc chú thích |
+| **—** | Chưa có |
+
+## ⚠️ Ba điều phải đọc trước khi đọc ma trận (§40)
+
+1. **Không một lời gọi AI nào xảy ra trong bản demo.** Cột *Kết luận* là **Rule
+   Twin** — luật chạy trên máy, không cần mạng, không cần khoá. Những câu ký tên
+   "Tổng Tài" trong hội thoại là **kịch bản viết sẵn** (`demo_scenario.dart`),
+   không phải văn bản do mô hình sinh. AI Router chỉ chạy khi người bán tự nhập
+   khoá (BYOK) và bản demo **không** gọi nó.
+2. **Không nền tảng nào được kết nối thật.** Mười nền tảng mang nhãn
+   `Demo — đang phát` là **đồng hồ mô phỏng đang sinh việc mang tên chúng**.
+   Không token, không request, không byte nào rời máy.
+3. **Cột *Hành động* là thật, cột *tới đích* thì không.** Mọi hành động đi trọn
+   `plan → approve → run` với vòng đời, lease và chống lặp; chỉ bước cuối — gửi
+   ra ngoài — chưa xảy ra, và nó tự khai bằng `vendor: demo` + `externalId` tiền
+   tố `demo:`.
+
+---
+
+## Ma trận · 21 hành trình × 8 cột
+
+| # | Hành trình | Dữ liệu demo | Màn hình | Kết luận (Rule Twin) | Đề xuất | Duyệt | Hành động | Kết quả | Dòng thời gian |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | **Discover** — khách biết tới shop | — | — | — | — | — | — | — | — |
+| 2 | **Lead** — khách quan tâm chưa mua | ✅ bình luận FB/IG | ✅ Hội thoại | — | — | — | — | — | ✅ |
+| 3 | **Conversation** — nhắn qua lại | ✅ 4 hội thoại | ✅ Hội thoại + chi tiết | ◐ nháp **kịch bản** | ◐ nháp | ✅ `Cần bạn duyệt` | ✅ `customer.send_message` | ✅ `demo:` | ✅ |
+| 4 | **Recommendation** — gợi ý hàng cho khách | — | — | — | — | — | — | — | — |
+| 5 | **Order** — đơn về | ✅ 112 nhập + ~90 sinh | ✅ Trang chủ · Khách 360 | ✅ doanh thu · AOV | — | — | — | ✅ | ✅ |
+| 6 | **Payment** — tiền vào tài khoản | ✅ ngân hàng báo có | ◐ Tài chính | — | — | — | — | — | ✅ |
+| 7 | **Fulfillment** — đóng gói, bàn giao | — | — | — | — | — | — | — | — |
+| 8 | **Shipment** — kiện đi tới đâu | ✅ 3 hãng, có chậm | ◐ chỉ trong Brief/Cơ hội, **không có màn riêng** | ✅ so hàng xóm cùng tuyến | ✅ | ✅ Brief | — chưa có handler liên hệ hãng | — | ✅ |
+| 9 | **Support** — khách phàn nàn | ✅ khách giận ngày 5 | ✅ Hội thoại | ◐ | ◐ | ✅ bắt buộc duyệt | ✅ | ✅ | ✅ |
+| 10 | **Refund** — hoàn tiền | — kịch bản chưa phát | — | — | — | — | — | — | — |
+| 11 | **Review** — đánh giá | — kịch bản chưa phát | — | — | — | — | — | — | — |
+| 12 | **Repeat** — tới nhịp mua lại | ✅ ngày 28 | ✅ Khách hàng · Cơ hội | ✅ RFM | ✅ | ✅ Brief | ◐ qua `customer.send_message` | ◐ | ✅ |
+| 13 | **Churn** — khách lặng lâu | ✅ ngày 21 | ✅ Khách hàng rủi ro | ✅ `customer_risk_rule` | ✅ | ✅ Brief | ◐ | ◐ | ✅ |
+| 14 | **Sourcing** — tìm nguồn | ✅ 1688 báo giá | ✅ Nguồn hàng · So sánh NCC | ✅ `supplier_comparison` | ✅ | ✅ Brief | ✅ `inventory.create_purchase_order` | ✅ `demo:` | ✅ |
+| 15 | **Inventory** — tồn kho | ✅ tồn giảm theo đơn | ✅ Kho · Cảnh báo tồn | ✅ sắp hết · hàng nằm | ✅ | ✅ Brief | ✅ | ✅ | ✅ |
+| 16 | **Supplier** — nhà cung cấp | ✅ 12 NCC · 124 báo giá | ✅ Nhà cung cấp | ✅ | ✅ | ✅ | ✅ | ✅ | ◐ |
+| 17 | **Campaign** — quảng cáo | ✅ ngày 14 | — **không có màn chiến dịch** | ◐ câu kịch bản | — | — | — chưa đăng ký handler | — | ✅ |
+| 18 | **Settlement** — đối soát sàn | ✅ mỗi tuần | ✅ Tài chính | ✅ phí sàn vào lời thật | ✅ | ✅ Brief | ◐ | ◐ | ✅ |
+| 19 | **Profit** — lời thật | ✅ suy từ đơn + phí | ✅ Báo cáo · Tài chính | ✅ `TrueProfitRule` | ✅ lỗ sau phí | ✅ Brief | ◐ | ◐ | ◐ |
+| 20 | **Goal** — mục tiêu kinh doanh | — kịch bản không tạo mục tiêu | ✅ Mục tiêu · Hành trình | ✅ tiến độ | ✅ kế hoạch | — | — | — | — |
+| 21 | **Automation** — tự chủ | ◐ | ✅ Tự chủ · Hoạt động | ✅ | ✅ | ✅ 4 mức | ✅ | ✅ | ✅ |
+
+### Đếm theo cột
+
+| Cột | ✅ | ◐ | — |
+|---|---|---|---|
+| Dữ liệu demo | 13 | 2 | 6 |
+| Màn hình | 11 | 3 | 7 |
+| Kết luận | 10 | 3 | 8 |
+| Đề xuất | 8 | 2 | 11 |
+| Duyệt | 9 | 0 | 12 |
+| Hành động | 5 | 4 | 12 |
+| Kết quả | 6 | 4 | 11 |
+| Dòng thời gian | 15 | 2 | 4 |
+
+---
+
+## Đọc ma trận này thế nào
+
+**Bốn hành trình chạy trọn từ đầu tới cuối** — có dữ liệu, có màn, có kết luận,
+có đề xuất, có cửa duyệt, có hành động, có kết quả:
+`Conversation` · `Sourcing` · `Inventory` · `Supplier`.
+
+**Hình dạng của phần còn lại nói một điều rõ ràng:** cột *Dòng thời gian* gần
+đầy (15 ✅) trong khi cột *Hành động* gần trống (5 ✅). Tổng Tài hôm nay **thấy**
+gần hết doanh nghiệp và **làm** được rất ít phần của nó. Đó không phải lỗi — đó
+là chỗ đang đứng, và là dữ kiện cho câu hỏi concept số 2 dưới đây.
+
+**Bốn hàng trống hoàn toàn** (`Discover` · `Recommendation` · `Fulfillment` +
+hai hàng chỉ thiếu kịch bản `Refund`/`Review`) là ứng viên đầu tiên cho câu hỏi
+*"cái nào thật sự cần?"* — chứ không tự động là việc phải làm.
+
+---
+
+## Nguồn kiểm chứng
+
+| Khẳng định | Kiểm ở đâu |
+|---|---|
+| 10 nền tảng đang phát | `test/features/tongtai/connection/demo_connected_test.dart` — đếm từ **kịch bản thật** |
+| demo không đè `connected`/`fileBridge` | cùng file, hai chiều |
+| nháp là nháp cho tới khi bấm Gửi | `test/features/tongtai/simulation/customer_conversation_test.dart` |
+| Gửi ⇒ hành động thật, khai là mô phỏng | `test/features/tongtai/simulation/conversation_screen_test.dart` |
+| đẩy đồng hồ đổi **miền thật** | `test/features/tongtai/simulation/business_life_screen_test.dart` |
+| toàn bộ | `flutter test` — 2488 xanh |
