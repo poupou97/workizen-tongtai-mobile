@@ -14,6 +14,7 @@ import '../agent/business_brief_service.dart';
 import '../agent/demo_reset.dart';
 import '../proposal/proposed_change_repository.dart';
 import 'tongtai_capability_provider.dart';
+import 'tongtai_commerce_provider.dart';
 import 'tongtai_connection_provider.dart';
 import '../../../core/prefs.dart';
 import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
@@ -118,8 +119,17 @@ final businessBriefProvider = FutureProvider<List<BriefItem>>((ref) async {
         alerts: alerts.result ?? const [],
       );
 
-  await ref.watch(briefInboxProvider).publish(items);
-  return items;
+  // WTM-329 — việc từ miền thương mại (lỗ sau phí · sắp hết · hàng nằm ·
+  // nguồn rẻ hơn) vào **cùng một brief**, không phải một màn thứ hai.
+  //
+  // Người bán không có "mục cơ hội thương mại" trong đầu; họ có *"sáng nay tôi
+  // cần làm gì"*. Hai danh sách song song là hai chỗ để bỏ sót.
+  final commerce = await ref.watch(commerceOpportunitiesProvider.future);
+  final all = [...items, ...commerce]
+    ..sort((a, b) => b.severity.index.compareTo(a.severity.index));
+
+  await ref.watch(briefInboxProvider).publish(all);
+  return all;
 });
 
 /// Quyết định đã ghi nhận cho từng việc trong brief.

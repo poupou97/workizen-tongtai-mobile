@@ -22,6 +22,14 @@ import 'settlement.dart';
 /// `settlement_no_derived_write_governance_test` canh đúng tính chất đó.
 abstract class SettlementRepository {
   /// Mọi khoản của một đơn.
+  /// Mọi dòng đối soát của doanh nghiệp.
+  ///
+  /// Thêm ở WTM-328: lời thật của **cả kỳ** cần toàn bộ dòng, không phải từng
+  /// đơn một. Gọi `loadForOrder` trong vòng lặp trên 112 đơn là 112 lượt truy
+  /// vấn cho một câu trả lời — và trên máy người bán thì đó là một màn hình
+  /// trắng vài giây.
+  Future<List<SettlementLine>> loadAll();
+
   Future<List<SettlementLine>> loadForOrder(String orderId);
 
   /// Mọi khoản đã trả trong một lô.
@@ -85,6 +93,15 @@ class DriftSettlementRepository implements SettlementRepository {
                   t.businessId.equals(businessId) & t.payoutId.equals(payoutId),
             ))
             .get();
+    return rows.map(_toLine).nonNulls.toList();
+  }
+
+  @override
+  Future<List<SettlementLine>> loadAll() async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    final rows = await (_db.select(
+      _db.settlementLinesTable,
+    )..where((t) => t.businessId.equals(businessId))).get();
     return rows.map(_toLine).nonNulls.toList();
   }
 

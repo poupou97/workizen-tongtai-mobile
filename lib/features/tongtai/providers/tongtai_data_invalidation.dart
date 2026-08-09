@@ -94,6 +94,12 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // Lịch sử nhập (WTM-326). Restore = Replace chép đè cả bảng, và một lần nhập
   // hiện ra sau khi đã bị xoá là một nút "Bỏ lần nhập" không xoá được gì.
   importJobsProvider,
+  // Lời thật và cơ hội thương mại (WTM-328/329). Chúng đọc đơn hàng, danh mục
+  // và đối soát — tức là mọi thứ một lần nhập hoặc một lần đặt lại demo đổi.
+  // Thiếu ở đây thì sau khi nhập 100 sản phẩm, brief vẫn nói "chưa có gì đáng
+  // chú ý" cho tới lần mở app sau.
+  commerceProfitProvider,
+  commerceOpportunitiesProvider,
 ];
 
 /// Drops every cached read of the business data ([kBusinessDataProviders]).

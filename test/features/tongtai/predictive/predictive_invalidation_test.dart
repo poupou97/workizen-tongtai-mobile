@@ -347,6 +347,10 @@ void main() {
         'workContextProvider',
         'knowledgeReferencesProvider',
         'atlassianReadyProvider',
+        // WTM-329: `family` theo sản phẩm — mở màn nào thì đọc màn đó, và nó
+        // được `ref.watch` lại mỗi lần mở. Đưa vào `kBusinessDataProviders`
+        // sẽ phải liệt kê từng sản phẩm một, tức là không đưa được.
+        'supplierComparisonProvider',
       };
 
       final declaration = RegExp(r'^final (\w+) = FutureProvider');

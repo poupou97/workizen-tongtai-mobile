@@ -374,11 +374,21 @@ def build_quotes(products: list[Product]) -> list[dict]:
         if p.scenario != "G_SUPPLIER_DIFF":
             continue
 
-        # Hai lựa chọn thay thế: một rẻ hơn nhưng chậm hơn, một đắt hơn nhưng
-        # nhanh hơn. Đó là đánh đổi thật, không phải "cái nào cũng tốt hơn".
+        # Hai lựa chọn thay thế. Mặc định là **đánh đổi thật**: rẻ hơn nhưng
+        # chậm hơn, hoặc nhanh hơn nhưng đắt hơn — không phải "cái nào cũng tốt
+        # hơn".
+        #
+        # Nhưng cứ ba sản phẩm nhóm G thì một sản phẩm có nguồn **rẻ hơn VÀ
+        # nhanh hơn**. Đó cũng là thực tế (đôi khi nguồn hiện tại đơn giản là
+        # tệ), và không có nó thì engine không bao giờ có "lựa chọn rõ ràng" để
+        # đề xuất — dataset sẽ chỉ chứng minh được đường "chưa kết luận được".
         alternatives = [s for s in SUPPLIERS if s[0] != current[0]]
         cheaper = alternatives[counter % len(alternatives)]
         faster = alternatives[(counter + 3) % len(alternatives)]
+        # Theo **chỉ số sản phẩm**, không theo `counter`: counter tăng ba đơn
+        # vị cho mỗi sản phẩm nhóm G, nên `counter % 3` là một hằng số cho cả
+        # nhóm — điều kiện sẽ đúng cho tất cả hoặc không cho cái nào.
+        clearly_better = (p.index % 3) == 0
 
         counter += 1
         rows.append(
@@ -390,11 +400,15 @@ def build_quotes(products: list[Product]) -> list[dict]:
                 "unit_cost": _round_price(p.cost * 0.88),
                 "currency": "VND",
                 "minimum_order_quantity": cheaper[6] * 2,
-                "lead_time_days": current[5] + 6,
+                "lead_time_days": max(1, current[5] - 5)
+                if clearly_better
+                else current[5] + 6,
                 "rating": cheaper[4],
                 "is_current": "no",
                 "source_url": f"https://detail.1688.com/offer/{700000 + counter}.html",
-                "notes": "Rẻ hơn nhưng giao chậm hơn",
+                "notes": "Rẻ hơn và giao nhanh hơn"
+                if clearly_better
+                else "Rẻ hơn nhưng giao chậm hơn",
             }
         )
 

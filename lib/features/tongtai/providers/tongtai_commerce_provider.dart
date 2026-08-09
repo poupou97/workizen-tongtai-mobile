@@ -2,7 +2,11 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../agent/business_brief.dart';
 import '../commerce/commerce_models.dart';
+import '../commerce/commerce_opportunity_service.dart';
+import '../commerce/commerce_profit.dart';
+import '../commerce/supplier_comparison.dart';
 import '../commerce/commerce_repository.dart';
 import '../commerce/import/commerce_import.dart';
 import '../commerce/import/commerce_importer.dart';
@@ -66,3 +70,50 @@ const String kBundledCommerceDemoFileName =
     'TongTai-Commerce-Demo-100-Products.xlsx';
 const String kBundledCommerceDemoAsset =
     'assets/demo/$kBundledCommerceDemoFileName';
+
+// ── C4 · lời thật sau phí ─────────────────────────────────────────────────
+
+/// **Lời thật 30 ngày** — Capability Context, tải on-demand (ADR-TON-016).
+///
+/// Không tự tính lợi nhuận: nó gom ba mảnh rồi giao cho `TrueProfitRule` —
+/// công thức nằm ở đúng một chỗ, và đó là chỗ đã có từ WTM-231.
+final commerceProfitProvider = FutureProvider<CommerceProfitContext>((
+  ref,
+) async {
+  final orders = await ref.watch(orderRepositoryProvider).loadAll();
+  final products = await ref.watch(productRepositoryProvider).loadAll();
+  final settlements = await ref.watch(settlementRepositoryProvider).loadAll();
+  return CommerceProfitContext.derive(
+    orders: orders,
+    products: products,
+    settlements: settlements,
+    now: DateTime.now(),
+  );
+});
+
+// ── C5 · cơ hội thương mại ────────────────────────────────────────────────
+
+/// Việc cần làm suy ra từ danh mục + lời thật + báo giá. **Không hardcode**
+/// (§16): đổi một con số trong file Excel thì việc hiện ra cũng đổi theo.
+final commerceOpportunitiesProvider = FutureProvider<List<BriefItem>>((
+  ref,
+) async {
+  final products = await ref.watch(productRepositoryProvider).loadAll();
+  final profit = await ref.watch(commerceProfitProvider.future);
+  final quotes = await ref.watch(commerceRepositoryProvider).loadQuotes();
+  return const CommerceOpportunityService().derive(
+    products: products,
+    profit: profit,
+    quotes: quotes,
+    now: DateTime.now(),
+  );
+});
+
+/// So sánh nhà cung cấp cho **một** sản phẩm — use case P0 (§17).
+final supplierComparisonProvider =
+    FutureProvider.family<SupplierComparison, String>((ref, productId) async {
+      final quotes = await ref
+          .watch(commerceRepositoryProvider)
+          .loadQuotes(productId: productId);
+      return SupplierComparison.from(productId: productId, quotes: quotes);
+    });
