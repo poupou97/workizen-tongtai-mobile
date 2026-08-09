@@ -138,7 +138,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 23;
+const int kTongtaiSchemaVersion = 24;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -431,6 +431,45 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 24) {
+        // v24 (WTM-327 · Epic WTM-324 — Canonical Commerce Model). Thuần thêm
+        // mới: ba bảng, không đụng cột nào đang có.
+        //
+        // Vì sao ba bảng chứ không phải ba cột:
+        //
+        // - `product_variants` — §4 cấm nhân Product thành nhiều Product. Một
+        //   áo Đen/S và Đen/M là MỘT mặt hàng; nhân đôi làm hỏng đúng con số
+        //   người bán hỏi nhiều nhất ("tôi có bao nhiêu mặt hàng").
+        // - `supplier_quotes` — `producers` trả lời "nhà cung cấp này thế
+        //   nào", còn câu hỏi P0 là "cho SẢN PHẨM NÀY ai rẻ hơn". Giá đi theo
+        //   cặp (sản phẩm, nhà cung cấp), không theo nhà cung cấp.
+        // - `import_jobs` — `importJobId` chỉ có nghĩa nếu nó trỏ tới một cái
+        //   gì đó. Đây là thứ cho phép xoá đúng MỘT lần nhập mà không đụng
+        //   dữ liệu người bán tự nhập (§22).
+        await _createTableWithIndexes(db, m, 'product_variants_table');
+        await _createTableWithIndexes(db, m, 'supplier_quotes_table');
+        await _createTableWithIndexes(db, m, 'import_jobs_table');
+
+        // Sản phẩm nhập từ file cần ba thứ: mã ở nguồn (để nhập lại không
+        // nhân đôi), nguồn gốc, và lần nhập nào tạo ra nó.
+        final products = db.allTables.firstWhere(
+          (t) => t.actualTableName == 'products_table',
+        );
+        for (final name in const [
+          'external_id',
+          'provenance_code',
+          'import_job_id',
+          'brand',
+          'image_url',
+        ]) {
+          await _addColumnIfMissing(
+            db,
+            m,
+            products,
+            products.columnsByName[name]!,
+          );
+        }
       }
       if (from < 23) {
         // v23 (WTM-301 / D-4 — Durable Agent). Thuần thêm mới.

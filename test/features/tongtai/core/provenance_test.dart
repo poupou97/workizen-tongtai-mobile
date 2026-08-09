@@ -18,12 +18,13 @@ import 'package:tongtai/features/tongtai/core/provenance.dart';
 ///   ghi `inferred`, nên một phỏng đoán không bao giờ đông cứng thành lời khai.
 void main() {
   group('mã canonical', () {
-    test('bốn mã, và chúng là mã chứ không phải nhãn hiển thị', () {
+    test('năm mã, và chúng là mã chứ không phải nhãn hiển thị', () {
       expect(ProvenanceSource.values.map((s) => s.code).toList(), [
         'manual',
         'sample',
         'derived',
         'connector',
+        'file_bridge',
       ]);
       // Nhãn hiển thị có dấu tiếng Việt hoặc khoảng trắng; mã thì không.
       for (final s in ProvenanceSource.values) {
@@ -33,6 +34,19 @@ void main() {
           reason: '${s.code} phải là mã canonical, không phải nhãn',
         );
       }
+    });
+
+    test('file_bridge KHÁC connector — file không tự cập nhật', () {
+      // Gộp hai thứ lại sẽ khiến một con số đọc từ file tháng trước trông y
+      // hệt một con số vừa đồng bộ sáng nay. Đó đúng là kiểu nói dối enum này
+      // sinh ra để chặn.
+      expect(ProvenanceSource.fileBridge, isNot(ProvenanceSource.connector));
+      expect(
+        ProvenanceSource.fromCode('file_bridge'),
+        ProvenanceSource.fileBridge,
+      );
+      // Và nó cũng không phải `manual`: người bán không gõ từng dòng.
+      expect(ProvenanceSource.fileBridge, isNot(ProvenanceSource.manual));
     });
 
     test('mã lạ ⇒ null, KHÔNG rơi về manual', () {

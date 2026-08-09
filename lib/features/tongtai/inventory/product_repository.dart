@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../database/database.dart';
 import '../core/domain_snapshot.dart';
 import '../core/local_workspace.dart';
+import '../core/provenance.dart';
 import 'product.dart';
 import 'product_inventory_service.dart' show kSampleProducts;
 
@@ -105,6 +106,14 @@ class DriftProductRepository implements ProductRepository {
           }, version: _snapshotVersion),
         ),
         updatedAt: Value(p.updatedAt),
+        // v24 (WTM-327) — nguồn ngoài. Phải đi qua ĐÂY chứ không phải một
+        // đường ghi riêng của importer: cùng một hàng đi vào bằng hai cửa thì
+        // sớm muộn hai cửa nói hai chuyện khác nhau.
+        externalId: Value(p.externalId),
+        brand: Value(p.brand),
+        imageUrl: Value(p.imageUrl),
+        provenanceCode: Value(p.provenance.code),
+        importJobId: Value(p.importJobId),
       );
 
   Product _toProduct(ProductsTableData row) => Product(
@@ -123,6 +132,17 @@ class DriftProductRepository implements ProductRepository {
       decodeDomainSnapshot(row.domainSnapshot),
       'imagePaths',
     ),
+    externalId: row.externalId,
+    brand: row.brand,
+    imageUrl: row.imageUrl,
+    // Mã lạ ⇒ `manual`. Đây là chỗ DUY NHẤT trong repo rơi về mặc định thay vì
+    // bỏ dòng, và có lý do: dòng có trước v24 **không có** cột này, và chúng
+    // đúng là do người bán tự nhập. Bỏ dòng ở đây sẽ xoá sạch danh mục của
+    // những người đã dùng app từ trước.
+    provenance:
+        ProvenanceSource.fromCode(row.provenanceCode) ??
+        ProvenanceSource.manual,
+    importJobId: row.importJobId,
   );
   @override
   Future<void> deleteByIdPrefix(String prefix) async {

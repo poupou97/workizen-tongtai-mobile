@@ -3,6 +3,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../export/backup_service.dart';
+import 'tongtai_commerce_provider.dart';
 import 'tongtai_consumer_provider.dart';
 import 'tongtai_finance_provider.dart';
 import 'tongtai_inventory_provider.dart';
@@ -39,6 +40,7 @@ final tongtaiBackupRepositoriesProvider = Provider<TongtaiBackupRepositories>(
     journeys: ref.watch(journeyRepositoryProvider),
     opportunityReactions: ref.watch(opportunityReactionRepositoryProvider),
     businessInputs: ref.watch(businessInputRepositoryProvider),
+    commerce: ref.watch(commerceRepositoryProvider),
   ),
 );
 
