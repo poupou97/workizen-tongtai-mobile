@@ -22,12 +22,16 @@ import 'connection_credential_store.dart';
 /// đó là đây.
 class ConnectionService {
   ConnectionService({
-    required ConnectionRepositoryLike repository,
+    required this.repository,
     required this.credentials,
     this.now = DateTime.now,
-  }) : _repo = repository;
+  });
 
-  final ConnectionRepositoryLike _repo;
+  /// Công khai vì một connector đôi khi cần đổi **nhãn** cùng lúc với trạng
+  /// thái (Telegram đổi tên kết nối thành `@tên_bot` sau khi xác thực token),
+  /// và một hàm `attachCredentials` không phải chỗ để làm việc đó.
+  final ConnectionRepositoryLike repository;
+
   final ConnectionCredentialStore credentials;
   final DateTime Function() now;
 
@@ -42,7 +46,7 @@ class ConnectionService {
   /// có. **Không** đụng tới credential — đó là bước sau.
   Future<Connection> ensure(String connectorId, {required String label}) async {
     final id = connectionIdFor(connectorId);
-    final existing = await _repo.byId(id);
+    final existing = await repository.byId(id);
     if (existing != null) return existing;
 
     final created = Connection(
@@ -52,7 +56,7 @@ class ConnectionService {
       status: ConnectionStatus.setupRequired,
       createdAt: now(),
     );
-    await _repo.upsert(created);
+    await repository.upsert(created);
     return created;
   }
 
@@ -73,7 +77,7 @@ class ConnectionService {
     }
     await credentials.write(connection, value);
     final active = connection.copyWith(status: ConnectionStatus.active);
-    await _repo.upsert(active);
+    await repository.upsert(active);
     return active;
   }
 
@@ -83,7 +87,7 @@ class ConnectionService {
   /// vì một lần gọi hỏng sẽ bắt họ đăng nhập lại vô cớ.
   Future<Connection> markError(Connection connection) async {
     final failed = connection.copyWith(status: ConnectionStatus.error);
-    await _repo.upsert(failed);
+    await repository.upsert(failed);
     return failed;
   }
 
@@ -92,7 +96,7 @@ class ConnectionService {
       status: ConnectionStatus.active,
       lastSyncAt: now(),
     );
-    await _repo.upsert(synced);
+    await repository.upsert(synced);
     return synced;
   }
 
@@ -104,7 +108,7 @@ class ConnectionService {
   /// nên không màn hình nào xoá được nữa.
   Future<void> disconnect(Connection connection) async {
     await credentials.delete(connection);
-    await _repo.delete(connection.id);
+    await repository.delete(connection.id);
   }
 
   /// **Đã kết nối chưa** — hỏi Keychain/Keystore, không hỏi cột `status`.
@@ -117,7 +121,7 @@ class ConnectionService {
   Future<List<ConnectorState>> catalogState() async {
     final out = <ConnectorState>[];
     for (final descriptor in ConnectorDescriptor.catalog.values) {
-      final connection = await _repo.byConnector(descriptor.id);
+      final connection = await repository.byConnector(descriptor.id);
       out.add(
         ConnectorState(
           descriptor: descriptor,

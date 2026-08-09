@@ -81,6 +81,13 @@ enum BusinessActionType {
   /// Áp dụng một `ProposedChange` đã được duyệt.
   applyProposedChange('proposal.apply', ActionRisk.low),
 
+  /// Báo cho **chính chủ shop** qua kênh họ đã nối (WTM-318).
+  ///
+  /// `low` vì nó nhắn cho **người đã chủ động bật nó lên**, không nhắn cho
+  /// khách. Đây là khác biệt quan trọng: `customerSendMessage` là `medium` vì
+  /// nó chạm tới một người thứ ba; cái này chỉ chạm tới người đang cầm máy.
+  ownerNotify('owner.notify', ActionRisk.low),
+
   /// Đưa một bản sao lưu lên kho ngoài (WTM-317).
   ///
   /// `low` vì nó **chỉ tạo thêm** một bản sao — không sửa, không xoá, không

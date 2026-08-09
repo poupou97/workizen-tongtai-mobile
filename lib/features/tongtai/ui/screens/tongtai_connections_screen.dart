@@ -12,6 +12,8 @@ import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../connection/google/google_connection.dart';
+import '../../connection/telegram/telegram_client.dart';
+import '../../connection/telegram/telegram_connection.dart';
 import '../../providers/tongtai_connection_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
@@ -39,6 +41,107 @@ class _TongtaiConnectionsScreenState
     extends ConsumerState<TongtaiConnectionsScreen> {
   bool _busy = false;
   DateTime? _lastBackupAt;
+
+  /// Các cuộc trò chuyện tìm được ở lần bấm gần nhất. `null` = **chưa tìm**,
+  /// khác hẳn danh sách rỗng = *đã tìm và chưa thấy ai* (kỷ luật `null` ≠ 0).
+  List<TelegramChat>? _chats;
+
+  Future<void> _saveTelegramToken(String token) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+
+    TelegramSetup? setup;
+    final failure = await runTongtaiAction(
+      () async =>
+          setup = await ref.read(telegramConnectionProvider).attachToken(token),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'connections',
+    );
+
+    if (!mounted) return;
+    setState(() => _busy = false);
+    ref.invalidate(connectorCatalogProvider);
+    ref.invalidate(telegramReadyProvider);
+    if (failure != null) {
+      showTongtaiFailure(context, failure);
+      return;
+    }
+
+    final l10n = context.l10n;
+    final bot = setup?.bot;
+    _say(
+      bot == null
+          ? l10n.telegramTokenBad
+          : l10n.telegramBotFound('@${bot.username}'),
+    );
+  }
+
+  Future<void> _findTelegramChats() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+
+    var found = <TelegramChat>[];
+    final failure = await runTongtaiAction(
+      () async =>
+          found = await ref.read(telegramConnectionProvider).discoverChats(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'connections',
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _chats = found;
+    });
+    if (failure != null) showTongtaiFailure(context, failure);
+  }
+
+  Future<void> _pickTelegramChat(TelegramChat chat) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final failure = await runTongtaiAction(
+      () => ref.read(telegramConnectionProvider).attachChat(chat.id),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'connections',
+    );
+
+    if (!mounted) return;
+    setState(() => _busy = false);
+    ref.invalidate(connectorCatalogProvider);
+    ref.invalidate(telegramReadyProvider);
+    if (failure != null) showTongtaiFailure(context, failure);
+  }
+
+  Future<void> _sendTelegramTest() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+
+    ActionRunResult? result;
+    final failure = await runTongtaiAction(
+      () async => result = await ref.read(ownerNotifierProvider).sendTest(),
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'connections',
+    );
+
+    if (!mounted) return;
+    setState(() => _busy = false);
+    // Tin thử là một `BusinessAction` — màn Hoạt động phải thấy nó.
+    invalidateBusinessDataProviders(ref);
+    if (failure != null) {
+      showTongtaiFailure(context, failure);
+      return;
+    }
+
+    final l10n = context.l10n;
+    switch (result) {
+      case ActionSucceeded():
+        _say(l10n.telegramTestSent);
+      case ActionFailed(:final errorMessage):
+        _say(errorMessage);
+      case _:
+        _say(l10n.stateRetry);
+    }
+  }
 
   Future<void> _connectGoogle() async {
     if (_busy) return;
@@ -204,6 +307,15 @@ class _TongtaiConnectionsScreenState
                 lastBackupAt: _lastBackupAt,
                 onBackup: _backupNow,
                 onRestore: _restoreFrom,
+              ),
+              const SizedBox(height: 12),
+              _TelegramCard(
+                busy: _busy,
+                chats: _chats,
+                onSaveToken: _saveTelegramToken,
+                onFindChats: _findTelegramChats,
+                onPickChat: _pickTelegramChat,
+                onSendTest: _sendTelegramTest,
               ),
             ],
           ),
@@ -502,6 +614,171 @@ class _StatusChip extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: color,
         ),
+      ),
+    );
+  }
+}
+
+/// Telegram: dán token → tìm cuộc trò chuyện → gửi thử.
+///
+/// Ba bước hiện **cùng lúc**, không phải wizard ba màn. Người bán thấy được
+/// mình đang ở đâu trong chuỗi, và quay lại sửa bước trước không phải bấm
+/// "Quay lại" ba lần.
+class _TelegramCard extends ConsumerStatefulWidget {
+  const _TelegramCard({
+    required this.busy,
+    required this.chats,
+    required this.onSaveToken,
+    required this.onFindChats,
+    required this.onPickChat,
+    required this.onSendTest,
+  });
+
+  final bool busy;
+
+  /// `null` = chưa bấm tìm lần nào. Rỗng = đã tìm, chưa ai nhắn cho bot.
+  final List<TelegramChat>? chats;
+
+  final Future<void> Function(String token) onSaveToken;
+  final Future<void> Function() onFindChats;
+  final Future<void> Function(TelegramChat) onPickChat;
+  final Future<void> Function() onSendTest;
+
+  @override
+  ConsumerState<_TelegramCard> createState() => _TelegramCardState();
+}
+
+class _TelegramCardState extends ConsumerState<_TelegramCard> {
+  final TextEditingController _token = TextEditingController();
+
+  @override
+  void dispose() {
+    _token.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    // `valueOrNull ?? false`: đang tải thì coi như **chưa sẵn sàng**. Hiện nút
+    // "Gửi tin thử" trong lúc còn chưa biết có token hay không sẽ mời người
+    // bán bấm vào một thứ chắc chắn hỏng.
+    final ready = ref.watch(telegramReadyProvider).asData?.value ?? false;
+    final chats = widget.chats;
+
+    return Container(
+      key: const Key('connections-telegram'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.telegramTitle,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.telegramHint,
+            style: const TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            key: const Key('connections-telegram-token'),
+            controller: _token,
+            enabled: !widget.busy,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: l10n.telegramTokenLabel,
+              helperText: l10n.telegramTokenHint,
+              helperMaxLines: 2,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              key: const Key('connections-telegram-save'),
+              onPressed: widget.busy
+                  ? null
+                  : () => widget.onSaveToken(_token.text),
+              child: Text(l10n.telegramSaveToken),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.telegramStartHint,
+            style: const TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: TongtaiDesignTokens.lightTextSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton(
+              key: const Key('connections-telegram-find'),
+              onPressed: widget.busy ? null : () => widget.onFindChats(),
+              child: Text(l10n.telegramFindChats),
+            ),
+          ),
+          if (chats != null) ...[
+            const SizedBox(height: 8),
+            if (chats.isEmpty)
+              Text(
+                l10n.telegramNoChats,
+                key: const Key('connections-telegram-no-chats'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: TongtaiDesignTokens.lightTextSecondary,
+                ),
+              )
+            else
+              for (final chat in chats)
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: TextButton(
+                    key: Key('connections-telegram-chat-${chat.id}'),
+                    onPressed: widget.busy
+                        ? null
+                        : () => widget.onPickChat(chat),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(chat.label),
+                    ),
+                  ),
+                ),
+          ],
+          if (ready) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton(
+                key: const Key('connections-telegram-test'),
+                onPressed: widget.busy ? null : () => widget.onSendTest(),
+                child: Text(l10n.telegramSendTest),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

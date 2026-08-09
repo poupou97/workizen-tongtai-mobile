@@ -10,6 +10,9 @@ import '../connection/google/drive_backup_coordinator.dart';
 import '../connection/google/drive_backup_service.dart';
 import '../connection/google/google_connection.dart';
 import '../connection/google/google_oauth.dart';
+import '../connection/telegram/owner_notifier.dart';
+import '../connection/telegram/telegram_client.dart';
+import '../connection/telegram/telegram_connection.dart';
 import 'tongtai_agentic_provider.dart';
 import 'tongtai_backup_provider.dart';
 import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
@@ -61,6 +64,26 @@ final driveBackupServiceProvider = Provider<DriveBackupService>(
   (ref) => DriveBackupService(),
 );
 
+final telegramClientProvider = Provider<TelegramClient>(
+  (ref) => TelegramClient(),
+);
+
+/// Telegram — **không** OAuth, không client ID, không xét duyệt: một bot token
+/// dán vào là chạy. Đó là lý do nó là connector thật chạy được **sớm nhất**.
+final telegramConnectionProvider = Provider<TelegramConnection>(
+  (ref) => TelegramConnection(
+    connections: ref.watch(connectionServiceProvider),
+    client: ref.watch(telegramClientProvider),
+  ),
+);
+
+final ownerNotifierProvider = Provider<OwnerNotifier>(
+  (ref) => OwnerNotifier(
+    executor: ref.watch(businessActionExecutorProvider),
+    telegram: ref.watch(telegramConnectionProvider),
+  ),
+);
+
 /// Bộ handler của **cửa ghi duy nhất**, đã có connector thật.
 ///
 /// `demoActionHandlers` vẫn ở đây cho những loại chưa nối được nền tảng nào —
@@ -75,6 +98,9 @@ final tongtaiActionHandlersProvider =
           connection: ref.watch(googleConnectionProvider),
           drive: ref.watch(driveBackupServiceProvider),
           backup: ref.watch(tongtaiBackupServiceProvider),
+        ),
+        BusinessActionType.ownerNotify: OwnerNotifier.effect(
+          ref.watch(telegramConnectionProvider),
         ),
       },
     );
@@ -95,4 +121,12 @@ final connectorCatalogProvider = FutureProvider<List<ConnectorState>>(
 /// Các bản sao lưu đang nằm trên Drive. Rỗng khi chưa kết nối — không phải lỗi.
 final driveBackupListProvider = FutureProvider<List<DriveBackupFile>>(
   (ref) => ref.watch(driveBackupCoordinatorProvider).list(),
+);
+
+/// Telegram đã đủ để gửi chưa — token **và** nơi nhận.
+///
+/// Không nằm trong `kBusinessDataProviders`: nó hỏi Keystore, không hỏi cơ sở
+/// dữ liệu nghiệp vụ, nên gieo hay xoá dữ liệu mẫu không đổi được câu trả lời.
+final telegramReadyProvider = FutureProvider<bool>(
+  (ref) => ref.watch(telegramConnectionProvider).isReady,
 );

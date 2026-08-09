@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,9 +13,11 @@ import 'package:tongtai/features/tongtai/connection/connection_credential_store.
 import 'package:tongtai/features/tongtai/connection/google/drive_backup_service.dart';
 import 'package:tongtai/features/tongtai/connection/google/google_oauth.dart';
 import 'package:tongtai/features/tongtai/core/connection.dart';
+import 'package:tongtai/features/tongtai/action/business_action.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_agentic_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
+import 'package:tongtai/features/tongtai/connection/telegram/telegram_client.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_connection_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_connections_screen.dart';
 
@@ -37,6 +41,7 @@ void main() {
     WidgetTester tester, {
     GoogleAuthenticator authenticator = const UnconfiguredGoogleAuthenticator(),
     MockClient? driveClient,
+    MockClient? telegramClient,
   }) async {
     final container = ProviderContainer(
       overrides: [
@@ -46,6 +51,10 @@ void main() {
         if (driveClient != null)
           driveBackupServiceProvider.overrideWithValue(
             DriveBackupService(client: driveClient),
+          ),
+        if (telegramClient != null)
+          telegramClientProvider.overrideWithValue(
+            TelegramClient(client: telegramClient),
           ),
       ],
     );
@@ -65,8 +74,34 @@ void main() {
     return container;
   }
 
-  Future<void> reveal(WidgetTester tester, Finder finder) =>
-      tester.scrollUntilVisible(finder, 250);
+  /// Cuộn tới khi thấy — chỉ định **rõ** cuộn cái nào.
+  ///
+  /// Mặc định `scrollUntilVisible` tìm `Scrollable` duy nhất trên cây; ô nhập
+  /// bot token cũng là một `Scrollable` (`EditableText`), nên mặc định nổ
+  /// "Too many elements" chứ không nổ vì màn hình sai.
+  /// Chờ SnackBar tự tắt.
+  ///
+  /// Nó phủ đáy màn hình, và các nút chọn cuộc trò chuyện nằm ở dưới — bấm vào
+  /// lúc snack còn hiện thì cú chạm rơi vào snack. Người dùng thật chỉ việc
+  /// đợi bốn giây; test phải nói ra là mình đang đợi cái gì.
+  Future<void> waitForSnackToGo(WidgetTester tester) async {
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> reveal(WidgetTester tester, Finder finder) async {
+    await tester.scrollUntilVisible(
+      finder,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // `scrollUntilVisible` dừng ngay khi finder **tồn tại**, và mọi thứ trong
+    // một thẻ đã dựng đều tồn tại kể cả khi nằm dưới mép màn hình. Nên phải
+    // kéo thêm cho nó thật sự nhìn thấy được, nếu không cú chạm rơi vào chỗ
+    // khác và test đỏ vì một lý do không liên quan gì tới màn hình.
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+  }
 
   group('trạng thái nói sự thật', () {
     testWidgets('mọi nền tảng trong catalog đều có thẻ', (tester) async {
@@ -217,6 +252,149 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(credentials.debugAll, isEmpty);
+    });
+  });
+
+  group('Telegram — ba bước, và bước khó là bước thứ hai', () {
+    /// Phản hồi giả dựng bằng bytes: `http.Response(String, …)` mặc định
+    /// latin-1 nên tên tiếng Việt sẽ nổ trong test dù production chạy tốt.
+    http.Response tgJson(Map<String, Object?> body) => http.Response.bytes(
+      utf8.encode(jsonEncode(body)),
+      200,
+      headers: const {'content-type': 'application/json; charset=utf-8'},
+    );
+
+    MockClient telegram({
+      bool tokenValid = true,
+      List<Object> chats = const [],
+      void Function(String text)? onSend,
+    }) => MockClient((request) async {
+      final path = request.url.path;
+      if (path.endsWith('getMe')) {
+        return tokenValid
+            ? tgJson({
+                'ok': true,
+                'result': {
+                  'id': 1,
+                  'username': 'tongtai_bot',
+                  'first_name': 'Tổng Tài',
+                },
+              })
+            : tgJson({
+                'ok': false,
+                'error_code': 401,
+                'description': 'Unauthorized',
+              });
+      }
+      if (path.endsWith('sendMessage')) {
+        onSend?.call((jsonDecode(request.body) as Map)['text'] as String);
+        return tgJson({
+          'ok': true,
+          'result': {'message_id': 42},
+        });
+      }
+      return tgJson({'ok': true, 'result': chats});
+    });
+
+    testWidgets('token sai ⇒ nói ra, KHÔNG hiện nút gửi thử', (tester) async {
+      await pumpConnections(
+        tester,
+        telegramClient: telegram(tokenValid: false),
+      );
+
+      final field = find.byKey(const Key('connections-telegram-token'));
+      await reveal(tester, field);
+      await tester.enterText(field, 'bậy');
+      final save = find.byKey(const Key('connections-telegram-save'));
+      await reveal(tester, save);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(credentials.debugAll, isEmpty);
+      expect(
+        find.byKey(const Key('connections-telegram-test')),
+        findsNothing,
+        reason: 'token sai mà vẫn mời gửi thử là mời bấm vào một thứ chắc hỏng',
+      );
+    });
+
+    testWidgets('chưa ai /start ⇒ nói rõ, không phải danh sách trống câm', (
+      tester,
+    ) async {
+      await pumpConnections(tester, telegramClient: telegram());
+
+      final field = find.byKey(const Key('connections-telegram-token'));
+      await reveal(tester, field);
+      await tester.enterText(field, '123:ABC');
+      final save = find.byKey(const Key('connections-telegram-save'));
+      await reveal(tester, save);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+
+      final findChats = find.byKey(const Key('connections-telegram-find'));
+      await reveal(tester, findChats);
+      await tester.tap(findChats);
+      await tester.pumpAndSettle();
+
+      final empty = find.byKey(const Key('connections-telegram-no-chats'));
+      await reveal(tester, empty);
+      expect(empty, findsOneWidget);
+    });
+
+    testWidgets('trọn chuỗi: token → chọn cuộc trò chuyện → gửi tin THẬT', (
+      tester,
+    ) async {
+      final sent = <String>[];
+      final container = await pumpConnections(
+        tester,
+        telegramClient: telegram(
+          chats: const [
+            {
+              'message': {
+                'chat': {'id': 555, 'first_name': 'Alex'},
+              },
+            },
+          ],
+          onSend: sent.add,
+        ),
+      );
+
+      final field = find.byKey(const Key('connections-telegram-token'));
+      await reveal(tester, field);
+      await tester.enterText(field, '123:ABC');
+      final save = find.byKey(const Key('connections-telegram-save'));
+      await reveal(tester, save);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+
+      await waitForSnackToGo(tester);
+
+      final findChats = find.byKey(const Key('connections-telegram-find'));
+      await reveal(tester, findChats);
+      await tester.tap(findChats);
+      await tester.pumpAndSettle();
+
+      final chat = find.byKey(const Key('connections-telegram-chat-555'));
+      await reveal(tester, chat);
+      await tester.tap(chat);
+      await tester.pumpAndSettle();
+
+      // Chọn xong nơi nhận thì mới có nút gửi thử — trước đó thì không.
+      // `pumpUntilFound`: `telegramReadyProvider` là một `FutureProvider`, nên
+      // nút xuất hiện ở khung hình SAU khi future xong, không phải ngay.
+      final test = find.byKey(const Key('connections-telegram-test'));
+      await pumpUntilFound(tester, test);
+      await reveal(tester, test);
+      await tester.tap(test);
+      await tester.pumpAndSettle();
+
+      expect(sent, hasLength(1));
+      final actions = await container
+          .read(businessActionExecutorProvider)
+          .loadRecent();
+      expect(actions.single.externalId, 'telegram:42');
+      expect(actions.single.vendor, ActionVendor.telegram);
     });
   });
 }

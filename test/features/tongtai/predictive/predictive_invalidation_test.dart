@@ -337,6 +337,10 @@ void main() {
         // bán. Nó được làm mới bởi chính hành động sinh ra file mới
         // (`backupNow` → `ref.invalidate`), đúng nhịp của nó.
         'driveBackupListProvider',
+        // WTM-318: hỏi Keystore *đã có token và nơi nhận chưa*, không hỏi DB.
+        // Nó được làm mới bởi chính các bước thiết lập Telegram, đúng nhịp
+        // của nó — gieo/xoá dữ liệu mẫu không đổi được câu trả lời.
+        'telegramReadyProvider',
       };
 
       final declaration = RegExp(r'^final (\w+) = FutureProvider');
