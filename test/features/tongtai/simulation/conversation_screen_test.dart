@@ -141,7 +141,7 @@ void main() {
     final c = container();
 
     final conversations = await c.read(customerConversationsProvider.future);
-    final waiting = sortConversationsForInbox(conversations).first;
+    final waiting = conversationsForInbox(conversations).first;
     expect(waiting.pendingDraft, isNotNull);
 
     await tester.pumpWidget(
@@ -183,7 +183,7 @@ void main() {
     await seedBusiness();
     final c = container();
 
-    final waiting = sortConversationsForInbox(
+    final waiting = conversationsForInbox(
       await c.read(customerConversationsProvider.future),
     ).first;
 
@@ -217,7 +217,7 @@ void main() {
     await seedBusiness();
     final c = container();
 
-    final waiting = sortConversationsForInbox(
+    final waiting = conversationsForInbox(
       await c.read(customerConversationsProvider.future),
     ).first;
 

@@ -146,11 +146,16 @@ class _TongtaiConversationScreenState
             return Column(
               children: [
                 Expanded(
+                  // Neo ở **đáy** như mọi khung chat: một hội thoại hai câu
+                  // mà dính lên mép trên với một nghìn điểm ảnh trắng bên
+                  // dưới thì đọc như màn hình hỏng.
                   child: ListView.builder(
                     key: const Key('conversation-thread'),
+                    reverse: true,
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                     itemCount: sent.length,
-                    itemBuilder: (context, i) => _Bubble(sent[i]),
+                    itemBuilder: (context, i) =>
+                        _Bubble(sent[sent.length - 1 - i]),
                   ),
                 ),
                 if (draft != null)

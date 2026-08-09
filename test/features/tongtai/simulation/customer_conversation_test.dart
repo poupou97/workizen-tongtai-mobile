@@ -184,11 +184,34 @@ void main() {
       ),
     ], buyer('c2', 'Khách xong'));
 
-    final sorted = sortConversationsForInbox([newerButDone, needsApproval]);
+    final sorted = conversationsForInbox([newerButDone, needsApproval]);
 
     // Sắp theo thời gian thuần thì câu hỏi "tôi nợ ai câu trả lời" phải cuộn
     // tay mà tìm — và đó là câu hỏi duy nhất khiến người ta mở màn này.
     expect(sorted.first.customerName, 'Khách giận');
+  });
+
+  test('⭐ hộp thư chỉ liệt kê HỘI THOẠI, không liệt kê mọi khách có đơn', () {
+    final onlyOrders = projectConversations(
+      events: [
+        event(
+          id: 'e1',
+          kind: DemoEventKind.orderCreated,
+          actor: DemoActor.platform,
+          vendor: DemoVendor.shopee,
+          subjectKind: 'product',
+          subjectId: 'p1',
+          payload: {'customerId': 'c9'},
+        ),
+      ],
+      customers: [buyer('c9', 'Khách chỉ mua')],
+    );
+
+    // Chiếu VẪN giữ khách này — Khách hàng 360 cần cả đơn hàng.
+    expect(onlyOrders.single.events, hasLength(1));
+    // …nhưng hộp thư thì không: một hộp thư liệt kê cả người chưa từng nói
+    // câu nào sẽ chôn ba hội thoại thật giữa bốn mươi dòng trống.
+    expect(conversationsForInbox(onlyOrders), isEmpty);
   });
 
   test('khách đã xoá khỏi danh bạ vẫn đọc được, và không bịa tên', () {

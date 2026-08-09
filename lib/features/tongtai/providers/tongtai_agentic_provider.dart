@@ -125,8 +125,24 @@ final businessBriefProvider = FutureProvider<List<BriefItem>>((ref) async {
   // Người bán không có "mục cơ hội thương mại" trong đầu; họ có *"sáng nay tôi
   // cần làm gì"*. Hai danh sách song song là hai chỗ để bỏ sót.
   final commerce = await ref.watch(commerceOpportunitiesProvider.future);
-  final all = [...items, ...commerce]
-    ..sort((a, b) => b.severity.index.compareTo(a.severity.index));
+
+  // ⛔ WTM-342 — **một chuyện về một mặt hàng = MỘT mục.**
+  //
+  // Hai luật cùng kết luận "sắp hết hàng" cho cùng sản phẩm: Rule Twin qua
+  // `StockAlertService`, và luật thương mại của WTM-329. Cùng `kind` + cùng
+  // `subjectId` ⇒ **cùng `BriefItem.id`** — nhưng payload khác nhau, nên
+  // `publish` gặp khoá chống lặp trùng với payload khác và **ném**, kéo sập
+  // cả brief. Trên máy Founder nó hiện thành một thẻ đỏ ngay dưới dòng
+  // "Hôm nay tôi tìm được 20 cơ hội".
+  //
+  // Giữ bản **đầu tiên** — bản của Rule Twin, vì nó mang thêm mức đặt lại và
+  // số cần nhập bù, tức là nói được *phải làm bao nhiêu* chứ không chỉ *có
+  // chuyện*. Đây là bẫy P-27 quen thuộc: một khái niệm, hai chủ.
+  final seen = <String>{};
+  final all = [
+    for (final item in [...items, ...commerce])
+      if (seen.add(item.id)) item,
+  ]..sort((a, b) => b.severity.index.compareTo(a.severity.index));
 
   await ref.watch(briefInboxProvider).publish(all);
   return all;
