@@ -14,7 +14,17 @@ enum ProfitBlocker {
   unknownFunding('unknown_funding'),
 
   /// Lô đối soát lệch quá ngưỡng chưa giải thích được.
-  unexplainedDelta('unexplained_delta');
+  unexplainedDelta('unexplained_delta'),
+
+  /// ⭐ Có đơn **bán trên sàn** mà chưa có khoản phí nào của sàn (WTM-322).
+  ///
+  /// Đây là con số nguy hiểm nhất app có thể in ra: nhập file đơn hàng mà chưa
+  /// nhập báo cáo thu nhập thì **doanh thu đúng, lợi nhuận sai** — và sai theo
+  /// hướng tâng bốc, tức là kiểu sai không ai đi kiểm.
+  ///
+  /// Không suy ra từ *"không có dòng phí nào"* mà từ **kênh bán**: một đơn bán
+  /// tại quầy không có phí sàn là chuyện bình thường, một đơn Shopee thì không.
+  missingMarketplaceFees('missing_marketplace_fees');
 
   const ProfitBlocker(this.code);
 
@@ -88,8 +98,13 @@ class TrueProfitRule {
     required Map<String, double?> itemCosts,
     required List<SettlementLine> lines,
     List<Payout> payouts = const [],
+    int marketplaceOrdersWithoutFees = 0,
   }) {
     final blockers = <ProfitBlocker>[];
+
+    if (marketplaceOrdersWithoutFees > 0) {
+      blockers.add(ProfitBlocker.missingMarketplaceFees);
+    }
 
     if (itemCosts.isEmpty || itemCosts.values.any((c) => c == null)) {
       blockers.add(ProfitBlocker.missingCost);

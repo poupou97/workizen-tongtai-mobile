@@ -5,6 +5,7 @@ import '../finance/settlement.dart';
 import '../finance/true_profit.dart';
 import '../inventory/product.dart';
 import '../orders/order.dart';
+import '../profile/business_profile.dart' show SalesChannel;
 
 /// **Lời thật sau phí** — Capability Context của thương mại (WTM-328 · C4).
 ///
@@ -74,10 +75,19 @@ class CommerceProfitContext {
     final itemCosts = <String, double?>{};
     final lines = <SettlementLine>[];
     final perProduct = <String, _ProductAccumulator>{};
+    var marketplaceOrdersWithoutFees = 0;
 
     for (final order in counted) {
       final orderLines = linesByOrder[order.id] ?? const <SettlementLine>[];
       lines.addAll(orderLines);
+
+      // ⭐ Đơn bán trên sàn mà chưa có khoản phí nào ⇒ chưa tính được lời
+      // (WTM-322). Suy ra từ **kênh bán**, không từ "không thấy dòng phí": một
+      // đơn bán tại quầy không có phí sàn là bình thường, một đơn Shopee thì
+      // không — và nhầm hai chuyện đó làm lợi nhuận sai theo hướng tâng bốc.
+      if (orderLines.isEmpty && _chargesPlatformFees(order.channel)) {
+        marketplaceOrdersWithoutFees++;
+      }
 
       final orderRevenue = order.items.fold<double>(
         0,
@@ -120,6 +130,7 @@ class CommerceProfitContext {
       revenue: revenue,
       itemCosts: itemCosts,
       lines: lines,
+      marketplaceOrdersWithoutFees: marketplaceOrdersWithoutFees,
     );
 
     final byProduct =
@@ -156,6 +167,16 @@ class CommerceProfitContext {
   final List<ProductProfit> byProduct;
 
   final DateTime observedAt;
+
+  /// Kênh này có thu phí sàn không.
+  ///
+  /// Danh sách đóng, và nó là **dữ liệu nghiệp vụ** chứ không phải chi tiết
+  /// kỹ thuật: thêm một sàn mới là thêm một dòng ở đây, và quên thêm nghĩa là
+  /// lợi nhuận của sàn đó bị tính thừa mà không ai báo.
+  static bool _chargesPlatformFees(SalesChannel? channel) => switch (channel) {
+    SalesChannel.shopee || SalesChannel.tiktok || SalesChannel.appStore => true,
+    _ => false,
+  };
 
   /// Sản phẩm **doanh thu dương nhưng lời thật âm** — thứ không ai nhìn thấy
   /// nếu chỉ đọc bảng doanh thu.

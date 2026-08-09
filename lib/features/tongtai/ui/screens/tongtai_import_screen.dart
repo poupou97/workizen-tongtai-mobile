@@ -8,10 +8,12 @@ import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../commerce/commerce_models.dart';
 import '../../commerce/import/commerce_import.dart';
-import '../../commerce/import/xlsx_commerce_source.dart';
+import '../../commerce/import/commerce_source_resolver.dart';
 import '../../core/screen_data_controller.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_commerce_provider.dart';
+import '../../providers/tongtai_inventory_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
 
@@ -108,11 +110,21 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
       () async {
         final picked = await (widget.pickFile ?? _defaultPick)();
         if (picked == null) return;
-        preview = await XlsxCommerceSource(
+
+        // App tự nhận file danh mục hay file sàn (WTM-322). Bắt người bán tự
+        // khai loại file là đẩy việc phân loại sang người ít có khả năng phân
+        // loại nhất.
+        final source = CommerceSourceResolver.resolve(
           bytes: picked.bytes,
           fileName: picked.name,
           now: DateTime.now(),
-        ).read();
+          knownProducts: await ref.read(productRepositoryProvider).loadAll(),
+          existingOrderIds: {
+            for (final o in await ref.read(orderRepositoryProvider).loadAll())
+              o.id,
+          },
+        );
+        preview = await source.read();
       },
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'import',

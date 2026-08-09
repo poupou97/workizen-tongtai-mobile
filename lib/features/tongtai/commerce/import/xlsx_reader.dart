@@ -214,16 +214,34 @@ class SheetTable {
   SheetTable(this.name, List<List<String>> rows)
     : headers = rows.isEmpty
           ? const []
-          : rows.first.map((h) => h.trim().toLowerCase()).toList(),
+          : rows.first.map((h) => h.trim()).toList(),
       dataRows = rows.length <= 1 ? const [] : rows.sublist(1);
 
   final String name;
+
+  /// Tiêu đề **giữ nguyên như trong file**.
+  ///
+  /// Không viết thường sẵn: khi app phải kể lại *"các cột đọc được là…"* thì
+  /// nó phải kể đúng tên thật. Một câu báo lỗi ghi `mã vận đơn` trong khi file
+  /// ghi `Mã vận đơn` biến chính thứ đang cần đối chiếu thành thứ không đối
+  /// chiếu được.
+  ///
+  /// Việc so khớp bỏ qua hoa/thường nằm ở [_indexOf], không nằm ở dữ liệu.
   final List<String> headers;
+
   final List<List<String>> dataRows;
 
   bool get isEmpty => dataRows.isEmpty;
 
-  bool hasColumn(String column) => headers.contains(column.toLowerCase());
+  bool hasColumn(String column) => _indexOf(column) >= 0;
+
+  int _indexOf(String column) {
+    final wanted = column.trim().toLowerCase();
+    for (var i = 0; i < headers.length; i++) {
+      if (headers[i].toLowerCase() == wanted) return i;
+    }
+    return -1;
+  }
 
   /// Các cột bắt buộc còn thiếu — để báo **một lần, đủ cả danh sách**, thay vì
   /// bắt người bán sửa từng cột rồi thử lại năm lần.
@@ -234,7 +252,7 @@ class SheetTable {
 
   /// Giá trị ô, `''` khi cột không tồn tại hoặc dòng ngắn hơn.
   String cell(List<String> row, String column) {
-    final index = headers.indexOf(column.toLowerCase());
+    final index = _indexOf(column);
     if (index < 0 || index >= row.length) return '';
     return row[index].trim();
   }
