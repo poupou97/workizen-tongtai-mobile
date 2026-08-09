@@ -223,9 +223,9 @@ class SimulationEngine {
           newShipments.add(
             Shipment(
               id: 'sample-${event.id}',
-              trackingNumber: 'GHN${event.id.hashCode.abs() % 100000000}',
+              trackingNumber: _tracking(event),
               status: ShipmentStatus.inTransit,
-              carrier: Carrier.ghn,
+              carrier: _carrierOf(event),
               // Lùi mốc cập nhật để Rule Twin thấy nó đứng im thật — không đặt
               // sẵn một cờ "chậm": việc nó chậm là **kết luận**, không phải một
               // ô trong dữ liệu (WTM-323).
@@ -241,9 +241,9 @@ class SimulationEngine {
           newShipments.add(
             Shipment(
               id: 'sample-${event.id}',
-              trackingNumber: 'GHN${event.id.hashCode.abs() % 100000000}',
+              trackingNumber: _tracking(event),
               status: ShipmentStatus.failed,
-              carrier: Carrier.ghn,
+              carrier: _carrierOf(event),
               lastUpdate: event.occurredAt,
               origin: 'TP.HCM',
               destination: 'Hà Nội',
@@ -321,6 +321,33 @@ class SimulationEngine {
     'facebook' => SalesChannel.facebook,
     _ => null,
   };
+
+  /// Hãng vận chuyển **của chính sự kiện đó** (WTM-340).
+  ///
+  /// Trước đây hằng số `Carrier.ghn`: sự kiện nói GHTK báo chậm, bản ghi lại
+  /// ghi GHN. Cùng một hình dạng lỗi với việc gán nhãn "Tổng Tài" cho việc do
+  /// sàn báo về — dữ liệu nói một đằng, nhãn nói một nẻo.
+  static Carrier _carrierOf(DemoEvent event) =>
+      Carrier.fromCode(event.vendor) ??
+      Carrier.fromCode(event.payload['carrier'] as String?) ??
+      Carrier.ghn;
+
+  /// Mã vận đơn **đúng hình dạng công khai của hãng đó**.
+  ///
+  /// `Carrier.guessFrom` đoán hãng từ hình dạng mã. Sinh mã sai hình dạng thì
+  /// hai đường suy ra hãng sẽ cho hai câu trả lời khác nhau trên cùng một kiện
+  /// — đúng bẫy "một khái niệm hai chủ" (P-27).
+  static String _tracking(DemoEvent event) {
+    final n = event.id.hashCode.abs() % 100000000;
+    return switch (_carrierOf(event)) {
+      Carrier.ghn => 'GHN${n.toString().padLeft(8, '0')}',
+      Carrier.ghtk => 'S${n.toString().padLeft(8, '0')}',
+      Carrier.viettelPost => '${n.toString().padLeft(11, '0')}VT',
+      Carrier.jt => 'JT${n.toString().padLeft(8, '0')}',
+      Carrier.spx => 'SPX${n.toString().padLeft(8, '0')}',
+      Carrier.ninjaVan => 'NJV${n.toString().padLeft(8, '0')}',
+    };
+  }
 }
 
 /// Kết quả một lần đẩy đồng hồ.

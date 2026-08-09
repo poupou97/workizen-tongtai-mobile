@@ -999,6 +999,15 @@ abstract class AppStrings {
   // ── catalog nguồn dữ liệu (WTM-331 · §24) ───────────────────────────────
   String get sourcesCommerce;
   String get sourcesSourcing;
+  String get sourcesMessaging;
+  String get sourcesLogistics;
+  String get sourcesFinance;
+
+  /// Nút bật doanh nghiệp mô phỏng ngay từ màn nguồn dữ liệu.
+  String get sourcesStartDemo;
+
+  /// "10 nền tảng đang phát dữ liệu demo".
+  String sourcesDemoLive(int count);
 
   /// Câu nhắc rằng danh sách này nói **trạng thái thật**, không phải quảng cáo.
   String get sourcesHonestNote;
@@ -1006,6 +1015,10 @@ abstract class AppStrings {
   String get readinessConnected;
   String get readinessFileBridge;
   String get readinessDemo;
+
+  /// ⭐ Trạng thái **thứ bảy** — đang phát trong bản mô phỏng, KHÔNG phải đã
+  /// nối. Cố ý không mượn nhãn của `connected` (§40).
+  String get readinessDemoConnected;
   String get readinessResearched;
   String get readinessPartnerRequired;
   String get readinessApiFuture;
@@ -2849,6 +2862,18 @@ class AppStringsVi extends AppStrings {
   @override
   String get sourcesSourcing => 'Nguồn nhập hàng';
   @override
+  String get sourcesMessaging => 'Kênh khách nhắn';
+  @override
+  String get sourcesLogistics => 'Vận chuyển';
+  @override
+  String get sourcesFinance => 'Tiền về';
+  @override
+  String get sourcesStartDemo => 'Bắt đầu doanh nghiệp demo';
+  @override
+  String sourcesDemoLive(int count) =>
+      '$count nền tảng đang phát dữ liệu trong bản mô phỏng. '
+      'Không có kết nối thật nào — không byte nào rời máy này.';
+  @override
   String get sourcesHonestNote =>
       'Danh sách này nói đúng trạng thái hiện tại. Nguồn chưa nối thì ghi là '
       'chưa nối — dữ liệu mẫu không được trình bày như dữ liệu từ sàn.';
@@ -2858,6 +2883,8 @@ class AppStringsVi extends AppStrings {
   String get readinessFileBridge => 'Nhập qua file';
   @override
   String get readinessDemo => 'Dữ liệu mẫu';
+  @override
+  String get readinessDemoConnected => 'Demo — đang phát';
   @override
   String get readinessResearched => 'Đã nghiên cứu';
   @override
@@ -4793,6 +4820,18 @@ class AppStringsEn extends AppStrings {
   @override
   String get sourcesSourcing => 'Where stock comes from';
   @override
+  String get sourcesMessaging => 'Where customers message';
+  @override
+  String get sourcesLogistics => 'Shipping';
+  @override
+  String get sourcesFinance => 'Money in';
+  @override
+  String get sourcesStartDemo => 'Start the demo business';
+  @override
+  String sourcesDemoLive(int count) =>
+      '$count platforms are emitting data in the simulation. '
+      'Nothing is really connected — no byte leaves this device.';
+  @override
   String get sourcesHonestNote =>
       'This list states the real current status. A source that is not '
       'connected says so — sample data is never presented as marketplace data.';
@@ -4802,6 +4841,8 @@ class AppStringsEn extends AppStrings {
   String get readinessFileBridge => 'Via file import';
   @override
   String get readinessDemo => 'Sample data only';
+  @override
+  String get readinessDemoConnected => 'Demo — live';
   @override
   String get readinessResearched => 'Researched';
   @override

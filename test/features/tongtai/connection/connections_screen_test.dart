@@ -103,6 +103,24 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  group('WTM-340 · nguồn đang phát trong mô phỏng', () {
+    testWidgets('chưa bật ⇒ có lối bật, và KHÔNG khai nền tảng nào đang phát', (
+      tester,
+    ) async {
+      await pumpConnections(tester);
+      await reveal(tester, find.byKey(const Key('connections-sources')));
+
+      expect(find.byKey(const Key('connections-demo-live')), findsNothing);
+      expect(find.byKey(const Key('connections-start-demo')), findsOneWidget);
+      // Nguồn giữ nhãn thật của nó — chưa có gì phát thì không có gì "đang
+      // phát".
+      expect(
+        find.byKey(const Key('connections-readiness-${'demo_connected'}')),
+        findsNothing,
+      );
+    });
+  });
+
   group('trạng thái nói sự thật', () {
     testWidgets('mọi nền tảng trong catalog đều có thẻ', (tester) async {
       await pumpConnections(tester);
