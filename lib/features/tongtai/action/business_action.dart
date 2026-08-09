@@ -22,6 +22,12 @@ enum ActionVendor {
   demo('demo'),
 
   telegram('telegram'),
+
+  /// Google — Drive hôm nay, Gmail/Calendar khi người bán bật (WTM-317).
+  google('google'),
+
+  /// Jira + Confluence — **một** vendor vì dùng chung một credential (WTM-319).
+  atlassian('atlassian'),
   messenger('messenger'),
   shopee('shopee'),
   tiktokShop('tiktok_shop'),
@@ -74,6 +80,12 @@ enum BusinessActionType {
   // ── Ghi vào chính Tổng Tài ─────────────────────────────────────────────
   /// Áp dụng một `ProposedChange` đã được duyệt.
   applyProposedChange('proposal.apply', ActionRisk.low),
+
+  /// Đưa một bản sao lưu lên kho ngoài (WTM-317).
+  ///
+  /// `low` vì nó **chỉ tạo thêm** một bản sao — không sửa, không xoá, không
+  /// tiêu tiền. Hỏng thì thử lại; không ai thiệt.
+  storageBackupUpload('storage.backup_upload', ActionRisk.low),
 
   // ── Khách hàng ─────────────────────────────────────────────────────────
   customerSendMessage('customer.send_message', ActionRisk.medium),

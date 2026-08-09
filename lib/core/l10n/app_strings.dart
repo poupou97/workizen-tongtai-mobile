@@ -901,6 +901,51 @@ abstract class AppStrings {
   /// "old" is never left to the imagination.
   String stateStaleBody(String time);
 
+  // ── kết nối nền tảng ngoài (WTM-317 · Epic WTM-315) ─────────────────────
+  String get titleConnections;
+
+  /// Câu mở màn Kết nối — nói app **dùng** nền tảng của người bán, không phải
+  /// gửi dữ liệu về đâu đó.
+  String get connectionsIntro;
+
+  String get connectorGoogle;
+  String get connectorTelegram;
+  String get connectorAtlassian;
+
+  /// Nhãn trạng thái. `SETUP_REQUIRED` cố ý **không** đọc là "lỗi".
+  String get connectionSetupRequired;
+  String get connectionActive;
+  String get connectionPaused;
+  String get connectionError;
+
+  String get connectionConnect;
+  String get connectionDisconnect;
+  String get connectionDisconnectConfirm;
+
+  /// Vì sao nút kết nối chưa bấm được — hiện ngay chỗ bấm, không giấu trong log.
+  String get connectionNotConfigured;
+
+  String get driveBackupTitle;
+  String get driveBackupHint;
+  String get driveBackupNow;
+  String get driveBackupRunning;
+
+  /// "Đã lưu lên Google Drive lúc 14:30" — nói việc đã xong ở đâu.
+  String driveBackupDone(String time);
+
+  String get driveBackupList;
+  String get driveBackupEmpty;
+  String get driveBackupRestore;
+
+  /// Khả năng đang bật của một kết nối.
+  String get capabilityDriveBackup;
+  String get capabilityTelegramMessaging;
+  String get capabilityJiraWork;
+  String get capabilityConfluenceKnowledge;
+
+  /// Nhãn hành động sao lưu trong màn Hoạt động.
+  String get actLabelBackupUpload;
+
   // ── backup & restore (WTM-164 / ADR-TON-018) ────────────────────────────
   String get titleBackup;
   String get backupCreate;
@@ -2517,6 +2562,66 @@ class AppStringsVi extends AppStrings {
   @override
   String stateStaleBody(String time) =>
       'Đang xem dữ liệu lúc $time. Lần làm mới gần nhất thất bại.';
+
+  @override
+  String get titleConnections => 'Kết nối';
+  @override
+  String get connectionsIntro =>
+      'Tổng Tài dùng chính tài khoản của bạn trên các nền tảng này. Dữ liệu '
+      'vẫn nằm trên máy bạn; khoá kết nối được cất riêng, không nằm trong file '
+      'sao lưu.';
+  @override
+  String get connectorGoogle => 'Google';
+  @override
+  String get connectorTelegram => 'Telegram';
+  @override
+  String get connectorAtlassian => 'Jira & Confluence';
+  @override
+  String get connectionSetupRequired => 'Chưa thiết lập';
+  @override
+  String get connectionActive => 'Đang hoạt động';
+  @override
+  String get connectionPaused => 'Tạm dừng';
+  @override
+  String get connectionError => 'Cần kết nối lại';
+  @override
+  String get connectionConnect => 'Kết nối';
+  @override
+  String get connectionDisconnect => 'Ngắt kết nối';
+  @override
+  String get connectionDisconnectConfirm =>
+      'Ngắt kết nối sẽ xoá khoá khỏi máy này. Dữ liệu kinh doanh giữ nguyên.';
+  @override
+  String get connectionNotConfigured =>
+      'Bản cài này chưa có khoá ứng dụng Google nên chưa đăng nhập được. '
+      'Mọi phần còn lại đã sẵn sàng.';
+  @override
+  String get driveBackupTitle => 'Sao lưu lên Google Drive';
+  @override
+  String get driveBackupHint =>
+      'Tổng Tài chỉ thấy được những file do chính nó tạo trong Drive của bạn.';
+  @override
+  String get driveBackupNow => 'Sao lưu ngay';
+  @override
+  String get driveBackupRunning => 'Đang sao lưu…';
+  @override
+  String driveBackupDone(String time) => 'Đã lưu lên Google Drive lúc $time';
+  @override
+  String get driveBackupList => 'Các bản đã lưu trên Drive';
+  @override
+  String get driveBackupEmpty => 'Chưa có bản sao lưu nào trên Drive.';
+  @override
+  String get driveBackupRestore => 'Khôi phục từ bản này';
+  @override
+  String get capabilityDriveBackup => 'Sao lưu lên Drive';
+  @override
+  String get capabilityTelegramMessaging => 'Nhắn cho khách qua Telegram';
+  @override
+  String get capabilityJiraWork => 'Đọc công việc trong Jira';
+  @override
+  String get capabilityConfluenceKnowledge => 'Đọc tài liệu Confluence';
+  @override
+  String get actLabelBackupUpload => 'Sao lưu dữ liệu';
 
   @override
   String get titleBackup => 'Sao lưu & khôi phục';
@@ -4198,6 +4303,67 @@ class AppStringsEn extends AppStrings {
   @override
   String stateStaleBody(String time) =>
       'Showing data from $time. The last refresh failed.';
+
+  @override
+  String get titleConnections => 'Connections';
+  @override
+  String get connectionsIntro =>
+      'Tổng Tài uses your own accounts on these platforms. Your data stays on '
+      'this device; connection keys are kept separately and never travel in a '
+      'backup file.';
+  @override
+  String get connectorGoogle => 'Google';
+  @override
+  String get connectorTelegram => 'Telegram';
+  @override
+  String get connectorAtlassian => 'Jira & Confluence';
+  @override
+  String get connectionSetupRequired => 'Not set up yet';
+  @override
+  String get connectionActive => 'Connected';
+  @override
+  String get connectionPaused => 'Paused';
+  @override
+  String get connectionError => 'Needs reconnecting';
+  @override
+  String get connectionConnect => 'Connect';
+  @override
+  String get connectionDisconnect => 'Disconnect';
+  @override
+  String get connectionDisconnectConfirm =>
+      'Disconnecting removes the key from this device. Your business data is '
+      'untouched.';
+  @override
+  String get connectionNotConfigured =>
+      'This build has no Google app key yet, so signing in is not possible. '
+      'Everything else is ready.';
+  @override
+  String get driveBackupTitle => 'Back up to Google Drive';
+  @override
+  String get driveBackupHint =>
+      'Tổng Tài can only see the files it creates itself in your Drive.';
+  @override
+  String get driveBackupNow => 'Back up now';
+  @override
+  String get driveBackupRunning => 'Backing up…';
+  @override
+  String driveBackupDone(String time) => 'Saved to Google Drive at $time';
+  @override
+  String get driveBackupList => 'Backups on Drive';
+  @override
+  String get driveBackupEmpty => 'No backups on Drive yet.';
+  @override
+  String get driveBackupRestore => 'Restore from this one';
+  @override
+  String get capabilityDriveBackup => 'Back up to Drive';
+  @override
+  String get capabilityTelegramMessaging => 'Message customers on Telegram';
+  @override
+  String get capabilityJiraWork => 'Read work items in Jira';
+  @override
+  String get capabilityConfluenceKnowledge => 'Read Confluence pages';
+  @override
+  String get actLabelBackupUpload => 'Back up your data';
 
   @override
   String get titleBackup => 'Backup & restore';

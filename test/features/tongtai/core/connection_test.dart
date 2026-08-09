@@ -68,12 +68,24 @@ void main() {
       }
     });
 
-    test('ba mã canonical', () {
+    test('bốn mã canonical — SETUP_REQUIRED đứng đầu', () {
       expect(ConnectionStatus.values.map((s) => s.code).toList(), [
+        'setup_required',
         'active',
         'paused',
         'error',
       ]);
+    });
+
+    test('SETUP_REQUIRED khác ERROR — chưa xong không phải là hỏng', () {
+      // WTM-317: không có mã này thì chỗ duy nhất để đặt một kết nối dở dang
+      // là `error`, và `error` nói sai chuyện — giao diện sẽ giục người bán
+      // "sửa" một thứ chưa bao giờ hỏng.
+      expect(ConnectionStatus.setupRequired, isNot(ConnectionStatus.error));
+      expect(
+        ConnectionStatus.fromCode('setup_required'),
+        ConnectionStatus.setupRequired,
+      );
     });
   });
 

@@ -2,6 +2,15 @@ import 'package:flutter/foundation.dart';
 
 /// Trạng thái một kết nối tới nền tảng ngoài — **mã canonical** (ADR-TON-018).
 enum ConnectionStatus {
+  /// **Chưa có credential.** Người bán đã chọn nền tảng nhưng chưa nhập khoá,
+  /// hoặc chưa đăng nhập xong.
+  ///
+  /// Trạng thái này tồn tại vì luật của Founder (WTM-318 §8): *chưa nhập token
+  /// ⇒ `SETUP_REQUIRED`, **không fake connected***. Không có nó thì chỗ duy
+  /// nhất để đặt một kết nối dở dang là `error` — và `error` nói sai chuyện:
+  /// không có gì hỏng cả, chỉ là chưa xong.
+  setupRequired('setup_required'),
+
   /// Đang hoạt động: có credential, lần đồng bộ gần nhất không lỗi.
   active('active'),
 
