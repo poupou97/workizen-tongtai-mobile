@@ -24387,6 +24387,756 @@ class ShipmentsTableCompanion extends UpdateCompanion<ShipmentsTableData> {
   }
 }
 
+class $DemoEventsTableTable extends DemoEventsTable
+    with TableInfo<$DemoEventsTableTable, DemoEventsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DemoEventsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actorMeta = const VerificationMeta('actor');
+  @override
+  late final GeneratedColumn<String> actor = GeneratedColumn<String>(
+    'actor',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
+  @override
+  late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
+    'vendor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _subjectKindMeta = const VerificationMeta(
+    'subjectKind',
+  );
+  @override
+  late final GeneratedColumn<String> subjectKind = GeneratedColumn<String>(
+    'subject_kind',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _subjectIdMeta = const VerificationMeta(
+    'subjectId',
+  );
+  @override
+  late final GeneratedColumn<String> subjectId = GeneratedColumn<String>(
+    'subject_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _correlationIdMeta = const VerificationMeta(
+    'correlationId',
+  );
+  @override
+  late final GeneratedColumn<String> correlationId = GeneratedColumn<String>(
+    'correlation_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _headlineMeta = const VerificationMeta(
+    'headline',
+  );
+  @override
+  late final GeneratedColumn<String> headline = GeneratedColumn<String>(
+    'headline',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _occurredAtMeta = const VerificationMeta(
+    'occurredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> occurredAt = GeneratedColumn<DateTime>(
+    'occurred_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _appliedAtMeta = const VerificationMeta(
+    'appliedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> appliedAt = GeneratedColumn<DateTime>(
+    'applied_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    kind,
+    actor,
+    vendor,
+    subjectKind,
+    subjectId,
+    correlationId,
+    headline,
+    payload,
+    occurredAt,
+    appliedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'demo_events_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DemoEventsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('actor')) {
+      context.handle(
+        _actorMeta,
+        actor.isAcceptableOrUnknown(data['actor']!, _actorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actorMeta);
+    }
+    if (data.containsKey('vendor')) {
+      context.handle(
+        _vendorMeta,
+        vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta),
+      );
+    }
+    if (data.containsKey('subject_kind')) {
+      context.handle(
+        _subjectKindMeta,
+        subjectKind.isAcceptableOrUnknown(
+          data['subject_kind']!,
+          _subjectKindMeta,
+        ),
+      );
+    }
+    if (data.containsKey('subject_id')) {
+      context.handle(
+        _subjectIdMeta,
+        subjectId.isAcceptableOrUnknown(data['subject_id']!, _subjectIdMeta),
+      );
+    }
+    if (data.containsKey('correlation_id')) {
+      context.handle(
+        _correlationIdMeta,
+        correlationId.isAcceptableOrUnknown(
+          data['correlation_id']!,
+          _correlationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('headline')) {
+      context.handle(
+        _headlineMeta,
+        headline.isAcceptableOrUnknown(data['headline']!, _headlineMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_headlineMeta);
+    }
+    if (data.containsKey('payload')) {
+      context.handle(
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+        _occurredAtMeta,
+        occurredAt.isAcceptableOrUnknown(data['occurred_at']!, _occurredAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredAtMeta);
+    }
+    if (data.containsKey('applied_at')) {
+      context.handle(
+        _appliedAtMeta,
+        appliedAt.isAcceptableOrUnknown(data['applied_at']!, _appliedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DemoEventsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DemoEventsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      actor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}actor'],
+      )!,
+      vendor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vendor'],
+      ),
+      subjectKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_kind'],
+      ),
+      subjectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject_id'],
+      ),
+      correlationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}correlation_id'],
+      ),
+      headline: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}headline'],
+      )!,
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      ),
+      occurredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}occurred_at'],
+      )!,
+      appliedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}applied_at'],
+      ),
+    );
+  }
+
+  @override
+  $DemoEventsTableTable createAlias(String alias) {
+    return $DemoEventsTableTable(attachedDatabase, alias);
+  }
+}
+
+class DemoEventsTableData extends DataClass
+    implements Insertable<DemoEventsTableData> {
+  final String id;
+  final String businessId;
+
+  /// Mã canonical loại sự kiện — mười bảy loại của §34.
+  final String kind;
+
+  /// Ai gây ra: `platform` (sàn/hãng) · `agent` (Tổng Tài) · `seller` (bạn).
+  ///
+  /// Ba chủ thể này là **nội dung** của dòng thời gian, không phải chi tiết kỹ
+  /// thuật: người bán cần thấy việc nào do máy làm và việc nào do mình làm.
+  final String actor;
+
+  /// Nền tảng liên quan — `shopee` · `facebook` · `ghn`… `null` khi nội bộ.
+  final String? vendor;
+  final String? subjectKind;
+  final String? subjectId;
+
+  /// Nối các sự kiện của **cùng một câu chuyện**.
+  ///
+  /// Đây là thứ thay cho một entity `BusinessConversation` (WTM-296 §10): một
+  /// bình luận, câu trả lời, đơn hàng và kiện hàng của cùng một khách đọc liền
+  /// mạch mà không cần bảng thứ hai.
+  final String? correlationId;
+
+  /// Câu người bán đọc. Đã là tiếng Việt, không phải mã.
+  final String headline;
+
+  /// Chi tiết theo loại — JSON.
+  final String? payload;
+
+  /// Lúc chuyện xảy ra **trong thế giới mô phỏng**, không phải lúc ghi dòng.
+  final DateTime occurredAt;
+
+  /// Lúc sự kiện được **áp vào miền thật**. `null` = chưa tới lượt.
+  ///
+  /// Tách hai mốc là điều kiện để đồng hồ chạy được: engine sinh sẵn 30 ngày
+  /// sự kiện, rồi mỗi lần bấm "Ngày tiếp" chỉ áp những cái đã tới hạn.
+  final DateTime? appliedAt;
+  const DemoEventsTableData({
+    required this.id,
+    required this.businessId,
+    required this.kind,
+    required this.actor,
+    this.vendor,
+    this.subjectKind,
+    this.subjectId,
+    this.correlationId,
+    required this.headline,
+    this.payload,
+    required this.occurredAt,
+    this.appliedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['kind'] = Variable<String>(kind);
+    map['actor'] = Variable<String>(actor);
+    if (!nullToAbsent || vendor != null) {
+      map['vendor'] = Variable<String>(vendor);
+    }
+    if (!nullToAbsent || subjectKind != null) {
+      map['subject_kind'] = Variable<String>(subjectKind);
+    }
+    if (!nullToAbsent || subjectId != null) {
+      map['subject_id'] = Variable<String>(subjectId);
+    }
+    if (!nullToAbsent || correlationId != null) {
+      map['correlation_id'] = Variable<String>(correlationId);
+    }
+    map['headline'] = Variable<String>(headline);
+    if (!nullToAbsent || payload != null) {
+      map['payload'] = Variable<String>(payload);
+    }
+    map['occurred_at'] = Variable<DateTime>(occurredAt);
+    if (!nullToAbsent || appliedAt != null) {
+      map['applied_at'] = Variable<DateTime>(appliedAt);
+    }
+    return map;
+  }
+
+  DemoEventsTableCompanion toCompanion(bool nullToAbsent) {
+    return DemoEventsTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      kind: Value(kind),
+      actor: Value(actor),
+      vendor: vendor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vendor),
+      subjectKind: subjectKind == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subjectKind),
+      subjectId: subjectId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subjectId),
+      correlationId: correlationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(correlationId),
+      headline: Value(headline),
+      payload: payload == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payload),
+      occurredAt: Value(occurredAt),
+      appliedAt: appliedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(appliedAt),
+    );
+  }
+
+  factory DemoEventsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DemoEventsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      actor: serializer.fromJson<String>(json['actor']),
+      vendor: serializer.fromJson<String?>(json['vendor']),
+      subjectKind: serializer.fromJson<String?>(json['subjectKind']),
+      subjectId: serializer.fromJson<String?>(json['subjectId']),
+      correlationId: serializer.fromJson<String?>(json['correlationId']),
+      headline: serializer.fromJson<String>(json['headline']),
+      payload: serializer.fromJson<String?>(json['payload']),
+      occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+      appliedAt: serializer.fromJson<DateTime?>(json['appliedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'kind': serializer.toJson<String>(kind),
+      'actor': serializer.toJson<String>(actor),
+      'vendor': serializer.toJson<String?>(vendor),
+      'subjectKind': serializer.toJson<String?>(subjectKind),
+      'subjectId': serializer.toJson<String?>(subjectId),
+      'correlationId': serializer.toJson<String?>(correlationId),
+      'headline': serializer.toJson<String>(headline),
+      'payload': serializer.toJson<String?>(payload),
+      'occurredAt': serializer.toJson<DateTime>(occurredAt),
+      'appliedAt': serializer.toJson<DateTime?>(appliedAt),
+    };
+  }
+
+  DemoEventsTableData copyWith({
+    String? id,
+    String? businessId,
+    String? kind,
+    String? actor,
+    Value<String?> vendor = const Value.absent(),
+    Value<String?> subjectKind = const Value.absent(),
+    Value<String?> subjectId = const Value.absent(),
+    Value<String?> correlationId = const Value.absent(),
+    String? headline,
+    Value<String?> payload = const Value.absent(),
+    DateTime? occurredAt,
+    Value<DateTime?> appliedAt = const Value.absent(),
+  }) => DemoEventsTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    kind: kind ?? this.kind,
+    actor: actor ?? this.actor,
+    vendor: vendor.present ? vendor.value : this.vendor,
+    subjectKind: subjectKind.present ? subjectKind.value : this.subjectKind,
+    subjectId: subjectId.present ? subjectId.value : this.subjectId,
+    correlationId: correlationId.present
+        ? correlationId.value
+        : this.correlationId,
+    headline: headline ?? this.headline,
+    payload: payload.present ? payload.value : this.payload,
+    occurredAt: occurredAt ?? this.occurredAt,
+    appliedAt: appliedAt.present ? appliedAt.value : this.appliedAt,
+  );
+  DemoEventsTableData copyWithCompanion(DemoEventsTableCompanion data) {
+    return DemoEventsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      actor: data.actor.present ? data.actor.value : this.actor,
+      vendor: data.vendor.present ? data.vendor.value : this.vendor,
+      subjectKind: data.subjectKind.present
+          ? data.subjectKind.value
+          : this.subjectKind,
+      subjectId: data.subjectId.present ? data.subjectId.value : this.subjectId,
+      correlationId: data.correlationId.present
+          ? data.correlationId.value
+          : this.correlationId,
+      headline: data.headline.present ? data.headline.value : this.headline,
+      payload: data.payload.present ? data.payload.value : this.payload,
+      occurredAt: data.occurredAt.present
+          ? data.occurredAt.value
+          : this.occurredAt,
+      appliedAt: data.appliedAt.present ? data.appliedAt.value : this.appliedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DemoEventsTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('kind: $kind, ')
+          ..write('actor: $actor, ')
+          ..write('vendor: $vendor, ')
+          ..write('subjectKind: $subjectKind, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('correlationId: $correlationId, ')
+          ..write('headline: $headline, ')
+          ..write('payload: $payload, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('appliedAt: $appliedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    kind,
+    actor,
+    vendor,
+    subjectKind,
+    subjectId,
+    correlationId,
+    headline,
+    payload,
+    occurredAt,
+    appliedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DemoEventsTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.kind == this.kind &&
+          other.actor == this.actor &&
+          other.vendor == this.vendor &&
+          other.subjectKind == this.subjectKind &&
+          other.subjectId == this.subjectId &&
+          other.correlationId == this.correlationId &&
+          other.headline == this.headline &&
+          other.payload == this.payload &&
+          other.occurredAt == this.occurredAt &&
+          other.appliedAt == this.appliedAt);
+}
+
+class DemoEventsTableCompanion extends UpdateCompanion<DemoEventsTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> kind;
+  final Value<String> actor;
+  final Value<String?> vendor;
+  final Value<String?> subjectKind;
+  final Value<String?> subjectId;
+  final Value<String?> correlationId;
+  final Value<String> headline;
+  final Value<String?> payload;
+  final Value<DateTime> occurredAt;
+  final Value<DateTime?> appliedAt;
+  final Value<int> rowid;
+  const DemoEventsTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.actor = const Value.absent(),
+    this.vendor = const Value.absent(),
+    this.subjectKind = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    this.correlationId = const Value.absent(),
+    this.headline = const Value.absent(),
+    this.payload = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+    this.appliedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DemoEventsTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String kind,
+    required String actor,
+    this.vendor = const Value.absent(),
+    this.subjectKind = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    this.correlationId = const Value.absent(),
+    required String headline,
+    this.payload = const Value.absent(),
+    required DateTime occurredAt,
+    this.appliedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       kind = Value(kind),
+       actor = Value(actor),
+       headline = Value(headline),
+       occurredAt = Value(occurredAt);
+  static Insertable<DemoEventsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? kind,
+    Expression<String>? actor,
+    Expression<String>? vendor,
+    Expression<String>? subjectKind,
+    Expression<String>? subjectId,
+    Expression<String>? correlationId,
+    Expression<String>? headline,
+    Expression<String>? payload,
+    Expression<DateTime>? occurredAt,
+    Expression<DateTime>? appliedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (kind != null) 'kind': kind,
+      if (actor != null) 'actor': actor,
+      if (vendor != null) 'vendor': vendor,
+      if (subjectKind != null) 'subject_kind': subjectKind,
+      if (subjectId != null) 'subject_id': subjectId,
+      if (correlationId != null) 'correlation_id': correlationId,
+      if (headline != null) 'headline': headline,
+      if (payload != null) 'payload': payload,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+      if (appliedAt != null) 'applied_at': appliedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DemoEventsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? kind,
+    Value<String>? actor,
+    Value<String?>? vendor,
+    Value<String?>? subjectKind,
+    Value<String?>? subjectId,
+    Value<String?>? correlationId,
+    Value<String>? headline,
+    Value<String?>? payload,
+    Value<DateTime>? occurredAt,
+    Value<DateTime?>? appliedAt,
+    Value<int>? rowid,
+  }) {
+    return DemoEventsTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      kind: kind ?? this.kind,
+      actor: actor ?? this.actor,
+      vendor: vendor ?? this.vendor,
+      subjectKind: subjectKind ?? this.subjectKind,
+      subjectId: subjectId ?? this.subjectId,
+      correlationId: correlationId ?? this.correlationId,
+      headline: headline ?? this.headline,
+      payload: payload ?? this.payload,
+      occurredAt: occurredAt ?? this.occurredAt,
+      appliedAt: appliedAt ?? this.appliedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (actor.present) {
+      map['actor'] = Variable<String>(actor.value);
+    }
+    if (vendor.present) {
+      map['vendor'] = Variable<String>(vendor.value);
+    }
+    if (subjectKind.present) {
+      map['subject_kind'] = Variable<String>(subjectKind.value);
+    }
+    if (subjectId.present) {
+      map['subject_id'] = Variable<String>(subjectId.value);
+    }
+    if (correlationId.present) {
+      map['correlation_id'] = Variable<String>(correlationId.value);
+    }
+    if (headline.present) {
+      map['headline'] = Variable<String>(headline.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<DateTime>(occurredAt.value);
+    }
+    if (appliedAt.present) {
+      map['applied_at'] = Variable<DateTime>(appliedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DemoEventsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('kind: $kind, ')
+          ..write('actor: $actor, ')
+          ..write('vendor: $vendor, ')
+          ..write('subjectKind: $subjectKind, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('correlationId: $correlationId, ')
+          ..write('headline: $headline, ')
+          ..write('payload: $payload, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('appliedAt: $appliedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -24449,6 +25199,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $ShipmentsTableTable shipmentsTable = $ShipmentsTableTable(this);
+  late final $DemoEventsTableTable demoEventsTable = $DemoEventsTableTable(
+    this,
+  );
   late final Index producersBusinessId = Index(
     'producers_business_id',
     'CREATE INDEX producers_business_id ON producers_table (business_id)',
@@ -24653,6 +25406,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'shipments_tracking',
     'CREATE INDEX shipments_tracking ON shipments_table (tracking_number)',
   );
+  late final Index demoEventsBusinessId = Index(
+    'demo_events_business_id',
+    'CREATE INDEX demo_events_business_id ON demo_events_table (business_id)',
+  );
+  late final Index demoEventsOccurredAt = Index(
+    'demo_events_occurred_at',
+    'CREATE INDEX demo_events_occurred_at ON demo_events_table (occurred_at)',
+  );
+  late final Index demoEventsCorrelation = Index(
+    'demo_events_correlation',
+    'CREATE INDEX demo_events_correlation ON demo_events_table (correlation_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -24691,6 +25456,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     chatMessagesTable,
     importJobsTable,
     shipmentsTable,
+    demoEventsTable,
     producersBusinessId,
     productsBusinessId,
     productsSku,
@@ -24742,6 +25508,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     shipmentsBusinessId,
     shipmentsOrderId,
     shipmentsTracking,
+    demoEventsBusinessId,
+    demoEventsOccurredAt,
+    demoEventsCorrelation,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -24950,6 +25719,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('shipments_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('demo_events_table', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -25468,6 +26244,26 @@ final class $$BusinessesTableTableReferences
     ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_shipmentsTableRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$DemoEventsTableTable, List<DemoEventsTableData>>
+  _demoEventsTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.demoEventsTable,
+    aliasName: 'businesses_table__id__demo_events_table__business_id',
+  );
+
+  $$DemoEventsTableTableProcessedTableManager get demoEventsTableRefs {
+    final manager = $$DemoEventsTableTableTableManager(
+      $_db,
+      $_db.demoEventsTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _demoEventsTableRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -26099,6 +26895,31 @@ class $$BusinessesTableTableFilterComposer
           }) => $$ShipmentsTableTableFilterComposer(
             $db: $db,
             $table: $db.shipmentsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> demoEventsTableRefs(
+    Expression<bool> Function($$DemoEventsTableTableFilterComposer f) f,
+  ) {
+    final $$DemoEventsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.demoEventsTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DemoEventsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.demoEventsTable,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -26817,6 +27638,31 @@ class $$BusinessesTableTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> demoEventsTableRefs<T extends Object>(
+    Expression<T> Function($$DemoEventsTableTableAnnotationComposer a) f,
+  ) {
+    final $$DemoEventsTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.demoEventsTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DemoEventsTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.demoEventsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$BusinessesTableTableTableManager
@@ -26856,6 +27702,7 @@ class $$BusinessesTableTableTableManager
             bool agentTasksTableRefs,
             bool importJobsTableRefs,
             bool shipmentsTableRefs,
+            bool demoEventsTableRefs,
           })
         > {
   $$BusinessesTableTableTableManager(
@@ -26960,6 +27807,7 @@ class $$BusinessesTableTableTableManager
                 agentTasksTableRefs = false,
                 importJobsTableRefs = false,
                 shipmentsTableRefs = false,
+                demoEventsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -26986,6 +27834,7 @@ class $$BusinessesTableTableTableManager
                     if (agentTasksTableRefs) db.agentTasksTable,
                     if (importJobsTableRefs) db.importJobsTable,
                     if (shipmentsTableRefs) db.shipmentsTable,
+                    if (demoEventsTableRefs) db.demoEventsTable,
                   ],
                   addJoins:
                       <
@@ -27485,6 +28334,27 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (demoEventsTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          DemoEventsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._demoEventsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).demoEventsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -27529,6 +28399,7 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool agentTasksTableRefs,
         bool importJobsTableRefs,
         bool shipmentsTableRefs,
+        bool demoEventsTableRefs,
       })
     >;
 typedef $$UsersTableTableCreateCompanionBuilder =
@@ -43615,6 +44486,476 @@ typedef $$ShipmentsTableTableProcessedTableManager =
       ShipmentsTableData,
       PrefetchHooks Function({bool businessId})
     >;
+typedef $$DemoEventsTableTableCreateCompanionBuilder =
+    DemoEventsTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String kind,
+      required String actor,
+      Value<String?> vendor,
+      Value<String?> subjectKind,
+      Value<String?> subjectId,
+      Value<String?> correlationId,
+      required String headline,
+      Value<String?> payload,
+      required DateTime occurredAt,
+      Value<DateTime?> appliedAt,
+      Value<int> rowid,
+    });
+typedef $$DemoEventsTableTableUpdateCompanionBuilder =
+    DemoEventsTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> kind,
+      Value<String> actor,
+      Value<String?> vendor,
+      Value<String?> subjectKind,
+      Value<String?> subjectId,
+      Value<String?> correlationId,
+      Value<String> headline,
+      Value<String?> payload,
+      Value<DateTime> occurredAt,
+      Value<DateTime?> appliedAt,
+      Value<int> rowid,
+    });
+
+final class $$DemoEventsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $DemoEventsTableTable,
+          DemoEventsTableData
+        > {
+  $$DemoEventsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
+      .businessesTable
+      .createAlias('demo_events_table__business_id__businesses_table__id');
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DemoEventsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DemoEventsTableTable> {
+  $$DemoEventsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actor => $composableBuilder(
+    column: $table.actor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vendor => $composableBuilder(
+    column: $table.vendor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get headline => $composableBuilder(
+    column: $table.headline,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get appliedAt => $composableBuilder(
+    column: $table.appliedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DemoEventsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DemoEventsTableTable> {
+  $$DemoEventsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actor => $composableBuilder(
+    column: $table.actor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get vendor => $composableBuilder(
+    column: $table.vendor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subjectId => $composableBuilder(
+    column: $table.subjectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get headline => $composableBuilder(
+    column: $table.headline,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get appliedAt => $composableBuilder(
+    column: $table.appliedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DemoEventsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DemoEventsTableTable> {
+  $$DemoEventsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get actor =>
+      $composableBuilder(column: $table.actor, builder: (column) => column);
+
+  GeneratedColumn<String> get vendor =>
+      $composableBuilder(column: $table.vendor, builder: (column) => column);
+
+  GeneratedColumn<String> get subjectKind => $composableBuilder(
+    column: $table.subjectKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subjectId =>
+      $composableBuilder(column: $table.subjectId, builder: (column) => column);
+
+  GeneratedColumn<String> get correlationId => $composableBuilder(
+    column: $table.correlationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get headline =>
+      $composableBuilder(column: $table.headline, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get appliedAt =>
+      $composableBuilder(column: $table.appliedAt, builder: (column) => column);
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DemoEventsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DemoEventsTableTable,
+          DemoEventsTableData,
+          $$DemoEventsTableTableFilterComposer,
+          $$DemoEventsTableTableOrderingComposer,
+          $$DemoEventsTableTableAnnotationComposer,
+          $$DemoEventsTableTableCreateCompanionBuilder,
+          $$DemoEventsTableTableUpdateCompanionBuilder,
+          (DemoEventsTableData, $$DemoEventsTableTableReferences),
+          DemoEventsTableData,
+          PrefetchHooks Function({bool businessId})
+        > {
+  $$DemoEventsTableTableTableManager(
+    _$AppDatabase db,
+    $DemoEventsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DemoEventsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DemoEventsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DemoEventsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> actor = const Value.absent(),
+                Value<String?> vendor = const Value.absent(),
+                Value<String?> subjectKind = const Value.absent(),
+                Value<String?> subjectId = const Value.absent(),
+                Value<String?> correlationId = const Value.absent(),
+                Value<String> headline = const Value.absent(),
+                Value<String?> payload = const Value.absent(),
+                Value<DateTime> occurredAt = const Value.absent(),
+                Value<DateTime?> appliedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DemoEventsTableCompanion(
+                id: id,
+                businessId: businessId,
+                kind: kind,
+                actor: actor,
+                vendor: vendor,
+                subjectKind: subjectKind,
+                subjectId: subjectId,
+                correlationId: correlationId,
+                headline: headline,
+                payload: payload,
+                occurredAt: occurredAt,
+                appliedAt: appliedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String kind,
+                required String actor,
+                Value<String?> vendor = const Value.absent(),
+                Value<String?> subjectKind = const Value.absent(),
+                Value<String?> subjectId = const Value.absent(),
+                Value<String?> correlationId = const Value.absent(),
+                required String headline,
+                Value<String?> payload = const Value.absent(),
+                required DateTime occurredAt,
+                Value<DateTime?> appliedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DemoEventsTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                kind: kind,
+                actor: actor,
+                vendor: vendor,
+                subjectKind: subjectKind,
+                subjectId: subjectId,
+                correlationId: correlationId,
+                headline: headline,
+                payload: payload,
+                occurredAt: occurredAt,
+                appliedAt: appliedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DemoEventsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$DemoEventsTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$DemoEventsTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DemoEventsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DemoEventsTableTable,
+      DemoEventsTableData,
+      $$DemoEventsTableTableFilterComposer,
+      $$DemoEventsTableTableOrderingComposer,
+      $$DemoEventsTableTableAnnotationComposer,
+      $$DemoEventsTableTableCreateCompanionBuilder,
+      $$DemoEventsTableTableUpdateCompanionBuilder,
+      (DemoEventsTableData, $$DemoEventsTableTableReferences),
+      DemoEventsTableData,
+      PrefetchHooks Function({bool businessId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -43703,4 +45044,6 @@ class $AppDatabaseManager {
       $$ImportJobsTableTableTableManager(_db, _db.importJobsTable);
   $$ShipmentsTableTableTableManager get shipmentsTable =>
       $$ShipmentsTableTableTableManager(_db, _db.shipmentsTable);
+  $$DemoEventsTableTableTableManager get demoEventsTable =>
+      $$DemoEventsTableTableTableManager(_db, _db.demoEventsTable);
 }

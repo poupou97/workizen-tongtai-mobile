@@ -138,7 +138,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 25;
+const int kTongtaiSchemaVersion = 26;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -431,6 +431,15 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 26) {
+        // v26 (WTM-337 — Connected Business Experience). Một bảng, thuần thêm.
+        //
+        // Bản mô phỏng cần sáu khái niệm (hội thoại · bình luận · đánh giá ·
+        // ca hỗ trợ · chiến dịch · lead) và cả sáu đều là "chuyện đã xảy ra
+        // vào một thời điểm, gắn với một đối tượng" — tức là một sự kiện.
+        // Sáu bảng ở đây sẽ là sáu bảng phải nuôi mãi cho một bản demo.
+        await _createTableWithIndexes(db, m, 'demo_events_table');
       }
       if (from < 25) {
         // v25 (WTM-323 — Logistics). Một bảng mới, thuần thêm mới.

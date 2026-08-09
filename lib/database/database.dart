@@ -9,6 +9,7 @@ import '../core/perf/startup_trace.dart';
 import 'tables/users.dart';
 import 'tables/businesses.dart';
 import 'tables/producers.dart';
+import 'tables/demo_events.dart';
 import 'tables/import_jobs.dart';
 import 'tables/product_variants.dart';
 import 'tables/products.dart';
@@ -106,6 +107,7 @@ part 'database.g.dart';
     ChatMessagesTable,
     ImportJobsTable,
     ShipmentsTable,
+    DemoEventsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
