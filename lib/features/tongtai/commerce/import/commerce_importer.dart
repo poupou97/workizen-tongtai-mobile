@@ -3,6 +3,8 @@ import '../../consumer/customer_repository.dart';
 import '../../core/provenance.dart';
 import '../../finance/settlement_repository.dart';
 import '../../inventory/product_repository.dart';
+import '../../logistics/shipment.dart';
+import '../../logistics/shipment_repository.dart';
 import '../../orders/order_repository.dart';
 import '../commerce_models.dart';
 import '../commerce_repository.dart';
@@ -32,6 +34,7 @@ class CommerceImporter {
     required this.orders,
     required this.settlements,
     required this.commerce,
+    required this.shipments,
     required this.now,
     required this.newId,
   }) : _db = database;
@@ -42,6 +45,7 @@ class CommerceImporter {
   final OrderRepository orders;
   final SettlementRepository settlements;
   final CommerceRepository commerce;
+  final ShipmentRepository shipments;
   final DateTime Function() now;
   final String Function() newId;
 
@@ -138,6 +142,27 @@ class CommerceImporter {
       if (preview.settlements.isNotEmpty) {
         await settlements.upsertAll(preview.settlements);
         counts['settlements'] = preview.settlements.length;
+      }
+      if (preview.shipments.isNotEmpty) {
+        await shipments.upsertAll([
+          for (final s in preview.shipments)
+            Shipment(
+              id: s.id,
+              orderId: s.orderId,
+              trackingNumber: s.trackingNumber,
+              carrier: s.carrier,
+              status: s.status,
+              lastUpdate: s.lastUpdate,
+              eta: s.eta,
+              origin: s.origin,
+              destination: s.destination,
+              notes: s.notes,
+              externalId: s.externalId,
+              provenance: ProvenanceSource.fileBridge,
+              importJobId: jobId,
+            ),
+        ]);
+        counts['shipments'] = preview.shipments.length;
       }
 
       await commerce.saveImportJob(

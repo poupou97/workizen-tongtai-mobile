@@ -12,6 +12,8 @@ import '../commerce/import/commerce_import.dart';
 import '../commerce/import/commerce_importer.dart';
 import '../commerce/import/xlsx_commerce_source.dart';
 import '../finance/settlement_repository.dart';
+import '../logistics/shipment_repository.dart';
+import '../logistics/shipment_rule.dart';
 import 'tongtai_chat_provider.dart' show tongtaiDatabaseProvider;
 import 'tongtai_consumer_provider.dart';
 import 'tongtai_inventory_provider.dart';
@@ -30,6 +32,18 @@ final settlementRepositoryProvider = Provider<SettlementRepository>(
   (ref) => DriftSettlementRepository(ref.watch(tongtaiDatabaseProvider)),
 );
 
+final shipmentRepositoryProvider = Provider<ShipmentRepository>(
+  (ref) => ShipmentRepository(ref.watch(tongtaiDatabaseProvider)),
+);
+
+/// Chuyến giao hàng đáng nhắc — Rule Twin, chạy không cần mạng (WTM-323).
+final shipmentConcernsProvider = FutureProvider<List<ShipmentConcern>>((
+  ref,
+) async {
+  final shipments = await ref.watch(shipmentRepositoryProvider).loadAll();
+  return const ShipmentRule().assess(shipments, now: DateTime.now());
+});
+
 /// Bộ nhập hàng — **đường production** (§15), không seed thẳng SQLite.
 final commerceImporterProvider = Provider<CommerceImporter>((ref) {
   const uuid = Uuid();
@@ -40,6 +54,7 @@ final commerceImporterProvider = Provider<CommerceImporter>((ref) {
     orders: ref.watch(orderRepositoryProvider),
     settlements: ref.watch(settlementRepositoryProvider),
     commerce: ref.watch(commerceRepositoryProvider),
+    shipments: ref.watch(shipmentRepositoryProvider),
     now: DateTime.now,
     newId: uuid.v4,
   );
@@ -105,6 +120,7 @@ final commerceOpportunitiesProvider = FutureProvider<List<BriefItem>>((
     products: products,
     profit: profit,
     quotes: quotes,
+    shipments: await ref.watch(shipmentConcernsProvider.future),
     now: DateTime.now(),
   );
 });

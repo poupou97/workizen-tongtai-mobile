@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../consumer/customer.dart';
 import '../../finance/settlement.dart';
 import '../../inventory/product.dart';
+import '../../logistics/shipment.dart';
 import '../../orders/order.dart';
 import '../commerce_models.dart';
 
@@ -97,6 +98,7 @@ class CommerceImportPreview {
     this.customers = const [],
     this.orders = const [],
     this.settlements = const [],
+    this.shipments = const [],
     this.issues = const [],
   });
 
@@ -122,6 +124,7 @@ class CommerceImportPreview {
   final List<Customer> customers;
   final List<CustomerOrder> orders;
   final List<SettlementLine> settlements;
+  final List<Shipment> shipments;
 
   final List<ImportIssue> issues;
 
@@ -145,7 +148,8 @@ class CommerceImportPreview {
       customers.isNotEmpty ||
       orders.isNotEmpty ||
       variants.isNotEmpty ||
-      quotes.isNotEmpty;
+      quotes.isNotEmpty ||
+      shipments.isNotEmpty;
 
   /// Số đếm theo loại — thứ màn xem trước hiện lên.
   Map<String, int> get counts => {
@@ -155,6 +159,7 @@ class CommerceImportPreview {
     'customers': customers.length,
     'orders': orders.length,
     'settlements': settlements.length,
+    'shipments': shipments.length,
   };
 }
 

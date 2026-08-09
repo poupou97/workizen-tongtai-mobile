@@ -18,6 +18,7 @@ import 'package:tongtai/features/tongtai/finance/settlement_repository.dart';
 import 'package:tongtai/features/tongtai/finance/true_profit.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+import 'package:tongtai/features/tongtai/logistics/shipment_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 
@@ -441,6 +442,7 @@ void main() {
         orders: DriftOrderRepository(db),
         settlements: DriftSettlementRepository(db),
         commerce: CommerceRepository(db),
+        shipments: ShipmentRepository(db),
         now: () => now,
         newId: () => 'test',
       ).apply(preview, sourceVendor: ImportVendor.bundledDemo, isDemo: true);

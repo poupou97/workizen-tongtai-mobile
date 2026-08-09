@@ -5,6 +5,7 @@ import '../inventory/product.dart';
 import '../proposal/proposed_change.dart';
 import 'commerce_models.dart';
 import 'commerce_profit.dart';
+import '../logistics/shipment_rule.dart';
 import 'supplier_comparison.dart';
 
 /// **Cơ hội thương mại** — Rule Twin, không hardcode (WTM-329 · §16).
@@ -41,12 +42,13 @@ class CommerceOpportunityService {
 
   final double thinMarginRatio;
 
-  /// Dựng danh sách việc từ danh mục + lời thật + báo giá.
+  /// Dựng danh sách việc từ danh mục + lời thật + báo giá + vận chuyển.
   List<BriefItem> derive({
     required List<Product> products,
     required CommerceProfitContext profit,
     required List<SupplierQuote> quotes,
     required DateTime now,
+    List<ShipmentConcern> shipments = const [],
   }) {
     final items = <BriefItem>[];
     final quotesByProduct = <String, List<SupplierQuote>>{};
@@ -59,7 +61,8 @@ class CommerceOpportunityService {
       ..addAll(_losingAfterFees(profit, products, now))
       ..addAll(_runningOut(products, now))
       ..addAll(_deadStock(products, soldProductIds, now))
-      ..addAll(_cheaperSupplier(products, quotesByProduct, profit, now));
+      ..addAll(_cheaperSupplier(products, quotesByProduct, profit, now))
+      ..addAll(_shipments(shipments, now));
 
     // Nặng trước. Trong cùng mức thì giữ thứ tự dựng — tức là "đang mất tiền"
     // đứng trên "sắp hết hàng", vì mất tiền không có ngày mai để sửa.
@@ -323,6 +326,54 @@ class CommerceOpportunityService {
     }
     return out;
   }
+
+  // ── vận chuyển ───────────────────────────────────────────────────────────
+
+  List<BriefItem> _shipments(List<ShipmentConcern> concerns, DateTime now) => [
+    for (final concern in concerns.take(maxPerKind))
+      BriefItem(
+        kind: BriefKind.businessSignal,
+        severity: switch (concern.kind) {
+          ShipmentConcernKind.deliveryFailed => BriefSeverity.critical,
+          ShipmentConcernKind.stuckWhilePeersArrived => BriefSeverity.warning,
+          ShipmentConcernKind.silent => BriefSeverity.info,
+        },
+        subjectKind: 'shipment',
+        subjectId: concern.shipment.id,
+        subjectLabel: concern.shipment.trackingNumber,
+        headline: switch (concern.kind) {
+          ShipmentConcernKind.deliveryFailed =>
+            'Đơn ${concern.shipment.trackingNumber} giao không thành công — '
+                'hãng sẽ hoàn về nếu không xử lý',
+          // ⭐ Câu đáng giá nhất: nó loại nguyên nhân chung (bão, quá tải) và
+          // chỉ còn lại nguyên nhân riêng của kiện này.
+          ShipmentConcernKind.stuckWhilePeersArrived =>
+            'Đơn ${concern.shipment.trackingNumber} đứng im '
+                '${concern.shipment.silentDaysAt(now)} ngày trong khi '
+                '${concern.peersDelivered} đơn cùng tuyến đã tới',
+          ShipmentConcernKind.silent =>
+            'Đơn ${concern.shipment.trackingNumber} '
+                '${concern.shipment.silentDaysAt(now)} ngày chưa có tin mới',
+        },
+        suggestion: concern.kind == ShipmentConcernKind.deliveryFailed
+            ? 'Gọi khách xác nhận địa chỉ rồi báo hãng giao lại'
+            : 'Gọi hãng hỏi tình trạng kiện hàng',
+        evidence: [
+          IdentityEvidence(
+            kind: IdentityEvidenceKind.businessRecordObservation,
+            source: 'rule:shipment-tracking',
+            detail: [
+              if (concern.shipment.carrier != null)
+                concern.shipment.carrier!.displayName,
+              if (concern.shipment.route != null) concern.shipment.route!,
+              if (concern.shipment.silentDaysAt(now) != null)
+                '${concern.shipment.silentDaysAt(now)} ngày không có tin',
+            ].join(' · '),
+          ),
+        ],
+        observedAt: now,
+      ),
+  ];
 
   /// Tiền, gọn cho một dòng tin. Không phải formatter của UI — đây là **dữ
   /// liệu** đi vào `headline`, và headline phải đọc được ở mọi nơi nó xuất
