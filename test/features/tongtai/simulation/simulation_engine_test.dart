@@ -10,6 +10,7 @@ import 'package:tongtai/features/tongtai/commerce/import/commerce_importer.dart'
 import 'package:tongtai/features/tongtai/commerce/import/xlsx_commerce_source.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
 import 'package:tongtai/features/tongtai/core/provenance.dart';
+import 'package:tongtai/features/tongtai/finance/settlement.dart';
 import 'package:tongtai/features/tongtai/finance/settlement_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/logistics/shipment_repository.dart';
@@ -158,11 +159,13 @@ void main() {
           db,
         ).loadStory('story-late-angry');
 
+        // WTM-345 — câu chuyện này nay chạy TRỌN, tới tận đánh giá của khách.
         expect(story.map((e) => e.kind), [
           DemoEventKind.orderCreated,
           DemoEventKind.shipmentDelayed,
           DemoEventKind.messageReceived,
           DemoEventKind.messageReceived,
+          DemoEventKind.reviewCreated,
         ]);
       },
     );
@@ -175,11 +178,80 @@ void main() {
       final angry = story.firstWhere(
         (e) => e.payload['sentiment'] == 'negative',
       );
-      final draft = story.last;
+      // Tìm bản nháp bằng **chủ thể**, không bằng vị trí: câu chuyện còn dài
+      // ra nữa (WTM-345 thêm đánh giá vào cuối), và `.last` sẽ âm thầm trỏ
+      // sang một sự kiện khác.
+      final draft = story.firstWhere((e) => e.actor == DemoActor.agent);
 
       // Một câu trả lời sai cho khách đang giận không rút lại được.
       expect(angry.payload['needsApproval'], isTrue);
       expect(draft.payload['needsApproval'], isTrue);
+    });
+
+    test(
+      '⭐ hoàn tiền vào SỔ ĐỐI SOÁT, không chỉ nằm trên dòng thời gian',
+      () async {
+        await importCatalogue();
+        final e = engine();
+        await e.start(anchor: anchor);
+        await e.advanceDay(days: 14);
+
+        // ⚠️ Bộ 100 sản phẩm **đã có sẵn** dòng hoàn tiền (cứ đơn thứ 23 là
+        // một đơn hoàn). Chỉ đếm phần MÔ PHỎNG sinh ra, nếu không bài test đo
+        // hai nguồn khác nhau và con số chẳng nói lên điều gì.
+        final refunds = [
+          for (final line in await DriftSettlementRepository(db).loadAll())
+            if (line.kind == SettlementKind.refund &&
+                line.id.startsWith('sample-'))
+              line,
+        ];
+
+        expect(refunds, hasLength(1));
+        final refund = refunds.single;
+        // ADR-TON-024: `amount` luôn dương, chiều nằm ở `direction`.
+        expect(refund.amount, greaterThan(0));
+        expect(refund.direction, SettlementDirection.outbound);
+        // Người bán trả, không phải sàn — nên nó ăn vào **lời thật** của họ.
+        expect(refund.fundedBy, FundingSource.seller);
+      },
+    );
+
+    test('đòi hoàn KHÔNG trừ tiền — chỉ hoàn tất mới chạm sổ', () async {
+      await importCatalogue();
+      final e = engine();
+      await e.start(anchor: anchor);
+      // Ngày 12 có yêu cầu hoàn, ngày 13 mới hoàn tất. `start()` đã áp ngày
+      // đầu, nên đẩy thêm 10 ngày là dừng đúng ở ngày có yêu cầu.
+      await e.advanceDay(days: 10);
+
+      final story = await DemoEventRepository(db).loadStory('story-refund');
+      expect(
+        story.where((x) => x.kind == DemoEventKind.refundRequested),
+        isNotEmpty,
+      );
+      // Trừ tiền ở bước ĐÒI là trừ cho một việc chưa xảy ra.
+      expect(
+        (await DriftSettlementRepository(db).loadAll()).where(
+          (l) => l.kind == SettlementKind.refund && l.id.startsWith('sample-'),
+        ),
+        isEmpty,
+      );
+    });
+
+    test('⭐ đánh giá nối vào ĐÚNG câu chuyện kiện chậm', () async {
+      await importCatalogue();
+      await engine().start(anchor: anchor);
+
+      final story = await DemoEventRepository(db).loadStory('story-late-angry');
+      final review = story.firstWhere(
+        (x) => x.kind == DemoEventKind.reviewCreated,
+      );
+
+      // Cùng một khách, cùng một câu chuyện — nên khi Founder mở khách ra thì
+      // thấy cả cái kết chứ không phải một chuỗi cụt.
+      expect(review.subjectKind, 'customer');
+      expect(review.subjectId, story.first.payload['customerId']);
+      expect(review.payload['rating'], 3);
     });
 
     test('ba chủ thể phân biệt được: sàn · Tổng Tài · bạn', () async {

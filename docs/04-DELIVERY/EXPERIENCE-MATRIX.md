@@ -1,6 +1,6 @@
 # Ma trận trải nghiệm — Tổng Tài
 
-> WTM-341 (E5 · Epic WTM-336) · cập nhật **2026-08-09** · nguồn: `main` sau PR #204.
+> WTM-341 (E5 · Epic WTM-336) · cập nhật **2026-08-10** · nguồn: `main` sau PR #210.
 > Founder Task Order EXPERIENCE-FIRST BUSINESS SIMULATION §39.
 
 Ma trận này trả lời **một** câu hỏi: *hành trình nào thật sự chạy trọn, và hành
@@ -49,8 +49,8 @@ trình nào mới có dữ liệu mà chưa có màn?*
 | 7 | **Fulfillment** — đóng gói, bàn giao | — | — | — | — | — | — | — | — |
 | 8 | **Shipment** — kiện đi tới đâu | ✅ 3 hãng, có chậm | ◐ chỉ trong Brief/Cơ hội, **không có màn riêng** | ✅ so hàng xóm cùng tuyến | ✅ | ✅ Brief | — chưa có handler liên hệ hãng | — | ✅ |
 | 9 | **Support** — khách phàn nàn | ✅ khách giận ngày 5 | ✅ Hội thoại | ◐ | ◐ | ✅ bắt buộc duyệt | ✅ | ✅ | ✅ |
-| 10 | **Refund** — hoàn tiền | — kịch bản chưa phát | — | — | — | — | — | — | — |
-| 11 | **Review** — đánh giá | — kịch bản chưa phát | — | — | — | — | — | — | — |
+| 10 | **Refund** — hoàn tiền | ✅ đòi → duyệt → hoàn | ✅ Hội thoại · Tài chính | ✅ vào lời thật | ◐ | ✅ bắt buộc duyệt | ◐ | ✅ dòng đối soát chiều ra | ✅ |
+| 11 | **Review** — đánh giá | ✅ 3 sao, nối câu chuyện kiện chậm | ✅ Khách 360 | — | — | — | — | — | ✅ |
 | 12 | **Repeat** — tới nhịp mua lại | ✅ ngày 28 | ✅ Khách hàng · Cơ hội | ✅ RFM | ✅ | ✅ Brief | ◐ qua `customer.send_message` | ◐ | ✅ |
 | 13 | **Churn** — khách lặng lâu | ✅ ngày 21 | ✅ Khách hàng rủi ro | ✅ `customer_risk_rule` | ✅ | ✅ Brief | ◐ | ◐ | ✅ |
 | 14 | **Sourcing** — tìm nguồn | ✅ 1688 báo giá | ✅ Nguồn hàng · So sánh NCC | ✅ `supplier_comparison` | ✅ | ✅ Brief | ✅ `inventory.create_purchase_order` | ✅ `demo:` | ✅ |
@@ -66,14 +66,14 @@ trình nào mới có dữ liệu mà chưa có màn?*
 
 | Cột | ✅ | ◐ | — |
 |---|---|---|---|
-| Dữ liệu demo | 13 | 2 | 6 |
-| Màn hình | 11 | 3 | 7 |
-| Kết luận | 10 | 3 | 8 |
-| Đề xuất | 8 | 2 | 11 |
-| Duyệt | 9 | 0 | 12 |
-| Hành động | 5 | 4 | 12 |
-| Kết quả | 6 | 4 | 11 |
-| Dòng thời gian | 15 | 2 | 4 |
+| Dữ liệu demo | 15 | 2 | 4 |
+| Màn hình | 13 | 3 | 5 |
+| Kết luận | 11 | 3 | 7 |
+| Đề xuất | 8 | 3 | 10 |
+| Duyệt | 10 | 0 | 11 |
+| Hành động | 5 | 5 | 11 |
+| Kết quả | 7 | 4 | 10 |
+| Dòng thời gian | 17 | 2 | 2 |
 
 ---
 
@@ -88,9 +88,15 @@ có đề xuất, có cửa duyệt, có hành động, có kết quả:
 gần hết doanh nghiệp và **làm** được rất ít phần của nó. Đó không phải lỗi — đó
 là chỗ đang đứng, và là dữ kiện cho câu hỏi concept số 2 dưới đây.
 
-**Bốn hàng trống hoàn toàn** (`Discover` · `Recommendation` · `Fulfillment` +
-hai hàng chỉ thiếu kịch bản `Refund`/`Review`) là ứng viên đầu tiên cho câu hỏi
-*"cái nào thật sự cần?"* — chứ không tự động là việc phải làm.
+**`Refund` và `Review` đã đóng** (WTM-345): hai hàng đó chỉ thiếu kịch bản, và
+loại sự kiện lẫn cấu trúc đối soát đều đã có sẵn — đóng chúng **không** cần kiến
+trúc mới. Hoàn tiền nay vào **sổ đối soát thật** (`kind: refund`, `direction:
+outbound`, `fundedBy: seller`) nên nó ăn vào **lời thật** của người bán, đúng chỗ
+người bán Việt Nam mất tiền nhiều nhất mà báo cáo hay bỏ sót.
+
+**Ba hàng còn trống hoàn toàn** — `Discover` · `Recommendation` · `Fulfillment` —
+cần **dữ liệu và màn mới**, tức là mở rộng phạm vi. Chúng là ứng viên cho câu hỏi
+*"cái nào thật sự cần?"* chứ không tự động là việc phải làm.
 
 ---
 
@@ -103,4 +109,5 @@ hai hàng chỉ thiếu kịch bản `Refund`/`Review`) là ứng viên đầu t
 | nháp là nháp cho tới khi bấm Gửi | `test/features/tongtai/simulation/customer_conversation_test.dart` |
 | Gửi ⇒ hành động thật, khai là mô phỏng | `test/features/tongtai/simulation/conversation_screen_test.dart` |
 | đẩy đồng hồ đổi **miền thật** | `test/features/tongtai/simulation/business_life_screen_test.dart` |
-| toàn bộ | `flutter test` — 2488 xanh |
+| hoàn tiền vào sổ đối soát, đòi hoàn thì chưa | `test/features/tongtai/simulation/simulation_engine_test.dart` |
+| toàn bộ | `flutter test` — 2509 xanh |
