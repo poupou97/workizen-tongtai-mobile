@@ -280,9 +280,7 @@ class _TongtaiOpportunityFeedScreenState
                     TongtaiDesignTokens.spacing2,
                   ),
                   child: Text(
-                    items.length == 1
-                        ? '1 opportunity'
-                        : '${items.length} opportunities',
+                    context.l10n.countOpportunities(items.length),
                     style: TongtaiDesignTokens.smallStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextSecondary,
                     ),

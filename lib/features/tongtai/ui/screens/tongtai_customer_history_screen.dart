@@ -230,7 +230,7 @@ class _TongtaiCustomerHistoryScreenState
                 TongtaiDesignTokens.spacing2,
               ),
               child: Text(
-                orders.length == 1 ? '1 order' : '${orders.length} orders',
+                context.l10n.countOrders(orders.length),
                 style: TongtaiDesignTokens.smallStyle.copyWith(
                   color: TongtaiDesignTokens.lightTextSecondary,
                 ),

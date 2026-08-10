@@ -164,10 +164,16 @@ class SimulationEngine {
           final quantity = (event.payload['quantity'] as num?)?.toInt() ?? 1;
           final orderId = 'sample-${event.id}';
 
+          // `orders.customer_id` là khoá ngoại. Ghi chuỗi rỗng khi kịch bản
+          // không có khách nào là SqliteException 787 — sập cả lần đẩy đồng
+          // hồ, chứ không phải một đơn thiếu tên (WTM-344).
+          final customerId = event.payload['customerId'] as String?;
+          if (customerId == null || customerId.isEmpty) break;
+
           newOrders.add(
             CustomerOrder(
               id: orderId,
-              customerId: (event.payload['customerId'] as String?) ?? '',
+              customerId: customerId,
               orderNumber: 'DH-${event.id.split('-').last}',
               date: event.occurredAt,
               status: OrderStatus.delivered,

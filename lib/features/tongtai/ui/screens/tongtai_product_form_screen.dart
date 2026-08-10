@@ -370,7 +370,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
             if (pending.isNotEmpty) ...[
               const SizedBox(height: TongtaiDesignTokens.spacing4),
               _ChangeList(
-                title: 'Unsaved changes (${pending.length})',
+                title: context.l10n.unsavedChanges(pending.length),
                 changes: pending,
                 accent: TongtaiDesignTokens.info,
               ),
