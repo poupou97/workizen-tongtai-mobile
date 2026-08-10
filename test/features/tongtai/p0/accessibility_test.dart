@@ -30,7 +30,6 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_producer_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_reports_screen.dart';
-import 'package:tongtai/features/tongtai/ui/screens/tongtai_timeline_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_form_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_list_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_goal_form_screen.dart';
@@ -153,7 +152,6 @@ void main() {
     'export': () => const TongtaiExportScreen(),
     'backup': () => const TongtaiBackupScreen(),
     'finance': () => const TongtaiFinanceScreen(),
-    'timeline': () => const TongtaiTimelineScreen(),
     'customer-risk': () => const TongtaiCustomerRiskScreen(),
     'forecast': () => const TongtaiForecastScreen(),
     // Every screen that constructs without a caller-supplied entity. The rest

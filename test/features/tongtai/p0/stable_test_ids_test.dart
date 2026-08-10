@@ -24,7 +24,6 @@ void main() {
     'tongtai_customer_list_screen.dart': 'customer',
     'tongtai_goals_screen.dart': 'goals',
     'tongtai_finance_screen.dart': 'finance',
-    'tongtai_timeline_screen.dart': 'timeline',
     'tongtai_opportunity_feed_screen.dart': 'opportunity',
     'tongtai_opportunity_detail_screen.dart': 'opportunity',
     'tongtai_reports_screen.dart': 'reports',

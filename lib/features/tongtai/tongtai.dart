@@ -118,7 +118,6 @@ export 'timeline/business_event.dart';
 export 'timeline/business_event_sources.dart';
 export 'timeline/timeline_service.dart';
 export 'timeline/timeline_theme.dart';
-export 'ui/screens/tongtai_timeline_screen.dart';
 
 // Journey — business goals (WTM-87) + goal detail & action plan (WTM-88)
 export 'journey/business_goal.dart';

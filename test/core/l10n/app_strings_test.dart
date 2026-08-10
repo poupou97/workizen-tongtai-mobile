@@ -54,7 +54,7 @@ void main() {
           s.languagePickerTitle,
           s.titleReports,
           s.titleFinance,
-          s.titleTimeline,
+          s.titleBusinessLife,
           s.moreLoadSample,
           s.moreRemoveSample,
           s.sectionGetStarted,

@@ -49,10 +49,30 @@ class BusinessEvent {
     this.subtitle = '',
     this.amount,
     this.refId,
+    this.actorCode,
+    this.vendor,
+    this.correlationId,
   });
 
   final String id;
   final BusinessEventType type;
+
+  // ── ai làm, ở đâu, thuộc chuyện nào (WTM-346) ────────────────────────────
+  //
+  // Ba trường này lên `BusinessEvent` chứ không ở riêng lớp demo, vì chúng là
+  // **nội dung** của một dòng thời gian doanh nghiệp: người bán cần biết việc
+  // nào sàn báo về, việc nào máy tự làm, việc nào chính mình đã bấm — kể cả
+  // khi ngày mai nguồn phát ra chúng là một connector thật.
+
+  /// `platform` · `agent` · `seller`. `null` = bản ghi nghiệp vụ thuần, không
+  /// có ai "làm" nó theo nghĩa đó (một dòng thu chi chẳng hạn).
+  final String? actorCode;
+
+  /// Mã nền tảng — `shopee` · `facebook_page`… `null` khi việc xảy ra nội bộ.
+  final String? vendor;
+
+  /// Nối các sự kiện của **cùng một câu chuyện**.
+  final String? correlationId;
   final String title;
   final String subtitle;
   final DateTime timestamp;
