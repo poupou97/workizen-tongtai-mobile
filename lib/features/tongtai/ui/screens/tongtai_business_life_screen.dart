@@ -4,41 +4,56 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
+import '../../core/tongtai_formatters.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_data_invalidation.dart';
+import '../../providers/tongtai_finance_provider.dart';
+import '../../providers/tongtai_journey_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
 import '../../providers/tongtai_simulation_provider.dart';
 import '../../simulation/demo_event.dart';
 import '../../simulation/simulation_engine.dart';
+import '../../timeline/business_event.dart';
+import '../../timeline/business_event_sources.dart';
+import '../../timeline/demo_event_source.dart';
+import '../../timeline/timeline_service.dart';
+import '../../timeline/timeline_theme.dart';
 import '../widgets/tongtai_screen_data.dart';
 
-/// **Doanh nghiệp của bạn** — dòng thời gian + đồng hồ mô phỏng.
-/// WTM-338 (E2 · Epic WTM-336). `IMPLEMENTATION_LEVEL=L3`.
+/// **Doanh nghiệp của bạn** — dòng thời gian DUY NHẤT của app.
+/// WTM-346 (gộp WTM-114 + WTM-338). `IMPLEMENTATION_LEVEL=L3`.
 ///
-/// ## §37 — Founder phải NHÌN THẤY doanh nghiệp đang sống
+/// ## Vì sao chỉ còn một màn
+///
+/// App từng có **hai** dòng thời gian: một dựng từ đơn/thu chi/cơ hội/mục tiêu
+/// thật, một dựng từ sổ sự kiện mô phỏng. Người bán không có hai khái niệm đó
+/// trong đầu — và tệ hơn, **không màn nào kể được trọn một ngày kinh doanh**:
+/// màn demo không thấy đơn thật, màn thật không thấy chuyện demo.
+///
+/// Nay sổ sự kiện là **một nguồn nữa** (`DemoBusinessEventSource`), không phải
+/// một màn nữa. Ngày connector thật thay chỗ mô phỏng, thứ phải đổi là một
+/// nguồn.
+///
+/// ## §37 — ba chủ thể là NỘI DUNG
 ///
 /// ```
 /// 08:12  Shopee     · 3 đơn về
-/// 08:31  Facebook   · khách hỏi về Áo thun cotton
 /// 09:05  Tổng Tài   · phát hiện sắp hết hàng
 /// 11:05  Bạn        · đã gửi câu trả lời
 /// ```
 ///
-/// Ba chủ thể — **sàn · Tổng Tài · bạn** — hiện rõ ai làm gì. Gộp cả ba thành
-/// "hệ thống" là xoá mất đúng thông tin khiến dòng thời gian đáng đọc: người
-/// bán cần phân biệt việc nào sàn báo về, việc nào máy tự làm, việc nào chính
-/// mình đã bấm.
+/// Gộp cả ba thành "hệ thống" là xoá mất đúng thông tin khiến dòng thời gian
+/// đáng đọc. Bản ghi nghiệp vụ thuần (một dòng thu chi) **không** có chủ thể —
+/// và để trống là câu trả lời đúng, không phải thiếu sót.
 ///
-/// ## §33 — 30 ngày trong 15 phút
+/// ## §33 · §40
 ///
-/// Ba nút đẩy đồng hồ. Mỗi lần đẩy, **miền thật thay đổi** — đơn vào sổ, tồn
-/// giảm, phí sàn về — nên mọi màn khác cũng đổi theo.
-///
-/// ## §40 — Không giấu chuyện đây là mô phỏng
-///
-/// Băng-rôn nằm trên cùng, không phải một dòng chữ mờ ở chân màn. Fake dữ liệu
-/// được phép; fake **trạng thái kỹ thuật** thì không.
+/// Ba nút đẩy đồng hồ đổi **miền thật**. Băng-rôn DEMO nằm trên cùng.
 class TongtaiBusinessLifeScreen extends ConsumerStatefulWidget {
-  const TongtaiBusinessLifeScreen({super.key});
+  const TongtaiBusinessLifeScreen({super.key, this.clock});
+
+  /// Đồng hồ tiêm vào để nhãn "Hôm nay/Hôm qua" kiểm được.
+  final DateTime Function()? clock;
 
   @override
   ConsumerState<TongtaiBusinessLifeScreen> createState() =>
@@ -47,7 +62,56 @@ class TongtaiBusinessLifeScreen extends ConsumerStatefulWidget {
 
 class _TongtaiBusinessLifeScreenState
     extends ConsumerState<TongtaiBusinessLifeScreen> {
+  late final ScreenDataController<TimelineService> _data;
+  BusinessEventType? _filter;
   bool _busy = false;
+
+  DateTime Function() get _clock => widget.clock ?? DateTime.now;
+
+  @override
+  void initState() {
+    super.initState();
+    _data = ScreenDataController<TimelineService>(
+      _read,
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'business_life',
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _data.dispose();
+    super.dispose();
+  }
+
+  /// Một dòng thời gian, nhiều nguồn — bản ghi thật **và** chuyện mô phỏng.
+  Future<TimelineService> _read() async {
+    final l10n = context.l10n;
+    final finance = await ref.read(financeRepositoryProvider).loadAll();
+    final orders = await ref.read(orderRepositoryProvider).loadAll();
+    final goals = await ref.read(businessGoalRepositoryProvider).loadAll();
+    final demo = await ref
+        .read(demoEventRepositoryProvider)
+        .loadTimeline(limit: 500);
+
+    // ⛔ **Cơ hội KHÔNG lên dòng thời gian** (WTM-346).
+    //
+    // Chúng là *việc nên làm*, không phải *việc đã xảy ra* — và điều đó lộ ra
+    // ở chính dữ liệu: mọi cơ hội đều mang mốc `now`, vì nó được suy ra lúc
+    // đọc chứ không xảy ra lúc nào cả. Gộp vào đây thì bốn mươi dòng "just
+    // now" dìm mất cả ngày kinh doanh thật, và người bán mở ra chỉ thấy máy
+    // nói về chính nó.
+    //
+    // Cơ hội đã có nhà riêng: màn Cơ hội và brief "Việc hôm nay" trên Trang
+    // chủ. Đây là dòng thời gian của **doanh nghiệp**, không phải nhật ký của
+    // bộ luật.
+    return TimelineService([
+      FinanceEventSource(finance, l10n: l10n),
+      OrderEventSource(orders),
+      JourneyEventSource(goals),
+      DemoBusinessEventSource(demo),
+    ]);
+  }
 
   Future<void> _run(Future<SimulationTick> Function() action) async {
     if (_busy) return;
@@ -67,7 +131,9 @@ class _TongtaiBusinessLifeScreenState
     // Chỉ làm mới màn này thì Founder bấm "Ngày tiếp" mà Home đứng im — và đó
     // đúng là thứ phá cảm giác "doanh nghiệp đang sống".
     invalidateBusinessDataProviders(ref);
+    await _data.load();
 
+    if (!mounted) return;
     if (failure != null) {
       showTongtaiFailure(context, failure);
       return;
@@ -91,7 +157,6 @@ class _TongtaiBusinessLifeScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final timeline = ref.watch(businessTimelineProvider);
     final day = ref.watch(simulationDayProvider).asData?.value;
 
     return Scaffold(
@@ -128,44 +193,57 @@ class _TongtaiBusinessLifeScreenState
               }),
             ),
             Expanded(
-              child: TongtaiAsyncScreenData<List<DemoEvent>>(
-                prefix: 'business-life',
-                async: timeline,
-                onRetry: () async => ref.invalidate(businessTimelineProvider),
-                isEmpty: (events) => events.isEmpty,
-                builder: (context, events) => ListView.builder(
-                  key: const Key('business-life-timeline'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  itemCount: events.length,
-                  itemBuilder: (context, i) => _TimelineRow(
-                    event: events[i],
-                    // Vạch ngày. Cột giờ chỉ có `hh:mm`, nên một tháng dồn
-                    // lại đọc ra "10:03 · 08:50 · 13:38" và trông như sắp
-                    // xếp hỏng — trong khi thứ tự vẫn đúng, chỉ là đã sang
-                    // ngày khác. Thiếu vạch này thì màn hình tự tố cáo mình
-                    // một lỗi không có thật.
-                    startsDay:
-                        i == 0 ||
-                        !_sameDay(
-                          events[i].occurredAt,
-                          events[i - 1].occurredAt,
-                        ),
-                    // Gạch nối giữa hai dòng cùng một câu chuyện — mắt bắt
-                    // được chuỗi sự việc trước khi đọc chữ.
-                    continuesStory:
-                        i + 1 < events.length &&
-                        events[i].correlationId != null &&
-                        events[i].correlationId == events[i + 1].correlationId,
-                  ),
+              child: ListenableBuilder(
+                listenable: _data,
+                builder: (context, _) => TongtaiScreenData<TimelineService>(
+                  prefix: 'business-life',
+                  state: _data.state,
+                  onRetry: _data.retry,
+                  isEmpty: (service) => service.timeline().isEmpty,
+                  builder: _body,
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _body(BuildContext context, TimelineService service) {
+    final now = _clock();
+    final all = service.timeline();
+    // Chỉ hiện bộ lọc cho loại **thật sự có** — một chip rỗng là một lời hứa
+    // suông.
+    final availableTypes = <BusinessEventType>[
+      for (final t in BusinessEventType.values)
+        if (all.any((e) => e.type == t)) t,
+    ];
+    final filtered = _filter == null
+        ? all
+        : [
+            for (final e in all)
+              if (e.type == _filter) e,
+          ];
+    final days = groupEventsByDay(filtered);
+
+    return Column(
+      children: [
+        _FilterRow(
+          types: availableTypes,
+          selected: _filter,
+          onSelected: (t) => setState(() => _filter = t),
+        ),
+        Expanded(
+          child: ListView(
+            key: const Key('business-life-timeline'),
+            padding: const EdgeInsets.only(
+              bottom: TongtaiDesignTokens.spacing6,
+            ),
+            children: [for (final d in days) _DaySection(day: d, now: now)],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -308,124 +386,201 @@ class _Controls extends StatelessWidget {
   }
 }
 
-bool _sameDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;
-
-class _TimelineRow extends StatelessWidget {
-  const _TimelineRow({
-    required this.event,
-    required this.continuesStory,
-    this.startsDay = false,
+class _FilterRow extends StatelessWidget {
+  const _FilterRow({
+    required this.types,
+    required this.selected,
+    required this.onSelected,
   });
 
-  final DemoEvent event;
+  final List<BusinessEventType> types;
+  final BusinessEventType? selected;
+  final ValueChanged<BusinessEventType?> onSelected;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 48,
+    child: ListView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(
+        horizontal: TongtaiDesignTokens.spacing4,
+      ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+          child: ChoiceChip(
+            key: const Key('business-life-filter-all'),
+            label: Text(context.l10n.filterAll),
+            selected: selected == null,
+            onSelected: (_) => onSelected(null),
+          ),
+        ),
+        for (final t in types)
+          Padding(
+            padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+            child: ChoiceChip(
+              key: Key('business-life-filter-${t.name}'),
+              label: Text(t.label(context.l10n.languageCode)),
+              selected: selected == t,
+              onSelected: (_) => onSelected(t),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+class _DaySection extends StatelessWidget {
+  const _DaySection({required this.day, required this.now});
+
+  final TimelineDay day;
+  final DateTime now;
+
+  String _label(AppStrings l10n) {
+    final today = DateTime(now.year, now.month, now.day);
+    final diff = today.difference(day.date).inDays;
+    if (diff == 0) return l10n.dateToday;
+    if (diff == 1) return l10n.dateYesterday;
+    return TongtaiFormatters.isoDate(day.date);
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          TongtaiDesignTokens.spacing4,
+          TongtaiDesignTokens.spacing4,
+          TongtaiDesignTokens.spacing4,
+          TongtaiDesignTokens.spacing2,
+        ),
+        child: Text(
+          _label(context.l10n),
+          style: TongtaiDesignTokens.smallStyle.copyWith(
+            color: TongtaiDesignTokens.lightTextSecondary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      for (var i = 0; i < day.events.length; i++)
+        _EventRow(
+          event: day.events[i],
+          now: now,
+          // Gạch nối giữa hai dòng cùng một câu chuyện — mắt bắt được chuỗi sự
+          // việc trước khi đọc chữ.
+          continuesStory:
+              i + 1 < day.events.length &&
+              day.events[i].correlationId != null &&
+              day.events[i].correlationId == day.events[i + 1].correlationId,
+        ),
+    ],
+  );
+}
+
+class _EventRow extends StatelessWidget {
+  const _EventRow({
+    required this.event,
+    required this.now,
+    this.continuesStory = false,
+  });
+
+  final BusinessEvent event;
+  final DateTime now;
   final bool continuesStory;
 
-  /// Dòng đầu tiên của một ngày ⇒ có vạch ngày phía trên.
-  final bool startsDay;
+  /// Ai làm việc này. `null` = bản ghi nghiệp vụ thuần, và để trống là câu trả
+  /// lời đúng: một dòng thu chi không có "ai" theo nghĩa đó.
+  (String, Color)? _actor(AppStrings l10n) => switch (event.actorCode) {
+    'platform' => (
+      event.vendor == null
+          ? l10n.actorPlatform
+          : DemoVendor.displayName(event.vendor),
+      const Color(0xFF3B6FD4),
+    ),
+    'agent' => (l10n.actorAgent, const Color(0xFF7A4FCF)),
+    'seller' => (l10n.actorSeller, const Color(0xFF2E7D4F)),
+    _ => null,
+  };
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final (label, color) = switch (event.actor) {
-      // Biết sàn nào thì gọi tên riêng của nó; không biết thì nói "Sàn" —
-      // một dòng ghi "Tổng Tài" cho việc do Shopee báo về là nói sai ai làm gì.
-      DemoActor.platform => (
-        event.vendor == null
-            ? l10n.actorPlatform
-            : DemoVendor.displayName(event.vendor),
-        const Color(0xFF3B6FD4),
-      ),
-      DemoActor.agent => (l10n.actorAgent, const Color(0xFF7A4FCF)),
-      DemoActor.seller => (l10n.actorSeller, const Color(0xFF2E7D4F)),
-    };
+    final actor = _actor(l10n);
+    final color = actor?.$2 ?? businessEventColor(event.type);
 
-    final row = IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 44,
-            child: Text(
-              _hhmm(event.occurredAt),
-              style: const TextStyle(
-                fontSize: 12,
-                fontFeatures: [FontFeature.tabularFigures()],
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              Container(
-                width: 9,
-                height: 9,
-                margin: const EdgeInsets.only(top: 4),
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              if (continuesStory)
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: color.withValues(alpha: 0.35),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TongtaiDesignTokens.spacing4,
+        vertical: TongtaiDesignTokens.spacing2,
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: color.withValues(alpha: 0.12),
+                  child: Icon(
+                    businessEventIcon(event.type),
+                    size: 18,
+                    color: color,
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 14),
+                if (continuesStory)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.only(top: 4),
+                      color: color.withValues(alpha: 0.35),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: color,
+                  if (actor != null)
+                    Text(
+                      actor.$1,
+                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: actor.$2,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
                   Text(
-                    event.headline,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      height: 1.4,
+                    event.title,
+                    style: TongtaiDesignTokens.smallStyle.copyWith(
                       color: TongtaiDesignTokens.lightTextPrimary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (event.subtitle.isNotEmpty)
+                    Text(
+                      event.subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                        color: TongtaiDesignTokens.lightTextSecondary,
+                      ),
+                    ),
                 ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            Text(
+              TongtaiFormatters.relativeDate(event.timestamp, now: now),
+              style: TongtaiDesignTokens.captionStyle.copyWith(
+                color: TongtaiDesignTokens.lightTextSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
-
-    if (!startsDay) return row;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            '${event.occurredAt.day}/${event.occurredAt.month}',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
-          ),
-        ),
-        row,
-      ],
-    );
   }
-
-  static String _hhmm(DateTime at) =>
-      '${at.hour.toString().padLeft(2, '0')}:'
-      '${at.minute.toString().padLeft(2, '0')}';
 }

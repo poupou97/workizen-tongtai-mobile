@@ -195,7 +195,6 @@ void main() {
         'more-demo-mode',
         'more-export',
         'more-reports',
-        'more-timeline',
         'more-finance',
         'more-forecast',
         'more-customer-risk',

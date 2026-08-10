@@ -131,7 +131,6 @@ abstract class AppStrings {
   // ── navigation / screen titles (P0 §2 WTM-145: one active locale) ──────
   String get titleReports;
   String get titleFinance;
-  String get titleTimeline;
   String get titleGoalDetail;
 
   // ── More menu ───────────────────────────────────────────────────────────
@@ -387,8 +386,6 @@ abstract class AppStrings {
   String goalTemplateDays(String typeLabel, int days);
 
   // ── Timeline (WTM-114) ──────────────────────────────────────────────────
-  String get timelineEmptyTitle;
-  String get timelineEmptyBody;
 
   // ── Chat (WTM-80/84) ────────────────────────────────────────────────────
   String get chatTyping;
@@ -1202,8 +1199,6 @@ class AppStringsVi extends AppStrings {
   @override
   String get titleFinance => 'Tài chính';
   @override
-  String get titleTimeline => 'Dòng thời gian';
-  @override
   String get titleGoalDetail => 'Chi tiết mục tiêu';
 
   @override
@@ -1631,13 +1626,6 @@ class AppStringsVi extends AppStrings {
   @override
   String goalTemplateDays(String typeLabel, int days) =>
       '$typeLabel • $days ngày';
-
-  @override
-  String get timelineEmptyTitle => 'Chưa có hoạt động nào';
-  @override
-  String get timelineEmptyBody =>
-      'Đơn hàng, thu chi, cơ hội và mục tiêu sẽ xuất hiện ở đây theo '
-      'thời gian.';
 
   @override
   String get chatTyping => 'Workizen AI đang nhập…';
@@ -3144,8 +3132,6 @@ class AppStringsEn extends AppStrings {
   @override
   String get titleFinance => 'Finance';
   @override
-  String get titleTimeline => 'Timeline';
-  @override
   String get titleGoalDetail => 'Goal details';
 
   @override
@@ -3573,13 +3559,6 @@ class AppStringsEn extends AppStrings {
   @override
   String goalTemplateDays(String typeLabel, int days) =>
       '$typeLabel • $days days';
-
-  @override
-  String get timelineEmptyTitle => 'No activity yet';
-  @override
-  String get timelineEmptyBody =>
-      'Orders, income & expenses, opportunities and goals will appear '
-      'here over time.';
 
   @override
   String get chatTyping => 'Workizen AI is typing…';

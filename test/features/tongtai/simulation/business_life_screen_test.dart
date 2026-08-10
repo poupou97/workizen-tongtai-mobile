@@ -25,7 +25,24 @@ import 'package:tongtai/features/tongtai/ui/screens/tongtai_business_life_screen
 import '../../../support/pump_until.dart';
 
 /// WTM-338 · E2 — màn **Doanh nghiệp của bạn** (`IMPLEMENTATION_LEVEL=L3`).
+///
+/// WTM-346 gộp nó với dòng thời gian cũ: một màn, nhiều nguồn.
 void main() {
+  /// Cuộn tới khi widget tồn tại.
+  ///
+  /// Không dùng `scrollUntilVisible`: hàm đó gọi `.first` trên một finder chưa
+  /// khớp gì và `Iterable.first` ném ngay, nên nó chỉ dùng được khi đã biết
+  /// chắc widget tồn tại.
+  Future<void> scrollTo(WidgetTester tester, Finder target) async {
+    for (var i = 0; i < 40 && target.evaluate().isEmpty; i++) {
+      await tester.drag(
+        find.byKey(const Key('business-life-timeline')),
+        const Offset(0, -300),
+      );
+      await tester.pump();
+    }
+  }
+
   late AppDatabase db;
   late SharedPreferences prefs;
   final anchor = DateTime(2026, 8, 9, 12);
@@ -117,6 +134,8 @@ void main() {
 
       expect(find.byKey(const Key('business-life-day')), findsOneWidget);
       // Ba chủ thể là NỘI DUNG của dòng thời gian, không phải chi tiết kỹ thuật.
+      // Danh sách cuộn dựng lười, nên phải cuộn tới thì widget mới tồn tại.
+      await scrollTo(tester, find.text('Shopee'));
       expect(find.text('Shopee'), findsWidgets);
       // Việc của Tổng Tài xảy ra ở ngày 1 nên nằm cuối danh sách (mới nhất
       // trước) — phải cuộn tới, `find.text` chỉ thấy widget đã dựng.
@@ -137,6 +156,50 @@ void main() {
       expect(events, isNotEmpty);
     },
   );
+
+  testWidgets('⭐ MỘT dòng thời gian: đơn thật và chuyện demo cùng chỗ', (
+    tester,
+  ) async {
+    await importCatalogue();
+    await pumpLife(tester);
+
+    await tester.tap(find.byKey(const Key('business-life-start')));
+    await pumpUntilFound(
+      tester,
+      find.byKey(const Key('business-life-timeline')),
+    );
+
+    // Bộ lọc theo loại áp cho **cả hai** nguồn — nếu demo có loại riêng thì
+    // đây là chỗ vách ngăn cũ mọc lại.
+    expect(find.byKey(const Key('business-life-filter-order')), findsOneWidget);
+    expect(
+      find.byKey(const Key('business-life-filter-customer')),
+      findsOneWidget,
+    );
+
+    // Đơn THẬT (nhập từ Excel) nằm cùng dòng thời gian với chuyện demo.
+    await scrollTo(tester, find.textContaining('DH-'));
+    expect(find.textContaining('DH-'), findsWidgets);
+  });
+
+  testWidgets('⛔ cơ hội KHÔNG lên dòng thời gian', (tester) async {
+    await importCatalogue();
+    await pumpLife(tester);
+
+    await tester.tap(find.byKey(const Key('business-life-start')));
+    await pumpUntilFound(
+      tester,
+      find.byKey(const Key('business-life-timeline')),
+    );
+
+    // Cơ hội mang mốc `now` vì nó được suy ra lúc đọc, không xảy ra lúc nào
+    // cả. Để nó vào đây là bốn mươi dòng "just now" dìm mất cả ngày thật.
+    expect(
+      find.byKey(const Key('business-life-filter-opportunity')),
+      findsNothing,
+    );
+    expect(find.textContaining('Cơ hội:'), findsNothing);
+  });
 
   testWidgets('Ngày tiếp đẩy thế giới đi và ĐƠN THẬT tăng lên', (tester) async {
     await importCatalogue();
