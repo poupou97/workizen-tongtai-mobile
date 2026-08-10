@@ -291,6 +291,105 @@ void main() {
         );
       });
 
+      test('⭐ chuỗi CÓ NỘI SUY cũng bị soi — chữ tiếng Anh cứng không lọt '
+          '(WTM-344)', () {
+        // ## Vì sao bài test cũ để lọt
+        //
+        // Bản trước bỏ qua **mọi** chuỗi chứa `$` với lý do
+        // *"interpolation = data-driven"*. Điều đó đúng với `'$count đ'` và
+        // **sai** với `'$count customers'`: phần chữ nằm NGOÀI chỗ nội suy vẫn
+        // là nhãn người dùng đọc.
+        //
+        // Founder cầm máy ngày 10/8 và thấy **"42 opportunities"** trên một
+        // màn tiếng Việt — trong khi 2494 test đang xanh. Governance chỉ bắt
+        // được thứ nó được viết để tìm.
+        //
+        // ## Cách tránh báo nhầm
+        //
+        // Chỉ soi **vị trí text** trong `lib/features/tongtai/ui/` — nên mã
+        // enum, log/debug, fixture test và dữ liệu doanh nghiệp demo (nằm ở
+        // `simulation/`) đều không lọt vào tầm quét. Phần còn lại sau khi bóc
+        // nội suy phải có một **từ ASCII ≥3 ký tự** không nằm trong danh sách
+        // tên riêng — nên `'$count đ'`, `'$d/$m'`, `'$a · $b'` đều im lặng.
+        final uiDir = Directory('lib/features/tongtai/ui');
+        final position = RegExp(
+          r"(?:Text\(\s*|label:\s*(?:const\s+)?(?:Text\(\s*)?|"
+          r"title:\s*(?:const\s+)?(?:Text\(\s*)?|tooltip:\s*|labelText:\s*|"
+          r"hintText:\s*|actionLabel:\s*|message:\s*|"
+          r"content:\s*(?:const\s+)?Text\(\s*)'((?:[^'\\]|\\.)+)'",
+        );
+        // Nội suy: `${...}` và `$tên`.
+        final interpolation = RegExp(r'\$\{[^}]*\}|\$[A-Za-z_][A-Za-z0-9_]*');
+        final asciiWord = RegExp(r'[A-Za-z]{3,}');
+        // Hiện nguyên văn ở mọi ngôn ngữ: tên riêng, đơn vị, viết tắt.
+        const verbatim = {
+          'workizen',
+          'tongtai',
+          'shopee',
+          'tiktok',
+          'shop',
+          'facebook',
+          'instagram',
+          'telegram',
+          'google',
+          'drive',
+          'excel',
+          'alibaba',
+          'aliexpress',
+          'amazon',
+          'ebay',
+          'shopify',
+          'woocommerce',
+          'ghn',
+          'ghtk',
+          'viettel',
+          'post',
+          'jira',
+          'confluence',
+          'ollama',
+          'grok',
+          'sku',
+          'roi',
+          'aov',
+          'csv',
+          'qr',
+          'api',
+          'vnd',
+          'xlsx',
+          'ttbk',
+        };
+
+        final offenders = <String>[];
+        for (final f
+            in uiDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          final src = f.readAsStringSync();
+          for (final m in position.allMatches(src)) {
+            final value = m.group(1)!;
+            if (!value.contains(r'$')) continue; // bài test trên lo phần này
+            final residue = value.replaceAll(interpolation, ' ');
+            final words = [
+              for (final w in asciiWord.allMatches(residue))
+                if (!verbatim.contains(w.group(0)!.toLowerCase())) w.group(0)!,
+            ];
+            if (words.isEmpty) continue;
+            final line = src.substring(0, m.start).split('\n').length;
+            offenders.add("${f.path}:$line: '$value' → $words");
+          }
+        }
+
+        expect(
+          offenders,
+          isEmpty,
+          reason:
+              'Chuỗi nội suy trong vị trí text vẫn chứa chữ cứng — dùng một '
+              "khoá nhận tham số (vd `l10n.countOrders(n)`):\n"
+              '${offenders.join('\n')}',
+        );
+      });
+
       test(
         'every AppStrings key is referenced somewhere in lib/ (unused check)',
         () {

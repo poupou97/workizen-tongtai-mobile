@@ -135,6 +135,19 @@ abstract class AppStrings {
   String get titleGoalDetail;
 
   // ── More menu ───────────────────────────────────────────────────────────
+  // ── đếm, hiện trên nhãn (WTM-344) ───────────────────────────────────────
+  /// "42 cơ hội" · "1 cơ hội".
+  String countOpportunities(int count);
+
+  /// "112 đơn" · "1 đơn".
+  String countOrders(int count);
+
+  /// "40 khách" · "1 khách".
+  String countCustomers(int count);
+
+  /// "Thay đổi chưa lưu (2)".
+  String unsavedChanges(int count);
+
   String get moreLoadSample;
   String get moreRemoveSample;
 
@@ -1193,6 +1206,14 @@ class AppStringsVi extends AppStrings {
   @override
   String get titleGoalDetail => 'Chi tiết mục tiêu';
 
+  @override
+  String countOpportunities(int count) => '$count cơ hội';
+  @override
+  String countOrders(int count) => '$count đơn';
+  @override
+  String countCustomers(int count) => '$count khách';
+  @override
+  String unsavedChanges(int count) => 'Thay đổi chưa lưu ($count)';
   @override
   String get moreLoadSample => 'Nạp dữ liệu mẫu';
   @override
@@ -3127,6 +3148,16 @@ class AppStringsEn extends AppStrings {
   @override
   String get titleGoalDetail => 'Goal details';
 
+  @override
+  String countOpportunities(int count) =>
+      count == 1 ? '1 opportunity' : '$count opportunities';
+  @override
+  String countOrders(int count) => count == 1 ? '1 order' : '$count orders';
+  @override
+  String countCustomers(int count) =>
+      count == 1 ? '1 customer' : '$count customers';
+  @override
+  String unsavedChanges(int count) => 'Unsaved changes ($count)';
   @override
   String get moreLoadSample => 'Load sample data';
   @override

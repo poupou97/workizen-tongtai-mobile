@@ -422,9 +422,9 @@ class HistoricalDataSet {
 class HistoricalDataGenerator {
   const HistoricalDataGenerator({this.clock});
 
-  /// Injected clock. Used **only** to resolve [HistoricalDataSpec.endMonth]
-  /// when the caller left it null; nothing inside generation reads the wall
-  /// clock. Defaults to [DateTime.now] (the repo-wide convention).
+  /// Injected clock. Resolves [HistoricalDataSpec.endMonth] when the caller
+  /// left it null, **và** là trần thời gian của toàn bộ dữ liệu sinh ra
+  /// (WTM-344). Defaults to [DateTime.now] (the repo-wide convention).
   final DateTime Function()? clock;
 
   HistoricalDataSet generate(HistoricalDataSpec spec) {
@@ -438,7 +438,18 @@ class HistoricalDataGenerator {
       endMonth.year,
       endMonth.month - spec.months + 1,
     );
-    final windowEnd = _endOfMonth(endMonth);
+    // ⛔ WTM-344 — **lịch sử không được chứa tương lai.**
+    //
+    // Trước đây cửa sổ kết thúc ở **cuối tháng hiện tại**, nên gieo dữ liệu
+    // ngày 10 sinh ra đơn hàng ngày 29 và 31. Hậu quả không nằm ở một dòng
+    // xấu xí: tháng hiện tại trông như đã bán xong cả tháng, nên Dự báo doanh
+    // thu lấy một tháng đầy giả làm mốc và mọi so sánh "tháng này vs tháng
+    // trước" đều lệch.
+    //
+    // Cắt theo `now` chứ không theo "hôm nay là ngày mấy": người gọi ghim một
+    // tháng trong quá khứ thì `_endOfMonth` đã nhỏ hơn `now`, không bị cắt —
+    // đó vẫn là lịch sử thật.
+    final windowEnd = _min(_endOfMonth(endMonth), now);
     final months = [
       for (var i = 0; i < spec.months; i++)
         DateTime(windowStart.year, windowStart.month + i),
@@ -515,6 +526,7 @@ class HistoricalDataGenerator {
         for (var k = 0; k < count; k++) {
           drafts.add(
             _buildOrderDraft(
+              windowEnd: windowEnd,
               plan: plan,
               month: months[monthIndex],
               monthsFromEnd: spec.months - 1 - monthIndex,
@@ -530,6 +542,7 @@ class HistoricalDataGenerator {
       }
     }
     _ensureEveryMonthCovered(
+      windowEnd: windowEnd,
       drafts: drafts,
       plans: plans,
       months: months,
@@ -624,6 +637,7 @@ class HistoricalDataGenerator {
       months: months,
       traits: traits,
       rand: rand,
+      windowEnd: windowEnd,
     );
 
     // ── 7. Goals, sized from the history that was just generated ──────────
@@ -787,9 +801,13 @@ class HistoricalDataGenerator {
     required List<_CatalogueEntry> catalogue,
     required Random rand,
     required int seqHint,
+    required DateTime windowEnd,
   }) {
-    final day = 1 + rand.nextInt(_daysInMonth(month));
-    final date = DateTime(month.year, month.month, day, 9 + rand.nextInt(9));
+    final day = 1 + rand.nextInt(_generatableDays(month, windowEnd));
+    final date = _min(
+      DateTime(month.year, month.month, day, 9 + rand.nextInt(9)),
+      windowEnd,
+    );
     // The month multiplier is DEMAND: it drives how many orders land in the
     // month (see the caller). Basket size follows it only weakly — a Tết
     // basket is a bit fuller, but the season shows up mostly as frequency.
@@ -873,6 +891,7 @@ class HistoricalDataGenerator {
   /// across the window (loyal → returning → slowing), so it never contradicts
   /// the behaviour the data is meant to show.
   void _ensureEveryMonthCovered({
+    required DateTime windowEnd,
     required List<_OrderDraft> drafts,
     required List<_PersonPlan> plans,
     required List<DateTime> months,
@@ -914,6 +933,7 @@ class HistoricalDataGenerator {
       if (covered.contains(i)) continue;
       drafts.add(
         _buildOrderDraft(
+          windowEnd: windowEnd,
           plan: filler,
           month: months[i],
           monthsFromEnd: months.length - 1 - i,
@@ -969,6 +989,7 @@ class HistoricalDataGenerator {
     required List<DateTime> months,
     required _ProfileTraits traits,
     required Random rand,
+    required DateTime windowEnd,
   }) {
     final revenueByMonth = <int, double>{
       for (var i = 0; i < months.length; i++) i: 0,
@@ -1012,7 +1033,7 @@ class HistoricalDataGenerator {
     for (var i = 0; i < months.length; i++) {
       final month = months[i];
       final revenue = revenueByMonth[i] ?? 0;
-      final lastDay = _daysInMonth(month);
+      final lastDay = _generatableDays(month, windowEnd);
       void expense(
         FinanceCategory category,
         double amount,
@@ -1497,6 +1518,17 @@ int _stochasticRound(double value, Random rand) {
 
 int _daysInMonth(DateTime month) =>
     DateTime(month.year, month.month + 1, 0).day;
+
+/// Số ngày **được phép sinh** trong tháng này (WTM-344).
+///
+/// Tháng cuối của cửa sổ dừng ở ngày của [windowEnd], không phải ngày cuối
+/// tháng. Mọi tháng trước đó dùng trọn tháng như cũ.
+int _generatableDays(DateTime month, DateTime windowEnd) =>
+    month.year == windowEnd.year && month.month == windowEnd.month
+    ? windowEnd.day
+    : _daysInMonth(month);
+
+DateTime _min(DateTime a, DateTime b) => a.isAfter(b) ? b : a;
 
 DateTime _endOfMonth(DateTime month) =>
     DateTime(month.year, month.month + 1, 0, 23, 59, 59);

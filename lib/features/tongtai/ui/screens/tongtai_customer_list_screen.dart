@@ -508,7 +508,7 @@ class _ResultsHeader extends StatelessWidget {
         TongtaiDesignTokens.spacing2,
       ),
       child: Text(
-        count == 1 ? '1 customer' : '$count customers',
+        context.l10n.countCustomers(count),
         key: const Key('customer-count-badge'),
         style: TongtaiDesignTokens.smallStyle.copyWith(
           color: TongtaiDesignTokens.lightTextSecondary,
@@ -673,9 +673,7 @@ class _CustomerRow extends StatelessWidget {
                   const SizedBox(height: TongtaiDesignTokens.spacing1),
                 ],
                 Text(
-                  customer.orderCount == 1
-                      ? '1 order'
-                      : '${customer.orderCount} orders',
+                  context.l10n.countOrders(customer.orderCount),
                   style: TongtaiDesignTokens.captionStyle.copyWith(
                     color: TongtaiDesignTokens.lightTextSecondary,
                   ),
