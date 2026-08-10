@@ -354,6 +354,9 @@ void main() {
         // `kBusinessDataProviders` — nên làm mới cái cha là làm mới cả họ.
         // Liệt kê từng khách một thì không liệt kê được.
         'customerConversationProvider',
+        // WTM-347: `family` theo khách — gợi ý mua kèm chỉ đọc khi mở đúng màn
+        // khách đó. Liệt kê từng khách một thì không liệt kê được.
+        'customerSuggestionsProvider',
       };
 
       final declaration = RegExp(r'^final (\w+) = FutureProvider');

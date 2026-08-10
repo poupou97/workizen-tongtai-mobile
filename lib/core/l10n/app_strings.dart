@@ -1091,6 +1091,15 @@ abstract class AppStrings {
   /// Tiêu đề phần câu chuyện khách hàng trong Khách hàng 360.
   String get customer360Story;
 
+  /// "Biết tới shop qua Facebook Page · 12/7".
+  String customer360FirstTouch(String channel, String date);
+
+  /// Tiêu đề phần gợi ý mua kèm.
+  String get customer360Suggestions;
+
+  /// "3 khách khác mua kèm".
+  String customer360BoughtTogether(int count);
+
   /// Nút mở khung hội thoại từ Khách hàng 360.
   ///
   /// Không có khoá "chưa có việc nào": khách chưa có gì trong sổ thì phần này
@@ -2944,6 +2953,13 @@ class AppStringsVi extends AppStrings {
   String get conversationYouSent => 'Bạn đã gửi';
   @override
   String get customer360Story => 'Câu chuyện khách hàng';
+  @override
+  String customer360FirstTouch(String channel, String date) =>
+      'Biết tới shop qua $channel · $date';
+  @override
+  String get customer360Suggestions => 'Gợi ý cho khách này';
+  @override
+  String customer360BoughtTogether(int count) => '$count khách khác mua kèm';
   @override
   String get customer360OpenConversation => 'Mở hội thoại';
 
@@ -4887,6 +4903,14 @@ class AppStringsEn extends AppStrings {
   String get conversationYouSent => 'You sent';
   @override
   String get customer360Story => 'Customer story';
+  @override
+  String customer360FirstTouch(String channel, String date) =>
+      'Found the shop via $channel · $date';
+  @override
+  String get customer360Suggestions => 'Suggest to this customer';
+  @override
+  String customer360BoughtTogether(int count) =>
+      '$count other customers bought it together';
   @override
   String get customer360OpenConversation => 'Open conversation';
 

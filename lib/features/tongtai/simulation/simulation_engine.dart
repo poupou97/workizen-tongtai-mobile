@@ -290,13 +290,37 @@ class SimulationEngine {
             ),
           );
 
+        // ⭐ WTM-347 — kiện đi ĐÚNG đường cũng là một hành trình.
+        //
+        // Trước đây chỉ kiện chậm và kiện hỏng mới thành bản ghi, nên người
+        // bán chỉ thấy khi có chuyện. Phần lớn thời gian mọi thứ chạy đúng, và
+        // nhìn thấy điều đó cũng là một tính năng.
+        case DemoEventKind.shipmentUpdated:
+          final status = ShipmentStatus.fromCode(
+            event.payload['status'] as String?,
+          );
+          final shipmentId = event.payload['shipmentId'] as String?;
+          if (status == null || shipmentId == null) break;
+          newShipments.add(
+            Shipment(
+              id: shipmentId,
+              trackingNumber: _tracking(event),
+              status: status,
+              carrier: _carrierOf(event),
+              lastUpdate: event.occurredAt,
+              origin: (event.payload['origin'] as String?) ?? 'TP.HCM',
+              destination:
+                  (event.payload['destination'] as String?) ?? 'Hà Nội',
+              provenance: ProvenanceSource.sample,
+            ),
+          );
+
         case DemoEventKind.commentReceived:
         case DemoEventKind.messageReceived:
         case DemoEventKind.reviewCreated:
         case DemoEventKind.refundRequested:
         case DemoEventKind.paymentFailed:
         case DemoEventKind.paymentSucceeded:
-        case DemoEventKind.shipmentUpdated:
         case DemoEventKind.inventoryLow:
         case DemoEventKind.supplierQuoteChanged:
         case DemoEventKind.campaignPerformanceChanged:

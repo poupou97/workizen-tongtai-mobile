@@ -10,7 +10,10 @@ import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../orders/order.dart';
 import '../../orders/order_controller.dart';
+import '../../consumer/customer_insight.dart';
+import '../../providers/tongtai_consumer_provider.dart';
 import '../../providers/tongtai_simulation_provider.dart';
+import '../../simulation/demo_event.dart';
 import 'tongtai_conversation_screen.dart';
 import 'tongtai_create_order_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -177,6 +180,7 @@ class _TongtaiCustomerHistoryScreenState
           children: [
             _MetricsHeader(metrics: metrics),
             _CustomerStorySection(customerId: customerId),
+            _CustomerSuggestionsSection(customerId: customerId),
             _FilterRow(
               label: context.l10n.labelPeriod,
               children: [
@@ -545,6 +549,13 @@ class _CustomerStorySection extends ConsumerWidget {
     }
 
     final recent = conversation.events.take(3).toList(growable: false);
+    // ⭐ WTM-347 · Discover — khách này từ đâu tới. Suy từ việc SỚM NHẤT có
+    // mang tên một nền tảng; khách được gõ tay vào danh bạ thì không có kênh
+    // nào cả, và để trống là câu trả lời thật chứ không phải thiếu sót.
+    final firstTouch = firstTouchOf([
+      for (final e in conversation.events.reversed)
+        (vendor: e.vendor, at: e.occurredAt),
+    ]);
 
     return Container(
       key: const Key('history-story'),
@@ -573,6 +584,20 @@ class _CustomerStorySection extends ConsumerWidget {
               color: TongtaiDesignTokens.lightTextPrimary,
             ),
           ),
+          if (firstTouch != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              l10n.customer360FirstTouch(
+                DemoVendor.displayName(firstTouch.vendor),
+                TongtaiFormatters.isoDate(firstTouch.at),
+              ),
+              key: const Key('history-first-touch'),
+              style: TongtaiDesignTokens.captionStyle.copyWith(
+                fontWeight: FontWeight.w600,
+                color: TongtaiDesignTokens.consumerBlueText,
+              ),
+            ),
+          ],
           const SizedBox(height: TongtaiDesignTokens.spacing2),
           for (final event in recent)
             Padding(
@@ -603,6 +628,86 @@ class _CustomerStorySection extends ConsumerWidget {
                             '${l10n.conversationDraftReady}'
                       : l10n.customer360OpenConversation,
                 ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// **Gợi ý cho khách này** — WTM-347 (Recommendation).
+///
+/// Suy từ đơn hàng THẬT: những gì khách khác mua kèm thứ khách này từng mua.
+/// Rule Twin, không AI — và **rỗng khi chưa biết gì**, chứ không rơi về danh
+/// sách bán chạy. Một danh sách bán chạy đội lốt gợi ý cá nhân là kiểu nói dối
+/// khó phát hiện nhất: nó luôn có nội dung, nên không ai nhận ra nó chưa bao
+/// giờ biết gì về khách.
+class _CustomerSuggestionsSection extends ConsumerWidget {
+  const _CustomerSuggestionsSection({required this.customerId});
+
+  final String customerId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final suggestions =
+        ref.watch(customerSuggestionsProvider(customerId)).asData?.value ??
+        const <ProductSuggestion>[];
+    if (suggestions.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      key: const Key('history-suggestions'),
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(
+        TongtaiDesignTokens.spacing4,
+        0,
+        TongtaiDesignTokens.spacing4,
+        TongtaiDesignTokens.spacing3,
+      ),
+      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
+          TongtaiDesignTokens.cardBorderRadius,
+        ),
+        border: Border.all(color: const Color(0x14000000)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.customer360Suggestions,
+            style: TongtaiDesignTokens.smallStyle.copyWith(
+              fontWeight: FontWeight.w800,
+              color: TongtaiDesignTokens.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          for (final s in suggestions)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      s.product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TongtaiDesignTokens.smallStyle.copyWith(
+                        color: TongtaiDesignTokens.lightTextPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Lý do đọc được, không phải một điểm số không ai kiểm được.
+                  Text(
+                    l10n.customer360BoughtTogether(s.boughtTogetherCount),
+                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                      color: TongtaiDesignTokens.lightTextSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
