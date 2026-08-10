@@ -1,6 +1,6 @@
 # Ma trận trải nghiệm — Tổng Tài
 
-> WTM-341 (E5 · Epic WTM-336) · cập nhật **2026-08-10** · nguồn: `main` sau PR #210.
+> WTM-341 (E5 · Epic WTM-336) · cập nhật **2026-08-10** · nguồn: `main` sau PR #212.
 > Founder Task Order EXPERIENCE-FIRST BUSINESS SIMULATION §39.
 
 Ma trận này trả lời **một** câu hỏi: *hành trình nào thật sự chạy trọn, và hành
@@ -40,13 +40,13 @@ trình nào mới có dữ liệu mà chưa có màn?*
 
 | # | Hành trình | Dữ liệu demo | Màn hình | Kết luận (Rule Twin) | Đề xuất | Duyệt | Hành động | Kết quả | Dòng thời gian |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | **Discover** — khách biết tới shop | — | — | — | — | — | — | — | — |
+| 1 | **Discover** — khách biết tới shop | ✅ kênh chạm đầu tiên | ✅ Khách 360 | ✅ suy từ việc sớm nhất | — | — | — | — | ✅ |
 | 2 | **Lead** — khách quan tâm chưa mua | ✅ bình luận FB/IG | ✅ Hội thoại | — | — | — | — | — | ✅ |
 | 3 | **Conversation** — nhắn qua lại | ✅ 4 hội thoại | ✅ Hội thoại + chi tiết | ◐ nháp **kịch bản** | ◐ nháp | ✅ `Cần bạn duyệt` | ✅ `customer.send_message` | ✅ `demo:` | ✅ |
-| 4 | **Recommendation** — gợi ý hàng cho khách | — | — | — | — | — | — | — | — |
+| 4 | **Recommendation** — gợi ý hàng cho khách | ✅ từ đơn thật | ✅ Khách 360 | ✅ mua kèm, có lý do | ✅ 3 gợi ý | — | — | — | — |
 | 5 | **Order** — đơn về | ✅ 112 nhập + ~90 sinh | ✅ Trang chủ · Khách 360 | ✅ doanh thu · AOV | — | — | — | ✅ | ✅ |
 | 6 | **Payment** — tiền vào tài khoản | ✅ ngân hàng báo có | ◐ Tài chính | — | — | — | — | — | ✅ |
-| 7 | **Fulfillment** — đóng gói, bàn giao | — | — | — | — | — | — | — | — |
+| 7 | **Fulfillment** — đóng gói, bàn giao | ✅ bàn giao → đang giao → đã giao | ✅ Dòng thời gian | ◐ | — | — | — | ✅ kiện vào sổ | ✅ |
 | 8 | **Shipment** — kiện đi tới đâu | ✅ 3 hãng, có chậm | ◐ chỉ trong Brief/Cơ hội, **không có màn riêng** | ✅ so hàng xóm cùng tuyến | ✅ | ✅ Brief | — chưa có handler liên hệ hãng | — | ✅ |
 | 9 | **Support** — khách phàn nàn | ✅ khách giận ngày 5 | ✅ Hội thoại | ◐ | ◐ | ✅ bắt buộc duyệt | ✅ | ✅ | ✅ |
 | 10 | **Refund** — hoàn tiền | ✅ đòi → duyệt → hoàn | ✅ Hội thoại · Tài chính | ✅ vào lời thật | ◐ | ✅ bắt buộc duyệt | ◐ | ✅ dòng đối soát chiều ra | ✅ |
@@ -66,14 +66,14 @@ trình nào mới có dữ liệu mà chưa có màn?*
 
 | Cột | ✅ | ◐ | — |
 |---|---|---|---|
-| Dữ liệu demo | 15 | 2 | 4 |
-| Màn hình | 13 | 3 | 5 |
-| Kết luận | 11 | 3 | 7 |
-| Đề xuất | 8 | 3 | 10 |
+| Dữ liệu demo | **18** | 2 | 1 |
+| Màn hình | **16** | 3 | 2 |
+| Kết luận | **13** | 4 | 4 |
+| Đề xuất | **9** | 3 | 9 |
 | Duyệt | 10 | 0 | 11 |
 | Hành động | 5 | 5 | 11 |
-| Kết quả | 7 | 4 | 10 |
-| Dòng thời gian | 17 | 2 | 2 |
+| Kết quả | **8** | 4 | 9 |
+| Dòng thời gian | **19** | 2 | 0 |
 
 ---
 
@@ -94,9 +94,22 @@ trúc mới. Hoàn tiền nay vào **sổ đối soát thật** (`kind: refund`,
 outbound`, `fundedBy: seller`) nên nó ăn vào **lời thật** của người bán, đúng chỗ
 người bán Việt Nam mất tiền nhiều nhất mà báo cáo hay bỏ sót.
 
-**Ba hàng còn trống hoàn toàn** — `Discover` · `Recommendation` · `Fulfillment` —
-cần **dữ liệu và màn mới**, tức là mở rộng phạm vi. Chúng là ứng viên cho câu hỏi
-*"cái nào thật sự cần?"* chứ không tự động là việc phải làm.
+**Không còn hàng nào trống hoàn toàn** (WTM-347). Ba hàng cuối đóng bằng **tái
+dùng**, không thêm màn nào:
+
+* **Discover** — kênh chạm đầu tiên, suy từ việc sớm nhất có mang tên nền tảng.
+  Khách gõ tay vào danh bạ thì **để trống**, vì đoán một kênh cho họ là bịa ra
+  một nguồn khách.
+* **Recommendation** — mua kèm, suy từ đơn **thật**, kèm lý do đọc được ("3
+  khách khác mua kèm"). **Rỗng khi chưa biết gì**, không rơi về danh sách bán
+  chạy — một danh sách bán chạy đội lốt gợi ý cá nhân luôn có nội dung, nên
+  không ai nhận ra nó chưa bao giờ biết gì về khách.
+* **Fulfillment** — bàn giao → đang giao → đã giao. Trước đây chỉ kiện **hỏng**
+  mới thành bản ghi, nên người bán chỉ thấy khi có chuyện; phần lớn thời gian
+  mọi thứ chạy đúng, và nhìn thấy điều đó cũng là một tính năng.
+
+Cột **Hành động** vẫn 5 ✅ — đó là khoảng cách thật còn lại giữa *thấy* và *làm*,
+và là dữ kiện cho câu hỏi concept "Business OS hay ERP mini".
 
 ---
 
@@ -110,4 +123,6 @@ cần **dữ liệu và màn mới**, tức là mở rộng phạm vi. Chúng l�
 | Gửi ⇒ hành động thật, khai là mô phỏng | `test/features/tongtai/simulation/conversation_screen_test.dart` |
 | đẩy đồng hồ đổi **miền thật** | `test/features/tongtai/simulation/business_life_screen_test.dart` |
 | hoàn tiền vào sổ đối soát, đòi hoàn thì chưa | `test/features/tongtai/simulation/simulation_engine_test.dart` |
-| toàn bộ | `flutter test` — 2509 xanh |
+| Discover không đoán kênh · gợi ý rỗng khi chưa biết | `test/features/tongtai/consumer/customer_insight_test.dart` |
+| một dòng thời gian, cơ hội không lên đó | `test/features/tongtai/simulation/business_life_screen_test.dart` |
+| toàn bộ | `flutter test` — 2513 xanh |

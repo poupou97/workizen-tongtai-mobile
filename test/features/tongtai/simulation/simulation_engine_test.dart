@@ -13,6 +13,7 @@ import 'package:tongtai/features/tongtai/core/provenance.dart';
 import 'package:tongtai/features/tongtai/finance/settlement.dart';
 import 'package:tongtai/features/tongtai/finance/settlement_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
+import 'package:tongtai/features/tongtai/logistics/shipment.dart';
 import 'package:tongtai/features/tongtai/logistics/shipment_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 import 'package:tongtai/features/tongtai/simulation/demo_event.dart';
@@ -253,6 +254,26 @@ void main() {
       expect(review.subjectId, story.first.payload['customerId']);
       expect(review.payload['rating'], 3);
     });
+
+    test(
+      '⭐ kiện đi ĐÚNG đường cũng thành bản ghi, không chỉ kiện hỏng',
+      () async {
+        await importCatalogue();
+        final e = engine();
+        await e.start(anchor: anchor);
+        await e.advanceDay(days: 5);
+
+        final shipment = (await ShipmentRepository(
+          db,
+        ).loadAll()).firstWhere((s) => s.id == 'sample-demo-fulfilment');
+
+        // Bàn giao → đang giao → đã giao: trạng thái CUỐI phải thắng, không phải
+        // bản ghi đầu tiên nhìn thấy.
+        expect(shipment.status, ShipmentStatus.delivered);
+        expect(shipment.carrier, Carrier.ghtk);
+        expect(shipment.destination, 'Đà Nẵng');
+      },
+    );
 
     test('ba chủ thể phân biệt được: sàn · Tổng Tài · bạn', () async {
       await importCatalogue();

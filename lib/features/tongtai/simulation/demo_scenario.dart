@@ -255,6 +255,45 @@ class DemoScenario {
         );
     }
 
+    // ── Câu chuyện 7: kiện hàng đi đúng đường ─────────────────────────────
+    //
+    // Hành trình Fulfillment: bàn giao → đang giao → đã giao. Trước đây bản
+    // demo chỉ có kiện **chậm** và kiện **hỏng**, nên người bán chỉ thấy khi
+    // có chuyện — mà phần lớn thời gian thì mọi thứ chạy đúng, và nhìn thấy
+    // điều đó cũng là một tính năng.
+    {
+      final story = 'story-fulfilment';
+      final item = product(5);
+      final buyer = customer(3);
+
+      for (final (day, hour, status, line) in [
+        (2, 16, 'created', 'đã bàn giao cho GHTK'),
+        (3, 9, 'in_transit', 'đang trên đường tới Đà Nẵng'),
+        (4, 14, 'delivered', 'đã giao thành công'),
+      ]) {
+        events.add(
+          DemoEvent(
+            id: nextId('shp'),
+            kind: DemoEventKind.shipmentUpdated,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.ghtk,
+            subjectKind: 'shipment',
+            subjectId: 'sample-demo-fulfilment',
+            correlationId: story,
+            headline: 'Kiện ${item.name} của ${buyer?.name ?? "khách"} $line',
+            payload: {
+              'carrier': 'ghtk',
+              'status': status,
+              'shipmentId': 'sample-demo-fulfilment',
+              'origin': 'TP.HCM',
+              'destination': 'Đà Nẵng',
+            },
+            occurredAt: at(day, hour, 0),
+          ),
+        );
+      }
+    }
+
     // ── Câu chuyện 6: đòi hoàn tiền ───────────────────────────────────────
     //
     // Hoàn tiền là hành trình duy nhất mà **tiền đi ngược**. Bỏ nó ra khỏi
