@@ -261,11 +261,39 @@ class SimulationEngine {
         // Những loại còn lại **chỉ sống trên dòng thời gian và trong hội
         // thoại**. Ép chúng thành bản ghi miền sẽ đẻ ra sáu bảng cho một bản
         // demo — đúng thứ §41 cấm.
+        // ⭐ WTM-345 — hoàn tiền là **tiền đi ra**, không phải một dòng kể.
+        //
+        // `refundRequested` mới chỉ là khách đòi; chỉ `refundCompleted` mới
+        // chạm sổ. Ghi ở bước đòi là trừ tiền của người bán cho một việc chưa
+        // xảy ra.
+        //
+        // ADR-TON-024: `amount` **luôn dương**, chiều nằm ở `direction`. Một
+        // số âm ở đây sẽ cộng dồn đúng trong báo cáo và sai trong mọi phép so
+        // sánh khác.
+        case DemoEventKind.refundCompleted:
+          final refundedOrderId = event.payload['orderId'] as String?;
+          final refundAmount = (event.payload['amount'] as num?)?.toDouble();
+          if (refundedOrderId == null || refundAmount == null) break;
+          newSettlements.add(
+            SettlementLine(
+              id: 'sample-${event.id}',
+              orderId: refundedOrderId,
+              kind: SettlementKind.refund,
+              direction: SettlementDirection.outbound,
+              amount: refundAmount.roundToDouble(),
+              currency: 'VND',
+              occurredAt: event.occurredAt,
+              // Người bán trả, không phải sàn — nên nó vào **lời thật** của
+              // người bán chứ không biến mất trong phí sàn.
+              fundedBy: FundingSource.seller,
+              provenance: const Provenance.declared(ProvenanceSource.sample),
+            ),
+          );
+
         case DemoEventKind.commentReceived:
         case DemoEventKind.messageReceived:
         case DemoEventKind.reviewCreated:
         case DemoEventKind.refundRequested:
-        case DemoEventKind.refundCompleted:
         case DemoEventKind.paymentFailed:
         case DemoEventKind.paymentSucceeded:
         case DemoEventKind.shipmentUpdated:

@@ -225,6 +225,135 @@ class DemoScenario {
             },
             occurredAt: at(5, 9, 45),
           ),
+        )
+        // ⭐ WTM-345 — câu chuyện này lần đầu chạy TRỌN: đặt → chậm → giận →
+        // xin lỗi → **đánh giá**. Cùng `correlationId`, nên khi Founder mở
+        // khách ra thì thấy cả cái kết, chứ không phải một chuỗi cụt.
+        //
+        // Ba sao chứ không một sao: người bán đã xin lỗi và tặng mã giảm.
+        // Một sao sẽ biến câu chuyện thành "làm gì cũng vô ích", và đó không
+        // phải bài học mà bản demo muốn dạy.
+        ..add(
+          DemoEvent(
+            id: nextId('rev'),
+            kind: DemoEventKind.reviewCreated,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.tiktok,
+            subjectKind: 'customer',
+            subjectId: buyer?.id,
+            correlationId: story,
+            headline:
+                '${buyer?.name ?? "Khách"} đánh giá 3 sao trên TikTok Shop: '
+                '"Hàng ổn nhưng giao lâu, shop có xin lỗi"',
+            payload: {
+              'rating': 3,
+              'customerId': buyer?.id,
+              'comment': 'Hàng ổn nhưng giao lâu, shop có xin lỗi',
+            },
+            occurredAt: at(8, 20, 5),
+          ),
+        );
+    }
+
+    // ── Câu chuyện 6: đòi hoàn tiền ───────────────────────────────────────
+    //
+    // Hoàn tiền là hành trình duy nhất mà **tiền đi ngược**. Bỏ nó ra khỏi
+    // bản demo thì "lời thật" chỉ còn trừ phí sàn — trong khi thứ ăn vào lời
+    // của người bán Việt Nam nhiều nhất lại thường là hàng hoàn.
+    {
+      final story = 'story-refund';
+      final item = product(19);
+      final buyer = customer(7);
+      final orderId = 'sample-demo-refund-order';
+      final amount = item.pricePerUnit;
+
+      events
+        ..add(
+          DemoEvent(
+            id: nextId('ord'),
+            kind: DemoEventKind.orderCreated,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.shopee,
+            subjectKind: 'product',
+            subjectId: item.id,
+            correlationId: story,
+            headline: '${buyer?.name ?? "Khách"} đặt ${item.name} trên Shopee',
+            payload: {
+              'productId': item.id,
+              'customerId': buyer?.id,
+              'quantity': 1,
+              'unitPrice': item.pricePerUnit,
+              'channel': 'shopee',
+              'orderId': orderId,
+            },
+            occurredAt: at(10, 10, 20),
+          ),
+        )
+        ..add(
+          DemoEvent(
+            id: nextId('rfq'),
+            kind: DemoEventKind.refundRequested,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.shopee,
+            subjectKind: 'customer',
+            subjectId: buyer?.id,
+            correlationId: story,
+            headline:
+                '${buyer?.name ?? "Khách"} yêu cầu hoàn tiền ${item.name} '
+                '— "hàng không giống mô tả"',
+            payload: {
+              'message': 'Hàng không giống mô tả, shop cho em hoàn nhé',
+              'orderId': orderId,
+              'amount': amount,
+              // ⭐ Tiền là rủi ro cao ⇒ BẮT BUỘC duyệt, bất kể mức tự chủ.
+              'needsApproval': true,
+              'needsReply': true,
+            },
+            occurredAt: at(12, 9, 15),
+          ),
+        )
+        ..add(
+          DemoEvent(
+            id: nextId('draft'),
+            kind: DemoEventKind.messageReceived,
+            actor: DemoActor.agent,
+            subjectKind: 'customer',
+            subjectId: buyer?.id,
+            correlationId: story,
+            headline:
+                'Tổng Tài soạn phản hồi hoàn tiền — CẦN bạn duyệt, '
+                'đây là ${_money(amount)}',
+            payload: {
+              'draft':
+                  'Dạ em xin lỗi vì sản phẩm chưa đúng mong đợi của chị. Em '
+                  'đã duyệt hoàn ${_money(amount)} cho đơn này, chị nhận lại '
+                  'trong 3–5 ngày làm việc ạ.',
+              'orderId': orderId,
+              'amount': amount,
+              'needsApproval': true,
+            },
+            occurredAt: at(12, 9, 20),
+          ),
+        )
+        ..add(
+          DemoEvent(
+            id: nextId('rfc'),
+            kind: DemoEventKind.refundCompleted,
+            actor: DemoActor.platform,
+            vendor: DemoVendor.shopee,
+            subjectKind: 'customer',
+            subjectId: buyer?.id,
+            correlationId: story,
+            headline:
+                'Đã hoàn ${_money(amount)} cho ${buyer?.name ?? "khách"} '
+                '— tiền trừ vào lời của bạn, không phải phí sàn',
+            payload: {
+              'orderId': orderId,
+              'amount': amount,
+              'customerId': buyer?.id,
+            },
+            occurredAt: at(13, 15, 40),
+          ),
         );
     }
 
