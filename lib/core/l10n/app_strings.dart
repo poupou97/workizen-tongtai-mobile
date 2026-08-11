@@ -896,6 +896,24 @@ abstract class AppStrings {
   String get forecastWhy;
   String get forecastRuleBased;
 
+  // ── Tổng kết tuần (WTM-377 · Epic WTM-179) ──────────────────────────────
+  String get titleWeeklyReview;
+  String get weeklyReviewSubtitle;
+  String get weeklyReviewRange;
+  String get weeklyReviewRevenue;
+  String get weeklyReviewOrders;
+  String get weeklyReviewCustomers;
+  String get weeklyReviewAov;
+  String get weeklyReviewVsPrevious;
+  String get weeklyReviewNoPrevious;
+  String get weeklyReviewTopProduct;
+  String get weeklyReviewNothingSold;
+  String get weeklyReviewNothingSoldBody;
+  String get weeklyReviewHistory;
+  String get weeklyReviewInsufficient;
+  String get weeklyReviewInsufficientBody;
+  String get weeklyReviewWhy;
+
   /// Câu miễn trừ cho mọi con số mang tính phán đoán (WTM-280).
   ///
   /// Đặt **ngay cạnh con số**, không phải trong một trang điều khoản — người
@@ -2796,6 +2814,43 @@ class AppStringsVi extends AppStrings {
   String get forecastWhy => 'Vì sao';
   @override
   String get forecastRuleBased => 'Quy tắc (không cần AI)';
+
+  @override
+  String get titleWeeklyReview => 'Tổng kết tuần';
+  @override
+  String get weeklyReviewSubtitle => 'Tuần rồi thế nào, tuần tới nên làm gì';
+  @override
+  String get weeklyReviewRange => 'Tuần';
+  @override
+  String get weeklyReviewRevenue => 'Doanh thu';
+  @override
+  String get weeklyReviewOrders => 'Đơn hàng';
+  @override
+  String get weeklyReviewCustomers => 'Khách mua';
+  @override
+  String get weeklyReviewAov => 'Trung bình mỗi đơn';
+  @override
+  String get weeklyReviewVsPrevious => 'So với tuần trước';
+  @override
+  String get weeklyReviewNoPrevious => 'Chưa có tuần trước để so';
+  @override
+  String get weeklyReviewTopProduct => 'Bán chạy nhất tuần';
+  @override
+  String get weeklyReviewNothingSold => 'Tuần rồi không bán được gì';
+  @override
+  String get weeklyReviewNothingSoldBody =>
+      'Đây là số thật, không phải lỗi đọc dữ liệu. Xem lại tồn kho và khách '
+      'lâu chưa quay lại để chuẩn bị cho tuần tới.';
+  @override
+  String get weeklyReviewHistory => 'Bốn tuần gần nhất';
+  @override
+  String get weeklyReviewInsufficient => 'Chưa đủ dữ liệu để tổng kết';
+  @override
+  String get weeklyReviewInsufficientBody =>
+      'Cần ít nhất một tuần đã kết thúc có đơn hàng. Ghi đơn trong tuần này, '
+      'sáng thứ Hai sẽ có bản tổng kết đầu tiên.';
+  @override
+  String get weeklyReviewWhy => 'Vì sao';
 
   @override
   String get estimateDisclaimer =>
@@ -4874,6 +4929,43 @@ class AppStringsEn extends AppStrings {
   String get forecastWhy => 'Why';
   @override
   String get forecastRuleBased => 'Rule-based (no AI needed)';
+
+  @override
+  String get titleWeeklyReview => 'Weekly review';
+  @override
+  String get weeklyReviewSubtitle => 'How last week went, what to do next';
+  @override
+  String get weeklyReviewRange => 'Week';
+  @override
+  String get weeklyReviewRevenue => 'Revenue';
+  @override
+  String get weeklyReviewOrders => 'Orders';
+  @override
+  String get weeklyReviewCustomers => 'Customers';
+  @override
+  String get weeklyReviewAov => 'Average per order';
+  @override
+  String get weeklyReviewVsPrevious => 'vs last week';
+  @override
+  String get weeklyReviewNoPrevious => 'No previous week to compare';
+  @override
+  String get weeklyReviewTopProduct => 'Best seller this week';
+  @override
+  String get weeklyReviewNothingSold => 'Nothing sold last week';
+  @override
+  String get weeklyReviewNothingSoldBody =>
+      'This is a real number, not a read error. Check stock and customers who '
+      'have not come back, to prepare for next week.';
+  @override
+  String get weeklyReviewHistory => 'Last four weeks';
+  @override
+  String get weeklyReviewInsufficient => 'Not enough data to review';
+  @override
+  String get weeklyReviewInsufficientBody =>
+      'At least one completed week with orders is needed. Record orders this '
+      'week and the first review appears on Monday morning.';
+  @override
+  String get weeklyReviewWhy => 'Why';
 
   @override
   String get estimateDisclaimer =>

@@ -62,6 +62,7 @@ void main() {
     'tongtai_goals_screen.dart': 3,
     'tongtai_finance_screen.dart': 3,
     'tongtai_opportunity_feed_screen.dart': 3,
+    'tongtai_weekly_review_screen.dart': 3,
     'tongtai_forecast_screen.dart': 3,
     'tongtai_customer_risk_screen.dart': 3,
     'tongtai_agent_screen.dart': 3,

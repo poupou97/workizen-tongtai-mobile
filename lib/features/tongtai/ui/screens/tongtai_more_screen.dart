@@ -24,6 +24,7 @@ import 'tongtai_import_screen.dart';
 import 'tongtai_export_screen.dart';
 import 'tongtai_finance_screen.dart';
 import 'tongtai_forecast_screen.dart';
+import 'tongtai_weekly_review_screen.dart';
 import 'tongtai_goals_screen.dart';
 import 'tongtai_reports_screen.dart';
 import 'tongtai_agent_screen.dart';
@@ -303,9 +304,19 @@ class TongtaiMoreScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Predictive Foundation (WTM-160/161 · ADR-TON-016): the
-                // deterministic revenue-forecast and churn/win-back twins —
-                // no AI, no key, no network.
+                // Predictive Foundation (WTM-160/161/377 · ADR-TON-016): the
+                // deterministic weekly-review, revenue-forecast and
+                // churn/win-back twins — no AI, no key, no network.
+                _SettingsItem(
+                  key: const Key('more-weekly-review'),
+                  icon: Icons.calendar_view_week_outlined,
+                  label: context.l10n.titleWeeklyReview,
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const TongtaiWeeklyReviewScreen(),
+                    ),
+                  ),
+                ),
                 _SettingsItem(
                   key: const Key('more-forecast'),
                   icon: Icons.insights_outlined,
