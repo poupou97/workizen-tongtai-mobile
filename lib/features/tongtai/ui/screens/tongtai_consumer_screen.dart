@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../providers/tongtai_orders_provider.dart';
 import '../../analytics/customer_rfm.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -34,7 +36,7 @@ class TongtaiConsumerScreen extends ConsumerStatefulWidget {
 }
 
 class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
-  static const _blue = Color(0xFF3B82F6);
+  static const _blue = TtColors.info;
 
   late final DateTime Function() _clock;
 
@@ -244,7 +246,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
               height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: TtColors.border),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(child: Text(l10n.emptyCustomerSegments)),
@@ -272,7 +274,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
               height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: TtColors.border),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(child: Text(l10n.emptyRecentInteractions)),
@@ -280,7 +282,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
           else
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: TtColors.border),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -297,7 +299,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                         c.tier.label(l10n.languageCode),
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF6B7280),
+                          color: TtColors.textSecondary,
                         ),
                       ),
                     ),
@@ -314,7 +316,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(color: TtColors.border),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -378,7 +380,7 @@ class _CustomerStat extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+          style: const TextStyle(fontSize: 12, color: TtColors.textSecondary),
         ),
       ],
     );

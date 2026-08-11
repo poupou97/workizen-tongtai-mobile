@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/inventory_context.dart';
@@ -10,7 +12,6 @@ import '../../inventory/product_image_source.dart';
 import '../../inventory/product_inventory_service.dart';
 import '../../inventory/stock_alert.dart';
 import '../../inventory/stock_alert_service.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_inventory_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import 'tongtai_product_form_screen.dart';
@@ -24,9 +25,9 @@ import '../../../../core/telemetry/tongtai_telemetry.dart';
 /// out). Pulled out as a pure function so the mapping is directly unit-testable
 /// without pumping a widget.
 Color tongtaiStockStatusColor(StockStatus status) => switch (status) {
-  StockStatus.inStock => TongtaiDesignTokens.success,
-  StockStatus.lowStock => TongtaiDesignTokens.warning,
-  StockStatus.outOfStock => TongtaiDesignTokens.error,
+  StockStatus.inStock => TtColors.success,
+  StockStatus.lowStock => TtColors.warning,
+  StockStatus.outOfStock => TtColors.danger,
 };
 
 /// Inventory / product list screen (WTM-68) — Product & Warehouse hub.
@@ -158,7 +159,7 @@ class _TongtaiInventoryScreenState
         final page = service.page(_query);
         final alerts = StockAlertService(_catalog.products);
         return Scaffold(
-          backgroundColor: TongtaiDesignTokens.lightBackground,
+          backgroundColor: TtColors.surfaceSecondary,
           appBar: tongtaiScreenHeader(
             context,
             screen: 'inventory',
@@ -170,7 +171,7 @@ class _TongtaiInventoryScreenState
             onPressed: () => _openForm(context),
             // White label on amber-500 reads at 2.15:1 — the worst pairing
             // in the palette. Same hue, deep enough to read (WTM-169).
-            backgroundColor: TongtaiDesignTokens.inventoryOrangeText,
+            backgroundColor: TtColors.warningOnDark,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.invAdd),
@@ -227,10 +228,10 @@ class _TongtaiInventoryScreenState
                         ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
-                          TongtaiDesignTokens.spacing4,
-                          TongtaiDesignTokens.spacing3,
-                          TongtaiDesignTokens.spacing4,
-                          TongtaiDesignTokens.spacing2,
+                          TtSpace.x4,
+                          TtSpace.x3,
+                          TtSpace.x4,
+                          TtSpace.x2,
                         ),
                         child: _SearchField(
                           controller: _searchController,
@@ -343,34 +344,27 @@ class _OverviewCard extends StatelessWidget {
       (StockStatus.outOfStock, summary.outOfStockCount),
     ];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing3,
-        TongtaiDesignTokens.spacing4,
-        0,
-      ),
+      padding: const EdgeInsets.fromLTRB(TtSpace.x4, TtSpace.x3, TtSpace.x4, 0),
       child: Container(
         key: const Key('inventory-overview'),
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         decoration: BoxDecoration(
-          color: TongtaiDesignTokens.lightBackground,
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.cardBorderRadius,
-          ),
-          border: Border.all(color: TongtaiDesignTokens.lightBorder),
-          boxShadow: TongtaiDesignTokens.elevation1,
+          color: TtColors.surfaceSecondary,
+          borderRadius: BorderRadius.circular(TtRadius.md),
+          border: Border.all(color: TtColors.border),
+          boxShadow: TtElevation.soft,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               l10n.invOverviewTitle,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Row(
               children: [
                 Expanded(
@@ -382,7 +376,7 @@ class _OverviewCard extends StatelessWidget {
                         value: '${summary.productCount}',
                         label: l10n.invOverviewProducts,
                       ),
-                      const SizedBox(height: TongtaiDesignTokens.spacing3),
+                      const SizedBox(height: TtSpace.x3),
                       _OverviewKpi(
                         keyId: 'inventory-overview-value',
                         value: TongtaiFormatters.vndShort(summary.stockValue),
@@ -391,7 +385,7 @@ class _OverviewCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: TongtaiDesignTokens.spacing3),
+                const SizedBox(width: TtSpace.x3),
                 SizedBox(
                   width: 72,
                   height: 72,
@@ -403,18 +397,18 @@ class _OverviewCard extends StatelessWidget {
                           if (count > 0)
                             (tongtaiStockStatusColor(status), count),
                       ],
-                      trackColor: TongtaiDesignTokens.lightBorder,
+                      trackColor: TtColors.border,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             // Wrap, not Row: at a 2.0× system font three legend entries do not
             // fit one line on a small phone (the WTM-169 overflow class).
             Wrap(
-              spacing: TongtaiDesignTokens.spacing3,
-              runSpacing: TongtaiDesignTokens.spacing1,
+              spacing: TtSpace.x3,
+              runSpacing: TtSpace.x1,
               children: [
                 for (final (status, count) in segments)
                   _LegendEntry(
@@ -452,16 +446,14 @@ class _OverviewKpi extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TongtaiDesignTokens.heading3Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
+          style: TtType.h2.copyWith(
+            color: TtColors.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
         Text(
           label,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
       ],
     );
@@ -489,15 +481,13 @@ class _LegendEntry extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: TongtaiDesignTokens.spacing1),
+        const SizedBox(width: TtSpace.x1),
         // Flexible, or the min-size Row overflows its Wrap slot by the width
         // of whatever the label grew to — measured 12px at vi/1.3× on 320px.
         Flexible(
           child: Text(
             '$label $percent%',
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
         ),
       ],
@@ -571,9 +561,9 @@ class _LowStockStrip extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            TongtaiDesignTokens.spacing4,
-            TongtaiDesignTokens.spacing3,
-            TongtaiDesignTokens.spacing4,
+            TtSpace.x4,
+            TtSpace.x3,
+            TtSpace.x4,
             0,
           ),
           child: Row(
@@ -581,8 +571,8 @@ class _LowStockStrip extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.invLowStockSection,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -602,13 +592,10 @@ class _LowStockStrip extends StatelessWidget {
           // overflows 30px per card at 2.0× (the WTM-169 class).
           height: MediaQuery.textScalerOf(context).scale(96),
           child: ListView.separated(
-            padding: const EdgeInsets.symmetric(
-              horizontal: TongtaiDesignTokens.spacing4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
             scrollDirection: Axis.horizontal,
             itemCount: alerts.length,
-            separatorBuilder: (_, _) =>
-                const SizedBox(width: TongtaiDesignTokens.spacing2),
+            separatorBuilder: (_, _) => const SizedBox(width: TtSpace.x2),
             itemBuilder: (context, index) {
               final alert = alerts[index];
               return _LowStockCard(alert: alert, onOpen: onOpen);
@@ -637,17 +624,13 @@ class _LowStockCard extends StatelessWidget {
       child: InkWell(
         key: Key('inventory-lowstock-${alert.product.id}'),
         onTap: () => onOpen(alert.product),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         child: Container(
           width: 168,
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+          padding: const EdgeInsets.all(TtSpace.x3),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.cardBorderRadius,
-            ),
+            borderRadius: BorderRadius.circular(TtRadius.md),
             border: Border.all(color: color.withValues(alpha: 0.4)),
           ),
           child: Column(
@@ -658,20 +641,20 @@ class _LowStockCard extends StatelessWidget {
                   alert.product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing1),
+              const SizedBox(height: TtSpace.x1),
               Text(
                 context.l10n.stockQtyOfThreshold(
                   alert.quantity,
                   alert.threshold,
                 ),
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.readableText(color),
+                style: TtType.caption.copyWith(
+                  color: TtColors.readableOn(color),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -712,16 +695,12 @@ class _SearchField extends StatelessWidget {
                 onPressed: onClear,
               ),
         filled: true,
-        fillColor: TongtaiDesignTokens.lightHover,
+        fillColor: TtColors.surfaceTertiary,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.componentBorderRadius,
-          ),
+          borderRadius: BorderRadius.circular(TtRadius.sm),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: TongtaiDesignTokens.spacing4,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       ),
     );
   }
@@ -744,7 +723,7 @@ class _CategoryFilter extends StatelessWidget {
       label: context.l10n.searchCategory,
       children: [
         Padding(
-          padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+          padding: const EdgeInsets.only(right: TtSpace.x2),
           child: ChoiceChip(
             label: Text(context.l10n.filterAll),
             selected: selected == null,
@@ -753,7 +732,7 @@ class _CategoryFilter extends StatelessWidget {
         ),
         for (final category in categories)
           Padding(
-            padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+            padding: const EdgeInsets.only(right: TtSpace.x2),
             child: ChoiceChip(
               label: Text(category),
               selected: selected == category,
@@ -793,7 +772,7 @@ class _SortBar extends StatelessWidget {
       children: [
         for (final option in ProductSort.values)
           Padding(
-            padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+            padding: const EdgeInsets.only(right: TtSpace.x2),
             child: ChoiceChip(
               label: Text(option.label(context.l10n.languageCode)),
               selected: sort == option,
@@ -818,8 +797,8 @@ class _ChipsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x1,
       ),
       child: Row(
         children: [
@@ -827,8 +806,8 @@ class _ChipsRow extends StatelessWidget {
             width: 68,
             child: Text(
               label,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -855,17 +834,15 @@ class _ResultsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing3,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing2,
+        TtSpace.x4,
+        TtSpace.x3,
+        TtSpace.x4,
+        TtSpace.x2,
       ),
       child: Text(
         count == 1 ? '1 product' : '$count products',
         key: const Key('inventory-count-badge'),
-        style: TongtaiDesignTokens.smallStyle.copyWith(
-          color: TongtaiDesignTokens.lightTextSecondary,
-        ),
+        style: TtType.body.copyWith(color: TtColors.textSecondary),
       ),
     );
   }
@@ -880,15 +857,9 @@ class _ProductList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        0,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing4,
-      ),
+      padding: const EdgeInsets.fromLTRB(TtSpace.x4, 0, TtSpace.x4, TtSpace.x4),
       itemCount: products.length,
-      separatorBuilder: (context, _) =>
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+      separatorBuilder: (context, _) => const SizedBox(height: TtSpace.x3),
       itemBuilder: (context, index) => _ProductRow(
         product: products[index],
         onTap: () => onEdit(products[index]),
@@ -910,18 +881,14 @@ class _ProductRow extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         child: Container(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+          padding: const EdgeInsets.all(TtSpace.x3),
           decoration: BoxDecoration(
-            color: TongtaiDesignTokens.lightBackground,
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.cardBorderRadius,
-            ),
-            border: Border.all(color: TongtaiDesignTokens.lightBorder),
-            boxShadow: TongtaiDesignTokens.elevation1,
+            color: TtColors.surfaceSecondary,
+            borderRadius: BorderRadius.circular(TtRadius.md),
+            border: Border.all(color: TtColors.border),
+            boxShadow: TtElevation.soft,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -934,33 +901,33 @@ class _ProductRow extends StatelessWidget {
                       product.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                      style: TtType.bodyLarge.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     Text(
                       '${product.sku} • ${product.category}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     Text(
                       context.l10n.invUpdatedOn(
                         TongtaiFormatters.isoDate(product.updatedAt),
                       ),
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               // Bounded, or a long price on a 320 px phone pushes the row 11 px
               // past the screen edge (WTM-169) — the Expanded on the left can
               // only give way if the right-hand side is allowed to shrink.
@@ -970,25 +937,25 @@ class _ProductRow extends StatelessWidget {
                   children: [
                     Text(
                       TongtaiFormatters.vnd(product.pricePerUnit),
-                      style: TongtaiDesignTokens.smallStyle.copyWith(
+                      style: TtType.body.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
                     // ADR-TON-023: sản phẩm số không có tồn kho — không dòng
                     // số lượng, không chip trạng thái. Hiện "SL 0 · Hết hàng"
                     // cho một phần mềm là app nói một điều không có thật.
                     if (product.quantity case final q?) ...[
-                      const SizedBox(height: TongtaiDesignTokens.spacing1),
+                      const SizedBox(height: TtSpace.x1),
                       Text(
                         context.l10n.invQuantity(q),
-                        style: TongtaiDesignTokens.captionStyle.copyWith(
-                          color: TongtaiDesignTokens.lightTextSecondary,
+                        style: TtType.caption.copyWith(
+                          color: TtColors.textSecondary,
                         ),
                       ),
                     ],
                     if (product.stockStatus case final status?) ...[
-                      const SizedBox(height: TongtaiDesignTokens.spacing2),
+                      const SizedBox(height: TtSpace.x2),
                       _StatusChip(status: status),
                     ],
                   ],
@@ -1011,18 +978,15 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = tongtaiStockStatusColor(status);
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing2,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        borderRadius: BorderRadius.circular(TtRadius.full),
         border: Border.all(color: color),
       ),
       child: Text(
         status.label(context.l10n.languageCode),
-        style: TongtaiDesignTokens.captionStyle.copyWith(
+        style: TtType.caption.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
         ),
@@ -1046,12 +1010,12 @@ class _PaginationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing2,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x2,
       ),
       decoration: const BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        border: Border(top: BorderSide(color: TongtaiDesignTokens.lightBorder)),
+        color: TtColors.surfaceSecondary,
+        border: Border(top: BorderSide(color: TtColors.border)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1065,9 +1029,7 @@ class _PaginationBar extends StatelessWidget {
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
           ),
           // Flexible, because two 48 dp tap targets plus a page label is wider
@@ -1089,8 +1051,8 @@ class _PaginationBar extends StatelessWidget {
                     key: const Key('inventory-page-indicator'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                    style: TtType.body.copyWith(
+                      color: TtColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1121,31 +1083,29 @@ class _EmptyState extends StatelessWidget {
     return SingleChildScrollView(
       key: const Key('inventory-empty'),
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
               Icons.inventory_2_outlined,
               size: 48,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Text(
               context.l10n.invEmptySearch,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.bodyLarge.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               context.l10n.invEmptySearchHint,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),

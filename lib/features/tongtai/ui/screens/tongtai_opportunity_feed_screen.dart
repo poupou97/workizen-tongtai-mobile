@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../core/tongtai_formatters.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_feed_controller.dart';
 import '../../opportunity/opportunity_signals.dart';
@@ -182,7 +183,7 @@ class _TongtaiOpportunityFeedScreenState
       builder: (context, _) {
         final items = _controller.feed(_query);
         return Scaffold(
-          backgroundColor: TongtaiDesignTokens.lightBackground,
+          backgroundColor: TtColors.surfaceSecondary,
           appBar: tongtaiScreenHeader(
             context,
             screen: 'opportunity',
@@ -196,9 +197,7 @@ class _TongtaiOpportunityFeedScreenState
                     : context.l10n.oppFilterSaved,
                 icon: Icon(
                   _query.savedOnly ? Icons.bookmark : Icons.bookmark_outline,
-                  color: _query.savedOnly
-                      ? TongtaiDesignTokens.inventoryOrange
-                      : null,
+                  color: _query.savedOnly ? TtColors.warning : null,
                 ),
                 onPressed: () => setState(
                   () => _query = _query.copyWith(savedOnly: !_query.savedOnly),
@@ -217,9 +216,7 @@ class _TongtaiOpportunityFeedScreenState
                   label: context.l10n.labelType,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(
-                        right: TongtaiDesignTokens.spacing2,
-                      ),
+                      padding: const EdgeInsets.only(right: TtSpace.x2),
                       child: ChoiceChip(
                         label: Text(context.l10n.filterAll),
                         selected: _query.type == null,
@@ -230,9 +227,7 @@ class _TongtaiOpportunityFeedScreenState
                     ),
                     for (final type in _controller.availableTypes)
                       Padding(
-                        padding: const EdgeInsets.only(
-                          right: TongtaiDesignTokens.spacing2,
-                        ),
+                        padding: const EdgeInsets.only(right: TtSpace.x2),
                         child: ChoiceChip(
                           key: Key('opportunity-type-${type.name}'),
                           label: Text(type.label(context.l10n.languageCode)),
@@ -258,9 +253,7 @@ class _TongtaiOpportunityFeedScreenState
                       _controller.all,
                     ))
                       Padding(
-                        padding: const EdgeInsets.only(
-                          right: TongtaiDesignTokens.spacing2,
-                        ),
+                        padding: const EdgeInsets.only(right: TtSpace.x2),
                         child: ChoiceChip(
                           key: Key('opportunity-sort-${sort.name}'),
                           label: Text(sort.label(context.l10n.languageCode)),
@@ -274,16 +267,14 @@ class _TongtaiOpportunityFeedScreenState
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    TongtaiDesignTokens.spacing4,
-                    TongtaiDesignTokens.spacing3,
-                    TongtaiDesignTokens.spacing4,
-                    TongtaiDesignTokens.spacing2,
+                    TtSpace.x4,
+                    TtSpace.x3,
+                    TtSpace.x4,
+                    TtSpace.x2,
                   ),
                   child: Text(
                     context.l10n.countOpportunities(items.length),
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
-                    ),
+                    style: TtType.body.copyWith(color: TtColors.textSecondary),
                   ),
                 ),
                 Expanded(
@@ -296,14 +287,14 @@ class _TongtaiOpportunityFeedScreenState
                         _EmptyState(savedOnly: _query.savedOnly),
                     builder: (context, _) => ListView.separated(
                       padding: const EdgeInsets.fromLTRB(
-                        TongtaiDesignTokens.spacing4,
+                        TtSpace.x4,
                         0,
-                        TongtaiDesignTokens.spacing4,
-                        TongtaiDesignTokens.spacing4,
+                        TtSpace.x4,
+                        TtSpace.x4,
                       ),
                       itemCount: items.length,
                       separatorBuilder: (context, _) =>
-                          const SizedBox(height: TongtaiDesignTokens.spacing3),
+                          const SizedBox(height: TtSpace.x3),
                       itemBuilder: (context, index) {
                         final opportunity = items[index];
                         // AC5: swipe right = interested, left = dismiss.
@@ -318,13 +309,13 @@ class _TongtaiOpportunityFeedScreenState
                           ),
                           background: _SwipeHint(
                             alignment: Alignment.centerLeft,
-                            color: TongtaiDesignTokens.success,
+                            color: TtColors.success,
                             icon: Icons.thumb_up_alt_outlined,
                             label: context.l10n.oppInterested,
                           ),
                           secondaryBackground: _SwipeHint(
                             alignment: Alignment.centerRight,
-                            color: TongtaiDesignTokens.error,
+                            color: TtColors.danger,
                             icon: Icons.close,
                             label: context.l10n.oppDismiss,
                           ),
@@ -384,14 +375,12 @@ class _OpportunityCard extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Container(
         key: Key('opportunity-card-${opportunity.id}'),
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+        padding: const EdgeInsets.all(TtSpace.x3),
         decoration: BoxDecoration(
-          color: TongtaiDesignTokens.lightBackground,
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.cardBorderRadius,
-          ),
-          border: Border.all(color: TongtaiDesignTokens.lightBorder),
-          boxShadow: TongtaiDesignTokens.elevation1,
+          color: TtColors.surfaceSecondary,
+          borderRadius: BorderRadius.circular(TtRadius.md),
+          border: Border.all(color: TtColors.border),
+          boxShadow: TtElevation.soft,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,30 +389,28 @@ class _OpportunityCard extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: TongtaiDesignTokens.spacing2,
+                    horizontal: TtSpace.x2,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(
-                      TongtaiDesignTokens.radiusFull,
-                    ),
+                    borderRadius: BorderRadius.circular(TtRadius.full),
                     border: Border.all(color: color),
                   ),
                   child: Text(
                     opportunity.type.label(context.l10n.languageCode),
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                    style: TtType.caption.copyWith(
                       color: color,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 if (opportunity.reaction != OpportunityReaction.none) ...[
-                  const SizedBox(width: TongtaiDesignTokens.spacing2),
+                  const SizedBox(width: TtSpace.x2),
                   Text(
                     opportunity.reaction.label(context.l10n.languageCode),
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -444,33 +431,31 @@ class _OpportunityCard extends StatelessWidget {
                         : Icons.bookmark_outline,
                     size: 20,
                     color: opportunity.isSaved
-                        ? TongtaiDesignTokens.inventoryOrange
-                        : TongtaiDesignTokens.lightTextSecondary,
+                        ? TtColors.warning
+                        : TtColors.textSecondary,
                   ),
                   onPressed: onToggleSaved,
                 ),
               ],
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               opportunity.title,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
+              style: TtType.bodyLarge.copyWith(
                 fontWeight: FontWeight.w600,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
             if (signals.isNotEmpty) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               TongtaiOpportunitySignalBadges(signals: signals),
             ],
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               opportunity.description,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             Text(
               '${context.l10n.oppEstimatePrefix} '
               // ROI dropped (WTM-193): it came from a constant. The score
@@ -479,8 +464,8 @@ class _OpportunityCard extends StatelessWidget {
               '+${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
               ' • ${context.l10n.oppScoreLabel} '
               '${opportunity.score.value?.round() ?? '—'}',
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.caption.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -509,23 +494,19 @@ class _SwipeHint extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: alignment,
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: TongtaiDesignTokens.spacing1),
+          const SizedBox(width: TtSpace.x1),
           Text(
             label,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
+            style: TtType.body.copyWith(
               color: color,
               fontWeight: FontWeight.w600,
             ),
@@ -545,7 +526,7 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -555,28 +536,26 @@ class _EmptyState extends StatelessWidget {
               const Icon(
                 Icons.bookmark_outline,
                 size: 48,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               )
             else
               const TongtaiFoxMascot.face(size: 64),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Text(
               savedOnly ? context.l10n.oppEmptySaved : context.l10n.oppEmptyTab,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.bodyLarge.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               savedOnly
                   ? context.l10n.oppEmptySaved
                   : context.l10n.oppEmptyFeed,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),
@@ -596,8 +575,8 @@ class _ChipsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x1,
       ),
       child: Row(
         children: [
@@ -605,8 +584,8 @@ class _ChipsRow extends StatelessWidget {
             width: 48,
             child: Text(
               label,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),

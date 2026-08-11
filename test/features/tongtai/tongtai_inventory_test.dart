@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart';
-import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dart';
+import 'package:tongtai/core/design/tt.dart';
 
 /// Real unit tests for the WTM-68 inventory logic: the stock-status derivation,
 /// the color mapping, free-text + category filtering, all four sort keys and
@@ -65,18 +65,13 @@ void main() {
 
   group('tongtaiStockStatusColor', () {
     test('maps each status to its semantic color', () {
-      expect(
-        tongtaiStockStatusColor(StockStatus.inStock),
-        TongtaiDesignTokens.success,
-      );
-      expect(
-        tongtaiStockStatusColor(StockStatus.lowStock),
-        TongtaiDesignTokens.warning,
-      );
-      expect(
-        tongtaiStockStatusColor(StockStatus.outOfStock),
-        TongtaiDesignTokens.error,
-      );
+      // Ánh xạ NGHĨA không đổi (còn hàng → tích cực, sắp hết → cần chú ý, hết
+      // → nguy cấp); chỉ bảng màu chuyển sang Design System (WTM-370). Khẳng
+      // định theo token, không theo mã màu — một test ghim mã màu sẽ đỏ mỗi
+      // lần bảng màu đổi kể cả khi nghĩa giữ nguyên.
+      expect(tongtaiStockStatusColor(StockStatus.inStock), TtColors.success);
+      expect(tongtaiStockStatusColor(StockStatus.lowStock), TtColors.warning);
+      expect(tongtaiStockStatusColor(StockStatus.outOfStock), TtColors.danger);
     });
 
     test('the three statuses have distinct colors', () {

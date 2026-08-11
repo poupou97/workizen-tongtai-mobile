@@ -1241,7 +1241,7 @@ class _Hero extends StatelessWidget {
         Text(
           headline,
           key: const Key('home-hero-headline'),
-          style: TtType.h2.copyWith(
+          style: TtType.h1.copyWith(
             color: TtColors.textPrimary,
             fontWeight: FontWeight.w700,
           ),
