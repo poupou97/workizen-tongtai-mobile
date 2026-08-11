@@ -7,12 +7,12 @@ import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order_history_service.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
-import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/orders/order_controller.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_create_order_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_history_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_list_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_picker_screen.dart';
+import 'package:tongtai/core/design/tt.dart';
 
 /// Widget tests for the WTM-77 Purchase History screen + its entry point on
 /// the customer list.
@@ -224,26 +224,11 @@ void main() {
   testWidgets('status chip colors map by status (pure function)', (
     tester,
   ) async {
-    expect(
-      tongtaiOrderStatusColor(OrderStatus.pending),
-      TongtaiDesignTokens.warning,
-    );
-    expect(
-      tongtaiOrderStatusColor(OrderStatus.confirmed),
-      TongtaiDesignTokens.info,
-    );
-    expect(
-      tongtaiOrderStatusColor(OrderStatus.shipped),
-      TongtaiDesignTokens.info,
-    );
-    expect(
-      tongtaiOrderStatusColor(OrderStatus.delivered),
-      TongtaiDesignTokens.success,
-    );
-    expect(
-      tongtaiOrderStatusColor(OrderStatus.cancelled),
-      TongtaiDesignTokens.error,
-    );
+    expect(tongtaiOrderStatusColor(OrderStatus.pending), TtColors.warning);
+    expect(tongtaiOrderStatusColor(OrderStatus.confirmed), TtColors.info);
+    expect(tongtaiOrderStatusColor(OrderStatus.shipped), TtColors.info);
+    expect(tongtaiOrderStatusColor(OrderStatus.delivered), TtColors.success);
+    expect(tongtaiOrderStatusColor(OrderStatus.cancelled), TtColors.danger);
   });
 
   testWidgets(

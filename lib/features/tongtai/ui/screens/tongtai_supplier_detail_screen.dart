@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../core/tongtai_formatters.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../producer/supplier.dart';
 import '../../producer/supplier_profile.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -33,11 +34,9 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
     final sent = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(TongtaiDesignTokens.radiusXl),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(TtRadius.lg)),
       ),
       builder: (_) => _MessageComposerSheet(supplierName: profile.name),
     );
@@ -51,12 +50,12 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.labelSupplier),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -67,25 +66,25 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
                 child: SizedBox(
                   width: width,
                   child: Padding(
-                    padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+                    padding: const EdgeInsets.all(TtSpace.x4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _ProfileHeader(profile: profile),
-                        const SizedBox(height: TongtaiDesignTokens.spacing4),
+                        const SizedBox(height: TtSpace.x4),
                         _AboutSection(description: profile.description),
-                        const SizedBox(height: TongtaiDesignTokens.spacing4),
+                        const SizedBox(height: TtSpace.x4),
                         _RatingsSection(profile: profile),
-                        const SizedBox(height: TongtaiDesignTokens.spacing4),
+                        const SizedBox(height: TtSpace.x4),
                         _CatalogSection(profile: profile),
-                        const SizedBox(height: TongtaiDesignTokens.spacing4),
+                        const SizedBox(height: TtSpace.x4),
                         _TransactionsSection(summary: profile.transactions),
-                        const SizedBox(height: TongtaiDesignTokens.spacing4),
+                        const SizedBox(height: TtSpace.x4),
                         _ContactSection(
                           profile: profile,
                           onMessage: () => _openMessageSheet(context),
                         ),
-                        const SizedBox(height: TongtaiDesignTokens.spacing6),
+                        const SizedBox(height: TtSpace.x6),
                       ],
                     ),
                   ),
@@ -113,37 +112,35 @@ class _ProfileHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _LogoMonogram(initials: profile.initials),
-        const SizedBox(width: TongtaiDesignTokens.spacing4),
+        const SizedBox(width: TtSpace.x4),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 profile.name,
-                style: TongtaiDesignTokens.heading2Style.copyWith(
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                ),
+                style: TtType.h1.copyWith(color: TtColors.textPrimary),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing1),
+              const SizedBox(height: TtSpace.x1),
               Row(
                 children: [
                   const Icon(
                     Icons.place_outlined,
                     size: 16,
-                    color: TongtaiDesignTokens.lightTextSecondary,
+                    color: TtColors.textSecondary,
                   ),
-                  const SizedBox(width: TongtaiDesignTokens.spacing1),
+                  const SizedBox(width: TtSpace.x1),
                   Expanded(
                     child: Text(
                       profile.location,
-                      style: TongtaiDesignTokens.smallStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.body.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               _RatingRow(profile: profile),
             ],
           ),
@@ -165,13 +162,13 @@ class _LogoMonogram extends StatelessWidget {
       height: 64,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
+        color: TtColors.success.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(TtRadius.md),
       ),
       child: Text(
         initials,
-        style: TongtaiDesignTokens.heading3Style.copyWith(
-          color: TongtaiDesignTokens.producerGreenText,
+        style: TtType.h2.copyWith(
+          color: TtColors.successOnLight,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -188,16 +185,16 @@ class _RatingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.star, size: 18, color: Color(0xFFF59E0B)),
-        const SizedBox(width: TongtaiDesignTokens.spacing1),
+        const Icon(Icons.star, size: 18, color: TtColors.warning),
+        const SizedBox(width: TtSpace.x1),
         Text(
           profile.rating.toStringAsFixed(1),
-          style: TongtaiDesignTokens.smallStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w700,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(width: TongtaiDesignTokens.spacing1),
+        const SizedBox(width: TtSpace.x1),
         // Flexible + localized: the review count was hardcoded English and
         // pushed the header 190 px past the edge at a 2.0x font (WTM-168).
         Flexible(
@@ -205,9 +202,7 @@ class _RatingRow extends StatelessWidget {
             context.l10n.supplierReviewCount(profile.reviewCount),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.body.copyWith(color: TtColors.textSecondary),
           ),
         ),
       ],
@@ -228,9 +223,7 @@ class _AboutSection extends StatelessWidget {
       title: context.l10n.supAbout,
       child: Text(
         description,
-        style: TongtaiDesignTokens.bodyStyle.copyWith(
-          color: TongtaiDesignTokens.lightTextPrimary,
-        ),
+        style: TtType.bodyLarge.copyWith(color: TtColors.textPrimary),
       ),
     );
   }
@@ -257,29 +250,25 @@ class _RatingsSection extends StatelessWidget {
             children: [
               Text(
                 profile.rating.toStringAsFixed(1),
-                style: TongtaiDesignTokens.heading1Style.copyWith(
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                ),
+                style: TtType.display.copyWith(color: TtColors.textPrimary),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing1),
-              const Icon(Icons.star, size: 20, color: Color(0xFFF59E0B)),
-              const SizedBox(width: TongtaiDesignTokens.spacing2),
+              const SizedBox(width: TtSpace.x1),
+              const Icon(Icons.star, size: 20, color: TtColors.warning),
+              const SizedBox(width: TtSpace.x2),
               Flexible(
                 child: Text(
                   context.l10n.supplierFromReviews(profile.reviewCount),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.body.copyWith(color: TtColors.textSecondary),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
-            runSpacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
+            runSpacing: TtSpace.x2,
             children: [
               for (final cert in profile.certifications)
                 _CertificationBadge(label: cert),
@@ -300,15 +289,13 @@ class _CertificationBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing3,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x3,
+        vertical: TtSpace.x1,
       ),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
-        border: Border.all(
-          color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.3),
-        ),
+        color: TtColors.success.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(TtRadius.full),
+        border: Border.all(color: TtColors.success.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -316,13 +303,13 @@ class _CertificationBadge extends StatelessWidget {
           const Icon(
             Icons.verified_outlined,
             size: 14,
-            color: TongtaiDesignTokens.producerGreenText,
+            color: TtColors.successOnLight,
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing1),
+          const SizedBox(width: TtSpace.x1),
           Text(
             label,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.producerGreenText,
+            style: TtType.caption.copyWith(
+              color: TtColors.successOnLight,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -353,36 +340,32 @@ class _CatalogSection extends StatelessWidget {
               profile.productCount,
               categoryCount,
             ),
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.body.copyWith(color: TtColors.textSecondary),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           for (final row in profile.catalog)
             Padding(
-              padding: const EdgeInsets.only(
-                bottom: TongtaiDesignTokens.spacing2,
-              ),
+              padding: const EdgeInsets.only(bottom: TtSpace.x2),
               child: Row(
                 children: [
                   const Icon(
                     Icons.category_outlined,
                     size: 16,
-                    color: TongtaiDesignTokens.producerGreenText,
+                    color: TtColors.successOnLight,
                   ),
-                  const SizedBox(width: TongtaiDesignTokens.spacing2),
+                  const SizedBox(width: TtSpace.x2),
                   Expanded(
                     child: Text(
                       row.category,
-                      style: TongtaiDesignTokens.bodyStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                      style: TtType.bodyLarge.copyWith(
+                        color: TtColors.textPrimary,
                       ),
                     ),
                   ),
                   Text(
                     context.l10n.supplierProductCount(row.count),
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.body.copyWith(
+                      color: TtColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -409,8 +392,8 @@ class _TransactionsSection extends StatelessWidget {
       sectionKey: const Key('supplier-detail-transactions'),
       title: context.l10n.supTransactionHistory,
       child: Wrap(
-        spacing: TongtaiDesignTokens.spacing3,
-        runSpacing: TongtaiDesignTokens.spacing3,
+        spacing: TtSpace.x3,
+        runSpacing: TtSpace.x3,
         children: [
           _MetricTile(
             icon: Icons.inventory_2_outlined,
@@ -455,28 +438,21 @@ class _MetricTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 148,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightHover,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
+        color: TtColors.surfaceTertiary,
+        borderRadius: BorderRadius.circular(TtRadius.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: TongtaiDesignTokens.producerGreen),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
-          Text(
-            value,
-            style: TongtaiDesignTokens.heading3Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-            ),
-          ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
+          Icon(icon, size: 18, color: TtColors.success),
+          const SizedBox(height: TtSpace.x2),
+          Text(value, style: TtType.h2.copyWith(color: TtColors.textPrimary)),
+          const SizedBox(height: TtSpace.x1),
           Text(
             label,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
         ],
       ),
@@ -505,22 +481,20 @@ class _ContactSection extends StatelessWidget {
               value: profile.contactEmail!,
             ),
           if (profile.contactPhone != null) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             _ContactRow(
               icon: Icons.phone_outlined,
               value: profile.contactPhone!,
             ),
           ],
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               key: const Key('supplier-detail-action-message'),
               style: FilledButton.styleFrom(
-                backgroundColor: TongtaiDesignTokens.producerGreenText,
-                minimumSize: const Size.fromHeight(
-                  TongtaiDesignTokens.buttonHeight,
-                ),
+                backgroundColor: TtColors.successOnLight,
+                minimumSize: const Size.fromHeight(TtButtonMetrics.height),
               ),
               onPressed: onMessage,
               icon: const Icon(Icons.chat_bubble_outline, size: 18),
@@ -543,14 +517,12 @@ class _ContactRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: TongtaiDesignTokens.lightTextSecondary),
-        const SizedBox(width: TongtaiDesignTokens.spacing2),
+        Icon(icon, size: 18, color: TtColors.textSecondary),
+        const SizedBox(width: TtSpace.x2),
         Expanded(
           child: Text(
             value,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-            ),
+            style: TtType.bodyLarge.copyWith(color: TtColors.textPrimary),
           ),
         ),
       ],
@@ -578,25 +550,18 @@ class _DetailSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: sectionKey,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        boxShadow: TongtaiDesignTokens.elevation1,
+        color: TtColors.surfaceSecondary,
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.border),
+        boxShadow: TtElevation.soft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TongtaiDesignTokens.heading3Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-            ),
-          ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          Text(title, style: TtType.h2.copyWith(color: TtColors.textPrimary)),
+          const SizedBox(height: TtSpace.x3),
           child,
         ],
       ),
@@ -632,10 +597,10 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing4 + bottomInset,
+        TtSpace.x4,
+        TtSpace.x4,
+        TtSpace.x4,
+        TtSpace.x4 + bottomInset,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -643,11 +608,9 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
         children: [
           Text(
             context.l10n.supplierMessageTitle(widget.supplierName),
-            style: TongtaiDesignTokens.heading3Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-            ),
+            style: TtType.h2.copyWith(color: TtColors.textPrimary),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           TextField(
             controller: _controller,
             onChanged: (_) => setState(() {}),
@@ -657,24 +620,20 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
             decoration: InputDecoration(
               hintText: context.l10n.supAskHint,
               filled: true,
-              fillColor: TongtaiDesignTokens.lightHover,
+              fillColor: TtColors.surfaceTertiary,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                  TongtaiDesignTokens.componentBorderRadius,
-                ),
+                borderRadius: BorderRadius.circular(TtRadius.sm),
                 borderSide: BorderSide.none,
               ),
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               style: FilledButton.styleFrom(
-                backgroundColor: TongtaiDesignTokens.producerGreenText,
-                minimumSize: const Size.fromHeight(
-                  TongtaiDesignTokens.buttonHeight,
-                ),
+                backgroundColor: TtColors.successOnLight,
+                minimumSize: const Size.fromHeight(TtButtonMetrics.height),
               ),
               onPressed: _canSend
                   ? () => Navigator.of(context).pop(true)

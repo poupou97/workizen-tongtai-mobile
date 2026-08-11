@@ -98,6 +98,17 @@ abstract final class TtColors {
   /// cả bảng màu (WTM-169 đã trả giá một lần). `#B45309` đạt **5,02:1**.
   static const Color warningOnDark = Color(0xFFB45309);
 
+  // ── Biến thể đậm, dùng được trong `const` ───────────────────────────────
+  //
+  // `readableOn` là một hàm nên nó không nằm trong biểu thức `const` được, mà
+  // rất nhiều chỗ trong app dựng màu ở vị trí const. Bốn hằng dưới đây là cùng
+  // giá trị, khai riêng để hàm và hằng không thể lệch nhau: hàm trả về **chính
+  // chúng**.
+  static const Color successOnLight = Color(0xFF047857);
+  static const Color infoOnLight = Color(0xFF1D4ED8);
+  static const Color aiOnLight = Color(0xFF6D28D9);
+  static const Color dangerOnLight = Color(0xFFB91C1C);
+
   /// Chữ **đọc được** đặt trên một màu ngữ nghĩa.
   ///
   /// Có hàm này để một component được **trao** một màu (chip, badge, tiêu đề)
@@ -111,19 +122,19 @@ abstract final class TtColors {
   /// chuyển tiếp về đây.
   static Color readableOn(Color base) => switch (base.toARGB32()) {
     // Design System
-    0xFF16A34A => Color(0xFF047857), // success
-    0xFF2563EB => Color(0xFF1D4ED8), // info
-    0xFFF59E0B => warningOnDark, // warning
-    0xFFDC2626 => Color(0xFFB91C1C), // danger
-    0xFF7C3AED => Color(0xFF6D28D9), // ai
-    0xFF94A3B8 => textSecondary, // unknown
-    0xFFF97316 => brandOnDark, // brand
+    0xFF16A34A => successOnLight,
+    0xFF2563EB => infoOnLight,
+    0xFFF59E0B => warningOnDark,
+    0xFFDC2626 => dangerOnLight,
+    0xFF7C3AED => aiOnLight,
+    0xFF94A3B8 => textSecondary,
+    0xFFF97316 => brandOnDark,
     // Bảng cũ, còn dùng ở những màn chưa di trú
-    0xFF10B981 => Color(0xFF047857), // producerGreen
-    0xFF3B82F6 => Color(0xFF1D4ED8), // consumerBlue
-    0xFF8B5CF6 || 0xFFA78BFA => Color(0xFF6D28D9), // financePurple/copilot
-    0xFFEF4444 => Color(0xFFB91C1C), // error cũ
-    0xFF6B7280 => Color(0xFF4B5563), // setupGray/neutral
+    0xFF10B981 => successOnLight, // producerGreen
+    0xFF3B82F6 => infoOnLight, // consumerBlue
+    0xFF8B5CF6 || 0xFFA78BFA => aiOnLight, // financePurple/copilot
+    0xFFEF4444 => dangerOnLight, // error cũ
+    0xFF6B7280 => textSecondary, // setupGray/neutral
     _ => textPrimary,
   };
 

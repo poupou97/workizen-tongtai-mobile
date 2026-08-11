@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../capability/customer_capability.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/screen_state.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../predictive/customer_risk_rule.dart';
 import '../../predictive/rule_twin.dart';
 import '../../providers/tongtai_consumer_provider.dart';
@@ -87,12 +88,12 @@ class _TongtaiCustomerRiskScreenState
     final risk = ref.watch(customerRiskProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleCustomerRisk),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         // Through the shared seam (WTM-148). A failed load is NOT "no risk" —
@@ -139,10 +140,9 @@ class _TongtaiCustomerRiskScreenState
     // index 0 is the summary + provenance header; the rest are the ranked
     // entries, highest risk first (the twin's own total order).
     return ListView.separated(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       itemCount: assessment.entries.length + 1,
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+      separatorBuilder: (context, index) => const SizedBox(height: TtSpace.x3),
       itemBuilder: (context, index) {
         if (index == 0) {
           return _RiskHeader(twin: twin, assessment: assessment);
@@ -184,11 +184,11 @@ String tongtaiRiskStageKey(CustomerLifecycleStage stage) => switch (stage) {
 /// Semantic colour of a [stage] — the same ladder the rule scores on, so the
 /// colour can never contradict the number next to it.
 Color tongtaiRiskStageColor(CustomerLifecycleStage stage) => switch (stage) {
-  CustomerLifecycleStage.neverPurchased => TongtaiDesignTokens.neutral,
-  CustomerLifecycleStage.active => TongtaiDesignTokens.success,
-  CustomerLifecycleStage.cooling => TongtaiDesignTokens.info,
-  CustomerLifecycleStage.atRisk => TongtaiDesignTokens.warning,
-  CustomerLifecycleStage.churned => TongtaiDesignTokens.error,
+  CustomerLifecycleStage.neverPurchased => TtColors.unknown,
+  CustomerLifecycleStage.active => TtColors.success,
+  CustomerLifecycleStage.cooling => TtColors.info,
+  CustomerLifecycleStage.atRisk => TtColors.warning,
+  CustomerLifecycleStage.churned => TtColors.danger,
 };
 
 // ── Header: summary band + provenance + why ─────────────────────────────────
@@ -207,17 +207,15 @@ class _RiskHeader extends StatelessWidget {
       children: [
         Text(
           l10n.customersAtRisk(assessment.atRiskCount),
-          style: TongtaiDesignTokens.heading3Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-          ),
+          style: TtType.h2.copyWith(color: TtColors.textPrimary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         // Summary band — one tile per lifecycle stage (mutually exclusive, so
         // the tiles sum to the number of rows below: Summary Count == Visible
         // Records) plus the overlapping win-back count.
         Wrap(
-          spacing: TongtaiDesignTokens.spacing2,
-          runSpacing: TongtaiDesignTokens.spacing2,
+          spacing: TtSpace.x2,
+          runSpacing: TtSpace.x2,
           children: [
             for (final stage in CustomerLifecycleStage.values)
               _SummaryStat(
@@ -230,87 +228,83 @@ class _RiskHeader extends StatelessWidget {
               statKey: const Key('risk-summary-win-back'),
               count: assessment.winBackCount,
               label: l10n.riskWinBack,
-              color: TongtaiDesignTokens.financePurple,
+              color: TtColors.ai,
             ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         // Provenance — this screen is arithmetic, not a guess: the seller can
         // see it needs no AI, no network and no key (ADR-TON-016).
         Container(
           key: const Key('risk-confidence'),
           padding: const EdgeInsets.symmetric(
-            horizontal: TongtaiDesignTokens.spacing3,
-            vertical: TongtaiDesignTokens.spacing2,
+            horizontal: TtSpace.x3,
+            vertical: TtSpace.x2,
           ),
           decoration: BoxDecoration(
-            color: TongtaiDesignTokens.lightHover,
-            borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
-            border: Border.all(color: TongtaiDesignTokens.lightBorder),
+            color: TtColors.surfaceTertiary,
+            borderRadius: BorderRadius.circular(TtRadius.full),
+            border: Border.all(color: TtColors.border),
           ),
           child: Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               const Icon(
                 Icons.calculate_outlined,
                 size: 16,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
               Text(
                 l10n.forecastRuleBased,
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                style: TtType.caption.copyWith(
+                  color: TtColors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 '${l10n.forecastConfidence}: '
                 '${twin.confidence.label(l10n.languageCode)}',
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.textSecondary),
               ),
             ],
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         // WTM-280 — màn này xếp hạng khách theo rủi ro rồi gợi ý liên hệ /
         // ưu đãi. Đó là phán đoán về người thật, nên cùng câu miễn trừ với
         // màn dự báo: số là ước tính, quyết định là của người bán.
         Text(
           l10n.estimateDisclaimer,
           key: const Key('risk-estimate-disclaimer'),
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
+          style: TtType.caption.copyWith(
+            color: TtColors.textSecondary,
             height: 1.4,
           ),
         ),
         if (twin.reasonCodes.isNotEmpty) ...[
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Text(
             l10n.forecastWhy,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.body.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           _ReasonCodes(
             reasonCodes: twin.reasonCodes,
-            color: TongtaiDesignTokens.lightTextSecondary,
+            color: TtColors.textSecondary,
           ),
         ],
         // Partial answers must carry their caveat, never silently pass as a
         // full assessment (RuleTwinResult contract).
         if (twin.sufficiency == DataSufficiency.partial) ...[
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Text(
             l10n.riskEmptyBody,
             key: const Key('risk-partial-note'),
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
         ],
       ],
@@ -336,14 +330,12 @@ class _SummaryStat extends StatelessWidget {
     return Container(
       key: statKey,
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing3,
-        vertical: TongtaiDesignTokens.spacing2,
+        horizontal: TtSpace.x3,
+        vertical: TtSpace.x2,
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Column(
@@ -352,15 +344,15 @@ class _SummaryStat extends StatelessWidget {
         children: [
           Text(
             '$count',
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
+            style: TtType.bodyLarge.copyWith(
               color: color,
               fontWeight: FontWeight.w700,
             ),
           ),
           Text(
             label,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
+            style: TtType.caption.copyWith(
+              color: TtColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -389,14 +381,12 @@ class _RiskRow extends StatelessWidget {
     final recencyDays = entry.recencyDays;
     return Container(
       key: Key('risk-item-${entry.customerId}'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        boxShadow: TongtaiDesignTokens.elevation1,
+        color: TtColors.surfaceSecondary,
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.border),
+        boxShadow: TtElevation.soft,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,15 +395,15 @@ class _RiskRow extends StatelessWidget {
             name ?? entry.customerId,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.bodyLarge.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
-            runSpacing: TongtaiDesignTokens.spacing1,
+            spacing: TtSpace.x2,
+            runSpacing: TtSpace.x1,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _Pill(
@@ -421,15 +411,12 @@ class _RiskRow extends StatelessWidget {
                 color: color,
               ),
               if (entry.winBackCandidate)
-                _Pill(
-                  label: l10n.riskWinBack,
-                  color: TongtaiDesignTokens.financePurple,
-                ),
+                _Pill(label: l10n.riskWinBack, color: TtColors.ai),
               Text(
                 // The score is the twin's, rounded for display only — the
                 // ranking above is still the twin's exact order.
                 l10n.riskScoreLabel(entry.riskScore.round()),
-                style: TongtaiDesignTokens.captionStyle.copyWith(
+                style: TtType.caption.copyWith(
                   color: color,
                   fontWeight: FontWeight.w700,
                 ),
@@ -439,21 +426,19 @@ class _RiskRow extends StatelessWidget {
               if (recencyDays != null)
                 Text(
                   l10n.daysSincePurchase(recencyDays),
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
             ],
           ),
           if (entry.reasonCodes.isNotEmpty) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             _ReasonCodes(
               reasonCodes: entry.reasonCodes,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ],
           if (entry.winBackCandidate) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             _RecommendedActions(customerId: entry.customerId),
           ],
         ],
@@ -474,24 +459,22 @@ class _ReasonCodes extends StatelessWidget {
   Widget build(BuildContext context) {
     final code = context.l10n.languageCode;
     return Wrap(
-      spacing: TongtaiDesignTokens.spacing2,
-      runSpacing: TongtaiDesignTokens.spacing1,
+      spacing: TtSpace.x2,
+      runSpacing: TtSpace.x1,
       children: [
         for (final reason in reasonCodes)
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: TongtaiDesignTokens.spacing2,
+              horizontal: TtSpace.x2,
               vertical: 2,
             ),
             decoration: BoxDecoration(
-              color: TongtaiDesignTokens.lightHover,
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.radiusFull,
-              ),
+              color: TtColors.surfaceTertiary,
+              borderRadius: BorderRadius.circular(TtRadius.full),
             ),
             child: Text(
               reason.label(code),
-              style: TongtaiDesignTokens.captionStyle.copyWith(color: color),
+              style: TtType.caption.copyWith(color: color),
             ),
           ),
       ],
@@ -519,12 +502,12 @@ class _RecommendedActions extends StatelessWidget {
       children: [
         Text(
           l10n.riskRecommendedActions,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
+          style: TtType.caption.copyWith(
+            color: TtColors.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing1),
+        const SizedBox(height: TtSpace.x1),
         _Suggestion(
           suggestionKey: Key('risk-action-contact-$customerId'),
           icon: Icons.chat_bubble_outline,
@@ -555,18 +538,16 @@ class _Suggestion extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       key: suggestionKey,
-      padding: const EdgeInsets.only(top: TongtaiDesignTokens.spacing1),
+      padding: const EdgeInsets.only(top: TtSpace.x1),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: TongtaiDesignTokens.financePurple),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          Icon(icon, size: 16, color: TtColors.ai),
+          const SizedBox(width: TtSpace.x2),
           Expanded(
             child: Text(
               label,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textPrimary),
             ),
           ),
         ],
@@ -584,18 +565,15 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing2,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        borderRadius: BorderRadius.circular(TtRadius.full),
         border: Border.all(color: color),
       ),
       child: Text(
         label,
-        style: TongtaiDesignTokens.captionStyle.copyWith(
+        style: TtType.caption.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
         ),
@@ -616,7 +594,7 @@ class _RiskEmpty extends StatelessWidget {
     return _CenteredNotice(
       noticeKey: const Key('risk-empty'),
       icon: Icons.people_outline,
-      color: TongtaiDesignTokens.neutral,
+      color: TtColors.unknown,
       title: l10n.riskEmpty,
       body: l10n.riskEmptyBody,
     );
@@ -642,27 +620,25 @@ class _CenteredNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       key: noticeKey,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing6),
+      padding: const EdgeInsets.all(TtSpace.x6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 48, color: color),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.bodyLarge.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
+          const SizedBox(height: TtSpace.x1),
           Text(
             body,
             textAlign: TextAlign.center,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.body.copyWith(color: TtColors.textSecondary),
           ),
         ],
       ),

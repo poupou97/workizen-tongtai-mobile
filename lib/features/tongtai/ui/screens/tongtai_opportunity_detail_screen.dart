@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../ai/opportunity_ai.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_action_plan.dart';
@@ -205,11 +206,11 @@ class _TongtaiOpportunityDetailScreenState
         false;
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleOpportunityDetail),
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         elevation: 0,
         actions: [
           IconButton(
@@ -217,9 +218,7 @@ class _TongtaiOpportunityDetailScreenState
             tooltip: _saved ? l10n.oppUnsaveTooltip : l10n.oppSaveTooltip,
             icon: Icon(
               _saved ? Icons.bookmark : Icons.bookmark_outline,
-              color: _saved
-                  ? TongtaiDesignTokens.inventoryOrange
-                  : TongtaiDesignTokens.lightTextSecondary,
+              color: _saved ? TtColors.warning : TtColors.textSecondary,
             ),
             onPressed: _toggleSaved,
           ),
@@ -230,7 +229,7 @@ class _TongtaiOpportunityDetailScreenState
       // warns, and every later assertion runs on a screen nobody touched.
       body: ListView(
         key: const Key('opportunity-detail-list'),
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         children: [
           // ── Type + AI score + title ──────────────────────────────────
           Row(
@@ -243,13 +242,11 @@ class _TongtaiOpportunityDetailScreenState
               _ScoreBadge(score: _o.aiScore),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Text(
             _o.title,
             key: const Key('opportunity-detail-title'),
-            style: TongtaiDesignTokens.heading2Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-            ),
+            style: TtType.h1.copyWith(color: TtColors.textPrimary),
           ),
           Builder(
             builder: (context) {
@@ -259,14 +256,12 @@ class _TongtaiOpportunityDetailScreenState
               );
               if (signals.isEmpty) return const SizedBox.shrink();
               return Padding(
-                padding: const EdgeInsets.only(
-                  top: TongtaiDesignTokens.spacing3,
-                ),
+                padding: const EdgeInsets.only(top: TtSpace.x3),
                 child: TongtaiOpportunitySignalBadges(signals: signals),
               );
             },
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
 
           // ── Key numbers ──────────────────────────────────────────────
           Row(
@@ -275,53 +270,45 @@ class _TongtaiOpportunityDetailScreenState
                 child: _StatTile(
                   label: l10n.oppImpact,
                   value: '+${TongtaiFormatters.vndShort(_o.expectedImpact)}',
-                  accent: TongtaiDesignTokens.financePurple,
+                  accent: TtColors.ai,
                 ),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               Expanded(
                 child: _StatTile(
                   label: l10n.oppDetected,
                   value: TongtaiFormatters.isoDate(_o.discoveredAt),
-                  accent: TongtaiDesignTokens.consumerBlue,
+                  accent: TtColors.info,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
 
           // ── Reasoning ────────────────────────────────────────────────
           Text(
             l10n.oppWhyWorth,
-            style: TongtaiDesignTokens.heading3Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.h2.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Text(
             _o.description,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.bodyLarge.copyWith(color: TtColors.textSecondary),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
 
           // ── Workizen AI insight (WTM-141) — annotation only; the rule
           //    score stays authoritative. ─────────────────────────────────
           Container(
             key: const Key('opportunity-ai-section'),
-            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+            padding: const EdgeInsets.all(TtSpace.x3),
             decoration: BoxDecoration(
-              color: TongtaiDesignTokens.copilotViolet.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.componentBorderRadius,
-              ),
-              border: Border.all(
-                color: TongtaiDesignTokens.copilotViolet.withValues(
-                  alpha: 0.25,
-                ),
-              ),
+              color: TtColors.ai.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(TtRadius.sm),
+              border: Border.all(color: TtColors.ai.withValues(alpha: 0.25)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,9 +318,9 @@ class _TongtaiOpportunityDetailScreenState
                     const Icon(
                       Icons.auto_awesome,
                       size: 16,
-                      color: TongtaiDesignTokens.copilotViolet,
+                      color: TtColors.ai,
                     ),
-                    const SizedBox(width: TongtaiDesignTokens.spacing2),
+                    const SizedBox(width: TtSpace.x2),
                     Expanded(
                       child: Text(
                         _insight == null
@@ -341,15 +328,15 @@ class _TongtaiOpportunityDetailScreenState
                             : 'Workizen AI — '
                                   '${_insight!.isAi ? (_insight!.provider?.displayName ?? 'AI') : 'Rule-based'}'
                                   '${_insight!.aiScore != null ? ' · ${l10n.aiScoreLabel} ${_insight!.aiScore!.round()}' : ''}',
-                        style: TongtaiDesignTokens.captionStyle.copyWith(
-                          color: TongtaiDesignTokens.lightTextSecondary,
+                        style: TtType.caption.copyWith(
+                          color: TtColors.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: TongtaiDesignTokens.spacing2),
+                const SizedBox(height: TtSpace.x2),
                 if (_explaining)
                   const TongtaiInlineBusy()
                 else if (_insight == null)
@@ -363,25 +350,25 @@ class _TongtaiOpportunityDetailScreenState
                   Text(
                     _insight!.text,
                     key: const Key('opportunity-ai-insight-text'),
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                    style: TtType.body.copyWith(
+                      color: TtColors.textPrimary,
                       height: 1.5,
                     ),
                   ),
               ],
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
 
           // ── Action plan ──────────────────────────────────────────────
           Text(
             l10n.sectionActionPlan,
-            style: TongtaiDesignTokens.heading3Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.h2.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Column(
             key: const Key('opportunity-detail-plan'),
             children: [
@@ -389,7 +376,7 @@ class _TongtaiOpportunityDetailScreenState
                 _PlanStep(index: i + 1, step: plan[i], accent: color),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing6),
+          const SizedBox(height: TtSpace.x6),
 
           // ── Opportunity Action (WTM-94): opportunity → Journey goal ──
           OutlinedButton.icon(
@@ -398,7 +385,7 @@ class _TongtaiOpportunityDetailScreenState
             icon: const Icon(Icons.flag_outlined),
             label: Text(context.l10n.opportunityCreateGoal),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           // ── Business Loop (WTM-223, Founder 2026-08-02) ──────────────
           //
           // Beat 3 "thấy kết quả" and beat 4 "biết bước tiếp theo" must
@@ -414,18 +401,12 @@ class _TongtaiOpportunityDetailScreenState
             Container(
               key: const Key('opportunity-in-journey'),
               width: double.infinity,
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+              padding: const EdgeInsets.all(TtSpace.x3),
               decoration: BoxDecoration(
-                color: TongtaiDesignTokens.producerGreen.withValues(
-                  alpha: 0.10,
-                ),
-                borderRadius: BorderRadius.circular(
-                  TongtaiDesignTokens.cardBorderRadius,
-                ),
+                color: TtColors.success.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(TtRadius.md),
                 border: Border.all(
-                  color: TongtaiDesignTokens.producerGreen.withValues(
-                    alpha: 0.4,
-                  ),
+                  color: TtColors.success.withValues(alpha: 0.4),
                 ),
               ),
               child: Column(
@@ -436,21 +417,21 @@ class _TongtaiOpportunityDetailScreenState
                       const Icon(
                         Icons.check_circle_outline,
                         size: 18,
-                        color: TongtaiDesignTokens.producerGreenText,
+                        color: TtColors.successOnLight,
                       ),
-                      const SizedBox(width: TongtaiDesignTokens.spacing2),
+                      const SizedBox(width: TtSpace.x2),
                       Expanded(
                         child: Text(
                           l10n.oppInJourney,
-                          style: TongtaiDesignTokens.smallStyle.copyWith(
-                            color: TongtaiDesignTokens.lightTextPrimary,
+                          style: TtType.body.copyWith(
+                            color: TtColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing2),
+                  const SizedBox(height: TtSpace.x2),
                   OutlinedButton.icon(
                     key: const Key('opportunity-open-journey'),
                     onPressed: () => Navigator.of(context).push<void>(
@@ -477,7 +458,7 @@ class _TongtaiOpportunityDetailScreenState
                 minimumSize: const Size.fromHeight(48),
               ),
             ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
 
           // ── Reactions ────────────────────────────────────────────────
           Row(
@@ -489,15 +470,13 @@ class _TongtaiOpportunityDetailScreenState
                   icon: const Icon(Icons.close),
                   label: Text(l10n.oppDismiss),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: TongtaiDesignTokens.error,
-                    side: const BorderSide(color: TongtaiDesignTokens.error),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: TongtaiDesignTokens.spacing3,
-                    ),
+                    foregroundColor: TtColors.danger,
+                    side: const BorderSide(color: TtColors.danger),
+                    padding: const EdgeInsets.symmetric(vertical: TtSpace.x3),
                   ),
                 ),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               Expanded(
                 child: FilledButton.icon(
                   key: const Key('opportunity-detail-interested'),
@@ -505,10 +484,8 @@ class _TongtaiOpportunityDetailScreenState
                   icon: const Icon(Icons.thumb_up_alt_outlined),
                   label: Text(l10n.oppInterested),
                   style: FilledButton.styleFrom(
-                    backgroundColor: TongtaiDesignTokens.producerGreenText,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: TongtaiDesignTokens.spacing3,
-                    ),
+                    backgroundColor: TtColors.successOnLight,
+                    padding: const EdgeInsets.symmetric(vertical: TtSpace.x3),
                   ),
                 ),
               ),
@@ -529,21 +506,15 @@ class _TypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing3,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x3, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        borderRadius: BorderRadius.circular(TtRadius.full),
         border: Border.all(color: color),
       ),
       child: Text(
         label,
-        style: TongtaiDesignTokens.smallStyle.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TtType.body.copyWith(color: color, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -565,9 +536,9 @@ class _ScoreBadge extends StatelessWidget {
       // longer fit and it clipped (WTM-168). A minimum keeps the shape at
       // normal sizes and lets it grow rather than swallow the score.
       constraints: const BoxConstraints(minWidth: 52, minHeight: 52),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing1),
+      padding: const EdgeInsets.all(TtSpace.x1),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.copilotViolet.withValues(alpha: 0.12),
+        color: TtColors.ai.withValues(alpha: 0.12),
         shape: BoxShape.circle,
       ),
       child: Column(
@@ -577,17 +548,14 @@ class _ScoreBadge extends StatelessWidget {
           Text(
             // A dash reads as "unknown"; a 0 would read as "worthless".
             score?.round().toString() ?? '—',
-            style: TongtaiDesignTokens.heading3Style.copyWith(
-              color: TongtaiDesignTokens.financePurple,
+            style: TtType.h2.copyWith(
+              color: TtColors.ai,
               fontWeight: FontWeight.w700,
             ),
           ),
           Text(
             context.l10n.aiScoreLabel,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.financePurple,
-              fontSize: 9,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.ai, fontSize: 9),
           ),
         ],
       ),
@@ -609,12 +577,10 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.sm),
         border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Column(
@@ -624,17 +590,15 @@ class _StatTile extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.body.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
         ],
       ),
@@ -656,7 +620,7 @@ class _PlanStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -670,30 +634,28 @@ class _PlanStep extends StatelessWidget {
             ),
             child: Text(
               '$index',
-              style: TongtaiDesignTokens.smallStyle.copyWith(
+              style: TtType.body.copyWith(
                 color: accent,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing3),
+          const SizedBox(width: TtSpace.x3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   step.titleVi,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   step.detailVi,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
               ],
             ),
