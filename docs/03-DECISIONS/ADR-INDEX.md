@@ -50,6 +50,13 @@
 Xem [OPEN-DECISIONS.md](OPEN-DECISIONS.md) (SSoT, cập nhật 2026-07-23) —
 còn: mascot/icon (WTM-11) · scope WTM-83 · WTM-101 nghi trùng · SQLCipher.
 
+## Tài liệu chuẩn khác (không phải ADR, nhưng ràng buộc như ADR)
+
+| Tài liệu | Ràng buộc gì |
+|---|---|
+| [`../02-ARCHITECTURE/TONG_TAI_DESIGN_SYSTEM_V1.md`](../02-ARCHITECTURE/TONG_TAI_DESIGN_SYSTEM_V1.md) | Một ngôn ngữ thị giác cho toàn sản phẩm (Epic WTM-362). **CAM = bấm được · TÍM = AI đang hiểu · XÁM = chưa biết.** Ghi cả chỗ Design System **lệch khỏi spec Founder** vì WCAG, và lý do |
+| [`../02-ARCHITECTURE/UI-IMPLEMENTATION-LEVELS.md`](../02-ARCHITECTURE/UI-IMPLEMENTATION-LEVELS.md) | Mức L0–L4 của từng màn (ADR-TON-015) |
+
 ## Quy tắc
 
 Không silently mâu thuẫn ADR. Thay đổi = ADR mới `ADR-TON-00N-*.md` ghi rõ
