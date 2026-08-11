@@ -246,10 +246,17 @@ Hai chỗ concept vẽ sai và **không được chép**:
 |---|---|
 | `tongtai_onboarding_v2_screen` | WTM-365 |
 | `tongtai_startup_screen` | WTM-367 (dựng mới trên DS) |
+| `tongtai_home_screen` | WTM-369 |
+
+> Danh sách này **được test khoá**: `test/core/design/migrated_screens_test.dart`
+> quét từng màn đã migrate và bắt màu viết thẳng, token cũ, hay `switch` màu
+> theo mức khẩn. Migration tăng dần chỉ có nghĩa nếu phần đã đi không trôi
+> ngược. Quét cả `ui/` thì suite sẽ đỏ thường trực vì ~40 màn chưa đi — và một
+> suite đỏ thường trực thì không ai đọc nữa.
 
 ### Chưa migrate
 
-Trang chủ · Nguồn hàng · Kho · Khách hàng · Cơ hội · Tài chính · Báo cáo ·
+Nguồn hàng · Kho · Khách hàng · Cơ hội · Tài chính · Báo cáo ·
 Business Journey · Supplier Detail · Product Intelligence.
 
 ---

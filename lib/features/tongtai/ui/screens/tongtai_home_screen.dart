@@ -13,7 +13,8 @@ import '../../journey/business_goal.dart';
 import '../../metrics/business_health.dart';
 import '../../metrics/business_metrics.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
+import '../../../../core/design/tt.dart';
+import '../../navigation/tongtai_design_tokens.dart' show TongtaiTabs;
 import '../../journey/journey_progress.dart';
 import '../../providers/tongtai_navigation_provider.dart';
 import '../../providers/tongtai_orders_provider.dart';
@@ -393,7 +394,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     // would keep rendering a business that no longer exists (WTM-174).
     ref.listen(businessDataRevisionProvider, (_, _) => _data.refresh());
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.titleHomeDashboard),
         elevation: 0,
@@ -542,10 +543,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                   const SizedBox(height: 8),
                   Text(
                     context.l10n.homeAiSubtitle,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TtType.body.copyWith(color: TtColors.textSecondary),
                   ),
                   const SizedBox(height: 16),
                   _ModuleSummaryGrid(
@@ -722,9 +720,7 @@ class _HealthBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final healthy = health.isHealthy;
-    final color = healthy
-        ? TongtaiDesignTokens.success
-        : TongtaiDesignTokens.neutral;
+    final color = healthy ? TtColors.success : TtColors.unknown;
     return Tooltip(
       // Was health.label('en') below and a Vietnamese-only reason here, so the
       // Vietnamese build showed "Not enough data" and the English build would
@@ -735,7 +731,7 @@ class _HealthBadge extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+          borderRadius: BorderRadius.circular(TtRadius.full),
           border: Border.all(color: color),
         ),
         child: Row(
@@ -749,7 +745,7 @@ class _HealthBadge extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               health.label(context.l10n.languageCode),
-              style: TongtaiDesignTokens.captionStyle.copyWith(
+              style: TtType.caption.copyWith(
                 color: color,
                 fontWeight: FontWeight.w600,
               ),
@@ -795,9 +791,7 @@ class _GetStartedCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               context.l10n.homeEmptyBody,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
             const SizedBox(height: 12),
             _CtaTile(
@@ -855,7 +849,7 @@ class _CtaTile extends StatelessWidget {
     return ListTile(
       key: tileKey,
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: TongtaiDesignTokens.consumerBlue),
+      leading: Icon(icon, color: TtColors.info),
       title: Text(label),
       trailing: const Icon(Icons.chevron_right, size: 18),
       onTap: onTap,
@@ -950,25 +944,27 @@ class _ModuleSummaryGrid extends StatelessWidget {
           cardKey: const Key('home-tile-producer'),
           title: context.l10n.navProducer,
           count: '$producers',
-          color: TongtaiDesignTokens.producerGreen,
+          color: TtColors.success,
         ),
         _ModuleCard(
           cardKey: const Key('home-tile-inventory'),
           title: context.l10n.navInventory,
           count: '$inventory',
-          color: TongtaiDesignTokens.inventoryOrange,
+          color: TtColors.warning,
         ),
         _ModuleCard(
           cardKey: const Key('home-tile-consumer'),
           title: context.l10n.navConsumer,
           count: '$consumers',
-          color: TongtaiDesignTokens.consumerBlue,
+          color: TtColors.info,
         ),
         _ModuleCard(
           cardKey: const Key('home-tile-journey'),
           title: context.l10n.tileJourney,
           count: '$journeys',
-          color: const Color(0xFFFBBF24),
+          // Hành trình là **việc đang chờ làm**, không phải một cảnh báo —
+          // trước đây nó mang một mã màu hổ phách viết thẳng, không ai sở hữu.
+          color: TtColors.warning,
         ),
       ],
     );
@@ -1045,7 +1041,7 @@ class _KpiRow extends StatelessWidget {
             tileKey: const Key('home-kpi-revenue'),
             label: context.l10n.kpiRevenue,
             value: TongtaiFormatters.vndShort(metrics.revenue),
-            color: TongtaiDesignTokens.financePurple,
+            color: TtColors.ai,
           ),
         ),
         const SizedBox(width: 12),
@@ -1054,7 +1050,7 @@ class _KpiRow extends StatelessWidget {
             tileKey: const Key('home-kpi-orders'),
             label: context.l10n.kpiOrders,
             value: '${metrics.ordersCount}',
-            color: TongtaiDesignTokens.consumerBlue,
+            color: TtColors.info,
           ),
         ),
         const SizedBox(width: 12),
@@ -1063,7 +1059,7 @@ class _KpiRow extends StatelessWidget {
             tileKey: const Key('home-kpi-aov'),
             label: context.l10n.kpiAovShort,
             value: TongtaiFormatters.vndShort(metrics.averageOrderValue),
-            color: TongtaiDesignTokens.producerGreen,
+            color: TtColors.success,
           ),
         ),
       ],
@@ -1104,16 +1100,13 @@ class _KpiTile extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: const TextStyle(fontSize: 11, color: TtColors.textSecondary),
           ),
         ],
       ),
@@ -1134,14 +1127,14 @@ class _OpportunityTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        border: Border.all(color: TtColors.border),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: TongtaiDesignTokens.copilotViolet.withValues(alpha: 0.12),
+              color: TtColors.ai.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
@@ -1150,7 +1143,7 @@ class _OpportunityTile extends StatelessWidget {
               opportunity.score.value?.round().toString() ?? '—',
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
-                color: TongtaiDesignTokens.financePurple,
+                color: TtColors.ai,
               ),
             ),
           ),
@@ -1165,7 +1158,7 @@ class _OpportunityTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1175,7 +1168,7 @@ class _OpportunityTile extends StatelessWidget {
                   TongtaiFormatters.vnd(opportunity.expectedImpact),
                   style: const TextStyle(
                     fontSize: 12,
-                    color: TongtaiDesignTokens.lightTextSecondary,
+                    color: TtColors.textSecondary,
                   ),
                 ),
               ],
@@ -1232,66 +1225,58 @@ class _Hero extends StatelessWidget {
         Row(
           children: [
             const TongtaiFoxMascot.avatar(size: 40),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: Text(
                 // No name: the product has no account (D-4), so it does not
                 // know the seller's — and inventing one would be the first
                 // thing it ever told them that was untrue.
                 l10n.homeGreeting,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.body.copyWith(color: TtColors.textSecondary),
               ),
             ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           headline,
           key: const Key('home-hero-headline'),
-          style: TongtaiDesignTokens.heading2Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
+          style: TtType.h2.copyWith(
+            color: TtColors.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         Material(
           color: Colors.transparent,
           child: InkWell(
             key: const Key('home-ask'),
             onTap: onAsk,
-            borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+            borderRadius: BorderRadius.circular(TtRadius.full),
             child: Container(
               constraints: const BoxConstraints(
-                minHeight: TongtaiDesignTokens.buttonHeight,
+                minHeight: TtButtonMetrics.height,
               ),
               padding: const EdgeInsets.symmetric(
-                horizontal: TongtaiDesignTokens.spacing4,
-                vertical: TongtaiDesignTokens.spacing3,
+                horizontal: TtSpace.x4,
+                vertical: TtSpace.x3,
               ),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(
-                  TongtaiDesignTokens.radiusFull,
-                ),
-                border: Border.all(color: TongtaiDesignTokens.lightBorder),
+                borderRadius: BorderRadius.circular(TtRadius.full),
+                border: Border.all(color: TtColors.border),
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.auto_awesome,
-                    size: 18,
-                    color: TongtaiDesignTokens.copilotViolet,
-                  ),
-                  const SizedBox(width: TongtaiDesignTokens.spacing2),
+                  const Icon(Icons.auto_awesome, size: 18, color: TtColors.ai),
+                  const SizedBox(width: TtSpace.x2),
                   Expanded(
                     child: Text(
                       l10n.homeAskHint,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.smallStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.body.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
                   ),
@@ -1322,7 +1307,7 @@ class _JourneyMissionTile extends StatelessWidget {
           node.state == JourneyNodeState.inProgress
               ? Icons.play_circle_outline
               : Icons.radio_button_unchecked,
-          color: TongtaiDesignTokens.copilotViolet,
+          color: TtColors.ai,
         ),
         title: Text(node.title, maxLines: 2, overflow: TextOverflow.ellipsis),
         // Provenance stays visible (WTM-191): a commitment the seller made
@@ -1336,20 +1321,34 @@ class _JourneyMissionTile extends StatelessWidget {
   }
 }
 
+/// Ô trống của Trang chủ.
+///
+/// ⚠️ Trước đây nó tự vẽ bằng `Color(0xFFE5E7EB)` và `borderRadius(8)` viết
+/// thẳng — hai giá trị không ai sở hữu, và chúng lệch khỏi mọi ô trống khác
+/// trong app. Nay đi qua Design System.
+///
+/// Vẫn là **empty state**, không phải *"chưa đủ dữ liệu"*: những chỗ gọi nó đều
+/// đã nhìn (không có hành trình, không có bước nào chờ) và đang nói *"đã xét và
+/// không có gì"*. Chỗ nào thật sự chưa xét được thì dùng [TtInsufficientData] —
+/// gộp hai câu ấy là cách một màn im lặng biến thành lời trấn an sai.
 class _EmptyBox extends StatelessWidget {
   const _EmptyBox(this.label);
 
   final String label;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 100,
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(child: Text(label)),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(TtSpace.cardPadding),
+    decoration: BoxDecoration(
+      color: TtColors.surface,
+      border: Border.all(color: TtColors.border),
+      borderRadius: BorderRadius.circular(TtRadius.lg),
+    ),
+    child: Text(
+      label,
+      textAlign: TextAlign.center,
+      style: TtType.body.copyWith(color: TtColors.textSecondary),
+    ),
+  );
 }
