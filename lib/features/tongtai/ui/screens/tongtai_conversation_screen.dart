@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../action/business_action_executor.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../../providers/tongtai_simulation_provider.dart';
 import '../../simulation/customer_conversation.dart';
@@ -121,12 +122,12 @@ class _TongtaiConversationScreenState
     final async = ref.watch(customerConversationProvider(widget.customerId));
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(async.asData?.value?.customerName ?? ''),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: TongtaiAsyncScreenData<CustomerConversation?>(
@@ -202,7 +203,7 @@ class _Bubble extends StatelessWidget {
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
           const SizedBox(height: 3),
@@ -219,7 +220,7 @@ class _Bubble extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 height: 1.4,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
           ),
@@ -289,7 +290,7 @@ class _DraftCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               height: 1.4,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),

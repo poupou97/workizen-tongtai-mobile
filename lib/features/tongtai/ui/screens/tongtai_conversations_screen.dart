@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_simulation_provider.dart';
 import '../../simulation/customer_conversation.dart';
 import '../../simulation/demo_event.dart';
@@ -27,12 +28,12 @@ class TongtaiConversationsScreen extends ConsumerWidget {
     final async = ref.watch(customerConversationsProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleConversations),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: TongtaiAsyncScreenData<List<CustomerConversation>>(
@@ -107,7 +108,7 @@ class _ConversationTile extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
           ),
@@ -135,7 +136,7 @@ class _ConversationTile extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 height: 1.35,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
           const SizedBox(height: 6),

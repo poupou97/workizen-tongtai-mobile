@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../../providers/tongtai_finance_provider.dart';
 import '../../providers/tongtai_journey_provider.dart';
@@ -160,12 +161,12 @@ class _TongtaiBusinessLifeScreenState
     final day = ref.watch(simulationDayProvider).asData?.value;
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleBusinessLife),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: Column(
@@ -237,9 +238,7 @@ class _TongtaiBusinessLifeScreenState
         Expanded(
           child: ListView(
             key: const Key('business-life-timeline'),
-            padding: const EdgeInsets.only(
-              bottom: TongtaiDesignTokens.spacing6,
-            ),
+            padding: const EdgeInsets.only(bottom: TtSpace.x6),
             children: [for (final d in days) _DaySection(day: d, now: now)],
           ),
         ),
@@ -402,12 +401,10 @@ class _FilterRow extends StatelessWidget {
     height: 48,
     child: ListView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       children: [
         Padding(
-          padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+          padding: const EdgeInsets.only(right: TtSpace.x2),
           child: ChoiceChip(
             key: const Key('business-life-filter-all'),
             label: Text(context.l10n.filterAll),
@@ -417,7 +414,7 @@ class _FilterRow extends StatelessWidget {
         ),
         for (final t in types)
           Padding(
-            padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+            padding: const EdgeInsets.only(right: TtSpace.x2),
             child: ChoiceChip(
               key: Key('business-life-filter-${t.name}'),
               label: Text(t.label(context.l10n.languageCode)),
@@ -450,15 +447,15 @@ class _DaySection extends StatelessWidget {
     children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(
-          TongtaiDesignTokens.spacing4,
-          TongtaiDesignTokens.spacing4,
-          TongtaiDesignTokens.spacing4,
-          TongtaiDesignTokens.spacing2,
+          TtSpace.x4,
+          TtSpace.x4,
+          TtSpace.x4,
+          TtSpace.x2,
         ),
         child: Text(
           _label(context.l10n),
-          style: TongtaiDesignTokens.smallStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
+          style: TtType.body.copyWith(
+            color: TtColors.textSecondary,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -511,8 +508,8 @@ class _EventRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing2,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x2,
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -539,7 +536,7 @@ class _EventRow extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,15 +544,15 @@ class _EventRow extends StatelessWidget {
                   if (actor != null)
                     Text(
                       actor.$1,
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                      style: TtType.caption.copyWith(
                         fontWeight: FontWeight.w700,
                         color: actor.$2,
                       ),
                     ),
                   Text(
                     event.title,
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                    style: TtType.body.copyWith(
+                      color: TtColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -564,19 +561,17 @@ class _EventRow extends StatelessWidget {
                       event.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
                 ],
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            const SizedBox(width: TtSpace.x2),
             Text(
               TongtaiFormatters.relativeDate(event.timestamp, now: now),
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),

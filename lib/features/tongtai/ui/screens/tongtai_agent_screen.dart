@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../agent/brief_inbox.dart';
 import '../../agent/business_brief.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_agentic_provider.dart';
 import '../widgets/tongtai_brief_widgets.dart';
 import '../widgets/tongtai_fox_mascot.dart';
@@ -47,12 +48,12 @@ class TongtaiAgentScreen extends ConsumerWidget {
         : const <String, BriefDecision>{};
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleAgent),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         actions: [
           IconButton(
             key: const Key('agent-open-activity'),
@@ -127,17 +128,17 @@ class _AgentBody extends StatelessWidget {
       onRefresh: onRefresh,
       child: ListView(
         key: const Key('agent-list'),
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         children: [
           _AgentGreeting(count: items.length, clock: clock),
           if (decide.isNotEmpty) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
             _SectionLabel(
               key: const Key('agent-section-decide'),
               text: l10n.briefSectionDecide,
             ),
             for (final item in decide) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+              const SizedBox(height: TtSpace.x3),
               TongtaiBriefTile(
                 item: item,
                 keyPrefix: 'agent',
@@ -154,17 +155,17 @@ class _AgentBody extends StatelessWidget {
             ],
           ],
           if (know.isNotEmpty) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
             _SectionLabel(
               key: const Key('agent-section-know'),
               text: l10n.briefSectionKnow,
             ),
             for (final item in know) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+              const SizedBox(height: TtSpace.x3),
               TongtaiBriefTile(item: item, keyPrefix: 'agent'),
             ],
           ],
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
         ],
       ),
     );
@@ -187,7 +188,7 @@ class _AgentGreeting extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const TongtaiFoxMascot.avatar(size: 44),
-        const SizedBox(width: TongtaiDesignTokens.spacing3),
+        const SizedBox(width: TtSpace.x3),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +199,7 @@ class _AgentGreeting extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: TongtaiDesignTokens.neutralText,
+                  color: TtColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -209,7 +210,7 @@ class _AgentGreeting extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   height: 1.3,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -218,7 +219,7 @@ class _AgentGreeting extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   height: 1.4,
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                  color: TtColors.textSecondary,
                 ),
               ),
             ],
@@ -243,12 +244,12 @@ class _AgentEmpty extends StatelessWidget {
     final l10n = context.l10n;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing5),
+        padding: const EdgeInsets.all(TtSpace.x5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const TongtaiFoxMascot.face(size: 88),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             Text(
               l10n.briefNothingTitle,
               key: const Key('agent-empty'),
@@ -256,17 +257,17 @@ class _AgentEmpty extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             Text(
               l10n.briefNothingBody,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 14,
                 height: 1.45,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
           ],
@@ -288,7 +289,7 @@ class _SectionLabel extends StatelessWidget {
       fontSize: 11,
       fontWeight: FontWeight.w800,
       letterSpacing: 0.8,
-      color: TongtaiDesignTokens.neutralText,
+      color: TtColors.textSecondary,
     ),
   );
 }

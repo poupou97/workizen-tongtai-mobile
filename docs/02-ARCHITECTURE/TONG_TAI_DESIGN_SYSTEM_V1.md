@@ -257,6 +257,26 @@ Hai chỗ concept vẽ sai và **không được chép**:
 | `tongtai_customer_risk_screen` | WTM-371 |
 | `tongtai_customer_history_screen` | WTM-371 |
 | `tongtai_opportunity_detail_screen` | WTM-371 |
+| `tongtai_journey_screen` | WTM-372 |
+| `tongtai_goals_screen` | WTM-372 |
+| `tongtai_brief_story_screen` | WTM-372 |
+| `tongtai_agent_screen` | WTM-372 |
+
+### Đã đi **một nửa**
+
+| Màn | Còn gì |
+|---|---|
+| `tongtai_business_life_screen` | bảng màu **chủ thể** (WTM-338) |
+| `tongtai_conversations_screen` | bảng màu **chủ thể** |
+| `tongtai_conversation_screen` | bảng màu **chủ thể** |
+
+Ba màn dòng thời gian phân biệt **ai đã làm việc này** — người bán · nền tảng ·
+khách — bằng màu. Đó là một **nghĩa thật**, không phải màu vô chủ: ép nó vào khe
+ngữ nghĩa của Design System (success/info/warning) sẽ **mất đúng thứ nó đang
+nói**. Chuyển bảng ấy là một quyết định sản phẩm riêng, không phải một phép thay.
+
+Khai ở đây thay vì im lặng: một màn đi nửa đường mà không ai ghi lại thì lần sau
+người ta tưởng nó đã xong. Test vẫn khoá phần **đã** đi (không còn token cũ).
 
 > Danh sách này **được test khoá**: `test/core/design/migrated_screens_test.dart`
 > quét từng màn đã migrate và bắt màu viết thẳng, token cũ, hay `switch` màu
@@ -266,9 +286,11 @@ Hai chỗ concept vẽ sai và **không được chép**:
 
 ### Chưa migrate
 
-**13/50 màn đã đi.** Còn lại: Business Journey · Mục tiêu · Hội thoại · Doanh
-nghiệp của bạn · Kết nối · Sao lưu · Tìm kiếm · các form (sản phẩm, khách, đơn,
-giao dịch) · các màn cài đặt.
+**17/50 màn đã đi** (14 trọn vẹn + 3 đi một nửa). Còn lại: Kết nối · Sao lưu · Tìm kiếm · Tự chủ · Hoạt động · các form (sản
+phẩm, khách, đơn, giao dịch, mục tiêu) · các màn cài đặt và pháp lý.
+
+Nhóm này **người bán ít mở trong một phiên bình thường** — nên nó xuống sau
+những gì họ chạm hằng ngày, đúng thứ tự ưu tiên PRODUCT EXPERIENCE.
 
 Script di trú dùng lại được: `/tmp/migrate_ds.py` trong PR WTM-371 — nhưng đọc
 bảng ánh xạ dưới đây **trước khi chạy nó trên một màn mới**.
