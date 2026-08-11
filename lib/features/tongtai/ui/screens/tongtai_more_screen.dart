@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../core/screen_data_controller.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
@@ -502,7 +503,7 @@ class _SettingsSection extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF6B7280),
+              color: TtColors.textSecondary,
             ),
           ),
         ),
@@ -536,7 +537,7 @@ class _SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final muted = TongtaiDesignTokens.lightTextSecondary;
+    final muted = TtColors.textSecondary;
     return ListTile(
       enabled: !comingSoon,
       leading: Icon(icon, color: muted),
@@ -544,9 +545,9 @@ class _SettingsItem extends StatelessWidget {
       trailing: comingSoon
           ? Text(
               context.l10n.settingsComingSoon,
-              style: TongtaiDesignTokens.captionStyle.copyWith(color: muted),
+              style: TtType.caption.copyWith(color: muted),
             )
-          : const Icon(Icons.chevron_right, color: Color(0xFFD1D5DB)),
+          : const Icon(Icons.chevron_right, color: TtColors.borderStrong),
       onTap: comingSoon ? null : onTap,
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../action/business_action_executor.dart';
@@ -11,7 +13,6 @@ import '../../connection/google/drive_backup_service.dart';
 import '../../core/connection.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../connection/atlassian/atlassian_client.dart';
 import '../../connection/atlassian/atlassian_connection.dart';
 import '../../connection/google/google_connection.dart';
@@ -352,12 +353,12 @@ class _TongtaiConnectionsScreenState
     final catalog = ref.watch(connectorCatalogProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleConnections),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: TongtaiAsyncScreenData<List<ConnectorState>>(
@@ -374,7 +375,7 @@ class _TongtaiConnectionsScreenState
                 style: const TextStyle(
                   fontSize: 13,
                   height: 1.5,
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                  color: TtColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -450,7 +451,7 @@ class _ConnectorCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,7 +464,7 @@ class _ConnectorCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
               ),
@@ -478,7 +479,7 @@ class _ConnectorCard extends StatelessWidget {
                 '· ${_capabilityName(l10n, capability)}',
                 style: const TextStyle(
                   fontSize: 13,
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                  color: TtColors.textSecondary,
                 ),
               ),
             ),
@@ -540,7 +541,7 @@ class _DriveBackupCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -550,7 +551,7 @@ class _DriveBackupCard extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -559,7 +560,7 @@ class _DriveBackupCard extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
           if (lastBackupAt != null) ...[
@@ -570,7 +571,7 @@ class _DriveBackupCard extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
           ],
@@ -590,7 +591,7 @@ class _DriveBackupCard extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -600,7 +601,7 @@ class _DriveBackupCard extends ConsumerWidget {
               key: const Key('connections-drive-empty'),
               style: const TextStyle(
                 fontSize: 13,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
             AsyncData(value: final list) => Column(
@@ -616,7 +617,7 @@ class _DriveBackupCard extends ConsumerWidget {
               key: const Key('connections-drive-empty'),
               style: const TextStyle(
                 fontSize: 13,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
           },
@@ -650,7 +651,7 @@ class _DriveFileRow extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
                 if (created != null)
@@ -658,7 +659,7 @@ class _DriveFileRow extends StatelessWidget {
                     TongtaiFormatters.isoDate(created.toLocal()),
                     style: const TextStyle(
                       fontSize: 12,
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                      color: TtColors.textSecondary,
                     ),
                   ),
               ],
@@ -690,12 +691,12 @@ class _StatusChip extends StatelessWidget {
     final (label, color) = switch (status) {
       ConnectionStatus.setupRequired => (
         l10n.connectionSetupRequired,
-        TongtaiDesignTokens.lightTextSecondary,
+        TtColors.textSecondary,
       ),
       ConnectionStatus.active => (l10n.connectionActive, Colors.green),
       ConnectionStatus.paused => (
         l10n.connectionPaused,
-        TongtaiDesignTokens.lightTextSecondary,
+        TtColors.textSecondary,
       ),
       ConnectionStatus.error => (l10n.connectionError, Colors.orange),
     };
@@ -772,7 +773,7 @@ class _TelegramCardState extends ConsumerState<_TelegramCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -782,7 +783,7 @@ class _TelegramCardState extends ConsumerState<_TelegramCard> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -791,7 +792,7 @@ class _TelegramCardState extends ConsumerState<_TelegramCard> {
             style: const TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -825,7 +826,7 @@ class _TelegramCardState extends ConsumerState<_TelegramCard> {
             style: const TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -846,7 +847,7 @@ class _TelegramCardState extends ConsumerState<_TelegramCard> {
                 key: const Key('connections-telegram-no-chats'),
                 style: const TextStyle(
                   fontSize: 13,
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                  color: TtColors.textSecondary,
                 ),
               )
             else
@@ -939,7 +940,7 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -949,7 +950,7 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -958,7 +959,7 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
             style: const TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -1020,7 +1021,7 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
             if (projects.isEmpty)
@@ -1029,7 +1030,7 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
                 key: const Key('connections-atlassian-no-projects'),
                 style: const TextStyle(
                   fontSize: 13,
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                  color: TtColors.textSecondary,
                 ),
               )
             else
@@ -1056,7 +1057,7 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
             for (final space in widget.spaces!)
@@ -1085,7 +1086,7 @@ class _AtlassianCardState extends ConsumerState<_AtlassianCard> {
               fontSize: 14,
               fontWeight: FontWeight.w600,
               height: 1.5,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
         ],
@@ -1121,7 +1122,7 @@ class _SourceCatalogCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1131,7 +1132,7 @@ class _SourceCatalogCard extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 12,
               height: 1.5,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
           if (demoCount > 0) ...[
@@ -1231,7 +1232,7 @@ class _SourceGroup extends StatelessWidget {
         style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: TongtaiDesignTokens.lightTextPrimary,
+          color: TtColors.textPrimary,
         ),
       ),
       const SizedBox(height: 6),
@@ -1247,7 +1248,7 @@ class _SourceGroup extends StatelessWidget {
                   source.name,
                   style: const TextStyle(
                     fontSize: 13,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
               ),
@@ -1274,12 +1275,9 @@ class _ReadinessChip extends StatelessWidget {
       ConnectionReadiness.connected => (l10n.readinessConnected, Colors.green),
       ConnectionReadiness.fileBridge => (
         l10n.readinessFileBridge,
-        TongtaiDesignTokens.lightTextPrimary,
+        TtColors.textPrimary,
       ),
-      ConnectionReadiness.demo => (
-        l10n.readinessDemo,
-        TongtaiDesignTokens.lightTextSecondary,
-      ),
+      ConnectionReadiness.demo => (l10n.readinessDemo, TtColors.textSecondary),
       // Tím, KHÔNG xanh. Màu là thứ người ta đọc trước chữ, nên một nhãn demo
       // màu xanh lá đã nói dối xong trước khi ai kịp đọc nó.
       ConnectionReadiness.demoConnected => (
@@ -1288,7 +1286,7 @@ class _ReadinessChip extends StatelessWidget {
       ),
       ConnectionReadiness.researched => (
         l10n.readinessResearched,
-        TongtaiDesignTokens.lightTextSecondary,
+        TtColors.textSecondary,
       ),
       ConnectionReadiness.partnerRequired => (
         l10n.readinessPartnerRequired,
@@ -1296,7 +1294,7 @@ class _ReadinessChip extends StatelessWidget {
       ),
       ConnectionReadiness.apiFuture => (
         l10n.readinessApiFuture,
-        TongtaiDesignTokens.lightTextSecondary,
+        TtColors.textSecondary,
       ),
     };
 

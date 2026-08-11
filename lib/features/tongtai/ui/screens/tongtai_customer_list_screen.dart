@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../consumer/customer.dart';
 import '../../consumer/customer_directory_controller.dart';
 import '../../consumer/customer_directory_service.dart';
@@ -8,7 +10,6 @@ import '../../consumer/customer_order_history_service.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../orders/order_controller.dart';
 import '../../providers/tongtai_consumer_provider.dart';
 import '../../providers/tongtai_inventory_provider.dart';
@@ -28,10 +29,13 @@ import 'tongtai_opportunity_detail_screen.dart';
 /// Color for a [CustomerTier] badge (WTM-75 AC: visual indicators for VIP /
 /// high-value customers). Pulled out as a pure function so the mapping is
 /// directly unit-testable without pumping a widget.
+/// ⚠️ **Vàng và đồng KHÔNG chuyển sang Design System.** Chúng là tên **kim
+/// loại** — một thang hạng khách quen thuộc — chứ không phải một mức ngữ nghĩa.
+/// Ép `vip` thành `warning` sẽ biến "khách quý nhất" thành "khách cần chú ý".
 Color tongtaiCustomerTierColor(CustomerTier tier) => switch (tier) {
   CustomerTier.vip => const Color(0xFFD4AF37), // gold
-  CustomerTier.gold => TongtaiDesignTokens.warning, // amber
-  CustomerTier.silver => TongtaiDesignTokens.neutral, // gray
+  CustomerTier.gold => TtColors.warning, // amber
+  CustomerTier.silver => TtColors.unknown, // gray
   CustomerTier.bronze => const Color(0xFFB45309), // bronze
 };
 
@@ -228,17 +232,17 @@ class _TongtaiCustomerListScreenState
         final page = service.page(_query);
 
         return Scaffold(
-          backgroundColor: TongtaiDesignTokens.lightBackground,
+          backgroundColor: TtColors.surfaceSecondary,
           appBar: AppBar(
             title: Text(context.l10n.titleCustomers),
             elevation: 0,
-            backgroundColor: TongtaiDesignTokens.lightBackground,
-            foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+            backgroundColor: TtColors.surfaceSecondary,
+            foregroundColor: TtColors.textPrimary,
           ),
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('customer-action-add'),
             onPressed: () => _openForm(context),
-            backgroundColor: TongtaiDesignTokens.consumerBlueText,
+            backgroundColor: TtColors.infoOnLight,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.custAdd),
@@ -267,10 +271,10 @@ class _TongtaiCustomerListScreenState
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    TongtaiDesignTokens.spacing4,
-                    TongtaiDesignTokens.spacing3,
-                    TongtaiDesignTokens.spacing4,
-                    TongtaiDesignTokens.spacing2,
+                    TtSpace.x4,
+                    TtSpace.x3,
+                    TtSpace.x4,
+                    TtSpace.x2,
                   ),
                   child: _SearchField(
                     controller: _searchController,
@@ -346,16 +350,12 @@ class _SearchField extends StatelessWidget {
                 onPressed: onClear,
               ),
         filled: true,
-        fillColor: TongtaiDesignTokens.lightHover,
+        fillColor: TtColors.surfaceTertiary,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.componentBorderRadius,
-          ),
+          borderRadius: BorderRadius.circular(TtRadius.sm),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: TongtaiDesignTokens.spacing4,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       ),
     );
   }
@@ -379,7 +379,7 @@ class _LocationFilter extends StatelessWidget {
       label: context.l10n.labelLocation,
       children: [
         Padding(
-          padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+          padding: const EdgeInsets.only(right: TtSpace.x2),
           child: ChoiceChip(
             label: Text(context.l10n.filterAll),
             selected: selected == null,
@@ -388,7 +388,7 @@ class _LocationFilter extends StatelessWidget {
         ),
         for (final location in locations)
           Padding(
-            padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+            padding: const EdgeInsets.only(right: TtSpace.x2),
             child: ChoiceChip(
               label: Text(location),
               selected: selected == location,
@@ -429,7 +429,7 @@ class _SortBar extends StatelessWidget {
       children: [
         for (final option in CustomerSort.values)
           Padding(
-            padding: const EdgeInsets.only(right: TongtaiDesignTokens.spacing2),
+            padding: const EdgeInsets.only(right: TtSpace.x2),
             child: ChoiceChip(
               label: Text(option.label(context.l10n.languageCode)),
               selected: sort == option,
@@ -465,8 +465,8 @@ class _ChipsRow extends StatelessWidget {
     return Padding(
       key: rowKey,
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x1,
       ),
       child: Row(
         children: [
@@ -474,8 +474,8 @@ class _ChipsRow extends StatelessWidget {
             width: 68,
             child: Text(
               label,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -502,17 +502,15 @@ class _ResultsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing3,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing2,
+        TtSpace.x4,
+        TtSpace.x3,
+        TtSpace.x4,
+        TtSpace.x2,
       ),
       child: Text(
         context.l10n.countCustomers(count),
         key: const Key('customer-count-badge'),
-        style: TongtaiDesignTokens.smallStyle.copyWith(
-          color: TongtaiDesignTokens.lightTextSecondary,
-        ),
+        style: TtType.body.copyWith(color: TtColors.textSecondary),
       ),
     );
   }
@@ -537,15 +535,9 @@ class _CustomerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        0,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing4,
-      ),
+      padding: const EdgeInsets.fromLTRB(TtSpace.x4, 0, TtSpace.x4, TtSpace.x4),
       itemCount: customers.length,
-      separatorBuilder: (context, _) =>
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+      separatorBuilder: (context, _) => const SizedBox(height: TtSpace.x3),
       itemBuilder: (context, index) => _CustomerRow(
         customer: customers[index],
         onTap: () => onEdit(customers[index]),
@@ -580,16 +572,14 @@ class _CustomerRow extends StatelessWidget {
     return InkWell(
       key: Key('customer-item-${customer.id}'),
       onTap: onTap,
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
+      borderRadius: BorderRadius.circular(TtRadius.md),
       child: Container(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+        padding: const EdgeInsets.all(TtSpace.x3),
         decoration: BoxDecoration(
-          color: TongtaiDesignTokens.lightBackground,
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.cardBorderRadius,
-          ),
-          border: Border.all(color: TongtaiDesignTokens.lightBorder),
-          boxShadow: TongtaiDesignTokens.elevation1,
+          color: TtColors.surfaceSecondary,
+          borderRadius: BorderRadius.circular(TtRadius.md),
+          border: Border.all(color: TtColors.border),
+          boxShadow: TtElevation.soft,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,28 +595,28 @@ class _CustomerRow extends StatelessWidget {
                           customer.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TongtaiDesignTokens.bodyStyle.copyWith(
+                          style: TtType.bodyLarge.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: TongtaiDesignTokens.lightTextPrimary,
+                            color: TtColors.textPrimary,
                           ),
                         ),
                       ),
-                      const SizedBox(width: TongtaiDesignTokens.spacing2),
+                      const SizedBox(width: TtSpace.x2),
                       _TierChip(tier: customer.tier),
                     ],
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  const SizedBox(height: TtSpace.x1),
                   Text(
                     customer.location.isEmpty
                         ? customer.maskedPhone
                         : '${customer.maskedPhone} • ${customer.location}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  const SizedBox(height: TtSpace.x1),
                   Text(
                     customer.lastPurchaseDate == null
                         ? context.l10n.customerNoPurchases
@@ -635,25 +625,25 @@ class _CustomerRow extends StatelessWidget {
                               customer.lastPurchaseDate!,
                             ),
                           ),
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   TongtaiFormatters.vnd(customer.totalSpent),
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                  style: TtType.body.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: TongtaiDesignTokens.spacing1),
+                const SizedBox(height: TtSpace.x1),
                 if (opportunity case final o?) ...[
                   TextButton(
                     key: Key('customer-opportunity-${customer.id}'),
@@ -670,13 +660,11 @@ class _CustomerRow extends StatelessWidget {
                     ),
                     child: Text(context.l10n.customerSeeOpportunity),
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  const SizedBox(height: TtSpace.x1),
                 ],
                 Text(
                   context.l10n.countOrders(customer.orderCount),
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
                 IconButton(
                   key: Key('customer-history-${customer.id}'),
@@ -684,7 +672,7 @@ class _CustomerRow extends StatelessWidget {
                   icon: const Icon(
                     Icons.receipt_long_outlined,
                     size: 20,
-                    color: TongtaiDesignTokens.consumerBlueText,
+                    color: TtColors.infoOnLight,
                   ),
                   onPressed: onHistory,
                 ),
@@ -708,13 +696,10 @@ class _TierChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = tongtaiCustomerTierColor(tier);
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing2,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        borderRadius: BorderRadius.circular(TtRadius.full),
         border: Border.all(color: color),
       ),
       child: Row(
@@ -726,7 +711,7 @@ class _TierChip extends StatelessWidget {
           ],
           Text(
             tier.label(context.l10n.languageCode),
-            style: TongtaiDesignTokens.captionStyle.copyWith(
+            style: TtType.caption.copyWith(
               color: color,
               fontWeight: FontWeight.w600,
             ),
@@ -752,12 +737,12 @@ class _PaginationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing2,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x2,
       ),
       decoration: const BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        border: Border(top: BorderSide(color: TongtaiDesignTokens.lightBorder)),
+        color: TtColors.surfaceSecondary,
+        border: Border(top: BorderSide(color: TtColors.border)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -771,9 +756,7 @@ class _PaginationBar extends StatelessWidget {
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
           ),
           Row(
@@ -788,8 +771,8 @@ class _PaginationBar extends StatelessWidget {
               Text(
                 context.l10n.invPageOf(page.pageIndex + 1, page.pageCount),
                 key: const Key('customer-page-indicator'),
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                style: TtType.body.copyWith(
+                  color: TtColors.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -815,27 +798,25 @@ class _EmptyState extends StatelessWidget {
     return Center(
       key: const Key('customer-empty'),
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const TongtaiFoxMascot.face(size: 64),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Text(
               context.l10n.custEmptySearch,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.bodyLarge.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               context.l10n.custEmptySearchHint,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),

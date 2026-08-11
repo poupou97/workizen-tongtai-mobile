@@ -4,13 +4,14 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../commerce/commerce_models.dart';
 import '../../commerce/import/commerce_import.dart';
 import '../../commerce/import/commerce_source_resolver.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_commerce_provider.dart';
 import '../../providers/tongtai_inventory_provider.dart';
 import '../../providers/tongtai_orders_provider.dart';
@@ -198,12 +199,12 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
     final jobs = ref.watch(importJobsProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleImport),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListView(
@@ -215,7 +216,7 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
               style: const TextStyle(
                 fontSize: 13,
                 height: 1.5,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
             const SizedBox(height: 16),
@@ -248,7 +249,7 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
             Text(
@@ -258,7 +259,7 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
               style: const TextStyle(
                 fontSize: 12,
                 height: 1.5,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -268,7 +269,7 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
                 key: const Key('import-history-empty'),
                 style: const TextStyle(
                   fontSize: 13,
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                  color: TtColors.textSecondary,
                 ),
               ),
               AsyncData(value: final list) => Column(
@@ -309,17 +310,14 @@ class _PreviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             preview.sourceName,
-            style: const TextStyle(
-              fontSize: 13,
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: const TextStyle(fontSize: 13, color: TtColors.textSecondary),
           ),
           const SizedBox(height: 8),
           Text(
@@ -328,7 +326,7 @@ class _PreviewCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -348,7 +346,7 @@ class _PreviewCard extends StatelessWidget {
                 '· $line',
                 style: const TextStyle(
                   fontSize: 13,
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                  color: TtColors.textSecondary,
                 ),
               ),
             ),
@@ -436,7 +434,7 @@ class _IssueBlock extends StatelessWidget {
                   '${issue.subject}: ${issue.detail}',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
                 // Chỗ sửa — nhỏ, cho ai muốn mở Excel ra. Không phải nội dung
@@ -449,7 +447,7 @@ class _IssueBlock extends StatelessWidget {
                     ),
                     style: const TextStyle(
                       fontSize: 11,
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                      color: TtColors.textSecondary,
                     ),
                   ),
               ],
@@ -462,7 +460,7 @@ class _IssueBlock extends StatelessWidget {
               context.l10n.importMoreIssues(rest),
               style: const TextStyle(
                 fontSize: 12,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
           ),
@@ -496,7 +494,7 @@ class _ResultCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           if (result.skipped.isNotEmpty) ...[
@@ -505,7 +503,7 @@ class _ResultCard extends StatelessWidget {
               l10n.importBlocked(result.skipped.length),
               style: const TextStyle(
                 fontSize: 12,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
           ],
@@ -539,7 +537,7 @@ class _JobRow extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
                 Text(
@@ -547,7 +545,7 @@ class _JobRow extends StatelessWidget {
                   '${l10n.importRecordCount(job.totalRecords)}',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: TongtaiDesignTokens.lightTextSecondary,
+                    color: TtColors.textSecondary,
                   ),
                 ),
               ],

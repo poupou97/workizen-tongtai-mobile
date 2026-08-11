@@ -5,10 +5,11 @@ import '../../inventory/product_catalog_controller.dart';
 import '../../inventory/product_image_source.dart';
 import '../../inventory/stock_alert.dart';
 import '../../inventory/stock_alert_service.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import 'tongtai_product_form_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/design/tt.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_for.dart';
 import '../../providers/tongtai_context_provider.dart';
@@ -18,8 +19,8 @@ import 'tongtai_opportunity_detail_screen.dart';
 /// low stock the warning amber. Pure function so the mapping is unit-testable
 /// without pumping a widget.
 Color tongtaiStockAlertColor(StockAlertLevel level) => switch (level) {
-  StockAlertLevel.outOfStock => TongtaiDesignTokens.error,
-  StockAlertLevel.lowStock => TongtaiDesignTokens.warning,
+  StockAlertLevel.outOfStock => TtColors.danger,
+  StockAlertLevel.lowStock => TtColors.warning,
 };
 
 /// Stock Alerts screen (WTM-70) — "notify the user when qty falls below the
@@ -53,12 +54,12 @@ class TongtaiStockAlertsScreen extends ConsumerWidget {
         ref.watch(generatedOpportunitiesProvider).value ??
         const <Opportunity>[];
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.titleStockAlerts),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListenableBuilder(
@@ -77,14 +78,14 @@ class TongtaiStockAlertsScreen extends ConsumerWidget {
                 Expanded(
                   child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(
-                      TongtaiDesignTokens.spacing4,
+                      TtSpace.x4,
                       0,
-                      TongtaiDesignTokens.spacing4,
-                      TongtaiDesignTokens.spacing4,
+                      TtSpace.x4,
+                      TtSpace.x4,
                     ),
                     itemCount: alerts.length,
                     separatorBuilder: (context, _) =>
-                        const SizedBox(height: TongtaiDesignTokens.spacing3),
+                        const SizedBox(height: TtSpace.x3),
                     itemBuilder: (context, index) => _AlertRow(
                       alert: alerts[index],
                       onTap: () => _openForm(context, alerts[index].product),
@@ -133,10 +134,10 @@ class _AlertSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing3,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing3,
+        TtSpace.x4,
+        TtSpace.x3,
+        TtSpace.x4,
+        TtSpace.x3,
       ),
       child: Row(
         children: [
@@ -145,16 +146,16 @@ class _AlertSummary extends StatelessWidget {
               statKey: const Key('stock-summary-out-of-stock'),
               count: outOfStock,
               label: context.l10n.stockOut,
-              color: TongtaiDesignTokens.error,
+              color: TtColors.danger,
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing3),
+          const SizedBox(width: TtSpace.x3),
           Expanded(
             child: _SummaryStat(
               statKey: const Key('stock-summary-low-stock'),
               count: lowStock,
               label: context.l10n.stockLow,
-              color: TongtaiDesignTokens.warning,
+              color: TtColors.warning,
             ),
           ),
         ],
@@ -181,12 +182,10 @@ class _SummaryStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: statKey,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Column(
@@ -194,17 +193,17 @@ class _SummaryStat extends StatelessWidget {
         children: [
           Text(
             '$count',
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
+            style: TtType.bodyLarge.copyWith(
               color: color,
               fontWeight: FontWeight.w700,
               fontSize: 22,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
+          const SizedBox(height: TtSpace.x1),
           Text(
             label,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
+            style: TtType.caption.copyWith(
+              color: TtColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -234,18 +233,14 @@ class _AlertRow extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         child: Container(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+          padding: const EdgeInsets.all(TtSpace.x3),
           decoration: BoxDecoration(
-            color: TongtaiDesignTokens.lightBackground,
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.cardBorderRadius,
-            ),
-            border: Border.all(color: TongtaiDesignTokens.lightBorder),
-            boxShadow: TongtaiDesignTokens.elevation1,
+            color: TtColors.surfaceSecondary,
+            borderRadius: BorderRadius.circular(TtRadius.md),
+            border: Border.all(color: TtColors.border),
+            boxShadow: TtElevation.soft,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,14 +248,10 @@ class _AlertRow extends StatelessWidget {
               Container(
                 width: 4,
                 height: 44,
-                margin: const EdgeInsets.only(
-                  right: TongtaiDesignTokens.spacing3,
-                ),
+                margin: const EdgeInsets.only(right: TtSpace.x3),
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(
-                    TongtaiDesignTokens.radiusFull,
-                  ),
+                  borderRadius: BorderRadius.circular(TtRadius.full),
                 ),
               ),
               Expanded(
@@ -271,24 +262,24 @@ class _AlertRow extends StatelessWidget {
                       product.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                      style: TtType.bodyLarge.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     Text(
                       '${product.sku} • ${product.category}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     Text(
                       _restockHint(alert, context.l10n),
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                      style: TtType.caption.copyWith(
                         color: color,
                         fontWeight: FontWeight.w600,
                       ),
@@ -296,23 +287,23 @@ class _AlertRow extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   _LevelChip(level: alert.level),
-                  const SizedBox(height: TongtaiDesignTokens.spacing2),
+                  const SizedBox(height: TtSpace.x2),
                   Text(
                     context.l10n.stockQtyOfThreshold(
                       alert.quantity,
                       alert.threshold,
                     ),
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                   if (opportunity case final o?) ...[
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     TextButton(
                       key: Key('stock-opportunity-${alert.product.id}'),
                       onPressed: () => Navigator.of(context).push<void>(
@@ -359,18 +350,15 @@ class _LevelChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = tongtaiStockAlertColor(level);
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing2,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        borderRadius: BorderRadius.circular(TtRadius.full),
         border: Border.all(color: color),
       ),
       child: Text(
         level.label(context.l10n.languageCode),
-        style: TongtaiDesignTokens.captionStyle.copyWith(
+        style: TtType.caption.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
         ),
@@ -387,31 +375,29 @@ class _HealthyState extends StatelessWidget {
     return Center(
       key: const Key('stock-empty'),
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
               Icons.check_circle_outline,
               size: 48,
-              color: TongtaiDesignTokens.success,
+              color: TtColors.success,
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Text(
               context.l10n.stockAllHealthy,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.bodyLarge.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               context.l10n.stockAllHealthyBody,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),

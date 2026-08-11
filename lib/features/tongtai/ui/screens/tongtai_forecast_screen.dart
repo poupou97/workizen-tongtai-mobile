@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../ai/predictive_ai.dart';
 import '../../analytics/revenue_series.dart';
@@ -8,7 +10,6 @@ import '../../capability/capability_context.dart';
 import '../../capability/revenue_capability.dart';
 import '../../core/screen_state.dart';
 import '../../core/tongtai_formatters.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../predictive/revenue_forecast_rule.dart';
 import '../../predictive/rule_twin.dart';
 import '../../providers/tongtai_capability_provider.dart';
@@ -81,12 +82,12 @@ class _TongtaiForecastScreenState extends ConsumerState<TongtaiForecastScreen> {
     final revenue = ref.watch(revenueCapabilityProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleForecast),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         // Through the shared seam (WTM-148): loading, a failed load, a stale
@@ -139,12 +140,12 @@ class _TongtaiForecastScreenState extends ConsumerState<TongtaiForecastScreen> {
       // Not a ListView: the whole page is a fixed 12-month window, and building
       // every history row eagerly is what lets a contract test prove the rows
       // the window counted are the rows the seller can see.
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _HeadlineCard(twin: twin, forecast: forecast),
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
           _AiExplainAction(
             running: _aiRunning,
             explanation: _explanation,
@@ -152,13 +153,13 @@ class _TongtaiForecastScreenState extends ConsumerState<TongtaiForecastScreen> {
             // explanation must be built from the SAME context, never reloaded.
             onExplain: revenue == null ? null : () => _explain(revenue, twin),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing6),
+          const SizedBox(height: TtSpace.x6),
           _HistorySection(series: series),
           if (revenue != null) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing6),
+            const SizedBox(height: TtSpace.x6),
             _ComparisonCard(comparison: revenue.comparison),
           ],
-          const SizedBox(height: TongtaiDesignTokens.spacing6),
+          const SizedBox(height: TtSpace.x6),
           _WhySection(twin: twin, forecast: forecast),
         ],
       ),
@@ -173,9 +174,9 @@ class _TongtaiForecastScreenState extends ConsumerState<TongtaiForecastScreen> {
 /// on purpose: a flat month is not a failure.
 Color tongtaiForecastDirectionColor(RevenueTrendDirection direction) =>
     switch (direction) {
-      RevenueTrendDirection.growing => TongtaiDesignTokens.success,
-      RevenueTrendDirection.declining => TongtaiDesignTokens.error,
-      RevenueTrendDirection.flat => TongtaiDesignTokens.neutral,
+      RevenueTrendDirection.growing => TtColors.success,
+      RevenueTrendDirection.declining => TtColors.danger,
+      RevenueTrendDirection.flat => TtColors.unknown,
     };
 
 IconData tongtaiForecastDirectionIcon(RevenueTrendDirection direction) =>
@@ -200,21 +201,17 @@ class _HeadlineCard extends StatelessWidget {
     final target = forecast.targetMonth;
     return Container(
       key: const Key('forecast-headline'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.financePurple.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        border: Border.all(
-          color: TongtaiDesignTokens.financePurple.withValues(alpha: 0.25),
-        ),
+        color: TtColors.ai.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.ai.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Icon(
@@ -224,60 +221,54 @@ class _HeadlineCard extends StatelessWidget {
               ),
               Text(
                 l10n.forecastNextMonth,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                style: TtType.body.copyWith(
+                  color: TtColors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               if (target != null)
                 Text(
                   '${target.month}/${target.year}',
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           // The twin's number, formatted — never re-derived, never re-rounded
           // beyond what the money formatter does for display.
           Text(
             TongtaiFormatters.vnd(forecast.nextMonthRevenue),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TongtaiDesignTokens.heading2Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.h1.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           // The band travels with the number: a forecast without its range is
           // a promise, and this rule never makes one.
           Row(
             key: const Key('forecast-range'),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.unfold_more,
-                size: 16,
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
-              const SizedBox(width: TongtaiDesignTokens.spacing2),
+              Icon(Icons.unfold_more, size: 16, color: TtColors.textSecondary),
+              const SizedBox(width: TtSpace.x2),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       l10n.forecastRange,
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
                     Text(
                       '${TongtaiFormatters.vnd(forecast.lowerBound)} – '
                       '${TongtaiFormatters.vnd(forecast.upperBound)}',
-                      style: TongtaiDesignTokens.smallStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                      style: TtType.body.copyWith(
+                        color: TtColors.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -286,10 +277,10 @@ class _HeadlineCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
-            runSpacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
+            runSpacing: TtSpace.x2,
             children: [
               // Confidence is a coarse, explainable band — shown next to the
               // number so the two are never read apart.
@@ -299,7 +290,7 @@ class _HeadlineCard extends StatelessWidget {
                 label:
                     '${l10n.forecastConfidence}: '
                     '${twin.confidence.label(l10n.languageCode)}',
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
               // Provenance: this figure is arithmetic. No AI, no network, no
               // BYOK key was involved in producing it (ADR-TON-016).
@@ -307,19 +298,19 @@ class _HeadlineCard extends StatelessWidget {
                 chipKey: const Key('forecast-provenance'),
                 icon: Icons.calculate_outlined,
                 label: l10n.forecastRuleBased,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           // WTM-280 — câu miễn trừ đi CÙNG con số, trong cùng một thẻ.
           // Đặt ở trang riêng thì người bán đọc nó lúc không nhìn số, tức là
           // không bao giờ đọc đúng lúc.
           Text(
             l10n.estimateDisclaimer,
             key: const Key('forecast-estimate-disclaimer'),
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
+            style: TtType.caption.copyWith(
+              color: TtColors.textSecondary,
               height: 1.4,
             ),
           ),
@@ -367,7 +358,7 @@ class _AiExplainAction extends StatelessWidget {
       children: [
         if (answer != null) ...[
           _AiExplanationCard(explanation: answer),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
         ],
         Align(
           alignment: Alignment.centerLeft,
@@ -391,7 +382,7 @@ class _AiExplanationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    const accent = TongtaiDesignTokens.copilotViolet;
+    const accent = TtColors.ai;
     // Provenance, always: the seller must be able to tell a provider's prose
     // from the deterministic explanation of the same twin.
     final source = explanation.isAi
@@ -399,12 +390,10 @@ class _AiExplanationCard extends StatelessWidget {
         : l10n.forecastRuleBased;
     return Container(
       key: const Key('forecast-ai-answer'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Column(
@@ -413,17 +402,17 @@ class _AiExplanationCard extends StatelessWidget {
           Text(
             source,
             key: const Key('forecast-ai-source'),
-            style: TongtaiDesignTokens.captionStyle.copyWith(
+            style: TtType.caption.copyWith(
               color: accent,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Text(
             explanation.text,
             key: const Key('forecast-ai-text'),
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.body.copyWith(
+              color: TtColors.textPrimary,
               height: 1.5,
             ),
           ),
@@ -450,19 +439,19 @@ class _HistorySection extends StatelessWidget {
     );
     return Container(
       key: const Key('forecast-history'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.forecastHistory,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.body.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           SizedBox(
             height: 120,
             child: CustomPaint(
@@ -471,7 +460,7 @@ class _HistorySection extends StatelessWidget {
               painter: _MonthlyRevenueBarsPainter(points: points, peak: peak),
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           // One row per month IN THE WINDOW — a month that booked nothing gets
           // its own visible zero row. Skipping it would let a chart close the
           // gap and hide a month the business lost.
@@ -491,23 +480,17 @@ class _HistoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     // An empty month is shown, and shown as empty: dimmed, with its real zero.
-    final color = point.isEmpty
-        ? TongtaiDesignTokens.lightTextSecondary
-        : TongtaiDesignTokens.lightTextPrimary;
+    final color = point.isEmpty ? TtColors.textSecondary : TtColors.textPrimary;
     return Padding(
       key: Key('forecast-item-${point.year}-${point.month}'),
-      padding: const EdgeInsets.symmetric(
-        vertical: TongtaiDesignTokens.spacing1,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: TtSpace.x1),
       child: Row(
         children: [
           SizedBox(
             width: 56,
             child: Text(
               '${point.month}/${point.year}',
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
           ),
           Expanded(
@@ -515,18 +498,16 @@ class _HistoryRow extends StatelessWidget {
               TongtaiFormatters.vndShort(point.revenue),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
+              style: TtType.caption.copyWith(
                 color: color,
                 fontWeight: point.isEmpty ? FontWeight.w400 : FontWeight.w600,
               ),
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const SizedBox(width: TtSpace.x2),
           Text(
             l10n.reportsOrdersCount(point.orderCount),
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
         ],
       ),
@@ -555,8 +536,8 @@ class _MonthlyRevenueBarsPainter extends CustomPainter {
     final slot = size.width / points.length;
     final barWidth = (slot - gap).clamp(3.0, 32.0);
 
-    final barPaint = Paint()..color = TongtaiDesignTokens.financePurple;
-    final zeroPaint = Paint()..color = TongtaiDesignTokens.lightBorder;
+    final barPaint = Paint()..color = TtColors.ai;
+    final zeroPaint = Paint()..color = TtColors.border;
     final baseline = size.height;
 
     for (var i = 0; i < points.length; i++) {
@@ -595,50 +576,46 @@ class _ComparisonCard extends StatelessWidget {
     final code = l10n.languageCode;
     return Container(
       key: const Key('forecast-comparison'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.forecastVsPrevious,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.body.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           // Without both windows the comparison is not "flat" — it is unknown,
           // and it says so instead of printing a −100% collapse that never
           // happened (RevenueWindowComparison.insufficient).
           if (!comparison.hasBothWindows)
             Text(
               ReasonCode.notEnoughHistory.label(code),
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             )
           else ...[
             Text(
               '${TongtaiFormatters.vndShort(comparison.previousRevenue)} → '
               '${TongtaiFormatters.vndShort(comparison.recentRevenue)}',
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
+              style: TtType.bodyLarge.copyWith(
                 color: _deltaColor(comparison.revenueDelta),
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               '${l10n.reportsOrdersCount(comparison.previousOrders)} → '
               '${l10n.reportsOrdersCount(comparison.recentOrders)}',
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
             // A percentage only when it exists: growth out of a zero month has
             // no percentage, and `+∞%` would be a fabricated fact.
             if (comparison.revenueChange != null) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               _Chip(
                 chipKey: const Key('forecast-comparison-delta'),
                 icon: comparison.revenueDelta >= 0
@@ -655,10 +632,10 @@ class _ComparisonCard extends StatelessWidget {
   }
 
   Color _deltaColor(double delta) => delta > 0
-      ? TongtaiDesignTokens.success
+      ? TtColors.success
       : delta < 0
-      ? TongtaiDesignTokens.error
-      : TongtaiDesignTokens.neutral;
+      ? TtColors.danger
+      : TtColors.unknown;
 }
 
 // ── Why: the reason codes and the months the number came from ───────────────
@@ -674,42 +651,40 @@ class _WhySection extends StatelessWidget {
     final l10n = context.l10n;
     return Container(
       key: const Key('forecast-why'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.forecastWhy,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.body.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           _ReasonCodes(reasonCodes: twin.reasonCodes),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Text(
             l10n.forecastBasis,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.caption.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
+          const SizedBox(height: TtSpace.x1),
           // Exactly the months the rule computed from — leading empty months
           // are absent here because the rule dropped them, and saying so is
           // more honest than implying a longer history than it used.
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
-            runSpacing: TongtaiDesignTokens.spacing1,
+            spacing: TtSpace.x2,
+            runSpacing: TtSpace.x1,
             children: [
               for (final point in forecast.basis)
                 Text(
                   '${point.month}/${point.year}',
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
             ],
           ),
@@ -730,26 +705,22 @@ class _ReasonCodes extends StatelessWidget {
   Widget build(BuildContext context) {
     final code = context.l10n.languageCode;
     return Wrap(
-      spacing: TongtaiDesignTokens.spacing2,
-      runSpacing: TongtaiDesignTokens.spacing1,
+      spacing: TtSpace.x2,
+      runSpacing: TtSpace.x1,
       children: [
         for (final reason in reasonCodes)
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: TongtaiDesignTokens.spacing2,
+              horizontal: TtSpace.x2,
               vertical: 2,
             ),
             decoration: BoxDecoration(
-              color: TongtaiDesignTokens.lightHover,
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.radiusFull,
-              ),
+              color: TtColors.surfaceTertiary,
+              borderRadius: BorderRadius.circular(TtRadius.full),
             ),
             child: Text(
               reason.label(code),
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
           ),
       ],
@@ -775,23 +746,23 @@ class _Chip extends StatelessWidget {
     return Container(
       key: chipKey,
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing3,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x3,
+        vertical: TtSpace.x1,
       ),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightHover,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        color: TtColors.surfaceTertiary,
+        borderRadius: BorderRadius.circular(TtRadius.full),
+        border: Border.all(color: TtColors.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: color),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const SizedBox(width: TtSpace.x2),
           Flexible(
             child: Text(
               label,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
+              style: TtType.caption.copyWith(
                 color: color,
                 fontWeight: FontWeight.w600,
               ),
@@ -804,7 +775,7 @@ class _Chip extends StatelessWidget {
 }
 
 final BoxDecoration _cardDecoration = BoxDecoration(
-  color: TongtaiDesignTokens.lightBackground,
-  borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
-  border: Border.all(color: TongtaiDesignTokens.lightBorder),
+  color: TtColors.surfaceSecondary,
+  borderRadius: BorderRadius.circular(TtRadius.md),
+  border: Border.all(color: TtColors.border),
 );
