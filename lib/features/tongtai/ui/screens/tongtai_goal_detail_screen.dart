@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
 import '../../journey/goal_action_plan.dart';
 import '../../journey/goal_theme.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../../../core/l10n/app_strings.dart';
 
 /// Goal Detail & Action Plan (WTM-88) — the tap target from the goals list.
@@ -44,11 +45,11 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
     final tips = goalGuidanceTips(goal.type);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.titleGoalDetail),
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         elevation: 0,
         actions: [
           if (onEdit != null)
@@ -61,19 +62,19 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         children: [
           // ── Type + pace + name ───────────────────────────────────────
           // Wrap, not Row: two Vietnamese badges side by side ran past a
           // 320 px screen at a 2.0x font (WTM-168). Wrapping to a second line
           // is the right answer for labels — truncating a goal's type is not.
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
-            runSpacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
+            runSpacing: TtSpace.x2,
             children: [
               _Badge(
                 label: goal.type.label(context.l10n.languageCode),
-                color: TongtaiDesignTokens.financePurple,
+                color: TtColors.ai,
               ),
               _Badge(
                 label: pace.label(context.l10n.languageCode),
@@ -81,35 +82,31 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Text(
             goal.name,
             key: const Key('goal-detail-title'),
-            style: TongtaiDesignTokens.heading2Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-            ),
+            style: TtType.h1.copyWith(color: TtColors.textPrimary),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
 
           // ── Progress ─────────────────────────────────────────────────
           _ProgressCard(goal: goal, now: now, paceColor: paceColor),
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
 
           // ── Real sales booked in the goal window (WTM-89) ────────────
           if (realizedRevenue != null && goal.targetAmount > 0) ...[
             _RealizedSalesCard(goal: goal, realized: realizedRevenue!),
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
           ] else
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
 
           // ── Recommendation ───────────────────────────────────────────
           Container(
-            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+            padding: const EdgeInsets.all(TtSpace.x3),
             decoration: BoxDecoration(
               color: paceColor.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.componentBorderRadius,
-              ),
+              borderRadius: BorderRadius.circular(TtRadius.sm),
               border: Border.all(color: paceColor.withValues(alpha: 0.3)),
             ),
             child: Row(
@@ -120,23 +117,21 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
                   size: 20,
                   color: paceColor,
                 ),
-                const SizedBox(width: TongtaiDesignTokens.spacing2),
+                const SizedBox(width: TtSpace.x2),
                 Expanded(
                   child: Text(
                     goal.recommendation(now),
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
-                    ),
+                    style: TtType.body.copyWith(color: TtColors.textPrimary),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
 
           // ── Action plan ──────────────────────────────────────────────
           _SectionTitle(context.l10n.sectionActionPlan),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Column(
             key: const Key('goal-detail-plan'),
             children: [
@@ -144,11 +139,11 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
                 _PlanStep(index: i + 1, step: plan[i]),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
 
           // ── Guidance tips ────────────────────────────────────────────
           _SectionTitle(context.l10n.sectionSuggestions),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           for (final tip in tips) _Tip(text: tip),
         ],
       ),
@@ -183,13 +178,11 @@ class _ProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final pct = (goal.progress * 100).round();
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        color: TtColors.surfaceSecondary,
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,7 +192,7 @@ class _ProgressCard extends StatelessWidget {
             children: [
               Text(
                 '$pct%',
-                style: TongtaiDesignTokens.displayStyle.copyWith(
+                style: TtType.display.copyWith(
                   color: paceColor,
                   fontWeight: FontWeight.w700,
                 ),
@@ -212,24 +205,22 @@ class _ProgressCard extends StatelessWidget {
                   _progressLabel,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.body.copyWith(color: TtColors.textSecondary),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           ClipRRect(
-            borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+            borderRadius: BorderRadius.circular(TtRadius.full),
             child: LinearProgressIndicator(
               value: goal.progress,
               minHeight: 8,
-              backgroundColor: TongtaiDesignTokens.lightHover,
+              backgroundColor: TtColors.surfaceTertiary,
               valueColor: AlwaysStoppedAnimation<Color>(paceColor),
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Row(
             children: [
               Expanded(
@@ -266,47 +257,41 @@ class _RealizedSalesCard extends StatelessWidget {
     final share = goal.targetAmount <= 0
         ? 0
         : (realized / goal.targetAmount * 100).round();
-    const accent = TongtaiDesignTokens.producerGreen;
+    const accent = TtColors.success;
     return Container(
       key: const Key('goal-detail-realized'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.sm),
         border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(Icons.point_of_sale_outlined, size: 20, color: accent),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const SizedBox(width: TtSpace.x2),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   context.l10n.journeyRealizedTitle,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${TongtaiFormatters.vndShort(realized)} · '
                   '${context.l10n.percentOfGoal(share)}',
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   context.l10n.journeyRealizedSource,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
               ],
             ),
@@ -330,16 +315,14 @@ class _MiniStat extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
+          style: TtType.body.copyWith(
+            color: TtColors.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
         Text(
           label,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
       ],
     );
@@ -355,21 +338,15 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing3,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x3, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        borderRadius: BorderRadius.circular(TtRadius.full),
         border: Border.all(color: color),
       ),
       child: Text(
         label,
-        style: TongtaiDesignTokens.smallStyle.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TtType.body.copyWith(color: color, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -384,8 +361,8 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TongtaiDesignTokens.heading3Style.copyWith(
-        color: TongtaiDesignTokens.lightTextPrimary,
+      style: TtType.h2.copyWith(
+        color: TtColors.textPrimary,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -400,9 +377,9 @@ class _PlanStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const accent = TongtaiDesignTokens.financePurple;
+    const accent = TtColors.ai;
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -416,30 +393,28 @@ class _PlanStep extends StatelessWidget {
             ),
             child: Text(
               '$index',
-              style: TongtaiDesignTokens.smallStyle.copyWith(
+              style: TtType.body.copyWith(
                 color: accent,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing3),
+          const SizedBox(width: TtSpace.x3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   step.titleVi,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   step.detailVi,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
               ],
             ),
@@ -458,24 +433,18 @@ class _Tip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing2),
+      padding: const EdgeInsets.only(bottom: TtSpace.x2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
             padding: EdgeInsets.only(top: 6, right: 8),
-            child: Icon(
-              Icons.circle,
-              size: 6,
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            child: Icon(Icons.circle, size: 6, color: TtColors.textSecondary),
           ),
           Expanded(
             child: Text(
               text,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ),
         ],

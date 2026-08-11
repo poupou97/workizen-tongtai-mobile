@@ -39,6 +39,13 @@ void main() {
     'tongtai_more_screen.dart': 'WTM-373',
     'tongtai_create_order_screen.dart': 'WTM-373',
     'tongtai_forecast_screen.dart': 'WTM-373',
+    'tongtai_product_form_screen.dart': 'WTM-374',
+    'tongtai_customer_form_screen.dart': 'WTM-374',
+    'tongtai_goal_form_screen.dart': 'WTM-374',
+    'tongtai_transaction_form_screen.dart': 'WTM-374',
+    'tongtai_business_input_form_screen.dart': 'WTM-374',
+    'tongtai_goal_detail_screen.dart': 'WTM-374',
+    'tongtai_inventory_picker_screen.dart': 'WTM-374',
   };
 
   /// Màn **đã đi một nửa**: token thị giác đã sang Design System, nhưng còn một
@@ -177,6 +184,86 @@ void main() {
       // nhận được, cỡ lệch thì không.
       expect(TtType.h1.fontSize, TongtaiDesignTokens.heading2Style.fontSize);
       expect(TtType.h2.fontSize, TongtaiDesignTokens.heading3Style.fontSize);
+    });
+  });
+
+  test('⛔ nút chính KHÔNG mượn màu ngữ nghĩa của thứ khác', () {
+    // ⚠️ Lỗi tìm thấy khi làm WTM-374: **cùng một nút Lưu mang năm màu khác
+    // nhau** tuỳ màn — hổ phách ở sản phẩm, xanh dương ở khách, tím ở mục tiêu
+    // và giao dịch, mặc định ở nguồn đầu vào. Di sản của bảng màu-theo-năng-lực
+    // cũ: mỗi form ăn theo màu của capability chứa nó.
+    //
+    // Dưới luật mới thì đó là nói sai: `Lưu` là **HÀNH ĐỘNG** nên nó phải cam.
+    // Một nút *"Lưu giao dịch"* màu tím nói rằng **AI** đang làm việc này —
+    // trong khi người bán mới là người làm. Đúng chỗ chỉ thị §Design System
+    // gọi tên: *ORANGE ≠ AI*.
+    //
+    // Nút cam nằm trong `TtPrimaryButton`, nên test này bắt đúng thứ ngược lại:
+    // một `FilledButton` **tự sơn** màu ngữ nghĩa.
+    const stolen = [
+      'ai',
+      'aiOnLight',
+      'info',
+      'infoOnLight',
+      'success',
+      'successOnLight',
+      'warning',
+      'warningOnDark',
+    ];
+    for (final file in migrated.keys) {
+      final code = codeOf(file);
+      for (var i = 0; i < code.length;) {
+        final at = code.indexOf('FilledButton.styleFrom(', i);
+        if (at < 0) break;
+        final block = code.substring(at, (at + 260).clamp(0, code.length));
+        for (final name in stolen) {
+          expect(
+            block.contains('backgroundColor: TtColors.$name'),
+            isFalse,
+            reason:
+                '$file sơn nút đặc bằng TtColors.$name — nút cam là '
+                'TtPrimaryButton; màu ngữ nghĩa nói NGHĨA, không nói cấp bậc',
+          );
+        }
+        i = at + 1;
+      }
+    }
+  });
+
+  group('⭐ `readableOn` với đối số cố định — dùng HẰNG, không gọi hàm', () {
+    // ⚠️ Lỗi đã xảy ra thật (WTM-374): phép thay sinh ra
+    // `TtColors.readableOn(TtColors.danger)` bên trong một widget `const`, và
+    // build đỏ ngay — *"Methods can't be invoked in constant expressions"*.
+    //
+    // Đây là lỗi may mắn: nó gãy lúc biên dịch. Nhưng cách sửa đúng không phải
+    // gỡ `const` đi — mà là dùng biến thể hằng, vì giá trị hai bên y hệt nhau.
+    // Hai test dưới giữ cả hai vế của câu đó.
+    const fixed = <String, (Color, Color)>{
+      'success': (TtColors.success, TtColors.successOnLight),
+      'info': (TtColors.info, TtColors.infoOnLight),
+      'ai': (TtColors.ai, TtColors.aiOnLight),
+      'danger': (TtColors.danger, TtColors.dangerOnLight),
+    };
+
+    test('hằng và hàm cho ra ĐÚNG một màu', () {
+      for (final e in fixed.entries) {
+        final (base, constant) = e.value;
+        expect(TtColors.readableOn(base), constant, reason: e.key);
+      }
+    });
+
+    test('⛔ không màn nào gọi hàm khi đối số là hằng', () {
+      // Gọi hàm ở đây không sai *hôm nay* — nó sai vào ngày ai đó bọc chỗ ấy
+      // trong `const`. Chặn ở đây rẻ hơn sửa lúc build đỏ.
+      for (final file in migrated.keys) {
+        for (final name in fixed.keys) {
+          expect(
+            codeOf(file).contains('readableOn(TtColors.$name)'),
+            isFalse,
+            reason: '$file gọi readableOn(TtColors.$name) — dùng biến thể hằng',
+          );
+        }
+      }
     });
   });
 

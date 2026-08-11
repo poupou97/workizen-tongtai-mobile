@@ -490,15 +490,11 @@ class _ContactSection extends StatelessWidget {
           const SizedBox(height: TtSpace.x4),
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
+            child: TtPrimaryButton(
               key: const Key('supplier-detail-action-message'),
-              style: FilledButton.styleFrom(
-                backgroundColor: TtColors.successOnLight,
-                minimumSize: const Size.fromHeight(TtButtonMetrics.height),
-              ),
+              label: context.l10n.supMessage,
+              icon: Icons.chat_bubble_outline,
               onPressed: onMessage,
-              icon: const Icon(Icons.chat_bubble_outline, size: 18),
-              label: Text(context.l10n.supMessage),
             ),
           ),
         ],
@@ -630,16 +626,12 @@ class _MessageComposerSheetState extends State<_MessageComposerSheet> {
           const SizedBox(height: TtSpace.x3),
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: TtColors.successOnLight,
-                minimumSize: const Size.fromHeight(TtButtonMetrics.height),
-              ),
+            child: TtPrimaryButton(
+              label: context.l10n.actionSend,
+              icon: Icons.send,
               onPressed: _canSend
                   ? () => Navigator.of(context).pop(true)
                   : null,
-              icon: const Icon(Icons.send, size: 18),
-              label: Text(context.l10n.actionSend),
             ),
           ),
         ],

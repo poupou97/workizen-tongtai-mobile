@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../../../core/l10n/app_strings.dart';
 
 /// Inventory Picker (WTM-126) — the only way to add an order line: the seller
@@ -48,18 +49,18 @@ class _TongtaiInventoryPickerScreenState
   Widget build(BuildContext context) {
     final products = _filtered;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.pickerTitle),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+              padding: const EdgeInsets.all(TtSpace.x4),
               child: TextField(
                 controller: _search,
                 onChanged: (v) => setState(() => _query = v),
@@ -68,11 +69,9 @@ class _TongtaiInventoryPickerScreenState
                   hintText: context.l10n.pickerSearchHint,
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
-                  fillColor: TongtaiDesignTokens.lightHover,
+                  fillColor: TtColors.surfaceTertiary,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      TongtaiDesignTokens.componentBorderRadius,
-                    ),
+                    borderRadius: BorderRadius.circular(TtRadius.sm),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -83,14 +82,14 @@ class _TongtaiInventoryPickerScreenState
                   ? Center(
                       child: Text(
                         context.l10n.pickerNoMatch,
-                        style: TongtaiDesignTokens.bodyStyle.copyWith(
-                          color: TongtaiDesignTokens.lightTextSecondary,
+                        style: TtType.bodyLarge.copyWith(
+                          color: TtColors.textSecondary,
                         ),
                       ),
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: TongtaiDesignTokens.spacing4,
+                        horizontal: TtSpace.x4,
                       ),
                       itemCount: products.length,
                       separatorBuilder: (_, _) => const Divider(height: 1),
@@ -103,8 +102,8 @@ class _TongtaiInventoryPickerScreenState
                           subtitle: Text(
                             '${p.sku} • ${p.category} • '
                             '${TongtaiFormatters.vnd(p.pricePerUnit)}',
-                            style: TongtaiDesignTokens.captionStyle.copyWith(
-                              color: TongtaiDesignTokens.lightTextSecondary,
+                            style: TtType.caption.copyWith(
+                              color: TtColors.textSecondary,
                             ),
                           ),
                           // Không có tồn kho ⇒ không có nhãn trạng thái kho.
@@ -114,7 +113,7 @@ class _TongtaiInventoryPickerScreenState
                                   p.stockStatus!.label(
                                     context.l10n.languageCode,
                                   ),
-                                  style: TongtaiDesignTokens.captionStyle,
+                                  style: TtType.caption,
                                 ),
                           onTap: () => Navigator.of(context).pop(p),
                         );
