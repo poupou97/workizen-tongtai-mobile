@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../ai/tongtai_ai_errors.dart';
@@ -8,7 +10,6 @@ import '../../ai/tongtai_ai_key_validator.dart';
 import '../../ai/tongtai_ai_provider_kind.dart';
 import '../../ai/tongtai_ai_service.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../providers/tongtai_ai_provider.dart';
 import 'tongtai_key_scan_screen.dart';
@@ -211,24 +212,23 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleAiAssistant),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _Header(providerName: _providerKind.displayName),
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               if (_hasKey == true) const _KeySetBadge(),
-              if (_hasKey == true)
-                const SizedBox(height: TongtaiDesignTokens.spacing3),
+              if (_hasKey == true) const SizedBox(height: TtSpace.x3),
               _KeyField(
                 controller: _controller,
                 obscure: _obscure,
@@ -237,7 +237,7 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                 hasKey: _hasKey == true,
                 onToggleObscure: () => setState(() => _obscure = !_obscure),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
@@ -252,31 +252,24 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                   _providerKind.keyConsoleUrl,
                   _providerKind.displayName,
                 ),
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.textSecondary),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               if (_statusMessage != null) ...[
                 _StatusBanner(message: _statusMessage!, tone: _statusTone),
-                const SizedBox(height: TongtaiDesignTokens.spacing4),
+                const SizedBox(height: TtSpace.x4),
               ],
-              SizedBox(
-                width: double.infinity,
-                height: TongtaiDesignTokens.buttonHeight,
-                child: FilledButton(
-                  key: const Key('ai-key-action-save'),
-                  onPressed: _busy ? null : _save,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: TongtaiDesignTokens.financeVioletText,
-                  ),
-                  child: Text(l10n.aiKeySave),
-                ),
+              // Cam, không tím: **người bán** lưu khoá của họ. Tím sẽ nói là
+              // AI đang làm việc này (luật WTM-374).
+              TtPrimaryButton(
+                key: const Key('ai-key-action-save'),
+                label: l10n.aiKeySave,
+                onPressed: _busy ? null : _save,
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+              const SizedBox(height: TtSpace.x3),
               SizedBox(
                 width: double.infinity,
-                height: TongtaiDesignTokens.buttonHeight,
+                height: TtButtonMetrics.height,
                 child: OutlinedButton(
                   key: const Key('ai-key-action-test'),
                   onPressed: (_busy || _hasKey != true) ? null : _test,
@@ -284,10 +277,10 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                 ),
               ),
               if (_hasKey == true) ...[
-                const SizedBox(height: TongtaiDesignTokens.spacing3),
+                const SizedBox(height: TtSpace.x3),
                 SizedBox(
                   width: double.infinity,
-                  height: TongtaiDesignTokens.buttonHeight,
+                  height: TtButtonMetrics.height,
                   child: OutlinedButton(
                     key: const Key('ai-key-action-rotate'),
                     onPressed: _busy ? null : _rotate,
@@ -296,23 +289,23 @@ class _TongtaiAiKeyScreenState extends ConsumerState<TongtaiAiKeyScreen> {
                 ),
               ],
               if (_hasKey == true) ...[
-                const SizedBox(height: TongtaiDesignTokens.spacing3),
+                const SizedBox(height: TtSpace.x3),
                 SizedBox(
                   width: double.infinity,
-                  height: TongtaiDesignTokens.buttonHeight,
+                  height: TtButtonMetrics.height,
                   child: OutlinedButton(
                     key: const Key('ai-key-action-delete'),
                     onPressed: _busy ? null : _delete,
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: TongtaiDesignTokens.error,
-                      side: const BorderSide(color: TongtaiDesignTokens.error),
+                      foregroundColor: TtColors.danger,
+                      side: const BorderSide(color: TtColors.danger),
                     ),
                     child: Text(l10n.aiKeyRemove),
                   ),
                 ),
               ],
               if (_busy) ...[
-                const SizedBox(height: TongtaiDesignTokens.spacing4),
+                const SizedBox(height: TtSpace.x4),
                 const Center(child: TongtaiInlineBusy()),
               ],
             ],
@@ -336,27 +329,20 @@ class _Header extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(
-              Icons.auto_awesome,
-              color: TongtaiDesignTokens.financeVioletText,
-            ),
-            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            const Icon(Icons.auto_awesome, color: TtColors.aiOnLight),
+            const SizedBox(width: TtSpace.x2),
             Expanded(
               child: Text(
                 l10n.aiKeyCardTitle(providerName),
-                style: TongtaiDesignTokens.heading3Style.copyWith(
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                ),
+                style: TtType.h2.copyWith(color: TtColors.textPrimary),
               ),
             ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           l10n.aiKeyByokHint,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.body.copyWith(color: TtColors.textSecondary),
         ),
       ],
     );
@@ -369,30 +355,20 @@ class _KeySetBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.success.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
-        border: Border.all(
-          color: TongtaiDesignTokens.success.withValues(alpha: 0.4),
-        ),
+        color: TtColors.success.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(TtRadius.sm),
+        border: Border.all(color: TtColors.success.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.check_circle,
-            size: 18,
-            color: TongtaiDesignTokens.success,
-          ),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const Icon(Icons.check_circle, size: 18, color: TtColors.success),
+          const SizedBox(width: TtSpace.x2),
           Expanded(
             child: Text(
               context.l10n.aiKeyStoredHint,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textPrimary),
             ),
           ),
         ],
@@ -430,9 +406,7 @@ class _KeyField extends StatelessWidget {
       autocorrect: false,
       enableSuggestions: false,
       maxLines: 1,
-      style: TongtaiDesignTokens.bodyStyle.copyWith(
-        color: TongtaiDesignTokens.lightTextPrimary,
-      ),
+      style: TtType.bodyLarge.copyWith(color: TtColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
         errorText: errorText,
@@ -444,9 +418,7 @@ class _KeyField extends StatelessWidget {
           onPressed: onToggleObscure,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.componentBorderRadius,
-          ),
+          borderRadius: BorderRadius.circular(TtRadius.sm),
         ),
       ),
     );
@@ -462,9 +434,9 @@ class _StatusBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (tone) {
-      _AiStatusTone.success => TongtaiDesignTokens.success,
-      _AiStatusTone.error => TongtaiDesignTokens.error,
-      _AiStatusTone.info => TongtaiDesignTokens.info,
+      _AiStatusTone.success => TtColors.success,
+      _AiStatusTone.error => TtColors.danger,
+      _AiStatusTone.info => TtColors.info,
     };
     final icon = switch (tone) {
       _AiStatusTone.success => Icons.check_circle_outline,
@@ -474,25 +446,21 @@ class _StatusBanner extends StatelessWidget {
     return Container(
       key: const Key('ai-key-status'),
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.sm),
         border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 18, color: color),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const SizedBox(width: TtSpace.x2),
           Expanded(
             child: Text(
               message,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textPrimary),
             ),
           ),
         ],

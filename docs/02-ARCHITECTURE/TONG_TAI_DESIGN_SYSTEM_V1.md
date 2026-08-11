@@ -132,6 +132,7 @@ giả vào ngày mai — có test quét tên bị cấm.
 |---|---|
 | `TtPrimaryButton` | một **việc kinh doanh thật** — cam |
 | `TtSecondaryButton` | xem · lưu · so sánh — trắng + viền |
+| `TtDangerButton` | việc **phá huỷ, không lùi được** — đỏ |
 | `TtAiActionButton` | hỏi/xem thứ **AI** nói — nền tím **nhạt**, chữ tím |
 | `TtTextAction` | *"xem tất cả →"* |
 | `TtCard` | một **đối tượng nghiệp vụ** rõ ràng |
@@ -149,6 +150,19 @@ không rải trong màn.
 
 ⛔ **Không có nút tím đặc.** Nút AI phải **mời**, không **giục**; tím đặc trông
 ngang hàng nút cam và dạy người bán rằng hai thứ đó cùng loại.
+
+⛔ **Không nút đặc nào tự sơn nền.** Mọi `FilledButton` đến từ bảng trên;
+`migrated_screens_test.dart` cấm `FilledButton.styleFrom(backgroundColor: …)`
+trong toàn bộ `ui/`.
+
+### ⭐ Vì sao `TtDangerButton` không phá luật *"cam = hành động"*
+
+Luật thật không phải *"nút chính luôn cam"* — mà là **một nút không mượn nghĩa
+nó không có**. *"Khôi phục = Thay thế"* thì **đúng là** đỏ: nó xoá cả sáu
+repository và không lùi được (ADR-TON-018). Sơn nó cam sẽ làm *"xoá sạch dữ
+liệu"* trông y hệt *"lưu sản phẩm"*.
+
+Nên nó là một **loại riêng**, không phải một `FilledButton` ai đó tự sơn đỏ.
 
 ---
 
@@ -273,6 +287,7 @@ Hai chỗ concept vẽ sai và **không được chép**:
 | `tongtai_business_input_form_screen` | WTM-374 |
 | `tongtai_goal_detail_screen` | WTM-374 |
 | `tongtai_inventory_picker_screen` | WTM-374 |
+| 16 màn phụ trợ + tầng widget dùng chung | WTM-375 |
 
 ### Đã đi **một nửa**
 
@@ -305,21 +320,50 @@ người ta tưởng nó đã xong. Test vẫn khoá phần **đã** đi (không
 > ngược. Quét cả `ui/` thì suite sẽ đỏ thường trực vì ~40 màn chưa đi — và một
 > suite đỏ thường trực thì không ai đọc nữa.
 
+### Đóng Epic — WTM-375
+
+Chặng cuối đưa nốt **16 màn phụ trợ** + **tầng widget dùng chung** về DS.
+`ui/` nay còn **0** mã màu viết thẳng và **0** token màu cũ, ngoài năm bảng màu
+đã khai ở trên.
+
+**Hai thứ tìm thấy ở chặng này, cả hai đều không phải việc đổi token.**
+
+**1 · Hạt giống theme là XANH LÁ.** `main.dart` gieo `ColorScheme.fromSeed` bằng
+`producerGreen`. Mọi widget Material không được tạo kiểu riêng — hộp thoại, công
+tắc, ô đánh dấu, tay kéo chọn chữ, snackbar, **nút mặc định** — lấy màu từ đó.
+Tức là cả app ngầm nói *"tốt / thành công"* ở mọi chỗ chưa ai sơn tay, trong khi
+luật nói XANH LÁ = KẾT QUẢ TÍCH CỰC. Đây chính là lý do nút `Lưu` của màn Nguồn
+đầu vào trông khác bốn nút `Lưu` còn lại: nó là nút *mặc định*. Hạt giống nay là
+**cam thương hiệu**.
+
+**2 · Một bảng ánh xạ mức khẩn thứ hai.** `tongtaiBriefColor` tự `switch` thẳng
+sang `TtColors`, song song với `TtStatus` — đúng bẫy P-27/P-28. Nay nó dịch qua
+`tongtaiBriefStatus` rồi lấy `.color`, nên màu chỉ còn một chủ.
+
+Thứ tìm ra nó là **suite quét cả thư mục**, ngay lần chạy đầu tiên — không phải
+mắt người.
+
+### Governance đổi chiều
+
+Suite này từng quét theo **danh sách màn đã migrate**, vì lúc ~40 màn chưa đi
+thì quét cả `ui/` sẽ đỏ thường trực. Nay phần còn lại đã đóng, nên danh sách ấy
+trở thành một **lỗ**: thêm một màn mới mà quên khai thì không gì đỏ cả.
+
+Nó nay quét **cả thư mục**, và thứ phải khai là **ngoại lệ** — kèm lý do. Đúng
+chiều: quên khai một màn mới thì test đỏ, chứ không im lặng.
+
 ### Chưa migrate
 
-**31/50 màn đã đi** (26 trọn vẹn + 5 đi một nửa). Mọi màn ĐỌC trên đường demo,
-mọi đích deep-link của kế hoạch đầu tiên, và toàn bộ đường GHI đều đã đi.
+**Không còn màn nào.** Mọi màn của sản phẩm nói cùng một ngôn ngữ thị giác —
+mục tiêu §1 của chỉ thị.
 
-Còn lại: Sao lưu · Tìm kiếm hợp nhất · Tìm nhà cung cấp · Yêu thích NCC · Trò
-chuyện + tìm trong hội thoại · Tự chủ · Hoạt động · Nguồn đầu vào · Xuất dữ
-liệu · Khoá AI · Hồ sơ kinh doanh · Góp ý · Giới thiệu · Chính sách riêng tư ·
-Quét khoá.
-
-Nhóm này **người bán ít mở trong một phiên bình thường** — nên nó xuống sau
-những gì họ chạm hằng ngày, đúng thứ tự ưu tiên PRODUCT EXPERIENCE.
+Còn lại là **ba bảng màu miền** đứng ngoài `ui/`: `opportunity_theme` ·
+`goal_theme` · `timeline_theme`. Chúng cùng loại với năm bảng màu đã khai —
+mang nghĩa riêng, nên chuyển là một quyết định sản phẩm, không phải một phép
+thay.
 
 Script di trú dùng lại được: `tools/migrate_ds.py` — nhưng đọc bảng ánh xạ dưới
-đây **trước khi chạy nó trên một màn mới**.
+đây **trước khi chạy nó trên một file mới**.
 
 ### ⛔ Nút chính không mượn màu ngữ nghĩa của thứ khác
 

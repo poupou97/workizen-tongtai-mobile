@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../agent/business_brief.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_agentic_provider.dart';
 import '../screens/tongtai_agent_screen.dart';
 import 'tongtai_brief_widgets.dart';
@@ -73,13 +74,11 @@ class _BriefCardBody extends StatelessWidget {
     return Container(
       key: const Key('home-brief'),
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.copilotViolet.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusXl),
-        border: Border.all(
-          color: TongtaiDesignTokens.copilotViolet.withValues(alpha: 0.35),
-        ),
+        color: TtColors.ai.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(TtRadius.lg),
+        border: Border.all(color: TtColors.ai.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +87,7 @@ class _BriefCardBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const TongtaiFoxMascot.avatar(size: 36),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +98,7 @@ class _BriefCardBody extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: TongtaiDesignTokens.neutralText,
+                        color: TtColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -110,7 +109,7 @@ class _BriefCardBody extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         height: 1.3,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
                   ],
@@ -118,9 +117,9 @@ class _BriefCardBody extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           for (final item in items) _BriefLine(item: item),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton(
@@ -137,7 +136,7 @@ class _BriefCardBody extends StatelessWidget {
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 minimumSize: const Size(48, 48),
-                foregroundColor: TongtaiDesignTokens.financeVioletText,
+                foregroundColor: TtColors.aiOnLight,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -189,7 +188,7 @@ class _BriefLine extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13.5,
                 height: 1.35,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
           ),
@@ -209,22 +208,20 @@ class _BriefFailed extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     key: const Key('home-brief-failed'),
     width: double.infinity,
-    padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+    padding: const EdgeInsets.all(TtSpace.x3),
     decoration: BoxDecoration(
-      color: TongtaiDesignTokens.error.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
-      border: Border.all(
-        color: TongtaiDesignTokens.error.withValues(alpha: 0.35),
-      ),
+      color: TtColors.danger.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(TtRadius.md),
+      border: Border.all(color: TtColors.danger.withValues(alpha: 0.35)),
     ),
     child: Row(
       children: [
         const Icon(
           Icons.error_outline,
           size: 18,
-          color: TongtaiDesignTokens.errorText,
+          color: TtColors.dangerOnLight,
         ),
-        const SizedBox(width: TongtaiDesignTokens.spacing2),
+        const SizedBox(width: TtSpace.x2),
         Expanded(
           child: Text(
             // WTM-342 — **hỏng** và **thiếu dữ liệu** là hai trạng thái khác
@@ -232,10 +229,7 @@ class _BriefFailed extends StatelessWidget {
             // "chưa đủ dữ liệu" cho một lần đọc HỎNG là đổ lỗi cho người bán
             // về một lỗi của máy — và giấu mất thứ duy nhất đáng sửa.
             context.l10n.briefFailedTitle,
-            style: const TextStyle(
-              fontSize: 13,
-              color: TongtaiDesignTokens.lightTextPrimary,
-            ),
+            style: const TextStyle(fontSize: 13, color: TtColors.textPrimary),
           ),
         ),
         TextButton(

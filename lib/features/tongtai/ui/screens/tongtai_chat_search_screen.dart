@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../chat/chat_message.dart';
 import '../../chat/chat_message_store.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -101,10 +102,10 @@ class _TongtaiChatSearchScreenState extends State<TongtaiChatSearchScreen> {
   Widget build(BuildContext context) {
     final hasKeyword = _keyword.trim().isNotEmpty;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         elevation: 0,
         title: TextField(
           key: const Key('chat-search-field'),
@@ -157,15 +158,11 @@ class _RangeRow extends StatelessWidget {
       height: 48,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: TongtaiDesignTokens.spacing4,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
         children: [
           for (final range in ChatSearchRange.values)
             Padding(
-              padding: const EdgeInsets.only(
-                right: TongtaiDesignTokens.spacing2,
-              ),
+              padding: const EdgeInsets.only(right: TtSpace.x2),
               child: ChoiceChip(
                 key: Key('chat-search-range-${range.name}'),
                 label: Text(range.label(context.l10n)),
@@ -212,30 +209,28 @@ class _ResultList extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            TongtaiDesignTokens.spacing4,
-            TongtaiDesignTokens.spacing3,
-            TongtaiDesignTokens.spacing4,
+            TtSpace.x4,
+            TtSpace.x3,
+            TtSpace.x4,
             0,
           ),
           child: Text(
             l10n.searchResultCount(results.length),
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
         ),
         for (final entry in sections.entries) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              TongtaiDesignTokens.spacing4,
-              TongtaiDesignTokens.spacing3,
-              TongtaiDesignTokens.spacing4,
-              TongtaiDesignTokens.spacing2,
+              TtSpace.x4,
+              TtSpace.x3,
+              TtSpace.x4,
+              TtSpace.x2,
             ),
             child: Text(
               entry.key,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -266,11 +261,11 @@ class _ResultTile extends StatelessWidget {
       leading: _fromSeller
           ? const CircleAvatar(
               radius: 16,
-              backgroundColor: TongtaiDesignTokens.lightHover,
+              backgroundColor: TtColors.surfaceTertiary,
               child: Icon(Icons.person_outline, size: 18),
             )
           : const TongtaiFoxMascot.avatar(size: 32),
-      title: Text('$who · $time', style: TongtaiDesignTokens.captionStyle),
+      title: Text('$who · $time', style: TtType.caption),
       subtitle: _Highlighted(text: message.text, keyword: keyword),
     );
   }
@@ -285,9 +280,7 @@ class _Highlighted extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = TongtaiDesignTokens.smallStyle.copyWith(
-      color: TongtaiDesignTokens.lightTextPrimary,
-    );
+    final base = TtType.body.copyWith(color: TtColors.textPrimary);
     if (keyword.isEmpty) return Text(text, style: base);
 
     final spans = <TextSpan>[];
@@ -308,10 +301,8 @@ class _Highlighted extends StatelessWidget {
           text: text.substring(index, index + keyword.length),
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: TongtaiDesignTokens.financePurple,
-            backgroundColor: TongtaiDesignTokens.financeVioletText.withValues(
-              alpha: 0.12,
-            ),
+            color: TtColors.ai,
+            backgroundColor: TtColors.aiOnLight.withValues(alpha: 0.12),
           ),
         ),
       );
@@ -334,9 +325,7 @@ class _Prompt extends StatelessWidget {
       key: const Key('chat-search-prompt'),
       child: Text(
         context.l10n.chatSearchPrompt,
-        style: TongtaiDesignTokens.smallStyle.copyWith(
-          color: TongtaiDesignTokens.lightTextSecondary,
-        ),
+        style: TtType.body.copyWith(color: TtColors.textSecondary),
       ),
     );
   }
@@ -350,17 +339,15 @@ class _NoResults extends StatelessWidget {
     return Center(
       key: const Key('chat-search-empty'),
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const TongtaiFoxMascot.face(size: 64),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Text(
               context.l10n.chatSearchNoResults,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),

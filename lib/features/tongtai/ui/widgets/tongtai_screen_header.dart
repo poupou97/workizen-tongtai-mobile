@@ -2,8 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import 'tongtai_fox_mascot.dart';
 import 'tongtai_more_action.dart';
 
@@ -37,8 +38,8 @@ AppBar tongtaiScreenHeader(
   return AppBar(
     key: Key('$screen-header'),
     elevation: 0,
-    backgroundColor: backgroundColor ?? TongtaiDesignTokens.lightBackground,
-    foregroundColor: foregroundColor ?? TongtaiDesignTokens.lightTextPrimary,
+    backgroundColor: backgroundColor ?? TtColors.surfaceSecondary,
+    foregroundColor: foregroundColor ?? TtColors.textPrimary,
     // Title + subtitle stack, so the bar grows with the system font instead of
     // clipping the subtitle away.
     toolbarHeight: math.max(kToolbarHeight, scaler.scale(kToolbarHeight)),
@@ -47,7 +48,7 @@ AppBar tongtaiScreenHeader(
         // The mascot is a drawing, not text — scaling it with the font would
         // eat the width the title needs at 2.0×.
         const TongtaiFoxMascot.avatar(size: 32),
-        const SizedBox(width: TongtaiDesignTokens.spacing2),
+        const SizedBox(width: TtSpace.x2),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,9 +58,8 @@ AppBar tongtaiScreenHeader(
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TongtaiDesignTokens.heading3Style.copyWith(
-                  color:
-                      foregroundColor ?? TongtaiDesignTokens.lightTextPrimary,
+                style: TtType.h2.copyWith(
+                  color: foregroundColor ?? TtColors.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -68,9 +68,7 @@ AppBar tongtaiScreenHeader(
                 key: Key('$screen-header-subtitle'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.textSecondary),
               ),
             ],
           ),

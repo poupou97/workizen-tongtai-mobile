@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../producer/supplier.dart';
 import '../../producer/supplier_favorites_controller.dart';
@@ -147,12 +148,12 @@ class _TongtaiSupplierSearchScreenState
         _filter.query.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.titleSupplierSearch),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         actions: [
           ListenableBuilder(
             listenable: _favorites,
@@ -181,10 +182,10 @@ class _TongtaiSupplierSearchScreenState
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      TongtaiDesignTokens.spacing4,
-                      TongtaiDesignTokens.spacing3,
-                      TongtaiDesignTokens.spacing4,
-                      TongtaiDesignTokens.spacing2,
+                      TtSpace.x4,
+                      TtSpace.x3,
+                      TtSpace.x4,
+                      TtSpace.x2,
                     ),
                     child: _SearchField(
                       controller: _queryController,
@@ -281,16 +282,12 @@ class _SearchField extends StatelessWidget {
                 onPressed: onClear,
               ),
         filled: true,
-        fillColor: TongtaiDesignTokens.lightHover,
+        fillColor: TtColors.surfaceTertiary,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.componentBorderRadius,
-          ),
+          borderRadius: BorderRadius.circular(TtRadius.sm),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: TongtaiDesignTokens.spacing4,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       ),
     );
   }
@@ -305,21 +302,15 @@ class _SuggestionsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        boxShadow: TongtaiDesignTokens.elevation2,
+        color: TtColors.surfaceSecondary,
+        borderRadius: BorderRadius.circular(TtRadius.sm),
+        border: Border.all(color: TtColors.border),
+        boxShadow: TtElevation.soft,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.sm),
         child: Material(
           type: MaterialType.transparency,
           child: Column(
@@ -376,8 +367,8 @@ class _FilterBar extends StatelessWidget {
                   favoritesOnly ? Icons.favorite : Icons.favorite_border,
                   size: 16,
                   color: favoritesOnly
-                      ? TongtaiDesignTokens.error
-                      : TongtaiDesignTokens.lightTextSecondary,
+                      ? TtColors.danger
+                      : TtColors.textSecondary,
                 ),
                 onSelected: onFavoritesOnly,
               ),
@@ -390,9 +381,7 @@ class _FilterBar extends StatelessWidget {
             children: [
               for (final category in service.categories)
                 Padding(
-                  padding: const EdgeInsets.only(
-                    right: TongtaiDesignTokens.spacing2,
-                  ),
+                  padding: const EdgeInsets.only(right: TtSpace.x2),
                   child: ChoiceChip(
                     label: Text(category),
                     selected: filter.category == category,
@@ -409,9 +398,7 @@ class _FilterBar extends StatelessWidget {
             children: [
               for (final rating in kSupplierRatingPresets)
                 Padding(
-                  padding: const EdgeInsets.only(
-                    right: TongtaiDesignTokens.spacing2,
-                  ),
+                  padding: const EdgeInsets.only(right: TtSpace.x2),
                   child: ChoiceChip(
                     label: Text('${rating.toStringAsFixed(1)}★+'),
                     selected: filter.minRating == rating,
@@ -428,9 +415,7 @@ class _FilterBar extends StatelessWidget {
             children: [
               for (final country in service.countries)
                 Padding(
-                  padding: const EdgeInsets.only(
-                    right: TongtaiDesignTokens.spacing2,
-                  ),
+                  padding: const EdgeInsets.only(right: TtSpace.x2),
                   child: ChoiceChip(
                     label: Text(country),
                     selected: filter.location == country,
@@ -456,8 +441,8 @@ class _FilterRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x1,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -466,8 +451,8 @@ class _FilterRow extends StatelessWidget {
             width: 72,
             child: Text(
               label,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -499,18 +484,16 @@ class _ResultsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing3,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing2,
+        TtSpace.x4,
+        TtSpace.x3,
+        TtSpace.x4,
+        TtSpace.x2,
       ),
       child: Row(
         children: [
           Text(
             count == 1 ? '1 supplier' : '$count suppliers',
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.body.copyWith(color: TtColors.textSecondary),
           ),
           const Spacer(),
           if (hasActiveFilters)
@@ -539,10 +522,10 @@ class _ResultsGrid extends StatelessWidget {
         final columns = supplierResultColumns(constraints.maxWidth);
         return GridView.builder(
           padding: const EdgeInsets.fromLTRB(
-            TongtaiDesignTokens.spacing4,
+            TtSpace.x4,
             0,
-            TongtaiDesignTokens.spacing4,
-            TongtaiDesignTokens.spacing4,
+            TtSpace.x4,
+            TtSpace.x4,
           ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
@@ -550,8 +533,8 @@ class _ResultsGrid extends StatelessWidget {
             // 28 (WTM-168). Growing the tile is the honest trade — shrinking
             // the target back is how it got to 20x20 in the first place.
             mainAxisExtent: 204,
-            crossAxisSpacing: TongtaiDesignTokens.spacing3,
-            mainAxisSpacing: TongtaiDesignTokens.spacing3,
+            crossAxisSpacing: TtSpace.x3,
+            mainAxisSpacing: TtSpace.x3,
           ),
           itemCount: suppliers.length,
           itemBuilder: (context, index) => _SupplierCard(
@@ -607,18 +590,14 @@ class _SupplierCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => _openDetail(context),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         child: Container(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+          padding: const EdgeInsets.all(TtSpace.x3),
           decoration: BoxDecoration(
-            color: TongtaiDesignTokens.lightBackground,
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.cardBorderRadius,
-            ),
-            border: Border.all(color: TongtaiDesignTokens.lightBorder),
-            boxShadow: TongtaiDesignTokens.elevation1,
+            color: TtColors.surfaceSecondary,
+            borderRadius: BorderRadius.circular(TtRadius.md),
+            border: Border.all(color: TtColors.border),
+            boxShadow: TtElevation.soft,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -631,9 +610,9 @@ class _SupplierCard extends StatelessWidget {
                       supplier.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                      style: TtType.bodyLarge.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
                   ),
@@ -644,58 +623,58 @@ class _SupplierCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing1),
+              const SizedBox(height: TtSpace.x1),
               Row(
                 children: [
                   const Icon(
                     Icons.place_outlined,
                     size: 14,
-                    color: TongtaiDesignTokens.lightTextSecondary,
+                    color: TtColors.textSecondary,
                   ),
-                  const SizedBox(width: TongtaiDesignTokens.spacing1),
+                  const SizedBox(width: TtSpace.x1),
                   Expanded(
                     child: Text(
                       supplier.location,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               Row(
                 children: [
-                  const Icon(Icons.star, size: 16, color: Color(0xFFF59E0B)),
-                  const SizedBox(width: TongtaiDesignTokens.spacing1),
+                  const Icon(Icons.star, size: 16, color: TtColors.warning),
+                  const SizedBox(width: TtSpace.x1),
                   Text(
                     supplier.rating.toStringAsFixed(1),
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
+                    style: TtType.body.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                      color: TtColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: TongtaiDesignTokens.spacing1),
+                  const SizedBox(width: TtSpace.x1),
                   Text(
                     '(${supplier.reviewCount})',
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                 ],
               ),
               const Spacer(),
               Wrap(
-                spacing: TongtaiDesignTokens.spacing1,
-                runSpacing: TongtaiDesignTokens.spacing1,
+                spacing: TtSpace.x1,
+                runSpacing: TtSpace.x1,
                 children: [
                   for (final category in supplier.categories.take(2))
                     _CategoryTag(label: category),
                 ],
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing1),
+              const SizedBox(height: TtSpace.x1),
               Text(
                 context.l10n.supplierMinOrder(
                   supplier.minOrderUnits,
@@ -703,9 +682,7 @@ class _SupplierCard extends StatelessWidget {
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.textSecondary),
               ),
             ],
           ),
@@ -742,17 +719,15 @@ class _FavoriteHeart extends StatelessWidget {
       key: heartKey,
       message: isFavorite ? context.l10n.favRemove : context.l10n.favAdd,
       child: SizedBox(
-        width: TongtaiDesignTokens.buttonHeight,
-        height: TongtaiDesignTokens.buttonHeight,
+        width: TtButtonMetrics.height,
+        height: TtButtonMetrics.height,
         child: InkResponse(
           onTap: onPressed,
           radius: 24,
           child: Icon(
             isFavorite ? Icons.favorite : Icons.favorite_border,
             size: 20,
-            color: isFavorite
-                ? TongtaiDesignTokens.errorText
-                : TongtaiDesignTokens.lightTextSecondary,
+            color: isFavorite ? TtColors.dangerOnLight : TtColors.textSecondary,
           ),
         ),
       ),
@@ -768,18 +743,15 @@ class _CategoryTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing2,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        color: TtColors.success.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(TtRadius.full),
       ),
       child: Text(
         label,
-        style: TongtaiDesignTokens.captionStyle.copyWith(
-          color: TongtaiDesignTokens.producerGreen,
+        style: TtType.caption.copyWith(
+          color: TtColors.success,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -806,16 +778,16 @@ class _EmptyState extends StatelessWidget {
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+              padding: const EdgeInsets.all(TtSpace.x8),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     favoritesOnly ? Icons.favorite_border : Icons.search_off,
                     size: 48,
-                    color: TongtaiDesignTokens.lightTextSecondary,
+                    color: TtColors.textSecondary,
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing3),
+                  const SizedBox(height: TtSpace.x3),
                   Text(
                     // Key carries which empty state this is — behaviour tests
                     // must not assert on copy (WTM-194).
@@ -828,20 +800,18 @@ class _EmptyState extends StatelessWidget {
                         ? context.l10n.supplierNoFavoritesMatch
                         : context.l10n.supplierNoSearchMatch,
                     textAlign: TextAlign.center,
-                    style: TongtaiDesignTokens.bodyStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                    style: TtType.bodyLarge.copyWith(
+                      color: TtColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  const SizedBox(height: TtSpace.x1),
                   Text(
                     favoritesOnly
                         ? context.l10n.supplierFavoritesHint
                         : context.l10n.supplierSearchHint,
                     textAlign: TextAlign.center,
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
-                    ),
+                    style: TtType.body.copyWith(color: TtColors.textSecondary),
                   ),
                 ],
               ),

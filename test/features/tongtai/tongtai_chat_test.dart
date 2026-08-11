@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/chat/chat_controller.dart';
 import 'package:tongtai/features/tongtai/chat/chat_message.dart';
 import 'package:tongtai/features/tongtai/chat/chat_message_store.dart';
-import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
+import 'package:tongtai/core/design/tt.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_chat_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_chat_search_screen.dart';
@@ -205,7 +205,7 @@ void main() {
           matching: find.byIcon(Icons.done_all),
         ),
       );
-      expect(ticks.color, TongtaiDesignTokens.consumerBlue);
+      expect(ticks.color, TtColors.info);
     });
 
     testWidgets('AC5: typing indicator shows while the reply is pending and '

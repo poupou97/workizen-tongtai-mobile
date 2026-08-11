@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../navigation/tongtai_design_tokens.dart';
+import '../../../../core/design/tt.dart';
+
 import '../../opportunity/opportunity_signals.dart';
 import '../../opportunity/opportunity_theme.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -27,8 +28,8 @@ class TongtaiOpportunitySignalBadges extends StatelessWidget {
         .where(signals.contains)
         .toList(growable: false);
     return Wrap(
-      spacing: TongtaiDesignTokens.spacing2,
-      runSpacing: TongtaiDesignTokens.spacing1,
+      spacing: TtSpace.x2,
+      runSpacing: TtSpace.x1,
       children: [
         for (final s in ordered)
           Container(
@@ -36,9 +37,7 @@ class TongtaiOpportunitySignalBadges extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: tongtaiOpportunitySignalColor(s).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.radiusFull,
-              ),
+              borderRadius: BorderRadius.circular(TtRadius.full),
               border: Border.all(color: tongtaiOpportunitySignalColor(s)),
             ),
             child: Row(
@@ -52,7 +51,7 @@ class TongtaiOpportunitySignalBadges extends StatelessWidget {
                 const SizedBox(width: 3),
                 Text(
                   s.label(context.l10n.languageCode),
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
+                  style: TtType.caption.copyWith(
                     color: tongtaiOpportunitySignalColor(s),
                     fontWeight: FontWeight.w600,
                   ),

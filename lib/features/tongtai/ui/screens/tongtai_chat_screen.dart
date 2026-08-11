@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../chat/chat_controller.dart';
 import '../../chat/chat_message.dart';
 import '../../inventory/product_image_source.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../providers/tongtai_chat_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
@@ -149,11 +150,11 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
       builder: (context, _) {
         final messages = _controller.messages;
         return Scaffold(
-          backgroundColor: TongtaiDesignTokens.lightBackground,
+          backgroundColor: TtColors.surfaceSecondary,
           appBar: AppBar(
             elevation: 0,
-            backgroundColor: TongtaiDesignTokens.lightBackground,
-            foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+            backgroundColor: TtColors.surfaceSecondary,
+            foregroundColor: TtColors.textPrimary,
             title: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -161,7 +162,7 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
                   size: 34,
                   semanticsLabel: 'Workizen AI',
                 ),
-                const SizedBox(width: TongtaiDesignTokens.spacing2),
+                const SizedBox(width: TtSpace.x2),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -175,16 +176,16 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
                           height: 8,
                           decoration: BoxDecoration(
                             color: _controller.assistantOnline
-                                ? TongtaiDesignTokens.success
-                                : TongtaiDesignTokens.neutral,
+                                ? TtColors.success
+                                : TtColors.unknown,
                             shape: BoxShape.circle,
                           ),
                         ),
-                        const SizedBox(width: TongtaiDesignTokens.spacing1),
+                        const SizedBox(width: TtSpace.x1),
                         Text(
                           _controller.assistantOnline ? 'Online' : 'Offline',
-                          style: TongtaiDesignTokens.captionStyle.copyWith(
-                            color: TongtaiDesignTokens.lightTextSecondary,
+                          style: TtType.caption.copyWith(
+                            color: TtColors.textSecondary,
                           ),
                         ),
                       ],
@@ -214,9 +215,7 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
                         ? const _EmptyState()
                         : ListView.builder(
                             reverse: true,
-                            padding: const EdgeInsets.all(
-                              TongtaiDesignTokens.spacing4,
-                            ),
+                            padding: const EdgeInsets.all(TtSpace.x4),
                             itemCount: messages.length,
                             itemBuilder: (context, index) => _MessageBubble(
                               message: messages[messages.length - 1 - index],
@@ -255,48 +254,41 @@ class _MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSeller = message.isSeller;
     final background = isSeller
-        ? TongtaiDesignTokens.consumerBlue.withValues(alpha: 0.12)
-        : TongtaiDesignTokens.lightHover;
+        ? TtColors.info.withValues(alpha: 0.12)
+        : TtColors.surfaceTertiary;
     return Align(
       alignment: isSeller ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         key: Key('chat-bubble-${message.id}'),
         constraints: const BoxConstraints(maxWidth: 320),
-        margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+        margin: const EdgeInsets.only(bottom: TtSpace.x3),
+        padding: const EdgeInsets.all(TtSpace.x3),
         decoration: BoxDecoration(
           color: background,
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.cardBorderRadius,
-          ),
+          borderRadius: BorderRadius.circular(TtRadius.md),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (message.hasAttachment) ...[
               _AttachmentView(attachment: message.attachment!),
-              if (message.text.isNotEmpty)
-                const SizedBox(height: TongtaiDesignTokens.spacing2),
+              if (message.text.isNotEmpty) const SizedBox(height: TtSpace.x2),
             ],
             if (message.text.isNotEmpty)
               Text(
                 message.text,
-                style: TongtaiDesignTokens.bodyStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextPrimary,
-                ),
+                style: TtType.bodyLarge.copyWith(color: TtColors.textPrimary),
               ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   _timeOf(message.timestamp),
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
                 if (isSeller) ...[
-                  const SizedBox(width: TongtaiDesignTokens.spacing1),
+                  const SizedBox(width: TtSpace.x1),
                   _StatusTicks(status: message.status),
                 ],
               ],
@@ -322,22 +314,10 @@ class _StatusTicks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, color) = switch (status) {
-      ChatMessageStatus.sending => (
-        Icons.schedule,
-        TongtaiDesignTokens.lightTextSecondary,
-      ),
-      ChatMessageStatus.sent => (
-        Icons.check,
-        TongtaiDesignTokens.lightTextSecondary,
-      ),
-      ChatMessageStatus.delivered => (
-        Icons.done_all,
-        TongtaiDesignTokens.lightTextSecondary,
-      ),
-      ChatMessageStatus.read => (
-        Icons.done_all,
-        TongtaiDesignTokens.consumerBlue,
-      ),
+      ChatMessageStatus.sending => (Icons.schedule, TtColors.textSecondary),
+      ChatMessageStatus.sent => (Icons.check, TtColors.textSecondary),
+      ChatMessageStatus.delivered => (Icons.done_all, TtColors.textSecondary),
+      ChatMessageStatus.read => (Icons.done_all, TtColors.info),
     };
     return Tooltip(
       message: status.label(context.l10n.languageCode),
@@ -360,9 +340,7 @@ class _AttachmentView extends StatelessWidget {
       final file = File(attachment.path);
       const size = 140.0;
       return ClipRRect(
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.sm),
         child: file.existsSync()
             ? Image.file(
                 file,
@@ -380,15 +358,15 @@ class _AttachmentView extends StatelessWidget {
         const Icon(
           Icons.description_outlined,
           size: 16,
-          color: TongtaiDesignTokens.lightTextSecondary,
+          color: TtColors.textSecondary,
         ),
-        const SizedBox(width: TongtaiDesignTokens.spacing1),
+        const SizedBox(width: TtSpace.x1),
         Flexible(
           child: Text(
             attachment.name,
             overflow: TextOverflow.ellipsis,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.body.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -406,12 +384,9 @@ class _ImagePlaceholder extends StatelessWidget {
     return Container(
       width: 140,
       height: 140,
-      color: TongtaiDesignTokens.lightHover,
+      color: TtColors.surfaceTertiary,
       alignment: Alignment.center,
-      child: const Icon(
-        Icons.image_outlined,
-        color: TongtaiDesignTokens.lightTextSecondary,
-      ),
+      child: const Icon(Icons.image_outlined, color: TtColors.textSecondary),
     );
   }
 }
@@ -426,13 +401,13 @@ class _TypingIndicator extends StatelessWidget {
       key: const Key('chat-typing'),
       alignment: Alignment.centerLeft,
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x1,
       ),
       child: Text(
         context.l10n.chatTyping,
-        style: TongtaiDesignTokens.captionStyle.copyWith(
-          color: TongtaiDesignTokens.lightTextSecondary,
+        style: TtType.caption.copyWith(
+          color: TtColors.textSecondary,
           fontStyle: FontStyle.italic,
         ),
       ),
@@ -452,8 +427,8 @@ class _PendingAttachment extends StatelessWidget {
     return Container(
       key: const Key('chat-pending-attachment'),
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x1,
       ),
       child: Row(
         children: [
@@ -462,16 +437,14 @@ class _PendingAttachment extends StatelessWidget {
                 ? Icons.image_outlined
                 : Icons.description_outlined,
             size: 16,
-            color: TongtaiDesignTokens.lightTextSecondary,
+            color: TtColors.textSecondary,
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing1),
+          const SizedBox(width: TtSpace.x1),
           Expanded(
             child: Text(
               attachment.name,
               overflow: TextOverflow.ellipsis,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textPrimary),
             ),
           ),
           IconButton(
@@ -501,10 +474,10 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: const BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        border: Border(top: BorderSide(color: TongtaiDesignTokens.lightBorder)),
+        color: TtColors.surfaceSecondary,
+        border: Border(top: BorderSide(color: TtColors.border)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -526,26 +499,24 @@ class _InputBar extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: context.l10n.chatInputHint,
                 filled: true,
-                fillColor: TongtaiDesignTokens.lightHover,
+                fillColor: TtColors.surfaceTertiary,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                    TongtaiDesignTokens.componentBorderRadius,
-                  ),
+                  borderRadius: BorderRadius.circular(TtRadius.sm),
                   borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: TongtaiDesignTokens.spacing3,
-                  vertical: TongtaiDesignTokens.spacing2,
+                  horizontal: TtSpace.x3,
+                  vertical: TtSpace.x2,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const SizedBox(width: TtSpace.x2),
           IconButton.filled(
             key: const Key('chat-send'),
             tooltip: context.l10n.actionSend,
             style: IconButton.styleFrom(
-              backgroundColor: TongtaiDesignTokens.financeVioletText,
+              backgroundColor: TtColors.aiOnLight,
               foregroundColor: Colors.white,
             ),
             icon: const Icon(Icons.send),
@@ -564,17 +535,17 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const TongtaiFoxMascot.face(size: 72),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Text(
               context.l10n.chatEmptyPrompt,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.bodyLarge.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),

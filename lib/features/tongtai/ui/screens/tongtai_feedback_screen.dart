@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../core/screen_data_controller.dart';
 import '../../feedback/feedback_delivery.dart';
 import '../../feedback/feedback_report.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart' show showTongtaiFailure;
 
 /// "Send feedback" (WTM-175 · Release Readiness).
@@ -83,21 +84,21 @@ class _TongtaiFeedbackScreenState extends State<TongtaiFeedbackScreen> {
     final l10n = context.l10n;
     final environment = _environment(l10n.languageCode);
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(title: Text(l10n.moreSendFeedback)),
       body: SafeArea(
         child: ListView(
           key: const Key('feedback-list'),
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           children: [
             Text(
               l10n.feedbackIntro,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.body.copyWith(
+                color: TtColors.textPrimary,
                 height: 1.5,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             TextField(
               key: const Key('feedback-input'),
               controller: _message,
@@ -109,11 +110,11 @@ class _TongtaiFeedbackScreenState extends State<TongtaiFeedbackScreen> {
                 errorText: _showEmptyError ? l10n.feedbackEmpty : null,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
             _WhatIsSent(environment: environment),
-            const SizedBox(height: TongtaiDesignTokens.spacing6),
+            const SizedBox(height: TtSpace.x6),
             SizedBox(
-              height: TongtaiDesignTokens.buttonHeight,
+              height: TtButtonMetrics.height,
               child: FilledButton.icon(
                 key: const Key('feedback-send'),
                 onPressed: _sending ? null : _send,
@@ -140,34 +141,34 @@ class _WhatIsSent extends StatelessWidget {
     final l10n = context.l10n;
     return Container(
       key: const Key('feedback-disclosure'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
+        border: Border.all(color: TtColors.border),
+        borderRadius: BorderRadius.circular(TtRadius.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.feedbackWhatIsSent,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
+            style: TtType.bodyLarge.copyWith(
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           _Line('${l10n.feedbackAppVersionLabel}: ${environment.appVersion}'),
           _Line(
             '${l10n.feedbackPlatformLabel}: ${environment.platform} '
             '${environment.osVersion}',
           ),
           _Line('${l10n.feedbackLocaleLabel}: ${environment.locale}'),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Text(
             l10n.feedbackNoBusinessData,
             key: const Key('feedback-no-business-data'),
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.producerGreenText,
+            style: TtType.caption.copyWith(
+              color: TtColors.successOnLight,
               height: 1.5,
             ),
           ),
@@ -185,12 +186,10 @@ class _Line extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: TongtaiDesignTokens.spacing1),
+      padding: const EdgeInsets.only(top: TtSpace.x1),
       child: Text(
         text,
-        style: TongtaiDesignTokens.captionStyle.copyWith(
-          color: TongtaiDesignTokens.lightTextSecondary,
-        ),
+        style: TtType.caption.copyWith(color: TtColors.textSecondary),
       ),
     );
   }

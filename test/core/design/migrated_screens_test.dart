@@ -5,60 +5,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/core/design/tt.dart';
 import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 
-/// **Màn đã migrate phải ở lại Design System** — WTM-369 (Epic WTM-362).
+/// **Ngôn ngữ thị giác không được trôi ngược** — Epic WTM-362.
 ///
-/// Migration tăng dần chỉ có nghĩa nếu phần đã đi không trôi ngược. Danh sách
-/// dưới đây là hợp đồng: thêm một màn vào đây nghĩa là màn đó **không được**
-/// quay lại màu viết thẳng hay token cũ.
+/// ## Suite này từng là một danh sách, và nay không còn là
 ///
-/// Đây là lý do test này quét theo **danh sách đã migrate** chứ không quét cả
-/// `ui/`: quét tất cả sẽ đỏ ngay vì ~40 màn chưa đi, và một suite đỏ thường
+/// Từ WTM-369 đến WTM-374 nó quét theo **danh sách màn đã migrate**, vì lúc ấy
+/// ~40 màn chưa đi và quét cả `ui/` sẽ đỏ thường trực — mà một suite đỏ thường
 /// trực thì không ai đọc nữa.
+///
+/// WTM-375 đóng nốt phần còn lại, nên danh sách ấy **hết lý do tồn tại** và trở
+/// thành một lỗ: thêm một màn mới mà quên khai thì không gì đỏ cả. Nay nó quét
+/// **cả thư mục**, và thứ phải khai là **ngoại lệ** — kèm lý do.
+///
+/// Đó là chiều đúng: quên khai một màn mới thì test đỏ, chứ không im lặng.
 void main() {
-  /// Màn đã đưa về Design System, kèm story đã làm việc đó.
-  const migrated = <String, String>{
-    'tongtai_onboarding_v2_screen.dart': 'WTM-365',
-    'tongtai_startup_screen.dart': 'WTM-367',
-    'tongtai_home_screen.dart': 'WTM-369',
-    'tongtai_producer_screen.dart': 'WTM-370',
-    'tongtai_inventory_screen.dart': 'WTM-370',
-    'tongtai_consumer_screen.dart': 'WTM-370',
-    'tongtai_opportunity_feed_screen.dart': 'WTM-370',
-    'tongtai_reports_screen.dart': 'WTM-371',
-    'tongtai_finance_screen.dart': 'WTM-371',
-    'tongtai_supplier_detail_screen.dart': 'WTM-371',
-    'tongtai_customer_risk_screen.dart': 'WTM-371',
-    'tongtai_customer_history_screen.dart': 'WTM-371',
-    'tongtai_opportunity_detail_screen.dart': 'WTM-371',
-    'tongtai_journey_screen.dart': 'WTM-372',
-    'tongtai_goals_screen.dart': 'WTM-372',
-    'tongtai_brief_story_screen.dart': 'WTM-372',
-    'tongtai_agent_screen.dart': 'WTM-372',
-    'tongtai_import_screen.dart': 'WTM-373',
-    'tongtai_stock_alerts_screen.dart': 'WTM-373',
-    'tongtai_more_screen.dart': 'WTM-373',
-    'tongtai_create_order_screen.dart': 'WTM-373',
-    'tongtai_forecast_screen.dart': 'WTM-373',
-    'tongtai_product_form_screen.dart': 'WTM-374',
-    'tongtai_customer_form_screen.dart': 'WTM-374',
-    'tongtai_goal_form_screen.dart': 'WTM-374',
-    'tongtai_transaction_form_screen.dart': 'WTM-374',
-    'tongtai_business_input_form_screen.dart': 'WTM-374',
-    'tongtai_goal_detail_screen.dart': 'WTM-374',
-    'tongtai_inventory_picker_screen.dart': 'WTM-374',
-  };
+  const uiDir = 'lib/features/tongtai/ui';
 
-  /// Màn **đã đi một nửa**: token thị giác đã sang Design System, nhưng còn một
-  /// bảng màu riêng chưa chuyển.
+  /// Màn giữ một bảng màu **mang nghĩa riêng**, không phải màu vô chủ.
   ///
-  /// Ba màn dòng thời gian phân biệt **chủ thể** (người bán · nền tảng · khách)
-  /// bằng màu — đó là một nghĩa thật, không phải màu vô chủ, và ép nó vào khe
-  /// ngữ nghĩa của Design System sẽ **mất** đúng thứ nó đang nói. Chuyển bảng
-  /// ấy là một quyết định sản phẩm riêng, không phải một phép thay.
-  ///
-  /// Khai ở đây thay vì im lặng: một màn đi nửa đường mà không ai ghi lại thì
-  /// lần sau người ta tưởng nó đã xong.
-  const partiallyMigrated = <String, String>{
+  /// Ép chúng vào khe ngữ nghĩa của Design System sẽ **mất** đúng thứ chúng
+  /// đang nói. Chuyển là một quyết định sản phẩm riêng, không phải một phép
+  /// thay — nên chúng đứng đây, có tên và có lý do, thay vì im lặng.
+  const ownPalette = <String, String>{
     'tongtai_business_life_screen.dart': 'bảng màu chủ thể (WTM-338)',
     'tongtai_conversations_screen.dart': 'bảng màu chủ thể (WTM-338)',
     'tongtai_conversation_screen.dart': 'bảng màu chủ thể (WTM-338)',
@@ -66,9 +34,14 @@ void main() {
     'tongtai_connections_screen.dart': 'tím demo-connected (WTM-340)',
   };
 
+  /// Thành viên `TongtaiDesignTokens` **không phải màu** nên còn dùng được.
+  ///
+  /// Luật là *"một chủ cho mỗi màu"*, không phải *"cấm nhắc tên file cũ"*.
+  const legacyNonColour = <String>{'navBarIconSize'};
+
   /// Bỏ chú thích trước khi quét — một mã màu nhắc trong tài liệu không phải
   /// một mã màu đang được dùng.
-  String codeOf(String file) => File('lib/features/tongtai/ui/screens/$file')
+  String codeOf(File f) => f
       .readAsLinesSync()
       .where(
         (l) =>
@@ -76,71 +49,144 @@ void main() {
       )
       .join('\n');
 
-  test('màn đi nửa đường vẫn phải sạch token thị giác cũ', () {
-    for (final entry in partiallyMigrated.entries) {
-      final uses = RegExp(
-        r'TongtaiDesignTokens\.[a-zA-Z]',
-      ).allMatches(codeOf(entry.key));
-      expect(
-        uses,
-        isEmpty,
-        reason: '${entry.key} còn ${uses.length} chỗ dùng token cũ',
-      );
-    }
-  });
+  List<File> uiFiles() => Directory(uiDir)
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.path.endsWith('.dart'))
+      .toList();
+
+  String nameOf(File f) => f.uri.pathSegments.last;
 
   test('⭐ quét được mã nguồn thật (chống PASS giả)', () {
-    for (final file in migrated.keys) {
-      final code = codeOf(file);
-      expect(code, isNotEmpty, reason: file);
+    // Nếu đường dẫn sai hay bộ lọc hỏng, mọi test dưới sẽ PASS trên một danh
+    // sách rỗng. Cửa này bắt đúng cái đó.
+    final files = uiFiles();
+    expect(files.length, greaterThan(40), reason: 'quét hụt $uiDir');
+    expect(
+      files.map(codeOf).where((c) => c.contains('TtColors.')).length,
+      greaterThan(30),
+      reason: 'đọc được file nhưng không thấy Design System đâu',
+    );
+  });
+
+  test('ngoại lệ phải là màn có thật', () {
+    for (final name in ownPalette.keys) {
       expect(
-        code,
-        contains('core/design/tt.dart'),
-        reason: '$file chưa nhập Design System',
+        File('$uiDir/screens/$name').existsSync(),
+        isTrue,
+        reason: '$name không còn tồn tại — gỡ khỏi danh sách ngoại lệ',
       );
     }
   });
 
-  test('⛔ không màn nào đã migrate còn màu viết thẳng', () {
-    for (final entry in migrated.entries) {
+  test('⛔ không màu viết thẳng ngoài các bảng màu đã khai', () {
+    for (final f in uiFiles()) {
+      if (ownPalette.containsKey(nameOf(f))) continue;
       expect(
-        codeOf(entry.key).contains('Color(0x'),
+        codeOf(f).contains('Color(0x'),
         isFalse,
         reason:
-            '${entry.key} (${entry.value}) có mã màu viết thẳng — một giá trị '
-            'không ai sở hữu sẽ lệch khỏi mọi màn khác vào lần sửa sau',
+            '${nameOf(f)} có mã màu viết thẳng — một giá trị không ai sở hữu '
+            'sẽ lệch khỏi mọi màn khác vào lần sửa sau',
       );
     }
   });
 
-  test('⛔ không màn nào đã migrate còn dùng token thị giác cũ', () {
-    for (final entry in migrated.entries) {
-      final uses = RegExp(
-        r'TongtaiDesignTokens\.(?!.*\bTongtaiTabs\b)[a-zA-Z]',
-      ).allMatches(codeOf(entry.key));
-      expect(
-        uses,
-        isEmpty,
-        reason:
-            '${entry.key} (${entry.value}) còn ${uses.length} chỗ dùng token cũ',
-      );
+  test('⛔ không ai còn dùng token MÀU cũ', () {
+    final uses = RegExp(r'TongtaiDesignTokens\.([a-zA-Z]+)');
+    for (final f in uiFiles()) {
+      for (final m in uses.allMatches(codeOf(f))) {
+        expect(
+          legacyNonColour.contains(m.group(1)),
+          isTrue,
+          reason: '${nameOf(f)} còn dùng TongtaiDesignTokens.${m.group(1)}',
+        );
+      }
     }
   });
 
   test('⛔ không màn nào tự viết switch màu theo mức khẩn', () {
     // `TtStatus` là chủ duy nhất của ánh xạ mức → màu. Hai bảng ánh xạ sẽ lệch
     // nhau đúng vào ngày ai đó sửa một bên (P-27/P-28).
-    for (final entry in migrated.entries) {
-      final code = codeOf(entry.key);
-      final hasSeverityColourSwitch =
-          code.contains('BriefSeverity.critical =>') &&
-          code.contains('TtColors.danger');
+    for (final f in uiFiles()) {
+      final code = codeOf(f);
       expect(
-        hasSeverityColourSwitch,
+        code.contains('BriefSeverity.critical =>') &&
+            code.contains('TtColors.danger'),
         isFalse,
-        reason: '${entry.key} ánh xạ mức khẩn sang màu tại chỗ — dùng TtStatus',
+        reason: '${nameOf(f)} ánh xạ mức khẩn sang màu tại chỗ — dùng TtStatus',
       );
     }
+  });
+
+  test('⛔ nút đặc KHÔNG tự sơn — nó đến từ catalog', () {
+    // ⚠️ Lỗi tìm thấy khi làm WTM-374: **cùng một nút Lưu mang năm màu khác
+    // nhau** tuỳ màn — hổ phách ở sản phẩm, xanh dương ở khách, tím ở mục tiêu
+    // và giao dịch, mặc định ở nguồn đầu vào. Di sản của bảng màu-theo-năng-lực
+    // cũ: mỗi form ăn theo màu của capability chứa nó.
+    //
+    // Luật không phải *"nút chính luôn cam"* — mà là **một nút không mượn nghĩa
+    // nó không có**. `Lưu` màu tím nói *AI đang làm*; `Quan tâm` màu xanh lá
+    // nói *đã thành công*, trong khi nó là hành động **chưa xảy ra**.
+    //
+    // Nút đỏ của *"Khôi phục = Thay thế"* thì đúng là đỏ — nên nó là một loại
+    // riêng (`TtDangerButton`), không phải một `FilledButton` ai đó tự sơn. Vì
+    // vậy test này cấm **mọi** lời tự sơn, không chỉ vài màu.
+    for (final f in uiFiles()) {
+      final code = codeOf(f);
+      for (var i = 0; i < code.length;) {
+        final at = code.indexOf('FilledButton.styleFrom(', i);
+        if (at < 0) break;
+        final block = code.substring(at, (at + 260).clamp(0, code.length));
+        expect(
+          block.contains('backgroundColor:'),
+          isFalse,
+          reason:
+              '${nameOf(f)} tự sơn nền một nút đặc — dùng TtPrimaryButton / '
+              'TtDangerButton / TtAiActionButton',
+        );
+        i = at + 1;
+      }
+    }
+  });
+
+  group('⭐ `readableOn` với đối số cố định — dùng HẰNG, không gọi hàm', () {
+    // ⚠️ Lỗi đã xảy ra thật (WTM-374): phép thay sinh ra
+    // `TtColors.readableOn(TtColors.danger)` bên trong một widget `const`, và
+    // build đỏ ngay — *"Methods can't be invoked in constant expressions"*.
+    //
+    // Đây là lỗi may mắn: nó gãy lúc biên dịch. Nhưng cách sửa đúng không phải
+    // gỡ `const` đi — mà là dùng biến thể hằng, vì giá trị hai bên y hệt nhau.
+    // Hai test dưới giữ cả hai vế của câu đó.
+    const fixed = <String, (Color, Color)>{
+      'success': (TtColors.success, TtColors.successOnLight),
+      'info': (TtColors.info, TtColors.infoOnLight),
+      'ai': (TtColors.ai, TtColors.aiOnLight),
+      'danger': (TtColors.danger, TtColors.dangerOnLight),
+    };
+
+    test('hằng và hàm cho ra ĐÚNG một màu', () {
+      for (final e in fixed.entries) {
+        final (base, constant) = e.value;
+        expect(TtColors.readableOn(base), constant, reason: e.key);
+      }
+    });
+
+    test('⛔ không ai gọi hàm khi đối số là hằng', () {
+      // Gọi hàm ở đây không sai *hôm nay* — nó sai vào ngày ai đó bọc chỗ ấy
+      // trong `const`. Chặn ở đây rẻ hơn sửa lúc build đỏ.
+      for (final f in uiFiles()) {
+        for (final name in fixed.keys) {
+          expect(
+            codeOf(f).contains('readableOn(TtColors.$name)'),
+            isFalse,
+            reason:
+                '${nameOf(f)} gọi readableOn(TtColors.$name) — dùng biến thể '
+                'hằng',
+          );
+        }
+      }
+    });
   });
 
   group('⭐ bảng ánh xạ chữ — theo GIÁ TRỊ, không theo tên', () {
@@ -185,95 +231,5 @@ void main() {
       expect(TtType.h1.fontSize, TongtaiDesignTokens.heading2Style.fontSize);
       expect(TtType.h2.fontSize, TongtaiDesignTokens.heading3Style.fontSize);
     });
-  });
-
-  test('⛔ nút chính KHÔNG mượn màu ngữ nghĩa của thứ khác', () {
-    // ⚠️ Lỗi tìm thấy khi làm WTM-374: **cùng một nút Lưu mang năm màu khác
-    // nhau** tuỳ màn — hổ phách ở sản phẩm, xanh dương ở khách, tím ở mục tiêu
-    // và giao dịch, mặc định ở nguồn đầu vào. Di sản của bảng màu-theo-năng-lực
-    // cũ: mỗi form ăn theo màu của capability chứa nó.
-    //
-    // Dưới luật mới thì đó là nói sai: `Lưu` là **HÀNH ĐỘNG** nên nó phải cam.
-    // Một nút *"Lưu giao dịch"* màu tím nói rằng **AI** đang làm việc này —
-    // trong khi người bán mới là người làm. Đúng chỗ chỉ thị §Design System
-    // gọi tên: *ORANGE ≠ AI*.
-    //
-    // Nút cam nằm trong `TtPrimaryButton`, nên test này bắt đúng thứ ngược lại:
-    // một `FilledButton` **tự sơn** màu ngữ nghĩa.
-    const stolen = [
-      'ai',
-      'aiOnLight',
-      'info',
-      'infoOnLight',
-      'success',
-      'successOnLight',
-      'warning',
-      'warningOnDark',
-    ];
-    for (final file in migrated.keys) {
-      final code = codeOf(file);
-      for (var i = 0; i < code.length;) {
-        final at = code.indexOf('FilledButton.styleFrom(', i);
-        if (at < 0) break;
-        final block = code.substring(at, (at + 260).clamp(0, code.length));
-        for (final name in stolen) {
-          expect(
-            block.contains('backgroundColor: TtColors.$name'),
-            isFalse,
-            reason:
-                '$file sơn nút đặc bằng TtColors.$name — nút cam là '
-                'TtPrimaryButton; màu ngữ nghĩa nói NGHĨA, không nói cấp bậc',
-          );
-        }
-        i = at + 1;
-      }
-    }
-  });
-
-  group('⭐ `readableOn` với đối số cố định — dùng HẰNG, không gọi hàm', () {
-    // ⚠️ Lỗi đã xảy ra thật (WTM-374): phép thay sinh ra
-    // `TtColors.readableOn(TtColors.danger)` bên trong một widget `const`, và
-    // build đỏ ngay — *"Methods can't be invoked in constant expressions"*.
-    //
-    // Đây là lỗi may mắn: nó gãy lúc biên dịch. Nhưng cách sửa đúng không phải
-    // gỡ `const` đi — mà là dùng biến thể hằng, vì giá trị hai bên y hệt nhau.
-    // Hai test dưới giữ cả hai vế của câu đó.
-    const fixed = <String, (Color, Color)>{
-      'success': (TtColors.success, TtColors.successOnLight),
-      'info': (TtColors.info, TtColors.infoOnLight),
-      'ai': (TtColors.ai, TtColors.aiOnLight),
-      'danger': (TtColors.danger, TtColors.dangerOnLight),
-    };
-
-    test('hằng và hàm cho ra ĐÚNG một màu', () {
-      for (final e in fixed.entries) {
-        final (base, constant) = e.value;
-        expect(TtColors.readableOn(base), constant, reason: e.key);
-      }
-    });
-
-    test('⛔ không màn nào gọi hàm khi đối số là hằng', () {
-      // Gọi hàm ở đây không sai *hôm nay* — nó sai vào ngày ai đó bọc chỗ ấy
-      // trong `const`. Chặn ở đây rẻ hơn sửa lúc build đỏ.
-      for (final file in migrated.keys) {
-        for (final name in fixed.keys) {
-          expect(
-            codeOf(file).contains('readableOn(TtColors.$name)'),
-            isFalse,
-            reason: '$file gọi readableOn(TtColors.$name) — dùng biến thể hằng',
-          );
-        }
-      }
-    });
-  });
-
-  test('danh sách đã migrate không có mục chết', () {
-    for (final file in migrated.keys) {
-      expect(
-        File('lib/features/tongtai/ui/screens/$file').existsSync(),
-        isTrue,
-        reason: '$file không còn tồn tại — gỡ khỏi danh sách',
-      );
-    }
   });
 }

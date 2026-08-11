@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/prefs.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
@@ -16,7 +18,6 @@ import '../../export/csv_exporter.dart';
 import '../../export/export_history_store.dart';
 import '../../inventory/product.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 
 /// Date-range presets for the orders export (WTM-99 AC3).
@@ -254,12 +255,12 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleExport),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListenableBuilder(
@@ -277,19 +278,19 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
 
   Widget _form(BuildContext context, AppStrings l10n) {
     return ListView(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       children: [
         Text(
           l10n.exportPickDataSet,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w600,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Wrap(
-          spacing: TongtaiDesignTokens.spacing2,
-          runSpacing: TongtaiDesignTokens.spacing1,
+          spacing: TtSpace.x2,
+          runSpacing: TtSpace.x1,
           children: [
             for (final type in TongtaiExportType.values)
               ChoiceChip(
@@ -301,17 +302,17 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
           ],
         ),
         if (_type == TongtaiExportType.orders) ...[
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Text(
             l10n.exportDateRange,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
+            style: TtType.body.copyWith(
               fontWeight: FontWeight.w600,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
             children: [
               for (final range in ExportRange.values)
                 ChoiceChip(
@@ -323,23 +324,21 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
             ],
           ),
         ],
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         // ── Encryption (WTM-100) ─────────────────────────────────────
         SwitchListTile(
           key: const Key('export-encrypt-toggle'),
           contentPadding: EdgeInsets.zero,
           title: Text(
             l10n.exportEncryptTitle,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
+            style: TtType.body.copyWith(
               fontWeight: FontWeight.w600,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
           subtitle: Text(
             l10n.exportEncryptHint,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
           value: _encrypt,
           onChanged: (v) => setState(() => _encrypt = v),
@@ -354,60 +353,48 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
               border: const OutlineInputBorder(),
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
         ],
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
-        FilledButton.icon(
+        const SizedBox(height: TtSpace.x2),
+        // Cam, không xanh lá: xuất dữ liệu là **hành động chưa xảy ra**, không
+        // phải một kết quả tốt (luật WTM-374). Tương phản do TtPrimaryButton lo.
+        TtPrimaryButton(
           key: const Key('export-run'),
+          label: _busy ? l10n.exportRunning : l10n.exportRun,
+          icon: Icons.ios_share,
           onPressed: _busy ? null : _export,
-          style: FilledButton.styleFrom(
-            // White label on producerGreen reads at 2.54:1; the readable twin
-            // takes it to 5.48:1 (WTM-169). Same hue, deeper.
-            backgroundColor: TongtaiDesignTokens.producerGreenText,
-            minimumSize: const Size.fromHeight(
-              TongtaiDesignTokens.buttonHeight,
-            ),
-          ),
-          icon: const Icon(Icons.ios_share),
-          label: Text(_busy ? l10n.exportRunning : l10n.exportRun),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           l10n.exportCsvHint,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing4),
+        const SizedBox(height: TtSpace.x4),
         Text(
           l10n.exportHistory,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w700,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         if (_records.isEmpty)
           Text(
             l10n.exportHistoryEmpty,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           )
         else
           for (final record in _records)
             Padding(
-              padding: const EdgeInsets.only(
-                bottom: TongtaiDesignTokens.spacing2,
-              ),
+              padding: const EdgeInsets.only(bottom: TtSpace.x2),
               child: Row(
                 children: [
                   const Icon(
                     Icons.description_outlined,
                     size: 18,
-                    color: TongtaiDesignTokens.lightTextSecondary,
+                    color: TtColors.textSecondary,
                   ),
-                  const SizedBox(width: TongtaiDesignTokens.spacing2),
+                  const SizedBox(width: TtSpace.x2),
                   Expanded(
                     child: Text(
                       l10n.exportHistoryLine(
@@ -416,8 +403,8 @@ class _TongtaiExportScreenState extends ConsumerState<TongtaiExportScreen> {
                         record.rowCount,
                         TongtaiFormatters.isoDate(record.exportedAt),
                       ),
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textPrimary,
                       ),
                     ),
                   ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../producer/supplier.dart';
 import '../../producer/supplier_favorites_controller.dart';
@@ -51,12 +52,12 @@ class _TongtaiSupplierFavoritesScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.titleFavoriteSuppliers),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListenableBuilder(
@@ -65,10 +66,9 @@ class _TongtaiSupplierFavoritesScreenState
             final suppliers = widget.favorites.favoriteSuppliers(_service.all);
             if (suppliers.isEmpty) return const _EmptyFavorites();
             return ListView.separated(
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+              padding: const EdgeInsets.all(TtSpace.x4),
               itemCount: suppliers.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(height: TongtaiDesignTokens.spacing3),
+              separatorBuilder: (_, _) => const SizedBox(height: TtSpace.x3),
               itemBuilder: (context, index) => _FavoriteTile(
                 supplier: suppliers[index],
                 onRemove: () => _removeFavorite(context, suppliers[index].id),
@@ -120,18 +120,14 @@ class _FavoriteTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onOpen,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         child: Container(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+          padding: const EdgeInsets.all(TtSpace.x3),
           decoration: BoxDecoration(
-            color: TongtaiDesignTokens.lightBackground,
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.cardBorderRadius,
-            ),
-            border: Border.all(color: TongtaiDesignTokens.lightBorder),
-            boxShadow: TongtaiDesignTokens.elevation1,
+            color: TtColors.surfaceSecondary,
+            borderRadius: BorderRadius.circular(TtRadius.md),
+            border: Border.all(color: TtColors.border),
+            boxShadow: TtElevation.soft,
           ),
           child: Row(
             children: [
@@ -143,46 +139,46 @@ class _FavoriteTile extends StatelessWidget {
                       supplier.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                      style: TtType.bodyLarge.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     Row(
                       children: [
                         const Icon(
                           Icons.place_outlined,
                           size: 14,
-                          color: TongtaiDesignTokens.lightTextSecondary,
+                          color: TtColors.textSecondary,
                         ),
-                        const SizedBox(width: TongtaiDesignTokens.spacing1),
+                        const SizedBox(width: TtSpace.x1),
                         Expanded(
                           child: Text(
                             supplier.location,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TongtaiDesignTokens.captionStyle.copyWith(
-                              color: TongtaiDesignTokens.lightTextSecondary,
+                            style: TtType.caption.copyWith(
+                              color: TtColors.textSecondary,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     Row(
                       children: [
                         const Icon(
                           Icons.star,
                           size: 14,
-                          color: Color(0xFFF59E0B),
+                          color: TtColors.warning,
                         ),
-                        const SizedBox(width: TongtaiDesignTokens.spacing1),
+                        const SizedBox(width: TtSpace.x1),
                         Text(
                           '${supplier.rating.toStringAsFixed(1)} '
                           '(${supplier.reviewCount})',
-                          style: TongtaiDesignTokens.captionStyle.copyWith(
-                            color: TongtaiDesignTokens.lightTextSecondary,
+                          style: TtType.caption.copyWith(
+                            color: TtColors.textSecondary,
                           ),
                         ),
                       ],
@@ -190,16 +186,13 @@ class _FavoriteTile extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing2),
+              const SizedBox(width: TtSpace.x2),
               // Filled heart — one tap removes from favorites (AC1/AC2).
               IconButton(
                 key: Key('supplier-fav-action-remove-${supplier.id}'),
                 onPressed: onRemove,
                 tooltip: context.l10n.favRemove,
-                icon: const Icon(
-                  Icons.favorite,
-                  color: TongtaiDesignTokens.error,
-                ),
+                icon: const Icon(Icons.favorite, color: TtColors.danger),
               ),
             ],
           ),
@@ -217,31 +210,29 @@ class _EmptyFavorites extends StatelessWidget {
     return Center(
       key: const Key('supplier-fav-empty'),
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
               Icons.favorite_border,
               size: 48,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Text(
               context.l10n.favEmpty,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.bodyLarge.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               context.l10n.favEmptyHint,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),

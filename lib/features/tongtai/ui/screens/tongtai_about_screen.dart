@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../export/backup_format.dart' show kTongtaiAppVersion;
-import '../../navigation/tongtai_design_tokens.dart';
 
 /// "About Tổng Tài" (WTM-170).
 ///
@@ -20,12 +21,12 @@ class TongtaiAboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(title: Text(l10n.moreAbout)),
       body: SafeArea(
         child: ListView(
           key: const Key('about-list'),
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           children: [
             Center(
               child: Column(
@@ -34,40 +35,36 @@ class TongtaiAboutScreen extends StatelessWidget {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: TongtaiDesignTokens.producerGreen.withValues(
-                        alpha: 0.12,
-                      ),
+                      color: TtColors.success.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.storefront_outlined,
                       size: 36,
-                      color: TongtaiDesignTokens.producerGreenText,
+                      color: TtColors.successOnLight,
                     ),
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing3),
+                  const SizedBox(height: TtSpace.x3),
                   Text(
                     'Tổng Tài',
-                    style: TongtaiDesignTokens.heading2Style.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
-                    ),
+                    style: TtType.h1.copyWith(color: TtColors.textPrimary),
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  const SizedBox(height: TtSpace.x1),
                   Text(
                     l10n.aboutVersion(kTongtaiAppVersion),
                     key: const Key('about-version'),
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing6),
+            const SizedBox(height: TtSpace.x6),
             _AboutSection(title: l10n.aboutWhatTitle, body: l10n.aboutWhatBody),
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
             _AboutSection(title: l10n.aboutDataTitle, body: l10n.aboutDataBody),
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
             _AboutSection(title: l10n.aboutAiTitle, body: l10n.aboutAiBody),
           ],
         ),
@@ -89,18 +86,15 @@ class _AboutSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TongtaiDesignTokens.bodyStyle.copyWith(
+          style: TtType.bodyLarge.copyWith(
             fontWeight: FontWeight.w700,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           body,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-            height: 1.5,
-          ),
+          style: TtType.body.copyWith(color: TtColors.textPrimary, height: 1.5),
         ),
       ],
     );
