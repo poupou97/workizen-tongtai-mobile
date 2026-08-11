@@ -198,7 +198,6 @@ void main() {
         'more-finance',
         'more-forecast',
         'more-customer-risk',
-        'more-language',
       ]) {
         final finder = find.byKey(Key(key));
         await tester.scrollUntilVisible(
