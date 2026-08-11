@@ -37,7 +37,22 @@ class BusinessBriefService {
   const BusinessBriefService({
     this.maxItems = 5,
     this.thinMarginRatio = kThinMarginRatio,
+    this.repeatDueFrom = 0.8,
+    this.repeatDueTo = 1.25,
+    this.minimumOrdersForCadence = 3,
   });
+
+  /// Cửa sổ "sắp tới nhịp", đo bằng `gapRatio` của chính khách đó.
+  ///
+  /// Dưới [repeatDueFrom] là còn sớm — nhắc lúc đó chỉ làm phiền. Trên
+  /// [repeatDueTo] là đã trễ, và khi đó khách thuộc về mục *khách đã im lặng*
+  /// chứ không phải mục này.
+  final double repeatDueFrom;
+  final double repeatDueTo;
+
+  /// Hai đơn cho ra một khoảng cách, và một khoảng cách không phải một thói
+  /// quen. Dưới mức này thì "nhịp mua" chưa đủ căn cứ để nhắc.
+  final int minimumOrdersForCadence;
 
   /// Bao nhiêu việc là vừa đủ cho một buổi sáng.
   ///
@@ -78,6 +93,7 @@ class BusinessBriefService {
 
     final items = <BriefItem>[
       ..._customerItems(risk, byId, cadence, now),
+      ..._repeatDueItems(risk, byId, profiles, now),
       ..._stockItems(products, now),
       ..._marginItems(products, now),
       ..._signalItems(alerts, now),
@@ -158,6 +174,89 @@ class BusinessBriefService {
           actionType: BusinessActionType.customerSendMessage,
           // Chưa connector nào chạy thật. `vendor` phải nói đúng điều đó —
           // xem `ActionVendor.demo` (WTM-305).
+          vendor: ActionVendor.demo,
+        ),
+        observedAt: now,
+      );
+    }
+  }
+
+  // ── Khách sắp tới nhịp mua lại (WTM-180 story 2, mặt kia) ────────────────
+
+  /// Khách **sắp** quay lại — nhắn trước khi họ quên.
+  ///
+  /// ## Cùng một tín hiệu, hai đầu khác nhau
+  ///
+  /// `_customerItems` ở trên dùng `gapRatio` để báo khách **đã** im lặng quá
+  /// lâu. Đó là tin đến **sau** khi mất khách. Cùng con số đó, đọc ở đoạn
+  /// `≈ 1.0`, lại là thứ đến **trước**: khách đang tới đúng nhịp mua của chính
+  /// họ, và một tin nhắn lúc này rẻ hơn nhiều so với một chiến dịch kéo khách
+  /// đã đi.
+  ///
+  /// ## Ba điều kiện, và vì sao
+  ///
+  /// 1. **Phải có nhịp thật** — `medianGapDays` null nghĩa là chưa đủ đơn để
+  ///    biết khách này mua theo chu kỳ nào. Chưa biết thì không nhắc.
+  /// 2. **Đủ số lần mua** ([minimumOrdersForCadence]) — hai đơn cho ra một
+  ///    khoảng cách, và một khoảng cách không phải một thói quen.
+  /// 3. **Chưa bị đánh dấu rủi ro** — khách đã quá hạn thuộc về mục ở trên.
+  ///    Báo cả hai chỗ là một khách hiện hai lần với hai lời khuyên khác nhau,
+  ///    và người bán không biết tin cái nào (P-27: một chuyện, một mục).
+  Iterable<BriefItem> _repeatDueItems(
+    CustomerRiskAssessment? risk,
+    Map<String, Customer> byId,
+    List<CustomerRfm> profiles,
+    DateTime now,
+  ) sync* {
+    final alreadyFlagged = {
+      for (final e in risk?.entries ?? const []) e.customerId,
+    };
+
+    for (final p in profiles) {
+      if (alreadyFlagged.contains(p.customerId)) continue;
+      if (p.frequency < minimumOrdersForCadence) continue;
+
+      final gap = p.medianGapDays;
+      final ratio = p.gapRatio;
+      final days = p.recencyDays;
+      if (gap == null || ratio == null || days == null) continue;
+      if (ratio < repeatDueFrom || ratio > repeatDueTo) continue;
+
+      final name = byId[p.customerId]?.name;
+      yield BriefItem(
+        kind: BriefKind.customerAtRisk,
+        // Đây là **cơ hội**, không phải báo động: khách chưa mất, chỉ là sắp
+        // tới lúc. Đánh severity cao hơn sẽ đẩy nó lên trên những việc đang
+        // thật sự cháy.
+        severity: BriefSeverity.info,
+        subjectKind: 'customer',
+        subjectId: p.customerId,
+        subjectLabel: name,
+        headline: name == null
+            ? 'Một khách quen thường mua lại sau ${gap.round()} ngày '
+                  '— hôm nay là ngày thứ $days'
+            : '$name thường mua lại sau ${gap.round()} ngày '
+                  '— hôm nay là ngày thứ $days',
+        suggestion: 'Nhắn trước khi họ quên, kèm mặt hàng họ hay mua',
+        evidence: [
+          IdentityEvidence(
+            kind: IdentityEvidenceKind.orderHistoryMatch,
+            source: 'rule:repeat-due',
+            detail: 'Đã mua ${p.frequency} lần',
+          ),
+          IdentityEvidence(
+            kind: IdentityEvidenceKind.orderHistoryMatch,
+            source: 'rule:repeat-due',
+            detail: 'Nhịp mua của riêng khách này: ${gap.round()} ngày',
+          ),
+          IdentityEvidence(
+            kind: IdentityEvidenceKind.orderHistoryMatch,
+            source: 'rule:repeat-due',
+            detail: 'Lần mua gần nhất cách đây $days ngày',
+          ),
+        ],
+        move: const DoSomething(
+          actionType: BusinessActionType.customerSendMessage,
           vendor: ActionVendor.demo,
         ),
         observedAt: now,
