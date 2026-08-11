@@ -78,6 +78,8 @@ void main() {
     'tongtai_feedback_screen.dart': 3,
     'tongtai_journey_screen.dart': 3,
     'tongtai_onboarding_v2_screen.dart': 3,
+    // Màn khởi động: đọc CSDL + đếm danh mục/đơn, hiện tiến trình THẬT.
+    'tongtai_startup_screen.dart': 3,
     'tongtai_supplier_search_screen.dart': 3,
     'tongtai_supplier_favorites_screen.dart': 3,
     'tongtai_business_inputs_screen.dart': 3,

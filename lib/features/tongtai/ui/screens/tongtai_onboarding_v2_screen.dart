@@ -6,7 +6,7 @@ import '../../core/screen_data_controller.dart';
 import '../../journey/business_goal.dart';
 import '../../journey/journey_controller.dart';
 import '../../journey/journey_planner.dart';
-import '../../navigation/tongtai_design_tokens.dart';
+import '../../../../core/design/tt.dart';
 import '../../agent/business_brief.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../onboarding/analysis_pipeline.dart';
@@ -81,10 +81,10 @@ class _TongtaiOnboardingV2ScreenState
   Widget build(BuildContext context) {
     final stage = _flow.stage;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing5),
+          padding: const EdgeInsets.all(TtSpace.x5),
           child: switch (stage) {
             null => const SizedBox.shrink(),
             OnboardingStage.welcome => _Welcome(onStart: _next),
@@ -402,7 +402,7 @@ class _Welcome extends StatelessWidget {
     return ListView(
       key: const Key('onboarding-v2-welcome'),
       children: [
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
         // §17: linh vật xuất hiện khi AI **tự giới thiệu**. Đây đúng là lúc đó
         // — và là một trong sáu chỗ duy nhất nó được phép có mặt.
         Center(
@@ -412,46 +412,40 @@ class _Welcome extends StatelessWidget {
             semanticsLabel: l10n.obV2MascotGreeting,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
-        Text(l10n.obV2WelcomeTitle, style: TongtaiDesignTokens.heading1Style),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x5),
+        Text(l10n.obV2WelcomeTitle, style: TtType.h1),
+        const SizedBox(height: TtSpace.x3),
         Text(
           l10n.obV2WelcomeBody,
-          style: TongtaiDesignTokens.bodyStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-            height: 1.6,
-          ),
+          style: TtType.body.copyWith(color: TtColors.textPrimary, height: 1.6),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing8),
+        const SizedBox(height: TtSpace.x8),
         _Value(
           icon: Icons.trending_up,
-          color: TongtaiDesignTokens.producerGreen,
+          color: TtColors.success,
           title: l10n.obV2ValueOpportunityTitle,
           body: l10n.obV2ValueOpportunityBody,
         ),
         _Value(
           icon: Icons.warning_amber_rounded,
-          color: TongtaiDesignTokens.inventoryOrange,
+          color: TtColors.brand,
           title: l10n.obV2ValueRiskTitle,
           body: l10n.obV2ValueRiskBody,
         ),
         _Value(
           icon: Icons.auto_awesome,
-          color: TongtaiDesignTokens.copilotViolet,
+          color: TtColors.ai,
           title: l10n.obV2ValueActionTitle,
           body: l10n.obV2ValueActionBody,
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing8),
+        const SizedBox(height: TtSpace.x8),
         // ⛔ KHÔNG có "Đã có tài khoản? Đăng nhập" ở đây (§16 directive).
         // Tài khoản mâu thuẫn với D-4 / Local First, và một dòng chữ dưới cái
         // nút không phải chỗ để đưa ra quyết định kiến trúc đó.
-        SizedBox(
-          height: TongtaiDesignTokens.buttonHeight,
-          child: FilledButton(
-            key: const Key('onboarding-v2-start'),
-            onPressed: onStart,
-            child: Text(l10n.obStart),
-          ),
+        TtPrimaryButton(
+          key: const Key('onboarding-v2-start'),
+          label: l10n.obStart,
+          onPressed: onStart,
         ),
       ],
     );
@@ -473,27 +467,27 @@ class _Value extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing5),
+    padding: const EdgeInsets.only(bottom: TtSpace.x5),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, color: color),
-        const SizedBox(width: TongtaiDesignTokens.spacing3),
+        const SizedBox(width: TtSpace.x3),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: TongtaiDesignTokens.bodyStyle.copyWith(
+                style: TtType.body.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
               Text(
                 body,
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                style: TtType.caption.copyWith(
+                  color: TtColors.textSecondary,
                   height: 1.5,
                 ),
               ),
@@ -543,21 +537,17 @@ class _Profile extends StatelessWidget {
           '${l10n.obProgress} ${conversation.stepIndex + 1}/'
           '${kOnboardingSteps.length}',
           key: const Key('onboarding-v2-profile-progress'),
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         Text(
           l10n.obQuestion(step.id),
-          style: TongtaiDesignTokens.heading2Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-          ),
+          style: TtType.h2.copyWith(color: TtColors.textPrimary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
+        const SizedBox(height: TtSpace.x5),
         Wrap(
-          spacing: TongtaiDesignTokens.spacing2,
-          runSpacing: TongtaiDesignTokens.spacing2,
+          spacing: TtSpace.x2,
+          runSpacing: TtSpace.x2,
           children: [
             for (var i = 0; i < step.optionCodes.length; i++)
               ChoiceChip(
@@ -568,7 +558,7 @@ class _Profile extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
         Row(
           children: [
             if (onBack != null)
@@ -578,13 +568,13 @@ class _Profile extends StatelessWidget {
                 child: Text(l10n.obBack),
               ),
             const Spacer(),
-            SizedBox(
-              height: TongtaiDesignTokens.buttonHeight,
-              child: FilledButton(
-                key: const Key('onboarding-v2-profile-next'),
-                onPressed: onNext,
-                child: Text(l10n.obNext),
-              ),
+            TtPrimaryButton(
+              key: const Key('onboarding-v2-profile-next'),
+              label: l10n.obNext,
+              onPressed: onNext,
+              // Trong `Row`: không giãn, nếu không `width: double.infinity`
+              // gặp ràng buộc ngang vô hạn và cả màn không dựng được.
+              expand: false,
             ),
           ],
         ),
@@ -623,22 +613,18 @@ class _DataStart extends StatelessWidget {
       children: [
         Text(
           l10n.obV2DataTitle,
-          style: TongtaiDesignTokens.heading2Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-          ),
+          style: TtType.h2.copyWith(color: TtColors.textPrimary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           l10n.obV2DataBody,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
         _DataDoor(
           testKey: 'onboarding-v2-data-csv',
           icon: Icons.description_outlined,
-          color: TongtaiDesignTokens.consumerBlue,
+          color: TtColors.info,
           title: l10n.obV2DataCsvTitle,
           body: l10n.obV2DataCsvBody,
           onTap: busy ? null : () => onChoose(DataStartChoice.csv),
@@ -646,7 +632,7 @@ class _DataStart extends StatelessWidget {
         _DataDoor(
           testKey: 'onboarding-v2-data-sample',
           icon: Icons.auto_awesome,
-          color: TongtaiDesignTokens.copilotViolet,
+          color: TtColors.ai,
           title: l10n.obV2DataSampleTitle,
           body: l10n.obV2DataSampleBody,
           onTap: busy ? null : () => onChoose(DataStartChoice.sample),
@@ -654,13 +640,13 @@ class _DataStart extends StatelessWidget {
         _DataDoor(
           testKey: 'onboarding-v2-data-none',
           icon: Icons.lightbulb_outline,
-          color: TongtaiDesignTokens.producerGreen,
+          color: TtColors.success,
           title: l10n.obV2DataNoneTitle,
           body: l10n.obV2DataNoneBody,
           highlighted: preparing,
           onTap: busy ? null : () => onChoose(DataStartChoice.none),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing4),
+        const SizedBox(height: TtSpace.x4),
         // ⛔ Sàn thương mại điện tử và Google Drive KHÔNG có nút ở đây: chưa có
         // connector nào tồn tại, và một nút mang tên Shopee mà không kết nối
         // được Shopee là lời nói dối đắt nhất một màn onboarding có thể kể.
@@ -668,11 +654,9 @@ class _DataStart extends StatelessWidget {
         Text(
           l10n.obV2DataConnectorsLater,
           key: const Key('onboarding-v2-data-connectors-note'),
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
+        const SizedBox(height: TtSpace.x5),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
@@ -708,11 +692,11 @@ class _DataDoor extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     key: Key(testKey),
-    margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+    margin: const EdgeInsets.only(bottom: TtSpace.x3),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
+      borderRadius: BorderRadius.circular(TtRadius.md),
       side: BorderSide(
-        color: highlighted ? color : TongtaiDesignTokens.lightBorder,
+        color: highlighted ? color : TtColors.border,
         width: highlighted ? 2 : 1,
       ),
     ),
@@ -720,16 +704,14 @@ class _DataDoor extends StatelessWidget {
       leading: Icon(icon, color: color),
       title: Text(
         title,
-        style: TongtaiDesignTokens.bodyStyle.copyWith(
+        style: TtType.body.copyWith(
           fontWeight: FontWeight.w600,
-          color: TongtaiDesignTokens.lightTextPrimary,
+          color: TtColors.textPrimary,
         ),
       ),
       subtitle: Text(
         body,
-        style: TongtaiDesignTokens.captionStyle.copyWith(
-          color: TongtaiDesignTokens.lightTextSecondary,
-        ),
+        style: TtType.caption.copyWith(color: TtColors.textSecondary),
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
@@ -756,7 +738,7 @@ class _Analysis extends StatelessWidget {
     return ListView(
       key: const Key('onboarding-v2-analysis'),
       children: [
-        const SizedBox(height: TongtaiDesignTokens.spacing4),
+        const SizedBox(height: TtSpace.x4),
         Center(
           child: TongtaiMascotPose(
             MascotPose.working,
@@ -764,58 +746,47 @@ class _Analysis extends StatelessWidget {
             semanticsLabel: l10n.obV2MascotWorking,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing4),
+        const SizedBox(height: TtSpace.x4),
         Text(
           l10n.obV2AnalysisTitle,
-          style: TongtaiDesignTokens.heading2Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-          ),
+          style: TtType.h2.copyWith(color: TtColors.textPrimary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           l10n.obV2AnalysisBody,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
         // Mỗi dòng chỉ tồn tại vì chặng của nó ĐÃ CHẠY XONG. Danh sách này
         // không có phần "sẽ chạy" — không có chỗ nào để một con số xuất hiện
         // trước việc sinh ra nó.
         for (final p in progress)
           Padding(
             key: Key('onboarding-v2-stage-${p.stage.code}'),
-            padding: const EdgeInsets.only(
-              bottom: TongtaiDesignTokens.spacing3,
-            ),
+            padding: const EdgeInsets.only(bottom: TtSpace.x3),
             child: Row(
               children: [
                 const Icon(
                   Icons.check_circle,
-                  color: TongtaiDesignTokens.producerGreen,
+                  color: TtColors.success,
                   size: 20,
                 ),
-                const SizedBox(width: TongtaiDesignTokens.spacing3),
+                const SizedBox(width: TtSpace.x3),
                 Expanded(
                   child: Text(
                     l10n.obV2AnalysisStage(p.stage.code, p.count),
-                    style: TongtaiDesignTokens.bodyStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
-                    ),
+                    style: TtType.body.copyWith(color: TtColors.textPrimary),
                   ),
                 ),
               ],
             ),
           ),
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
         if (done)
-          SizedBox(
-            height: TongtaiDesignTokens.buttonHeight,
-            child: FilledButton(
-              key: const Key('onboarding-v2-analysis-continue'),
-              onPressed: onContinue,
-              child: Text(l10n.obV2Continue),
-            ),
+          TtPrimaryButton(
+            key: const Key('onboarding-v2-analysis-continue'),
+            label: l10n.obV2Continue,
+            onPressed: onContinue,
           ),
       ],
     );
@@ -863,7 +834,7 @@ class _Insight extends StatelessWidget {
     return ListView(
       key: const Key('onboarding-v2-insight'),
       children: [
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         Center(
           child: TongtaiMascotPose(
             pose,
@@ -871,23 +842,21 @@ class _Insight extends StatelessWidget {
             semanticsLabel: poseLabel,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         Text(
           title,
           key: const Key('onboarding-v2-insight-title'),
-          style: TongtaiDesignTokens.heading2Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-          ),
+          style: TtType.h2.copyWith(color: TtColors.textPrimary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           body,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
+          style: TtType.caption.copyWith(
+            color: TtColors.textSecondary,
             height: 1.5,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
+        const SizedBox(height: TtSpace.x5),
         if (result != null)
           for (final f in result.findings)
             _FindingCard(
@@ -895,17 +864,14 @@ class _Insight extends StatelessWidget {
               finding: f,
             ),
         if (result != null && !result.snapshot.isEmpty) ...[
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           _Snapshot(snapshot: result.snapshot),
         ],
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
-        SizedBox(
-          height: TongtaiDesignTokens.buttonHeight,
-          child: FilledButton(
-            key: const Key('onboarding-v2-insight-continue'),
-            onPressed: onContinue,
-            child: Text(l10n.obV2Continue),
-          ),
+        const SizedBox(height: TtSpace.x6),
+        TtPrimaryButton(
+          key: const Key('onboarding-v2-insight-continue'),
+          label: l10n.obV2Continue,
+          onPressed: onContinue,
         ),
       ],
     );
@@ -919,11 +885,15 @@ class _FindingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = switch (finding.severity) {
-      BriefSeverity.critical => TongtaiDesignTokens.error,
-      BriefSeverity.warning => TongtaiDesignTokens.inventoryOrange,
-      BriefSeverity.info => TongtaiDesignTokens.consumerBlue,
+    // Mức khẩn đi qua **một** bảng ánh xạ của Design System. Trước đây màn này
+    // có `switch` màu riêng — hai bảng ánh xạ sẽ lệch nhau đúng vào ngày ai đó
+    // sửa một bên (P-27/P-28).
+    final status = switch (finding.severity) {
+      BriefSeverity.critical => TtStatus.danger,
+      BriefSeverity.warning => TtStatus.warning,
+      BriefSeverity.info => TtStatus.info,
     };
+    final color = status.color;
     // ⚠️ Dogfood WTM-360: bốn thẻ trên máy thật trông **giống hệt nhau** —
     // "đã hết hàng" và "khách chưa quay lại" chỉ khác ở một sắc độ viền mà mắt
     // không tách được. Màu được đọc TRƯỚC chữ (bài học WTM-340: chip tím chứ
@@ -937,10 +907,10 @@ class _FindingCard extends StatelessWidget {
     // bo mà không cần viền không đồng nhất.
     return Container(
       key: const Key('onboarding-v2-finding-card'),
-      margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      margin: const EdgeInsets.only(bottom: TtSpace.x3),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.border),
       ),
       clipBehavior: Clip.antiAlias,
       child: IntrinsicHeight(
@@ -954,25 +924,25 @@ class _FindingCard extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+                padding: const EdgeInsets.all(TtSpace.x4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       finding.headline,
-                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                      style: TtType.body.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     // Lý do đọc thẳng từ bằng chứng của luật — không viết lại.
                     // Hai danh sách lý do sẽ lệch nhau đúng vào ngày ai đó sửa
                     // một bên.
                     Text(
                       finding.reason,
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
                   ],
@@ -996,8 +966,8 @@ class _Snapshot extends StatelessWidget {
     final l10n = context.l10n;
     return Wrap(
       key: const Key('onboarding-v2-snapshot'),
-      spacing: TongtaiDesignTokens.spacing3,
-      runSpacing: TongtaiDesignTokens.spacing3,
+      spacing: TtSpace.x3,
+      runSpacing: TtSpace.x3,
       children: [
         if (snapshot.revenue case final r?)
           _Tile(
@@ -1040,13 +1010,13 @@ class _Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(
-      horizontal: TongtaiDesignTokens.spacing4,
-      vertical: TongtaiDesignTokens.spacing3,
+      horizontal: TtSpace.x4,
+      vertical: TtSpace.x3,
     ),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
-      border: Border.all(color: TongtaiDesignTokens.lightBorder),
+      borderRadius: BorderRadius.circular(TtRadius.md),
+      border: Border.all(color: TtColors.border),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1054,17 +1024,13 @@ class _Tile extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
         Text(
           value,
-          style: TongtaiDesignTokens.bodyStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w600,
-            color: muted
-                ? TongtaiDesignTokens.lightTextSecondary
-                : TongtaiDesignTokens.lightTextPrimary,
+            color: muted ? TtColors.textSecondary : TtColors.textPrimary,
           ),
         ),
       ],
@@ -1095,21 +1061,17 @@ class _Goal extends StatelessWidget {
       children: [
         Text(
           l10n.obV2GoalTitle,
-          style: TongtaiDesignTokens.heading2Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-          ),
+          style: TtType.h2.copyWith(color: TtColors.textPrimary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           l10n.obV2GoalBody,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
+        const SizedBox(height: TtSpace.x5),
         Wrap(
-          spacing: TongtaiDesignTokens.spacing2,
-          runSpacing: TongtaiDesignTokens.spacing2,
+          spacing: TtSpace.x2,
+          runSpacing: TtSpace.x2,
           children: [
             for (final goal in OnboardingGoal.values)
               ChoiceChip(
@@ -1120,14 +1082,12 @@ class _Goal extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         Text(
           l10n.obV2GoalLimit,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
         Row(
           children: [
             TextButton(
@@ -1136,13 +1096,13 @@ class _Goal extends StatelessWidget {
               child: Text(l10n.obBack),
             ),
             const Spacer(),
-            SizedBox(
-              height: TongtaiDesignTokens.buttonHeight,
-              child: FilledButton(
-                key: const Key('onboarding-v2-goal-next'),
-                onPressed: onNext,
-                child: Text(l10n.obNext),
-              ),
+            TtPrimaryButton(
+              key: const Key('onboarding-v2-goal-next'),
+              label: l10n.obNext,
+              onPressed: onNext,
+              // Trong `Row`: không giãn, nếu không `width: double.infinity`
+              // gặp ràng buộc ngang vô hạn và cả màn không dựng được.
+              expand: false,
             ),
           ],
         ),
@@ -1180,28 +1140,24 @@ class _Plan extends StatelessWidget {
             semanticsLabel: l10n.obV2MascotPlanning,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         Text(
           l10n.obV2PlanTitle,
-          style: TongtaiDesignTokens.heading2Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-          ),
+          style: TtType.h2.copyWith(color: TtColors.textPrimary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Text(
           l10n.obV2PlanBody,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
+        const SizedBox(height: TtSpace.x5),
         for (final a in actions)
           Card(
             key: Key('onboarding-v2-plan-${a.priority}'),
-            margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+            margin: const EdgeInsets.only(bottom: TtSpace.x3),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
-              side: const BorderSide(color: TongtaiDesignTokens.lightBorder),
+              borderRadius: BorderRadius.circular(TtRadius.md),
+              side: const BorderSide(color: TtColors.border),
             ),
             // Cả thẻ là vùng chạm, không chỉ dòng chữ cam: một dòng chữ trông
             // bấm được mà chỉ bấm trúng khi nhắm đúng vài chục pixel thì vẫn là
@@ -1210,39 +1166,34 @@ class _Plan extends StatelessWidget {
               key: Key('onboarding-v2-plan-open-${a.priority}'),
               onTap: () => onOpen(a.destination),
               child: Padding(
-                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+                padding: const EdgeInsets.all(TtSpace.x4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '${a.priority}. ${a.problem}',
-                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                      style: TtType.body.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    const SizedBox(height: TtSpace.x1),
                     Text(
                       '${l10n.obV2PlanEvidence}: ${a.evidence}',
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: TongtaiDesignTokens.spacing2),
+                    const SizedBox(height: TtSpace.x2),
                     Row(
                       children: [
                         Expanded(
                           child: Text(
                             a.action,
-                            style: TongtaiDesignTokens.bodyStyle.copyWith(
-                              color: TongtaiDesignTokens.inventoryOrange,
-                            ),
+                            style: TtType.body.copyWith(color: TtColors.brand),
                           ),
                         ),
-                        const Icon(
-                          Icons.chevron_right,
-                          color: TongtaiDesignTokens.inventoryOrange,
-                        ),
+                        const Icon(Icons.chevron_right, color: TtColors.brand),
                       ],
                     ),
                   ],
@@ -1250,14 +1201,11 @@ class _Plan extends StatelessWidget {
               ),
             ),
           ),
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
-        SizedBox(
-          height: TongtaiDesignTokens.buttonHeight,
-          child: FilledButton(
-            key: const Key('onboarding-v2-finish'),
-            onPressed: saving ? null : onFinish,
-            child: Text(l10n.obV2PlanCta),
-          ),
+        const SizedBox(height: TtSpace.x6),
+        TtPrimaryButton(
+          key: const Key('onboarding-v2-finish'),
+          label: l10n.obV2PlanCta,
+          onPressed: saving ? null : onFinish,
         ),
       ],
     );

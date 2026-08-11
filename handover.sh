@@ -20,6 +20,27 @@ MASTER="$LOG_DIR/handover-$(date +%Y%m%d-%H%M%S).log"
 log(){ echo "[$(date '+%F %T')] $*" | tee -a "$MASTER"; }
 die(){ log "FATAL: $*"; exit 1; }
 
+# ── Single-instance lock ──────────────────────────────────────────────────
+#
+# Hai vòng autonomous cùng chạy trên một repo sẽ commit chồng lên nhau và
+# tranh nhau cùng một nhánh story. Trước đây script này KHÔNG có khoá nào —
+# nên câu "single-instance" chỉ là một lời hứa, không phải một cơ chế.
+#
+# Khoá giữ bằng thư mục: `mkdir` là thao tác nguyên tử trên mọi POSIX, không
+# cần `flock` (macOS không có sẵn). Lock ghi kèm PID và mô tả để người sau biết
+# ai đang giữ, thay vì chỉ biết là bị chặn.
+LOCK_DIR="${LOCK_DIR:-$HOME/.local/state/ai-wf/$(basename "$TARGET_DIR").lock}"
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  HOLDER="$(cat "$LOCK_DIR/owner" 2>/dev/null || echo 'không rõ')"
+  echo "TỪ CHỐI CHẠY: đã có một vòng autonomous giữ khoá trên repo này."
+  echo "  khoá: $LOCK_DIR"
+  echo "  chủ:  $HOLDER"
+  echo "Nếu chắc chắn vòng kia đã chết: rm -rf \"$LOCK_DIR\""
+  exit 3
+fi
+printf 'pid=%s started=%s script=handover.sh\n' "$$" "$(date '+%F %T')" > "$LOCK_DIR/owner"
+trap 'rm -rf "$LOCK_DIR"' EXIT INT TERM
+
 log "=== preflight ==="
 command -v node>/dev/null||die "node missing (>=20)"
 command -v git>/dev/null||die "git missing"

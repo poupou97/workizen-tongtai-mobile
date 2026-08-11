@@ -246,10 +246,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final label = tester
-          .widget<FilledButton>(find.byKey(const Key('onboarding-v2-finish')))
-          .child;
-      expect((label! as Text).data, const AppStringsVi().obV2PlanCta);
+      // Khẳng định CHỮ HIỆN RA, không chọc vào `FilledButton.child`: nút nay
+      // là `TtPrimaryButton` của Design System, và test đo cách một component
+      // được dựng bên trong sẽ đỏ mỗi lần component ấy đổi mà nghĩa không đổi.
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('onboarding-v2-finish')),
+          matching: find.text(const AppStringsVi().obV2PlanCta),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('màn đầu KHÔNG có lối đăng nhập (§16 Founder Gate)', (

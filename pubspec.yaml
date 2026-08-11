@@ -1,7 +1,7 @@
 name: tongtai
 description: "Tổng Tài — AI-First Business OS for SME entrepreneurs (Workizen)."
 publish_to: 'none'
-version: 0.1.0+6
+version: 0.1.0+11
 
 environment:
   sdk: ^3.12.2
@@ -89,26 +89,41 @@ flutter:
     # được ngay cả khi chưa nối Google Drive — cùng file, cùng đường import.
     - assets/demo/
 
-# App launcher icon (WTM-110). Source rendered from
-# assets/branding/app_icon.svg (08a Origami on navy). iOS strips alpha;
-# Android uses an adaptive icon (navy background + padded fox foreground).
+# App launcher icon — WTM-366 (Epic WTM-362).
+#
+# Nguồn: docs/01-PRODUCT/concept-1/news-icon.png (Founder cung cấp, bản thứ
+# hai) — cáo mặc vest giơ ngón cái, cầm máy tính bảng, trước khung bo góc phát
+# sáng trên nền TỐI. Thay bộ Origami-trên-navy của WTM-110: hai hình cáo khác
+# nhau giữa icon và trong app là cách người dùng không nhận ra cùng một sản
+# phẩm, và linh vật mới nay có mặt khắp onboarding.
+#
+# ⚠️ Ảnh gốc là ảnh NGANG và chủ thể lệch trái (tâm ngang ở 769/1536). Cắt vuông
+# quanh CHỦ THỂ chứ không quanh tâm ảnh — cắt giữa sẽ đẩy con cáo lệch trong
+# icon.
+#
+# ⚠️ Foreground của adaptive icon thu về 66% khung và đặt giữa. Mặt nạ tròn của
+# Android chỉ chừa ~66% chiều rộng; dán ảnh vuông thẳng vào là mất tai và cằm
+# con cáo — chỗ hỏng phổ biến nhất của icon Android. Nền adaptive đặt đúng màu
+# nền của ảnh (gần đen tuyệt đối, đo được 0–1 ở bốn góc) nên mép ảnh thu nhỏ
+# không để lại đường ghép. Mẹo này chỉ dùng được vì nền TỐI VÀ PHẲNG.
 flutter_launcher_icons:
   image_path: "assets/branding/app_icon.png"
   remove_alpha_ios: true
   android: true
   ios: true
   min_sdk_android: 21
-  adaptive_icon_background: "#111827"
+  adaptive_icon_background: "#000000"
   adaptive_icon_foreground: "assets/branding/app_icon_foreground.png"
 
-# Native splash (WTM-110): navy ground with the fox, matched in dark mode.
+# Native splash — nền cam cùng icon (WTM-366). Splash gốc chỉ là khoảnh khắc
+# trước khi Flutter dựng frame đầu; màn khởi động thật là WTM-367.
 flutter_native_splash:
-  color: "#111827"
-  color_dark: "#111827"
+  color: "#000000"
+  color_dark: "#000000"
   image: "assets/branding/app_icon_foreground.png"
   image_dark: "assets/branding/app_icon_foreground.png"
   android_12:
-    color: "#111827"
-    color_dark: "#111827"
+    color: "#000000"
+    color_dark: "#000000"
     image: "assets/branding/app_icon_foreground.png"
     image_dark: "assets/branding/app_icon_foreground.png"
