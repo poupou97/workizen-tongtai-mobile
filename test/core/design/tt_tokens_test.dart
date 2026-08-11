@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,6 +45,35 @@ void main() {
               'đó về chất lượng, trong khi nghĩa của nó là CHƯA BIẾT',
         );
       }
+    });
+
+    test('⭐ nền nút mang chữ trắng phải qua WCAG AA', () {
+      // Spec ghi `#F97316`; chữ trắng trên đó đạt 2,80:1. Suite accessibility
+      // của repo bắt đúng điều đó, nên Design System dùng một sắc đậm hơn cho
+      // NỀN nút và giữ `brand` cho biểu tượng/viền/chữ trên nền sáng.
+      double lum(Color c) {
+        double f(double v) => v <= 0.03928
+            ? v / 12.92
+            : math.pow((v + 0.055) / 1.055, 2.4) as double;
+        return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+      }
+
+      double ratio(Color a, Color b) {
+        final l = [lum(a), lum(b)]..sort();
+        return (l[1] + 0.05) / (l[0] + 0.05);
+      }
+
+      expect(
+        ratio(TtColors.brandOnDark, TtColors.textOnBrand),
+        greaterThanOrEqualTo(4.5),
+      );
+      expect(
+        ratio(TtColors.brandPressed, TtColors.textOnBrand),
+        greaterThanOrEqualTo(4.5),
+      );
+      // Và màu thương hiệu gốc vẫn giữ nguyên — nó chỉ không được làm nền cho
+      // chữ trắng.
+      expect(TtColors.brand, const Color(0xFFF97316));
     });
 
     test('AI và HÀNH ĐỘNG là hai màu khác nhau', () {

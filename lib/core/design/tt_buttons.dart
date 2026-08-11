@@ -52,7 +52,9 @@ class TtPrimaryButton extends StatelessWidget {
       child: FilledButton(
         onPressed: onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: TtColors.brand,
+          // `brandOnDark`, không phải `brand`: chữ trắng trên `brand` chỉ đạt
+          // 2,80:1 — xem chú thích ở token.
+          backgroundColor: TtColors.brandOnDark,
           foregroundColor: TtColors.textOnBrand,
           disabledBackgroundColor: TtColors.borderStrong,
           padding: const EdgeInsets.symmetric(

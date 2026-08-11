@@ -38,9 +38,22 @@ import 'package:flutter/widgets.dart';
 /// có `action` và `ai`, vì đó là thứ quyết định lúc chọn.
 abstract final class TtColors {
   // ── Thương hiệu / hành động ────────────────────────────────────────────
-  /// Nút và liên kết người bán **bấm được**.
+  /// Màu thương hiệu — dùng cho **biểu tượng, viền, chữ trên nền sáng**.
   static const Color brand = Color(0xFFF97316);
-  static const Color brandPressed = Color(0xFFEA580C);
+
+  /// ⚠️ Nền của nút mang chữ trắng — **đậm hơn** [brand] có chủ đích.
+  ///
+  /// Spec của Founder ghi nền nút là `#F97316`. Chữ trắng trên màu đó chỉ đạt
+  /// **2,80:1**, dưới ngưỡng WCAG AA 4,5:1 — và suite `accessibility_test` của
+  /// repo này bắt đúng điều đó khi thử. `#C2410C` đạt **5,18:1** và là sắc cam
+  /// sáng nhất còn qua được ngưỡng.
+  ///
+  /// Đây là chỗ duy nhất trong Design System lệch khỏi spec, và nó lệch vì một
+  /// cổng chất lượng đã có sẵn chứ không vì sở thích. Cùng bài học mà
+  /// `TongtaiDesignTokens` đã ghi cho `inventoryOrange` (2,15:1).
+  static const Color brandOnDark = Color(0xFFC2410C);
+
+  static const Color brandPressed = Color(0xFF9A3412);
   static const Color brandSoft = Color(0xFFFFF7ED);
 
   // ── AI / trí tuệ ───────────────────────────────────────────────────────

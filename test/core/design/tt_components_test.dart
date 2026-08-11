@@ -20,9 +20,12 @@ void main() {
       final style = tester
           .widget<FilledButton>(find.byType(FilledButton))
           .style!;
+      // `brandOnDark`, không phải `brand`: chữ trắng trên `#F97316` chỉ đạt
+      // 2,80:1 và suite accessibility bắt được. Nút vẫn là CAM — chỉ là sắc cam
+      // đậm nhất còn qua WCAG AA.
       expect(
         style.backgroundColor!.resolve({}),
-        TtColors.brand,
+        TtColors.brandOnDark,
         reason: 'nút hành động không mang màu thương hiệu',
       );
     });
