@@ -336,6 +336,17 @@ luật nói XANH LÁ = KẾT QUẢ TÍCH CỰC. Đây chính là lý do nút `L�
 đầu vào trông khác bốn nút `Lưu` còn lại: nó là nút *mặc định*. Hạt giống nay là
 **cam thương hiệu**.
 
+**⭐ Hạt giống nay là `tongtaiTheme`, không phải một biểu thức vô danh.**
+WTM-379 đưa nó về `core/design/tt_theme.dart` — nó **là** một phần Design
+System, và để thứ ảnh hưởng rộng nhất trong sản phẩm nằm giữa `build()` của
+`TongtaiApp` nghĩa là nó **không ai sở hữu**. `theme_seed_test.dart` khoá: sắc
+của `primary` phải ở vùng cam, `primary` không được trùng khe ngữ nghĩa nào, và
+các cặp `on*/[*]` phải đạt 4,5:1. Đã kiểm chứng nó đỏ thật khi gieo lại bằng
+xanh lá.
+
+⚠️ Nó **không thay được** dogfood máy thật (WTM-321): test biết hạt giống màu
+gì, nhưng không biết một hộp thoại trông thế nào.
+
 **2 · Một bảng ánh xạ mức khẩn thứ hai.** `tongtaiBriefColor` tự `switch` thẳng
 sang `TtColors`, song song với `TtStatus` — đúng bẫy P-27/P-28. Nay nó dịch qua
 `tongtaiBriefStatus` rồi lấy `.color`, nên màu chỉ còn một chủ.
