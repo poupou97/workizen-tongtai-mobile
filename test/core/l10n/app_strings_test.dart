@@ -32,14 +32,14 @@ void main() {
     expect(s, isA<AppStringsVi>());
     expect(s.actionViewAll, 'Xem tất cả');
     expect(s.titleReports, 'Báo cáo & Phân tích');
-    expect(s.settingsLanguage, 'Ngôn ngữ');
+    expect(s.moreRemoveSample, 'Xóa dữ liệu mẫu');
   });
 
   testWidgets('English locale resolves English strings', (tester) async {
     final s = await stringsFor(tester, const Locale('en'));
     expect(s, isA<AppStringsEn>());
     expect(s.actionViewAll, 'View all');
-    expect(s.settingsLanguage, 'Language');
+    expect(s.moreRemoveSample, 'Remove sample data');
   });
 
   test('every key is implemented in both locales (no missing override)', () {
@@ -50,8 +50,6 @@ void main() {
           s.actionViewAll,
           s.actionSearch,
           s.actionCancel,
-          s.settingsLanguage,
-          s.languagePickerTitle,
           s.titleReports,
           s.titleFinance,
           s.titleBusinessLife,

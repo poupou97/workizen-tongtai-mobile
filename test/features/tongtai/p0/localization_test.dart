@@ -1,20 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/core/l10n/app_strings.dart';
 import 'package:tongtai/core/l10n/language_notifier.dart';
-import 'package:tongtai/core/prefs.dart';
-import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
-import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
-import 'package:tongtai/features/tongtai/orders/order_repository.dart';
-import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
-import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
-import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
-import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
 
 /// P0 §2 (WTM-145) — single-locale localization:
 ///  - NO label may mix two languages ("Timeline · Dòng thời gian" is banned);
@@ -429,66 +417,25 @@ void main() {
     },
   );
 
-  group('runtime switching + persistence (production wiring)', () {
-    Widget app(SharedPreferences prefs) => ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-        customerRepositoryProvider.overrideWithValue(
-          InMemoryCustomerRepository(),
-        ),
-        productRepositoryProvider.overrideWithValue(
-          InMemoryProductRepository([]),
-        ),
-        orderRepositoryProvider.overrideWithValue(InMemoryOrderRepository()),
-      ],
-      child: Consumer(
-        builder: (context, ref, _) {
-          final code = ref.watch(languageProvider);
-          return MaterialApp(
-            locale: appLocale(code),
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [Locale('en'), Locale('vi')],
-            home: const TongtaiMoreScreen(),
-          );
-        },
-      ),
-    );
+  group('⛔ MỘT locale — WTM-308', () {
+    // Trước đây có bộ chọn ngôn ngữ và mặc định lấy ngôn ngữ MÁY, nên máy đặt
+    // tiếng Anh thì nhãn ra tiếng Anh trong khi câu brief vẫn là dữ liệu tiếng
+    // Việt đã lưu cùng bản ghi. Đó không phải lỗi dịch thiếu: câu brief chứa
+    // tên khách và con số của chính doanh nghiệp này, và WTM-299 buộc nó phải
+    // đi cùng bản ghi — dựng lại theo locale lúc hiển thị sẽ khiến mở một
+    // quyết định cũ đọc ra câu khác câu lúc bấm.
+    test('locale của app là hằng số, không hỏi máy', () {
+      expect(kAppLocaleCode, 'vi');
+    });
 
-    testWidgets(
-      'switching locale re-renders the whole app in ONE language and persists',
-      (tester) async {
-        SharedPreferences.setMockInitialValues({'wz.locale': 'vi'});
-        final prefs = await SharedPreferences.getInstance();
-        await tester.pumpWidget(app(prefs));
-        await tester.pumpAndSettle();
-
-        // Vietnamese only — the English variant must NOT be on screen.
-        expect(find.text('Nạp dữ liệu mẫu'), findsOneWidget);
-        expect(find.text('Load sample data'), findsNothing);
-        expect(find.text('Timeline · Dòng thời gian'), findsNothing);
-
-        // Switch to English through the real notifier.
-        final container = ProviderScope.containerOf(
-          tester.element(find.byType(TongtaiMoreScreen)),
-        );
-        await container.read(languageProvider.notifier).setLocale('en');
-        await tester.pumpAndSettle();
-
-        expect(find.text('Load sample data'), findsOneWidget);
-        expect(find.text('Nạp dữ liệu mẫu'), findsNothing);
-
-        // Persisted: a fresh app over the SAME prefs restarts in English.
-        await tester.pumpWidget(const SizedBox());
-        await tester.pumpWidget(app(prefs));
-        await tester.pumpAndSettle();
-        expect(find.text('Load sample data'), findsOneWidget);
-        expect(find.text('Nạp dữ liệu mẫu'), findsNothing);
-      },
-    );
+    test('màn Thêm KHÔNG còn mục chọn ngôn ngữ', () {
+      // Một bộ chọn còn đó nghĩa là còn đường quay lại trạng thái nửa Việt nửa
+      // Anh — thứ vừa bỏ.
+      final source = File(
+        'lib/features/tongtai/ui/screens/tongtai_more_screen.dart',
+      ).readAsStringSync();
+      expect(source.contains("more-language"), isFalse);
+    });
   });
 }
 

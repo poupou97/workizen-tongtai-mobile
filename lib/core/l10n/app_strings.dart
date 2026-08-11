@@ -23,8 +23,6 @@ abstract class AppStrings {
   String get actionCancel;
 
   // ── settings / language ────────────────────────────────────────────────
-  String get settingsLanguage;
-  String get languagePickerTitle;
 
   // ── Tổng Tài · brief hằng ngày (WTM-304, Epic WTM-302) ─────────────────
   /// Lời chào theo buổi — thứ đầu tiên người bán đọc khi mở app.
@@ -1194,11 +1192,6 @@ class AppStringsVi extends AppStrings {
   String get actionSearch => 'Tìm kiếm';
   @override
   String get actionCancel => 'Hủy';
-
-  @override
-  String get settingsLanguage => 'Ngôn ngữ';
-  @override
-  String get languagePickerTitle => 'Chọn ngôn ngữ';
 
   @override
   String get titleReports => 'Báo cáo & Phân tích';
@@ -3132,11 +3125,6 @@ class AppStringsEn extends AppStrings {
   String get actionSearch => 'Search';
   @override
   String get actionCancel => 'Cancel';
-
-  @override
-  String get settingsLanguage => 'Language';
-  @override
-  String get languagePickerTitle => 'Choose language';
 
   @override
   String get titleReports => 'Reports & Analytics';

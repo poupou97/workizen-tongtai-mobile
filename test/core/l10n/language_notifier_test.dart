@@ -1,55 +1,24 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tongtai/core/l10n/app_strings.dart';
 import 'package:tongtai/core/l10n/language_notifier.dart';
-import 'package:tongtai/core/prefs.dart';
 
-/// WTM-119 — the language notifier persists the locale choice.
+/// WTM-308 — **giao diện chỉ một locale**, và nó là tiếng Việt.
 void main() {
-  Future<ProviderContainer> container(Map<String, Object> initial) async {
-    SharedPreferences.setMockInitialValues(initial);
-    final prefs = await SharedPreferences.getInstance();
-    final c = ProviderContainer(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-    );
-    addTearDown(c.dispose);
-    return c;
-  }
-
-  test('a saved locale is restored on build', () async {
-    final c = await container({'wz.locale': 'vi'});
-    expect(c.read(languageProvider), 'vi');
+  test('⛔ locale KHÔNG theo máy nữa — nó là hằng số', () {
+    // Trước đây mặc định lấy ngôn ngữ máy, nên máy đặt tiếng Anh thì nhãn ra
+    // tiếng Anh trong khi câu brief vẫn là dữ liệu tiếng Việt đã lưu. Mở app
+    // trên một chiếc máy tiếng Anh là đọc được nửa này nửa kia.
+    expect(kAppLocaleCode, 'vi');
+    expect(kAppLocale.languageCode, 'vi');
   });
 
-  test('with no saved locale, the default is a supported code', () async {
-    final c = await container({});
-    expect(kSupportedLocaleCodes.contains(c.read(languageProvider)), isTrue);
-  });
-
-  test('setLocale updates the state and persists it', () async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-    final c = ProviderContainer(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-    );
-    addTearDown(c.dispose);
-
-    await c.read(languageProvider.notifier).setLocale('en');
-    expect(c.read(languageProvider), 'en');
-    expect(prefs.getString('wz.locale'), 'en');
-
-    await c.read(languageProvider.notifier).setLocale('vi');
-    expect(c.read(languageProvider), 'vi');
-  });
-
-  test('an unsupported code is ignored', () async {
-    final c = await container({'wz.locale': 'en'});
-    await c.read(languageProvider.notifier).setLocale('zz');
-    expect(c.read(languageProvider), 'en'); // unchanged
-  });
-
-  test('localeDisplayName maps codes to names', () {
-    expect(localeDisplayName('vi'), 'Tiếng Việt');
-    expect(localeDisplayName('en'), 'English');
+  test('bộ chuỗi tiếng Anh GIỮ NGUYÊN trong mã, chỉ không được tự chọn', () {
+    // Ngày thêm một thị trường là một quyết định sản phẩm thật; lúc đó bộ chuỗi
+    // đã sẵn ở đây. Cái bị bỏ là việc để máy chọn hộ.
+    const en = AppStringsEn();
+    const vi = AppStringsVi();
+    expect(en.languageCode, 'en');
+    expect(vi.languageCode, 'vi');
+    expect(en.actionCancel, isNotEmpty);
   });
 }

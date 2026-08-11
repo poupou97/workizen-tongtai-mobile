@@ -59,8 +59,6 @@ class TongtaiApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Active locale (WTM-119) — drives Material localizations + AppStrings.
-    final localeCode = ref.watch(languageProvider);
     return MaterialApp(
       title: 'Tổng Tài',
       debugShowCheckedModeBanner: false,
@@ -70,13 +68,13 @@ class TongtaiApp extends ConsumerWidget {
           seedColor: TongtaiDesignTokens.producerGreen,
         ),
       ),
-      locale: appLocale(localeCode),
+      locale: kAppLocale,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('en'), Locale('vi')],
+      supportedLocales: const [kAppLocale],
       home: const TongtaiRootGate(),
     );
   }

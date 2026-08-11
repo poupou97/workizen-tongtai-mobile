@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
-import '../../../../core/l10n/language_notifier.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../core/screen_data_controller.dart';
 import '../../providers/tongtai_data_invalidation.dart';
@@ -30,43 +29,6 @@ import 'tongtai_agent_screen.dart';
 import 'tongtai_autonomy_screen.dart';
 import 'tongtai_privacy_policy_screen.dart';
 import 'tongtai_about_screen.dart';
-
-/// Opens the language picker (WTM-119) and persists the choice; the app
-/// re-renders in the chosen locale via [languageProvider].
-Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
-  final current = ref.read(languageProvider);
-  final picked = await showDialog<String>(
-    context: context,
-    builder: (dialogContext) => SimpleDialog(
-      title: Text(dialogContext.l10n.languagePickerTitle),
-      children: [
-        for (final code in kSupportedLocaleCodes)
-          SimpleDialogOption(
-            key: Key('language-option-$code'),
-            onPressed: () => Navigator.of(dialogContext).pop(code),
-            child: Row(
-              children: [
-                Icon(
-                  code == current
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
-                  size: 20,
-                  color: code == current
-                      ? TongtaiDesignTokens.producerGreen
-                      : TongtaiDesignTokens.lightTextSecondary,
-                ),
-                const SizedBox(width: TongtaiDesignTokens.spacing3),
-                Text(localeDisplayName(code)),
-              ],
-            ),
-          ),
-      ],
-    ),
-  );
-  if (picked != null) {
-    await ref.read(languageProvider.notifier).setLocale(picked);
-  }
-}
 
 /// More/Settings screen for Tổng Tài
 /// Provides access to settings, help, and additional features.
@@ -251,12 +213,6 @@ class TongtaiMoreScreen extends ConsumerWidget {
                   icon: Icons.notifications_outlined,
                   label: context.l10n.moreNotifications,
                   comingSoon: true,
-                ),
-                _SettingsItem(
-                  key: const Key('more-language'),
-                  icon: Icons.language,
-                  label: context.l10n.settingsLanguage,
-                  onTap: () => _pickLanguage(context, ref),
                 ),
                 _SettingsItem(
                   icon: Icons.dark_mode_outlined,
