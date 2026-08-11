@@ -251,6 +251,12 @@ Hai chỗ concept vẽ sai và **không được chép**:
 | `tongtai_inventory_screen` | WTM-370 |
 | `tongtai_consumer_screen` | WTM-370 |
 | `tongtai_opportunity_feed_screen` | WTM-370 |
+| `tongtai_reports_screen` | WTM-371 |
+| `tongtai_finance_screen` | WTM-371 |
+| `tongtai_supplier_detail_screen` | WTM-371 |
+| `tongtai_customer_risk_screen` | WTM-371 |
+| `tongtai_customer_history_screen` | WTM-371 |
+| `tongtai_opportunity_detail_screen` | WTM-371 |
 
 > Danh sách này **được test khoá**: `test/core/design/migrated_screens_test.dart`
 > quét từng màn đã migrate và bắt màu viết thẳng, token cũ, hay `switch` màu
@@ -260,8 +266,12 @@ Hai chỗ concept vẽ sai và **không được chép**:
 
 ### Chưa migrate
 
-Tài chính · Báo cáo · Business Journey · Supplier Detail · Product
-Intelligence · và các màn phụ (form, chi tiết, cài đặt).
+**13/50 màn đã đi.** Còn lại: Business Journey · Mục tiêu · Hội thoại · Doanh
+nghiệp của bạn · Kết nối · Sao lưu · Tìm kiếm · các form (sản phẩm, khách, đơn,
+giao dịch) · các màn cài đặt.
+
+Script di trú dùng lại được: `/tmp/migrate_ds.py` trong PR WTM-371 — nhưng đọc
+bảng ánh xạ dưới đây **trước khi chạy nó trên một màn mới**.
 
 ### ⚠️ Bảng ánh xạ chữ — **theo giá trị, không theo tên**
 
@@ -281,6 +291,11 @@ thu nhỏ. Triệu chứng duy nhất lộ ra là một chỗ tràn **1 pixel** 
 
 Bảng này là **mã chạy được**, không phải một dòng trong tài liệu:
 `migrated_screens_test.dart` khẳng định cỡ chữ và line-height của từng cặp.
+
+`readableOn` là một **hàm**, nên nó không dùng được trong biểu thức `const` —
+mà rất nhiều chỗ dựng màu ở vị trí const. Bốn hằng `successOnLight` ·
+`infoOnLight` · `aiOnLight` · `dangerOnLight` là cùng giá trị, và hàm trả về
+**chính chúng** nên hai đường không thể lệch nhau.
 
 `TongtaiDesignTokens.readableText` nay **chuyển tiếp** sang
 `TtColors.readableOn` — một bảng ánh xạ, một chủ. Bảng đó phủ cả màu cũ lẫn mới

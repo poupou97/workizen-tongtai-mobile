@@ -24,6 +24,12 @@ void main() {
     'tongtai_inventory_screen.dart': 'WTM-370',
     'tongtai_consumer_screen.dart': 'WTM-370',
     'tongtai_opportunity_feed_screen.dart': 'WTM-370',
+    'tongtai_reports_screen.dart': 'WTM-371',
+    'tongtai_finance_screen.dart': 'WTM-371',
+    'tongtai_supplier_detail_screen.dart': 'WTM-371',
+    'tongtai_customer_risk_screen.dart': 'WTM-371',
+    'tongtai_customer_history_screen.dart': 'WTM-371',
+    'tongtai_opportunity_detail_screen.dart': 'WTM-371',
   };
 
   /// Bỏ chú thích trước khi quét — một mã màu nhắc trong tài liệu không phải

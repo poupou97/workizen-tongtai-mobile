@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+import '../../navigation/tongtai_design_tokens.dart' show TongtaiTabs;
+
 import '../../ai/business_health_ai.dart';
 import '../../ai/business_plan.dart';
 import '../../ai/business_recommendation.dart';
@@ -8,7 +11,6 @@ import '../../ai/business_summary.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../metrics/business_metrics.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_navigation_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_screen_header.dart';
@@ -243,7 +245,7 @@ class _TongtaiReportsScreenState extends ConsumerState<TongtaiReportsScreen> {
     );
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: tongtaiScreenHeader(
         context,
         screen: 'reports',
@@ -317,7 +319,7 @@ class _ReportBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       children: [
         // ── Headline KPIs — the four canonical metrics from the KPI source of
         //    truth (WTM-127, BusinessMetricsService). Never recomputed here. ──
@@ -328,23 +330,23 @@ class _ReportBody extends StatelessWidget {
                 key: const Key('reports-kpi-revenue'),
                 label: context.l10n.kpiRevenue,
                 value: TongtaiFormatters.vnd(metrics.revenue),
-                accent: TongtaiDesignTokens.financePurple,
+                accent: TtColors.ai,
                 icon: Icons.trending_up,
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: _KpiCard(
                 key: const Key('reports-kpi-orders'),
                 label: context.l10n.kpiOrders,
                 value: '${metrics.ordersCount}',
-                accent: TongtaiDesignTokens.consumerBlue,
+                accent: TtColors.info,
                 icon: Icons.receipt_long_outlined,
               ),
             ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         Row(
           children: [
             Expanded(
@@ -352,24 +354,24 @@ class _ReportBody extends StatelessWidget {
                 key: const Key('reports-kpi-customers'),
                 label: context.l10n.kpiCustomers,
                 value: '${metrics.customersCount}',
-                accent: TongtaiDesignTokens.inventoryOrange,
+                accent: TtColors.warning,
                 icon: Icons.people_outline,
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: _KpiCard(
                 key: const Key('reports-kpi-aov'),
                 label: context.l10n.kpiAov,
                 value: TongtaiFormatters.vnd(metrics.averageOrderValue),
-                accent: TongtaiDesignTokens.producerGreen,
+                accent: TtColors.success,
                 icon: Icons.shopping_bag_outlined,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Workizen AI (WTM-116 G-3A summary · WTM-135 G-3B recommend) ─
         _AiSummaryCard(
@@ -381,38 +383,38 @@ class _ReportBody extends StatelessWidget {
           onHealth: onHealth,
         ),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Revenue trend (WTM-95) ──────────────────────────────────────
         _SectionTitle(context.l10n.sectionRevenueTrend),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         _RevenueTrendCard(report: report),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Period selector — scopes the breakdowns below (WTM-115) ─────
         _SectionTitle(context.l10n.sectionBreakdownByPeriod),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         _PeriodSelector(period: period, onChanged: onPeriodChanged),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
+        const SizedBox(height: TtSpace.x5),
 
         // ── Top categories (WTM-95, period-scoped WTM-115) ──────────────
         _SectionTitle(context.l10n.sectionTopCategories),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         _TopCategoriesCard(
           categories: breakdown.topCategories,
           total: breakdown.revenue,
         ),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Top products (WTM-97, period-scoped WTM-115) ────────────────
         _SectionTitle(context.l10n.sectionTopProducts),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         _TopProductsCard(products: breakdown.topProducts),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Top customers (WTM-97, period-scoped WTM-115) ───────────────
         // ── Revenue by channel (WTM-209) — only when recorded ──────────
@@ -421,16 +423,14 @@ class _ReportBody extends StatelessWidget {
         // breakdown is a promise with nothing behind it (WTM-182).
         if (breakdown.channelRevenue.isNotEmpty) ...[
           _SectionTitle(context.l10n.sectionRevenueByChannel),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Container(
             key: const Key('reports-channel-revenue'),
-            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+            padding: const EdgeInsets.all(TtSpace.x4),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.cardBorderRadius,
-              ),
-              border: Border.all(color: TongtaiDesignTokens.lightBorder),
+              borderRadius: BorderRadius.circular(TtRadius.md),
+              border: Border.all(color: TtColors.border),
             ),
             child: Column(
               children: [
@@ -440,41 +440,41 @@ class _ReportBody extends StatelessWidget {
                       Expanded(
                         child: Text(
                           context.l10n.profileChannel(c.channel.code),
-                          style: TongtaiDesignTokens.bodyStyle.copyWith(
-                            color: TongtaiDesignTokens.lightTextPrimary,
+                          style: TtType.bodyLarge.copyWith(
+                            color: TtColors.textPrimary,
                           ),
                         ),
                       ),
                       Text(
                         context.l10n.reportChannelOrders(c.orders),
-                        style: TongtaiDesignTokens.captionStyle.copyWith(
-                          color: TongtaiDesignTokens.lightTextSecondary,
+                        style: TtType.caption.copyWith(
+                          color: TtColors.textSecondary,
                         ),
                       ),
-                      const SizedBox(width: TongtaiDesignTokens.spacing3),
+                      const SizedBox(width: TtSpace.x3),
                       Text(
                         TongtaiFormatters.vnd(c.revenue),
-                        style: TongtaiDesignTokens.bodyStyle.copyWith(
+                        style: TtType.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: TongtaiDesignTokens.lightTextPrimary,
+                          color: TtColors.textPrimary,
                         ),
                       ),
                     ],
                   ),
                   if (c != breakdown.channelRevenue.last)
-                    const Divider(height: TongtaiDesignTokens.spacing4),
+                    const Divider(height: TtSpace.x4),
                 ],
               ],
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing6),
+          const SizedBox(height: TtSpace.x6),
         ],
 
         _SectionTitle(context.l10n.sectionTopCustomers),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         _TopCustomersCard(customers: breakdown.topCustomers),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Opportunity pipeline (WTM-98) ───────────────────────────────
         _SectionHeader(
@@ -493,7 +493,7 @@ class _ReportBody extends StatelessWidget {
             if (Navigator.of(context).canPop()) Navigator.of(context).pop();
           },
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         _PipelineCard(pipeline: pipeline),
       ],
     );
@@ -539,15 +539,13 @@ class _AiSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const accent = TongtaiDesignTokens.copilotViolet;
+    const accent = TtColors.ai;
     return Container(
       key: const Key('reports-ai-summary'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Column(
@@ -556,14 +554,14 @@ class _AiSummaryCard extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.auto_awesome, size: 18, color: accent),
-              const SizedBox(width: TongtaiDesignTokens.spacing2),
+              const SizedBox(width: TtSpace.x2),
               Expanded(
                 child: Text(
                   result == null
                       ? 'Workizen AI'
                       : 'Workizen AI — ${result!.title}',
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -571,19 +569,17 @@ class _AiSummaryCard extends StatelessWidget {
               if (result != null)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: TongtaiDesignTokens.spacing2,
+                    horizontal: TtSpace.x2,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(
-                      TongtaiDesignTokens.radiusFull,
-                    ),
+                    borderRadius: BorderRadius.circular(TtRadius.full),
                   ),
                   child: Text(
                     result!.sourceLabel,
                     key: const Key('reports-ai-summary-source'),
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                    style: TtType.caption.copyWith(
                       color: accent,
                       fontWeight: FontWeight.w600,
                     ),
@@ -591,7 +587,7 @@ class _AiSummaryCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           if (running)
             TongtaiInlineBusy(label: context.l10n.reportsAnalyzing)
           else ...[
@@ -599,28 +595,28 @@ class _AiSummaryCard extends StatelessWidget {
               Text(
                 result!.text,
                 key: const Key('reports-ai-summary-text'),
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                style: TtType.body.copyWith(
+                  color: TtColors.textPrimary,
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               // WTM-280 — chỉ hiện KHI có kết quả. Không có gì để đọc thì câu
               // miễn trừ chỉ là nhiễu, và nhiễu thường xuyên làm người ta
               // ngừng đọc đúng lúc nó quan trọng.
               Text(
                 context.l10n.estimateDisclaimer,
                 key: const Key('reports-ai-estimate-disclaimer'),
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                style: TtType.caption.copyWith(
+                  color: TtColors.textSecondary,
                   height: 1.4,
                 ),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+              const SizedBox(height: TtSpace.x3),
             ],
             Wrap(
-              spacing: TongtaiDesignTokens.spacing2,
-              runSpacing: TongtaiDesignTokens.spacing1,
+              spacing: TtSpace.x2,
+              runSpacing: TtSpace.x1,
               children: [
                 OutlinedButton.icon(
                   key: const Key('reports-ai-summary-run'),
@@ -667,8 +663,8 @@ class _PeriodSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Wrap(
       key: const Key('reports-period-selector'),
-      spacing: TongtaiDesignTokens.spacing2,
-      runSpacing: TongtaiDesignTokens.spacing1,
+      spacing: TtSpace.x2,
+      runSpacing: TtSpace.x1,
       children: [
         for (final p in ReportPeriod.values)
           ChoiceChip(
@@ -676,13 +672,9 @@ class _PeriodSelector extends StatelessWidget {
             label: Text(p.label(context.l10n.languageCode)),
             selected: p == period,
             onSelected: (_) => onChanged(p),
-            selectedColor: TongtaiDesignTokens.financePurple.withValues(
-              alpha: 0.15,
-            ),
-            labelStyle: TongtaiDesignTokens.smallStyle.copyWith(
-              color: p == period
-                  ? TongtaiDesignTokens.financePurple
-                  : TongtaiDesignTokens.lightTextSecondary,
+            selectedColor: TtColors.ai.withValues(alpha: 0.15),
+            labelStyle: TtType.body.copyWith(
+              color: p == period ? TtColors.ai : TtColors.textSecondary,
               fontWeight: p == period ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
@@ -730,20 +722,18 @@ class _PipelineCard extends StatelessWidget {
     if (!pipeline.hasActive) {
       return Container(
         key: const Key('reports-pipeline'),
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         decoration: _cardDecoration,
         child: Text(
           context.l10n.reportsNoPipeline,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.body.copyWith(color: TtColors.textSecondary),
         ),
       );
     }
     final top = pipeline.top!;
     return Container(
       key: const Key('reports-pipeline'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -764,35 +754,31 @@ class _PipelineCard extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(height: TongtaiDesignTokens.spacing6),
+          const Divider(height: TtSpace.x6),
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: TongtaiDesignTokens.copilotViolet.withValues(
-                    alpha: 0.12,
-                  ),
-                  borderRadius: BorderRadius.circular(
-                    TongtaiDesignTokens.radiusFull,
-                  ),
+                  color: TtColors.ai.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(TtRadius.full),
                 ),
                 child: Text(
                   top.score.value?.round().toString() ?? '—',
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.financePurple,
+                  style: TtType.caption.copyWith(
+                    color: TtColors.ai,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               Expanded(
                 child: Text(
                   top.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -818,16 +804,14 @@ class _PipelineStat extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TongtaiDesignTokens.heading3Style.copyWith(
-            color: TongtaiDesignTokens.copilotViolet,
+          style: TtType.h2.copyWith(
+            color: TtColors.ai,
             fontWeight: FontWeight.w700,
           ),
         ),
         Text(
           label,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
       ],
     );
@@ -844,16 +828,14 @@ class _TopProductsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('reports-top-products'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         children: [
           for (var i = 0; i < products.length; i++)
             _RankRow(
               rank: i + 1,
-              accent: TongtaiDesignTokens.inventoryOrange,
+              accent: TtColors.warning,
               title: products[i].name,
               subtitle:
                   '${context.l10n.reportsSoldPrefix} ${products[i].quantity}',
@@ -875,16 +857,14 @@ class _TopCustomersCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('reports-top-customers'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         children: [
           for (var i = 0; i < customers.length; i++)
             _RankRow(
               rank: i + 1,
-              accent: TongtaiDesignTokens.consumerBlue,
+              accent: TtColors.info,
               title: customers[i].name,
               subtitle: context.l10n.reportsOrdersCount(customers[i].orders),
               value: TongtaiFormatters.vndShort(customers[i].spend),
@@ -914,9 +894,7 @@ class _RankRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: TongtaiDesignTokens.spacing3,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: TtSpace.x3),
       child: Row(
         children: [
           Container(
@@ -929,13 +907,13 @@ class _RankRow extends StatelessWidget {
             ),
             child: Text(
               '$rank',
-              style: TongtaiDesignTokens.captionStyle.copyWith(
+              style: TtType.caption.copyWith(
                 color: accent,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing3),
+          const SizedBox(width: TtSpace.x3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -944,25 +922,23 @@ class _RankRow extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const SizedBox(width: TtSpace.x2),
           Text(
             value,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.body.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -990,34 +966,30 @@ class _KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 20, color: accent),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TongtaiDesignTokens.heading3Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.h2.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
         ],
       ),
@@ -1034,8 +1006,8 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TongtaiDesignTokens.heading3Style.copyWith(
-        color: TongtaiDesignTokens.lightTextPrimary,
+      style: TtType.h2.copyWith(
+        color: TtColors.textPrimary,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -1053,18 +1025,16 @@ class _RevenueTrendCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final months = report.monthlyRevenue;
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '${context.l10n.reportsPeakPrefix} ${TongtaiFormatters.vnd(report.peakMonthlyRevenue)}',
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           SizedBox(
             height: 160,
             child: CustomPaint(
@@ -1076,7 +1046,7 @@ class _RevenueTrendCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1085,8 +1055,8 @@ class _RevenueTrendCard extends StatelessWidget {
                   child: Text(
                     m.shortLabelVi,
                     textAlign: TextAlign.center,
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                 ),
@@ -1116,8 +1086,8 @@ class _RevenueBarsPainter extends CustomPainter {
     // A visible sliver even for a zero month keeps the axis readable.
     const minBarHeight = 3.0;
 
-    final barPaint = Paint()..color = TongtaiDesignTokens.financePurple;
-    final zeroPaint = Paint()..color = TongtaiDesignTokens.lightBorder;
+    final barPaint = Paint()..color = TtColors.ai;
+    final zeroPaint = Paint()..color = TtColors.border;
     final baseline = size.height;
 
     for (var i = 0; i < months.length; i++) {
@@ -1151,7 +1121,7 @@ class _TopCategoriesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         children: [
@@ -1160,8 +1130,7 @@ class _TopCategoriesCard extends StatelessWidget {
               category: c,
               share: total <= 0 ? 0 : c.revenue / total,
             ),
-            if (c != categories.last)
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+            if (c != categories.last) const SizedBox(height: TtSpace.x3),
           ],
         ],
       ),
@@ -1185,29 +1154,25 @@ class _CategoryBar extends StatelessWidget {
           children: [
             Text(
               category.category,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.body.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
             Text(
               '${TongtaiFormatters.vnd(category.revenue)} · ${(share * 100).round()}%',
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing1),
+        const SizedBox(height: TtSpace.x1),
         ClipRRect(
-          borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+          borderRadius: BorderRadius.circular(TtRadius.full),
           child: LinearProgressIndicator(
             value: share.clamp(0.0, 1.0),
             minHeight: 8,
-            backgroundColor: TongtaiDesignTokens.lightHover,
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              TongtaiDesignTokens.inventoryOrange,
-            ),
+            backgroundColor: TtColors.surfaceTertiary,
+            valueColor: const AlwaysStoppedAnimation<Color>(TtColors.warning),
           ),
         ),
       ],
@@ -1226,26 +1191,22 @@ class _ReportsEmptyState extends StatelessWidget {
       // empty view owes (ADR-TON-015 §3).
       key: const Key('reports-empty'),
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const TongtaiFoxMascot.face(size: 72),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             Text(
               context.l10n.reportsEmptyTitle,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.heading3Style.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+              style: TtType.h2.copyWith(color: TtColors.textPrimary),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             Text(
               context.l10n.reportsEmptyBody,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),
@@ -1255,9 +1216,9 @@ class _ReportsEmptyState extends StatelessWidget {
 }
 
 final BoxDecoration _cardDecoration = BoxDecoration(
-  color: TongtaiDesignTokens.lightBackground,
-  borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
-  border: Border.all(color: TongtaiDesignTokens.lightBorder),
+  color: TtColors.surfaceSecondary,
+  borderRadius: BorderRadius.circular(TtRadius.md),
+  border: Border.all(color: TtColors.border),
 );
 
 /// Everything the Reports screen is computed from, in one read.

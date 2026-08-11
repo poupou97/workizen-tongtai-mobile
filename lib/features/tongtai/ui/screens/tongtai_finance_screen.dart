@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../finance/finance_category.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
@@ -8,7 +10,6 @@ import '../../core/tongtai_formatters.dart';
 import '../../finance/finance_controller.dart';
 import '../../finance/finance_summary.dart';
 import '../../finance/finance_transaction.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_finance_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_screen_data.dart';
@@ -33,8 +34,8 @@ class TongtaiFinanceScreen extends ConsumerStatefulWidget {
   final FinanceController? controller;
   final DateTime Function()? clock;
 
-  static const Color _income = TongtaiDesignTokens.producerGreen;
-  static const Color _expense = TongtaiDesignTokens.error;
+  static const Color _income = TtColors.success;
+  static const Color _expense = TtColors.danger;
 
   @override
   ConsumerState<TongtaiFinanceScreen> createState() =>
@@ -114,7 +115,7 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
       listenable: Listenable.merge([_controller, _data]),
       builder: (context, _) {
         return Scaffold(
-          backgroundColor: TongtaiDesignTokens.lightBackground,
+          backgroundColor: TtColors.surfaceSecondary,
           // Finance and Reports are pushed screens, not tabs — they keep the
           // back arrow and carry no More action (WTM-192 put that on tabs).
           appBar: tongtaiScreenHeader(
@@ -129,7 +130,7 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
             onPressed: _addTransaction,
             // White label on violet-500 reads at 4.23:1 — near miss, still a
             // miss (WTM-169).
-            backgroundColor: TongtaiDesignTokens.financeVioletText,
+            backgroundColor: TtColors.aiOnLight,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.titleTransactionForm),
@@ -160,7 +161,7 @@ class _FinanceBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       children: [
         // ── KPIs (YTD) ──────────────────────────────────────────────────
         Row(
@@ -183,7 +184,7 @@ class _FinanceBody extends StatelessWidget {
                 icon: Icons.south_west,
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: _KpiCard(
                 cardKey: const Key('finance-kpi-expense'),
@@ -195,7 +196,7 @@ class _FinanceBody extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         Row(
           children: [
             Expanded(
@@ -203,33 +204,33 @@ class _FinanceBody extends StatelessWidget {
                 cardKey: const Key('finance-kpi-profit'),
                 label: context.l10n.kpiProfit,
                 value: TongtaiFormatters.vnd(summary.profitYtd),
-                accent: TongtaiDesignTokens.financePurple,
+                accent: TtColors.ai,
                 icon: Icons.savings_outlined,
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: _KpiCard(
                 cardKey: const Key('finance-kpi-margin'),
                 label: context.l10n.kpiMargin,
                 value: '${(summary.marginYtd * 100).round()}%',
-                accent: TongtaiDesignTokens.consumerBlue,
+                accent: TtColors.info,
                 icon: Icons.percent,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Cashflow: income vs expense per month ───────────────────────
         _SectionTitle(context.l10n.sectionCashflow),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         const _CashflowLegend(),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         _CashflowCard(summary: summary),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Receivables (WTM-211) — only when money is actually stuck ───
         // Derived from orders the seller marked unpaid; never stored, and an
@@ -237,36 +238,30 @@ class _FinanceBody extends StatelessWidget {
         if (summary.receivables > 0) ...[
           Container(
             key: const Key('finance-receivables'),
-            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+            padding: const EdgeInsets.all(TtSpace.x4),
             decoration: BoxDecoration(
-              color: TongtaiDesignTokens.inventoryOrange.withValues(
-                alpha: 0.08,
-              ),
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.cardBorderRadius,
-              ),
+              color: TtColors.warning.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(TtRadius.md),
               border: Border.all(
-                color: TongtaiDesignTokens.inventoryOrange.withValues(
-                  alpha: 0.3,
-                ),
+                color: TtColors.warning.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
               children: [
                 const Icon(
                   Icons.hourglass_bottom,
-                  color: TongtaiDesignTokens.inventoryOrangeText,
+                  color: TtColors.warningOnDark,
                 ),
-                const SizedBox(width: TongtaiDesignTokens.spacing3),
+                const SizedBox(width: TtSpace.x3),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         context.l10n.financeReceivablesTitle,
-                        style: TongtaiDesignTokens.bodyStyle.copyWith(
+                        style: TtType.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: TongtaiDesignTokens.lightTextPrimary,
+                          color: TtColors.textPrimary,
                         ),
                       ),
                       Text(
@@ -274,8 +269,8 @@ class _FinanceBody extends StatelessWidget {
                           TongtaiFormatters.vnd(summary.receivables),
                           summary.debtorCount,
                         ),
-                        style: TongtaiDesignTokens.smallStyle.copyWith(
-                          color: TongtaiDesignTokens.lightTextSecondary,
+                        style: TtType.body.copyWith(
+                          color: TtColors.textSecondary,
                         ),
                       ),
                     ],
@@ -284,22 +279,22 @@ class _FinanceBody extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing6),
+          const SizedBox(height: TtSpace.x6),
         ],
 
         // ── Expense breakdown ───────────────────────────────────────────
         _SectionTitle(context.l10n.sectionExpensesByCategory),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         _ExpenseBreakdownCard(
           categories: summary.expenseByCategory,
           total: summary.expenseYtd,
         ),
 
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TtSpace.x6),
 
         // ── Recent activity ─────────────────────────────────────────────
         _SectionTitle(context.l10n.sectionRecent),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         _RecentCard(transactions: recent),
       ],
     );
@@ -329,43 +324,37 @@ class _KpiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: cardKey,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 20, color: accent),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TongtaiDesignTokens.heading3Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.h2.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.caption.copyWith(color: TtColors.textSecondary),
           ),
           if (note case final note?) ...[
             const SizedBox(height: 2),
             Text(
               note,
               key: const Key('finance-kpi-income-note'),
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ],
@@ -383,8 +372,8 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TongtaiDesignTokens.heading3Style.copyWith(
-        color: TongtaiDesignTokens.lightTextPrimary,
+      style: TtType.h2.copyWith(
+        color: TtColors.textPrimary,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -399,7 +388,7 @@ class _CashflowLegend extends StatelessWidget {
     return Row(
       children: [
         _dot(TongtaiFinanceScreen._income, context.l10n.txnIncome),
-        const SizedBox(width: TongtaiDesignTokens.spacing4),
+        const SizedBox(width: TtSpace.x4),
         _dot(TongtaiFinanceScreen._expense, context.l10n.txnExpense),
       ],
     );
@@ -415,9 +404,7 @@ class _CashflowLegend extends StatelessWidget {
       const SizedBox(width: 6),
       Text(
         label,
-        style: TongtaiDesignTokens.captionStyle.copyWith(
-          color: TongtaiDesignTokens.lightTextSecondary,
-        ),
+        style: TtType.caption.copyWith(color: TtColors.textSecondary),
       ),
     ],
   );
@@ -432,7 +419,7 @@ class _CashflowCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final months = summary.monthly;
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,7 +435,7 @@ class _CashflowCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -457,8 +444,8 @@ class _CashflowCard extends StatelessWidget {
                   child: Text(
                     m.shortLabelVi,
                     textAlign: TextAlign.center,
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                 ),
@@ -543,14 +530,13 @@ class _ExpenseBreakdownCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         children: [
           for (final c in categories) ...[
             _ExpenseBar(category: c, share: total <= 0 ? 0 : c.amount / total),
-            if (c != categories.last)
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+            if (c != categories.last) const SizedBox(height: TtSpace.x3),
           ],
         ],
       ),
@@ -576,29 +562,25 @@ class _ExpenseBar extends StatelessWidget {
               // WTM-197: the breakdown groups by **code**; the seller must
               // still read a label. Codes are for storage, never for eyes.
               financeCategoryCodeLabel(category.category, context.l10n),
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.body.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
             Text(
               '${TongtaiFormatters.vnd(category.amount)} · ${(share * 100).round()}%',
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing1),
+        const SizedBox(height: TtSpace.x1),
         ClipRRect(
-          borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+          borderRadius: BorderRadius.circular(TtRadius.full),
           child: LinearProgressIndicator(
             value: share.clamp(0.0, 1.0),
             minHeight: 8,
-            backgroundColor: TongtaiDesignTokens.lightHover,
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              TongtaiDesignTokens.error,
-            ),
+            backgroundColor: TtColors.surfaceTertiary,
+            valueColor: const AlwaysStoppedAnimation<Color>(TtColors.danger),
           ),
         ),
       ],
@@ -614,9 +596,7 @@ class _RecentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       decoration: _cardDecoration,
       child: Column(
         children: [for (final t in transactions) _RecentRow(transaction: t)],
@@ -638,9 +618,7 @@ class _RecentRow extends StatelessWidget {
         : TongtaiFinanceScreen._expense;
     final sign = income ? '+' : '-';
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: TongtaiDesignTokens.spacing3,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: TtSpace.x3),
       child: Row(
         children: [
           CircleAvatar(
@@ -652,7 +630,7 @@ class _RecentRow extends StatelessWidget {
               color: color,
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing3),
+          const SizedBox(width: TtSpace.x3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -663,24 +641,22 @@ class _RecentRow extends StatelessWidget {
                       : transaction.description,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   '${transaction.category} · ${TongtaiFormatters.isoDate(transaction.date)}',
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const SizedBox(width: TtSpace.x2),
           Text(
             '$sign${TongtaiFormatters.vnd(transaction.amount)}',
-            style: TongtaiDesignTokens.smallStyle.copyWith(
+            style: TtType.body.copyWith(
               color: color,
               fontWeight: FontWeight.w700,
             ),
@@ -702,26 +678,22 @@ class _FinanceEmptyState extends StatelessWidget {
       // §3) — timeline and risk already carried it, these two did not.
       key: const Key('finance-empty'),
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const TongtaiFoxMascot.face(size: 72),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             Text(
               context.l10n.financeEmptyTitle,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.heading3Style.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+              style: TtType.h2.copyWith(color: TtColors.textPrimary),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             Text(
               context.l10n.financeEmptyBody,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
         ),
@@ -731,7 +703,7 @@ class _FinanceEmptyState extends StatelessWidget {
 }
 
 final BoxDecoration _cardDecoration = BoxDecoration(
-  color: TongtaiDesignTokens.lightBackground,
-  borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
-  border: Border.all(color: TongtaiDesignTokens.lightBorder),
+  color: TtColors.surfaceSecondary,
+  borderRadius: BorderRadius.circular(TtRadius.md),
+  border: Border.all(color: TtColors.border),
 );
