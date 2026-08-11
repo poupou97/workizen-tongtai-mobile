@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../core/screen_data_controller.dart';
 import '../../journey/business_goal.dart';
+import '../../journey/journey_controller.dart';
+import '../../journey/journey_planner.dart';
 import '../../navigation/tongtai_design_tokens.dart';
 import '../../agent/business_brief.dart';
 import '../../core/tongtai_formatters.dart';
@@ -18,7 +20,15 @@ import '../../providers/tongtai_onboarding_v2_provider.dart';
 import '../../providers/tongtai_profile_provider.dart';
 import '../../providers/tongtai_sample_provider.dart';
 import '../widgets/tongtai_screen_data.dart' show showTongtaiFailure;
+import 'tongtai_customer_list_screen.dart';
+import 'tongtai_customer_risk_screen.dart';
+import 'tongtai_finance_screen.dart';
+import 'tongtai_goals_screen.dart';
 import 'tongtai_import_screen.dart';
+import 'tongtai_inventory_screen.dart';
+import 'tongtai_journey_screen.dart';
+import 'tongtai_opportunity_feed_screen.dart';
+import 'tongtai_reports_screen.dart';
 
 /// **Onboarding V2** — Epic WTM-349.
 ///
@@ -110,6 +120,7 @@ class _TongtaiOnboardingV2ScreenState
               plan: _plan,
               saving: _saving,
               onFinish: _finish,
+              onOpen: _openDestination,
             ),
           },
         ),
@@ -238,6 +249,17 @@ class _TongtaiOnboardingV2ScreenState
     });
   }
 
+  /// Mở chỗ làm của một việc.
+  ///
+  /// ⚠️ Dogfood máy thật (WTM-360) bắt được: phụ đề hứa *"mỗi việc mở thẳng
+  /// vào chỗ làm"* và dòng hành động tô cam **trông bấm được**, nhưng không có
+  /// `onTap` nào. Đó là CTA chết ở dạng khó thấy nhất — nó không hỏng, nó chỉ
+  /// im lặng. Không test nào bắt được vì test chỉ kiểm `destination` **có mặt**
+  /// trong danh sách đóng, không kiểm màn hình có DÙNG nó không.
+  Future<void> _openDestination(PlanDestination destination) => Navigator.of(
+    context,
+  ).push<void>(MaterialPageRoute(builder: (_) => screenFor(destination)));
+
   // ── Kết thúc ─────────────────────────────────────────────────────────────
 
   Future<void> _finish() async {
@@ -267,7 +289,9 @@ class _TongtaiOnboardingV2ScreenState
             .read(businessGoalRepositoryProvider)
             .upsert(
               BusinessGoal(
-                id: 'onboarding-${goal.code}-${now.microsecondsSinceEpoch}',
+                id:
+                    '$_kOnboardingGoalPrefix${goal.code}-'
+                    '${now.microsecondsSinceEpoch}',
                 name: template.nameVi,
                 type: archetype,
                 targetAmount: template.suggestedTarget,
@@ -286,11 +310,83 @@ class _TongtaiOnboardingV2ScreenState
       if (failure != null) showTongtaiFailure(context, failure);
     }
 
+    // ⚠️ Dogfood (WTM-360): Trang chủ hiện *"Việc hôm nay — chưa có nhiệm vụ
+    // nào"* ngay dưới một brief liệt kê ba việc. Hai khối cạnh nhau, một nói
+    // có việc, một nói không.
+    //
+    // Nguyên nhân không phải lời văn: khối "Việc hôm nay" đọc **hành trình**,
+    // và onboarding mới chỉ tạo *mục tiêu*. Sửa bằng cách đổi chữ sẽ giấu đi
+    // đúng thứ cần sửa — một mục tiêu chưa sinh ra kế hoạch thì chưa phải một
+    // mục tiêu, nó là một điều ước.
+    await _startJourneyForFirstGoal();
+
     if (!mounted) return;
     invalidateBusinessDataProviders(ref);
     widget.onDone(OnboardingOutcome(insight: _run?.insight, plan: _plan));
   }
 }
+
+// ── Hành trình cho mục tiêu vừa chọn ─────────────────────────────────────────
+
+extension _StartJourney on _TongtaiOnboardingV2ScreenState {
+  Future<void> _startJourneyForFirstGoal() async {
+    final goal = _goals.firstWhere(
+      (g) => g.createsGoal,
+      orElse: () => OnboardingGoal.justExplore,
+    );
+    if (!goal.createsGoal) return;
+
+    final goals = await ref.read(businessGoalRepositoryProvider).loadAll();
+    final mine = goals.where((g) => g.id.startsWith(_kOnboardingGoalPrefix));
+    if (mine.isEmpty) return;
+
+    // Số đếm lấy từ chính lượt phân tích vừa chạy — không đọc lại repository,
+    // vì hai lần đọc quanh một lần ghi là hai câu trả lời có thể khác nhau.
+    final run = _run;
+    await runTongtaiAction(
+      () => JourneyController(ref.read(journeyRepositoryProvider)).startJourney(
+        JourneyPlanInput(
+          goal: mine.last,
+          profile: _flow.conversation.profile,
+          productCount: run?.countOf(AnalysisStage.products) ?? 0,
+          customerCount: run?.countOf(AnalysisStage.customers) ?? 0,
+          orderCount: run?.countOf(AnalysisStage.orders) ?? 0,
+        ),
+        journeyId: '$_kOnboardingGoalPrefix${mine.last.id}',
+      ),
+      screen: 'onboarding_v2',
+    );
+  }
+}
+
+/// Màn hình cho một đích của kế hoạch.
+///
+/// `switch` **vét cạn** trên enum, nên thêm một [PlanDestination] mà quên nối
+/// màn là lỗi biên dịch — không phải một nút im lặng. Đó chính là khoảng trống
+/// mà dogfood WTM-360 tìm ra: đích được khai đầy đủ, nhưng không ai dùng nó.
+Widget screenFor(PlanDestination destination) => switch (destination) {
+  PlanDestination.home => const TongtaiGoalsScreen(),
+  PlanDestination.inventory => const TongtaiInventoryScreen(),
+  // Màn cảnh báo tồn nhận `catalog` do màn Kho sở hữu. Dựng một catalog thứ
+  // hai ở đây sẽ tạo đúng thứ P-27 cấm: hai chủ cho một khái niệm. Kho là chỗ
+  // việc thật sự xảy ra, và nó hiện cảnh báo ngay đầu màn.
+  PlanDestination.stockAlerts => const TongtaiInventoryScreen(),
+  PlanDestination.customerList => const TongtaiCustomerListScreen(),
+  PlanDestination.customerRisk => const TongtaiCustomerRiskScreen(),
+  PlanDestination.opportunity => const TongtaiOpportunityFeedScreen(),
+  PlanDestination.finance => const TongtaiFinanceScreen(),
+  PlanDestination.reports => const TongtaiReportsScreen(),
+  PlanDestination.goals => const TongtaiGoalsScreen(),
+  PlanDestination.journey => const TongtaiJourneyScreen(),
+  PlanDestination.importData => const TongtaiImportScreen(),
+};
+
+/// Tiền tố id mục tiêu do onboarding tạo.
+///
+/// Phân biệt với mục tiêu `sample-` của bộ dữ liệu mẫu: *"Xoá dữ liệu mẫu"*
+/// chỉ được xoá phần mẫu, và tiền tố là thứ làm điều đó đúng theo cấu trúc
+/// chứ không theo trí nhớ.
+const String _kOnboardingGoalPrefix = 'onboarding-';
 
 // ── Chặng 1 · Gặp Tổng Tài ───────────────────────────────────────────────────
 
@@ -789,31 +885,59 @@ class _FindingCard extends StatelessWidget {
       BriefSeverity.warning => TongtaiDesignTokens.inventoryOrange,
       BriefSeverity.info => TongtaiDesignTokens.consumerBlue,
     };
-    return Card(
+    // ⚠️ Dogfood WTM-360: bốn thẻ trên máy thật trông **giống hệt nhau** —
+    // "đã hết hàng" và "khách chưa quay lại" chỉ khác ở một sắc độ viền mà mắt
+    // không tách được. Màu được đọc TRƯỚC chữ (bài học WTM-340: chip tím chứ
+    // không xanh lá), nên mức khẩn phải là một vạch ĐẶC.
+    //
+    // Hai cách làm sai đã thử trước khi ra hình này, cả hai đều chỉ ném lúc
+    // *vẽ* chứ không lúc biên dịch:
+    //   · `Row(stretch)` trần trong `ListView` — chiều cao không có biên;
+    //   · viền bốn cạnh khác màu kèm `borderRadius` — Flutter cấm.
+    // `IntrinsicHeight` cho hàng một chiều cao có biên, `ClipRRect` cho góc
+    // bo mà không cần viền không đồng nhất.
+    return Container(
+      key: const Key('onboarding-v2-finding-card'),
       margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
-      shape: RoundedRectangleBorder(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
-        side: BorderSide(color: color.withValues(alpha: 0.4)),
+        border: Border.all(color: TongtaiDesignTokens.lightBorder),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              finding.headline,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
-                fontWeight: FontWeight.w600,
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+            Container(
+              key: const Key('onboarding-v2-finding-severity'),
+              width: 4,
+              color: color,
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
-            // Lý do đọc thẳng từ bằng chứng của luật — không viết lại. Hai
-            // danh sách lý do sẽ lệch nhau đúng vào ngày ai đó sửa một bên.
-            Text(
-              finding.reason,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      finding.headline,
+                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: TongtaiDesignTokens.lightTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    // Lý do đọc thẳng từ bằng chứng của luật — không viết lại.
+                    // Hai danh sách lý do sẽ lệch nhau đúng vào ngày ai đó sửa
+                    // một bên.
+                    Text(
+                      finding.reason,
+                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                        color: TongtaiDesignTokens.lightTextSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -995,11 +1119,13 @@ class _Plan extends StatelessWidget {
     required this.plan,
     required this.saving,
     required this.onFinish,
+    required this.onOpen,
   });
 
   final FirstPlan? plan;
   final bool saving;
   final VoidCallback onFinish;
+  final ValueChanged<PlanDestination> onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -1030,33 +1156,50 @@ class _Plan extends StatelessWidget {
               borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
               side: const BorderSide(color: TongtaiDesignTokens.lightBorder),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${a.priority}. ${a.problem}',
-                    style: TongtaiDesignTokens.bodyStyle.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: TongtaiDesignTokens.lightTextPrimary,
+            // Cả thẻ là vùng chạm, không chỉ dòng chữ cam: một dòng chữ trông
+            // bấm được mà chỉ bấm trúng khi nhắm đúng vài chục pixel thì vẫn là
+            // một lời hứa hỏng.
+            child: InkWell(
+              key: Key('onboarding-v2-plan-open-${a.priority}'),
+              onTap: () => onOpen(a.destination),
+              child: Padding(
+                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${a.priority}. ${a.problem}',
+                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: TongtaiDesignTokens.lightTextPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing1),
-                  Text(
-                    '${l10n.obV2PlanEvidence}: ${a.evidence}',
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    const SizedBox(height: TongtaiDesignTokens.spacing1),
+                    Text(
+                      '${l10n.obV2PlanEvidence}: ${a.evidence}',
+                      style: TongtaiDesignTokens.captionStyle.copyWith(
+                        color: TongtaiDesignTokens.lightTextSecondary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing2),
-                  Text(
-                    a.action,
-                    style: TongtaiDesignTokens.bodyStyle.copyWith(
-                      color: TongtaiDesignTokens.inventoryOrange,
+                    const SizedBox(height: TongtaiDesignTokens.spacing2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            a.action,
+                            style: TongtaiDesignTokens.bodyStyle.copyWith(
+                              color: TongtaiDesignTokens.inventoryOrange,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right,
+                          color: TongtaiDesignTokens.inventoryOrange,
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

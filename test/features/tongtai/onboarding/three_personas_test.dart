@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/core/l10n/app_strings.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/providers/tongtai_inventory_provider.dart';
+import 'package:tongtai/features/tongtai/onboarding/first_plan.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_journey_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_onboarding_v2_screen.dart';
 
@@ -267,6 +269,162 @@ void main() {
       expect(mine, hasLength(1));
       // Không phải "gần đúng archetype": bảy mục tiêu ánh xạ 1:1 chính vì thế.
       expect(mine.single.type.name, 'sourcing');
+    });
+  });
+
+  /// ⭐ Bốn lỗi mà **một vòng cầm máy** bắt được, còn 2597 test thì không.
+  ///
+  /// Ba trong bốn có cùng hình dạng: **thứ gì đó được khai đúng nhưng không ai
+  /// dùng nó**. Không test cũ nào bắt được, vì màn hình vẫn render, vẫn không
+  /// ném, vẫn đúng theo mọi khẳng định đã viết.
+  group('⛔ hồi quy dogfood máy thật (WTM-360)', () {
+    testWidgets('LỖI 1 · mỗi việc trong kế hoạch BẤM ĐƯỢC', (tester) async {
+      // Trên máy: dòng hành động tô cam trông bấm được và không có `onTap`.
+      // Test cũ chỉ kiểm `destination` CÓ MẶT trong danh sách đóng — không
+      // kiểm màn hình có dùng nó.
+      await tester.pumpWidget(host());
+      await tester.pumpAndSettle();
+      final taps = <String>[];
+      await tap(tester, 'onboarding-v2-start', taps);
+      await tap(tester, 'onboarding-v2-profile-skip-all', taps);
+      await tap(tester, 'onboarding-v2-data-none', taps);
+      await tap(tester, 'onboarding-v2-goal-grow_profit', taps);
+      await tap(
+        tester,
+        'onboarding-v2-goal-next',
+        taps,
+        under: 'onboarding-v2-goal',
+      );
+
+      final opener = find.byKey(const Key('onboarding-v2-plan-open-1'));
+      expect(opener, findsOneWidget);
+      await tester.tapByKey(
+        'onboarding-v2-plan-open-1',
+        scrollableUnder: 'onboarding-v2-plan',
+      );
+      // Mở ra một màn thật — không phải "không có gì xảy ra".
+      expect(find.byKey(const Key('onboarding-v2-plan')), findsNothing);
+    });
+
+    test('LỖI 1b · mọi đích đều phân giải được thành một màn', () {
+      // `switch` vét cạn khiến thiếu một đích là lỗi biên dịch. Test này giữ
+      // cho hàm KHÔNG bị thay bằng một `Map` có thể thiếu khoá lặng lẽ.
+      for (final d in PlanDestination.values) {
+        expect(screenFor(d), isA<Widget>(), reason: d.code);
+      }
+    });
+
+    testWidgets('LỖI 2 · mức khẩn đọc được bằng MẮT, không chỉ bằng chữ', (
+      tester,
+    ) async {
+      // Trên máy bốn thẻ trông giống hệt nhau: viền nhạt cùng sắc độ. Màu
+      // được đọc TRƯỚC chữ (WTM-340), nên nó phải là một vạch đặc.
+      await tester.pumpWidget(host());
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
+      await container
+          .read(productRepositoryProvider)
+          .upsert(
+            Product(
+              id: 'p-out',
+              sku: 'POUT',
+              name: 'Hàng hết',
+              category: 'test',
+              pricePerUnit: 100000,
+              costPrice: 60000,
+              quantity: 0,
+              reorderLevel: 10,
+              updatedAt: DateTime.now(),
+            ),
+          );
+
+      final taps = <String>[];
+      await tap(tester, 'onboarding-v2-start', taps);
+      await tap(tester, 'onboarding-v2-profile-skip-all', taps);
+      await tap(tester, 'onboarding-v2-data-sample', taps);
+      await tap(
+        tester,
+        'onboarding-v2-analysis-continue',
+        taps,
+        under: 'onboarding-v2-analysis',
+      );
+
+      expect(
+        find.byKey(const Key('onboarding-v2-finding-card')),
+        findsWidgets,
+        reason: 'không có thẻ phát hiện nào',
+      );
+      // Vạch ĐẶC bên trái — mắt tách được ở khoảng cách đọc, khác hẳn một sắc
+      // độ viền. `color` khác `null` là điều kiện để nó thật sự được tô.
+      final stripes = tester.widgetList<Container>(
+        find.byKey(const Key('onboarding-v2-finding-severity')),
+      );
+      expect(stripes, isNotEmpty);
+      for (final stripe in stripes) {
+        expect(stripe.color, isNotNull);
+      }
+    });
+
+    testWidgets('LỖI 3 · mục tiêu sinh ra HÀNH TRÌNH, không chỉ một bản ghi', (
+      tester,
+    ) async {
+      // Trên máy: Trang chủ hiện "Việc hôm nay — chưa có nhiệm vụ nào" ngay
+      // dưới brief có ba việc. Khối đó đọc hành trình; onboarding mới chỉ tạo
+      // mục tiêu. Một mục tiêu chưa sinh ra kế hoạch là một điều ước.
+      await tester.pumpWidget(host());
+      await tester.pumpAndSettle();
+      final taps = <String>[];
+      await tap(tester, 'onboarding-v2-start', taps);
+      await tap(tester, 'onboarding-v2-profile-skip-all', taps);
+      await tap(tester, 'onboarding-v2-data-sample', taps);
+      await tap(
+        tester,
+        'onboarding-v2-analysis-continue',
+        taps,
+        under: 'onboarding-v2-analysis',
+      );
+      await tap(
+        tester,
+        'onboarding-v2-insight-continue',
+        taps,
+        under: 'onboarding-v2-insight',
+      );
+      await tap(tester, 'onboarding-v2-goal-optimize_inventory', taps);
+      await tap(
+        tester,
+        'onboarding-v2-goal-next',
+        taps,
+        under: 'onboarding-v2-goal',
+      );
+      await tap(
+        tester,
+        'onboarding-v2-finish',
+        taps,
+        under: 'onboarding-v2-plan',
+      );
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
+      final journeys = await container
+          .read(journeyRepositoryProvider)
+          .loadAll();
+      expect(
+        journeys,
+        isNotEmpty,
+        reason: 'mục tiêu đã tạo nhưng không có hành trình nào',
+      );
+    });
+
+    test('LỖI 4 · hai con số về "đơn hàng" không mang cùng một nhãn', () {
+      // Màn phân tích: "đã phân tích 636 đơn hàng" (mọi đơn).
+      // Ảnh chụp:      "đơn hàng 598"            (đơn đã chốt).
+      // Cả hai đều đúng; cùng tên thì người bán phải đoán con nào là thật.
+      const vi = AppStringsVi();
+      expect(vi.obV2AnalysisStage('orders', 636), contains('đơn hàng'));
+      expect(vi.obV2SnapshotOrders, isNot('Đơn hàng'));
     });
   });
 
