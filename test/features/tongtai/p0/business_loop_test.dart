@@ -278,9 +278,10 @@ void main() {
       'tongtai_supplier_search_screen.dart':
           'same as favourites; and the screen '
           'has no journey into it at all yet (WTM-218)',
-      'tongtai_onboarding_conversation_screen.dart':
-          'writes the profile before '
-          'any of the readers exist — the app has not started yet',
+      'tongtai_onboarding_v2_screen.dart':
+          'ghi hồ sơ và mục tiêu TRƯỚC khi bất kỳ màn đọc nào tồn tại — app '
+          'chưa bắt đầu. Nó gọi invalidateBusinessDataProviders ở cuối, nên '
+          'Trang chủ dựng lại trên dữ liệu vừa nhập (WTM-357)',
       'tongtai_opportunity_detail_screen.dart':
           'writes journey nodes and '
           'invalidates the journey providers directly (WTM-191/223)',

@@ -324,6 +324,14 @@ class FirstInsightEngine {
   }
 }
 
+/// Lý do "chưa hề chạy phân tích" — dùng cho đường B, nơi engine **không được
+/// gọi** chứ không phải chạy rồi không thấy gì.
+///
+/// Là một **mã**, không phải một câu: nó không bao giờ hiện lên màn hình (màn
+/// đọc `isInsufficient` rồi tự chọn câu qua `AppStrings`), và một chuỗi tiếng
+/// Việt nằm trong `ui/` là thứ governance l10n cấm — đúng như nó vừa bắt được.
+const String kInsightNotAnalysed = 'not_analysed';
+
 /// Mã luật mùa vụ. Hằng số để test và UI không chép tay chuỗi.
 const String kSeasonalRuleCode = 'rule:seasonal';
 

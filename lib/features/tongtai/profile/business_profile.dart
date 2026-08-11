@@ -100,6 +100,20 @@ enum SalesChannel {
 
   final String code;
 
+  /// Kênh này có **giữ lại một phần tiền** trước khi trả cho người bán không.
+  ///
+  /// Đặt trên enum vì đó là một sự thật của kênh, không phải của màn hình nào.
+  /// Nó là thứ quyết định *"đã tính được lời thật chưa"*: một đơn bán qua sàn
+  /// mà chưa có dòng đối soát nào thì phí sàn còn nằm ngoài sổ, và cộng doanh
+  /// thu trừ giá vốn ở đó cho ra một con số luôn đẹp hơn sự thật (WTM-354).
+  ///
+  /// `appStore` nằm trong nhóm này: Apple và Google cũng cắt phần trăm, và một
+  /// doanh nghiệp số quên điều đó sai y hệt một người bán quên phí Shopee.
+  bool get chargesPlatformFee => switch (this) {
+    SalesChannel.shopee || SalesChannel.tiktok || SalesChannel.appStore => true,
+    _ => false,
+  };
+
   static SalesChannel? fromCode(String? code) {
     if (code == null) return null;
     for (final value in values) {

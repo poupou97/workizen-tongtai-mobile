@@ -693,20 +693,68 @@ abstract class AppStrings {
   String get journeyMeasured;
 
   // AI-first Onboarding (WTM-178) — hội thoại chạy được KHÔNG cần AI.
-  String get obGreeting;
-  String get obGreetingBody;
   String get obStart;
-  String get obSkip;
   String get obNext;
   String get obBack;
-  String get obDone;
-  String get obClosing;
-  String get obClosingEmpty;
   String get obProgress;
   String obQuestion(String stepId);
 
-  /// Nhãn cho một đáp án của câu "loại hình kinh doanh" (WTM-351).
+  // ── Onboarding V2 (Epic WTM-349) ────────────────────────────────────────
+  // Trải nghiệm vào cửa phải chứng minh giá trị TRƯỚC khi người bán tới phần
+  // còn lại của sản phẩm. Không chuỗi nào ở đây nói "hoàn tất thiết lập".
+  String get obV2WelcomeTitle;
+  String get obV2WelcomeBody;
+  String get obV2ValueOpportunityTitle;
+  String get obV2ValueOpportunityBody;
+  String get obV2ValueRiskTitle;
+  String get obV2ValueRiskBody;
+  String get obV2ValueActionTitle;
+  String get obV2ValueActionBody;
+
+  /// Nhãn một đáp án của câu "loại hình kinh doanh" (WTM-351).
   String profileBusinessType(String code);
+
+  String get obV2DataTitle;
+  String get obV2DataBody;
+  String get obV2DataCsvTitle;
+  String get obV2DataCsvBody;
+  String get obV2DataSampleTitle;
+  String get obV2DataSampleBody;
+  String get obV2DataNoneTitle;
+  String get obV2DataNoneBody;
+  String get obV2DataConnectorsLater;
+
+  String get obV2AnalysisTitle;
+  String get obV2AnalysisBody;
+
+  /// Một dòng tiến trình: chặng + số bản ghi **thật** vừa xử lý.
+  String obV2AnalysisStage(String stageCode, int count);
+
+  String get obV2InsightTitle;
+  String get obV2InsightBody;
+  String get obV2InsightQuietTitle;
+  String get obV2InsightQuietBody;
+  String get obV2InsightInsufficientTitle;
+  String get obV2InsightInsufficientBody;
+  String get obV2SnapshotRevenue;
+  String get obV2SnapshotProfit;
+  String get obV2SnapshotOrders;
+  String get obV2SnapshotInventory;
+
+  /// Vì sao chưa tính được lời — hiện ra thay cho một con số đoán.
+  String get obV2ProfitUnknown;
+
+  String get obV2GoalTitle;
+  String get obV2GoalBody;
+  String get obV2GoalLimit;
+  String obV2Goal(String code);
+
+  String get obV2PlanTitle;
+  String get obV2PlanBody;
+  String get obV2PlanEvidence;
+  String get obV2PlanCta;
+  String get obV2Continue;
+  String get obV2SkipProfile;
   String get moreLegalSection;
   String get moreTerms;
   String get morePrivacy;
@@ -2285,30 +2333,11 @@ class AppStringsVi extends AppStrings {
     _ => 'Kênh khác',
   };
   @override
-  String get obGreeting => 'Chào bạn 👋';
-  @override
-  String get obGreetingBody =>
-      'Tôi là Workizen AI. Cho tôi hỏi bốn câu ngắn về việc kinh doanh của bạn, '
-      'để những gợi ý sau này nói đúng chuyện của bạn thay vì nói chung chung. '
-      'Câu nào không muốn trả lời thì bỏ qua.';
-  @override
   String get obStart => 'Bắt đầu';
-  @override
-  String get obSkip => 'Bỏ qua';
   @override
   String get obNext => 'Tiếp';
   @override
   String get obBack => 'Quay lại';
-  @override
-  String get obDone => 'Xong, vào ứng dụng';
-  @override
-  String get obClosing =>
-      'Cảm ơn bạn. Từ giờ khi bạn hỏi, tôi đã biết bạn kinh doanh gì — gợi ý sẽ '
-      'sát hơn. Bạn sửa lại bất cứ lúc nào trong Thêm › Thông tin doanh nghiệp.';
-  @override
-  String get obClosingEmpty =>
-      'Không sao, vào dùng thử trước cũng được. Khi nào muốn kể tôi nghe về việc '
-      'kinh doanh của bạn thì vào Thêm › Thông tin doanh nghiệp.';
   @override
   String get obProgress => 'Câu';
   @override
@@ -2320,6 +2349,26 @@ class AppStringsVi extends AppStrings {
     _ => 'Có mùa nào bạn bán chạy hơn hẳn không?',
   };
   @override
+  String get obV2WelcomeTitle => 'Tôi là Tổng Tài';
+  @override
+  String get obV2WelcomeBody =>
+      'Tôi giúp bạn hiểu và điều hành doanh nghiệp bằng AI.';
+  @override
+  String get obV2ValueOpportunityTitle => 'Phát hiện cơ hội';
+  @override
+  String get obV2ValueOpportunityBody =>
+      'Tìm chỗ còn tiền trong chính số liệu bạn đang có.';
+  @override
+  String get obV2ValueRiskTitle => 'Cảnh báo rủi ro';
+  @override
+  String get obV2ValueRiskBody =>
+      'Báo trước khi hết hàng, khách nguội hay tiền hụt.';
+  @override
+  String get obV2ValueActionTitle => 'Đề xuất việc cần làm';
+  @override
+  String get obV2ValueActionBody =>
+      'Mỗi phát hiện đi kèm một việc bấm được ngay.';
+  @override
   String profileBusinessType(String code) => switch (code) {
     'goods' => 'Bán hàng (nhập, tồn, giao)',
     'digital' => 'Sản phẩm số, khoá học, phần mềm',
@@ -2328,6 +2377,94 @@ class AppStringsVi extends AppStrings {
     'preparing' => 'Đang chuẩn bị kinh doanh',
     _ => 'Khác',
   };
+  @override
+  String get obV2DataTitle => 'Tổng Tài cần hiểu doanh nghiệp của bạn';
+  @override
+  String get obV2DataBody => 'Chọn cách bạn muốn bắt đầu.';
+  @override
+  String get obV2DataCsvTitle => 'Nhập file Excel / CSV';
+  @override
+  String get obV2DataCsvBody => 'Sản phẩm, đơn hàng, khách hàng từ file có sẵn';
+  @override
+  String get obV2DataSampleTitle => 'Dùng dữ liệu mẫu';
+  @override
+  String get obV2DataSampleBody =>
+      'Một doanh nghiệp 12 tháng để xem Tổng Tài làm được gì';
+  @override
+  String get obV2DataNoneTitle => 'Chưa có dữ liệu';
+  @override
+  String get obV2DataNoneBody => 'Bắt đầu từ ý tưởng kinh doanh';
+  @override
+  String get obV2DataConnectorsLater =>
+      'Kết nối thẳng với sàn bán hàng sẽ có ở bản sau.';
+  @override
+  String get obV2AnalysisTitle => 'Tổng Tài đang hiểu doanh nghiệp của bạn';
+  @override
+  String get obV2AnalysisBody => 'Chạy ngay trên máy bạn, không gửi đi đâu cả.';
+  @override
+  String obV2AnalysisStage(String stageCode, int count) => switch (stageCode) {
+    'products' => 'Đã đọc $count sản phẩm',
+    'orders' => 'Đã phân tích $count đơn hàng',
+    'customers' => 'Đã nhận diện $count khách hàng',
+    'stock' => 'Đã kiểm tra tồn kho, $count mặt hàng cần chú ý',
+    _ => 'Đã tìm ra $count điều đáng chú ý',
+  };
+  @override
+  String get obV2InsightTitle => 'Tôi đã hiểu doanh nghiệp của bạn';
+  @override
+  String get obV2InsightBody => 'Đây là những điều đáng chú ý nhất lúc này.';
+  @override
+  String get obV2InsightQuietTitle => 'Tôi đã xem, chưa có gì gấp';
+  @override
+  String get obV2InsightQuietBody =>
+      'Các luật đã chạy hết trên dữ liệu của bạn và không thấy việc nào cần '
+      'làm ngay. Tôi sẽ báo khi có.';
+  @override
+  String get obV2InsightInsufficientTitle => 'Tôi chưa có gì để xem';
+  @override
+  String get obV2InsightInsufficientBody =>
+      'Chưa đủ dữ liệu để kết luận. Đây không phải "mọi thứ đều ổn" — tôi chưa '
+      'nhìn thấy gì cả.';
+  @override
+  String get obV2SnapshotRevenue => 'Doanh thu';
+  @override
+  String get obV2SnapshotProfit => 'Lợi nhuận';
+  @override
+  String get obV2SnapshotOrders => 'Đơn hàng';
+  @override
+  String get obV2SnapshotInventory => 'Vốn tồn kho';
+  @override
+  String get obV2ProfitUnknown => 'Chưa tính được';
+  @override
+  String get obV2GoalTitle => 'Bạn muốn Tổng Tài giúp đạt mục tiêu nào trước?';
+  @override
+  String get obV2GoalBody => 'Chọn 1–2 điều quan trọng nhất với bạn lúc này.';
+  @override
+  String get obV2GoalLimit => 'Chọn nhiều nhất 2 mục tiêu';
+  @override
+  String obV2Goal(String code) => switch (code) {
+    'grow_revenue' => 'Tăng doanh thu',
+    'grow_profit' => 'Tăng lợi nhuận',
+    'find_products' => 'Tìm sản phẩm mới',
+    'optimize_inventory' => 'Tối ưu tồn kho',
+    'better_sourcing' => 'Tìm nguồn hàng tốt hơn',
+    'keep_customers' => 'Giữ chân khách hàng',
+    'new_market' => 'Bán sang thị trường mới',
+    _ => 'Chỉ khám phá trước',
+  };
+  @override
+  String get obV2PlanTitle => 'Kế hoạch đầu tiên của bạn';
+  @override
+  String get obV2PlanBody =>
+      'Làm từ trên xuống. Mỗi việc mở thẳng vào chỗ làm.';
+  @override
+  String get obV2PlanEvidence => 'Vì sao';
+  @override
+  String get obV2PlanCta => 'Bắt đầu điều hành cùng Tổng Tài';
+  @override
+  String get obV2Continue => 'Tiếp tục';
+  @override
+  String get obV2SkipProfile => 'Bỏ qua, tôi khai sau';
   @override
   String get journeyTitle => 'Hành trình';
   @override
@@ -4230,30 +4367,11 @@ class AppStringsEn extends AppStrings {
     _ => 'Other channel',
   };
   @override
-  String get obGreeting => 'Hello 👋';
-  @override
-  String get obGreetingBody =>
-      'I am Workizen AI. Let me ask four short questions about your business, so '
-      'my advice talks about your shop instead of shops in general. Skip any '
-      'question you would rather not answer.';
-  @override
   String get obStart => 'Start';
-  @override
-  String get obSkip => 'Skip';
   @override
   String get obNext => 'Next';
   @override
   String get obBack => 'Back';
-  @override
-  String get obDone => 'Done, open the app';
-  @override
-  String get obClosing =>
-      'Thank you. From now on I know what you sell, so my suggestions will fit '
-      'better. Change any of it under More › Business info.';
-  @override
-  String get obClosingEmpty =>
-      'That is fine — have a look around first. When you want to tell me about '
-      'your business, it is under More › Business info.';
   @override
   String get obProgress => 'Question';
   @override
@@ -4265,6 +4383,26 @@ class AppStringsEn extends AppStrings {
     _ => 'Any season when you sell much more?',
   };
   @override
+  String get obV2WelcomeTitle => 'I am Tổng Tài';
+  @override
+  String get obV2WelcomeBody =>
+      'I help you understand and run your business with AI.';
+  @override
+  String get obV2ValueOpportunityTitle => 'Spot opportunities';
+  @override
+  String get obV2ValueOpportunityBody =>
+      'Find the money still sitting in the numbers you already have.';
+  @override
+  String get obV2ValueRiskTitle => 'Warn about risk';
+  @override
+  String get obV2ValueRiskBody =>
+      'Tell you before stock runs out, customers go quiet or cash gets tight.';
+  @override
+  String get obV2ValueActionTitle => 'Suggest what to do';
+  @override
+  String get obV2ValueActionBody =>
+      'Every finding comes with something you can act on right away.';
+  @override
   String profileBusinessType(String code) => switch (code) {
     'goods' => 'Selling goods (buy, stock, ship)',
     'digital' => 'Digital products, courses, software',
@@ -4273,6 +4411,96 @@ class AppStringsEn extends AppStrings {
     'preparing' => 'Getting ready to start',
     _ => 'Something else',
   };
+  @override
+  String get obV2DataTitle => 'Tổng Tài needs to understand your business';
+  @override
+  String get obV2DataBody => 'Pick how you want to start.';
+  @override
+  String get obV2DataCsvTitle => 'Import an Excel / CSV file';
+  @override
+  String get obV2DataCsvBody =>
+      'Products, orders and customers from a file you already have';
+  @override
+  String get obV2DataSampleTitle => 'Use sample data';
+  @override
+  String get obV2DataSampleBody =>
+      'A 12-month business so you can see what Tổng Tài does';
+  @override
+  String get obV2DataNoneTitle => 'No data yet';
+  @override
+  String get obV2DataNoneBody => 'Start from the business idea';
+  @override
+  String get obV2DataConnectorsLater =>
+      'Connecting directly to marketplaces comes in a later release.';
+  @override
+  String get obV2AnalysisTitle => 'Tổng Tài is reading your business';
+  @override
+  String get obV2AnalysisBody =>
+      'Running on your device. Nothing is sent anywhere.';
+  @override
+  String obV2AnalysisStage(String stageCode, int count) => switch (stageCode) {
+    'products' => 'Read $count products',
+    'orders' => 'Analysed $count orders',
+    'customers' => 'Recognised $count customers',
+    'stock' => 'Checked stock, $count items need attention',
+    _ => 'Found $count things worth knowing',
+  };
+  @override
+  String get obV2InsightTitle => 'I understand your business now';
+  @override
+  String get obV2InsightBody => 'Here is what matters most right now.';
+  @override
+  String get obV2InsightQuietTitle => 'I looked — nothing urgent';
+  @override
+  String get obV2InsightQuietBody =>
+      'Every rule ran over your data and found nothing that needs doing today. '
+      'I will tell you when that changes.';
+  @override
+  String get obV2InsightInsufficientTitle => 'I have nothing to look at yet';
+  @override
+  String get obV2InsightInsufficientBody =>
+      'Not enough data to conclude anything. This is not "all clear" — I have '
+      'not seen anything at all.';
+  @override
+  String get obV2SnapshotRevenue => 'Revenue';
+  @override
+  String get obV2SnapshotProfit => 'Profit';
+  @override
+  String get obV2SnapshotOrders => 'Orders';
+  @override
+  String get obV2SnapshotInventory => 'Stock capital';
+  @override
+  String get obV2ProfitUnknown => 'Cannot compute yet';
+  @override
+  String get obV2GoalTitle => 'Which goal should Tổng Tài help with first?';
+  @override
+  String get obV2GoalBody => 'Pick the 1–2 that matter most right now.';
+  @override
+  String get obV2GoalLimit => 'Pick at most 2 goals';
+  @override
+  String obV2Goal(String code) => switch (code) {
+    'grow_revenue' => 'Grow revenue',
+    'grow_profit' => 'Grow profit',
+    'find_products' => 'Find new products',
+    'optimize_inventory' => 'Optimise inventory',
+    'better_sourcing' => 'Find better suppliers',
+    'keep_customers' => 'Keep customers coming back',
+    'new_market' => 'Sell into a new market',
+    _ => 'Just explore for now',
+  };
+  @override
+  String get obV2PlanTitle => 'Your first plan';
+  @override
+  String get obV2PlanBody =>
+      'Work top down. Each item opens where the work happens.';
+  @override
+  String get obV2PlanEvidence => 'Why';
+  @override
+  String get obV2PlanCta => 'Start running the business with Tổng Tài';
+  @override
+  String get obV2Continue => 'Continue';
+  @override
+  String get obV2SkipProfile => 'Skip, I will fill this in later';
   @override
   String get journeyTitle => 'Journey';
   @override
