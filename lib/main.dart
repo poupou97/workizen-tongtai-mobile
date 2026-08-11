@@ -62,20 +62,7 @@ class TongtaiApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Tổng Tài',
       debugShowCheckedModeBanner: false,
-      // ⭐ Hạt giống là **cam thương hiệu**, không phải xanh lá (WTM-375).
-      //
-      // Mọi widget Material không được tạo kiểu riêng — hộp thoại, công tắc,
-      // ô đánh dấu, tay kéo chọn chữ, snackbar, nút mặc định — lấy màu từ hạt
-      // giống này. Gieo bằng `producerGreen` nghĩa là **cả app ngầm nói "tốt /
-      // thành công"** ở mọi chỗ chưa ai sơn tay, trong khi luật Design System
-      // nói XANH LÁ = KẾT QUẢ TÍCH CỰC và CAM = HÀNH ĐỘNG.
-      //
-      // Đây là lý do nút `Lưu` của màn Nguồn đầu vào trông khác bốn nút Lưu
-      // còn lại: nó là nút *mặc định*, nên nó mang màu của hạt giống.
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: TtColors.brand),
-      ),
+      theme: tongtaiTheme,
       locale: kAppLocale,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
