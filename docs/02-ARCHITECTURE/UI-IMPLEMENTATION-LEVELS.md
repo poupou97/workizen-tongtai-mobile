@@ -2,7 +2,7 @@
 
 Chuẩn: [ADR-TON-015](../03-DECISIONS/ADR-TON-015-ui-maturity-and-one-data-path.md).
 Cập nhật **cùng PR** mỗi khi một màn đổi level. Level = sự thật đo được từ
-code, không phải ý định. Audit gần nhất: **2026-08-11** (Epic WTM-362: `tongtai_startup_screen` (L3); onboarding V2 chuyển sang Design System — xem `TONG_TAI_DESIGN_SYSTEM_V1.md`) · trước đó **2026-08-11** (Epic WTM-349: `tongtai_onboarding_v2_screen` (L3) thay `tongtai_onboarding_conversation_screen`) · trước đó **2026-08-09** (WTM-326 thêm `tongtai_import_screen` (L3) · WTM-317 thêm `tongtai_connections_screen` (L3) — màn Kết nối nền tảng ngoài đầu tiên) · trước đó **2026-08-01** (38 màn + 3 shell — WTM-187 thêm `tongtai_journey_screen` (L3) — WTM-175 thêm `tongtai_feedback_screen`, WTM-177 thêm `tongtai_business_profile_screen`, WTM-178 thay onboarding slide bằng `tongtai_onboarding_conversation_screen`; cả ba L3).
+code, không phải ý định. Audit gần nhất: **2026-08-11** (WTM-369 Trang chủ về Design System · Epic WTM-362: `tongtai_startup_screen` (L3); onboarding V2 chuyển sang Design System — xem `TONG_TAI_DESIGN_SYSTEM_V1.md`) · trước đó **2026-08-11** (Epic WTM-349: `tongtai_onboarding_v2_screen` (L3) thay `tongtai_onboarding_conversation_screen`) · trước đó **2026-08-09** (WTM-326 thêm `tongtai_import_screen` (L3) · WTM-317 thêm `tongtai_connections_screen` (L3) — màn Kết nối nền tảng ngoài đầu tiên) · trước đó **2026-08-01** (38 màn + 3 shell — WTM-187 thêm `tongtai_journey_screen` (L3) — WTM-175 thêm `tongtai_feedback_screen`, WTM-177 thêm `tongtai_business_profile_screen`, WTM-178 thay onboarding slide bằng `tongtai_onboarding_conversation_screen`; cả ba L3).
 
 ## ⛔ Điều kiện đứng trước mọi level — Journey Reachability (Founder 2026-08-02)
 
