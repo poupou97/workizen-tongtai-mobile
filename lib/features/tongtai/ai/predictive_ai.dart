@@ -42,6 +42,7 @@ import '../predictive/business_alerts_rule.dart';
 import '../predictive/customer_risk_rule.dart';
 import '../predictive/revenue_forecast_rule.dart';
 import '../predictive/rule_twin.dart';
+import '../predictive/weekly_review_rule.dart';
 import 'business_summary.dart' show BusinessSummarySource;
 import 'tongtai_ai_errors.dart';
 import 'tongtai_ai_models.dart';
@@ -59,13 +60,17 @@ enum PredictiveTopic {
   customerRisk,
 
   /// What needs attention today, from [BusinessAlertsRule].
-  businessAlerts;
+  businessAlerts,
+
+  /// *"Tuần rồi thế nào"*, from [WeeklyReviewRule].
+  weeklyReview;
 
   /// Vietnamese heading used inside the prompt (UI strings live in l10n).
   String get labelVi => switch (this) {
     PredictiveTopic.revenueForecast => 'Dự báo doanh thu tháng tới',
     PredictiveTopic.customerRisk => 'Rủi ro rời bỏ của khách hàng',
     PredictiveTopic.businessAlerts => 'Cảnh báo kinh doanh',
+    PredictiveTopic.weeklyReview => 'Tổng kết tuần vừa qua',
   };
 }
 
@@ -191,6 +196,63 @@ String predictiveAiPromptTextFor({
 }
 
 // ── Rule Twin blocks (the AI's second, authoritative half) ──────────────────
+/// Renders the weekly-review twin for the prompt. Pure, and **PII-free**: it
+/// carries the week's own numbers and reason codes, never a customer name.
+String weeklyReviewRuleBlock(RuleTwinResult<WeeklyReview> twin) {
+  final buffer = StringBuffer()
+    ..writeln('# Rule Twin: ${PredictiveTopic.weeklyReview.labelVi}')
+    ..write(_twinHeader(twin));
+
+  final review = twin.result;
+  if (review == null) {
+    buffer.write(
+      '- KHÔNG CÓ CON SỐ: rule từ chối tổng kết vì chưa có tuần hoàn chỉnh nào '
+      'có đơn. Không được tự đưa ra bất kỳ con số nào.',
+    );
+    return buffer.toString();
+  }
+
+  final week = review.week;
+  buffer
+    ..writeln(
+      '- Tuần: ${week.week} đến ${TongtaiFormatters.isoDate(week.week.sunday)}',
+    )
+    ..writeln('- Doanh thu: ${TongtaiFormatters.vnd(week.revenue)}')
+    ..writeln('- Số đơn: ${week.orderCount}')
+    ..writeln('- Số khách đã mua: ${week.customerCount}')
+    ..writeln(
+      '- Trung bình mỗi đơn: ${TongtaiFormatters.vnd(week.averageOrderValue)}',
+    )
+    ..writeln('- Xu hướng so tuần trước: ${review.trend.name}');
+
+  // ⛔ `null` phải nói ra thành lời, không được im lặng thành 0 %: model đọc
+  // một khoảng trống rất dễ tự điền "không đổi".
+  final change = review.revenueChange;
+  buffer.writeln(
+    change == null
+        ? '- So với tuần trước: KHÔNG SO ĐƯỢC (không có tuần trước, hoặc tuần '
+              'trước bằng 0). Không được nói "không đổi" hay "0%".'
+        : '- So với tuần trước: ${capabilityDecimal(change * 100, decimals: 1)}%',
+  );
+
+  if (week.topProduct case final top?) {
+    buffer.writeln(
+      '- Bán chạy nhất (theo tiền): ${top.name}, '
+      '${TongtaiFormatters.vnd(top.revenue)}, ${top.quantity} đơn vị',
+    );
+  } else {
+    buffer.writeln('- Bán chạy nhất: không có, tuần rồi không bán được gì');
+  }
+
+  buffer.writeln('- Bốn tuần gần nhất (cũ → mới):');
+  for (final point in review.history) {
+    buffer.writeln(
+      '  · ${point.week}: ${TongtaiFormatters.vnd(point.revenue)}, '
+      '${point.orderCount} đơn',
+    );
+  }
+  return buffer.toString();
+}
 
 /// Renders the revenue forecast twin for the prompt. Pure.
 String revenueForecastRuleBlock(RuleTwinResult<RevenueForecast> twin) {
@@ -340,6 +402,71 @@ String businessAlertsRuleBlock(RuleTwinResult<List<BusinessAlert>> twin) {
 
 /// Explains the revenue forecast without AI. Pure, deterministic, Vietnamese,
 /// and it quotes the twin's own reason codes.
+/// The deterministic weekly-review explanation — what ships when there is no
+/// BYOK key, or every provider fails.
+///
+/// Nó phải đứng một mình được: đây là câu người bán đọc trong đa số phiên, chứ
+/// không phải một chỗ giữ chỗ chờ AI.
+String ruleBasedWeeklyReviewExplanation(RuleTwinResult<WeeklyReview> twin) {
+  final buffer = StringBuffer();
+  final review = twin.result;
+
+  if (review == null) {
+    buffer
+      ..writeln(
+        'Chưa có tuần nào đã kết thúc có đơn hàng, nên phần mềm không tổng kết '
+        '— một bản tổng kết toàn số 0 sẽ nói sai về việc kinh doanh của bạn.',
+      )
+      ..writeln(_bullets(twin.reasonCodes))
+      ..writeln(
+        'Cứ ghi đơn trong tuần này, sáng thứ Hai sẽ có bản tổng kết đầu tiên.',
+      )
+      ..write(_ruleFooter(twin));
+    return buffer.toString();
+  }
+
+  final week = review.week;
+  if (week.isEmpty) {
+    // ⭐ Đây là một CÂU TRẢ LỜI, không phải một lời từ chối.
+    buffer.writeln(
+      'Tuần ${week.week} không có đơn nào. Đây là số thật, không phải lỗi đọc '
+      'dữ liệu.',
+    );
+  } else {
+    buffer
+      ..writeln(
+        'Tuần ${week.week}: ${TongtaiFormatters.vnd(week.revenue)} từ '
+        '${week.orderCount} đơn của ${week.customerCount} khách, trung bình '
+        '${TongtaiFormatters.vnd(week.averageOrderValue)} mỗi đơn.',
+      )
+      ..writeln(
+        week.topProduct == null
+            ? ''
+            : 'Bán chạy nhất là ${week.topProduct!.name} '
+                  '(${TongtaiFormatters.vnd(week.topProduct!.revenue)}).',
+      );
+  }
+
+  final change = review.revenueChange;
+  buffer.writeln(
+    change == null
+        // ⛔ Không có tuần trước thì nói thẳng, không vẽ "không đổi".
+        ? 'Chưa có tuần trước để so, nên chưa nói được là tăng hay giảm.'
+        : 'So với tuần trước: '
+              '${change >= 0 ? 'tăng' : 'giảm'} '
+              '${capabilityDecimal(change.abs() * 100, decimals: 0)}%.',
+  );
+  buffer.writeln(_bullets(twin.reasonCodes));
+  if (twin.sufficiency == DataSufficiency.partial) {
+    buffer.writeln(
+      'Mới có một tuần để nhìn, nên hãy đọc con số này như một điểm khởi đầu, '
+      'chưa phải một xu hướng.',
+    );
+  }
+  buffer.write(_ruleFooter(twin));
+  return buffer.toString();
+}
+
 String ruleBasedForecastExplanation(RuleTwinResult<RevenueForecast> twin) {
   final buffer = StringBuffer();
   final forecast = twin.result;
@@ -539,7 +666,26 @@ class PredictiveAiService {
     ruleText: ruleBasedAlertsExplanation(alerts),
   );
 
-  /// The one runner behind all three topics.
+  /// Explains the weekly review.
+  ///
+  /// Không truyền capability context: [WeeklyReviewRule] đọc thẳng sổ đơn nên
+  /// **bản thân bản tổng kết đã là bằng chứng**. Cửa zero-spend vì thế hỏi
+  /// đúng câu của nó — *"tuần rồi có gì để nói không"* — thay vì hỏi một
+  /// capability context không tồn tại.
+  Future<PredictiveExplanation> explainWeeklyReview({
+    required RuleTwinResult<WeeklyReview> review,
+  }) => _explain(
+    topic: PredictiveTopic.weeklyReview,
+    contexts: const [],
+    twin: review,
+    ruleBlock: weeklyReviewRuleBlock(review),
+    ruleText: ruleBasedWeeklyReviewExplanation(review),
+    // Một tuần trống VẪN đáng giải thích: *"tuần rồi không bán được gì"* là
+    // đúng lúc người bán cần một câu nói cho ra hồn nhất.
+    hasEvidence: review.result != null,
+  );
+
+  /// The one runner behind all four topics.
   ///
   /// Order matters: the zero-spend guard comes first, then the provider chain,
   /// then the deterministic twin explanation. Whatever answers, the twin's
@@ -550,6 +696,7 @@ class PredictiveAiService {
     required RuleTwinResult<Object> twin,
     required String ruleBlock,
     required String ruleText,
+    bool? hasEvidence,
   }) async {
     final now = (clock ?? DateTime.now)();
 
@@ -572,9 +719,14 @@ class PredictiveAiService {
     // Zero-spend guard. A twin that refused to answer has nothing to explain,
     // and neither does a set of empty capability contexts — sending either to
     // a provider would burn the seller's BYOK quota to be told "no data".
+    //
+    // `hasEvidence` cho phép một twin KHÔNG có capability context tự khai bằng
+    // chứng của nó (Tổng kết tuần đọc thẳng sổ đơn). Mặc định vẫn là câu hỏi
+    // cũ — đây là khái quát hoá, không phải nới lỏng: cửa vẫn đóng khi twin từ
+    // chối, và đó là vế quan trọng.
     final worthExplaining =
         twin.sufficiency.canAnswer &&
-        contexts.any((context) => context.hasData);
+        (hasEvidence ?? contexts.any((context) => context.hasData));
 
     if (worthExplaining) {
       final input = predictiveAiPromptTextFor(

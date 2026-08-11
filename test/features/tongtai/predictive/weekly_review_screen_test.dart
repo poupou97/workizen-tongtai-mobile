@@ -5,10 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/core/design/tt.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_formatters.dart';
+import 'package:tongtai/features/tongtai/ai/predictive_ai.dart';
+import 'package:tongtai/features/tongtai/ai/tongtai_ai_key_store.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 import 'package:tongtai/features/tongtai/predictive/rule_twin.dart';
 import 'package:tongtai/features/tongtai/predictive/weekly_review_rule.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_ai_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_orders_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_predictive_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_weekly_review_screen.dart';
@@ -66,25 +69,31 @@ void main() {
     ],
   );
 
-  Widget host(List<CustomerOrder> orders, {String locale = 'vi'}) =>
-      ProviderScope(
-        overrides: [
-          orderRepositoryProvider.overrideWithValue(
-            InMemoryOrderRepository(orders),
-          ),
-          weeklyReviewClockProvider.overrideWithValue(() => now),
-        ],
-        child: MaterialApp(
-          locale: Locale(locale),
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [Locale('en'), Locale('vi')],
-          home: const TongtaiWeeklyReviewScreen(),
-        ),
-      );
+  Widget host(
+    List<CustomerOrder> orders, {
+    String locale = 'vi',
+  }) => ProviderScope(
+    overrides: [
+      orderRepositoryProvider.overrideWithValue(
+        InMemoryOrderRepository(orders),
+      ),
+      weeklyReviewClockProvider.overrideWithValue(() => now),
+      // Kho khoá BYOK **rỗng** và nằm trong bộ nhớ: không platform channel,
+      // không mạng — nên đường AI đi nhánh không-có-khoá, đúng nhánh phải
+      // trả lời được.
+      tongtaiAiKeyStoreProvider.overrideWithValue(InMemoryTongtaiAiKeyStore()),
+    ],
+    child: MaterialApp(
+      locale: Locale(locale),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en'), Locale('vi')],
+      home: const TongtaiWeeklyReviewScreen(),
+    ),
+  );
 
   Future<void> pump(WidgetTester tester, Widget app) async {
     // Mặt phẳng cao để cả trang được dựng — hợp đồng nói về thứ người bán NHÌN
@@ -258,5 +267,104 @@ void main() {
     }
     // ⛔ Mã của THÁNG không được lọt vào bản tổng kết TUẦN.
     expect(find.text(ReasonCode.partialMonthExcluded.labelVi), findsNothing);
+  });
+
+  group('⭐ AI chỉ GIẢI THÍCH, không đổi số (WTM-378)', () {
+    testWidgets(
+      'không có khoá BYOK ⇒ vẫn có lời giải thích rule-based đầy đủ',
+      (tester) async {
+        await pump(
+          tester,
+          host([
+            order(id: 'a', date: DateTime(2026, 8, 4), amount: 900000),
+            order(id: 'b', date: DateTime(2026, 7, 28), amount: 400000),
+          ]),
+        );
+
+        await tester.tap(find.byKey(const Key('weekly-review-action-ai')));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('weekly-review-ai-answer')),
+          findsOneWidget,
+        );
+        // Xuất xứ nói thật: đây KHÔNG phải lời của một nhà cung cấp. Tìm bằng
+        // Key chứ không bằng chữ — cùng nhãn ấy còn nằm ở huy hiệu khối
+        // "Vì sao", và tìm bằng text sẽ bắt nhầm cả hai.
+        expect(
+          tester
+              .widget<Text>(find.byKey(const Key('weekly-review-ai-source')))
+              .data,
+          'Quy tắc (không cần AI)',
+        );
+        final text = tester
+            .widget<Text>(find.byKey(const Key('weekly-review-ai-text')))
+            .data!;
+        // Con số trong lời văn là con số của TWIN, không phải một số viết
+        // cứng trong test — đó mới là điều One Data Path khẳng định.
+        final review = (await twinOf(tester)).result!;
+        expect(text, contains(TongtaiFormatters.vnd(review.week.revenue)));
+        expect(text, contains(kWeeklyReviewRuleVersion));
+      },
+    );
+
+    testWidgets('⛔ twin từ chối ⇒ lời giải thích cũng từ chối, KHÔNG có số', (
+      tester,
+    ) async {
+      final twin = const WeeklyReviewRule().evaluate(orders: [], now: now);
+      final explanation = ruleBasedWeeklyReviewExplanation(twin);
+      expect(twin.result, isNull);
+      expect(explanation, contains('Chưa có tuần nào'));
+      expect(
+        RegExp(r'\d+\.\d{3}').hasMatch(explanation),
+        isFalse,
+        reason: 'lời từ chối không được mang một con số tiền nào',
+      );
+    });
+
+    testWidgets('⛔ tuần trống là CÂU TRẢ LỜI, không phải lời từ chối', (
+      tester,
+    ) async {
+      final twin = const WeeklyReviewRule().evaluate(
+        orders: [order(id: 'o', date: DateTime(2026, 7, 29), amount: 500000)],
+        now: now,
+      );
+      final explanation = ruleBasedWeeklyReviewExplanation(twin);
+      expect(explanation, contains('không có đơn nào'));
+      expect(explanation, contains('số thật'));
+    });
+
+    test('⛔ không có tuần trước ⇒ prompt CẤM model nói "không đổi"', () {
+      final twin = const WeeklyReviewRule(windowWeeks: 1).evaluate(
+        orders: [order(id: 'o', date: DateTime(2026, 8, 4), amount: 700000)],
+        now: now,
+      );
+      final block = weeklyReviewRuleBlock(twin);
+      expect(block, contains('KHÔNG SO ĐƯỢC'));
+      expect(block, contains('Không được nói "không đổi"'));
+    });
+
+    test('khối prompt mang phiên bản công thức, không mang tên khách', () {
+      final twin = const WeeklyReviewRule().evaluate(
+        orders: [
+          order(
+            id: 'o',
+            date: DateTime(2026, 8, 4),
+            amount: 700000,
+            customerId: 'chi-Lan',
+          ),
+        ],
+        now: now,
+      );
+      final block = weeklyReviewRuleBlock(twin);
+      expect(block, contains(kWeeklyReviewRuleVersion));
+      expect(block, isNot(contains('chi-Lan')));
+    });
+
+    test('mọi chủ đề predictive đều có nhãn trong prompt', () {
+      for (final topic in PredictiveTopic.values) {
+        expect(topic.labelVi, isNotEmpty, reason: topic.name);
+      }
+    });
   });
 }
