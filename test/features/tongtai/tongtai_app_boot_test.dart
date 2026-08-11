@@ -75,15 +75,30 @@ void main() {
     // Đường ngắn nhất qua V2: bắt đầu → bỏ qua hồ sơ → "chưa có dữ liệu" →
     // mục tiêu → xong. Người vội vẫn đi qua cửa dữ liệu, vì đó là chỗ rẽ quyết
     // định họ nhận được gì chứ không phải một bước thủ tục.
-    await tester.tap(find.byKey(const Key('onboarding-v2-start')));
+    await tester.tapByKey(
+      'onboarding-v2-start',
+      scrollableUnder: 'onboarding-v2-welcome',
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onboarding-v2-profile-skip-all')));
+    await tester.tapByKey(
+      'onboarding-v2-profile-skip-all',
+      scrollableUnder: 'onboarding-v2-profile',
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+    await tester.tapByKey(
+      'onboarding-v2-data-none',
+      scrollableUnder: 'onboarding-v2-data',
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+    await tester.tapByKey(
+      'onboarding-v2-goal-next',
+      scrollableUnder: 'onboarding-v2-goal',
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onboarding-v2-finish')));
+    await tester.tapByKey(
+      'onboarding-v2-finish',
+      scrollableUnder: 'onboarding-v2-plan',
+    );
     await tester.pumpAndSettle();
 
     expect(tutorial(), findsNothing);
@@ -103,18 +118,33 @@ void main() {
     // WTM-349 sinh ra để sửa. Đường nhanh nhất nay đi qua cửa dữ liệu và kết
     // thúc bằng kế hoạch khởi đầu — dài hơn ba chạm, và ba chạm đó là toàn bộ
     // giá trị người bán nhận được.
-    await tester.tap(find.byKey(const Key('onboarding-v2-start')));
+    await tester.tapByKey(
+      'onboarding-v2-start',
+      scrollableUnder: 'onboarding-v2-welcome',
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onboarding-v2-profile-skip-all')));
+    await tester.tapByKey(
+      'onboarding-v2-profile-skip-all',
+      scrollableUnder: 'onboarding-v2-profile',
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+    await tester.tapByKey(
+      'onboarding-v2-data-none',
+      scrollableUnder: 'onboarding-v2-data',
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+    await tester.tapByKey(
+      'onboarding-v2-goal-next',
+      scrollableUnder: 'onboarding-v2-goal',
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('onboarding-v2-plan')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('onboarding-v2-finish')));
+    await tester.tapByKey(
+      'onboarding-v2-finish',
+      scrollableUnder: 'onboarding-v2-plan',
+    );
     await tester.pumpAndSettle();
 
     expect(tutorial(), findsNothing);

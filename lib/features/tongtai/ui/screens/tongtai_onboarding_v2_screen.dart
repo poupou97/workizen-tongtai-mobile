@@ -19,6 +19,7 @@ import '../../providers/tongtai_journey_provider.dart';
 import '../../providers/tongtai_onboarding_v2_provider.dart';
 import '../../providers/tongtai_profile_provider.dart';
 import '../../providers/tongtai_sample_provider.dart';
+import '../widgets/tongtai_mascot_pose.dart';
 import '../widgets/tongtai_screen_data.dart' show showTongtaiFailure;
 import 'tongtai_customer_list_screen.dart';
 import 'tongtai_customer_risk_screen.dart';
@@ -401,7 +402,17 @@ class _Welcome extends StatelessWidget {
     return ListView(
       key: const Key('onboarding-v2-welcome'),
       children: [
-        const SizedBox(height: TongtaiDesignTokens.spacing10),
+        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        // §17: linh vật xuất hiện khi AI **tự giới thiệu**. Đây đúng là lúc đó
+        // — và là một trong sáu chỗ duy nhất nó được phép có mặt.
+        Center(
+          child: TongtaiMascotPose(
+            MascotPose.greeting,
+            height: 160,
+            semanticsLabel: l10n.obV2MascotGreeting,
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing5),
         Text(l10n.obV2WelcomeTitle, style: TongtaiDesignTokens.heading1Style),
         const SizedBox(height: TongtaiDesignTokens.spacing3),
         Text(
@@ -745,7 +756,15 @@ class _Analysis extends StatelessWidget {
     return ListView(
       key: const Key('onboarding-v2-analysis'),
       children: [
-        const SizedBox(height: TongtaiDesignTokens.spacing6),
+        const SizedBox(height: TongtaiDesignTokens.spacing4),
+        Center(
+          child: TongtaiMascotPose(
+            MascotPose.working,
+            height: 130,
+            semanticsLabel: l10n.obV2MascotWorking,
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing4),
         Text(
           l10n.obV2AnalysisTitle,
           style: TongtaiDesignTokens.heading2Style.copyWith(
@@ -829,10 +848,30 @@ class _Insight extends StatelessWidget {
       _ => (l10n.obV2InsightTitle, l10n.obV2InsightBody),
     };
 
+    // ⭐ Tư thế đổi theo **kết luận**, không theo màn: trình bày một phát hiện,
+    // bình thản khi không có gì gấp, và ngồi im khi chưa có gì để xem. Một con
+    // cáo hớn hở trên màn "chưa đủ dữ liệu" là hình ảnh nói dối trước cả chữ.
+    final (pose, poseLabel) = switch (result) {
+      null || FirstInsight(isInsufficient: true) => (
+        MascotPose.idle,
+        l10n.obV2MascotIdle,
+      ),
+      FirstInsight(isQuiet: true) => (MascotPose.calm, l10n.obV2MascotCalm),
+      _ => (MascotPose.explaining, l10n.obV2MascotExplaining),
+    };
+
     return ListView(
       key: const Key('onboarding-v2-insight'),
       children: [
-        const SizedBox(height: TongtaiDesignTokens.spacing4),
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        Center(
+          child: TongtaiMascotPose(
+            pose,
+            height: 120,
+            semanticsLabel: poseLabel,
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
         Text(
           title,
           key: const Key('onboarding-v2-insight-title'),
@@ -1134,6 +1173,14 @@ class _Plan extends StatelessWidget {
     return ListView(
       key: const Key('onboarding-v2-plan'),
       children: [
+        Center(
+          child: TongtaiMascotPose(
+            MascotPose.planning,
+            height: 110,
+            semanticsLabel: l10n.obV2MascotPlanning,
+          ),
+        ),
+        const SizedBox(height: TongtaiDesignTokens.spacing3),
         Text(
           l10n.obV2PlanTitle,
           style: TongtaiDesignTokens.heading2Style.copyWith(

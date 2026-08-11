@@ -755,6 +755,14 @@ abstract class AppStrings {
   String get obV2PlanCta;
   String get obV2Continue;
   String get obV2SkipProfile;
+
+  /// Nhãn trợ năng cho linh vật — nói **AI đang làm gì**, không tả con cáo.
+  String get obV2MascotGreeting;
+  String get obV2MascotWorking;
+  String get obV2MascotExplaining;
+  String get obV2MascotPlanning;
+  String get obV2MascotCalm;
+  String get obV2MascotIdle;
   String get moreLegalSection;
   String get moreTerms;
   String get morePrivacy;
@@ -2465,6 +2473,18 @@ class AppStringsVi extends AppStrings {
   String get obV2Continue => 'Tiếp tục';
   @override
   String get obV2SkipProfile => 'Bỏ qua, tôi khai sau';
+  @override
+  String get obV2MascotGreeting => 'Tổng Tài đang chào bạn';
+  @override
+  String get obV2MascotWorking => 'Tổng Tài đang đọc dữ liệu của bạn';
+  @override
+  String get obV2MascotExplaining => 'Tổng Tài đang trình bày điều vừa tìm ra';
+  @override
+  String get obV2MascotPlanning => 'Tổng Tài đang đưa ra việc cần làm';
+  @override
+  String get obV2MascotCalm => 'Tổng Tài đã xem xong và không thấy gì gấp';
+  @override
+  String get obV2MascotIdle => 'Tổng Tài chưa có dữ liệu nào để xem';
   @override
   String get journeyTitle => 'Hành trình';
   @override
@@ -4501,6 +4521,18 @@ class AppStringsEn extends AppStrings {
   String get obV2Continue => 'Continue';
   @override
   String get obV2SkipProfile => 'Skip, I will fill this in later';
+  @override
+  String get obV2MascotGreeting => 'Tổng Tài is greeting you';
+  @override
+  String get obV2MascotWorking => 'Tổng Tài is reading your data';
+  @override
+  String get obV2MascotExplaining => 'Tổng Tài is presenting what it found';
+  @override
+  String get obV2MascotPlanning => 'Tổng Tài is proposing what to do';
+  @override
+  String get obV2MascotCalm => 'Tổng Tài looked and found nothing urgent';
+  @override
+  String get obV2MascotIdle => 'Tổng Tài has no data to look at yet';
   @override
   String get journeyTitle => 'Journey';
   @override

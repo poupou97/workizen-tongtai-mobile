@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/core/prefs.dart' show sharedPreferencesProvider;
 import 'package:tongtai/features/tongtai/tongtai.dart';
 
+import '../../support/tap_by_key.dart';
+
 /// Real tests for the Onboarding Flow Tutorial (WTM-59).
 ///
 /// Every acceptance criterion is exercised:
@@ -13,6 +15,8 @@ import 'package:tongtai/features/tongtai/tongtai.dart';
 ///  - AC3: a Skip button appears on every screen and dismisses the tutorial
 ///  - AC4: completion is stored locally; the tutorial shows only once
 ///  - AC5: the tutorial can be re-triggered from Settings
+// Chạm qua `tapByKey`: khung test hẹp hơn điện thoại thật, và `tester.tap`
+// chỉ IN CẢNH BÁO khi trượt — test vẫn chạy tiếp trên màn nó chưa từng rời.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -188,17 +192,30 @@ void main() {
         expect(onboarding(), findsOneWidget);
 
         // Đi đường ngắn nhất qua V2 → cổng lật sang shell và lưu cờ.
-        await tester.tap(find.byKey(const Key('onboarding-v2-start')));
-        await tester.pumpAndSettle();
-        await tester.tap(
-          find.byKey(const Key('onboarding-v2-profile-skip-all')),
+        await tester.tapByKey(
+          'onboarding-v2-start',
+          scrollableUnder: 'onboarding-v2-welcome',
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+        await tester.tapByKey(
+          'onboarding-v2-profile-skip-all',
+          scrollableUnder: 'onboarding-v2-profile',
+        );
         await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+        await tester.tapByKey(
+          'onboarding-v2-data-none',
+          scrollableUnder: 'onboarding-v2-data',
+        );
         await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('onboarding-v2-finish')));
+        await tester.tapByKey(
+          'onboarding-v2-goal-next',
+          scrollableUnder: 'onboarding-v2-goal',
+        );
+        await tester.pumpAndSettle();
+        await tester.tapByKey(
+          'onboarding-v2-finish',
+          scrollableUnder: 'onboarding-v2-plan',
+        );
         await tester.pumpAndSettle();
 
         expect(onboarding(), findsNothing);
