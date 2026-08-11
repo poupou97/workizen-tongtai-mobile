@@ -55,6 +55,11 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   revenueForecastProvider,
   customerRiskProvider,
   businessAlertsProvider,
+  // Tổng kết tuần (WTM-376/377). Nó đọc thẳng `orderRepositoryProvider` chứ
+  // không qua một capability context, nên KHÔNG có ai vô hiệu hoá nó hộ — bỏ
+  // dòng này là sáng thứ Hai sau khi nạp dữ liệu mẫu, người bán vẫn đọc bản
+  // tổng kết của doanh nghiệp cũ.
+  weeklyReviewProvider,
   // The Opportunity Rule Engine's output — read by Home, Reports, Timeline,
   // Producer and the Opportunity feed.
   generatedOpportunitiesProvider,

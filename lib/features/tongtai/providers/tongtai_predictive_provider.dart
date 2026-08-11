@@ -7,6 +7,7 @@ import '../predictive/business_alerts_rule.dart';
 import '../predictive/customer_risk_rule.dart';
 import '../predictive/revenue_forecast_rule.dart';
 import '../predictive/rule_twin.dart';
+import '../predictive/weekly_review_rule.dart';
 import 'tongtai_ai_provider.dart';
 import 'tongtai_orders_provider.dart';
 import 'tongtai_capability_provider.dart';
@@ -25,6 +26,31 @@ import 'tongtai_inventory_provider.dart';
 /// a dependency changes. Tests override the repository providers with in-memory
 /// ones, or — better — call the rule directly with a hand-built context, since
 /// the rules themselves are pure.
+
+/// The clock the Weekly Review reads, isolated so tests pin *"bây giờ"*.
+///
+/// Nó phải override được: một bản tổng kết tuần mà đọc đồng hồ thật thì test
+/// của nó sẽ hỏng vào đúng thứ Hai nào đó — và một suite hỏng theo lịch là
+/// suite không ai tin nữa.
+final weeklyReviewClockProvider = Provider<DateTime Function()>(
+  (ref) => DateTime.now,
+);
+
+/// *"Tuần rồi thế nào?"* — [WeeklyReviewRule], version `weekly-review/1`
+/// (WTM-376/377, Epic WTM-179).
+///
+/// Chạy được với **không AI, không mạng, không khoá**. `result == null` là twin
+/// **từ chối** trả lời vì chưa có tuần nào hoàn chỉnh có đơn — màn hình phải
+/// hiện đúng lời từ chối ấy, không được vẽ một tuần toàn số 0.
+final weeklyReviewProvider = FutureProvider<RuleTwinResult<WeeklyReview>>((
+  ref,
+) async {
+  final orders = await ref.watch(orderRepositoryProvider).loadAll();
+  return const WeeklyReviewRule().evaluate(
+    orders: orders,
+    now: ref.watch(weeklyReviewClockProvider)(),
+  );
+});
 
 /// Next-month revenue forecast with its band, confidence, sufficiency and
 /// reason codes (WTM-155, [RevenueForecastRule] version `revenue-forecast/1`).
