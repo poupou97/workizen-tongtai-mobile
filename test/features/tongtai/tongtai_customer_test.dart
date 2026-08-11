@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_directory_service.dart';
-import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_customer_list_screen.dart';
+import 'package:tongtai/core/design/tt.dart';
 
 /// Real unit tests for the WTM-75 customer-directory logic: the value-tier
 /// derivation, the tier-color mapping, phone masking, free-text + location
@@ -109,14 +109,8 @@ void main() {
 
   group('tongtaiCustomerTierColor', () {
     test('maps each tier to its color', () {
-      expect(
-        tongtaiCustomerTierColor(CustomerTier.gold),
-        TongtaiDesignTokens.warning,
-      );
-      expect(
-        tongtaiCustomerTierColor(CustomerTier.silver),
-        TongtaiDesignTokens.neutral,
-      );
+      expect(tongtaiCustomerTierColor(CustomerTier.gold), TtColors.warning);
+      expect(tongtaiCustomerTierColor(CustomerTier.silver), TtColors.unknown);
     });
 
     test('the four tiers have distinct colors', () {

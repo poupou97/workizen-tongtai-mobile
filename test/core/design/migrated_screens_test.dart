@@ -34,6 +34,11 @@ void main() {
     'tongtai_goals_screen.dart': 'WTM-372',
     'tongtai_brief_story_screen.dart': 'WTM-372',
     'tongtai_agent_screen.dart': 'WTM-372',
+    'tongtai_import_screen.dart': 'WTM-373',
+    'tongtai_stock_alerts_screen.dart': 'WTM-373',
+    'tongtai_more_screen.dart': 'WTM-373',
+    'tongtai_create_order_screen.dart': 'WTM-373',
+    'tongtai_forecast_screen.dart': 'WTM-373',
   };
 
   /// Màn **đã đi một nửa**: token thị giác đã sang Design System, nhưng còn một
@@ -50,6 +55,8 @@ void main() {
     'tongtai_business_life_screen.dart': 'bảng màu chủ thể (WTM-338)',
     'tongtai_conversations_screen.dart': 'bảng màu chủ thể (WTM-338)',
     'tongtai_conversation_screen.dart': 'bảng màu chủ thể (WTM-338)',
+    'tongtai_customer_list_screen.dart': 'thang hạng khách vàng/đồng (WTM-75)',
+    'tongtai_connections_screen.dart': 'tím demo-connected (WTM-340)',
   };
 
   /// Bỏ chú thích trước khi quét — một mã màu nhắc trong tài liệu không phải

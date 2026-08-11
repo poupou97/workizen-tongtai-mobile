@@ -261,6 +261,11 @@ Hai chỗ concept vẽ sai và **không được chép**:
 | `tongtai_goals_screen` | WTM-372 |
 | `tongtai_brief_story_screen` | WTM-372 |
 | `tongtai_agent_screen` | WTM-372 |
+| `tongtai_import_screen` | WTM-373 |
+| `tongtai_stock_alerts_screen` | WTM-373 |
+| `tongtai_more_screen` | WTM-373 |
+| `tongtai_create_order_screen` | WTM-373 |
+| `tongtai_forecast_screen` | WTM-373 |
 
 ### Đã đi **một nửa**
 
@@ -269,9 +274,18 @@ Hai chỗ concept vẽ sai và **không được chép**:
 | `tongtai_business_life_screen` | bảng màu **chủ thể** (WTM-338) |
 | `tongtai_conversations_screen` | bảng màu **chủ thể** |
 | `tongtai_conversation_screen` | bảng màu **chủ thể** |
+| `tongtai_customer_list_screen` | thang hạng khách **vàng/đồng** (WTM-75) |
+| `tongtai_connections_screen` | **tím demo-connected** (WTM-340) |
 
-Ba màn dòng thời gian phân biệt **ai đã làm việc này** — người bán · nền tảng ·
-khách — bằng màu. Đó là một **nghĩa thật**, không phải màu vô chủ: ép nó vào khe
+Năm màn giữ một bảng màu **mang nghĩa riêng**, không phải màu vô chủ:
+
+* ba màn dòng thời gian phân biệt **ai đã làm việc này** — người bán · nền tảng
+  · khách;
+* danh sách khách dùng **vàng/đồng** cho thang hạng — tên **kim loại**, không
+  phải mức ngữ nghĩa. Ép `vip` thành `warning` sẽ biến *"khách quý nhất"* thành
+  *"khách cần chú ý"*;
+* màn kết nối dùng **tím demo-connected** (WTM-340), một trạng thái thứ bảy cố ý
+  không mượn nhãn của `connected`. Đó là một **nghĩa thật**, không phải màu vô chủ: ép nó vào khe
 ngữ nghĩa của Design System (success/info/warning) sẽ **mất đúng thứ nó đang
 nói**. Chuyển bảng ấy là một quyết định sản phẩm riêng, không phải một phép thay.
 
@@ -286,8 +300,9 @@ người ta tưởng nó đã xong. Test vẫn khoá phần **đã** đi (không
 
 ### Chưa migrate
 
-**17/50 màn đã đi** (14 trọn vẹn + 3 đi một nửa). Còn lại: Kết nối · Sao lưu · Tìm kiếm · Tự chủ · Hoạt động · các form (sản
-phẩm, khách, đơn, giao dịch, mục tiêu) · các màn cài đặt và pháp lý.
+**24/50 màn đã đi** (19 trọn vẹn + 5 đi một nửa). Còn lại: Sao lưu · Tìm kiếm · Trò chuyện · Tự chủ · Hoạt động · Nguồn đầu vào ·
+Xuất dữ liệu · Khoá AI · các form (sản phẩm, khách, giao dịch, mục tiêu) · các
+màn cài đặt và pháp lý.
 
 Nhóm này **người bán ít mở trong một phiên bình thường** — nên nó xuống sau
 những gì họ chạm hằng ngày, đúng thứ tự ưu tiên PRODUCT EXPERIENCE.

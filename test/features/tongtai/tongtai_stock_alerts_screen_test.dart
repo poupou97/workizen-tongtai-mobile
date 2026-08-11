@@ -5,10 +5,10 @@ import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_catalog_controller.dart';
 import 'package:tongtai/features/tongtai/inventory/product_image_source.dart';
 import 'package:tongtai/features/tongtai/inventory/stock_alert.dart';
-import 'package:tongtai/features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_product_form_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart';
+import 'package:tongtai/core/design/tt.dart';
 
 /// Widget tests for the WTM-70 Stock Alerts screen and the Inventory alert
 /// banner: the alerting products are listed with their counts, the healthy state
@@ -218,13 +218,7 @@ void main() {
   });
 
   test('tongtaiStockAlertColor maps each level to its token', () {
-    expect(
-      tongtaiStockAlertColor(StockAlertLevel.outOfStock),
-      TongtaiDesignTokens.error,
-    );
-    expect(
-      tongtaiStockAlertColor(StockAlertLevel.lowStock),
-      TongtaiDesignTokens.warning,
-    );
+    expect(tongtaiStockAlertColor(StockAlertLevel.outOfStock), TtColors.danger);
+    expect(tongtaiStockAlertColor(StockAlertLevel.lowStock), TtColors.warning);
   });
 }

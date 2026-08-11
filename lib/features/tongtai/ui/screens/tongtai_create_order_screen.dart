@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../profile/business_profile.dart';
 import '../../consumer/customer.dart';
 import '../../core/tongtai_enums.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../orders/order.dart';
 import 'tongtai_inventory_picker_screen.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -171,12 +172,12 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.titleCreateOrder),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         actions: [
           TextButton(
             key: const Key('create-order-save'),
@@ -188,7 +189,7 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('create-order-add-item'),
         onPressed: _addItem,
-        backgroundColor: TongtaiDesignTokens.consumerBlueText,
+        backgroundColor: TtColors.readableOn(TtColors.info),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: Text(context.l10n.orderAddItem),
@@ -210,12 +211,10 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(
-                        TongtaiDesignTokens.spacing4,
-                      ),
+                      padding: const EdgeInsets.all(TtSpace.x4),
                       child: Text(
                         context.l10n.orderForCustomer(widget.customer.name),
-                        style: TongtaiDesignTokens.bodyStyle.copyWith(
+                        style: TtType.bodyLarge.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -239,14 +238,12 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: TongtaiDesignTokens.spacing4,
-                vertical: TongtaiDesignTokens.spacing2,
+                horizontal: TtSpace.x4,
+                vertical: TtSpace.x2,
               ),
               child: Text(
                 _items.length == 1 ? '1 item' : '${_items.length} items',
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.body.copyWith(color: TtColors.textSecondary),
               ),
             ),
             Expanded(
@@ -254,14 +251,14 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
                   ? Center(
                       child: Text(
                         context.l10n.orderEmptyItems,
-                        style: TongtaiDesignTokens.bodyStyle.copyWith(
-                          color: TongtaiDesignTokens.lightTextSecondary,
+                        style: TtType.bodyLarge.copyWith(
+                          color: TtColors.textSecondary,
                         ),
                       ),
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: TongtaiDesignTokens.spacing4,
+                        horizontal: TtSpace.x4,
                       ),
                       itemCount: _items.length,
                       separatorBuilder: (_, _) => const Divider(height: 1),
@@ -275,8 +272,8 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
                             '${item.quantity} × '
                             '${TongtaiFormatters.vnd(item.unitPrice)} = '
                             '${TongtaiFormatters.vnd(item.lineTotal)}',
-                            style: TongtaiDesignTokens.captionStyle.copyWith(
-                              color: TongtaiDesignTokens.lightTextSecondary,
+                            style: TtType.caption.copyWith(
+                              color: TtColors.textSecondary,
                             ),
                           ),
                           trailing: IconButton(
@@ -293,22 +290,18 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 context.l10n.labelTotal,
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.textSecondary),
               ),
               Text(
                 TongtaiFormatters.vnd(_total),
                 key: const Key('create-order-total'),
-                style: TongtaiDesignTokens.bodyStyle.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TtType.bodyLarge.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -328,8 +321,8 @@ class _StatusRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x1,
       ),
       child: Row(
         children: [
@@ -337,8 +330,8 @@ class _StatusRow extends StatelessWidget {
             width: 68,
             child: Text(
               context.l10n.labelStatus,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -350,9 +343,7 @@ class _StatusRow extends StatelessWidget {
                 children: [
                   for (final s in OrderStatus.values)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        right: TongtaiDesignTokens.spacing2,
-                      ),
+                      padding: const EdgeInsets.only(right: TtSpace.x2),
                       child: ChoiceChip(
                         label: Text(s.label(context.l10n.languageCode)),
                         selected: status == s,
@@ -381,8 +372,8 @@ class _ChannelRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-        vertical: TongtaiDesignTokens.spacing1,
+        horizontal: TtSpace.x4,
+        vertical: TtSpace.x1,
       ),
       child: Row(
         children: [
@@ -390,8 +381,8 @@ class _ChannelRow extends StatelessWidget {
             width: 68,
             child: Text(
               context.l10n.labelChannel,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -403,9 +394,7 @@ class _ChannelRow extends StatelessWidget {
                 children: [
                   for (final c in SalesChannel.values)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        right: TongtaiDesignTokens.spacing2,
-                      ),
+                      padding: const EdgeInsets.only(right: TtSpace.x2),
                       child: ChoiceChip(
                         key: Key('create-order-channel-${c.code}'),
                         label: Text(context.l10n.profileChannel(c.code)),
