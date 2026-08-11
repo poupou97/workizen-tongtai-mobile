@@ -4,17 +4,39 @@ import 'package:flutter/foundation.dart';
 /// different business types). Mirrors the goal archetypes in
 /// `docs/01-PRODUCT/BUSINESS-JOURNEY-BIBLE.md`; bilingual like every domain
 /// enum (WTM-60 convention).
+/// Nguyên mẫu mục tiêu.
+///
+/// WTM-355 thêm ba giá trị cuối. Vì sao mở rộng enum thay vì ép ba lựa chọn
+/// mới của onboarding vào bốn nguyên mẫu cũ: *"tối ưu tồn kho"* và *"tìm nguồn
+/// hàng tốt hơn"* không phải biến thể của *"tăng doanh thu"* — chúng là hai
+/// trong năm tab của sản phẩm này. Ép chúng vào `revenue` sẽ cho người bán một
+/// kế hoạch nói về khuyến mãi khi họ vừa nói mình muốn dọn kho.
+///
+/// Lưu bằng **tên** (`GoalType.name`), nên giá trị mới không phá bản ghi cũ.
 enum GoalType {
   revenue,
   newChannel,
   customerGrowth,
-  productLaunch;
+  productLaunch,
+
+  /// Lời chứ không phải doanh thu — bán nhiều mà mỏng biên thì không giải
+  /// quyết được gì.
+  profit,
+
+  /// Vốn đang nằm trong hàng, hàng chậm bán, hàng sắp hết.
+  inventory,
+
+  /// Giá nhập, nhà cung cấp, điều kiện giao.
+  sourcing;
 
   String get labelEn => switch (this) {
     GoalType.revenue => 'Grow revenue',
     GoalType.newChannel => 'Open a new sales channel',
     GoalType.customerGrowth => 'Acquire customers',
     GoalType.productLaunch => 'Launch a product',
+    GoalType.profit => 'Grow profit',
+    GoalType.inventory => 'Optimise inventory',
+    GoalType.sourcing => 'Find better suppliers',
   };
 
   String get labelVi => switch (this) {
@@ -22,6 +44,9 @@ enum GoalType {
     GoalType.newChannel => 'Mở kênh bán mới',
     GoalType.customerGrowth => 'Tăng khách hàng',
     GoalType.productLaunch => 'Ra mắt sản phẩm',
+    GoalType.profit => 'Tăng lợi nhuận',
+    GoalType.inventory => 'Tối ưu tồn kho',
+    GoalType.sourcing => 'Tìm nguồn hàng tốt hơn',
   };
 
   /// Label for a language code ('vi' -> Vietnamese, otherwise English).
@@ -119,6 +144,33 @@ const List<GoalTemplate> kTongtaiGoalTemplates = [
     suggestedTarget: 50000000,
     suggestedDays: 45,
     suggestedGrowthTarget: 100, // units sold
+  ),
+  // WTM-355 — ba nguyên mẫu mới. Con số gợi ý cố ý khiêm tốn: một mục tiêu
+  // mặc định quá lớn làm người bán bỏ ngay từ đầu, và mục tiêu đầu tiên của họ
+  // nên là thứ đạt được.
+  GoalTemplate(
+    type: GoalType.profit,
+    nameEn: 'Reach 20M ₫ profit this quarter',
+    nameVi: 'Đạt 20 triệu ₫ lợi nhuận trong quý',
+    suggestedTarget: 20000000,
+    suggestedDays: 90,
+    suggestedGrowthTarget: 100, // đơn có lời
+  ),
+  GoalTemplate(
+    type: GoalType.inventory,
+    nameEn: 'Free up 30M ₫ tied in slow stock',
+    nameVi: 'Giải phóng 30 triệu ₫ vốn nằm trong hàng chậm bán',
+    suggestedTarget: 30000000,
+    suggestedDays: 60,
+    suggestedGrowthTarget: 50, // mặt hàng đã xử lý
+  ),
+  GoalTemplate(
+    type: GoalType.sourcing,
+    nameEn: 'Cut 10M ₫ from purchase cost',
+    nameVi: 'Giảm 10 triệu ₫ chi phí nhập hàng',
+    suggestedTarget: 10000000,
+    suggestedDays: 90,
+    suggestedGrowthTarget: 10, // mặt hàng đã đổi được giá
   ),
 ];
 
