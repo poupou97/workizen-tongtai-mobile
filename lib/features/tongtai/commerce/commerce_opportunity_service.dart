@@ -6,6 +6,7 @@ import '../proposal/proposed_change.dart';
 import 'commerce_models.dart';
 import 'commerce_profit.dart';
 import '../logistics/shipment_rule.dart';
+import '../opportunity/seasonal_rule.dart';
 import '../orders/order.dart';
 import 'supplier_comparison.dart';
 
@@ -69,7 +70,8 @@ class CommerceOpportunityService {
       ..addAll(_runningOut(products, now))
       ..addAll(_deadStock(products, soldProductIds, now))
       ..addAll(_cheaperSupplier(products, quotesByProduct, profit, now))
-      ..addAll(_shipments(shipments, orders, now));
+      ..addAll(_shipments(shipments, orders, now))
+      ..addAll(_seasonal(orders, products, now));
 
     // Nặng trước. Trong cùng mức thì giữ thứ tự dựng — tức là "đang mất tiền"
     // đứng trên "sắp hết hàng", vì mất tiền không có ngày mai để sửa.
@@ -409,6 +411,56 @@ class CommerceOpportunityService {
             ),
             _ => null,
           },
+          observedAt: now,
+        ),
+    ];
+  }
+
+  // ── mùa vụ lặp lại (WTM-180 story 4) ─────────────────────────────────────
+
+  /// Cùng kỳ năm ngoái bán chạy gì, mà năm nay chưa chuẩn bị.
+  ///
+  /// Luật **từ chối kết luận** khi chưa đủ một năm lịch sử; ở đây điều đó hiện
+  /// ra thành **không có mục nào**, đúng như khi đã xét mà không thấy gì. Hai
+  /// trạng thái đó khác nhau ở tầng luật (`SeasonalVerdict`), nhưng với brief
+  /// thì cùng một nghĩa: hôm nay không có việc mùa vụ nào để làm.
+  List<BriefItem> _seasonal(
+    List<CustomerOrder> orders,
+    List<Product> products,
+    DateTime now,
+  ) {
+    final verdict = const SeasonalRule().evaluate(
+      orders: orders,
+      products: products,
+      now: now,
+    );
+
+    return [
+      for (final s in verdict.opportunities)
+        BriefItem(
+          kind: BriefKind.stockRunningOut,
+          severity: BriefSeverity.info,
+          subjectKind: 'product',
+          subjectId: s.product.id,
+          subjectLabel: s.product.name,
+          headline:
+              'Cùng kỳ năm ngoái ${s.product.name} bán ${s.unitsLastYear} '
+              '— năm nay mới ${s.unitsThisYear}',
+          suggestion: 'Nhập thêm ${s.shortfall} trước khi vào mùa',
+          evidence: [
+            IdentityEvidence(
+              kind: IdentityEvidenceKind.businessRecordObservation,
+              source: 'rule:seasonal-repeat',
+              detail:
+                  '${s.unitsLastYear} bán ra cùng kỳ năm ngoái · '
+                  '${s.unitsThisYear} năm nay · tồn ${s.product.quantity ?? 0}',
+            ),
+          ],
+          move: DoSomething(
+            actionType: BusinessActionType.inventoryCreatePurchaseOrder,
+            vendor: ActionVendor.internal,
+            parameters: {'productId': s.product.id, 'quantity': s.shortfall},
+          ),
           observedAt: now,
         ),
     ];
