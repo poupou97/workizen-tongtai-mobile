@@ -1,7 +1,7 @@
 name: tongtai
 description: "Tổng Tài — AI-First Business OS for SME entrepreneurs (Workizen)."
 publish_to: 'none'
-version: 0.1.0+4
+version: 0.1.0+5
 
 environment:
   sdk: ^3.12.2
