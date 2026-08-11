@@ -69,7 +69,6 @@ class _BriefCardBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final now = (clock ?? DateTime.now)();
-    final hasDemo = items.any((i) => i.isDemo);
 
     return Container(
       key: const Key('home-brief'),
@@ -117,7 +116,6 @@ class _BriefCardBody extends StatelessWidget {
                   ],
                 ),
               ),
-              if (hasDemo) const TongtaiDemoBadge(),
             ],
           ),
           const SizedBox(height: TongtaiDesignTokens.spacing3),

@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/logistics/shipment_rule.dart';
+import 'package:tongtai/features/tongtai/logistics/shipment.dart';
+import 'package:tongtai/features/tongtai/action/business_action.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/agent/business_brief.dart';
 import 'package:tongtai/features/tongtai/commerce/commerce_models.dart';
@@ -383,6 +386,88 @@ void main() {
       );
 
       expect(items.where((i) => i.kind == BriefKind.stockRunningOut), isEmpty);
+    });
+
+    test('⭐ kiện kẹt ⇒ bấm được: nhắn cho KHÁCH đang chờ (WTM-348)', () {
+      final stuck = Shipment(
+        id: 'shp-1',
+        orderId: 'o-1',
+        trackingNumber: 'GHN12345678',
+        status: ShipmentStatus.inTransit,
+        carrier: Carrier.ghn,
+        lastUpdate: now.subtract(const Duration(days: 6)),
+        origin: 'TP.HCM',
+        destination: 'Hà Nội',
+      );
+      final item = const CommerceOpportunityService()
+          .derive(
+            products: const [],
+            profit: CommerceProfitContext.derive(
+              products: const [],
+              orders: const [],
+              settlements: const [],
+              now: now,
+            ),
+            quotes: const [],
+            now: now,
+            shipments: [
+              ShipmentConcern(
+                shipment: stuck,
+                kind: ShipmentConcernKind.silent,
+                peersDelivered: 0,
+              ),
+            ],
+            orders: [
+              order(
+                id: 'o-1',
+                of: product(id: 'p1'),
+              ),
+            ],
+          )
+          .firstWhere((i) => i.subjectKind == 'shipment');
+
+      // Trước WTM-348 mục này chỉ nói "gọi hãng" rồi dừng — thấy được mà không
+      // bấm được gì.
+      final move = item.move;
+      expect(move, isA<DoSomething>());
+      expect(
+        (move! as DoSomething).actionType,
+        BusinessActionType.customerSendMessage,
+      );
+    });
+
+    test('⛔ không tra ra khách ⇒ KHÔNG có nút, chứ không nhắn bừa', () {
+      final orphan = Shipment(
+        id: 'shp-2',
+        trackingNumber: 'GHN99999999',
+        status: ShipmentStatus.inTransit,
+        carrier: Carrier.ghn,
+        lastUpdate: now.subtract(const Duration(days: 6)),
+      );
+      final item = const CommerceOpportunityService()
+          .derive(
+            products: const [],
+            profit: CommerceProfitContext.derive(
+              products: const [],
+              orders: const [],
+              settlements: const [],
+              now: now,
+            ),
+            quotes: const [],
+            now: now,
+            shipments: [
+              ShipmentConcern(
+                shipment: orphan,
+                kind: ShipmentConcernKind.silent,
+                peersDelivered: 0,
+              ),
+            ],
+          )
+          .firstWhere((i) => i.subjectKind == 'shipment');
+
+      // Vẫn hiện ra — biết có chuyện vẫn hơn không biết. Chỉ là không có nút,
+      // vì nhắn cho một khách đoán bừa còn tệ hơn im lặng.
+      expect(item.move, isNull);
     });
 
     test('hàng nằm = KHÔNG bán được món nào, không phải "bán ít"', () {

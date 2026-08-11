@@ -41,9 +41,6 @@ abstract class AppStrings {
   String get briefSectionDecide;
   String get briefSectionKnow;
 
-  /// Nhãn nguồn gốc — dữ liệu mẫu phải NHÌN RA ĐƯỢC (WTM-143).
-  String get briefDemoBadge;
-
   String get briefWhyTitle;
   String get briefSuggestTitle;
 
@@ -1840,8 +1837,6 @@ class AppStringsVi extends AppStrings {
   String get briefSectionDecide => 'Đang chờ bạn quyết';
   @override
   String get briefSectionKnow => 'Chỉ để bạn biết';
-  @override
-  String get briefDemoBadge => 'Dữ liệu mẫu';
   @override
   String get briefWhyTitle => 'Vì sao tôi nghĩ vậy';
   @override
@@ -3779,8 +3774,6 @@ class AppStringsEn extends AppStrings {
   String get briefSectionDecide => 'Waiting on you';
   @override
   String get briefSectionKnow => 'Just so you know';
-  @override
-  String get briefDemoBadge => 'Sample data';
   @override
   String get briefWhyTitle => 'Why I think so';
   @override

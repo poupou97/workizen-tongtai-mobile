@@ -121,6 +121,8 @@ final commerceOpportunitiesProvider = FutureProvider<List<BriefItem>>((
     profit: profit,
     quotes: quotes,
     shipments: await ref.watch(shipmentConcernsProvider.future),
+    // Chỉ để tra **khách nào** đang chờ kiện đang kẹt (WTM-348).
+    orders: await ref.watch(orderRepositoryProvider).loadAll(),
     now: DateTime.now(),
   );
 });

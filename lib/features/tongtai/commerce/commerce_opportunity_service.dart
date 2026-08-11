@@ -6,6 +6,7 @@ import '../proposal/proposed_change.dart';
 import 'commerce_models.dart';
 import 'commerce_profit.dart';
 import '../logistics/shipment_rule.dart';
+import '../orders/order.dart';
 import 'supplier_comparison.dart';
 
 /// **Cơ hội thương mại** — Rule Twin, không hardcode (WTM-329 · §16).
@@ -49,6 +50,12 @@ class CommerceOpportunityService {
     required List<SupplierQuote> quotes,
     required DateTime now,
     List<ShipmentConcern> shipments = const [],
+
+    /// Đơn hàng — chỉ dùng để tìm **khách nào** đang chờ kiện đang kẹt.
+    ///
+    /// Không có nó thì việc "kiện đứng im 5 ngày" vẫn hiện ra được, nhưng
+    /// không bấm được gì: người bán biết có chuyện mà không biết nhắn cho ai.
+    List<CustomerOrder> orders = const [],
   }) {
     final items = <BriefItem>[];
     final quotesByProduct = <String, List<SupplierQuote>>{};
@@ -62,7 +69,7 @@ class CommerceOpportunityService {
       ..addAll(_runningOut(products, now))
       ..addAll(_deadStock(products, soldProductIds, now))
       ..addAll(_cheaperSupplier(products, quotesByProduct, profit, now))
-      ..addAll(_shipments(shipments, now));
+      ..addAll(_shipments(shipments, orders, now));
 
     // Nặng trước. Trong cùng mức thì giữ thứ tự dựng — tức là "đang mất tiền"
     // đứng trên "sắp hết hàng", vì mất tiền không có ngày mai để sửa.
@@ -329,51 +336,83 @@ class CommerceOpportunityService {
 
   // ── vận chuyển ───────────────────────────────────────────────────────────
 
-  List<BriefItem> _shipments(List<ShipmentConcern> concerns, DateTime now) => [
-    for (final concern in concerns.take(maxPerKind))
-      BriefItem(
-        kind: BriefKind.businessSignal,
-        severity: switch (concern.kind) {
-          ShipmentConcernKind.deliveryFailed => BriefSeverity.critical,
-          ShipmentConcernKind.stuckWhilePeersArrived => BriefSeverity.warning,
-          ShipmentConcernKind.silent => BriefSeverity.info,
-        },
-        subjectKind: 'shipment',
-        subjectId: concern.shipment.id,
-        subjectLabel: concern.shipment.trackingNumber,
-        headline: switch (concern.kind) {
-          ShipmentConcernKind.deliveryFailed =>
-            'Đơn ${concern.shipment.trackingNumber} giao không thành công — '
-                'hãng sẽ hoàn về nếu không xử lý',
-          // ⭐ Câu đáng giá nhất: nó loại nguyên nhân chung (bão, quá tải) và
-          // chỉ còn lại nguyên nhân riêng của kiện này.
-          ShipmentConcernKind.stuckWhilePeersArrived =>
-            'Đơn ${concern.shipment.trackingNumber} đứng im '
-                '${concern.shipment.silentDaysAt(now)} ngày trong khi '
-                '${concern.peersDelivered} đơn cùng tuyến đã tới',
-          ShipmentConcernKind.silent =>
-            'Đơn ${concern.shipment.trackingNumber} '
-                '${concern.shipment.silentDaysAt(now)} ngày chưa có tin mới',
-        },
-        suggestion: concern.kind == ShipmentConcernKind.deliveryFailed
-            ? 'Gọi khách xác nhận địa chỉ rồi báo hãng giao lại'
-            : 'Gọi hãng hỏi tình trạng kiện hàng',
-        evidence: [
-          IdentityEvidence(
-            kind: IdentityEvidenceKind.businessRecordObservation,
-            source: 'rule:shipment-tracking',
-            detail: [
-              if (concern.shipment.carrier != null)
-                concern.shipment.carrier!.displayName,
-              if (concern.shipment.route != null) concern.shipment.route!,
-              if (concern.shipment.silentDaysAt(now) != null)
-                '${concern.shipment.silentDaysAt(now)} ngày không có tin',
-            ].join(' · '),
-          ),
-        ],
-        observedAt: now,
-      ),
-  ];
+  List<BriefItem> _shipments(
+    List<ShipmentConcern> concerns,
+    List<CustomerOrder> orders,
+    DateTime now,
+  ) {
+    final customerByOrder = {for (final o in orders) o.id: o.customerId};
+
+    return [
+      for (final concern in concerns.take(maxPerKind))
+        BriefItem(
+          kind: BriefKind.businessSignal,
+          severity: switch (concern.kind) {
+            ShipmentConcernKind.deliveryFailed => BriefSeverity.critical,
+            ShipmentConcernKind.stuckWhilePeersArrived => BriefSeverity.warning,
+            ShipmentConcernKind.silent => BriefSeverity.info,
+          },
+          subjectKind: 'shipment',
+          subjectId: concern.shipment.id,
+          subjectLabel: concern.shipment.trackingNumber,
+          headline: switch (concern.kind) {
+            ShipmentConcernKind.deliveryFailed =>
+              'Đơn ${concern.shipment.trackingNumber} giao không thành công — '
+                  'hãng sẽ hoàn về nếu không xử lý',
+            // ⭐ Câu đáng giá nhất: nó loại nguyên nhân chung (bão, quá tải) và
+            // chỉ còn lại nguyên nhân riêng của kiện này.
+            ShipmentConcernKind.stuckWhilePeersArrived =>
+              'Đơn ${concern.shipment.trackingNumber} đứng im '
+                  '${concern.shipment.silentDaysAt(now)} ngày trong khi '
+                  '${concern.peersDelivered} đơn cùng tuyến đã tới',
+            ShipmentConcernKind.silent =>
+              'Đơn ${concern.shipment.trackingNumber} '
+                  '${concern.shipment.silentDaysAt(now)} ngày chưa có tin mới',
+          },
+          suggestion: concern.kind == ShipmentConcernKind.deliveryFailed
+              ? 'Gọi khách xác nhận địa chỉ rồi báo hãng giao lại'
+              : 'Gọi hãng hỏi tình trạng kiện hàng',
+          evidence: [
+            IdentityEvidence(
+              kind: IdentityEvidenceKind.businessRecordObservation,
+              source: 'rule:shipment-tracking',
+              detail: [
+                if (concern.shipment.carrier != null)
+                  concern.shipment.carrier!.displayName,
+                if (concern.shipment.route != null) concern.shipment.route!,
+                if (concern.shipment.silentDaysAt(now) != null)
+                  '${concern.shipment.silentDaysAt(now)} ngày không có tin',
+              ].join(' · '),
+            ),
+          ],
+          // ⭐ WTM-348 — **thấy được thì phải bấm được.**
+          //
+          // Trước đây mục này chỉ nói "Gọi hãng hỏi tình trạng kiện hàng" rồi
+          // dừng: app nhìn ra kiện kẹt nhưng người bán vẫn phải tự làm mọi thứ.
+          //
+          // Việc đúng duy nhất mà app làm hộ được là **báo cho khách đang chờ**
+          // — người bán không gọi hãng thay được, nhưng im lặng với khách mới là
+          // thứ biến một kiện chậm thành một đơn hoàn.
+          //
+          // `null` khi không tra ra khách: kiện không gắn đơn, hoặc đơn không
+          // gắn khách. Khi đó mục vẫn hiện (biết có chuyện vẫn hơn không biết),
+          // chỉ là không có nút — chứ không phải nhắn cho một khách đoán bừa.
+          move: switch (customerByOrder[concern.shipment.orderId]) {
+            final String customerId when customerId.isNotEmpty => DoSomething(
+              actionType: BusinessActionType.customerSendMessage,
+              vendor: ActionVendor.demo,
+              parameters: {
+                'customerId': customerId,
+                'shipmentId': concern.shipment.id,
+                'reason': concern.kind.code,
+              },
+            ),
+            _ => null,
+          },
+          observedAt: now,
+        ),
+    ];
+  }
 
   /// Tiền, gọn cho một dòng tin. Không phải formatter của UI — đây là **dữ
   /// liệu** đi vào `headline`, và headline phải đọc được ở mọi nơi nó xuất
