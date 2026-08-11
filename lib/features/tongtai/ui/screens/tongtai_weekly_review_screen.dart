@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/tt.dart';
 import '../../../../core/l10n/app_strings.dart';
+import '../../ai/predictive_ai.dart';
 import '../../core/screen_state.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../predictive/rule_twin.dart';
@@ -37,11 +38,43 @@ import '../widgets/tongtai_screen_data.dart';
 /// 0 % ở đó là bịa ra một phép so sánh không tồn tại — nên chỗ ấy hiện đúng câu
 /// "chưa có tuần trước để so", và `deltaStatus` để `null` nên chênh lệch hiện
 /// **xám** chứ không xanh (UNKNOWN ≠ SUCCESS).
-class TongtaiWeeklyReviewScreen extends ConsumerWidget {
+class TongtaiWeeklyReviewScreen extends ConsumerStatefulWidget {
   const TongtaiWeeklyReviewScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TongtaiWeeklyReviewScreen> createState() =>
+      _TongtaiWeeklyReviewScreenState();
+}
+
+class _TongtaiWeeklyReviewScreenState
+    extends ConsumerState<TongtaiWeeklyReviewScreen> {
+  /// Lời diễn giải của Workizen AI về **đúng bản tổng kết đang hiện**, hoặc
+  /// `null` cho tới khi người bán bấm hỏi. Nó không bao giờ mang một con số màn
+  /// hình vẽ ra — con số vẫn là của twin (ADR-TON-016).
+  PredictiveExplanation? _explanation;
+  bool _aiRunning = false;
+
+  /// Nhờ [PredictiveAiService] giải thích bản tổng kết **đã ở trên màn**.
+  ///
+  /// Twin được truyền vào chứ không nạp lại, nên lời văn chỉ có thể nói về
+  /// đúng những con số người bán đang nhìn. Dịch vụ tự lùi về lời giải thích
+  /// rule-based khi không có khoá BYOK hoặc mọi nhà cung cấp hỏng — nên nút
+  /// **luôn trả lời**, và không âm thầm đốt lượt gọi để nghe một lời từ chối.
+  Future<void> _explain(RuleTwinResult<WeeklyReview> twin) async {
+    if (_aiRunning) return;
+    setState(() => _aiRunning = true);
+    final explanation = await ref
+        .read(predictiveAiServiceProvider)
+        .explainWeeklyReview(review: twin);
+    if (!mounted) return;
+    setState(() {
+      _explanation = explanation;
+      _aiRunning = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
       backgroundColor: TtColors.surfaceSecondary,
@@ -69,7 +102,13 @@ class TongtaiWeeklyReviewScreen extends ConsumerWidget {
                   ],
                 )
               : null,
-          builder: (context, twin) => _Body(review: twin.result!, twin: twin),
+          builder: (context, twin) => _Body(
+            review: twin.result!,
+            twin: twin,
+            aiRunning: _aiRunning,
+            explanation: _explanation,
+            onExplain: () => _explain(twin),
+          ),
         ),
       ),
     );
@@ -77,10 +116,19 @@ class TongtaiWeeklyReviewScreen extends ConsumerWidget {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.review, required this.twin});
+  const _Body({
+    required this.review,
+    required this.twin,
+    required this.aiRunning,
+    required this.explanation,
+    required this.onExplain,
+  });
 
   final WeeklyReview review;
   final RuleTwinResult<WeeklyReview> twin;
+  final bool aiRunning;
+  final PredictiveExplanation? explanation;
+  final VoidCallback onExplain;
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +211,12 @@ class _Body extends StatelessWidget {
         const SizedBox(height: TtSpace.x4),
 
         _Why(twin: twin),
+        const SizedBox(height: TtSpace.x4),
+        _AiExplain(
+          running: aiRunning,
+          explanation: explanation,
+          onExplain: onExplain,
+        ),
         const SizedBox(height: TtSpace.x3),
         Text(
           l10n.estimateDisclaimer,
@@ -333,6 +387,89 @@ class _Why extends StatelessWidget {
                 ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Nút hỏi Workizen AI, và câu trả lời của nó.
+///
+/// **AI chỉ giải thích** (ADR-TON-016): mọi con số trên màn này đến từ twin, và
+/// khối văn dưới đây không được sinh ra một con số nào khác. Nguồn luôn hiện —
+/// người bán phải phân biệt được lời của nhà cung cấp với lời giải thích
+/// rule-based của **cùng một** twin.
+class _AiExplain extends StatelessWidget {
+  const _AiExplain({
+    required this.running,
+    required this.explanation,
+    required this.onExplain,
+  });
+
+  final bool running;
+  final PredictiveExplanation? explanation;
+  final VoidCallback onExplain;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    if (running) {
+      return TongtaiInlineBusy(
+        key: const Key('weekly-review-action-ai'),
+        label: l10n.aiExplainRunning,
+      );
+    }
+    final answer = explanation;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (answer != null) ...[
+          _AiAnswer(explanation: answer),
+          const SizedBox(height: TtSpace.x3),
+        ],
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TtAiActionButton(
+            key: const Key('weekly-review-action-ai'),
+            label: l10n.aiExplain,
+            onPressed: onExplain,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AiAnswer extends StatelessWidget {
+  const _AiAnswer({required this.explanation});
+
+  final PredictiveExplanation explanation;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return TtAiCard(
+      key: const Key('weekly-review-ai-answer'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            // Xuất xứ, luôn luôn.
+            explanation.isAi
+                ? (explanation.provider?.displayName ?? 'Workizen AI')
+                : l10n.forecastRuleBased,
+            key: const Key('weekly-review-ai-source'),
+            style: TtType.caption.copyWith(
+              color: TtColors.ai,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: TtSpace.x2),
+          Text(
+            explanation.text,
+            key: const Key('weekly-review-ai-text'),
+            style: TtType.body.copyWith(color: TtColors.textPrimary),
+          ),
         ],
       ),
     );
