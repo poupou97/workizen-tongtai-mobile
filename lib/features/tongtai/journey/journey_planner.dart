@@ -94,6 +94,9 @@ abstract final class JourneyReason {
   static const String goalNewChannel = 'goal.new_channel';
   static const String goalCustomerGrowth = 'goal.customer_growth';
   static const String goalProductLaunch = 'goal.product_launch';
+  static const String goalProfit = 'goal.profit';
+  static const String goalInventory = 'goal.inventory';
+  static const String goalSourcing = 'goal.sourcing';
 
   static const String profileKnown = 'profile.known';
   static const String profileUnknown = 'profile.unknown';
@@ -246,7 +249,87 @@ List<_Milestone> _blueprintFor(JourneyPlanInput input) =>
       GoalType.newChannel => _newChannelPlan(input),
       GoalType.customerGrowth => _customerGrowthPlan(input),
       GoalType.productLaunch => _productLaunchPlan(input),
+      GoalType.profit => _profitPlan(input),
+      GoalType.inventory => _inventoryPlan(input),
+      GoalType.sourcing => _sourcingPlan(input),
     };
+
+// ── WTM-355 · ba nguyên mẫu mới ─────────────────────────────────────────────
+//
+// ⚠️ Các bước dưới đây cố ý **không mang `metric`**.
+//
+// Cám dỗ là gắn `JourneyMetric.products` vào *"khai giá vốn cho 10 mặt hàng"*
+// cho nó có thanh tiến độ. Nhưng `products` đếm **số sản phẩm**, không đếm số
+// sản phẩm đã có giá vốn — thanh đó sẽ đầy ngay khi người bán nhập hàng, tức
+// là hiện tiến độ họ chưa hề làm. Một chỉ số đo nhầm thứ tệ hơn hẳn không có
+// chỉ số. Thêm `JourneyMetric` đúng là việc của story riêng, không phải của
+// đường tới hạn onboarding.
+
+/// Bước tiền dùng chung cho ba kế hoạch mới.
+///
+/// Cùng hình dạng với các kế hoạch cũ, và vì cùng lý do (WTM-198): sổ chi rỗng
+/// thì bước đầu phải **đo được** — năm khoản chi là một quan sát, không phải
+/// một ô tích. Người đã ghi rồi thì đã qua bước đó.
+///
+/// Không kế hoạch nào được im lặng về tiền: một hành trình không bao giờ hỏi
+/// "việc này tốn bao nhiêu" thì không trả lời được "có đáng không".
+_Step _moneyStep(JourneyPlanInput input, String reason) =>
+    input.expenseCount == 0
+    ? _Step(
+        'Ghi 5 khoản chi đầu tiên',
+        metric: JourneyMetric.expenses.code,
+        target: 5,
+        reasonCodes: [JourneyReason.dataEmptyExpenses],
+      )
+    : _Step('Ghi đủ chi phí tháng này vào sổ chi', reasonCodes: [reason]);
+
+List<_Milestone> _profitPlan(JourneyPlanInput input) => [
+  _Milestone('Biết mình lời thật bao nhiêu', [
+    _Step(
+      'Khai giá vốn cho 10 mặt hàng bán chạy',
+      reasonCodes: [JourneyReason.goalProfit],
+    ),
+    _moneyStep(input, JourneyReason.goalProfit),
+  ]),
+  _Milestone('Chặn chỗ đang chảy máu', [
+    _Step(
+      'Xem lại mặt hàng bán gần bằng giá vốn',
+      reasonCodes: [JourneyReason.goalProfit],
+    ),
+  ]),
+];
+
+List<_Milestone> _inventoryPlan(JourneyPlanInput input) => [
+  _Milestone('Biết hàng đang nằm ở đâu', [
+    _Step(
+      'Khai tồn kho cho 10 mặt hàng',
+      reasonCodes: [JourneyReason.goalInventory],
+    ),
+    _moneyStep(input, JourneyReason.goalInventory),
+  ]),
+  _Milestone('Dọn phần vốn đang kẹt', [
+    _Step(
+      'Xử lý hàng chậm bán: giảm giá hoặc bán kèm',
+      reasonCodes: [JourneyReason.goalInventory],
+    ),
+  ]),
+];
+
+List<_Milestone> _sourcingPlan(JourneyPlanInput input) => [
+  _Milestone('Biết mình đang mua đắt hay rẻ', [
+    _Step(
+      'Thêm 3 nhà cung cấp để so giá',
+      reasonCodes: [JourneyReason.goalSourcing],
+    ),
+    _moneyStep(input, JourneyReason.goalSourcing),
+  ]),
+  _Milestone('Đổi được điều kiện tốt hơn', [
+    _Step(
+      'So sánh báo giá cho mặt hàng nhập nhiều nhất',
+      reasonCodes: [JourneyReason.goalSourcing],
+    ),
+  ]),
+];
 
 List<_Milestone> _revenuePlan(JourneyPlanInput input) {
   final target = input.goal.targetAmount;
@@ -525,6 +608,9 @@ String _goalReason(GoalType type) => switch (type) {
   GoalType.newChannel => JourneyReason.goalNewChannel,
   GoalType.customerGrowth => JourneyReason.goalCustomerGrowth,
   GoalType.productLaunch => JourneyReason.goalProductLaunch,
+  GoalType.profit => JourneyReason.goalProfit,
+  GoalType.inventory => JourneyReason.goalInventory,
+  GoalType.sourcing => JourneyReason.goalSourcing,
 };
 
 bool _hasOnlineChannel(BusinessProfile p) => p.channels.any(

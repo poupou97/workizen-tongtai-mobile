@@ -61,9 +61,63 @@ List<String> goalGuidanceTips(GoalType type) => switch (type) {
     'Nhập lô nhỏ để thử thị trường trước khi ôm hàng lớn.',
     'Chuẩn bị nội dung ra mắt trước ngày mở bán, đừng để nước tới chân.',
   ],
+  GoalType.profit => const [
+    'Lời = doanh thu − giá vốn − phí sàn. Thiếu một vế là con số sai.',
+    'Bán nhiều mà mỏng biên thì càng bán càng mệt — sửa giá trước khi đẩy đơn.',
+  ],
+  GoalType.inventory => const [
+    'Hàng nằm quá 90 ngày là tiền đang ngủ — thà bớt giá để lấy vốn ra.',
+    'Khai giá vốn thì mới biết mỗi kệ hàng đang giữ bao nhiêu tiền.',
+  ],
+  GoalType.sourcing => const [
+    'Ba báo giá cho cùng một mặt hàng là mức tối thiểu để biết mình mua đắt.',
+    'Giá rẻ mà giao chậm có khi đắt hơn — so cả điều kiện giao, không chỉ giá.',
+  ],
 };
 
 List<GoalActionStep> _stepsFor(GoalType type) => switch (type) {
+  GoalType.profit => const [
+    GoalActionStep(
+      'Khai giá vốn cho hàng bán chạy',
+      'Không có giá vốn thì mọi con số lợi nhuận đều là phỏng đoán.',
+    ),
+    GoalActionStep(
+      'Chặn mặt hàng bán gần bằng giá vốn',
+      'Sửa giá hoặc bỏ bán — mỗi đơn như thế đang lấy công làm lãi.',
+    ),
+    GoalActionStep(
+      'Đối soát phí sàn',
+      'Phí sàn ăn vào lời thật; chưa đối soát thì chưa biết mình còn bao nhiêu.',
+    ),
+  ],
+  GoalType.inventory => const [
+    GoalActionStep(
+      'Xử lý hàng chậm bán',
+      'Giảm giá hoặc bán kèm để lấy vốn ra khỏi hàng đang nằm.',
+    ),
+    GoalActionStep(
+      'Đặt mức đặt lại cho hàng chạy',
+      'Có mức đặt lại thì hết hàng được báo trước, không phải phát hiện sau.',
+    ),
+    GoalActionStep(
+      'Khai tồn kho còn thiếu',
+      'Mặt hàng chưa khai tồn là một khoảng mù, không phải một số không.',
+    ),
+  ],
+  GoalType.sourcing => const [
+    GoalActionStep(
+      'Thêm nhà cung cấp để so',
+      'Một nguồn duy nhất vừa là rủi ro vừa là lý do không biết giá thị trường.',
+    ),
+    GoalActionStep(
+      'So báo giá cho mặt hàng nhập nhiều nhất',
+      'Giảm được 5% ở mặt hàng nhập nhiều đáng hơn 20% ở mặt hàng lẻ.',
+    ),
+    GoalActionStep(
+      'So cả điều kiện giao, không chỉ giá',
+      'MOQ và thời gian giao đổi được thành tiền — tính chúng vào khi so.',
+    ),
+  ],
   GoalType.revenue => const [
     GoalActionStep(
       'Tăng giá trị mỗi đơn',
