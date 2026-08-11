@@ -171,6 +171,7 @@ class _Question extends StatelessWidget {
 
   String _optionLabel(AppStrings l10n, String stepId, String code) =>
       switch (stepId) {
+        'business_type' => l10n.profileBusinessType(code),
         'trade' => l10n.profileTrade(code),
         'size' => l10n.profileSize(code),
         'channels' => l10n.profileChannel(code),

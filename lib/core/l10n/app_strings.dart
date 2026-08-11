@@ -704,6 +704,9 @@ abstract class AppStrings {
   String get obClosingEmpty;
   String get obProgress;
   String obQuestion(String stepId);
+
+  /// Nhãn cho một đáp án của câu "loại hình kinh doanh" (WTM-351).
+  String profileBusinessType(String code);
   String get moreLegalSection;
   String get moreTerms;
   String get morePrivacy;
@@ -2310,10 +2313,20 @@ class AppStringsVi extends AppStrings {
   String get obProgress => 'Câu';
   @override
   String obQuestion(String stepId) => switch (stepId) {
+    'business_type' => 'Bạn đang kinh doanh gì?',
     'trade' => 'Bạn đang bán gì?',
     'channels' => 'Bạn bán ở những đâu?',
     'size' => 'Hiện tại bạn làm ở quy mô nào?',
     _ => 'Có mùa nào bạn bán chạy hơn hẳn không?',
+  };
+  @override
+  String profileBusinessType(String code) => switch (code) {
+    'goods' => 'Bán hàng (nhập, tồn, giao)',
+    'digital' => 'Sản phẩm số, khoá học, phần mềm',
+    'service' => 'Dịch vụ',
+    'mixed' => 'Vừa bán hàng vừa làm dịch vụ',
+    'preparing' => 'Đang chuẩn bị kinh doanh',
+    _ => 'Khác',
   };
   @override
   String get journeyTitle => 'Hành trình';
@@ -4245,10 +4258,20 @@ class AppStringsEn extends AppStrings {
   String get obProgress => 'Question';
   @override
   String obQuestion(String stepId) => switch (stepId) {
+    'business_type' => 'What kind of business do you run?',
     'trade' => 'What do you sell?',
     'channels' => 'Where do you sell?',
     'size' => 'How big is it right now?',
     _ => 'Any season when you sell much more?',
+  };
+  @override
+  String profileBusinessType(String code) => switch (code) {
+    'goods' => 'Selling goods (buy, stock, ship)',
+    'digital' => 'Digital products, courses, software',
+    'service' => 'Services',
+    'mixed' => 'Both goods and services',
+    'preparing' => 'Getting ready to start',
+    _ => 'Something else',
   };
   @override
   String get journeyTitle => 'Journey';

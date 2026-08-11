@@ -14,10 +14,21 @@
 /// may never be required for a step to appear.
 ///
 /// ## What it collects
-/// Exactly the four [BusinessProfile] questions, in the order that reads like a
+/// The [BusinessProfile] questions, in the order that reads like a
 /// conversation rather than a form. Nothing else: the profile's privacy
 /// boundary (WTM-177) is the boundary here too, which is why every step offers
 /// **choices**, never a text box.
+///
+/// ## WTM-351 — câu thứ năm: loại hình kinh doanh
+///
+/// [BusinessType] (ADR-TON-023) đã là một trường của [BusinessProfile] từ lâu
+/// nhưng **chưa bao giờ được onboarding hỏi**, nên nó luôn `null` với mọi
+/// người bán chưa vào màn hồ sơ. Câu này lấp chỗ đó.
+///
+/// **Vì sao KHÔNG hỏi "online hay cửa hàng"** như concept vẽ: đó là câu hỏi về
+/// *kênh bán*, và bước `channels` đã hỏi rồi. Hỏi lại là đúng cái bẫy "một
+/// khái niệm, hai chủ" (P-27/P-28) đã cắn bốn lần. Câu này hỏi thứ `channels`
+/// không biết: **bán vật, bán thứ sao chép được, hay bán thời gian**.
 library;
 
 import '../profile/business_profile.dart';
@@ -41,13 +52,44 @@ class OnboardingStep {
   final bool multiSelect;
 }
 
-/// The script. Order matters: trade first because it is the question a seller
-/// can answer without thinking, and the one that makes every later question
-/// feel relevant.
+/// Mã đáp án của bước `business_type` → [BusinessType] của ADR-TON-023.
+///
+/// Bảng này là **hợp đồng** giữa câu hỏi và miền, nên nó nằm ở đây chứ không
+/// rải trong `switch` của màn hình. Hai mã cố ý ánh xạ về `null`:
+///
+/// * `preparing` — *đang chuẩn bị kinh doanh*: chưa bán gì thì chưa có loại
+///   hình. Đoán hộ một loại hình cho họ là bịa dữ liệu miền.
+/// * `other` — người bán tự nói mình không thuộc nhóm nào; ghi `hybrid` cho
+///   họ là ghi một câu trả lời họ không đưa.
+///
+/// `null` ở đây nghĩa **chưa khai**, đúng như [BusinessType.fromCode] đã định
+/// nghĩa — không phải một giá trị mặc định.
+const Map<String, BusinessType?> kBusinessTypeByAnswer = {
+  'goods': BusinessType.physical,
+  'digital': BusinessType.digital,
+  'service': BusinessType.service,
+  'mixed': BusinessType.hybrid,
+  'preparing': null,
+  'other': null,
+};
+
+/// Mã đáp án nghĩa là *"tôi chưa bắt đầu kinh doanh"*.
+///
+/// Không lưu xuống DB (chưa có cột nào cho nó), nhưng luồng đọc nó để gợi ý
+/// cửa *"chưa có dữ liệu"* ở bước sau.
+const String kBusinessTypePreparing = 'preparing';
+
+/// The script. Order matters: business type first because it is the question a
+/// seller can answer without thinking at all; trade next; and each answer makes
+/// every later question feel relevant.
 /// WTM-232: không còn `const` vì bước "kênh bán" suy thẳng từ `SalesChannel`
 /// thay vì chép tay — danh sách chép tay vừa để sót ba kênh số mới, và người
 /// bán sản phẩm số sẽ đi qua onboarding mà không có ô nào đúng để chọn.
 final List<OnboardingStep> kOnboardingSteps = [
+  OnboardingStep(
+    id: 'business_type',
+    optionCodes: kBusinessTypeByAnswer.keys.toList(growable: false),
+  ),
   OnboardingStep(
     id: 'trade',
     optionCodes: [
@@ -87,10 +129,22 @@ class OnboardingConversation {
   const OnboardingConversation({
     this.stepIndex = 0,
     this.profile = BusinessProfile.empty,
+    this.businessTypeCode,
   });
 
   final int stepIndex;
   final BusinessProfile profile;
+
+  /// Mã đáp án **thô** của bước `business_type` — WTM-351.
+  ///
+  /// Giữ riêng khỏi `profile.type` vì đáp án mang nhiều thông tin hơn giá trị
+  /// đã ánh xạ: `preparing` và `other` **cùng** cho `type == null`, nhưng chỉ
+  /// một trong hai nghĩa là *"tôi chưa bắt đầu bán"*. Gộp chúng lại là mất đúng
+  /// tín hiệu mà đường B cần.
+  final String? businessTypeCode;
+
+  /// Người bán tự khai đang chuẩn bị kinh doanh.
+  bool get isPreparing => businessTypeCode == kBusinessTypePreparing;
 
   bool get isComplete => stepIndex >= kOnboardingSteps.length;
 
@@ -106,6 +160,7 @@ class OnboardingConversation {
     final step = currentStep;
     if (step == null) return const {};
     return switch (step.id) {
+      'business_type' => {?businessTypeCode},
       'trade' => {?profile.trade?.code},
       'size' => {?profile.size?.code},
       'channels' => profile.channels.map((c) => c.code).toSet(),
@@ -121,6 +176,19 @@ class OnboardingConversation {
     final step = currentStep;
     if (step == null) return this;
     final selected = selectedCodes.contains(code);
+    if (step.id == 'business_type') {
+      // Mã lạ bị bỏ qua chứ không lưu — cùng luật với các bước khác, nơi
+      // `fromCode` trả `null`. Ở đây phải viết tay vì mã thô được giữ lại.
+      if (!kBusinessTypeByAnswer.containsKey(code)) return this;
+      // Không đi qua `copyWith`: bỏ chọn phải xoá được về `null`, mà `copyWith`
+      // với tham số nullable không phân biệt được "không truyền" với "truyền
+      // null".
+      return OnboardingConversation(
+        stepIndex: stepIndex,
+        profile: _withType(selected ? null : kBusinessTypeByAnswer[code]),
+        businessTypeCode: selected ? null : code,
+      );
+    }
     return copyWith(
       profile: switch (step.id) {
         'trade' => _withTrade(selected ? null : BusinessTrade.fromCode(code)),
@@ -147,9 +215,24 @@ class OnboardingConversation {
       OnboardingConversation(
         stepIndex: stepIndex ?? this.stepIndex,
         profile: profile ?? this.profile,
+        businessTypeCode: businessTypeCode,
       );
 
+  // ⚠️ Mỗi hàm dưới đây dựng lại **cả** `BusinessProfile` để một trường có thể
+  // bị xoá về `null` — nghĩa là hàm nào quên chép một trường thì trường đó bị
+  // xoá lặng lẽ khi người bán trả lời câu khác. `type` là trường mới nhất
+  // (WTM-351) và đúng là trường dễ rơi nhất, nên có test khoá riêng cho nó.
+
+  BusinessProfile _withType(BusinessType? type) => BusinessProfile(
+    type: type,
+    trade: profile.trade,
+    size: profile.size,
+    channels: profile.channels,
+    seasonality: profile.seasonality,
+  );
+
   BusinessProfile _withTrade(BusinessTrade? trade) => BusinessProfile(
+    type: profile.type,
     trade: trade,
     size: profile.size,
     channels: profile.channels,
@@ -157,6 +240,7 @@ class OnboardingConversation {
   );
 
   BusinessProfile _withSize(BusinessSize? size) => BusinessProfile(
+    type: profile.type,
     trade: profile.trade,
     size: size,
     channels: profile.channels,
@@ -165,6 +249,7 @@ class OnboardingConversation {
 
   BusinessProfile _withSeasonality(BusinessSeasonality? seasonality) =>
       BusinessProfile(
+        type: profile.type,
         trade: profile.trade,
         size: profile.size,
         channels: profile.channels,
@@ -179,6 +264,7 @@ class OnboardingConversation {
         if (c == channel ? on : profile.channels.contains(c)) c,
     ];
     return BusinessProfile(
+      type: profile.type,
       trade: profile.trade,
       size: profile.size,
       channels: channels,
