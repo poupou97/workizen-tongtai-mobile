@@ -478,15 +478,11 @@ class _TongtaiOpportunityDetailScreenState
               ),
               const SizedBox(width: TtSpace.x3),
               Expanded(
-                child: FilledButton.icon(
+                child: TtPrimaryButton(
                   key: const Key('opportunity-detail-interested'),
+                  label: l10n.oppInterested,
+                  icon: Icons.thumb_up_alt_outlined,
                   onPressed: _interested,
-                  icon: const Icon(Icons.thumb_up_alt_outlined),
-                  label: Text(l10n.oppInterested),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: TtColors.successOnLight,
-                    padding: const EdgeInsets.symmetric(vertical: TtSpace.x3),
-                  ),
                 ),
               ),
             ],

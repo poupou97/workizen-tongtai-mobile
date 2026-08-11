@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../journey/business_goal.dart';
 import '../../journey/business_goal_form.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 
 /// Multi-step Business Goal form (WTM-87 AC1/AC2/AC3).
 ///
@@ -197,7 +198,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         // Stable test ID carries the *mode*, so behaviour tests never assert
         // on displayed copy — a test that reads the label breaks the moment
@@ -209,8 +210,8 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
               : context.l10n.goalFormNewTitle,
         ),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: switch (_step) {
@@ -227,7 +228,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+            padding: const EdgeInsets.all(TtSpace.x4),
             children: [
               _field(
                 key: const Key('goal-name-field'),
@@ -241,7 +242,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                 onSelected: (type) =>
                     setState(() => _seed = _seed.copyWith(type: type)),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+              const SizedBox(height: TtSpace.x3),
               _field(
                 key: const Key('goal-target-field'),
                 controller: _target,
@@ -257,22 +258,20 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
               if (_isEditing && widget.goal!.targetAmount > 0)
                 Padding(
                   key: const Key('goal-achieved-derived-note'),
-                  padding: const EdgeInsets.only(
-                    bottom: TongtaiDesignTokens.spacing3,
-                  ),
+                  padding: const EdgeInsets.only(bottom: TtSpace.x3),
                   child: Row(
                     children: [
                       const Icon(
                         Icons.auto_mode,
                         size: 16,
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                        color: TtColors.textSecondary,
                       ),
-                      const SizedBox(width: TongtaiDesignTokens.spacing2),
+                      const SizedBox(width: TtSpace.x2),
                       Expanded(
                         child: Text(
                           context.l10n.goalRealizedHelp,
-                          style: TongtaiDesignTokens.captionStyle.copyWith(
-                            color: TongtaiDesignTokens.lightTextSecondary,
+                          style: TtType.caption.copyWith(
+                            color: TtColors.textSecondary,
                           ),
                         ),
                       ),
@@ -302,7 +301,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                     ),
                   ),
                   if (_isEditing) ...[
-                    const SizedBox(width: TongtaiDesignTokens.spacing3),
+                    const SizedBox(width: TtSpace.x3),
                     Expanded(
                       child: _field(
                         key: const Key('goal-growth-achieved-field'),
@@ -323,7 +322,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                 onPickStart: () => _pickDate(isStart: true),
                 onPickEnd: () => _pickDate(isStart: false),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+              const SizedBox(height: TtSpace.x3),
               _field(
                 key: const Key('goal-notes-field'),
                 controller: _notes,
@@ -331,7 +330,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
                 hint: context.l10n.goalNotesHint,
                 maxLines: 3,
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing8),
+              const SizedBox(height: TtSpace.x8),
             ],
           ),
         ),
@@ -356,16 +355,16 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+            padding: const EdgeInsets.all(TtSpace.x4),
             children: [
               Text(
                 preview.name,
-                style: TongtaiDesignTokens.bodyStyle.copyWith(
+                style: TtType.bodyLarge.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing3),
+              const SizedBox(height: TtSpace.x3),
               _reviewRow(
                 context.l10n.goalReviewType,
                 preview.type.label(context.l10n.languageCode),
@@ -387,23 +386,19 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
               ),
               if (preview.notes.isNotEmpty)
                 _reviewRow(context.l10n.goalReviewNotes, preview.notes),
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               Container(
-                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+                padding: const EdgeInsets.all(TtSpace.x3),
                 decoration: BoxDecoration(
-                  color: TongtaiDesignTokens.info.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(
-                    TongtaiDesignTokens.cardBorderRadius,
-                  ),
+                  color: TtColors.info.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(TtRadius.md),
                   border: Border.all(
-                    color: TongtaiDesignTokens.info.withValues(alpha: 0.4),
+                    color: TtColors.info.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Text(
                   preview.recommendation(now),
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
-                  ),
+                  style: TtType.body.copyWith(color: TtColors.textPrimary),
                 ),
               ),
             ],
@@ -424,7 +419,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
 
   Widget _reviewRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing2),
+      padding: const EdgeInsets.only(bottom: TtSpace.x2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -432,8 +427,8 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
             width: 110,
             child: Text(
               label,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.body.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -441,9 +436,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
           Expanded(
             child: Text(
               value,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textPrimary),
             ),
           ),
         ],
@@ -463,7 +456,7 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
     int maxLines = 1,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: TextField(
         key: key,
         controller: controller,
@@ -486,11 +479,9 @@ class _TongtaiGoalFormScreenState extends State<TongtaiGoalFormScreen> {
           suffixText: suffixText,
           errorText: _errors[field],
           filled: true,
-          fillColor: TongtaiDesignTokens.lightHover,
+          fillColor: TtColors.surfaceTertiary,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.componentBorderRadius,
-            ),
+            borderRadius: BorderRadius.circular(TtRadius.sm),
             borderSide: BorderSide.none,
           ),
         ),
@@ -510,46 +501,40 @@ class _TemplateStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return ListView(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       children: [
         Text(
           l10n.goalWhatToAchieve,
-          style: TongtaiDesignTokens.bodyStyle.copyWith(
+          style: TtType.bodyLarge.copyWith(
             fontWeight: FontWeight.w700,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x3),
         for (final template in kTongtaiGoalTemplates)
           Padding(
-            padding: const EdgeInsets.only(
-              bottom: TongtaiDesignTokens.spacing3,
-            ),
+            padding: const EdgeInsets.only(bottom: TtSpace.x3),
             child: InkWell(
               key: Key('goal-template-${template.type.name}'),
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.cardBorderRadius,
-              ),
+              borderRadius: BorderRadius.circular(TtRadius.md),
               onTap: () => onTemplate(template),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+                padding: const EdgeInsets.all(TtSpace.x3),
                 decoration: BoxDecoration(
-                  color: TongtaiDesignTokens.lightBackground,
-                  borderRadius: BorderRadius.circular(
-                    TongtaiDesignTokens.cardBorderRadius,
-                  ),
-                  border: Border.all(color: TongtaiDesignTokens.lightBorder),
-                  boxShadow: TongtaiDesignTokens.elevation1,
+                  color: TtColors.surfaceSecondary,
+                  borderRadius: BorderRadius.circular(TtRadius.md),
+                  border: Border.all(color: TtColors.border),
+                  boxShadow: TtElevation.soft,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       template.nameVi,
-                      style: TongtaiDesignTokens.bodyStyle.copyWith(
+                      style: TtType.bodyLarge.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -558,8 +543,8 @@ class _TemplateStep extends StatelessWidget {
                         template.type.label(l10n.languageCode),
                         template.suggestedDays,
                       ),
-                      style: TongtaiDesignTokens.captionStyle.copyWith(
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
                       ),
                     ),
                   ],
@@ -588,8 +573,8 @@ class _TypePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: TongtaiDesignTokens.spacing2,
-      runSpacing: TongtaiDesignTokens.spacing1,
+      spacing: TtSpace.x2,
+      runSpacing: TtSpace.x1,
       children: [
         for (final type in GoalType.values)
           ChoiceChip(
@@ -638,7 +623,7 @@ class _TimelineRow extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: OutlinedButton.icon(
                 key: const Key('goal-end-date'),
@@ -655,12 +640,10 @@ class _TimelineRow extends StatelessWidget {
         ),
         if (error != null)
           Padding(
-            padding: const EdgeInsets.only(top: TongtaiDesignTokens.spacing1),
+            padding: const EdgeInsets.only(top: TtSpace.x1),
             child: Text(
               error!,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.errorText,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.dangerOnLight),
             ),
           ),
       ],
@@ -688,12 +671,10 @@ class _BottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         decoration: const BoxDecoration(
-          color: TongtaiDesignTokens.lightBackground,
-          border: Border(
-            top: BorderSide(color: TongtaiDesignTokens.lightBorder),
-          ),
+          color: TtColors.surfaceSecondary,
+          border: Border(top: BorderSide(color: TtColors.border)),
         ),
         child: Row(
           children: [
@@ -701,26 +682,18 @@ class _BottomBar extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: onSecondary,
                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(
-                    TongtaiDesignTokens.buttonHeight,
-                  ),
+                  minimumSize: const Size.fromHeight(TtButtonMetrics.height),
                 ),
                 child: Text(secondaryLabel),
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               flex: 2,
-              child: FilledButton(
+              child: TtPrimaryButton(
                 key: primaryKey,
+                label: primaryLabel,
                 onPressed: onPrimary,
-                style: FilledButton.styleFrom(
-                  backgroundColor: TongtaiDesignTokens.financeVioletText,
-                  minimumSize: const Size.fromHeight(
-                    TongtaiDesignTokens.buttonHeight,
-                  ),
-                ),
-                child: Text(primaryLabel),
               ),
             ),
           ],

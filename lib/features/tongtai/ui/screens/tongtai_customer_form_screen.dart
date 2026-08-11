@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../consumer/customer.dart';
 import '../../consumer/customer_form.dart';
 import '../../consumer/customer_history.dart';
 import '../../core/tongtai_formatters.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 
 /// Add / Edit Customer form (WTM-76).
 ///
@@ -229,7 +230,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
     final history = widget.customer?.history ?? const <CustomerRevision>[];
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         // Stable test ID carries the *mode* — see the note on the goal form.
         title: Text(
@@ -243,12 +244,12 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
               : context.l10n.customerAddTitle,
         ),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           children: [
             _field(
               key: const Key('customer-name-field'),
@@ -295,14 +296,14 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
               onAdd: _addAddressRow,
               onRemove: _addresses.length > 1 ? _removeAddressRow : null,
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             _SegmentsSection(
               selected: _segments,
               input: _segmentInput,
               onToggle: _toggleSegment,
               onAddCustom: _addCustomSegment,
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             _field(
               key: const Key('customer-tags-field'),
               controller: _tags,
@@ -320,18 +321,18 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
               textCapitalization: TextCapitalization.sentences,
             ),
             if (pending.isNotEmpty) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               _ChangeList(
                 title: context.l10n.unsavedChanges(pending.length),
                 changes: pending,
-                accent: TongtaiDesignTokens.info,
+                accent: TtColors.info,
               ),
             ],
             if (history.isNotEmpty) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               _ChangeHistory(history: history),
             ],
-            const SizedBox(height: TongtaiDesignTokens.spacing8),
+            const SizedBox(height: TtSpace.x8),
           ],
         ),
       ),
@@ -361,7 +362,7 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
         ? '${field.label(context.l10n.languageCode)} *'
         : field.label(context.l10n.languageCode);
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: TextField(
         key: key,
         controller: controller,
@@ -373,11 +374,9 @@ class _TongtaiCustomerFormScreenState extends State<TongtaiCustomerFormScreen> {
           hintText: hint,
           errorText: _errors[field],
           filled: true,
-          fillColor: TongtaiDesignTokens.lightHover,
+          fillColor: TtColors.surfaceTertiary,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.componentBorderRadius,
-            ),
+            borderRadius: BorderRadius.circular(TtRadius.sm),
             borderSide: BorderSide.none,
           ),
         ),
@@ -396,17 +395,15 @@ class _DuplicateWarning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const accent = TongtaiDesignTokens.warning;
+    const accent = TtColors.warning;
     return Container(
       key: const Key('customer-duplicate-warning'),
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      margin: const EdgeInsets.only(bottom: TtSpace.x3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: accent),
       ),
       child: Column(
@@ -415,27 +412,25 @@ class _DuplicateWarning extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.warning_amber_rounded, size: 16, color: accent),
-              const SizedBox(width: TongtaiDesignTokens.spacing1),
+              const SizedBox(width: TtSpace.x1),
               Expanded(
                 child: Text(
                   duplicates.length == 1
                       ? context.l10n.customerPossibleDuplicate
                       : 'Possible duplicate customers (${duplicates.length})',
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
+                  style: TtType.body.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
+          const SizedBox(height: TtSpace.x1),
           for (final customer in duplicates.take(3))
             Text(
               '${customer.name} • ${customer.maskedPhone}',
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
         ],
       ),
@@ -457,10 +452,10 @@ class _LocationSuggestions extends StatelessWidget {
   Widget build(BuildContext context) {
     if (locations.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: Wrap(
-        spacing: TongtaiDesignTokens.spacing2,
-        runSpacing: TongtaiDesignTokens.spacing1,
+        spacing: TtSpace.x2,
+        runSpacing: TtSpace.x1,
         children: [
           for (final location in locations)
             ActionChip(
@@ -495,17 +490,15 @@ class _AddressesSection extends StatelessWidget {
       children: [
         Text(
           context.l10n.customerAddressCount(controllers.length),
-          style: TongtaiDesignTokens.smallStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w600,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         for (var i = 0; i < controllers.length; i++)
           Padding(
-            padding: const EdgeInsets.only(
-              bottom: TongtaiDesignTokens.spacing2,
-            ),
+            padding: const EdgeInsets.only(bottom: TtSpace.x2),
             child: Row(
               children: [
                 Expanded(
@@ -515,11 +508,9 @@ class _AddressesSection extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: context.l10n.custAddressHint,
                       filled: true,
-                      fillColor: TongtaiDesignTokens.lightHover,
+                      fillColor: TtColors.surfaceTertiary,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          TongtaiDesignTokens.componentBorderRadius,
-                        ),
+                        borderRadius: BorderRadius.circular(TtRadius.sm),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -530,7 +521,7 @@ class _AddressesSection extends StatelessWidget {
                     key: Key('customer-address-remove-$i'),
                     tooltip: context.l10n.custRemoveAddress,
                     icon: const Icon(Icons.remove_circle_outline),
-                    color: TongtaiDesignTokens.errorText,
+                    color: TtColors.dangerOnLight,
                     onPressed: () => onRemove!(i),
                   ),
               ],
@@ -575,15 +566,15 @@ class _SegmentsSection extends StatelessWidget {
       children: [
         Text(
           context.l10n.custSegments,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w600,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Wrap(
-          spacing: TongtaiDesignTokens.spacing2,
-          runSpacing: TongtaiDesignTokens.spacing1,
+          spacing: TtSpace.x2,
+          runSpacing: TtSpace.x1,
           children: [
             for (final segment in options)
               FilterChip(
@@ -593,7 +584,7 @@ class _SegmentsSection extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Row(
           children: [
             Expanded(
@@ -605,17 +596,15 @@ class _SegmentsSection extends StatelessWidget {
                   hintText: context.l10n.custCustomSegmentHint,
                   isDense: true,
                   filled: true,
-                  fillColor: TongtaiDesignTokens.lightHover,
+                  fillColor: TtColors.surfaceTertiary,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      TongtaiDesignTokens.componentBorderRadius,
-                    ),
+                    borderRadius: BorderRadius.circular(TtRadius.sm),
                     borderSide: BorderSide.none,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            const SizedBox(width: TtSpace.x2),
             OutlinedButton(
               key: const Key('customer-segment-add'),
               onPressed: onAddCustom,
@@ -644,12 +633,10 @@ class _ChangeList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: accent.withValues(alpha: 0.4)),
       ),
       child: Column(
@@ -657,12 +644,12 @@ class _ChangeList extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
+            style: TtType.body.copyWith(
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           for (final change in changes)
             Padding(
               padding: const EdgeInsets.only(bottom: 2),
@@ -670,9 +657,7 @@ class _ChangeList extends StatelessWidget {
                 '${change.field.label(context.l10n.languageCode)}: '
                 '${change.before.isEmpty ? '—' : change.before} → '
                 '${change.after.isEmpty ? '—' : change.after}',
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.textSecondary),
               ),
             ),
         ],
@@ -694,21 +679,19 @@ class _ChangeHistory extends StatelessWidget {
       children: [
         Text(
           context.l10n.changeHistory,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w700,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         for (final revision in history)
           Padding(
-            padding: const EdgeInsets.only(
-              bottom: TongtaiDesignTokens.spacing2,
-            ),
+            padding: const EdgeInsets.only(bottom: TtSpace.x2),
             child: _ChangeList(
               title: TongtaiFormatters.isoDate(revision.timestamp),
               changes: revision.changes,
-              accent: TongtaiDesignTokens.neutral,
+              accent: TtColors.unknown,
             ),
           ),
       ],
@@ -732,39 +715,26 @@ class _SaveCancelBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         decoration: const BoxDecoration(
-          color: TongtaiDesignTokens.lightBackground,
-          border: Border(
-            top: BorderSide(color: TongtaiDesignTokens.lightBorder),
-          ),
+          color: TtColors.surfaceSecondary,
+          border: Border(top: BorderSide(color: TtColors.border)),
         ),
         child: Row(
           children: [
             Expanded(
-              child: OutlinedButton(
+              child: TtSecondaryButton(
+                label: context.l10n.actionCancel,
                 onPressed: onCancel,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(
-                    TongtaiDesignTokens.buttonHeight,
-                  ),
-                ),
-                child: Text(context.l10n.actionCancel),
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               flex: 2,
-              child: FilledButton(
+              child: TtPrimaryButton(
                 key: const Key('customer-save'),
+                label: saveLabel,
                 onPressed: onSave,
-                style: FilledButton.styleFrom(
-                  backgroundColor: TongtaiDesignTokens.consumerBlueText,
-                  minimumSize: const Size.fromHeight(
-                    TongtaiDesignTokens.buttonHeight,
-                  ),
-                ),
-                child: Text(saveLabel),
               ),
             ),
           ],

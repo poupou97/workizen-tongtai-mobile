@@ -283,14 +283,10 @@ class _Decisions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FilledButton(
+        TtPrimaryButton(
           key: const Key('story-accept'),
+          label: l10n.briefActionAccept,
           onPressed: busy ? null : onAccept,
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
-            backgroundColor: TtColors.readableOn(TtColors.info),
-          ),
-          child: Text(l10n.briefActionAccept),
         ),
         const SizedBox(height: TtSpace.x2),
         Row(

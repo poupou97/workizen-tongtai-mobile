@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../producer/business_input.dart';
 
 /// Form thêm/sửa một **nguồn đầu vào** (WTM-234 / ADR-TON-023).
@@ -105,24 +106,24 @@ class _TongtaiBusinessInputFormScreenState
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         key: const Key('input-form-header'),
         title: Text(
           widget.isEditing ? l10n.inputEditTitle : l10n.inputAddTitle,
         ),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           children: [
             _label(l10n.inputKindLabel),
             Wrap(
-              spacing: TongtaiDesignTokens.spacing2,
-              runSpacing: TongtaiDesignTokens.spacing1,
+              spacing: TtSpace.x2,
+              runSpacing: TtSpace.x1,
               children: [
                 for (final kind in BusinessInputKind.values)
                   ChoiceChip(
@@ -133,7 +134,7 @@ class _TongtaiBusinessInputFormScreenState
                   ),
               ],
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             TextField(
               key: const Key('input-name-field'),
               controller: _name,
@@ -146,11 +147,11 @@ class _TongtaiBusinessInputFormScreenState
                 error: _nameMissing ? l10n.inputNameRequired : null,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             _label(l10n.inputCadenceLabel),
             Wrap(
-              spacing: TongtaiDesignTokens.spacing2,
-              runSpacing: TongtaiDesignTokens.spacing1,
+              spacing: TtSpace.x2,
+              runSpacing: TtSpace.x1,
               children: [
                 for (final cadence in InputCadence.values)
                   ChoiceChip(
@@ -165,7 +166,7 @@ class _TongtaiBusinessInputFormScreenState
                   ),
               ],
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             TextField(
               key: const Key('input-amount-field'),
               controller: _amount,
@@ -189,17 +190,13 @@ class _TongtaiBusinessInputFormScreenState
             if (_cadence != null && !_cadence!.isCommitment)
               Padding(
                 key: const Key('input-not-commitment-note'),
-                padding: const EdgeInsets.only(
-                  top: TongtaiDesignTokens.spacing2,
-                ),
+                padding: const EdgeInsets.only(top: TtSpace.x2),
                 child: Text(
                   l10n.inputNotCommitmentNote,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
               ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             TextField(
               key: const Key('input-note-field'),
               controller: _note,
@@ -214,12 +211,10 @@ class _TongtaiBusinessInputFormScreenState
       ),
       bottomNavigationBar: SafeArea(
         child: Container(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           decoration: const BoxDecoration(
-            color: TongtaiDesignTokens.lightBackground,
-            border: Border(
-              top: BorderSide(color: TongtaiDesignTokens.lightBorder),
-            ),
+            color: TtColors.surfaceSecondary,
+            border: Border(top: BorderSide(color: TtColors.border)),
           ),
           child: Row(
             children: [
@@ -228,25 +223,18 @@ class _TongtaiBusinessInputFormScreenState
                   key: const Key('input-cancel-button'),
                   onPressed: () => Navigator.of(context).pop(),
                   style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(
-                      TongtaiDesignTokens.buttonHeight,
-                    ),
+                    minimumSize: const Size.fromHeight(TtButtonMetrics.height),
                   ),
                   child: Text(l10n.actionCancel),
                 ),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               Expanded(
                 flex: 2,
-                child: FilledButton(
+                child: TtPrimaryButton(
                   key: const Key('input-save-button'),
+                  label: l10n.actionSave,
                   onPressed: _save,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(
-                      TongtaiDesignTokens.buttonHeight,
-                    ),
-                  ),
-                  child: Text(l10n.actionSave),
                 ),
               ),
             ],
@@ -257,12 +245,12 @@ class _TongtaiBusinessInputFormScreenState
   }
 
   Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing2),
+    padding: const EdgeInsets.only(bottom: TtSpace.x2),
     child: Text(
       text,
-      style: TongtaiDesignTokens.smallStyle.copyWith(
+      style: TtType.body.copyWith(
         fontWeight: FontWeight.w600,
-        color: TongtaiDesignTokens.lightTextPrimary,
+        color: TtColors.textPrimary,
       ),
     ),
   );
@@ -278,11 +266,9 @@ class _TongtaiBusinessInputFormScreenState
     suffixText: suffix,
     errorText: error,
     filled: true,
-    fillColor: TongtaiDesignTokens.lightHover,
+    fillColor: TtColors.surfaceTertiary,
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(
-        TongtaiDesignTokens.componentBorderRadius,
-      ),
+      borderRadius: BorderRadius.circular(TtRadius.sm),
       borderSide: BorderSide.none,
     ),
   );

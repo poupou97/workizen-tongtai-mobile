@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../core/tongtai_enums.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../finance/finance_transaction.dart';
 import '../../finance/transaction_form.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../finance/finance_category.dart';
 
 /// Add Transaction form (WTM-113) — records an income or expense that flows
@@ -33,8 +34,8 @@ class _TongtaiTransactionFormScreenState
   bool _submitted = false;
   Map<TransactionField, String> _errors = const {};
 
-  static const Color _income = TongtaiDesignTokens.producerGreen;
-  static const Color _expense = TongtaiDesignTokens.error;
+  static const Color _income = TtColors.success;
+  static const Color _expense = TtColors.danger;
 
   @override
   void initState() {
@@ -88,15 +89,15 @@ class _TongtaiTransactionFormScreenState
     final date = _data.date ?? _clock();
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleTransactionForm),
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         elevation: 0,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         children: [
           // ── Direction: Thu / Chi ─────────────────────────────────────
           Row(
@@ -113,7 +114,7 @@ class _TongtaiTransactionFormScreenState
                   ),
                 ),
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               Expanded(
                 child: _TypeButton(
                   buttonKey: const Key('transaction-type-expense'),
@@ -128,11 +129,11 @@ class _TongtaiTransactionFormScreenState
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
 
           // ── Amount ───────────────────────────────────────────────────
           _Label(l10n.txnAmountLabel),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           TextField(
             key: const Key('transaction-amount'),
             controller: _amountController,
@@ -148,13 +149,13 @@ class _TongtaiTransactionFormScreenState
             ),
             onChanged: (v) => _update(_data.copyWith(amountText: v)),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
 
           // ── Category ─────────────────────────────────────────────────
           _Label(l10n.txnCategoryLabel),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
             children: [
               // Lưu **mã**, hiện **nhãn** (ADR-TON-018). Trước đây chip lưu
               // đúng chuỗi tiếng Việt đang hiện, nên bản tiếng Anh ghi nhãn
@@ -170,19 +171,17 @@ class _TongtaiTransactionFormScreenState
           ),
           if (_errors[TransactionField.category] != null)
             Padding(
-              padding: const EdgeInsets.only(top: TongtaiDesignTokens.spacing1),
+              padding: const EdgeInsets.only(top: TtSpace.x1),
               child: Text(
                 _errors[TransactionField.category]!,
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.errorText,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.dangerOnLight),
               ),
             ),
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
 
           // ── Date ─────────────────────────────────────────────────────
           _Label(l10n.txnDateLabel),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           OutlinedButton.icon(
             key: const Key('transaction-date'),
             onPressed: _pickDate,
@@ -191,16 +190,16 @@ class _TongtaiTransactionFormScreenState
             style: OutlinedButton.styleFrom(
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.symmetric(
-                horizontal: TongtaiDesignTokens.spacing3,
-                vertical: TongtaiDesignTokens.spacing3,
+                horizontal: TtSpace.x3,
+                vertical: TtSpace.x3,
               ),
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
 
           // ── Description ──────────────────────────────────────────────
           _Label(l10n.txnNoteLabel),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           TextField(
             key: const Key('transaction-description'),
             controller: _descriptionController,
@@ -210,18 +209,12 @@ class _TongtaiTransactionFormScreenState
             ),
             onChanged: (v) => _update(_data.copyWith(description: v)),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing6),
+          const SizedBox(height: TtSpace.x6),
 
-          FilledButton(
+          TtPrimaryButton(
             key: const Key('transaction-save'),
+            label: l10n.txnSave,
             onPressed: _save,
-            style: FilledButton.styleFrom(
-              backgroundColor: TongtaiDesignTokens.financeVioletText,
-              padding: const EdgeInsets.symmetric(
-                vertical: TongtaiDesignTokens.spacing4,
-              ),
-            ),
-            child: Text(l10n.txnSave),
           ),
         ],
       ),
@@ -252,16 +245,12 @@ class _TypeButton extends StatelessWidget {
       key: buttonKey,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: TongtaiDesignTokens.spacing3,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: TtSpace.x3),
         decoration: BoxDecoration(
           color: selected ? color.withValues(alpha: 0.12) : null,
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.componentBorderRadius,
-          ),
+          borderRadius: BorderRadius.circular(TtRadius.sm),
           border: Border.all(
-            color: selected ? color : TongtaiDesignTokens.lightBorder,
+            color: selected ? color : TtColors.border,
             width: selected ? 2 : 1,
           ),
         ),
@@ -269,15 +258,15 @@ class _TypeButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 18, color: selected ? color : null),
-            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            const SizedBox(width: TtSpace.x2),
             Text(
               label,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
+              style: TtType.bodyLarge.copyWith(
                 // Selected state tints the card at 12 %; the label has to be
                 // the readable twin or it sits at 3.23:1 on that tint.
                 color: selected
-                    ? TongtaiDesignTokens.readableText(color)
-                    : TongtaiDesignTokens.lightTextPrimary,
+                    ? TtColors.readableOn(color)
+                    : TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -297,8 +286,8 @@ class _Label extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TongtaiDesignTokens.smallStyle.copyWith(
-        color: TongtaiDesignTokens.lightTextSecondary,
+      style: TtType.body.copyWith(
+        color: TtColors.textSecondary,
         fontWeight: FontWeight.w600,
       ),
     );

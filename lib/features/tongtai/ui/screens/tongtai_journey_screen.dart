@@ -283,7 +283,7 @@ class _MilestoneTile extends StatelessWidget {
                   : Icons.radio_button_unchecked,
               size: 20,
               color: milestone.isDone
-                  ? TtColors.readableOn(TtColors.success)
+                  ? TtColors.successOnLight
                   : TtColors.textSecondary,
             ),
             const SizedBox(width: TtSpace.x3),
@@ -344,7 +344,7 @@ class _StepTile extends StatelessWidget {
               step.isDone ? Icons.check : Icons.circle_outlined,
               size: 16,
               color: step.isDone
-                  ? TtColors.readableOn(TtColors.success)
+                  ? TtColors.successOnLight
                   : TtColors.textSecondary,
             ),
             const SizedBox(width: TtSpace.x2),

@@ -5,12 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
 import '../../inventory/product_form.dart';
 import '../../inventory/product_history.dart';
 import '../../inventory/product_image_source.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../../../core/l10n/app_strings.dart';
 
 /// Add / Edit Product form (WTM-69).
@@ -221,7 +222,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     final history = widget.product?.history ?? const <ProductRevision>[];
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(
           widget.isEditing
@@ -229,12 +230,12 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
               : context.l10n.titleAddProduct,
         ),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           children: [
             // Đứng trước mọi ô khác vì nó quyết định các ô sau còn nghĩa hay
             // không: chọn "Sản phẩm số" thì tồn kho biến mất và "giá vốn" đổi
@@ -326,7 +327,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     ),
                   ),
-                  const SizedBox(width: TongtaiDesignTokens.spacing3),
+                  const SizedBox(width: TtSpace.x3),
                   Expanded(
                     child: _field(
                       key: const Key('product-reorder-field'),
@@ -343,24 +344,20 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
             else
               Padding(
                 key: const Key('product-no-stock-note'),
-                padding: const EdgeInsets.only(
-                  bottom: TongtaiDesignTokens.spacing3,
-                ),
+                padding: const EdgeInsets.only(bottom: TtSpace.x3),
                 child: Text(
                   context.l10n.productKindNoStockNote,
-                  style: TongtaiDesignTokens.captionStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
                 ),
               ),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             _DescriptionField(
               controller: _description,
               preview: _previewDescription,
               onTogglePreview: (preview) =>
                   setState(() => _previewDescription = preview),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             _ImagesSection(
               paths: _imagePaths,
               onUpload: () => _addImage(fromCamera: false),
@@ -368,18 +365,18 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
               onRemove: _removeImage,
             ),
             if (pending.isNotEmpty) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               _ChangeList(
                 title: context.l10n.unsavedChanges(pending.length),
                 changes: pending,
-                accent: TongtaiDesignTokens.info,
+                accent: TtColors.info,
               ),
             ],
             if (history.isNotEmpty) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               _ChangeHistory(history: history),
             ],
-            const SizedBox(height: TongtaiDesignTokens.spacing8),
+            const SizedBox(height: TtSpace.x8),
           ],
         ),
       ),
@@ -413,7 +410,7 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
         ? '$base *'
         : base;
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: TextField(
         key: key,
         controller: controller,
@@ -426,11 +423,9 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
           suffixText: suffixText,
           errorText: _errors[field],
           filled: true,
-          fillColor: TongtaiDesignTokens.lightHover,
+          fillColor: TtColors.surfaceTertiary,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.componentBorderRadius,
-            ),
+            borderRadius: BorderRadius.circular(TtRadius.sm),
             borderSide: BorderSide.none,
           ),
         ),
@@ -457,21 +452,21 @@ class _KindPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             context.l10n.productKindLabel,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
+            style: TtType.body.copyWith(
               fontWeight: FontWeight.w600,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
-            runSpacing: TongtaiDesignTokens.spacing1,
+            spacing: TtSpace.x2,
+            runSpacing: TtSpace.x1,
             children: [
               for (final kind in ProductKind.values)
                 ChoiceChip(
@@ -502,10 +497,10 @@ class _CategorySuggestions extends StatelessWidget {
   Widget build(BuildContext context) {
     if (categories.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: Wrap(
-        spacing: TongtaiDesignTokens.spacing2,
-        runSpacing: TongtaiDesignTokens.spacing1,
+        spacing: TtSpace.x2,
+        runSpacing: TtSpace.x1,
         children: [
           for (final category in categories)
             ActionChip(
@@ -542,9 +537,9 @@ class _DescriptionField extends StatelessWidget {
               child: Text(
                 context.l10n.labelDescription,
                 overflow: TextOverflow.ellipsis,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
+                style: TtType.body.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
             ),
@@ -553,7 +548,7 @@ class _DescriptionField extends StatelessWidget {
               selected: !preview,
               onSelected: (_) => onTogglePreview(false),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            const SizedBox(width: TtSpace.x2),
             ChoiceChip(
               label: Text(context.l10n.formPreview),
               selected: preview,
@@ -561,25 +556,21 @@ class _DescriptionField extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         if (preview)
           Container(
             width: double.infinity,
             constraints: const BoxConstraints(minHeight: 96),
-            padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+            padding: const EdgeInsets.all(TtSpace.x3),
             decoration: BoxDecoration(
-              color: TongtaiDesignTokens.lightHover,
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.componentBorderRadius,
-              ),
-              border: Border.all(color: TongtaiDesignTokens.lightBorder),
+              color: TtColors.surfaceTertiary,
+              borderRadius: BorderRadius.circular(TtRadius.sm),
+              border: Border.all(color: TtColors.border),
             ),
             child: controller.text.trim().isEmpty
                 ? Text(
                     context.l10n.formNothingToPreview,
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
-                    ),
+                    style: TtType.body.copyWith(color: TtColors.textSecondary),
                   )
                 : MarkdownBody(data: controller.text),
           )
@@ -592,11 +583,9 @@ class _DescriptionField extends StatelessWidget {
             decoration: InputDecoration(
               hintText: context.l10n.formMarkdownHint,
               filled: true,
-              fillColor: TongtaiDesignTokens.lightHover,
+              fillColor: TtColors.surfaceTertiary,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                  TongtaiDesignTokens.componentBorderRadius,
-                ),
+                borderRadius: BorderRadius.circular(TtRadius.sm),
                 borderSide: BorderSide.none,
               ),
             ),
@@ -627,23 +616,22 @@ class _ImagesSection extends StatelessWidget {
       children: [
         Text(
           context.l10n.productImageCount(paths.length),
-          style: TongtaiDesignTokens.smallStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w600,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         if (paths.isNotEmpty)
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
-            runSpacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
+            runSpacing: TtSpace.x2,
             children: [
               for (var i = 0; i < paths.length; i++)
                 _Thumbnail(path: paths[i], onRemove: () => onRemove(i)),
             ],
           ),
-        if (paths.isNotEmpty)
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+        if (paths.isNotEmpty) const SizedBox(height: TtSpace.x2),
         Row(
           children: [
             OutlinedButton.icon(
@@ -651,7 +639,7 @@ class _ImagesSection extends StatelessWidget {
               icon: const Icon(Icons.photo_library_outlined),
               label: Text(context.l10n.formUpload),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             OutlinedButton.icon(
               onPressed: onCamera,
               icon: const Icon(Icons.camera_alt_outlined),
@@ -684,9 +672,7 @@ class _Thumbnail extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(
-              TongtaiDesignTokens.componentBorderRadius,
-            ),
+            borderRadius: BorderRadius.circular(TtRadius.sm),
             child: exists
                 ? Image.file(
                     file,
@@ -705,7 +691,7 @@ class _Thumbnail extends StatelessWidget {
               iconSize: 18,
               icon: const CircleAvatar(
                 radius: 11,
-                backgroundColor: TongtaiDesignTokens.errorText,
+                backgroundColor: TtColors.dangerOnLight,
                 child: Icon(Icons.close, size: 14, color: Colors.white),
               ),
               onPressed: onRemove,
@@ -725,12 +711,9 @@ class _ThumbnailPlaceholder extends StatelessWidget {
     return Container(
       width: 72,
       height: 72,
-      color: TongtaiDesignTokens.lightHover,
+      color: TtColors.surfaceTertiary,
       alignment: Alignment.center,
-      child: const Icon(
-        Icons.image_outlined,
-        color: TongtaiDesignTokens.lightTextSecondary,
-      ),
+      child: const Icon(Icons.image_outlined, color: TtColors.textSecondary),
     );
   }
 }
@@ -751,12 +734,10 @@ class _ChangeList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         border: Border.all(color: accent.withValues(alpha: 0.4)),
       ),
       child: Column(
@@ -764,21 +745,19 @@ class _ChangeList extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
+            style: TtType.body.copyWith(
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           for (final change in changes)
             Padding(
               padding: const EdgeInsets.only(bottom: 2),
               child: Text(
                 '${change.field.label(context.l10n.languageCode)}: '
                 '${change.before} → ${change.after}',
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.textSecondary),
               ),
             ),
         ],
@@ -800,21 +779,19 @@ class _ChangeHistory extends StatelessWidget {
       children: [
         Text(
           context.l10n.changeHistory,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
+          style: TtType.body.copyWith(
             fontWeight: FontWeight.w700,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         for (final revision in history)
           Padding(
-            padding: const EdgeInsets.only(
-              bottom: TongtaiDesignTokens.spacing2,
-            ),
+            padding: const EdgeInsets.only(bottom: TtSpace.x2),
             child: _ChangeList(
               title: TongtaiFormatters.isoDate(revision.timestamp),
               changes: revision.changes,
-              accent: TongtaiDesignTokens.neutral,
+              accent: TtColors.unknown,
             ),
           ),
       ],
@@ -838,39 +815,26 @@ class _SaveCancelBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+        padding: const EdgeInsets.all(TtSpace.x4),
         decoration: const BoxDecoration(
-          color: TongtaiDesignTokens.lightBackground,
-          border: Border(
-            top: BorderSide(color: TongtaiDesignTokens.lightBorder),
-          ),
+          color: TtColors.surfaceSecondary,
+          border: Border(top: BorderSide(color: TtColors.border)),
         ),
         child: Row(
           children: [
             Expanded(
-              child: OutlinedButton(
+              child: TtSecondaryButton(
+                label: context.l10n.actionCancel,
                 onPressed: onCancel,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(
-                    TongtaiDesignTokens.buttonHeight,
-                  ),
-                ),
-                child: Text(context.l10n.actionCancel),
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               flex: 2,
-              child: FilledButton(
+              child: TtPrimaryButton(
                 key: const Key('product-save-button'),
+                label: saveLabel,
                 onPressed: onSave,
-                style: FilledButton.styleFrom(
-                  backgroundColor: TongtaiDesignTokens.inventoryOrangeText,
-                  minimumSize: const Size.fromHeight(
-                    TongtaiDesignTokens.buttonHeight,
-                  ),
-                ),
-                child: Text(saveLabel),
               ),
             ),
           ],

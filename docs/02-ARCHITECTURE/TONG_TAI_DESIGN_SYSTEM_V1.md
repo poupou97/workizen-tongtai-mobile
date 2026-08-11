@@ -266,6 +266,13 @@ Hai chỗ concept vẽ sai và **không được chép**:
 | `tongtai_more_screen` | WTM-373 |
 | `tongtai_create_order_screen` | WTM-373 |
 | `tongtai_forecast_screen` | WTM-373 |
+| `tongtai_product_form_screen` | WTM-374 |
+| `tongtai_customer_form_screen` | WTM-374 |
+| `tongtai_goal_form_screen` | WTM-374 |
+| `tongtai_transaction_form_screen` | WTM-374 |
+| `tongtai_business_input_form_screen` | WTM-374 |
+| `tongtai_goal_detail_screen` | WTM-374 |
+| `tongtai_inventory_picker_screen` | WTM-374 |
 
 ### Đã đi **một nửa**
 
@@ -300,15 +307,45 @@ người ta tưởng nó đã xong. Test vẫn khoá phần **đã** đi (không
 
 ### Chưa migrate
 
-**24/50 màn đã đi** (19 trọn vẹn + 5 đi một nửa). Còn lại: Sao lưu · Tìm kiếm · Trò chuyện · Tự chủ · Hoạt động · Nguồn đầu vào ·
-Xuất dữ liệu · Khoá AI · các form (sản phẩm, khách, giao dịch, mục tiêu) · các
-màn cài đặt và pháp lý.
+**31/50 màn đã đi** (26 trọn vẹn + 5 đi một nửa). Mọi màn ĐỌC trên đường demo,
+mọi đích deep-link của kế hoạch đầu tiên, và toàn bộ đường GHI đều đã đi.
+
+Còn lại: Sao lưu · Tìm kiếm hợp nhất · Tìm nhà cung cấp · Yêu thích NCC · Trò
+chuyện + tìm trong hội thoại · Tự chủ · Hoạt động · Nguồn đầu vào · Xuất dữ
+liệu · Khoá AI · Hồ sơ kinh doanh · Góp ý · Giới thiệu · Chính sách riêng tư ·
+Quét khoá.
 
 Nhóm này **người bán ít mở trong một phiên bình thường** — nên nó xuống sau
 những gì họ chạm hằng ngày, đúng thứ tự ưu tiên PRODUCT EXPERIENCE.
 
-Script di trú dùng lại được: `/tmp/migrate_ds.py` trong PR WTM-371 — nhưng đọc
-bảng ánh xạ dưới đây **trước khi chạy nó trên một màn mới**.
+Script di trú dùng lại được: `tools/migrate_ds.py` — nhưng đọc bảng ánh xạ dưới
+đây **trước khi chạy nó trên một màn mới**.
+
+### ⛔ Nút chính không mượn màu ngữ nghĩa của thứ khác
+
+Lỗi tìm thấy khi làm WTM-374: **cùng một nút *Lưu* mang năm màu khác nhau** tuỳ
+màn.
+
+| Màn | Màu nút Lưu (trước) | Nó nói gì |
+|---|---|---|
+| Sản phẩm | hổ phách | *cần chú ý* |
+| Khách | xanh dương | *thông tin* |
+| Mục tiêu | tím | ***AI đang làm việc này*** |
+| Giao dịch | tím | ***AI đang làm việc này*** |
+| Nguồn đầu vào | mặc định theme | không nói gì |
+
+Đây là di sản của bảng màu **theo năng lực** cũ: mỗi form ăn theo màu của
+capability chứa nó. Dưới luật mới thì đó là nói **sai** — `Lưu` là một **HÀNH
+ĐỘNG**, nên nó phải **cam**. Một nút *"Lưu giao dịch"* màu tím nói rằng AI đang
+làm việc này, trong khi người bán mới là người làm. Đúng chỗ chỉ thị gọi tên:
+***ORANGE ≠ AI***.
+
+Bốn nút nữa cùng hình dạng: `story-accept` (xanh dương — nút hệ trọng nhất của
+Business Story), `opportunity-detail-interested` và hai nút của màn nhà cung cấp
+(xanh lá — *"thành công"*, trong khi chúng là **hành động chưa xảy ra**).
+
+Cả chín nay là `TtPrimaryButton`. `migrated_screens_test.dart` bắt chiều ngược
+lại: một `FilledButton` **tự sơn** màu ngữ nghĩa.
 
 ### ⚠️ Bảng ánh xạ chữ — **theo giá trị, không theo tên**
 

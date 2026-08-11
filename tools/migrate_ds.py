@@ -29,11 +29,15 @@ TOKEN = {
     'TongtaiDesignTokens.lightTextSecondary': 'TtColors.textSecondary',
     'TongtaiDesignTokens.lightBorder': 'TtColors.border',
     'TongtaiDesignTokens.lightHover': 'TtColors.surfaceTertiary',
-    'TongtaiDesignTokens.producerGreenText': 'TtColors.readableOn(TtColors.success)',
+    # ⚠️ Bốn dòng `*OnLight` phải là HẰNG, không phải `TtColors.readableOn(...)`.
+    # `readableOn` là một *hàm*, nên nó không đứng được trong biểu thức `const`
+    # — và các màn hay đặt màu này trong một widget `const`. Giá trị hai bên y
+    # hệt nhau; chỉ khác chỗ đứng được.
+    'TongtaiDesignTokens.producerGreenText': 'TtColors.successOnLight',
     'TongtaiDesignTokens.inventoryOrangeText': 'TtColors.warningOnDark',
-    'TongtaiDesignTokens.consumerBlueText': 'TtColors.readableOn(TtColors.info)',
-    'TongtaiDesignTokens.financeVioletText': 'TtColors.readableOn(TtColors.ai)',
-    'TongtaiDesignTokens.errorText': 'TtColors.readableOn(TtColors.danger)',
+    'TongtaiDesignTokens.consumerBlueText': 'TtColors.infoOnLight',
+    'TongtaiDesignTokens.financeVioletText': 'TtColors.aiOnLight',
+    'TongtaiDesignTokens.errorText': 'TtColors.dangerOnLight',
     'TongtaiDesignTokens.neutralText': 'TtColors.textSecondary',
     'TongtaiDesignTokens.producerGreen': 'TtColors.success',
     'TongtaiDesignTokens.inventoryOrange': 'TtColors.warning',
