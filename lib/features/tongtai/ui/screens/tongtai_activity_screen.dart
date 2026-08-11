@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../agent/agent_activity.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../agent/agent_runner.dart';
 import '../../providers/tongtai_agentic_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
@@ -98,12 +99,12 @@ class _TongtaiActivityScreenState extends ConsumerState<TongtaiActivityScreen> {
     final activity = ref.watch(agentActivityProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleActivity),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         actions: [
           IconButton(
             key: const Key('activity-run'),
@@ -146,43 +147,43 @@ class _ActivityBody extends StatelessWidget {
 
     return ListView(
       key: const Key('activity-list'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       children: [
         Row(
           children: [
             const TongtaiFoxMascot.avatar(size: 40),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: Text(
                 l10n.activitySubtitle,
                 style: const TextStyle(
                   fontSize: 14,
                   height: 1.4,
-                  color: TongtaiDesignTokens.lightTextSecondary,
+                  color: TtColors.textSecondary,
                 ),
               ),
             ),
           ],
         ),
         if (today.isNotEmpty) ...[
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
           _DayLabel(
             key: const Key('activity-section-today'),
             text: l10n.activityToday,
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           for (final e in today) _ActivityLine(entry: e),
         ],
         if (earlier.isNotEmpty) ...[
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
           _DayLabel(
             key: const Key('activity-section-earlier'),
             text: l10n.activityEarlier,
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           for (final e in earlier) _ActivityLine(entry: e),
         ],
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
+        const SizedBox(height: TtSpace.x5),
       ],
     );
   }
@@ -200,19 +201,13 @@ class _ActivityLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, color) = switch (entry.tone) {
-      ActivityTone.done => (Icons.check, TongtaiDesignTokens.producerGreenText),
-      ActivityTone.attention => (
-        Icons.priority_high,
-        TongtaiDesignTokens.inventoryOrangeText,
-      ),
-      ActivityTone.waiting => (
-        Icons.arrow_forward,
-        TongtaiDesignTokens.consumerBlueText,
-      ),
+      ActivityTone.done => (Icons.check, TtColors.successOnLight),
+      ActivityTone.attention => (Icons.priority_high, TtColors.warningOnDark),
+      ActivityTone.waiting => (Icons.arrow_forward, TtColors.infoOnLight),
     };
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.only(bottom: TtSpace.x3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -229,7 +224,7 @@ class _ActivityLine extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     height: 1.4,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
                 if (entry.isDemo) ...[
@@ -239,7 +234,7 @@ class _ActivityLine extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
-                      color: TongtaiDesignTokens.inventoryOrangeText,
+                      color: TtColors.warningOnDark,
                     ),
                   ),
                 ],
@@ -261,29 +256,29 @@ class _ActivityEmpty extends StatelessWidget {
     final l10n = context.l10n;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing5),
+        padding: const EdgeInsets.all(TtSpace.x5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const TongtaiFoxMascot.face(size: 80),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             Text(
               l10n.activityEmpty,
               key: const Key('activity-empty-title'),
               style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: TongtaiDesignTokens.lightTextPrimary,
+                color: TtColors.textPrimary,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             Text(
               l10n.activityEmptyBody,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 14,
                 height: 1.45,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
           ],
@@ -305,7 +300,7 @@ class _DayLabel extends StatelessWidget {
       fontSize: 11,
       fontWeight: FontWeight.w800,
       letterSpacing: 0.8,
-      color: TongtaiDesignTokens.neutralText,
+      color: TtColors.textSecondary,
     ),
   );
 }

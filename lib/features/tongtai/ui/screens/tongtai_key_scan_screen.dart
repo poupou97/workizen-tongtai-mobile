@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../core/screen_state.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 
 /// QR scanner for BYOK API keys (WTM-83, Founder-approved dependency).
@@ -66,14 +67,12 @@ class _TongtaiKeyScanScreenState extends State<TongtaiKeyScanScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing6),
+              padding: const EdgeInsets.all(TtSpace.x6),
               child: Text(
                 context.l10n.keyScanHint,
                 key: const Key('key-scan-hint'),
                 textAlign: TextAlign.center,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: Colors.white,
-                ),
+                style: TtType.body.copyWith(color: Colors.white),
               ),
             ),
           ),

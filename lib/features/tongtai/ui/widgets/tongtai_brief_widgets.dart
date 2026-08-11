@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../agent/brief_inbox.dart';
 import '../../agent/business_brief.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 
 /// Các mảnh giao diện dùng chung cho brief — WTM-304 (Epic WTM-302).
 ///
@@ -12,12 +13,24 @@ import '../../navigation/tongtai_design_tokens.dart';
 /// thì hai chỗ sẽ nói khác nhau về cùng một khách vào ngày ai đó sửa một bên —
 /// đúng họ lỗi P-27 mà repo này đã dọn bốn lần.
 
-/// Màu của một mức khẩn. Dùng bộ token có sẵn, không tự chế thang màu thứ hai.
-Color tongtaiBriefColor(BriefSeverity severity) => switch (severity) {
-  BriefSeverity.critical => TongtaiDesignTokens.error,
-  BriefSeverity.warning => TongtaiDesignTokens.warning,
-  BriefSeverity.info => TongtaiDesignTokens.info,
+/// Mức khẩn của một việc, **dịch sang** thang ngữ nghĩa dùng chung.
+///
+/// ⚠️ Trước WTM-375 hàm dưới tự `switch` thẳng sang `TtColors` — tức là bảng
+/// ánh xạ mức → màu **thứ hai**, song song với [TtStatus]. Hai bảng sẽ lệch
+/// nhau đúng vào ngày ai đó sửa một bên (P-27/P-28), và lần này thứ tìm ra nó
+/// là suite quét cả thư mục chứ không phải mắt người.
+///
+/// Nay đây chỉ còn là phép **dịch tên miền**: `BriefSeverity` là ngôn ngữ của
+/// nghiệp vụ, `TtStatus` là ngôn ngữ của thị giác. Màu vẫn chỉ có một chủ.
+TtStatus tongtaiBriefStatus(BriefSeverity severity) => switch (severity) {
+  BriefSeverity.critical => TtStatus.danger,
+  BriefSeverity.warning => TtStatus.warning,
+  BriefSeverity.info => TtStatus.info,
 };
+
+/// Màu của một mức khẩn — đi qua [TtStatus], không tự chế thang màu thứ hai.
+Color tongtaiBriefColor(BriefSeverity severity) =>
+    tongtaiBriefStatus(severity).color;
 
 /// Biểu tượng theo **loại việc**, không theo mức khẩn.
 ///
@@ -86,7 +99,7 @@ class TongtaiBriefReason extends StatelessWidget {
             height: 4,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: TongtaiDesignTokens.neutralText,
+                color: TtColors.textSecondary,
                 shape: BoxShape.circle,
               ),
             ),
@@ -98,7 +111,7 @@ class TongtaiBriefReason extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               height: 1.4,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
         ),
@@ -141,16 +154,16 @@ class TongtaiBriefTile extends StatelessWidget {
 
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusXl),
+      borderRadius: BorderRadius.circular(TtRadius.lg),
       child: InkWell(
         key: Key('$keyPrefix-item-${item.id}'),
         onTap: onTap,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusXl),
+        borderRadius: BorderRadius.circular(TtRadius.lg),
         child: Container(
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           decoration: BoxDecoration(
-            border: Border.all(color: TongtaiDesignTokens.lightBorder),
-            borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusXl),
+            border: Border.all(color: TtColors.border),
+            borderRadius: BorderRadius.circular(TtRadius.lg),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,10 +181,10 @@ class TongtaiBriefTile extends StatelessWidget {
                     child: Icon(
                       tongtaiBriefIcon(item.kind),
                       size: 20,
-                      color: TongtaiDesignTokens.readableText(color),
+                      color: TtColors.readableOn(color),
                     ),
                   ),
-                  const SizedBox(width: TongtaiDesignTokens.spacing3),
+                  const SizedBox(width: TtSpace.x3),
                   Expanded(
                     child: Text(
                       item.headline,
@@ -179,20 +192,20 @@ class TongtaiBriefTile extends StatelessWidget {
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         height: 1.35,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
                   ),
                 ],
               ),
               if (reasons.isNotEmpty) ...[
-                const SizedBox(height: TongtaiDesignTokens.spacing3),
+                const SizedBox(height: TtSpace.x3),
                 Text(l10n.briefWhyTitle, style: _sectionLabel),
                 const SizedBox(height: 6),
                 for (final reason in reasons) TongtaiBriefReason(text: reason),
               ],
               if (item.isActionable) ...[
-                const SizedBox(height: TongtaiDesignTokens.spacing3),
+                const SizedBox(height: TtSpace.x3),
                 Text(l10n.briefSuggestTitle, style: _sectionLabel),
                 const SizedBox(height: 6),
                 Row(
@@ -203,7 +216,7 @@ class TongtaiBriefTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: TongtaiDesignTokens.readableText(color),
+                          color: TtColors.readableOn(color),
                         ),
                       ),
                     ),
@@ -229,7 +242,7 @@ class TongtaiBriefTile extends StatelessWidget {
     fontSize: 11,
     fontWeight: FontWeight.w700,
     letterSpacing: 0.6,
-    color: TongtaiDesignTokens.neutralText,
+    color: TtColors.textSecondary,
   );
 }
 
@@ -241,23 +254,23 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (decision) {
-      BriefDecision.pending => TongtaiDesignTokens.info,
-      BriefDecision.accepted => TongtaiDesignTokens.success,
-      BriefDecision.dismissed => TongtaiDesignTokens.neutral,
-      BriefDecision.postponed => TongtaiDesignTokens.warning,
+      BriefDecision.pending => TtColors.info,
+      BriefDecision.accepted => TtColors.success,
+      BriefDecision.dismissed => TtColors.unknown,
+      BriefDecision.postponed => TtColors.warning,
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+        borderRadius: BorderRadius.circular(TtRadius.full),
       ),
       child: Text(
         tongtaiBriefStatusLabel(context.l10n, decision),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: TongtaiDesignTokens.readableText(color),
+          color: TtColors.readableOn(color),
         ),
       ),
     );

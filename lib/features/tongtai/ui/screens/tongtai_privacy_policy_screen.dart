@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 
 /// The privacy policy, in the app (WTM-37).
 ///
@@ -33,23 +34,20 @@ class TongtaiPrivacyPolicyScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(title: Text(l10n.privacyTitle)),
       body: SafeArea(
         child: ListView.separated(
           key: const Key('privacy-list'),
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           itemCount: sections.length + 1,
-          separatorBuilder: (_, _) =>
-              const SizedBox(height: TongtaiDesignTokens.spacing5),
+          separatorBuilder: (_, _) => const SizedBox(height: TtSpace.x5),
           itemBuilder: (context, index) {
             if (index == 0) {
               return Text(
                 l10n.privacyUpdated,
                 key: const Key('privacy-updated'),
-                style: TongtaiDesignTokens.captionStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextSecondary,
-                ),
+                style: TtType.caption.copyWith(color: TtColors.textSecondary),
               );
             }
             final (title, body) = sections[index - 1];
@@ -59,16 +57,16 @@ class TongtaiPrivacyPolicyScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TongtaiDesignTokens.bodyStyle.copyWith(
+                  style: TtType.bodyLarge.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: TongtaiDesignTokens.spacing2),
+                const SizedBox(height: TtSpace.x2),
                 Text(
                   body,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     height: 1.5,
                   ),
                 ),

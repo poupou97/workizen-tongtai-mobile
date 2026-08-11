@@ -5,11 +5,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/design/tt.dart';
 import 'core/l10n/language_notifier.dart';
 import 'core/perf/startup_trace.dart';
 import 'core/prefs.dart';
 import 'core/telemetry/tongtai_telemetry.dart';
-import 'features/tongtai/navigation/tongtai_design_tokens.dart';
 import 'features/tongtai/ui/tongtai_root_gate.dart';
 
 /// Tổng Tài — AI-First Business OS (Workizen).
@@ -62,11 +62,19 @@ class TongtaiApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Tổng Tài',
       debugShowCheckedModeBanner: false,
+      // ⭐ Hạt giống là **cam thương hiệu**, không phải xanh lá (WTM-375).
+      //
+      // Mọi widget Material không được tạo kiểu riêng — hộp thoại, công tắc,
+      // ô đánh dấu, tay kéo chọn chữ, snackbar, nút mặc định — lấy màu từ hạt
+      // giống này. Gieo bằng `producerGreen` nghĩa là **cả app ngầm nói "tốt /
+      // thành công"** ở mọi chỗ chưa ai sơn tay, trong khi luật Design System
+      // nói XANH LÁ = KẾT QUẢ TÍCH CỰC và CAM = HÀNH ĐỘNG.
+      //
+      // Đây là lý do nút `Lưu` của màn Nguồn đầu vào trông khác bốn nút Lưu
+      // còn lại: nó là nút *mặc định*, nên nó mang màu của hạt giống.
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: TongtaiDesignTokens.producerGreen,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: TtColors.brand),
       ),
       locale: kAppLocale,
       localizationsDelegates: const [

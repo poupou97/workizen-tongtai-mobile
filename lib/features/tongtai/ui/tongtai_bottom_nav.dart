@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../core/l10n/app_strings.dart';
 import '../navigation/tongtai_design_tokens.dart';
 
@@ -35,7 +37,7 @@ class TongtaiBottomNav extends ConsumerWidget {
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: TongtaiDesignTokens.navBarHeight,
+          height: 64.0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -53,7 +55,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.shopping_bag_outlined,
                 selectedIcon: Icons.shopping_bag,
                 label: context.l10n.navProducer,
-                color: TongtaiDesignTokens.producerGreen,
+                color: TtColors.success,
                 onTap: onTabSelected,
               ),
               _NavTab(
@@ -62,7 +64,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.warehouse_outlined,
                 selectedIcon: Icons.warehouse,
                 label: context.l10n.navInventory,
-                color: TongtaiDesignTokens.inventoryOrange,
+                color: TtColors.warning,
                 onTap: onTabSelected,
               ),
               _NavTab(
@@ -71,7 +73,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.people_outline,
                 selectedIcon: Icons.people,
                 label: context.l10n.navConsumer,
-                color: TongtaiDesignTokens.consumerBlue,
+                color: TtColors.info,
                 onTap: onTabSelected,
               ),
               _NavTab(
@@ -80,7 +82,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.lightbulb_outline,
                 selectedIcon: Icons.lightbulb,
                 label: context.l10n.navOpportunity,
-                color: TongtaiDesignTokens.copilotViolet,
+                color: TtColors.ai,
                 onTap: onTabSelected,
               ),
             ],
@@ -115,7 +117,7 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tabColor = color ?? TongtaiDesignTokens.neutral;
+    final tabColor = color ?? TtColors.unknown;
     final isActive = isSelected;
 
     // `Expanded`: five tabs share the width evenly instead of each taking its
@@ -140,9 +142,7 @@ class _NavTab extends StatelessWidget {
             Icon(
               isActive ? selectedIcon : icon,
               size: TongtaiDesignTokens.navBarIconSize,
-              color: isActive
-                  ? tabColor
-                  : TongtaiDesignTokens.lightTextSecondary,
+              color: isActive ? tabColor : TtColors.textSecondary,
             ),
             const SizedBox(height: 4),
             Text(
@@ -153,9 +153,7 @@ class _NavTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                color: isActive
-                    ? tabColor
-                    : TongtaiDesignTokens.lightTextSecondary,
+                color: isActive ? tabColor : TtColors.textSecondary,
               ),
             ),
             const SizedBox(height: 4),

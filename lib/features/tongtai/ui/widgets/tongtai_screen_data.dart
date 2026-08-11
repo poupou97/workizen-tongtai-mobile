@@ -3,9 +3,10 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../core/screen_state.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 
 /// The **one** way a Tổng Tài screen renders loading, empty, insufficient,
 /// stale, refreshing and failed (WTM-148, ADR-TON-017).
@@ -126,7 +127,7 @@ class TongtaiScreenData<T> extends StatelessWidget {
             child: state.isRefreshing
                 ? ColoredBox(
                     key: Key('$prefix-refreshing'),
-                    color: TongtaiDesignTokens.consumerBlue,
+                    color: TtColors.info,
                   )
                 : null,
           ),
@@ -284,9 +285,7 @@ class TongtaiLoadingView extends StatelessWidget {
         liveRegion: true,
         child: Text(
           l10n.stateLoading,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.body.copyWith(color: TtColors.textSecondary),
         ),
       ),
     );
@@ -306,7 +305,7 @@ class TongtaiEmptyView extends StatelessWidget {
     return _CenteredState(
       stateKey: Key('$prefix-empty'),
       icon: Icons.inbox_outlined,
-      iconColor: TongtaiDesignTokens.lightTextSecondary,
+      iconColor: TtColors.textSecondary,
       title: message ?? l10n.stateEmpty,
     );
   }
@@ -336,14 +335,14 @@ class TongtaiInsufficientView extends StatelessWidget {
   Widget build(BuildContext context) => _CenteredState(
     stateKey: Key('$prefix-insufficient'),
     icon: Icons.help_outline,
-    iconColor: TongtaiDesignTokens.warning,
+    iconColor: TtColors.warning,
     title: insufficiency.title ?? context.l10n.stateInsufficientTitle,
     body: insufficiency.body ?? context.l10n.stateInsufficientBody,
     chips: insufficiency.reasons,
     trailing: extra == null
         ? null
         : Padding(
-            padding: const EdgeInsets.only(top: TongtaiDesignTokens.spacing6),
+            padding: const EdgeInsets.only(top: TtSpace.x6),
             child: extra,
           ),
   );
@@ -373,7 +372,7 @@ class TongtaiFailureView extends StatelessWidget {
     return _CenteredState(
       stateKey: Key('$prefix-error'),
       icon: Icons.error_outline,
-      iconColor: TongtaiDesignTokens.error,
+      iconColor: TtColors.danger,
       title: tongtaiFailureTitle(l10n, failure.kind),
       body: tongtaiFailureBody(l10n, failure.kind),
       liveRegion: true,
@@ -381,9 +380,9 @@ class TongtaiFailureView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (failure.isRetryable && onRetry != null) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             SizedBox(
-              height: TongtaiDesignTokens.buttonHeight,
+              height: TtButtonMetrics.height,
               child: ElevatedButton.icon(
                 key: Key('$prefix-error-retry'),
                 onPressed: () => onRetry!(),
@@ -392,7 +391,7 @@ class TongtaiFailureView extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: TongtaiDesignTokens.spacing4),
+          const SizedBox(height: TtSpace.x4),
           _TechnicalDetail(prefix: prefix, failure: failure),
         ],
       ),
@@ -431,19 +430,19 @@ class TongtaiStaleBanner extends StatelessWidget {
       child: Container(
         key: Key('$prefix-stale'),
         width: double.infinity,
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
-        color: TongtaiDesignTokens.warning.withValues(alpha: 0.12),
+        padding: const EdgeInsets.all(TtSpace.x3),
+        color: TtColors.warning.withValues(alpha: 0.12),
         // Wrap, not Row: at 320 px with large text the retry button drops to
         // its own line instead of overflowing (Testing Bible P-07).
         child: Wrap(
-          spacing: TongtaiDesignTokens.spacing3,
-          runSpacing: TongtaiDesignTokens.spacing2,
+          spacing: TtSpace.x3,
+          runSpacing: TtSpace.x2,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             const Icon(
               Icons.history_toggle_off,
               size: 18,
-              color: TongtaiDesignTokens.warning,
+              color: TtColors.warning,
             ),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 220),
@@ -453,16 +452,16 @@ class TongtaiStaleBanner extends StatelessWidget {
                 children: [
                   Text(
                     l10n.stateStaleTitle,
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                    style: TtType.body.copyWith(
+                      color: TtColors.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
                     l10n.stateStaleBody(time),
                     key: Key('$prefix-stale-body'),
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                 ],
@@ -503,13 +502,11 @@ class TongtaiInlineBusy extends StatelessWidget {
           height: 16,
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
-        const SizedBox(width: TongtaiDesignTokens.spacing2),
+        const SizedBox(width: TtSpace.x2),
         Flexible(
           child: Text(
             text,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.body.copyWith(color: TtColors.textSecondary),
           ),
         ),
       ],
@@ -595,8 +592,8 @@ class _TechnicalDetailState extends State<_TechnicalDetail> {
           widget.failure.code,
           key: Key('${widget.prefix}-error-code'),
           textAlign: TextAlign.center,
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
+          style: TtType.caption.copyWith(
+            color: TtColors.textSecondary,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -611,9 +608,7 @@ class _TechnicalDetailState extends State<_TechnicalDetail> {
               detail,
               key: Key('${widget.prefix}-error-detail'),
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
         ],
       ],
@@ -648,36 +643,34 @@ class _CenteredState extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = SingleChildScrollView(
       key: stateKey,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing6),
+      padding: const EdgeInsets.all(TtSpace.x6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 40, color: iconColor),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.bodyLarge.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
           if (body != null) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             Text(
               body!,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           ],
           if (chips.isNotEmpty) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Wrap(
               alignment: WrapAlignment.center,
-              spacing: TongtaiDesignTokens.spacing2,
-              runSpacing: TongtaiDesignTokens.spacing1,
+              spacing: TtSpace.x2,
+              runSpacing: TtSpace.x1,
               children: [for (final chip in chips) _ReasonChip(label: chip)],
             ),
           ],
@@ -700,19 +693,14 @@ class _ReasonChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(
-      horizontal: TongtaiDesignTokens.spacing2,
-      vertical: 2,
-    ),
+    padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
     decoration: BoxDecoration(
-      color: TongtaiDesignTokens.lightHover,
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+      color: TtColors.surfaceTertiary,
+      borderRadius: BorderRadius.circular(TtRadius.full),
     ),
     child: Text(
       label,
-      style: TongtaiDesignTokens.captionStyle.copyWith(
-        color: TongtaiDesignTokens.lightTextSecondary,
-      ),
+      style: TtType.caption.copyWith(color: TtColors.textSecondary),
     ),
   );
 }

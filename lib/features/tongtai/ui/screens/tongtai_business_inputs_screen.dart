@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../producer/business_input.dart';
 import '../../producer/business_input_repository.dart';
 import '../../providers/tongtai_context_provider.dart';
@@ -146,13 +147,13 @@ class _TongtaiBusinessInputsScreenState
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         key: const Key('inputs-header'),
         title: Text(l10n.titleBusinessInputs),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('inputs-action-add'),
@@ -177,29 +178,25 @@ class _TongtaiBusinessInputsScreenState
     final inputs = data.inputs;
     final summary = BusinessInputSummary.from(inputs);
     return ListView(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       children: [
         _CommitmentCard(summary: summary),
         // Nhịp 5 của Business Loop: khai xong một nguồn thì người bán phải
         // biết việc tiếp theo — và biết NGAY TẠI CHỖ họ vừa làm việc, không
         // phải đi tìm. Đọc từ Journey (SSoT), thường trực, không Snackbar.
         if (data.step case final step?) ...[
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           _JourneyStepCard(step: step),
         ],
-        const SizedBox(height: TongtaiDesignTokens.spacing4),
+        const SizedBox(height: TtSpace.x4),
         if (inputs.isEmpty)
           Padding(
             key: const Key('inputs-empty'),
-            padding: const EdgeInsets.symmetric(
-              vertical: TongtaiDesignTokens.spacing6,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: TtSpace.x6),
             child: Text(
               l10n.inputsEmpty,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.smallStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
             ),
           )
         else
@@ -236,34 +233,28 @@ class _JourneyStepCard extends StatelessWidget {
     return Container(
       key: const Key('inputs-journey-step'),
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        border: Border.all(
-          color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.4),
-        ),
+        color: TtColors.success.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.success.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.inputsJourneyStepTitle,
-            style: TongtaiDesignTokens.captionStyle.copyWith(
-              color: TongtaiDesignTokens.producerGreenText,
+            style: TtType.caption.copyWith(
+              color: TtColors.successOnLight,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
+          const SizedBox(height: TtSpace.x1),
           Text(
             step.title,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
-            ),
+            style: TtType.body.copyWith(color: TtColors.textPrimary),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           OutlinedButton.icon(
             key: const Key('inputs-open-journey'),
             onPressed: () => Navigator.of(context).push<void>(
@@ -292,44 +283,38 @@ class _CommitmentCard extends StatelessWidget {
     final l10n = context.l10n;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightHover,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        color: TtColors.surfaceTertiary,
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.inputsCommitmentLabel,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.body.copyWith(color: TtColors.textSecondary),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing1),
+          const SizedBox(height: TtSpace.x1),
           Text(
             TongtaiFormatters.vnd(summary.monthlyCommitment),
             key: const Key('inputs-summary-commitment'),
-            style: TongtaiDesignTokens.heading2Style.copyWith(
-              color: TongtaiDesignTokens.lightTextPrimary,
+            style: TtType.h1.copyWith(
+              color: TtColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Text(
             summary.isComplete
                 ? l10n.inputsAllCounted
                 : l10n.inputsUnknownCount(summary.unknownCount),
             key: const Key('inputs-summary-unknown'),
-            style: TongtaiDesignTokens.captionStyle.copyWith(
+            style: TtType.caption.copyWith(
               color: summary.isComplete
-                  ? TongtaiDesignTokens.lightTextSecondary
-                  : TongtaiDesignTokens.readableText(
-                      TongtaiDesignTokens.warning,
-                    ),
+                  ? TtColors.textSecondary
+                  : TtColors.readableOn(TtColors.warning),
             ),
           ),
         ],
@@ -356,12 +341,10 @@ class _InputTile extends StatelessWidget {
     return Card(
       key: Key('inputs-item-${input.id}'),
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing2),
+      margin: const EdgeInsets.only(bottom: TtSpace.x2),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        side: const BorderSide(color: TongtaiDesignTokens.lightBorder),
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        side: const BorderSide(color: TtColors.border),
       ),
       child: ListTile(
         onTap: onTap,
@@ -369,9 +352,7 @@ class _InputTile extends StatelessWidget {
         subtitle: Text(
           '${l10n.inputKindName(input.kind.code)} · '
           '${l10n.inputCadenceName(input.cadence?.code)}',
-          style: TongtaiDesignTokens.captionStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
-          ),
+          style: TtType.caption.copyWith(color: TtColors.textSecondary),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -383,10 +364,10 @@ class _InputTile extends StatelessWidget {
                   ? l10n.inputNotCounted
                   : TongtaiFormatters.vnd(monthly),
               key: Key('inputs-item-${input.id}-monthly'),
-              style: TongtaiDesignTokens.smallStyle.copyWith(
+              style: TtType.body.copyWith(
                 color: monthly == null
-                    ? TongtaiDesignTokens.lightTextSecondary
-                    : TongtaiDesignTokens.lightTextPrimary,
+                    ? TtColors.textSecondary
+                    : TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../database/search/tongtai_search_service.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../producer/supplier_favorites_store.dart';
 import '../../providers/tongtai_identity_provider.dart';
@@ -188,12 +189,12 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(context.l10n.actionSearch),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
         actions: [
           ListenableBuilder(
             listenable: _controller,
@@ -227,10 +228,10 @@ class _TongtaiUnifiedSearchScreenState extends State<TongtaiUnifiedSearchScreen>
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    TongtaiDesignTokens.spacing4,
-                    TongtaiDesignTokens.spacing3,
-                    TongtaiDesignTokens.spacing4,
-                    TongtaiDesignTokens.spacing2,
+                    TtSpace.x4,
+                    TtSpace.x3,
+                    TtSpace.x4,
+                    TtSpace.x2,
                   ),
                   child: _SearchField(
                     controller: _queryController,
@@ -320,16 +321,12 @@ class _SearchField extends StatelessWidget {
                 onPressed: onClear,
               ),
         filled: true,
-        fillColor: TongtaiDesignTokens.lightHover,
+        fillColor: TtColors.surfaceTertiary,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.componentBorderRadius,
-          ),
+          borderRadius: BorderRadius.circular(TtRadius.sm),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: TongtaiDesignTokens.spacing4,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       ),
     );
   }
@@ -344,21 +341,15 @@ class _SuggestionsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: TongtaiDesignTokens.spacing4,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        boxShadow: TongtaiDesignTokens.elevation2,
+        color: TtColors.surfaceSecondary,
+        borderRadius: BorderRadius.circular(TtRadius.sm),
+        border: Border.all(color: TtColors.border),
+        boxShadow: TtElevation.soft,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
+        borderRadius: BorderRadius.circular(TtRadius.sm),
         child: Material(
           type: MaterialType.transparency,
           child: Column(
@@ -407,19 +398,12 @@ class _AdvancedFilters extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Container(
-      margin: const EdgeInsets.fromLTRB(
-        TongtaiDesignTokens.spacing4,
-        0,
-        TongtaiDesignTokens.spacing4,
-        TongtaiDesignTokens.spacing2,
-      ),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      margin: const EdgeInsets.fromLTRB(TtSpace.x4, 0, TtSpace.x4, TtSpace.x2),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightHover,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.componentBorderRadius,
-        ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        color: TtColors.surfaceTertiary,
+        borderRadius: BorderRadius.circular(TtRadius.sm),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,9 +412,9 @@ class _AdvancedFilters extends StatelessWidget {
             children: [
               Text(
                 l10n.searchAdvancedFilters,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
+                style: TtType.body.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
               const Spacer(),
@@ -503,7 +487,7 @@ class _FilterFacetRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: TongtaiDesignTokens.spacing2),
+      padding: const EdgeInsets.only(top: TtSpace.x2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -511,8 +495,8 @@ class _FilterFacetRow extends StatelessWidget {
             width: 72,
             child: Text(
               label,
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.caption.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -524,9 +508,7 @@ class _FilterFacetRow extends StatelessWidget {
                 children: [
                   for (final child in children)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        right: TongtaiDesignTokens.spacing2,
-                      ),
+                      padding: const EdgeInsets.only(right: TtSpace.x2),
                       child: child,
                     ),
                 ],
@@ -568,23 +550,19 @@ class _IdleView extends StatelessWidget {
       );
     }
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.history,
-                size: 18,
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
-              const SizedBox(width: TongtaiDesignTokens.spacing2),
+              Icon(Icons.history, size: 18, color: TtColors.textSecondary),
+              const SizedBox(width: TtSpace.x2),
               Text(
                 l10n.searchRecent,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
+                style: TtType.body.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
               const Spacer(),
@@ -595,10 +573,10 @@ class _IdleView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
-            runSpacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
+            runSpacing: TtSpace.x2,
             children: [
               for (final query in recent)
                 ActionChip(
@@ -638,9 +616,9 @@ class _ResultsArea extends StatelessWidget {
       children: [
         TabBar(
           controller: tabController,
-          labelColor: TongtaiDesignTokens.lightTextPrimary,
-          unselectedLabelColor: TongtaiDesignTokens.lightTextSecondary,
-          indicatorColor: TongtaiDesignTokens.producerGreen,
+          labelColor: TtColors.textPrimary,
+          unselectedLabelColor: TtColors.textSecondary,
+          indicatorColor: TtColors.success,
           tabs: [
             for (final tab in tabs)
               Tab(text: '${tab.label(lang)} (${results.countFor(tab)})'),
@@ -695,10 +673,10 @@ class _ResultsTabView extends StatelessWidget {
     }
 
     const padding = EdgeInsets.fromLTRB(
-      TongtaiDesignTokens.spacing4,
-      TongtaiDesignTokens.spacing3,
-      TongtaiDesignTokens.spacing4,
-      TongtaiDesignTokens.spacing4,
+      TtSpace.x4,
+      TtSpace.x3,
+      TtSpace.x4,
+      TtSpace.x4,
     );
 
     switch (tab) {
@@ -725,7 +703,7 @@ class _ResultsTabView extends StatelessWidget {
             if (results.suppliers.isNotEmpty) ...[
               _SectionHeader(
                 label: '${l10n.sectionSuppliers} (${results.supplierCount})',
-                color: TongtaiDesignTokens.producerGreen,
+                color: TtColors.success,
               ),
               for (final s in results.suppliers)
                 _SupplierResultCard(supplier: s, lang: lang),
@@ -733,7 +711,7 @@ class _ResultsTabView extends StatelessWidget {
             if (results.products.isNotEmpty) ...[
               _SectionHeader(
                 label: '${l10n.sectionProducts} (${results.productCount})',
-                color: TongtaiDesignTokens.inventoryOrange,
+                color: TtColors.warning,
               ),
               for (final p in results.products)
                 _ProductResultCard(product: p, lang: lang),
@@ -753,7 +731,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing2),
+      padding: const EdgeInsets.only(bottom: TtSpace.x2),
       child: Row(
         children: [
           Container(
@@ -761,12 +739,12 @@ class _SectionHeader extends StatelessWidget {
             height: 8,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing2),
+          const SizedBox(width: TtSpace.x2),
           Text(
             label,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
+            style: TtType.body.copyWith(
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
         ],
@@ -786,7 +764,7 @@ class _SupplierResultCard extends StatelessWidget {
     return _ResultCard(
       cardKey: Key('search-item-supplier-${supplier.id}'),
       icon: Icons.factory_outlined,
-      iconColor: TongtaiDesignTokens.producerGreen,
+      iconColor: TtColors.success,
       title: supplier.name,
       subtitle: [
         if (supplier.category != null && supplier.category!.isNotEmpty)
@@ -799,13 +777,11 @@ class _SupplierResultCard extends StatelessWidget {
           : Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.star, size: 16, color: Color(0xFFF59E0B)),
+                const Icon(Icons.star, size: 16, color: TtColors.warning),
                 const SizedBox(width: 2),
                 Text(
                   supplier.rating!.toStringAsFixed(1),
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TtType.body.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -824,7 +800,7 @@ class _ProductResultCard extends StatelessWidget {
     return _ResultCard(
       cardKey: Key('search-item-product-${product.id}'),
       icon: Icons.inventory_2_outlined,
-      iconColor: TongtaiDesignTokens.inventoryOrange,
+      iconColor: TtColors.warning,
       title: product.name,
       subtitle: [
         if (product.category != null && product.category!.isNotEmpty)
@@ -835,9 +811,9 @@ class _ProductResultCard extends StatelessWidget {
       ].join(' • '),
       trailing: Text(
         TongtaiFormatters.vnd(product.price),
-        style: TongtaiDesignTokens.smallStyle.copyWith(
+        style: TtType.body.copyWith(
           fontWeight: FontWeight.w700,
-          color: TongtaiDesignTokens.lightTextPrimary,
+          color: TtColors.textPrimary,
         ),
       ),
     );
@@ -866,15 +842,13 @@ class _ResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: cardKey,
-      margin: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing3),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      margin: const EdgeInsets.only(bottom: TtSpace.x3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightBackground,
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        boxShadow: TongtaiDesignTokens.elevation1,
+        color: TtColors.surfaceSecondary,
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.border),
+        boxShadow: TtElevation.soft,
       ),
       child: Row(
         children: [
@@ -883,13 +857,11 @@ class _ResultCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.componentBorderRadius,
-              ),
+              borderRadius: BorderRadius.circular(TtRadius.sm),
             ),
             child: Icon(icon, size: 20, color: iconColor),
           ),
-          const SizedBox(width: TongtaiDesignTokens.spacing3),
+          const SizedBox(width: TtSpace.x3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -898,9 +870,9 @@ class _ResultCard extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TongtaiDesignTokens.bodyStyle.copyWith(
+                  style: TtType.bodyLarge.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                    color: TtColors.textPrimary,
                   ),
                 ),
                 if (subtitle.isNotEmpty) ...[
@@ -909,8 +881,8 @@ class _ResultCard extends StatelessWidget {
                     subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                 ],
@@ -918,7 +890,7 @@ class _ResultCard extends StatelessWidget {
             ),
           ),
           if (trailing != null) ...[
-            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            const SizedBox(width: TtSpace.x2),
             trailing!,
           ],
         ],
@@ -950,31 +922,25 @@ class _CenteredMessage extends StatelessWidget {
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+              padding: const EdgeInsets.all(TtSpace.x8),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    icon,
-                    size: 48,
-                    color: TongtaiDesignTokens.lightTextSecondary,
-                  ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing3),
+                  Icon(icon, size: 48, color: TtColors.textSecondary),
+                  const SizedBox(height: TtSpace.x3),
                   Text(
                     title,
                     textAlign: TextAlign.center,
-                    style: TongtaiDesignTokens.bodyStyle.copyWith(
+                    style: TtType.bodyLarge.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                      color: TtColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: TongtaiDesignTokens.spacing1),
+                  const SizedBox(height: TtSpace.x1),
                   Text(
                     subtitle,
                     textAlign: TextAlign.center,
-                    style: TongtaiDesignTokens.smallStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
-                    ),
+                    style: TtType.body.copyWith(color: TtColors.textSecondary),
                   ),
                 ],
               ),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../profile/business_profile.dart';
 import '../../providers/tongtai_profile_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
@@ -40,7 +41,7 @@ class _TongtaiBusinessProfileScreenState
     final stored = ref.watch(businessProfileProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(title: Text(l10n.profileTitle)),
       body: SafeArea(
         // ADR-TON-017: no hand-rolled `AsyncValue.when` in `ui/`. The first
@@ -56,16 +57,16 @@ class _TongtaiBusinessProfileScreenState
             final profile = _draft ?? loaded;
             return ListView(
               key: const Key('profile-list'),
-              padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+              padding: const EdgeInsets.all(TtSpace.x4),
               children: [
                 Text(
                   l10n.profileIntro,
-                  style: TongtaiDesignTokens.smallStyle.copyWith(
-                    color: TongtaiDesignTokens.lightTextPrimary,
+                  style: TtType.body.copyWith(
+                    color: TtColors.textPrimary,
                     height: 1.5,
                   ),
                 ),
-                const SizedBox(height: TongtaiDesignTokens.spacing5),
+                const SizedBox(height: TtSpace.x5),
                 _SingleChoice<BusinessTrade>(
                   label: l10n.profileTradeLabel,
                   keyPrefix: 'profile-trade',
@@ -102,23 +103,23 @@ class _TongtaiBusinessProfileScreenState
                     () => _draft = _clearable(profile, seasonality: v),
                   ),
                 ),
-                const SizedBox(height: TongtaiDesignTokens.spacing4),
+                const SizedBox(height: TtSpace.x4),
                 _PrivacyNote(text: l10n.profilePrivacyNote),
-                const SizedBox(height: TongtaiDesignTokens.spacing5),
+                const SizedBox(height: TtSpace.x5),
                 SizedBox(
-                  height: TongtaiDesignTokens.buttonHeight,
+                  height: TtButtonMetrics.height,
                   child: FilledButton(
                     key: const Key('profile-save'),
                     onPressed: _saving ? null : () => _save(profile),
                     child: Text(l10n.profileSave),
                   ),
                 ),
-                const SizedBox(height: TongtaiDesignTokens.spacing2),
+                const SizedBox(height: TtSpace.x2),
                 Center(
                   child: Text(
                     l10n.profileSkipHint,
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
-                      color: TongtaiDesignTokens.lightTextSecondary,
+                    style: TtType.caption.copyWith(
+                      color: TtColors.textSecondary,
                     ),
                   ),
                 ),
@@ -202,8 +203,8 @@ class _SingleChoice<T> extends StatelessWidget {
     return _Section(
       label: label,
       child: Wrap(
-        spacing: TongtaiDesignTokens.spacing2,
-        runSpacing: TongtaiDesignTokens.spacing2,
+        spacing: TtSpace.x2,
+        runSpacing: TtSpace.x2,
         children: [
           for (final value in values)
             ChoiceChip(
@@ -238,8 +239,8 @@ class _MultiChoice extends StatelessWidget {
     return _Section(
       label: label,
       child: Wrap(
-        spacing: TongtaiDesignTokens.spacing2,
-        runSpacing: TongtaiDesignTokens.spacing2,
+        spacing: TtSpace.x2,
+        runSpacing: TtSpace.x2,
         children: [
           for (final channel in SalesChannel.values)
             FilterChip(
@@ -266,18 +267,18 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: TongtaiDesignTokens.spacing5),
+      padding: const EdgeInsets.only(bottom: TtSpace.x5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
+            style: TtType.bodyLarge.copyWith(
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           child,
         ],
       ),
@@ -294,15 +295,15 @@ class _PrivacyNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('profile-privacy-note'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
+        border: Border.all(color: TtColors.border),
+        borderRadius: BorderRadius.circular(TtRadius.md),
       ),
       child: Text(
         text,
-        style: TongtaiDesignTokens.captionStyle.copyWith(
-          color: TongtaiDesignTokens.producerGreenText,
+        style: TtType.caption.copyWith(
+          color: TtColors.successOnLight,
           height: 1.5,
         ),
       ),

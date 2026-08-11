@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../agent/automation_card.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 
 /// **Trải nghiệm #3 · Orchestration Card** — WTM-306.
 ///
@@ -29,11 +30,11 @@ class TongtaiAutomationCard extends StatelessWidget {
     return Container(
       key: Key('$keyPrefix-card'),
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightHover,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusXl),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        color: TtColors.surfaceTertiary,
+        borderRadius: BorderRadius.circular(TtRadius.lg),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,10 +44,10 @@ class TongtaiAutomationCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           for (final (label, text) in card.lines)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -63,7 +64,7 @@ class TongtaiAutomationCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
                         height: 1.5,
-                        color: TongtaiDesignTokens.neutralText,
+                        color: TtColors.textSecondary,
                       ),
                     ),
                   ),
@@ -73,7 +74,7 @@ class TongtaiAutomationCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 13.5,
                         height: 1.4,
-                        color: TongtaiDesignTokens.lightTextPrimary,
+                        color: TtColors.textPrimary,
                       ),
                     ),
                   ),

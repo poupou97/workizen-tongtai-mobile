@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../action/business_action.dart';
 import '../../agent/automation_card.dart';
 import '../../agent/autonomy_settings.dart';
 import '../../agent/business_brief.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_agentic_provider.dart';
 import '../widgets/tongtai_automation_card.dart';
 
@@ -37,27 +38,27 @@ class TongtaiAutonomyScreen extends ConsumerWidget {
     final settings = ref.watch(autonomySettingsProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.titleAutonomy),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListView(
           key: const Key('autonomy-list'),
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           children: [
             Text(
               l10n.autonomySubtitle,
               style: const TextStyle(
                 fontSize: 14,
                 height: 1.45,
-                color: TongtaiDesignTokens.lightTextSecondary,
+                color: TtColors.textSecondary,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             for (final area in AutonomyArea.values) ...[
               _AreaCard(
                 area: area,
@@ -66,7 +67,7 @@ class TongtaiAutonomyScreen extends ConsumerWidget {
                     .read(autonomySettingsProvider.notifier)
                     .setMode(area, mode),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
             ],
 
             // Thẻ orchestration đọc **cùng** cấu hình ở trên, nên gạt một công
@@ -79,7 +80,7 @@ class TongtaiAutonomyScreen extends ConsumerWidget {
                 settings: settings,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
           ],
         ),
       ),
@@ -105,11 +106,11 @@ class _AreaCard extends StatelessWidget {
 
     return Container(
       key: Key('autonomy-area-${area.code}'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusXl),
-        border: Border.all(color: TongtaiDesignTokens.lightBorder),
+        borderRadius: BorderRadius.circular(TtRadius.lg),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,10 +120,10 @@ class _AreaCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
 
           for (final option in const [
             AutonomyMode.suggest,
@@ -147,18 +148,18 @@ class _AreaCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 12.5,
                 height: 1.4,
-                color: TongtaiDesignTokens.neutralText,
+                color: TtColors.textSecondary,
               ),
             ),
           ],
 
           if (mode == AutonomyMode.auto) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             _PreviewNotice(area: area),
           ],
 
           if (alwaysAsk.isNotEmpty) ...[
-            const SizedBox(height: TongtaiDesignTokens.spacing4),
+            const SizedBox(height: TtSpace.x4),
             _AlwaysAsk(area: area, actions: alwaysAsk),
           ],
         ],
@@ -185,16 +186,14 @@ class _ModeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final color = selected
-        ? TongtaiDesignTokens.consumerBlueText
-        : TongtaiDesignTokens.neutralText;
+    final color = selected ? TtColors.infoOnLight : TtColors.textSecondary;
 
     return Opacity(
       opacity: enabled ? 1 : 0.45,
       child: InkWell(
         key: Key('autonomy-${area.code}-${mode.code}'),
         onTap: enabled ? () => onPick(mode) : null,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
+        borderRadius: BorderRadius.circular(TtRadius.md),
         child: Container(
           constraints: const BoxConstraints(minHeight: 48),
           padding: const EdgeInsets.symmetric(vertical: 6),
@@ -208,7 +207,7 @@ class _ModeOption extends StatelessWidget {
                 size: 20,
                 color: color,
               ),
-              const SizedBox(width: TongtaiDesignTokens.spacing3),
+              const SizedBox(width: TtSpace.x3),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,7 +221,7 @@ class _ModeOption extends StatelessWidget {
                             fontWeight: selected
                                 ? FontWeight.w700
                                 : FontWeight.w500,
-                            color: TongtaiDesignTokens.lightTextPrimary,
+                            color: TtColors.textPrimary,
                           ),
                         ),
                         if (mode == AutonomyMode.auto) ...[
@@ -237,7 +236,7 @@ class _ModeOption extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12.5,
                         height: 1.35,
-                        color: TongtaiDesignTokens.lightTextSecondary,
+                        color: TtColors.textSecondary,
                       ),
                     ),
                   ],
@@ -261,15 +260,15 @@ class _PreviewBadge extends StatelessWidget {
     key: Key('autonomy-preview-${area.code}'),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     decoration: BoxDecoration(
-      color: TongtaiDesignTokens.warning.withValues(alpha: 0.15),
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
+      color: TtColors.warning.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(TtRadius.full),
     ),
     child: Text(
       context.l10n.autonomyPreviewBadge,
       style: const TextStyle(
         fontSize: 10.5,
         fontWeight: FontWeight.w800,
-        color: TongtaiDesignTokens.inventoryOrangeText,
+        color: TtColors.warningOnDark,
       ),
     ),
   );
@@ -284,17 +283,17 @@ class _PreviewNotice extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     key: Key('autonomy-preview-notice-${area.code}'),
     width: double.infinity,
-    padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+    padding: const EdgeInsets.all(TtSpace.x3),
     decoration: BoxDecoration(
-      color: TongtaiDesignTokens.warning.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
+      color: TtColors.warning.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(TtRadius.md),
     ),
     child: Text(
       context.l10n.autonomyPreviewBody,
       style: const TextStyle(
         fontSize: 12.5,
         height: 1.45,
-        color: TongtaiDesignTokens.lightTextPrimary,
+        color: TtColors.textPrimary,
       ),
     ),
   );
@@ -313,10 +312,10 @@ class _AlwaysAsk extends StatelessWidget {
     return Container(
       key: Key('autonomy-always-ask-${area.code}'),
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.lightHover,
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
+        color: TtColors.surfaceTertiary,
+        borderRadius: BorderRadius.circular(TtRadius.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,7 +325,7 @@ class _AlwaysAsk extends StatelessWidget {
               const Icon(
                 Icons.lock_outline,
                 size: 16,
-                color: TongtaiDesignTokens.neutralText,
+                color: TtColors.textSecondary,
               ),
               const SizedBox(width: 6),
               Text(
@@ -334,7 +333,7 @@ class _AlwaysAsk extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
             ],
@@ -345,7 +344,7 @@ class _AlwaysAsk extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12.5,
               height: 1.4,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -358,7 +357,7 @@ class _AlwaysAsk extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   height: 1.4,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
             ),
