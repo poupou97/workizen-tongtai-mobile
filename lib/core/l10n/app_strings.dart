@@ -2430,7 +2430,7 @@ class AppStringsVi extends AppStrings {
   @override
   String get obV2SnapshotProfit => 'Lợi nhuận';
   @override
-  String get obV2SnapshotOrders => 'Đơn hàng';
+  String get obV2SnapshotOrders => 'Đơn đã chốt';
   @override
   String get obV2SnapshotInventory => 'Vốn tồn kho';
   @override
@@ -4466,7 +4466,7 @@ class AppStringsEn extends AppStrings {
   @override
   String get obV2SnapshotProfit => 'Profit';
   @override
-  String get obV2SnapshotOrders => 'Orders';
+  String get obV2SnapshotOrders => 'Confirmed orders';
   @override
   String get obV2SnapshotInventory => 'Stock capital';
   @override

@@ -78,7 +78,6 @@ enum PlanDestination {
   customerList('customer_list'),
   customerRisk('customer_risk'),
   opportunity('opportunity'),
-  supplierSearch('supplier_search'),
   finance('finance'),
   reports('reports'),
   goals('goals'),
@@ -243,11 +242,19 @@ class FirstPlanBuilder {
       action: 'Khai tồn kho cho hàng đang có',
       destination: PlanDestination.inventory,
     ),
+    // ⛔ KHÔNG dẫn tới màn tìm nhà cung cấp: danh bạ ở đó là
+    // `SupplierSearchService.sample()` — nhà cung cấp **bịa** — và Founder đã
+    // chốt 2026-08-01 *"không cố xây AI bằng dữ liệu giả"*. Mở đường vào là
+    // trưng danh bạ giả cho người bán thật, tức là đúng thứ Epic này cấm, chỉ
+    // ở một chỗ khó thấy hơn.
+    //
+    // Việc THẬT đầu tiên để biết mình mua đắt hay rẻ là khai giá vốn hàng đang
+    // có — làm được ngay, ở màn Kho.
     OnboardingGoal.betterSourcing => const _Seed(
-      problem: 'Chưa có nguồn nào để so giá',
-      evidence: 'Một nguồn duy nhất thì không biết mình đang mua đắt hay rẻ',
-      action: 'Thêm nhà cung cấp để bắt đầu so',
-      destination: PlanDestination.supplierSearch,
+      problem: 'Chưa biết mình đang mua đắt hay rẻ',
+      evidence: 'Không có giá vốn thì không so được với bất kỳ báo giá nào',
+      action: 'Khai giá vốn cho hàng đang nhập',
+      destination: PlanDestination.inventory,
     ),
     OnboardingGoal.keepCustomers => const _Seed(
       problem: 'Chưa có khách nào trong danh bạ',

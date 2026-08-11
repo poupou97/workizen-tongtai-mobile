@@ -109,6 +109,14 @@ class BusinessSnapshot {
   /// Doanh thu trong cửa sổ xét. `null` khi không có đơn nào.
   final double? revenue;
 
+  /// Số đơn **đã chốt** — đơn huỷ không tính.
+  ///
+  /// ⚠️ Dogfood WTM-360: màn phân tích nói *"đã phân tích 636 đơn hàng"* rồi
+  /// ảnh chụp ngay sau đó nói *"đơn hàng 598"*. Cả hai đều đúng — pipeline
+  /// quét mọi đơn, ảnh chụp chỉ cộng đơn đã chốt — nhưng hai con số mang cùng
+  /// một cái tên trên hai màn liền nhau, và người bán sẽ hỏi con nào là thật.
+  /// Nhãn hiển thị nay nói rõ *"đơn đã chốt"*; con số thì không đổi, vì nó
+  /// chưa bao giờ sai.
   final int orders;
 
   /// Lời thật — `null` khi `TrueProfitRule` **từ chối** vì thiếu dữ liệu.
