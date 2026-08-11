@@ -150,7 +150,6 @@ class _TongtaiBriefStoryScreenState
                     ),
                   ),
                 ),
-                if (_item.isDemo) const TongtaiDemoBadge(),
               ],
             ),
 

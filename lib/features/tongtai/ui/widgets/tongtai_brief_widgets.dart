@@ -57,31 +57,15 @@ String tongtaiBriefGreeting(AppStrings l10n, DateTime now) {
   return l10n.briefGreetingEvening;
 }
 
-/// Nhãn **dữ liệu mẫu**.
-///
-/// Founder đã một lần nhầm màn demo với dashboard thật (WTM-143). Bản vá lúc
-/// đó là một banner ở màn hình; đây là nhãn đi **theo từng việc**, vì brief
-/// trộn chung việc về dữ liệu mẫu và việc về dữ liệu thật trong một danh sách.
-class TongtaiDemoBadge extends StatelessWidget {
-  const TongtaiDemoBadge({super.key});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-    decoration: BoxDecoration(
-      color: TongtaiDesignTokens.setupGray.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusFull),
-    ),
-    child: Text(
-      context.l10n.briefDemoBadge,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: TongtaiDesignTokens.neutralText,
-      ),
-    ),
-  );
-}
+// ⛔ WTM-348 — KHÔNG còn nhãn "Dữ liệu mẫu" trên từng việc.
+//
+// Founder chốt 2026-08-09: bản demo phải trông như thật. Hôm đó mới gỡ băng-rôn
+// trên Trang chủ mà sót cái nhãn này, nên nó vẫn hiện trên từng thẻ brief.
+//
+// Nhãn nói về **dữ liệu**, không nói về trạng thái kỹ thuật, nên gỡ nó không
+// phạm luật "cấm fake trạng thái engineering" (§40). Dấu vết vẫn còn nguyên ở
+// chỗ đáng tin hơn một cái chip: bản ghi mang tiền tố `sample-`/`importJobId`,
+// và "Xóa dữ liệu mẫu" vẫn xoá đúng chúng.
 
 /// Một dòng "vì sao" — chính là `detail` của một bằng chứng.
 class TongtaiBriefReason extends StatelessWidget {
@@ -199,10 +183,6 @@ class TongtaiBriefTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (item.isDemo) ...[
-                    const SizedBox(width: 8),
-                    const TongtaiDemoBadge(),
-                  ],
                 ],
               ),
               if (reasons.isNotEmpty) ...[

@@ -185,17 +185,25 @@ void main() {
   });
 
   // ────────────────────────────────────────────────────────────────────────
-  group('Dữ liệu mẫu phải NHÌN RA ĐƯỢC (WTM-143)', () {
-    testWidgets('việc về bản ghi mẫu mang nhãn', (tester) async {
+  group('⛔ KHÔNG còn nhãn "Dữ liệu mẫu" trên màn — Founder chốt 2026-08-09', () {
+    // WTM-143 từng bắt buộc có nhãn này, vì Founder đã một lần nhầm màn demo
+    // với dashboard thật. Founder **đảo lại luật đó** ngày 09/08: bản demo phải
+    // trông như thật.
+    //
+    // Đảo được vì nhãn nói về **dữ liệu**, không nói về trạng thái kỹ thuật —
+    // nên gỡ nó không phạm §40. Thứ chống nhầm lẫn không mất đi, nó chỉ chuyển
+    // sang chỗ đáng tin hơn một cái chip: **provenance trên chính bản ghi**.
+    testWidgets('việc về bản ghi mẫu KHÔNG còn mang nhãn', (tester) async {
       await pumpAgent(tester, items: [sampleItem()]);
       await pumpUntilFound(tester, find.byKey(const Key('agent-list')));
-      expect(find.text('Dữ liệu mẫu'), findsOneWidget);
+      expect(find.text('Dữ liệu mẫu'), findsNothing);
     });
 
-    testWidgets('việc về dữ liệu thật KHÔNG mang nhãn', (tester) async {
-      await pumpAgent(tester, items: [customerItem()]);
-      await pumpUntilFound(tester, find.byKey(const Key('agent-list')));
-      expect(find.text('Dữ liệu mẫu'), findsNothing);
+    testWidgets('…nhưng vẫn PHÂN BIỆT ĐƯỢC ở tầng dữ liệu', (tester) async {
+      // Đây mới là thứ khiến "Xóa dữ liệu mẫu" xoá đúng chỗ. Mất cái này thì
+      // mới là mất khả năng chống nhầm.
+      expect(sampleItem().isDemo, isTrue);
+      expect(customerItem().isDemo, isFalse);
     });
   });
 
