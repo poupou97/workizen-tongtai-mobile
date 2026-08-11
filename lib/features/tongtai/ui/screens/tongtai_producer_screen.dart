@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
@@ -17,7 +19,6 @@ import '../widgets/tongtai_screen_header.dart';
 import '../../producer/business_input.dart';
 import 'tongtai_business_inputs_screen.dart';
 import 'tongtai_supplier_favorites_screen.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 
 /// Producer/Sourcing tab for Tổng Tài (WTM-24).
 ///
@@ -38,7 +39,7 @@ class TongtaiProducerScreen extends ConsumerStatefulWidget {
 }
 
 class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
-  static const _green = Color(0xFF10B981);
+  static const _green = TtColors.success;
 
   /// Both sources behind this tab load together (WTM-148): if either the
   /// favourites store or the opportunity generator throws, the tab says so
@@ -173,7 +174,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF4),
+                      color: TtColors.successSoft,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: _green),
                     ),
@@ -201,7 +202,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(color: TtColors.border),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -265,7 +266,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
               height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: TtColors.border),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(child: Text(l10n.producerEmptyOpps)),
@@ -273,7 +274,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
           else
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: TtColors.border),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -320,7 +321,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
               height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: TtColors.border),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(child: Text(l10n.producerEmptySuppliers)),
@@ -328,7 +329,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
           else
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: TtColors.border),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -391,7 +392,7 @@ class _CapabilityPill extends StatelessWidget {
           fontWeight: FontWeight.w500,
           // The pill keeps the capability colour for its tint and border; the
           // label needs the readable twin or it sits at 2.31:1 (WTM-169).
-          color: TongtaiDesignTokens.readableText(color),
+          color: TtColors.readableOn(color),
         ),
       ),
     );

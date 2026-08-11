@@ -542,7 +542,7 @@ class _Profile extends StatelessWidget {
         const SizedBox(height: TtSpace.x3),
         Text(
           l10n.obQuestion(step.id),
-          style: TtType.h2.copyWith(color: TtColors.textPrimary),
+          style: TtType.h1.copyWith(color: TtColors.textPrimary),
         ),
         const SizedBox(height: TtSpace.x5),
         Wrap(
@@ -613,7 +613,7 @@ class _DataStart extends StatelessWidget {
       children: [
         Text(
           l10n.obV2DataTitle,
-          style: TtType.h2.copyWith(color: TtColors.textPrimary),
+          style: TtType.h1.copyWith(color: TtColors.textPrimary),
         ),
         const SizedBox(height: TtSpace.x2),
         Text(
@@ -749,7 +749,7 @@ class _Analysis extends StatelessWidget {
         const SizedBox(height: TtSpace.x4),
         Text(
           l10n.obV2AnalysisTitle,
-          style: TtType.h2.copyWith(color: TtColors.textPrimary),
+          style: TtType.h1.copyWith(color: TtColors.textPrimary),
         ),
         const SizedBox(height: TtSpace.x2),
         Text(
@@ -846,7 +846,7 @@ class _Insight extends StatelessWidget {
         Text(
           title,
           key: const Key('onboarding-v2-insight-title'),
-          style: TtType.h2.copyWith(color: TtColors.textPrimary),
+          style: TtType.h1.copyWith(color: TtColors.textPrimary),
         ),
         const SizedBox(height: TtSpace.x2),
         Text(
@@ -1061,7 +1061,7 @@ class _Goal extends StatelessWidget {
       children: [
         Text(
           l10n.obV2GoalTitle,
-          style: TtType.h2.copyWith(color: TtColors.textPrimary),
+          style: TtType.h1.copyWith(color: TtColors.textPrimary),
         ),
         const SizedBox(height: TtSpace.x2),
         Text(
@@ -1143,7 +1143,7 @@ class _Plan extends StatelessWidget {
         const SizedBox(height: TtSpace.x3),
         Text(
           l10n.obV2PlanTitle,
-          style: TtType.h2.copyWith(color: TtColors.textPrimary),
+          style: TtType.h1.copyWith(color: TtColors.textPrimary),
         ),
         const SizedBox(height: TtSpace.x2),
         Text(

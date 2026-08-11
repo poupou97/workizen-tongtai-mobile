@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/tt_tokens.dart';
+
 /// Design tokens for Tổng Tài navigation and UI components.
 /// Based on DESIGN-TOKENS.md and DESIGN-SYSTEM-DRAFT.md
 abstract final class TongtaiDesignTokens {
@@ -81,16 +83,12 @@ abstract final class TongtaiDesignTokens {
   /// badges, headers) can render its label legibly without every caller having
   /// to remember a second constant. Anything unrecognised falls back to primary
   /// text, because guessing at a contrast ratio is how this bug happened.
-  static Color readableText(Color base) => switch (base.toARGB32()) {
-    0xFF10B981 => producerGreenText, // producerGreen / success
-    0xFFF59E0B => inventoryOrangeText, // inventoryOrange / warning
-    0xFF3B82F6 => consumerBlueText, // consumerBlue / info
-    0xFF8B5CF6 => financeVioletText, // financePurple
-    0xFFA78BFA => financeVioletText, // copilotViolet
-    0xFFEF4444 => errorText, // error
-    0xFF6B7280 => neutralText, // setupGray / neutral
-    _ => lightTextPrimary,
-  };
+  /// ⚠️ **Chuyển tiếp sang Design System** (WTM-370).
+  ///
+  /// Bảng ánh xạ nay sống ở `TtColors.readableOn`, và nó phủ cả bảng màu cũ
+  /// lẫn mới. Giữ hai bảng song song là cách chúng lệch nhau đúng vào ngày ai
+  /// đó sửa một bên — đúng bẫy P-27/P-28 mà repo này đã dọn bốn lần.
+  static Color readableText(Color base) => TtColors.readableOn(base);
 
   // ── Light Theme ────────────────────────────────────────────────────────
 

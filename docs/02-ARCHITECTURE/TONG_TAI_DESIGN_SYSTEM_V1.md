@@ -247,6 +247,10 @@ Hai chỗ concept vẽ sai và **không được chép**:
 | `tongtai_onboarding_v2_screen` | WTM-365 |
 | `tongtai_startup_screen` | WTM-367 (dựng mới trên DS) |
 | `tongtai_home_screen` | WTM-369 |
+| `tongtai_producer_screen` | WTM-370 |
+| `tongtai_inventory_screen` | WTM-370 |
+| `tongtai_consumer_screen` | WTM-370 |
+| `tongtai_opportunity_feed_screen` | WTM-370 |
 
 > Danh sách này **được test khoá**: `test/core/design/migrated_screens_test.dart`
 > quét từng màn đã migrate và bắt màu viết thẳng, token cũ, hay `switch` màu
@@ -256,8 +260,31 @@ Hai chỗ concept vẽ sai và **không được chép**:
 
 ### Chưa migrate
 
-Nguồn hàng · Kho · Khách hàng · Cơ hội · Tài chính · Báo cáo ·
-Business Journey · Supplier Detail · Product Intelligence.
+Tài chính · Báo cáo · Business Journey · Supplier Detail · Product
+Intelligence · và các màn phụ (form, chi tiết, cài đặt).
+
+### ⚠️ Bảng ánh xạ chữ — **theo giá trị, không theo tên**
+
+Đây là lỗi đã xảy ra thật (WTM-370): một phép thay tự động ánh xạ theo **tên**
+và vì tên lệch một bậc so với giá trị, mọi tiêu đề lẫn thân bài của bốn màn bị
+thu nhỏ. Triệu chứng duy nhất lộ ra là một chỗ tràn **1 pixel** — suýt trôi qua.
+
+| Legacy | px/weight/line | → DS | px/weight/line |
+|---|---|---|---|
+| `displayStyle` | 32/700/40 | `TtType.display` | 28/700/34 (spec dừng ở 28) |
+| `heading1Style` | 28/700/34 | `TtType.display` | 28/700/34 ✅ khớp hẳn |
+| `heading2Style` | 24/600/32 | `TtType.h1` | 24/700/30 |
+| `heading3Style` | 20/600/28 | `TtType.h2` | 20/700/26 |
+| `bodyStyle` | **16**/400/24 | `TtType.bodyLarge` | 16/400/24 ✅ khớp hẳn |
+| `smallStyle` | 14/400/20 | `TtType.body` | 14/400/20 ✅ khớp hẳn |
+| `captionStyle` | 12/400/16 | `TtType.caption` | 12/400/16 ✅ khớp hẳn |
+
+Bảng này là **mã chạy được**, không phải một dòng trong tài liệu:
+`migrated_screens_test.dart` khẳng định cỡ chữ và line-height của từng cặp.
+
+`TongtaiDesignTokens.readableText` nay **chuyển tiếp** sang
+`TtColors.readableOn` — một bảng ánh xạ, một chủ. Bảng đó phủ cả màu cũ lẫn mới
+vì hai bảng màu còn sống song song trong lúc di trú.
 
 ---
 

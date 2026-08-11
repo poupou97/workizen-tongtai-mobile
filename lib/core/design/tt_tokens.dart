@@ -92,6 +92,41 @@ abstract final class TtColors {
   static const Color surfaceSecondary = Color(0xFFF8FAFC);
   static const Color surfaceTertiary = Color(0xFFF1F5F9);
 
+  /// ⚠️ Nền cho chữ trắng, sắc hổ phách — cùng lý do với [brandOnDark].
+  ///
+  /// `warning` `#F59E0B` với chữ trắng chỉ đạt **2,15:1** — cặp tệ nhất trong
+  /// cả bảng màu (WTM-169 đã trả giá một lần). `#B45309` đạt **5,02:1**.
+  static const Color warningOnDark = Color(0xFFB45309);
+
+  /// Chữ **đọc được** đặt trên một màu ngữ nghĩa.
+  ///
+  /// Có hàm này để một component được **trao** một màu (chip, badge, tiêu đề)
+  /// vẫn dựng được nhãn dễ đọc mà người gọi không phải nhớ một hằng số thứ hai.
+  /// Màu lạ rơi về [textPrimary] — đoán một tỉ lệ tương phản chính là cách lỗi
+  /// WTM-169 xảy ra.
+  ///
+  /// Bảng này phủ **cả** màu của Design System **và** màu của
+  /// `TongtaiDesignTokens`, vì hai bảng màu còn sống song song trong lúc di
+  /// trú. Một bảng ánh xạ, một chủ — `TongtaiDesignTokens.readableText` nay chỉ
+  /// chuyển tiếp về đây.
+  static Color readableOn(Color base) => switch (base.toARGB32()) {
+    // Design System
+    0xFF16A34A => Color(0xFF047857), // success
+    0xFF2563EB => Color(0xFF1D4ED8), // info
+    0xFFF59E0B => warningOnDark, // warning
+    0xFFDC2626 => Color(0xFFB91C1C), // danger
+    0xFF7C3AED => Color(0xFF6D28D9), // ai
+    0xFF94A3B8 => textSecondary, // unknown
+    0xFFF97316 => brandOnDark, // brand
+    // Bảng cũ, còn dùng ở những màn chưa di trú
+    0xFF10B981 => Color(0xFF047857), // producerGreen
+    0xFF3B82F6 => Color(0xFF1D4ED8), // consumerBlue
+    0xFF8B5CF6 || 0xFFA78BFA => Color(0xFF6D28D9), // financePurple/copilot
+    0xFFEF4444 => Color(0xFFB91C1C), // error cũ
+    0xFF6B7280 => Color(0xFF4B5563), // setupGray/neutral
+    _ => textPrimary,
+  };
+
   // ── Viền ───────────────────────────────────────────────────────────────
   static const Color border = Color(0xFFE2E8F0);
   static const Color borderStrong = Color(0xFFCBD5E1);
