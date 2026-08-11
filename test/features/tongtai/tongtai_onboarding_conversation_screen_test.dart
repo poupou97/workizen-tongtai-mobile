@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
+import 'package:tongtai/features/tongtai/onboarding/onboarding_conversation.dart';
 import 'package:tongtai/features/tongtai/profile/business_profile.dart';
 import 'package:tongtai/features/tongtai/profile/business_profile_repository.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
@@ -88,12 +89,12 @@ void main() {
       expect(find.byKey(const Key('onboarding-question')), findsNothing);
     });
 
-    testWidgets('[$locale] answers all four and saves the profile', (
+    testWidgets('[$locale] answers every question and saves the profile', (
       tester,
     ) async {
       await start(tester, locale);
 
-      for (var step = 0; step < 4; step++) {
+      for (var step = 0; step < kOnboardingSteps.length; step++) {
         expect(find.byKey(const Key('onboarding-prompt')), findsOneWidget);
         await tapOption(tester, 0);
         await tapNext(tester);
@@ -103,6 +104,7 @@ void main() {
       await tester.tapByKey('onboarding-done');
 
       final saved = await BusinessProfileRepository(db).load();
+      expect(saved.type, BusinessType.physical);
       expect(saved.trade, BusinessTrade.fashion);
       expect(saved.channels, contains(SalesChannel.shop));
       expect(saved.size, BusinessSize.solo);
@@ -117,7 +119,7 @@ void main() {
     // The path a hurried seller takes. It must be a normal outcome, not a
     // dead end and not an error.
     await start(tester, 'vi');
-    for (var step = 0; step < 4; step++) {
+    for (var step = 0; step < kOnboardingSteps.length; step++) {
       await tester.tapByKey('onboarding-skip');
     }
     await tester.tapByKey('onboarding-done');
@@ -132,7 +134,7 @@ void main() {
     // Thanking someone for information they declined to give reads as the app
     // not listening — the exact impression onboarding must not leave.
     await start(tester, 'vi');
-    for (var step = 0; step < 4; step++) {
+    for (var step = 0; step < kOnboardingSteps.length; step++) {
       await tester.tapByKey('onboarding-skip');
     }
     final closing = tester
@@ -167,7 +169,7 @@ void main() {
     await start(tester, 'vi');
     expect(
       tester.widget<Text>(find.byKey(const Key('onboarding-progress'))).data,
-      contains('1/4'),
+      contains('1/${kOnboardingSteps.length}'),
     );
   });
 
@@ -175,7 +177,7 @@ void main() {
     // Same boundary as the profile editor: nothing a seller types can reach an
     // AI prompt, because there is nowhere to type.
     await start(tester, 'vi');
-    for (var step = 0; step < 4; step++) {
+    for (var step = 0; step < kOnboardingSteps.length; step++) {
       expect(find.byType(TextField), findsNothing);
       expect(find.byType(TextFormField), findsNothing);
       await tapNext(tester);

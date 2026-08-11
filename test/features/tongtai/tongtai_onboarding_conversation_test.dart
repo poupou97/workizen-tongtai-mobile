@@ -7,10 +7,24 @@ import 'package:tongtai/features/tongtai/profile/business_profile.dart';
 /// Pure value logic, so the flow is provable without pumping a widget. The
 /// property that matters most: **it never needs AI**, which is why there is
 /// nothing to inject and nothing to stub in this file.
+///
+/// WTM-351 thêm câu thứ năm. Từ đó mọi test ở đây đi tới một bước **bằng mã
+/// bước**, không bằng vị trí: chèn một câu vào giữa từng làm bốn test im lặng
+/// đo nhầm bước khác.
 void main() {
+  /// Đưa hội thoại tới bước [stepId], bỏ qua mọi bước trước đó.
+  OnboardingConversation at(String stepId) {
+    var c = const OnboardingConversation();
+    while (c.currentStep != null && c.currentStep!.id != stepId) {
+      c = c.next();
+    }
+    return c;
+  }
+
   group('the script', () {
-    test('asks the four profile questions and nothing else', () {
+    test('asks the profile questions and nothing else', () {
       expect(kOnboardingSteps.map((s) => s.id), [
+        'business_type',
         'trade',
         'channels',
         'size',
@@ -30,6 +44,7 @@ void main() {
       for (final step in kOnboardingSteps) {
         for (final code in step.optionCodes) {
           final known = switch (step.id) {
+            'business_type' => kBusinessTypeByAnswer.containsKey(code),
             'trade' => BusinessTrade.fromCode(code) != null,
             'size' => BusinessSize.fromCode(code) != null,
             'channels' => SalesChannel.fromCode(code) != null,
@@ -44,21 +59,21 @@ void main() {
     test('offers every value the model can hold', () {
       // The inverse check: an enum value with no chip is unreachable, so a
       // seller could never describe that business.
+      List<String> optionsOf(String id) =>
+          kOnboardingSteps.firstWhere((s) => s.id == id).optionCodes;
+
+      expect(optionsOf('trade'), hasLength(BusinessTrade.values.length));
+      expect(optionsOf('channels'), hasLength(SalesChannel.values.length));
+      expect(optionsOf('size'), hasLength(BusinessSize.values.length));
       expect(
-        kOnboardingSteps[0].optionCodes,
-        hasLength(BusinessTrade.values.length),
-      );
-      expect(
-        kOnboardingSteps[1].optionCodes,
-        hasLength(SalesChannel.values.length),
-      );
-      expect(
-        kOnboardingSteps[2].optionCodes,
-        hasLength(BusinessSize.values.length),
-      );
-      expect(
-        kOnboardingSteps[3].optionCodes,
+        optionsOf('seasonality'),
         hasLength(BusinessSeasonality.values.length),
+      );
+      // Loại hình: mọi giá trị của `BusinessType` phải có ít nhất một đáp án
+      // dẫn tới nó, cộng thêm hai đáp án cố ý ánh xạ về `null` (WTM-351).
+      expect(
+        kBusinessTypeByAnswer.values.whereType<BusinessType>().toSet(),
+        BusinessType.values.toSet(),
       );
     });
   });
@@ -66,25 +81,27 @@ void main() {
   group('walking the conversation', () {
     test('starts at the first question with nothing answered', () {
       const c = OnboardingConversation();
-      expect(c.currentStep?.id, 'trade');
+      expect(c.currentStep?.id, 'business_type');
       expect(c.profile.isEmpty, isTrue);
       expect(c.isComplete, isFalse);
     });
 
     test('an answer lands on the profile', () {
-      final c = const OnboardingConversation().answer('fashion');
+      final c = at('trade').answer('fashion');
       expect(c.profile.trade, BusinessTrade.fashion);
     });
 
     test('answering does not advance — the seller taps next', () {
       // Auto-advance on tap makes a mis-tap unfixable: the question is gone
       // before you can correct it.
-      final c = const OnboardingConversation().answer('fashion');
+      final c = at('trade').answer('fashion');
       expect(c.currentStep?.id, 'trade');
     });
 
     test('runs the whole script to completion', () {
       var c = const OnboardingConversation()
+          .answer('goods')
+          .next()
           .answer('food')
           .next()
           .answer('shopee')
@@ -97,6 +114,7 @@ void main() {
 
       expect(c.isComplete, isTrue);
       expect(c.currentStep, isNull);
+      expect(c.profile.type, BusinessType.physical);
       expect(c.profile.trade, BusinessTrade.food);
       expect(c.profile.channels, hasLength(2));
       expect(c.profile.size, BusinessSize.solo);
@@ -117,43 +135,32 @@ void main() {
 
   group('correcting an answer', () {
     test('tapping the selected option clears it', () {
-      final c = const OnboardingConversation()
-          .answer('fashion')
-          .answer('fashion');
+      final c = at('trade').answer('fashion').answer('fashion');
       expect(c.profile.trade, isNull);
     });
 
     test('picking a different option replaces the first', () {
-      final c = const OnboardingConversation()
-          .answer('fashion')
-          .answer('cosmetics');
+      final c = at('trade').answer('fashion').answer('cosmetics');
       expect(c.profile.trade, BusinessTrade.cosmetics);
     });
 
     test('channels toggle independently', () {
-      final c = const OnboardingConversation()
-          .next()
-          .answer('shop')
-          .answer('zalo')
-          .answer('shop');
+      final c = at('channels').answer('shop').answer('zalo').answer('shop');
       expect(c.profile.channels, [SalesChannel.zalo]);
     });
 
     test('going back shows what was already answered', () {
       // A conversation that forgets what you just told it does not feel like
       // one.
-      final c = const OnboardingConversation().answer('food').next().back();
+      final c = at('trade').answer('food').next().back();
       expect(c.currentStep?.id, 'trade');
       expect(c.selectedCodes, {'food'});
     });
 
     test('an earlier answer survives answering later questions', () {
-      final c = const OnboardingConversation()
-          .answer('food')
-          .next()
-          .answer('shop')
-          .next()
-          .answer('solo');
+      final c = at(
+        'trade',
+      ).answer('food').next().answer('shop').next().answer('solo');
       expect(c.profile.trade, BusinessTrade.food);
       expect(c.profile.channels, [SalesChannel.shop]);
     });
@@ -181,8 +188,12 @@ void main() {
     });
 
     test('an unknown code is ignored rather than stored', () {
-      final c = const OnboardingConversation().answer('quantum_widgets');
+      final c = at('trade').answer('quantum_widgets');
       expect(c.profile.trade, isNull);
+      // Cùng luật ở bước loại hình, nơi mã thô được giữ lại (WTM-351).
+      final t = const OnboardingConversation().answer('quantum_widgets');
+      expect(t.profile.type, isNull);
+      expect(t.businessTypeCode, isNull);
     });
   });
 }
