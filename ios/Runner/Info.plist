@@ -69,6 +69,6 @@
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>NSCameraUsageDescription</key>
-	<string>Quét mã QR chứa API key cho Workizen AI (BYOK). Scan a QR code containing your Workizen AI API key.</string>
-</dict>
+		<string>Quét mã QR chứa API key cho Workizen AI (BYOK). Scan a QR code containing your Workizen AI API key.</string>
+	</dict>
 </plist>

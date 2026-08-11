@@ -1,0 +1,318 @@
+/// **Tổng Tài Design System v1.0 — tầng token** (WTM-363, Epic WTM-362).
+///
+/// Nguồn: directive Founder 2026-08-11 + `docs/01-PRODUCT/concept-1/concepts.png`.
+/// Khi ảnh và spec lệch nhau, **spec thắng** — ảnh là tham chiếu thị giác, không
+/// phải bảng màu để lấy mẫu pixel.
+///
+/// ## ⭐ Nguyên tắc phải nhớ trước khi dùng bất kỳ màu nào
+///
+/// ```
+/// TÍM      = AI đang hiểu / đang kết luận
+/// CAM      = người bán bấm được  (thương hiệu + hành động)
+/// XANH LÁ  = tích cực / khoẻ
+/// LAM      = thông tin
+/// HỔ PHÁCH = cần chú ý
+/// ĐỎ       = nguy cấp
+/// XÁM      = CHƯA BIẾT
+/// ```
+///
+/// Hai lỗi dễ mắc nhất, và cả hai đều làm người dùng hiểu sai sản phẩm:
+///
+/// * **CAM ≠ AI.** *"Tổng Tài phát hiện 3 SKU sắp hết"* là tím; *"Tạo đơn nhập"*
+///   là cam. Tô câu kết luận màu cam sẽ dạy người bán rằng chữ cam nghĩa là
+///   "AI nói", rồi họ thôi bấm những nút thật sự bấm được.
+/// * **XÁM ≠ XANH.** *"Chưa đủ dữ liệu"* không bao giờ mang màu thành công. Một
+///   ô trống tô xanh là lời trấn an cho điều chưa ai kiểm.
+///
+/// ## Quan hệ với `TongtaiDesignTokens`
+///
+/// Lớp cũ **không bị xoá** và ~40 màn vẫn dùng nó. Đây không phải tầng song
+/// song: giá trị nào trùng thì lớp cũ chuyển tiếp sang đây, giá trị nào lệch
+/// thì bảng migration trong `docs/02-ARCHITECTURE/TONG_TAI_DESIGN_SYSTEM_V1.md`
+/// nói rõ lệch ở đâu và vì sao. Migration là tăng dần, không big-bang.
+library;
+
+import 'package:flutter/widgets.dart';
+
+/// Màu — **semantic, không phải tên màu**. Không có `orange`/`purple` ở đây;
+/// có `action` và `ai`, vì đó là thứ quyết định lúc chọn.
+abstract final class TtColors {
+  // ── Thương hiệu / hành động ────────────────────────────────────────────
+  /// Nút và liên kết người bán **bấm được**.
+  static const Color brand = Color(0xFFF97316);
+  static const Color brandPressed = Color(0xFFEA580C);
+  static const Color brandSoft = Color(0xFFFFF7ED);
+
+  // ── AI / trí tuệ ───────────────────────────────────────────────────────
+  /// Chỗ **Tổng Tài đang nói**: quan sát, lý lẽ, đề xuất.
+  static const Color ai = Color(0xFF7C3AED);
+  static const Color aiSoft = Color(0xFFF5F3FF);
+  static const Color aiBorder = Color(0xFFDDD6FE);
+
+  // ── Trạng thái ─────────────────────────────────────────────────────────
+  static const Color success = Color(0xFF16A34A);
+  static const Color successSoft = Color(0xFFF0FDF4);
+
+  static const Color info = Color(0xFF2563EB);
+  static const Color infoSoft = Color(0xFFEFF6FF);
+
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color warningSoft = Color(0xFFFFFBEB);
+
+  static const Color danger = Color(0xFFDC2626);
+  static const Color dangerSoft = Color(0xFFFEF2F2);
+
+  /// ⭐ **CHƯA BIẾT.** Dùng cho *"chưa đủ dữ liệu"* · *"chưa phân tích"* ·
+  /// *"không xác định"*. Cố ý **không** có biến thể xanh: thiếu thông tin không
+  /// phải một kết quả tốt, và tô nó màu tốt là nói dối bằng màu.
+  static const Color unknown = Color(0xFF94A3B8);
+  static const Color unknownSoft = Color(0xFFF1F5F9);
+
+  // ── Chữ ────────────────────────────────────────────────────────────────
+  static const Color textPrimary = Color(0xFF0F172A);
+  static const Color textSecondary = Color(0xFF475569);
+  static const Color textTertiary = Color(0xFF94A3B8);
+  static const Color textOnBrand = Color(0xFFFFFFFF);
+
+  // ── Mặt nền ────────────────────────────────────────────────────────────
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color surfaceSecondary = Color(0xFFF8FAFC);
+  static const Color surfaceTertiary = Color(0xFFF1F5F9);
+
+  // ── Viền ───────────────────────────────────────────────────────────────
+  static const Color border = Color(0xFFE2E8F0);
+  static const Color borderStrong = Color(0xFFCBD5E1);
+  static const Color divider = Color(0xFFE5E7EB);
+}
+
+/// Mức nghiêm trọng — **một chỗ duy nhất** ánh xạ mức sang màu.
+///
+/// Có enum này để không màn nào tự viết `switch` màu riêng: hai bảng ánh xạ sẽ
+/// lệch nhau đúng vào ngày ai đó sửa một bên (P-27/P-28, repo này đã dọn bốn
+/// lần).
+enum TtStatus {
+  success,
+  info,
+  warning,
+  danger,
+
+  /// AI đang nói — không phải một mức nghiêm trọng, nhưng nó dùng chung khe
+  /// "màu ngữ nghĩa" nên nằm ở đây để không ai chế thêm bảng thứ hai.
+  ai,
+
+  /// Chưa biết. **Không** phải success.
+  unknown;
+
+  Color get color => switch (this) {
+    TtStatus.success => TtColors.success,
+    TtStatus.info => TtColors.info,
+    TtStatus.warning => TtColors.warning,
+    TtStatus.danger => TtColors.danger,
+    TtStatus.ai => TtColors.ai,
+    TtStatus.unknown => TtColors.unknown,
+  };
+
+  Color get soft => switch (this) {
+    TtStatus.success => TtColors.successSoft,
+    TtStatus.info => TtColors.infoSoft,
+    TtStatus.warning => TtColors.warningSoft,
+    TtStatus.danger => TtColors.dangerSoft,
+    TtStatus.ai => TtColors.aiSoft,
+    TtStatus.unknown => TtColors.unknownSoft,
+  };
+}
+
+/// Chữ. Font Inter, dự phòng SF Pro (iOS) → Roboto (Android) → hệ thống.
+///
+/// Khai `fontFamilyFallback` chứ không ép một font đóng gói: tiếng Việt có dấu
+/// chồng, và font hệ thống của mỗi nền tảng dựng dấu tốt hơn một bản Inter cắt
+/// gọn để giảm dung lượng.
+abstract final class TtType {
+  static const String family = 'Inter';
+  static const List<String> fallback = ['SF Pro Text', 'Roboto'];
+
+  static const TextStyle display = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    height: 34 / 28,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle h1 = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 24,
+    fontWeight: FontWeight.w700,
+    height: 30 / 24,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle h2 = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    height: 26 / 20,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle h3 = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    height: 24 / 18,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle title = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 22 / 16,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle bodyLarge = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 24 / 16,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle body = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    height: 20 / 14,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle bodyMedium = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    height: 20 / 14,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle caption = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    height: 16 / 12,
+    color: TtColors.textSecondary,
+  );
+  static const TextStyle label = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    height: 16 / 12,
+    color: TtColors.textSecondary,
+  );
+
+  /// Con số nghiệp vụ lớn — phải quét được bằng mắt trong một nhịp.
+  static const TextStyle metricLarge = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    height: 34 / 28,
+    color: TtColors.textPrimary,
+  );
+  static const TextStyle metric = TextStyle(
+    fontFamily: family,
+    fontFamilyFallback: fallback,
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    height: 26 / 20,
+    color: TtColors.textPrimary,
+  );
+}
+
+/// Khoảng cách — lưới 4px.
+///
+/// Trùng đúng với `TongtaiDesignTokens.spacing*` đang chạy, nên đây là chỗ hai
+/// lớp gặp nhau mà không ai phải đổi con số nào.
+abstract final class TtSpace {
+  static const double x1 = 4;
+  static const double x2 = 8;
+  static const double x3 = 12;
+  static const double x4 = 16;
+  static const double x5 = 20;
+  static const double x6 = 24;
+  static const double x8 = 32;
+  static const double x10 = 40;
+  static const double x12 = 48;
+
+  /// Lề ngang của mọi màn.
+  static const double screenH = x4;
+
+  /// Giữa hai khối lớn.
+  static const double section = x6;
+
+  /// Tiêu đề → nội dung của nó.
+  static const double headingToContent = x3;
+
+  static const double cardPadding = x4;
+  static const double heroPadding = x5;
+  static const double rowGap = x3;
+}
+
+/// Bo góc.
+///
+/// ⚠️ **Tên ở đây lệch tên cũ một bậc.** `TongtaiDesignTokens.radiusLg` = 12
+/// tương ứng [TtRadius.md]; `radiusXl` = 16 tương ứng [TtRadius.lg]. Di trú
+/// phải đi theo **giá trị**, không theo tên — đổi tên tại chỗ sẽ âm thầm bo lại
+/// góc của mọi màn đang chạy.
+abstract final class TtRadius {
+  static const double xs = 6;
+  static const double sm = 8;
+
+  /// Nút và ô nhập.
+  static const double md = 12;
+
+  /// Thẻ tiêu chuẩn.
+  static const double lg = 16;
+
+  /// Thẻ AI / hero.
+  static const double xl = 20;
+
+  /// Đáy bottom sheet.
+  static const double sheet = 24;
+
+  static const double full = 999;
+}
+
+/// Đổ bóng. **Mặc định là KHÔNG có.**
+///
+/// Viền nhẹ đọc tốt hơn bóng trên nền sáng, và một màn mà mọi thẻ đều nổi lên
+/// thì không thẻ nào còn nổi. Bóng chỉ dành cho thứ thật sự lơ lửng: FAB,
+/// modal, thanh hành động dính đáy, overlay.
+abstract final class TtElevation {
+  static const List<BoxShadow> none = [];
+
+  static const List<BoxShadow> soft = [
+    BoxShadow(color: Color(0x140F172A), blurRadius: 3, offset: Offset(0, 1)),
+  ];
+
+  static const List<BoxShadow> floating = [
+    BoxShadow(color: Color(0x1A0F172A), blurRadius: 24, offset: Offset(0, 8)),
+  ];
+}
+
+/// Chuyển động.
+///
+/// ⛔ Không có "thời lượng loading": một thanh chạy theo `Duration` cố định là
+/// tiến trình giả, và nó bị cấm ở §16 lẫn §21. Thời lượng ở đây chỉ dành cho
+/// chuyển cảnh và hiện/ẩn.
+abstract final class TtMotion {
+  static const Duration fast = Duration(milliseconds: 120);
+  static const Duration normal = Duration(milliseconds: 200);
+  static const Duration slow = Duration(milliseconds: 300);
+  static const Curve curve = Curves.easeOutCubic;
+
+  /// Insight hiện ra: mờ dần + trượt lên 8px.
+  static const double revealOffset = 8;
+}
