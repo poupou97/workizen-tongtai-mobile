@@ -101,6 +101,13 @@ enum ReasonCode {
   /// The current month is still running, so it is excluded from the base.
   partialMonthExcluded,
 
+  /// The current **week** is still running, so it is excluded from the base.
+  ///
+  /// Cố ý là một mã riêng chứ không dùng lại [partialMonthExcluded]: mã này
+  /// hiện thành chữ trên màn hình, và một bản tổng kết TUẦN nói *"đã loại tháng
+  /// đang chạy"* là nói sai sự thật với người bán.
+  partialWeekExcluded,
+
   // ── customer risk ───────────────────────────────────────────────────────
   /// Bought recently — inside the active window.
   recentPurchase,
@@ -148,6 +155,7 @@ enum ReasonCode {
     ReasonCode.highVolatility => 'Doanh thu biến động mạnh',
     ReasonCode.seasonalPatternDetected => 'Có quy luật mùa vụ',
     ReasonCode.partialMonthExcluded => 'Đã loại tháng đang chạy',
+    ReasonCode.partialWeekExcluded => 'Đã loại tuần đang chạy',
     ReasonCode.recentPurchase => 'Vừa mua gần đây',
     ReasonCode.purchaseGapExceeded => 'Lâu hơn nhịp mua thường lệ',
     ReasonCode.inactiveBeyondChurnWindow => 'Im lặng quá ngưỡng rời bỏ',
@@ -170,6 +178,7 @@ enum ReasonCode {
     ReasonCode.highVolatility => 'Revenue swings widely',
     ReasonCode.seasonalPatternDetected => 'Seasonal pattern detected',
     ReasonCode.partialMonthExcluded => 'Running month excluded',
+    ReasonCode.partialWeekExcluded => 'Running week excluded',
     ReasonCode.recentPurchase => 'Bought recently',
     ReasonCode.purchaseGapExceeded => 'Longer than their usual gap',
     ReasonCode.inactiveBeyondChurnWindow => 'Silent beyond the churn window',
