@@ -21,6 +21,8 @@ import 'package:tongtai/features/tongtai/providers/tongtai_profile_provider.dart
 import 'package:tongtai/features/tongtai/profile/business_profile.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_onboarding_v2_screen.dart';
 
+import '../../../support/tap_by_key.dart';
+
 /// Onboarding V2 — ba đường đi, trên máy thật của một test.
 ///
 /// Ba thứ được khoá:
@@ -56,12 +58,21 @@ void main() {
   );
 
   Future<void> answerProfile(WidgetTester tester) async {
-    await tester.tap(find.byKey(const Key('onboarding-v2-start')));
+    await tester.tapByKey(
+      'onboarding-v2-start',
+      scrollableUnder: 'onboarding-v2-welcome',
+    );
     await tester.pumpAndSettle();
     for (var i = 0; i < kOnboardingSteps.length; i++) {
-      await tester.tap(find.byKey(const Key('onboarding-v2-option-0')));
+      await tester.tapByKey(
+        'onboarding-v2-option-0',
+        scrollableUnder: 'onboarding-v2-profile',
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-v2-profile-next')));
+      await tester.tapByKey(
+        'onboarding-v2-profile-next',
+        scrollableUnder: 'onboarding-v2-profile',
+      );
       await tester.pumpAndSettle();
     }
   }
@@ -73,7 +84,10 @@ void main() {
       await answerProfile(tester);
 
       expect(find.byKey(const Key('onboarding-v2-data')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+      await tester.tapByKey(
+        'onboarding-v2-data-none',
+        scrollableUnder: 'onboarding-v2-data',
+      );
       await tester.pumpAndSettle();
 
       // Nhảy thẳng tới mục tiêu. Không phải "màn phân tích hiện rồi biến mất".
@@ -86,12 +100,21 @@ void main() {
       await tester.pumpWidget(host());
       await tester.pumpAndSettle();
       await answerProfile(tester);
-      await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+      await tester.tapByKey(
+        'onboarding-v2-data-none',
+        scrollableUnder: 'onboarding-v2-data',
+      );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('onboarding-v2-goal-grow_profit')));
+      await tester.tapByKey(
+        'onboarding-v2-goal-grow_profit',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+      await tester.tapByKey(
+        'onboarding-v2-goal-next',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('onboarding-v2-plan')), findsOneWidget);
@@ -104,15 +127,25 @@ void main() {
       await tester.pumpWidget(host());
       await tester.pumpAndSettle();
       await answerProfile(tester);
-      await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(const Key('onboarding-v2-goal-optimize_inventory')),
+      await tester.tapByKey(
+        'onboarding-v2-data-none',
+        scrollableUnder: 'onboarding-v2-data',
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+      await tester.tapByKey(
+        'onboarding-v2-goal-optimize_inventory',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-v2-finish')));
+      await tester.tapByKey(
+        'onboarding-v2-goal-next',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
+      await tester.pumpAndSettle();
+      await tester.tapByKey(
+        'onboarding-v2-finish',
+        scrollableUnder: 'onboarding-v2-plan',
+      );
       await tester.pumpAndSettle();
 
       expect(outcome, isNotNull);
@@ -138,15 +171,25 @@ void main() {
       await tester.pumpWidget(host());
       await tester.pumpAndSettle();
       await answerProfile(tester);
-      await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(const Key('onboarding-v2-goal-just_explore')),
+      await tester.tapByKey(
+        'onboarding-v2-data-none',
+        scrollableUnder: 'onboarding-v2-data',
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+      await tester.tapByKey(
+        'onboarding-v2-goal-just_explore',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-v2-finish')));
+      await tester.tapByKey(
+        'onboarding-v2-goal-next',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
+      await tester.pumpAndSettle();
+      await tester.tapByKey(
+        'onboarding-v2-finish',
+        scrollableUnder: 'onboarding-v2-plan',
+      );
       await tester.pumpAndSettle();
 
       final container = ProviderScope.containerOf(
@@ -192,9 +235,15 @@ void main() {
       await tester.pumpWidget(host());
       await tester.pumpAndSettle();
       await answerProfile(tester);
-      await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+      await tester.tapByKey(
+        'onboarding-v2-data-none',
+        scrollableUnder: 'onboarding-v2-data',
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+      await tester.tapByKey(
+        'onboarding-v2-goal-next',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
       await tester.pumpAndSettle();
 
       final label = tester
@@ -271,13 +320,20 @@ void main() {
       await tester.pumpWidget(host());
       await tester.pumpAndSettle();
       await answerProfile(tester);
-      await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(const Key('onboarding-v2-goal-grow_revenue')),
+      await tester.tapByKey(
+        'onboarding-v2-data-none',
+        scrollableUnder: 'onboarding-v2-data',
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+      await tester.tapByKey(
+        'onboarding-v2-goal-grow_revenue',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
+      await tester.pumpAndSettle();
+      await tester.tapByKey(
+        'onboarding-v2-goal-next',
+        scrollableUnder: 'onboarding-v2-goal',
+      );
       await tester.pumpAndSettle();
 
       final promise = RegExp(r'\+\s*[\d.,]+\s*(triệu|tr|nghìn|k|đ)');

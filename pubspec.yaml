@@ -84,6 +84,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/mascot/
+    - assets/mascot/poses/
     # Bộ dữ liệu thương mại demo (WTM-325). Đóng gói vào app để Founder nhập
     # được ngay cả khi chưa nối Google Drive — cùng file, cùng đường import.
     - assets/demo/
