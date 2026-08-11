@@ -756,6 +756,22 @@ abstract class AppStrings {
   String get obV2Continue;
   String get obV2SkipProfile;
 
+  // ── Màn khởi động (WTM-367) ─────────────────────────────────────────────
+  String get startupBrand;
+  String get startupTagline;
+  String get startupWorking;
+
+  /// Một chặng khởi động THẬT. `count` là số bản ghi thật, `null` khi chặng
+  /// đó không đếm gì — và khi đó câu chữ không được bịa ra một con số.
+  String startupStep(String stepCode, int? count);
+  String get startupValueUnderstandTitle;
+  String get startupValueUnderstandBody;
+  String get startupValueActTitle;
+  String get startupValueActBody;
+  String get startupValueMeasureTitle;
+  String get startupValueMeasureBody;
+  String get startupPrivacy;
+
   /// Nhãn trợ năng cho linh vật — nói **AI đang làm gì**, không tả con cáo.
   String get obV2MascotGreeting;
   String get obV2MascotWorking;
@@ -2473,6 +2489,34 @@ class AppStringsVi extends AppStrings {
   String get obV2Continue => 'Tiếp tục';
   @override
   String get obV2SkipProfile => 'Bỏ qua, tôi khai sau';
+  @override
+  String get startupBrand => 'Tổng Tài AI';
+  @override
+  String get startupTagline => 'Trợ lý điều hành doanh nghiệp bằng AI';
+  @override
+  String get startupWorking => 'Tổng Tài đang khởi động…';
+  @override
+  String startupStep(String stepCode, int? count) => switch (stepCode) {
+    'database' => 'Đã mở cơ sở dữ liệu',
+    'profile' => 'Đã đọc hồ sơ doanh nghiệp',
+    'catalog' => 'Đã đọc ${count ?? 0} sản phẩm',
+    _ => 'Đã đọc ${count ?? 0} đơn hàng',
+  };
+  @override
+  String get startupValueUnderstandTitle => 'Hiểu doanh nghiệp';
+  @override
+  String get startupValueUnderstandBody =>
+      'Phân tích dữ liệu, nhận diện cơ hội';
+  @override
+  String get startupValueActTitle => 'Đề xuất hành động';
+  @override
+  String get startupValueActBody => 'Gợi ý việc cần làm ưu tiên mỗi ngày';
+  @override
+  String get startupValueMeasureTitle => 'Đo lường kết quả';
+  @override
+  String get startupValueMeasureBody => 'Theo dõi hiệu quả và tối ưu liên tục';
+  @override
+  String get startupPrivacy => 'Dữ liệu của bạn nằm trên máy này';
   @override
   String get obV2MascotGreeting => 'Tổng Tài đang chào bạn';
   @override
@@ -4521,6 +4565,33 @@ class AppStringsEn extends AppStrings {
   String get obV2Continue => 'Continue';
   @override
   String get obV2SkipProfile => 'Skip, I will fill this in later';
+  @override
+  String get startupBrand => 'Tổng Tài AI';
+  @override
+  String get startupTagline => 'The AI assistant that runs your business';
+  @override
+  String get startupWorking => 'Tổng Tài is starting…';
+  @override
+  String startupStep(String stepCode, int? count) => switch (stepCode) {
+    'database' => 'Opened the database',
+    'profile' => 'Read the business profile',
+    'catalog' => 'Read ${count ?? 0} products',
+    _ => 'Read ${count ?? 0} orders',
+  };
+  @override
+  String get startupValueUnderstandTitle => 'Understand the business';
+  @override
+  String get startupValueUnderstandBody => 'Analyse data, spot opportunities';
+  @override
+  String get startupValueActTitle => 'Suggest what to do';
+  @override
+  String get startupValueActBody => 'Prioritised work, every day';
+  @override
+  String get startupValueMeasureTitle => 'Measure results';
+  @override
+  String get startupValueMeasureBody => 'Track what worked and keep tuning';
+  @override
+  String get startupPrivacy => 'Your data stays on this device';
   @override
   String get obV2MascotGreeting => 'Tổng Tài is greeting you';
   @override

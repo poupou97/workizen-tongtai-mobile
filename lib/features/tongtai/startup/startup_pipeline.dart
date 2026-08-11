@@ -63,6 +63,7 @@ class StartupProgress {
     required this.done,
     required this.total,
     this.count,
+    this.failed = false,
   });
 
   final StartupStep step;
@@ -72,8 +73,16 @@ class StartupProgress {
   final int total;
 
   /// Số bản ghi bước này vừa đọc. `null` khi bước không đếm gì (mở CSDL, đọc
-  /// cờ) — và khi đó màn hình **không** được bịa ra một con số cho đẹp.
+  /// cờ) **hoặc khi bước hỏng** — và khi đó màn hình **không** được bịa ra một
+  /// con số cho đẹp.
   final int? count;
+
+  /// Bước này ném lỗi.
+  ///
+  /// Một bước hỏng vẫn là một bước **đã chạy xong**, nên nó vẫn tính vào [done]
+  /// — nhưng nó không được khai một con số. Đây là chỗ duy nhất phân biệt
+  /// *"đọc được 0 bản ghi"* với *"không đọc được"*, và hai câu đó khác nhau.
+  final bool failed;
 
   /// 0..1. Là tỉ lệ **bước thật**, không phải một đường cong thời gian.
   double get fraction => done / total;
@@ -138,26 +147,56 @@ class StartupPipeline {
     final steps = <StartupProgress>[];
     var done = 0;
 
-    StartupProgress step(StartupStep s, {int? count}) {
+    StartupProgress step(StartupStep s, {int? count, bool failed = false}) {
       done++;
       final p = StartupProgress(
         step: s,
         done: done,
         total: total,
         count: count,
+        failed: failed,
       );
       steps.add(p);
       return p;
     }
 
-    await source.openDatabase();
-    yield step(StartupStep.database);
+    /// Chạy một bước, và **không bao giờ ném ra ngoài**.
+    ///
+    /// Hâm nóng hỏng không được nhốt người dùng ở màn khởi động: repository vẫn
+    /// tự mở CSDL khi màn hình đọc, nên đi tiếp là an toàn — thứ mất đi chỉ là
+    /// mấy con số đếm. Bắt lỗi nằm ở ĐÂY chứ không ở màn hình, vì ADR-TON-017
+    /// cấm `ui/` tự bắt lỗi, và vì một bước hỏng không nên kéo theo ba bước còn
+    /// lại chưa kịp chạy.
+    Future<int?> attempt(Future<int?> Function() work) async {
+      try {
+        return await work();
+      } on Object {
+        return null;
+      }
+    }
 
-    final onboarded = await source.loadOnboardingCompleted();
-    yield step(StartupStep.profile);
+    var failed =
+        await attempt(() async {
+          await source.openDatabase();
+          return 0;
+        }) ==
+        null;
+    yield step(StartupStep.database, failed: failed);
 
-    yield step(StartupStep.catalog, count: await source.countProducts());
-    yield step(StartupStep.orders, count: await source.countOrders());
+    var onboarded = false;
+    failed =
+        await attempt(() async {
+          onboarded = await source.loadOnboardingCompleted();
+          return 0;
+        }) ==
+        null;
+    yield step(StartupStep.profile, failed: failed);
+
+    final products = await attempt(source.countProducts);
+    yield step(StartupStep.catalog, count: products, failed: products == null);
+
+    final orders = await attempt(source.countOrders);
+    yield step(StartupStep.orders, count: orders, failed: orders == null);
 
     watch.stop();
     onDone(
