@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../action/business_action.dart';
@@ -8,7 +10,6 @@ import '../../action/business_action_executor.dart';
 import '../../agent/brief_inbox.dart';
 import '../../agent/business_brief.dart';
 import '../../core/screen_data_controller.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_agentic_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../../agent/automation_card.dart';
@@ -120,24 +121,24 @@ class _TongtaiBriefStoryScreenState
     final open = _decision == null || _decision == BriefDecision.pending;
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
         title: Text(l10n.briefStoryTitle),
         elevation: 0,
-        backgroundColor: TongtaiDesignTokens.lightBackground,
-        foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+        backgroundColor: TtColors.surfaceSecondary,
+        foregroundColor: TtColors.textPrimary,
       ),
       body: SafeArea(
         child: ListView(
           key: const Key('story-body'),
-          padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+          padding: const EdgeInsets.all(TtSpace.x4),
           children: [
             // ── WHAT HAPPENED ────────────────────────────────────────────
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const TongtaiFoxMascot.avatar(size: 40),
-                const SizedBox(width: TongtaiDesignTokens.spacing3),
+                const SizedBox(width: TtSpace.x3),
                 Expanded(
                   child: Text(
                     _item.headline,
@@ -146,7 +147,7 @@ class _TongtaiBriefStoryScreenState
                       fontSize: 19,
                       fontWeight: FontWeight.w700,
                       height: 1.3,
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                      color: TtColors.textPrimary,
                     ),
                   ),
                 ),
@@ -154,28 +155,26 @@ class _TongtaiBriefStoryScreenState
             ),
 
             // ── WHY ──────────────────────────────────────────────────────
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
             _Label(text: l10n.briefWhyTitle, key: const Key('story-why')),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             for (final e in _item.evidence)
               if (e.detail != null) TongtaiBriefReason(text: e.detail!),
 
             // ── WHAT AI SUGGESTS ─────────────────────────────────────────
             if (_item.isActionable) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               _Label(
                 text: l10n.briefSuggestTitle,
                 key: const Key('story-suggest'),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+                padding: const EdgeInsets.all(TtSpace.x3),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(
-                    TongtaiDesignTokens.radiusLg,
-                  ),
+                  borderRadius: BorderRadius.circular(TtRadius.md),
                 ),
                 child: Text(
                   _item.suggestion,
@@ -183,7 +182,7 @@ class _TongtaiBriefStoryScreenState
                     fontSize: 15,
                     height: 1.4,
                     fontWeight: FontWeight.w600,
-                    color: TongtaiDesignTokens.readableText(color),
+                    color: TtColors.readableOn(color),
                   ),
                 ),
               ),
@@ -191,7 +190,7 @@ class _TongtaiBriefStoryScreenState
 
             // ── WHAT I DECIDED ───────────────────────────────────────────
             if (open && _item.isActionable) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing5),
+              const SizedBox(height: TtSpace.x5),
               _Decisions(
                 busy: _busy,
                 onAccept: _accept,
@@ -199,33 +198,33 @@ class _TongtaiBriefStoryScreenState
                 onLater: _later,
               ),
             ] else if (_decision != null) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing5),
+              const SizedBox(height: TtSpace.x5),
               _Label(
                 text: l10n.briefStoryHappened,
                 key: const Key('story-decided'),
               ),
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               Text(
                 tongtaiBriefStatusLabel(l10n, _decision!),
                 key: Key('story-decision-${tongtaiBriefStatusKey(_decision!)}'),
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                  color: TtColors.textPrimary,
                 ),
               ),
             ],
 
             // ── WHAT HAPPENED NEXT ───────────────────────────────────────
             if (_isDemoRun) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               const _DemoExecutionNotice(),
             ],
             if (_decision == BriefDecision.accepted ||
                 _decision == BriefDecision.postponed) ...[
-              const SizedBox(height: TongtaiDesignTokens.spacing4),
+              const SizedBox(height: TtSpace.x4),
               _Label(text: l10n.briefStoryNext, key: const Key('story-next')),
-              const SizedBox(height: TongtaiDesignTokens.spacing2),
+              const SizedBox(height: TtSpace.x2),
               TongtaiBriefReason(
                 text: _decision == BriefDecision.postponed
                     ? l10n.briefLaterSnack(BriefInbox.kPostponeDays)
@@ -237,7 +236,7 @@ class _TongtaiBriefStoryScreenState
             // Dưới cùng, không phải trên đầu: người bán tới đây để QUYẾT một
             // việc cụ thể. Hình dạng của luật là câu hỏi thứ hai, và chỉ một
             // số người hỏi.
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
             TongtaiAutomationCard(
               keyPrefix: 'story-automation',
               card: AutomationCard.forKind(
@@ -245,7 +244,7 @@ class _TongtaiBriefStoryScreenState
                 settings: ref.watch(autonomySettingsProvider),
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing5),
+            const SizedBox(height: TtSpace.x5),
           ],
         ),
       ),
@@ -289,11 +288,11 @@ class _Decisions extends StatelessWidget {
           onPressed: busy ? null : onAccept,
           style: FilledButton.styleFrom(
             minimumSize: const Size.fromHeight(48),
-            backgroundColor: TongtaiDesignTokens.consumerBlueText,
+            backgroundColor: TtColors.readableOn(TtColors.info),
           ),
           child: Text(l10n.briefActionAccept),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         Row(
           children: [
             Expanded(
@@ -306,14 +305,14 @@ class _Decisions extends StatelessWidget {
                 child: Text(l10n.briefActionLater),
               ),
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            const SizedBox(width: TtSpace.x2),
             Expanded(
               child: TextButton(
                 key: const Key('story-dismiss'),
                 onPressed: busy ? null : onDismiss,
                 style: TextButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
-                  foregroundColor: TongtaiDesignTokens.neutralText,
+                  foregroundColor: TtColors.textSecondary,
                 ),
                 child: Text(l10n.briefActionDismiss),
               ),
@@ -335,13 +334,11 @@ class _DemoExecutionNotice extends StatelessWidget {
     return Container(
       key: const Key('story-demo-execution'),
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+      padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.warning.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusLg),
-        border: Border.all(
-          color: TongtaiDesignTokens.warning.withValues(alpha: 0.5),
-        ),
+        color: TtColors.warning.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.warning.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,7 +348,7 @@ class _DemoExecutionNotice extends StatelessWidget {
               const Icon(
                 Icons.science_outlined,
                 size: 18,
-                color: TongtaiDesignTokens.inventoryOrangeText,
+                color: TtColors.warningOnDark,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -360,7 +357,7 @@ class _DemoExecutionNotice extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: TongtaiDesignTokens.inventoryOrangeText,
+                    color: TtColors.warningOnDark,
                   ),
                 ),
               ),
@@ -372,7 +369,7 @@ class _DemoExecutionNotice extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               height: 1.45,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
           ),
         ],
@@ -393,7 +390,7 @@ class _Label extends StatelessWidget {
       fontSize: 11,
       fontWeight: FontWeight.w800,
       letterSpacing: 0.8,
-      color: TongtaiDesignTokens.neutralText,
+      color: TtColors.textSecondary,
     ),
   );
 }

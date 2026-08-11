@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../consumer/customer_order.dart';
@@ -10,7 +12,6 @@ import '../../journey/business_goal.dart';
 import '../../journey/business_goal_controller.dart';
 import '../../journey/goal_theme.dart';
 import '../../journey/journey_progress.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../../providers/tongtai_orders_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
@@ -177,17 +178,17 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
         // from real booked orders; the persisted goals stay untouched.
         final display = deriveGoalsProgress(goals, _orders, now);
         return Scaffold(
-          backgroundColor: TongtaiDesignTokens.lightBackground,
+          backgroundColor: TtColors.surfaceSecondary,
           appBar: AppBar(
             title: Text(context.l10n.titleBusinessGoals),
             elevation: 0,
-            backgroundColor: TongtaiDesignTokens.lightBackground,
-            foregroundColor: TongtaiDesignTokens.lightTextPrimary,
+            backgroundColor: TtColors.surfaceSecondary,
+            foregroundColor: TtColors.textPrimary,
           ),
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('goals-action-new'),
             onPressed: () => _openForm(context),
-            backgroundColor: TongtaiDesignTokens.financeVioletText,
+            backgroundColor: TtColors.readableOn(TtColors.ai),
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.goalNew),
@@ -200,10 +201,10 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
               isEmpty: (_) => goals.isEmpty,
               emptyBuilder: (_) => const _EmptyState(),
               builder: (context, _) => ListView.separated(
-                padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+                padding: const EdgeInsets.all(TtSpace.x4),
                 itemCount: display.length,
                 separatorBuilder: (context, _) =>
-                    const SizedBox(height: TongtaiDesignTokens.spacing3),
+                    const SizedBox(height: TtSpace.x3),
                 itemBuilder: (context, index) => _GoalCard(
                   goal: display[index],
                   now: now,
@@ -235,17 +236,15 @@ class _GoalCard extends StatelessWidget {
     final color = tongtaiGoalPaceColor(pace);
     return InkWell(
       key: Key('goals-item-${goal.id}'),
-      borderRadius: BorderRadius.circular(TongtaiDesignTokens.cardBorderRadius),
+      borderRadius: BorderRadius.circular(TtRadius.md),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing3),
+        padding: const EdgeInsets.all(TtSpace.x3),
         decoration: BoxDecoration(
-          color: TongtaiDesignTokens.lightBackground,
-          borderRadius: BorderRadius.circular(
-            TongtaiDesignTokens.cardBorderRadius,
-          ),
-          border: Border.all(color: TongtaiDesignTokens.lightBorder),
-          boxShadow: TongtaiDesignTokens.elevation1,
+          color: TtColors.surfaceSecondary,
+          borderRadius: BorderRadius.circular(TtRadius.md),
+          border: Border.all(color: TtColors.border),
+          boxShadow: TtElevation.soft,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,28 +256,26 @@ class _GoalCard extends StatelessWidget {
                     goal.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TongtaiDesignTokens.bodyStyle.copyWith(
+                    style: TtType.bodyLarge.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                      color: TtColors.textPrimary,
                     ),
                   ),
                 ),
-                const SizedBox(width: TongtaiDesignTokens.spacing2),
+                const SizedBox(width: TtSpace.x2),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: TongtaiDesignTokens.spacing2,
+                    horizontal: TtSpace.x2,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(
-                      TongtaiDesignTokens.radiusFull,
-                    ),
+                    borderRadius: BorderRadius.circular(TtRadius.full),
                     border: Border.all(color: color),
                   ),
                   child: Text(
                     pace.label(context.l10n.languageCode),
-                    style: TongtaiDesignTokens.captionStyle.copyWith(
+                    style: TtType.caption.copyWith(
                       color: color,
                       fontWeight: FontWeight.w600,
                     ),
@@ -286,7 +283,7 @@ class _GoalCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               [
                 goal.type.label(context.l10n.languageCode),
@@ -294,36 +291,30 @@ class _GoalCard extends StatelessWidget {
                   TongtaiFormatters.vnd(goal.targetAmount),
                 context.l10n.daysLeft(goal.daysRemaining(now)),
               ].join(' • '),
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textSecondary),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             ClipRRect(
-              borderRadius: BorderRadius.circular(
-                TongtaiDesignTokens.radiusFull,
-              ),
+              borderRadius: BorderRadius.circular(TtRadius.full),
               child: LinearProgressIndicator(
                 value: goal.progress,
                 minHeight: 8,
-                backgroundColor: TongtaiDesignTokens.lightHover,
+                backgroundColor: TtColors.surfaceTertiary,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing1),
+            const SizedBox(height: TtSpace.x1),
             Text(
               '${(goal.progress * 100).round()}%',
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextSecondary,
+              style: TtType.caption.copyWith(
+                color: TtColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing2),
+            const SizedBox(height: TtSpace.x2),
             Text(
               goal.recommendation(now),
-              style: TongtaiDesignTokens.captionStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
-              ),
+              style: TtType.caption.copyWith(color: TtColors.textPrimary),
             ),
           ],
         ),
@@ -340,21 +331,21 @@ class _EmptyState extends StatelessWidget {
     return Center(
       key: const Key('goals-empty'),
       child: Padding(
-        padding: const EdgeInsets.all(TongtaiDesignTokens.spacing8),
+        padding: const EdgeInsets.all(TtSpace.x8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
               Icons.flag_outlined,
               size: 48,
-              color: TongtaiDesignTokens.lightTextSecondary,
+              color: TtColors.textSecondary,
             ),
-            const SizedBox(height: TongtaiDesignTokens.spacing3),
+            const SizedBox(height: TtSpace.x3),
             Text(
               context.l10n.goalsEmptyPrompt,
               textAlign: TextAlign.center,
-              style: TongtaiDesignTokens.bodyStyle.copyWith(
-                color: TongtaiDesignTokens.lightTextPrimary,
+              style: TtType.bodyLarge.copyWith(
+                color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),

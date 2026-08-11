@@ -30,6 +30,26 @@ void main() {
     'tongtai_customer_risk_screen.dart': 'WTM-371',
     'tongtai_customer_history_screen.dart': 'WTM-371',
     'tongtai_opportunity_detail_screen.dart': 'WTM-371',
+    'tongtai_journey_screen.dart': 'WTM-372',
+    'tongtai_goals_screen.dart': 'WTM-372',
+    'tongtai_brief_story_screen.dart': 'WTM-372',
+    'tongtai_agent_screen.dart': 'WTM-372',
+  };
+
+  /// Màn **đã đi một nửa**: token thị giác đã sang Design System, nhưng còn một
+  /// bảng màu riêng chưa chuyển.
+  ///
+  /// Ba màn dòng thời gian phân biệt **chủ thể** (người bán · nền tảng · khách)
+  /// bằng màu — đó là một nghĩa thật, không phải màu vô chủ, và ép nó vào khe
+  /// ngữ nghĩa của Design System sẽ **mất** đúng thứ nó đang nói. Chuyển bảng
+  /// ấy là một quyết định sản phẩm riêng, không phải một phép thay.
+  ///
+  /// Khai ở đây thay vì im lặng: một màn đi nửa đường mà không ai ghi lại thì
+  /// lần sau người ta tưởng nó đã xong.
+  const partiallyMigrated = <String, String>{
+    'tongtai_business_life_screen.dart': 'bảng màu chủ thể (WTM-338)',
+    'tongtai_conversations_screen.dart': 'bảng màu chủ thể (WTM-338)',
+    'tongtai_conversation_screen.dart': 'bảng màu chủ thể (WTM-338)',
   };
 
   /// Bỏ chú thích trước khi quét — một mã màu nhắc trong tài liệu không phải
@@ -41,6 +61,19 @@ void main() {
             !l.trimLeft().startsWith('//') && !l.trimLeft().startsWith('///'),
       )
       .join('\n');
+
+  test('màn đi nửa đường vẫn phải sạch token thị giác cũ', () {
+    for (final entry in partiallyMigrated.entries) {
+      final uses = RegExp(
+        r'TongtaiDesignTokens\.[a-zA-Z]',
+      ).allMatches(codeOf(entry.key));
+      expect(
+        uses,
+        isEmpty,
+        reason: '${entry.key} còn ${uses.length} chỗ dùng token cũ',
+      );
+    }
+  });
 
   test('⭐ quét được mã nguồn thật (chống PASS giả)', () {
     for (final file in migrated.keys) {

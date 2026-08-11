@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tt.dart';
+
 import '../../../../core/l10n/app_strings.dart';
 import '../../journey/journey.dart';
 import '../../journey/journey_node.dart';
-import '../../navigation/tongtai_design_tokens.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../widgets/tongtai_screen_data.dart' show TongtaiAsyncScreenData;
 import 'tongtai_opportunity_feed_screen.dart';
@@ -43,7 +44,7 @@ class TongtaiJourneyScreen extends ConsumerWidget {
     final journeys = ref.watch(journeysProvider);
 
     return Scaffold(
-      backgroundColor: TongtaiDesignTokens.lightBackground,
+      backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(title: Text(l10n.journeyTitle)),
       body: SafeArea(
         child: TongtaiAsyncScreenData<List<Journey>>(
@@ -145,7 +146,7 @@ class _JourneyPlan extends StatelessWidget {
     final completion = journey.completion;
     return ListView(
       key: const Key('journey-list'),
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       children: [
         // WTM-226 — the moment the seller finishes. `JourneyState.completed`
         // existed from the start and nothing ever set it, so someone who did
@@ -159,14 +160,14 @@ class _JourneyPlan extends StatelessWidget {
         // app's first lie to them.
         if (journey.isPlanComplete) ...[
           _PlanDone(onSetNextGoal: onSetNextGoal),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
         ],
         if (completion != null)
           _ProgressHeader(label: l10n.journeyProgress, value: completion),
-        const SizedBox(height: TongtaiDesignTokens.spacing5),
+        const SizedBox(height: TtSpace.x5),
         for (final milestone in roots) ...[
           _MilestoneTile(milestone: milestone, journey: journey, onDo: onDo),
-          const SizedBox(height: TongtaiDesignTokens.spacing5),
+          const SizedBox(height: TtSpace.x5),
         ],
       ],
     );
@@ -184,34 +185,28 @@ class _PlanDone extends StatelessWidget {
     return Container(
       key: const Key('journey-plan-done'),
       width: double.infinity,
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing4),
+      padding: const EdgeInsets.all(TtSpace.x4),
       decoration: BoxDecoration(
-        color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(
-          TongtaiDesignTokens.cardBorderRadius,
-        ),
-        border: Border.all(
-          color: TongtaiDesignTokens.producerGreen.withValues(alpha: 0.4),
-        ),
+        color: TtColors.success.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(TtRadius.md),
+        border: Border.all(color: TtColors.success.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.journeyPlanDoneTitle,
-            style: TongtaiDesignTokens.bodyStyle.copyWith(
+            style: TtType.bodyLarge.copyWith(
               fontWeight: FontWeight.w700,
-              color: TongtaiDesignTokens.lightTextPrimary,
+              color: TtColors.textPrimary,
             ),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing2),
+          const SizedBox(height: TtSpace.x2),
           Text(
             l10n.journeyPlanDoneBody,
-            style: TongtaiDesignTokens.smallStyle.copyWith(
-              color: TongtaiDesignTokens.lightTextSecondary,
-            ),
+            style: TtType.body.copyWith(color: TtColors.textSecondary),
           ),
-          const SizedBox(height: TongtaiDesignTokens.spacing3),
+          const SizedBox(height: TtSpace.x3),
           OutlinedButton.icon(
             key: const Key('journey-set-next-goal'),
             onPressed: onSetNextGoal,
@@ -241,18 +236,18 @@ class _ProgressHeader extends StatelessWidget {
       children: [
         Text(
           '$label — ${(value * 100).round()}%',
-          style: TongtaiDesignTokens.bodyStyle.copyWith(
+          style: TtType.bodyLarge.copyWith(
             fontWeight: FontWeight.w700,
-            color: TongtaiDesignTokens.lightTextPrimary,
+            color: TtColors.textPrimary,
           ),
         ),
-        const SizedBox(height: TongtaiDesignTokens.spacing2),
+        const SizedBox(height: TtSpace.x2),
         ClipRRect(
-          borderRadius: BorderRadius.circular(TongtaiDesignTokens.radiusSm),
+          borderRadius: BorderRadius.circular(TtRadius.xs),
           child: LinearProgressIndicator(
             value: value,
             minHeight: 8,
-            backgroundColor: TongtaiDesignTokens.lightBorder,
+            backgroundColor: TtColors.border,
           ),
         ),
       ],
@@ -288,19 +283,19 @@ class _MilestoneTile extends StatelessWidget {
                   : Icons.radio_button_unchecked,
               size: 20,
               color: milestone.isDone
-                  ? TongtaiDesignTokens.producerGreenText
-                  : TongtaiDesignTokens.lightTextSecondary,
+                  ? TtColors.readableOn(TtColors.success)
+                  : TtColors.textSecondary,
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing3),
+            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     milestone.title,
-                    style: TongtaiDesignTokens.bodyStyle.copyWith(
+                    style: TtType.bodyLarge.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: TongtaiDesignTokens.lightTextPrimary,
+                      color: TtColors.textPrimary,
                     ),
                   ),
                   // WTM-191: say where this came from. A commitment the seller
@@ -318,10 +313,7 @@ class _MilestoneTile extends StatelessWidget {
         ),
         for (final step in children)
           Padding(
-            padding: const EdgeInsets.only(
-              left: TongtaiDesignTokens.spacing8,
-              top: TongtaiDesignTokens.spacing3,
-            ),
+            padding: const EdgeInsets.only(left: TtSpace.x8, top: TtSpace.x3),
             child: _StepTile(step: step, onDo: onDo),
           ),
       ],
@@ -352,15 +344,15 @@ class _StepTile extends StatelessWidget {
               step.isDone ? Icons.check : Icons.circle_outlined,
               size: 16,
               color: step.isDone
-                  ? TongtaiDesignTokens.producerGreenText
-                  : TongtaiDesignTokens.lightTextSecondary,
+                  ? TtColors.readableOn(TtColors.success)
+                  : TtColors.textSecondary,
             ),
-            const SizedBox(width: TongtaiDesignTokens.spacing2),
+            const SizedBox(width: TtSpace.x2),
             Expanded(
               child: Text(
                 step.title,
-                style: TongtaiDesignTokens.smallStyle.copyWith(
-                  color: TongtaiDesignTokens.lightTextPrimary,
+                style: TtType.body.copyWith(
+                  color: TtColors.textPrimary,
                   decoration: step.isDone ? TextDecoration.lineThrough : null,
                 ),
               ),
@@ -368,12 +360,9 @@ class _StepTile extends StatelessWidget {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            left: TongtaiDesignTokens.spacing6,
-            top: TongtaiDesignTokens.spacing1,
-          ),
+          padding: const EdgeInsets.only(left: TtSpace.x6, top: TtSpace.x1),
           child: Wrap(
-            spacing: TongtaiDesignTokens.spacing2,
+            spacing: TtSpace.x2,
             children: [
               if (step.origin == JourneyNodeOrigin.ruleTwin)
                 _Tag(
@@ -414,9 +403,7 @@ class _Tag extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: TongtaiDesignTokens.captionStyle.copyWith(
-        color: TongtaiDesignTokens.lightTextSecondary,
-      ),
+      style: TtType.caption.copyWith(color: TtColors.textSecondary),
     );
   }
 }
@@ -430,20 +417,15 @@ class _Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(TongtaiDesignTokens.spacing6),
+      padding: const EdgeInsets.all(TtSpace.x6),
       children: [
-        const SizedBox(height: TongtaiDesignTokens.spacing10),
-        Text(
-          title,
-          style: TongtaiDesignTokens.heading2Style.copyWith(
-            color: TongtaiDesignTokens.lightTextPrimary,
-          ),
-        ),
-        const SizedBox(height: TongtaiDesignTokens.spacing3),
+        const SizedBox(height: TtSpace.x10),
+        Text(title, style: TtType.h1.copyWith(color: TtColors.textPrimary)),
+        const SizedBox(height: TtSpace.x3),
         Text(
           body,
-          style: TongtaiDesignTokens.smallStyle.copyWith(
-            color: TongtaiDesignTokens.lightTextSecondary,
+          style: TtType.body.copyWith(
+            color: TtColors.textSecondary,
             height: 1.5,
           ),
         ),
