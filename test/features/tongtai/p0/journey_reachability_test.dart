@@ -77,7 +77,7 @@ void main() {
     'tongtai_business_profile_screen.dart': 3,
     'tongtai_feedback_screen.dart': 3,
     'tongtai_journey_screen.dart': 3,
-    'tongtai_onboarding_conversation_screen.dart': 3,
+    'tongtai_onboarding_v2_screen.dart': 3,
     'tongtai_supplier_search_screen.dart': 3,
     'tongtai_supplier_favorites_screen.dart': 3,
     'tongtai_business_inputs_screen.dart': 3,

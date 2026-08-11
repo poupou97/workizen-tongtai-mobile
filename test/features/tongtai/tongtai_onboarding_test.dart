@@ -152,7 +152,7 @@ void main() {
       );
     }
 
-    Finder onboarding() => find.byKey(const Key('onboarding-greeting'));
+    Finder onboarding() => find.byKey(const Key('onboarding-v2-welcome'));
     Finder appShell() => find.byType(TongtaiBottomNav);
 
     testWidgets('AC4: shows the tutorial on first launch (not completed)', (
@@ -187,8 +187,18 @@ void main() {
         await tester.pumpAndSettle();
         expect(onboarding(), findsOneWidget);
 
-        // Tap "skip" on the greeting → gate flips to the shell and persists.
-        await tester.tap(find.byKey(const Key('onboarding-skip-all')));
+        // Đi đường ngắn nhất qua V2 → cổng lật sang shell và lưu cờ.
+        await tester.tap(find.byKey(const Key('onboarding-v2-start')));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('onboarding-v2-profile-skip-all')),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('onboarding-v2-finish')));
         await tester.pumpAndSettle();
 
         expect(onboarding(), findsNothing);

@@ -46,12 +46,12 @@ void main() {
     child: const TongtaiApp(),
   );
 
-  // WTM-178: the six-slide tutorial became a conversation. The acceptance
-  // criteria are unchanged — first launch shows onboarding, finishing or
-  // skipping reveals the shell and persists the flag — so these finders were
-  // repointed rather than the tests rewritten.
-  Finder tutorial() => find.byKey(const Key('onboarding-greeting'));
-  Finder skipAll() => find.byKey(const Key('onboarding-skip-all'));
+  // WTM-178: sáu slide → hội thoại. Epic WTM-349: hội thoại → Onboarding V2.
+  // Acceptance criteria KHÔNG đổi qua cả hai lần — lần đầu mở app thấy
+  // onboarding, đi hết thì thấy shell và cờ được lưu — nên finder được trỏ lại
+  // chứ test không bị viết lại. Đó cũng là lý do file này vẫn có giá trị: nó đo
+  // hợp đồng của app, không đo cách một màn được vẽ.
+  Finder tutorial() => find.byKey(const Key('onboarding-v2-welcome'));
   Finder appShell() => find.byType(TongtaiBottomNav);
 
   testWidgets('AC2: first launch (no flag) boots into the tutorial', (
@@ -72,14 +72,18 @@ void main() {
     await tester.pumpWidget(app(prefs));
     await tester.pumpAndSettle();
 
-    // Walk the whole conversation, skipping every question, then finish.
-    await tester.tap(find.byKey(const Key('onboarding-start')));
+    // Đường ngắn nhất qua V2: bắt đầu → bỏ qua hồ sơ → "chưa có dữ liệu" →
+    // mục tiêu → xong. Người vội vẫn đi qua cửa dữ liệu, vì đó là chỗ rẽ quyết
+    // định họ nhận được gì chứ không phải một bước thủ tục.
+    await tester.tap(find.byKey(const Key('onboarding-v2-start')));
     await tester.pumpAndSettle();
-    for (var i = 0; i < kOnboardingSteps.length; i++) {
-      await tester.tap(find.byKey(const Key('onboarding-skip')));
-      await tester.pumpAndSettle();
-    }
-    await tester.tap(find.byKey(const Key('onboarding-done')));
+    await tester.tap(find.byKey(const Key('onboarding-v2-profile-skip-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding-v2-finish')));
     await tester.pumpAndSettle();
 
     expect(tutorial(), findsNothing);
@@ -87,16 +91,30 @@ void main() {
     expect(prefs.getBool(TongtaiOnboardingStore.storageKey), isTrue);
   });
 
-  testWidgets('AC3: skipping the tutorial reveals the shell and persists', (
+  testWidgets('AC3: đường ngắn nhất vẫn kết thúc bằng một kế hoạch', (
     tester,
   ) async {
     final prefs = await bootPrefs({});
     await tester.pumpWidget(app(prefs));
     await tester.pumpAndSettle();
 
-    // One tap from the greeting straight into the app — the conversation must
-    // not cost a hurried seller more taps than the slides it replaced.
-    await tester.tap(skipAll());
+    // V1 có lối "bỏ qua tất cả" một chạm từ màn chào. V2 bỏ nó có chủ ý: lối
+    // đó thả người bán vào một ứng dụng TRỐNG, tức là đúng vấn đề Epic
+    // WTM-349 sinh ra để sửa. Đường nhanh nhất nay đi qua cửa dữ liệu và kết
+    // thúc bằng kế hoạch khởi đầu — dài hơn ba chạm, và ba chạm đó là toàn bộ
+    // giá trị người bán nhận được.
+    await tester.tap(find.byKey(const Key('onboarding-v2-start')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding-v2-profile-skip-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding-v2-data-none')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onboarding-v2-goal-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('onboarding-v2-plan')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('onboarding-v2-finish')));
     await tester.pumpAndSettle();
 
     expect(tutorial(), findsNothing);
