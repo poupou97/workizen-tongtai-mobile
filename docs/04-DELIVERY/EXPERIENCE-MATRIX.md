@@ -47,11 +47,11 @@ trình nào mới có dữ liệu mà chưa có màn?*
 | 5 | **Order** — đơn về | ✅ 112 nhập + ~90 sinh | ✅ Trang chủ · Khách 360 | ✅ doanh thu · AOV | — | — | — | ✅ | ✅ |
 | 6 | **Payment** — tiền vào tài khoản | ✅ ngân hàng báo có | ◐ Tài chính | — | — | — | — | — | ✅ |
 | 7 | **Fulfillment** — đóng gói, bàn giao | ✅ bàn giao → đang giao → đã giao | ✅ Dòng thời gian | ◐ | — | — | — | ✅ kiện vào sổ | ✅ |
-| 8 | **Shipment** — kiện đi tới đâu | ✅ 3 hãng, có chậm | ◐ chỉ trong Brief/Cơ hội, **không có màn riêng** | ✅ so hàng xóm cùng tuyến | ✅ | ✅ Brief | — chưa có handler liên hệ hãng | — | ✅ |
+| 8 | **Shipment** — kiện đi tới đâu | ✅ 3 hãng, có chậm | ◐ chỉ trong Brief/Cơ hội, **không có màn riêng** | ✅ so hàng xóm cùng tuyến | ✅ | ✅ Brief | ✅ báo khách đang chờ | ✅ `demo:` | ✅ |
 | 9 | **Support** — khách phàn nàn | ✅ khách giận ngày 5 | ✅ Hội thoại | ◐ | ◐ | ✅ bắt buộc duyệt | ✅ | ✅ | ✅ |
 | 10 | **Refund** — hoàn tiền | ✅ đòi → duyệt → hoàn | ✅ Hội thoại · Tài chính | ✅ vào lời thật | ◐ | ✅ bắt buộc duyệt | ◐ | ✅ dòng đối soát chiều ra | ✅ |
 | 11 | **Review** — đánh giá | ✅ 3 sao, nối câu chuyện kiện chậm | ✅ Khách 360 | — | — | — | — | — | ✅ |
-| 12 | **Repeat** — tới nhịp mua lại | ✅ ngày 28 | ✅ Khách hàng · Cơ hội | ✅ RFM | ✅ | ✅ Brief | ◐ qua `customer.send_message` | ◐ | ✅ |
+| 12 | **Repeat** — tới nhịp mua lại | ✅ ngày 28 | ✅ Khách hàng · Cơ hội | ✅ nhịp riêng từng khách | ✅ `rule:repeat-due` | ✅ Brief | ✅ `customer.send_message` | ✅ `demo:` | ✅ |
 | 13 | **Churn** — khách lặng lâu | ✅ ngày 21 | ✅ Khách hàng rủi ro | ✅ `customer_risk_rule` | ✅ | ✅ Brief | ◐ | ◐ | ✅ |
 | 14 | **Sourcing** — tìm nguồn | ✅ 1688 báo giá | ✅ Nguồn hàng · So sánh NCC | ✅ `supplier_comparison` | ✅ | ✅ Brief | ✅ `inventory.create_purchase_order` | ✅ `demo:` | ✅ |
 | 15 | **Inventory** — tồn kho | ✅ tồn giảm theo đơn | ✅ Kho · Cảnh báo tồn | ✅ sắp hết · hàng nằm | ✅ | ✅ Brief | ✅ | ✅ | ✅ |
