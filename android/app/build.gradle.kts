@@ -88,17 +88,40 @@ android {
         }
     }
 
+    // ⛔ P-33 · WTM-385 — MỌI buildType cài được lên máy phải ký GIỐNG NHAU.
+    //
+    // Trước WTM-385 chỉ `release` được cấu hình. `debug` và `profile` dùng khoá
+    // debug mặc định, nên trên máy Founder — nơi `com.workizen.tongtai` đang
+    // cài bằng khoá phát hành — cả hai lệnh dưới đều chết:
+    //
+    //     flutter run              → INSTALL_FAILED_UPDATE_INCOMPATIBLE
+    //     flutter run --profile    → INSTALL_FAILED_UPDATE_INCOMPATIBLE
+    //
+    // Và lối thoát mọi hướng dẫn đưa ra là *"gỡ app rồi cài lại"* — nghe vô
+    // hại, thực chất **xoá sạch dữ liệu kinh doanh thật**, không khôi phục
+    // được. WTM-277 (`Ready`) yêu cầu đo scroll jank trên máy thật, tức phải
+    // dùng bản **profile** — người nhận vé đó sẽ đi thẳng vào bẫy này.
+    //
+    // Bài học lớp lỗi: repo đã ghi lý do P-33 rất rõ, nhưng **ghi lý do là
+    // chưa đủ nếu bản vá chỉ bịt một cửa**. Sau mỗi bản vá phải hỏi: *còn cửa
+    // nào khác cùng lớp?*
+    val installSigning = if (keystorePropertiesFile.exists()) {
+        // Có khoá thật ⇒ ký bằng khoá thật, để bản dựng cài đè được lên bản
+        // đang có trên máy.
+        signingConfigs.getByName("release")
+    } else {
+        // Không có khoá ⇒ khoá debug, để CI và máy chưa có khoá vẫn build
+        // được. Bản debug-signed KHÔNG upload lên Play được, nên nhầm lẫn này
+        // không im lặng.
+        signingConfigs.getByName("debug")
+    }
+
     buildTypes {
-        release {
-            // Có khoá thật ⇒ ký bằng khoá thật. Không có ⇒ khoá debug, để
-            // `flutter run --release` và CI vẫn chạy. Bản debug-signed KHÔNG
-            // upload lên Play được, nên nhầm lẫn này không im lặng.
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
-        }
+        release { signingConfig = installSigning }
+        debug { signingConfig = installSigning }
+        // `profile` là bản Flutter dùng để ĐO hiệu năng — đúng bản WTM-277
+        // cần, và đúng bản trước đây không ai ký.
+        getByName("profile") { signingConfig = installSigning }
     }
 }
 
