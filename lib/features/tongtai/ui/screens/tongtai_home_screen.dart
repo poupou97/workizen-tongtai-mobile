@@ -257,7 +257,21 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       // no goal there is nothing to plan for, and the message says so instead
       // of dressing goals up as missions.
       if (_goals.isEmpty) {
-        return [_EmptyBox(context.l10n.homeStartJourneyNeedGoal)];
+        // ⭐ WTM-390: trước đây ô này chỉ nói *"tạo một mục tiêu trước"* rồi
+        // dừng — người bán đọc xong không đi được đâu. Một ô trống biết mình
+        // thiếu gì mà không mở đường đi tới đó là một ngõ cụt, không phải một
+        // lời hướng dẫn.
+        return [
+          _EmptyBox(context.l10n.homeStartJourneyNeedGoal),
+          const SizedBox(height: 8),
+          TtPrimaryButton(
+            key: const Key('home-empty-create-goal'),
+            label: context.l10n.homeAddGoal,
+            icon: Icons.flag_outlined,
+            expand: false,
+            onPressed: () => _push(context, const TongtaiGoalsScreen()),
+          ),
+        ];
       }
       return [
         _EmptyBox(context.l10n.homeNoMissions),

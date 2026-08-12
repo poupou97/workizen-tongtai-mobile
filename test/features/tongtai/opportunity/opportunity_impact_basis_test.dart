@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/ai/opportunity_ai.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity.dart';
+import 'package:tongtai/features/tongtai/opportunity/opportunity_action_plan.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 
@@ -100,6 +101,35 @@ void main() {
         ruleBasedOpportunityInsight(opp(OpportunityImpactBasis.estimatedGain)),
         contains('ước tính thêm'),
       );
+    });
+  });
+
+  group('⛔ dư âm — kế hoạch hành động cũng không được hứa sai (WTM-390)', () {
+    // ⚠️ WTM-384 sửa nhãn trên thẻ và trong prompt AI, nhưng **bỏ sót** bước
+    // cuối của Kế hoạch hành động: nó gọi con số là *"mức kỳ vọng"*, trong khi
+    // với luật tồn kho và luật nhóm nó là doanh thu **đã qua**.
+    //
+    // Cùng một lời hứa sai, chỉ nấp ở một cửa khác. Đây là lý do sau mỗi bản
+    // vá phải hỏi *"còn cửa nào khác cùng lớp?"* — và lần này câu trả lời là
+    // "có", tìm ra bằng mắt trên máy chứ không bằng suite.
+    test('quan sát ⇒ gọi là MỐC 60 ngày, không phải kỳ vọng', () {
+      final steps = opportunityActionPlan(
+        opp(OpportunityImpactBasis.observedRevenue),
+      );
+      final last = steps.last.detailVi;
+      expect(last, contains('60 ngày qua'));
+      expect(
+        last,
+        isNot(contains('kỳ vọng')),
+        reason: 'doanh thu đã qua không phải một kỳ vọng',
+      );
+    });
+
+    test('ước tính ⇒ được phép gọi là kỳ vọng', () {
+      final steps = opportunityActionPlan(
+        opp(OpportunityImpactBasis.estimatedGain),
+      );
+      expect(steps.last.detailVi, contains('kỳ vọng'));
     });
   });
 
