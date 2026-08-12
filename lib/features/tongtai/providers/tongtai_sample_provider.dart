@@ -48,6 +48,8 @@ final sampleBusinessSeederProvider = Provider<SampleBusinessSeeder>(
     customers: ref.watch(customerRepositoryProvider),
     orders: ref.watch(orderRepositoryProvider),
     settlements: ref.watch(settlementRepositoryProvider),
+    products: ref.watch(productRepositoryProvider),
+    enricher: ref.watch(productAttributeEnricherProvider),
     bundledSource: () => ref.read(bundledDemoSourceProvider),
   ),
 );

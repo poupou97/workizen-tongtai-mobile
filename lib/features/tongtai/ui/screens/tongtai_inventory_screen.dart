@@ -14,6 +14,7 @@ import '../../inventory/stock_alert.dart';
 import '../../inventory/stock_alert_service.dart';
 import '../../providers/tongtai_inventory_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
+import 'tongtai_product_detail_screen.dart';
 import 'tongtai_product_form_screen.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_screen_header.dart';
@@ -264,7 +265,7 @@ class _TongtaiInventoryScreenState
                     emptyBuilder: (_) => const _EmptyState(),
                     builder: (context, _) => _ProductList(
                       products: page.items,
-                      onEdit: (product) => _openForm(context, product: product),
+                      onOpen: (product) => _openDetail(context, product),
                     ),
                   ),
                 ),
@@ -306,6 +307,27 @@ class _TongtaiInventoryScreenState
     // was visible only on the screen that made it.
     invalidateBusinessDataProviders(ref);
     setState(() => _query = _query.copyWith(pageIndex: 0));
+  }
+
+  /// Open the read-only Product Detail (WTM-335). Tapping a row now opens the
+  /// detail — the grouped attribute view — rather than the edit form directly;
+  /// editing is one tap further, from the detail's "Sửa" action. The detail
+  /// screen loads a product's attributes on demand, so the list load never
+  /// touches the value store (ADR-TON-019).
+  Future<void> _openDetail(BuildContext context, Product product) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (detailContext) => TongtaiProductDetailScreen(
+          product: product,
+          onEdit: () {
+            // Pop the detail first so a saved edit returns straight to the
+            // list, then open the form on the list's context.
+            Navigator.of(detailContext).pop();
+            _openForm(context, product: product);
+          },
+        ),
+      ),
+    );
   }
 
   /// Open the Stock Alerts screen (WTM-70), sharing the same live catalog so a
@@ -849,10 +871,10 @@ class _ResultsHeader extends StatelessWidget {
 }
 
 class _ProductList extends StatelessWidget {
-  const _ProductList({required this.products, required this.onEdit});
+  const _ProductList({required this.products, required this.onOpen});
 
   final List<Product> products;
-  final ValueChanged<Product> onEdit;
+  final ValueChanged<Product> onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -870,7 +892,7 @@ class _ProductList extends StatelessWidget {
       separatorBuilder: (context, _) => const SizedBox(height: TtSpace.x3),
       itemBuilder: (context, index) => _ProductRow(
         product: products[index],
-        onTap: () => onEdit(products[index]),
+        onTap: () => onOpen(products[index]),
       ),
     );
   }

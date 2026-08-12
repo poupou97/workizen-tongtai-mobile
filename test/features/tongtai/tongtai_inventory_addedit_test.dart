@@ -1,15 +1,22 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_catalog_controller.dart';
 import 'package:tongtai/features/tongtai/inventory/product_image_source.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
+    show tongtaiDatabaseProvider;
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_product_form_screen.dart';
 
+import '../../support/pump_until.dart';
+
 /// End-to-end widget tests for the WTM-69 wiring on the Inventory screen: the
 /// "+" button opens the Add form and a saved product lands in the list; tapping
-/// a row opens the same form in Edit mode.
+/// a row opens the read-only detail (WTM-335), whose "Sửa" action opens the
+/// same form in Edit mode.
 class _NoopImageSource implements ProductImageSource {
   @override
   Future<String?> pickFromGallery() async => null;
@@ -36,6 +43,14 @@ void main() {
   );
 
   Widget host(ProductCatalogController catalog) => ProviderScope(
+    // The detail screen (reached by tapping a row) reads attributes on demand
+    // through the real database provider; point it at an in-memory DB so the
+    // test stays hermetic and the (empty) attribute read resolves cleanly.
+    overrides: [
+      tongtaiDatabaseProvider.overrideWithValue(
+        AppDatabase.forExecutor(NativeDatabase.memory()),
+      ),
+    ],
     child: MaterialApp(
       home: TongtaiInventoryScreen(
         catalog: catalog,
@@ -43,6 +58,21 @@ void main() {
       ),
     ),
   );
+
+  /// Taps a product row and then the detail's "Sửa" action, landing on the
+  /// Edit form — the WTM-335 two-step path that replaced tap-to-edit. The Edit
+  /// action lives in the app bar and is not gated on the on-demand attribute
+  /// read, so tapping it does not need the grouped block to have loaded.
+  Future<void> openEdit(WidgetTester tester, String name) async {
+    await tester.tap(find.text(name));
+    await tester.pumpAndSettle();
+    await pumpUntilFound(
+      tester,
+      find.byKey(const Key('product-detail-action-edit')),
+    );
+    await tester.tap(find.byKey(const Key('product-detail-action-edit')));
+    await tester.pumpAndSettle();
+  }
 
   // Flushes the invalid-save SnackBar's auto-dismiss timer so it isn't left
   // pending at teardown (which fails the test).
@@ -108,7 +138,9 @@ void main() {
     expect(find.text('2 products'), findsOneWidget);
   });
 
-  testWidgets('tapping a product row opens it in Edit mode', (tester) async {
+  testWidgets('tapping a product row opens the detail, then Edit mode', (
+    tester,
+  ) async {
     useTallViewport(tester);
     final catalog = ProductCatalogController.inMemory([
       product('a', 'Alpha', 'SKU-A'),
@@ -116,7 +148,14 @@ void main() {
     await tester.pumpWidget(host(catalog));
     await tester.pumpAndSettle();
 
+    // Row tap now opens the read-only detail (WTM-335).
     await tester.tap(find.text('Alpha'));
+    await tester.pumpAndSettle();
+    await pumpUntilFound(tester, find.byKey(const Key('product-detail-core')));
+    expect(find.byKey(const Key('product-detail-core')), findsOneWidget);
+
+    // "Sửa" from the detail opens the form in Edit mode.
+    await tester.tap(find.byKey(const Key('product-detail-action-edit')));
     await tester.pumpAndSettle();
 
     expect(find.text('Edit Product'), findsOneWidget);
@@ -144,8 +183,7 @@ void main() {
     await tester.pumpWidget(host(catalog));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Alpha'));
-    await tester.pumpAndSettle();
+    await openEdit(tester, 'Alpha');
 
     // Change only the name; leave the SKU (which already exists as this
     // product's own) untouched.
@@ -178,8 +216,7 @@ void main() {
     await tester.pumpWidget(host(catalog));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Alpha'));
-    await tester.pumpAndSettle();
+    await openEdit(tester, 'Alpha');
 
     // Collide Alpha's SKU with Bravo's.
     await tester.enterText(find.byKey(const Key('product-sku-field')), 'SKU-B');

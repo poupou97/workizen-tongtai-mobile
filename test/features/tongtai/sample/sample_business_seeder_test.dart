@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
+import 'package:tongtai/features/tongtai/commerce/attributes/attribute_repository.dart';
+import 'package:tongtai/features/tongtai/commerce/attributes/product_attribute_enricher.dart';
 import 'package:tongtai/features/tongtai/commerce/commerce_models.dart';
 import 'package:tongtai/features/tongtai/commerce/commerce_repository.dart';
 import 'package:tongtai/features/tongtai/commerce/import/commerce_importer.dart';
@@ -63,6 +65,8 @@ void main() {
       customers: customers,
       orders: DriftOrderRepository(db),
       settlements: DriftSettlementRepository(db),
+      products: products,
+      enricher: ProductAttributeEnricher(AttributeRepository(db)),
       bundledSource: () async => XlsxCommerceSource(
         bytes: File(
           'assets/demo/TongTai-Commerce-Demo-100-Products.xlsx',

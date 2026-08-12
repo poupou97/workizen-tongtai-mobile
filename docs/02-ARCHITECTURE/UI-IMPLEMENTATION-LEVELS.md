@@ -59,6 +59,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | `tongtai_consumer_screen` | customerRepository | `ScreenDataController` | màn của bug gốc — có suite hành vi riêng |
 | `tongtai_producer_screen` | favorites store + generated opportunities | `ScreenDataController` | hai nguồn, một trạng thái |
 | `tongtai_inventory_screen` | productRepository | `ScreenDataController` + guarded upsert | |
+| `tongtai_product_detail_screen` | `productAttributeGroupsProvider` (family theo sản phẩm, on-demand) | `TongtaiAsyncScreenData` (read-only) | **WTM-335 · Epic WTM-324.** Mở bằng chạm một dòng sản phẩm ở Inventory. **Chỉ đọc:** khối "Thông tin chính" (cột typed, luôn hiện) + khối "Thông số kỹ thuật" gom **theo nhóm** — hiện **chỉ khi** sản phẩm có thuộc tính (§15), không dựng khối rỗng. Thuộc tính tải **on-demand** qua đúng một đường (ADR-TON-019), không join vào danh sách. Người bán chỉ thấy **trường · nhóm · giá trị** — không lộ `AttributeDefinition`/schema/JSON/EAV. "Sửa" mở lại form (L2) |
 | `tongtai_customer_list_screen` | customer + order + product repo | `ScreenDataController` + guarded upsert | |
 | `tongtai_goals_screen` | goal repo + orders | `ScreenDataController` + guarded upsert | |
 | `tongtai_finance_screen` | financeRepository | `ScreenDataController` + guarded add | |

@@ -1,7 +1,9 @@
 import '../commerce/commerce_models.dart';
 import '../commerce/commerce_repository.dart';
+import '../commerce/attributes/product_attribute_enricher.dart';
 import '../consumer/customer_repository.dart';
 import '../finance/settlement_repository.dart';
+import '../inventory/product_repository.dart';
 import '../orders/order_repository.dart';
 import '../commerce/import/commerce_import.dart';
 import '../commerce/import/commerce_importer.dart';
@@ -50,6 +52,8 @@ class SampleBusinessSeeder {
     required this.customers,
     required this.orders,
     required this.settlements,
+    required this.products,
+    required this.enricher,
     required this.bundledSource,
   });
 
@@ -60,6 +64,14 @@ class SampleBusinessSeeder {
   final CustomerRepository customers;
   final OrderRepository orders;
   final SettlementRepository settlements;
+
+  /// Đọc lại danh mục **sau khi nhập** để làm giàu thuộc tính. Cùng repository
+  /// mọi màn đọc — không có đường ghi riêng.
+  final ProductRepository products;
+
+  /// Làm giàu thuộc tính động **cộng thêm** (WTM-335 §17). Kiểu này không bị
+  /// governance scan canh, nên seeder giữ được nó mà không tự chạm value store.
+  final ProductAttributeEnricher enricher;
 
   /// Bộ 100 sản phẩm đóng kèm app. Hàm chứ không phải giá trị: đọc asset là
   /// việc tốn bộ nhớ, và nó chỉ cần xảy ra lúc người bán thật sự bấm.
@@ -83,6 +95,21 @@ class SampleBusinessSeeder {
       isDemo: true,
     );
 
+    // 3 · Làm giàu thuộc tính động — CỘNG THÊM (WTM-335 §17). Đọc lại danh mục
+    // vừa nhập rồi gắn thuộc tính theo ngành. Không xoá, không sửa sản phẩm:
+    // nếu bước này lỗi, 100 sản phẩm vẫn còn nguyên. Bọc để một lỗi ở tầng làm
+    // giàu (mới, không load-bearing) không kéo đổ cả lần nạp doanh nghiệp mẫu
+    // vốn đã thành công.
+    var enrichedProducts = 0;
+    try {
+      final report = await enricher.enrich(await products.loadAll());
+      enrichedProducts = report.enrichedProducts;
+    } on Object {
+      // Thuộc tính là lớp mô tả; thiếu nó dataset vẫn dùng được. Nuốt lỗi ở
+      // đây thay vì để nó vỡ nút "Xem thử Demo".
+      enrichedProducts = 0;
+    }
+
     return SampleBusinessReport(
       months: spec.months,
       // Đếm **sau khi ghi**, không đếm lúc xem trước: hai con số này có thể
@@ -90,6 +117,7 @@ class SampleBusinessSeeder {
       products: result.counts['products'] ?? 0,
       orders: result.counts['orders'] ?? 0,
       customers: result.counts['customers'] ?? 0,
+      enrichedProducts: enrichedProducts,
       importJobId: result.job.id,
     );
   }
@@ -144,6 +172,7 @@ class SampleBusinessReport {
     required this.orders,
     required this.customers,
     required this.importJobId,
+    this.enrichedProducts = 0,
   });
 
   final int months;
@@ -151,4 +180,8 @@ class SampleBusinessReport {
   final int orders;
   final int customers;
   final String importJobId;
+
+  /// Bao nhiêu sản phẩm được gắn thuộc tính động (WTM-335). Cộng thêm — không
+  /// bao giờ nhiều hơn [products].
+  final int enrichedProducts;
 }
