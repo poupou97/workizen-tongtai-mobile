@@ -50,6 +50,50 @@ void main() {
     );
   });
 
+  test('⭐ vai NHÌN THẤY ĐƯỢC đến từ token DS, không phải thang tông M3', () {
+    // ⚠️ Lỗi tìm thấy trên Nokia 6.1 (WTM-380): `fromSeed` **không giữ** màu
+    // hạt giống — nó sinh một thang tông và lấy một bậc tối làm `primary`, rồi
+    // nhuộm `surface` theo sắc hạt giống. Kết quả trên máy thật: hộp thoại nền
+    // **kem**, nút chính màu **nâu đất**, trong khi Design System nói cam.
+    //
+    // WTM-379 không bắt được vì nó chỉ hỏi *"primary có ở vùng cam không"* —
+    // mà nâu đất **vẫn ở vùng cam**. Đây là cửa chặt hơn: đúng token, không
+    // phải đúng vùng sắc.
+    expect(scheme.primary, TtColors.brandOnDark, reason: 'primary');
+    expect(scheme.onPrimary, TtColors.textOnBrand, reason: 'onPrimary');
+    expect(scheme.surface, TtColors.surface, reason: 'surface phải TRẮNG');
+    expect(scheme.onSurface, TtColors.textPrimary, reason: 'onSurface');
+    expect(scheme.error, TtColors.dangerOnLight, reason: 'error');
+  });
+
+  test('⛔ bề mặt nổi KHÔNG bị lớp phủ tông màu M3 nhuộm kem', () {
+    // `surfaceTint` là đúng thứ biến một thẻ trắng thành thẻ kem khi nó được
+    // nâng lên — vô hình trong test widget, rất rõ trên máy.
+    expect(tongtaiTheme.dialogTheme.backgroundColor, TtColors.surface);
+    expect(tongtaiTheme.dialogTheme.surfaceTintColor, Colors.transparent);
+    expect(tongtaiTheme.cardTheme.surfaceTintColor, Colors.transparent);
+    expect(tongtaiTheme.bottomSheetTheme.surfaceTintColor, Colors.transparent);
+    expect(tongtaiTheme.appBarTheme.surfaceTintColor, Colors.transparent);
+    expect(tongtaiTheme.popupMenuTheme.surfaceTintColor, Colors.transparent);
+  });
+
+  test('⛔ điều khiển bật/tắt mang CAM = hành động, không phải nâu', () {
+    const on = <WidgetState>{WidgetState.selected};
+    expect(
+      tongtaiTheme.switchTheme.trackColor!.resolve(on),
+      TtColors.brandOnDark,
+    );
+    expect(
+      tongtaiTheme.checkboxTheme.fillColor!.resolve(on),
+      TtColors.brandOnDark,
+    );
+    expect(
+      tongtaiTheme.radioTheme.fillColor!.resolve(on),
+      TtColors.brandOnDark,
+    );
+    expect(tongtaiTheme.progressIndicatorTheme.color, TtColors.brandOnDark);
+  });
+
   test('⛔ primary mặc định KHÔNG trùng khe ngữ nghĩa nào', () {
     // Nếu `primary` rơi trùng `success`, một hộp thoại **mặc định** sẽ ngầm nói
     // *"thành công"* — đúng lỗi WTM-375 phải dọn, chỉ khác chỗ nó nấp.
