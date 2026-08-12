@@ -186,7 +186,10 @@ class _ModeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final color = selected ? TtColors.infoOnLight : TtColors.textSecondary;
+    // ⭐ WTM-390: một lựa chọn **đã chọn** không phải *thông tin* — nó là
+    // trạng thái chọn, thuộc màu hành động. Xanh dương ở đây là di sản bảng
+    // màu năng lực cũ.
+    final color = selected ? TtColors.brandOnDark : TtColors.textSecondary;
 
     return Opacity(
       opacity: enabled ? 1 : 0.45,

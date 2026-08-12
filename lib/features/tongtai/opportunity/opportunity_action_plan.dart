@@ -27,12 +27,24 @@ List<OpportunityActionStep> opportunityActionPlan(Opportunity opportunity) {
   // **constant per rule** (WTM-193). The seller read a specific-looking target
   // that nobody had computed. Expected impact is a real number from their own
   // data, so the gate is now checkable against something true.
+  // ⚠️ WTM-390 — dư âm của WTM-384, tìm ra trên máy sau khi tưởng đã sửa xong.
+  //
+  // WTM-384 sửa nhãn trên thẻ và trong prompt AI, nhưng **bỏ sót đúng câu
+  // này**: bước cuối gọi con số là *"mức kỳ vọng"*, trong khi với luật tồn kho
+  // và luật nhóm nó là doanh thu **đã qua**. Cùng một lời hứa sai, chỉ nấp ở
+  // một cửa khác — đúng bài học *"còn cửa nào khác cùng lớp?"*.
+  //
+  // Nay câu chữ đổi theo cơ sở: quan sát thì lấy làm **mốc so**, ước tính mới
+  // được gọi là kỳ vọng.
   final impact = TongtaiFormatters.vnd(opportunity.expectedImpact);
+  final benchmark = opportunity.impactBasis.isEstimate
+      ? 'mức kỳ vọng ($impact)'
+      : 'mức 60 ngày qua ($impact)';
   return [
     ...steps,
     OpportunityActionStep(
       'Quyết định scale',
-      'Nếu lợi nhuận thực tiến gần mức kỳ vọng ($impact) thì nhân rộng, '
+      'Nếu lợi nhuận thực tiễn gần $benchmark thì nhân rộng, '
           'ngược lại dừng và rút kinh nghiệm.',
     ),
   ];

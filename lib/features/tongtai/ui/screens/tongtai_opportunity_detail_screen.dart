@@ -343,11 +343,17 @@ class _TongtaiOpportunityDetailScreenState
                 if (_explaining)
                   const TongtaiInlineBusy()
                 else if (_insight == null)
-                  OutlinedButton.icon(
+                  // ⭐ WTM-390: `OutlinedButton` không khai màu ⇒ ăn
+                  // `colorScheme.primary` = **cam**, và nó ngồi giữa một thẻ
+                  // AI tím. Hỏi AI là AI semantics ⇒ nút tím nhạt, đúng luật
+                  // Founder chốt 2026-08-12: *"AI color chỉ cho AI semantics"*.
+                  //
+                  // Trước WTM-380 nó màu nâu — tức sai từ trước, WTM-380 chỉ
+                  // đổi sắc chứ không đẻ ra lỗi này.
+                  TtAiActionButton(
                     key: const Key('opportunity-ai-explain'),
+                    label: context.l10n.aiInsight,
                     onPressed: _runExplain,
-                    icon: const Icon(Icons.auto_awesome, size: 16),
-                    label: Text(context.l10n.aiInsight),
                   )
                 else
                   Text(
