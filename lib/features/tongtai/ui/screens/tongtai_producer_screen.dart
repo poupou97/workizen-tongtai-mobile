@@ -39,7 +39,14 @@ class TongtaiProducerScreen extends ConsumerStatefulWidget {
 }
 
 class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
-  static const _green = TtColors.success;
+  /// ⚠️ WTM-383: màn này từng thuộc bảng màu *"producer = xanh lá"*, nên
+  /// `_green` sơn cả hộp **"Tóm tắt AI"** lẫn sáu chip **"Năng lực AI"**. Trong
+  /// khi thẻ AI ở Trang chủ là **tím** — tức là trong cùng một app, *"Tổng Tài
+  /// đang nói"* có hai màu.
+  ///
+  /// AI nay đi bằng [TtColors.ai]; xanh lá chỉ còn ở nơi nó **thật sự** nói
+  /// *"kết quả tích cực"*.
+  static const _ai = TtColors.ai;
 
   /// Both sources behind this tab load together (WTM-148): if either the
   /// favourites store or the opportunity generator throws, the tab says so
@@ -174,9 +181,9 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: TtColors.successSoft,
+                      color: TtColors.aiSoft,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: _green),
+                      border: Border.all(color: _ai),
                     ),
                     child: Text(
                       l10n.producerSummaryLine(
@@ -184,7 +191,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
                         favorites.length,
                       ),
                       key: const Key('producer-summary-line'),
-                      style: const TextStyle(fontSize: 14, color: _green),
+                      style: const TextStyle(fontSize: 14, color: _ai),
                     ),
                   ),
                 ],
@@ -245,12 +252,12 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _CapabilityPill(label: l10n.producerCapScoring, color: _green),
-              _CapabilityPill(label: l10n.producerCapRanking, color: _green),
-              _CapabilityPill(label: l10n.producerCapTrends, color: _green),
-              _CapabilityPill(label: l10n.producerCapPrice, color: _green),
-              _CapabilityPill(label: l10n.producerCapQuality, color: _green),
-              _CapabilityPill(label: l10n.producerCapDelivery, color: _green),
+              _CapabilityPill(label: l10n.producerCapScoring, color: _ai),
+              _CapabilityPill(label: l10n.producerCapRanking, color: _ai),
+              _CapabilityPill(label: l10n.producerCapTrends, color: _ai),
+              _CapabilityPill(label: l10n.producerCapPrice, color: _ai),
+              _CapabilityPill(label: l10n.producerCapQuality, color: _ai),
+              _CapabilityPill(label: l10n.producerCapDelivery, color: _ai),
             ],
           ),
           const SizedBox(height: 24),
@@ -307,10 +314,13 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
               Text(
                 '${favorites.length}',
                 key: const Key('producer-fav-count'),
+                // Con số là một **sự thật**, không phải một phán quyết. Xanh
+                // lá ở đây từng làm "0 nhà cung cấp yêu thích" trông như tin
+                // tốt (XÁM ≠ XANH).
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: _green,
+                  color: TtColors.textPrimary,
                 ),
               ),
             ],
@@ -341,7 +351,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
                       trailing: const Icon(
                         Icons.favorite,
                         size: 16,
-                        color: _green,
+                        color: TtColors.brandOnDark,
                       ),
                     ),
                   Align(

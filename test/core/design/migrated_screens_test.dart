@@ -181,6 +181,46 @@ void main() {
     }
   });
 
+  test('⛔ thứ có nhãn AI phải mang màu AI (WTM-383)', () {
+    // ⚠️ Lỗi tìm thấy trên Nokia 6.1: hộp **"Tóm tắt AI"** và sáu chip
+    // **"Năng lực AI"** của màn Nguồn hàng mang màu **xanh lá**, trong khi thẻ
+    // AI ở Trang chủ là **tím**. Cùng một app, *"Tổng Tài đang nói"* có hai
+    // màu — và người bán đọc màu trước khi đọc chữ (bài học WTM-340).
+    //
+    // Di sản của bảng màu *"producer = xanh lá"*: một hằng `_green` sơn tám
+    // chỗ, trong đó có hai khối AI.
+    //
+    // Cửa này bắt theo **nhãn**: chỗ nào lấy chữ từ một khoá l10n mang `Ai`
+    // thì **cả khối** dưới nhãn đó không được mang màu ngữ nghĩa của thứ khác.
+    //
+    // Cửa sổ tiến phải đủ dài để phủ hết khối, không chỉ dòng tiêu đề: sáu chip
+    // "Năng lực AI" nằm cách tiêu đề của chúng **644 ký tự**. Bản đầu của test
+    // này lấy 200 và **không bắt được** khi cố tình gieo lại một chip xanh lá —
+    // sai đúng kiểu PASS giả mà repo này cấm.
+    final aiLabel = RegExp(r'l10n\.[a-z]+Ai[A-Z][A-Za-z]*');
+    final wrongColour = RegExp(
+      r'TtColors\.(success|successSoft|successOnLight|warning|warningSoft|'
+      r'warningOnDark|info|infoSoft|infoOnLight)\b',
+    );
+    for (final f in uiFiles()) {
+      final code = codeOf(f);
+      for (final m in aiLabel.allMatches(code)) {
+        // Cửa sổ hai chiều: màu thường đứng ngay trước nhãn (decoration) hoặc
+        // ngay sau (style).
+        final from = (m.start - 260).clamp(0, code.length);
+        final to = (m.end + 900).clamp(0, code.length);
+        final hit = wrongColour.firstMatch(code.substring(from, to));
+        expect(
+          hit,
+          isNull,
+          reason:
+              '${nameOf(f)} sơn "${m.group(0)}" bằng ${hit?.group(0)} — nhãn '
+              'nói AI thì màu phải nói AI (TtColors.ai / TtAiCard)',
+        );
+      }
+    }
+  });
+
   group('⭐ `readableOn` với đối số cố định — dùng HẰNG, không gọi hàm', () {
     // ⚠️ Lỗi đã xảy ra thật (WTM-374): phép thay sinh ra
     // `TtColors.readableOn(TtColors.danger)` bên trong một widget `const`, và
