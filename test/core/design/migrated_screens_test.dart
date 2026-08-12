@@ -150,6 +150,37 @@ void main() {
     }
   });
 
+  test('⛔ nút NỔI cũng không mượn màu ngữ nghĩa (WTM-382)', () {
+    // ⚠️ Lỗi tìm thấy trên Nokia 6.1: **bảy màn có FAB, mang bốn màu khác
+    // nhau** — xanh dương ở Tạo đơn/Khách, **tím** ở Tài chính và Mục tiêu, hổ
+    // phách ở Kho. *"Thêm giao dịch"* màu tím nói AI đang ghi giao dịch.
+    //
+    // Cùng họ với WTM-374 (nút `Lưu` mang năm màu), chỉ khác chỗ nấp. Test cũ
+    // chỉ quét `FilledButton.styleFrom`, nên FAB đi lọt.
+    final stolen = RegExp(
+      r'backgroundColor:\s*TtColors\.'
+      r'(ai|aiOnLight|info|infoOnLight|success|successOnLight|warning|'
+      r'warningOnDark|danger|dangerOnLight)\b',
+    );
+    for (final f in uiFiles()) {
+      final code = codeOf(f);
+      for (var i = 0; i < code.length;) {
+        final at = code.indexOf('floatingActionButton', i);
+        if (at < 0) break;
+        final block = code.substring(at, (at + 420).clamp(0, code.length));
+        final hit = stolen.firstMatch(block);
+        expect(
+          hit,
+          isNull,
+          reason:
+              '${nameOf(f)} sơn FAB bằng ${hit?.group(0)} — thêm một bản ghi là '
+              'HÀNH ĐỘNG, dùng TtFab.background',
+        );
+        i = at + 1;
+      }
+    }
+  });
+
   group('⭐ `readableOn` với đối số cố định — dùng HẰNG, không gọi hàm', () {
     // ⚠️ Lỗi đã xảy ra thật (WTM-374): phép thay sinh ra
     // `TtColors.readableOn(TtColors.danger)` bên trong một widget `const`, và

@@ -188,8 +188,8 @@ class _TongtaiGoalsScreenState extends ConsumerState<TongtaiGoalsScreen> {
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('goals-action-new'),
             onPressed: () => _openForm(context),
-            backgroundColor: TtColors.aiOnLight,
-            foregroundColor: Colors.white,
+            backgroundColor: TtFab.background,
+            foregroundColor: TtFab.foreground,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.goalNew),
           ),

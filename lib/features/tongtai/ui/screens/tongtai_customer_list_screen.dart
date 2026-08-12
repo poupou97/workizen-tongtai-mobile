@@ -242,8 +242,8 @@ class _TongtaiCustomerListScreenState
           floatingActionButton: FloatingActionButton.extended(
             key: const Key('customer-action-add'),
             onPressed: () => _openForm(context),
-            backgroundColor: TtColors.infoOnLight,
-            foregroundColor: Colors.white,
+            backgroundColor: TtFab.background,
+            foregroundColor: TtFab.foreground,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.custAdd),
           ),

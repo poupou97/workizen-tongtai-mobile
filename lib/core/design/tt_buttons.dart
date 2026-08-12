@@ -85,6 +85,31 @@ class TtPrimaryButton extends StatelessWidget {
   }
 }
 
+/// Nút **nổi** để thêm một bản ghi: *"Thêm sản phẩm"* · *"Thêm giao dịch"*.
+///
+/// ## ⚠️ Vì sao nó phải nằm ở đây
+///
+/// Lỗi tìm thấy trên Nokia 6.1 (WTM-382): **bảy màn có FAB, và nó mang bốn màu
+/// khác nhau** — xanh dương ở Tạo đơn/Khách, **tím** ở Tài chính và Mục tiêu,
+/// hổ phách ở Kho.
+///
+/// *"Thêm giao dịch"* màu tím nói **AI đang ghi giao dịch**, trong khi người
+/// bán mới là người ghi. Đúng lỗi WTM-374 đã dọn cho nút `Lưu`, chỉ khác chỗ
+/// nấp: nút nổi.
+///
+/// Thêm một bản ghi là **HÀNH ĐỘNG** ⇒ cam. Một chỗ khai, bảy màn theo.
+///
+/// [scrollPadding] là chiều cao cần chừa dưới đáy danh sách để mục cuối cuộn
+/// ra khỏi vùng FAB che. Trên máy cao không ai thấy vấn đề; trên Nokia vùng
+/// danh sách chỉ còn một hai dòng và FAB che đúng vào đó.
+abstract final class TtFab {
+  static const Color background = TtColors.brandOnDark;
+  static const Color foreground = TtColors.textOnBrand;
+
+  /// 56 (chiều cao FAB) + 16×2 (lề nổi) — chừa đủ cho mục cuối thoát ra.
+  static const double scrollPadding = 88;
+}
+
 /// Việc **phá huỷ, không lùi được**: *"Thay thế toàn bộ dữ liệu"*.
 ///
 /// Đây là loại duy nhất được mang màu ngữ nghĩa, vì ở đây màu **chính là** điều
