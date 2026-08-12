@@ -897,6 +897,10 @@ abstract class AppStrings {
   String get forecastRuleBased;
 
   // ── Tổng kết tuần (WTM-377 · Epic WTM-179) ──────────────────────────────
+  /// *"114 sản phẩm"* — WTM-382. Trước đó là chuỗi tiếng Anh viết thẳng trong
+  /// màn Kho, và nó hiện ra trên máy người bán.
+  String invProductCount(int count);
+
   String get titleWeeklyReview;
   String get weeklyReviewSubtitle;
   String get weeklyReviewRange;
@@ -2814,6 +2818,9 @@ class AppStringsVi extends AppStrings {
   String get forecastWhy => 'Vì sao';
   @override
   String get forecastRuleBased => 'Quy tắc (không cần AI)';
+
+  @override
+  String invProductCount(int count) => '$count sản phẩm';
 
   @override
   String get titleWeeklyReview => 'Tổng kết tuần';
@@ -4929,6 +4936,10 @@ class AppStringsEn extends AppStrings {
   String get forecastWhy => 'Why';
   @override
   String get forecastRuleBased => 'Rule-based (no AI needed)';
+
+  @override
+  String invProductCount(int count) =>
+      count == 1 ? '1 product' : '$count products';
 
   @override
   String get titleWeeklyReview => 'Weekly review';

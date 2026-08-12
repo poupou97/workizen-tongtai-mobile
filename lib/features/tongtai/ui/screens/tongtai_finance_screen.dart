@@ -130,8 +130,8 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
             onPressed: _addTransaction,
             // White label on violet-500 reads at 4.23:1 — near miss, still a
             // miss (WTM-169).
-            backgroundColor: TtColors.aiOnLight,
-            foregroundColor: Colors.white,
+            backgroundColor: TtFab.background,
+            foregroundColor: TtFab.foreground,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.titleTransactionForm),
           ),

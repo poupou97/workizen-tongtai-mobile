@@ -171,8 +171,8 @@ class _TongtaiInventoryScreenState
             onPressed: () => _openForm(context),
             // White label on amber-500 reads at 2.15:1 — the worst pairing
             // in the palette. Same hue, deep enough to read (WTM-169).
-            backgroundColor: TtColors.warningOnDark,
-            foregroundColor: Colors.white,
+            backgroundColor: TtFab.background,
+            foregroundColor: TtFab.foreground,
             icon: const Icon(Icons.add),
             label: Text(context.l10n.invAdd),
           ),
@@ -840,7 +840,7 @@ class _ResultsHeader extends StatelessWidget {
         TtSpace.x2,
       ),
       child: Text(
-        count == 1 ? '1 product' : '$count products',
+        context.l10n.invProductCount(count),
         key: const Key('inventory-count-badge'),
         style: TtType.body.copyWith(color: TtColors.textSecondary),
       ),
@@ -857,7 +857,15 @@ class _ProductList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(TtSpace.x4, 0, TtSpace.x4, TtSpace.x4),
+      // ⚠️ WTM-382: chừa chiều cao FAB dưới đáy. Trên Nokia 6.1 (731 dp) vùng
+      // danh sách chỉ còn một hai dòng sau ô tìm kiếm + hai hàng bộ lọc, và
+      // FAB nổi che đúng vào đó. Trên máy cao thì không ai thấy vấn đề.
+      padding: const EdgeInsets.fromLTRB(
+        TtSpace.x4,
+        0,
+        TtSpace.x4,
+        TtFab.scrollPadding,
+      ),
       itemCount: products.length,
       separatorBuilder: (context, _) => const SizedBox(height: TtSpace.x3),
       itemBuilder: (context, index) => _ProductRow(

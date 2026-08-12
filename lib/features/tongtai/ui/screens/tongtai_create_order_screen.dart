@@ -189,8 +189,8 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('create-order-add-item'),
         onPressed: _addItem,
-        backgroundColor: TtColors.infoOnLight,
-        foregroundColor: Colors.white,
+        backgroundColor: TtFab.background,
+        foregroundColor: TtFab.foreground,
         icon: const Icon(Icons.add),
         label: Text(context.l10n.orderAddItem),
       ),
