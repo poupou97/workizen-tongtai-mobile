@@ -73,6 +73,7 @@ void main() {
     title: 'Nhập lại Quạt mini (đã hết hàng)',
     description: 'Bán chạy nhưng đã hết hàng.',
     expectedImpact: 800000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: OpportunityScore.fixed(85),
     discoveredAt: DateTime(2026, 7, 29),
   );

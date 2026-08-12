@@ -31,6 +31,7 @@ void main() {
     title: 'Quạt tích điện sắp vào mùa nóng',
     description: 'Nhu cầu quạt tích điện tăng mạnh khi vào hè.',
     expectedImpact: 5200000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: OpportunityScore.fixed(92),
     discoveredAt: DateTime(2026, 7, 18),
   );

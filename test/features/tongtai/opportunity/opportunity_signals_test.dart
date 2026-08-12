@@ -20,6 +20,7 @@ void main() {
     title: 't',
     description: 'd',
     expectedImpact: impact,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: OpportunityScore.fixed(50),
     discoveredAt: discoveredAt ?? DateTime(2026, 7, 24),
     reaction: reaction,

@@ -71,6 +71,7 @@ void main() {
           title: 'Đồ gia dụng mini',
           description: 'd',
           expectedImpact: 1000000,
+          impactBasis: OpportunityImpactBasis.estimatedGain,
           score: OpportunityScore.fixed(81),
           discoveredAt: DateTime(2026, 6, 20),
         ),
