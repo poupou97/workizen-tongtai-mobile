@@ -127,6 +127,15 @@ class BackupDatasets {
   static const String supplierQuotes = 'supplierQuotes';
   static const String importJobs = 'importJobs';
 
+  /// Tầng thuộc tính động (WTM-334). **Optional on purpose** — mọi `.ttbk`
+  /// phát hành trước v27 đều không có bốn dataset này, và chúng phải restore
+  /// được. Bốn dataset riêng chứ không gộp: mỗi bảng có khoá ngoại riêng, nên
+  /// khôi phục phải theo thứ tự cha-trước-con.
+  static const String attributeDefinitions = 'attributeDefinitions';
+  static const String attributeValues = 'attributeValues';
+  static const String attributeGroups = 'attributeGroups';
+  static const String attributeGroupItems = 'attributeGroupItems';
+
   /// Every dataset a v2 backup must carry. A file missing any of these is
   /// **not** a complete snapshot and is rejected rather than partially applied.
   ///
@@ -158,6 +167,10 @@ class BackupDatasets {
     productVariants,
     supplierQuotes,
     importJobs,
+    attributeDefinitions,
+    attributeValues,
+    attributeGroups,
+    attributeGroupItems,
   ];
 }
 

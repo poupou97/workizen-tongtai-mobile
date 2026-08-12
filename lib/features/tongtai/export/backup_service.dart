@@ -14,6 +14,8 @@ import '../journey/journey.dart';
 import '../journey/journey_repository.dart';
 import '../commerce/commerce_models.dart';
 import '../commerce/commerce_repository.dart';
+import '../commerce/attributes/attribute_models.dart';
+import '../commerce/attributes/attribute_repository.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_repository.dart';
 import '../finance/finance_repository.dart';
@@ -70,6 +72,7 @@ class TongtaiBackupRepositories {
     this.opportunityReactions,
     this.businessInputs,
     this.commerce,
+    this.attributes,
   });
 
   /// Needed for the single transaction that makes Replace atomic — the one
@@ -104,6 +107,11 @@ class TongtaiBackupRepositories {
   /// Miền thương mại chuẩn hoá (WTM-327). Nullable như [businessInputs]:
   /// `null` nghĩa là phần này không được sao lưu và không được khôi phục.
   final CommerceRepository? commerce;
+
+  /// Tầng thuộc tính động (WTM-334). Nullable như [commerce]: `null` nghĩa là
+  /// bốn dataset thuộc tính không được sao lưu và không được khôi phục — và mọi
+  /// `.ttbk` phát hành trước v27 đúng là không có chúng.
+  final AttributeRepository? attributes;
 }
 
 /// The decoded, type-checked contents of a backup.
@@ -123,6 +131,10 @@ class BackupContents {
     this.productVariants = const [],
     this.supplierQuotes = const [],
     this.importJobs = const [],
+    this.attributeDefinitions = const [],
+    this.attributeValues = const [],
+    this.attributeGroups = const [],
+    this.attributeGroupItems = const [],
   });
 
   final List<Customer> customers;
@@ -152,6 +164,13 @@ class BackupContents {
   final List<ProductVariant> productVariants;
   final List<SupplierQuote> supplierQuotes;
   final List<ImportJob> importJobs;
+
+  /// Tầng thuộc tính động (WTM-334). Rỗng nghĩa là gói không mang phần này —
+  /// hoặc nó phát hành trước v27, hoặc doanh nghiệp chưa tạo thuộc tính nào.
+  final List<AttributeDefinition> attributeDefinitions;
+  final List<AttributeValue> attributeValues;
+  final List<AttributeGroup> attributeGroups;
+  final List<AttributeGroupItem> attributeGroupItems;
 
   Map<String, int> get counts => {
     BackupDatasets.customers: customers.length,
@@ -433,6 +452,26 @@ class TongtaiBackupService {
           BackupDatasets.importJobs: [
             for (final j in contents.importJobs) BackupCodec.encodeImportJob(j),
           ],
+        if (contents.attributeDefinitions.isNotEmpty)
+          BackupDatasets.attributeDefinitions: [
+            for (final d in contents.attributeDefinitions)
+              BackupCodec.encodeAttributeDefinition(d),
+          ],
+        if (contents.attributeValues.isNotEmpty)
+          BackupDatasets.attributeValues: [
+            for (final v in contents.attributeValues)
+              BackupCodec.encodeAttributeValue(v),
+          ],
+        if (contents.attributeGroups.isNotEmpty)
+          BackupDatasets.attributeGroups: [
+            for (final g in contents.attributeGroups)
+              BackupCodec.encodeAttributeGroup(g),
+          ],
+        if (contents.attributeGroupItems.isNotEmpty)
+          BackupDatasets.attributeGroupItems: [
+            for (final i in contents.attributeGroupItems)
+              BackupCodec.encodeAttributeGroupItem(i),
+          ],
         BackupDatasets.favourites: [
           for (final f in contents.favourites) BackupCodec.encodeFavourite(f),
         ],
@@ -470,6 +509,12 @@ class TongtaiBackupService {
         if (contents.productVariants.isNotEmpty) BackupDatasets.productVariants,
         if (contents.supplierQuotes.isNotEmpty) BackupDatasets.supplierQuotes,
         if (contents.importJobs.isNotEmpty) BackupDatasets.importJobs,
+        if (contents.attributeDefinitions.isNotEmpty)
+          BackupDatasets.attributeDefinitions,
+        if (contents.attributeValues.isNotEmpty) BackupDatasets.attributeValues,
+        if (contents.attributeGroups.isNotEmpty) BackupDatasets.attributeGroups,
+        if (contents.attributeGroupItems.isNotEmpty)
+          BackupDatasets.attributeGroupItems,
       ],
       redaction: BackupRedaction.none,
     );
@@ -491,6 +536,12 @@ class TongtaiBackupService {
     productVariants: await repositories.commerce?.loadVariants() ?? const [],
     supplierQuotes: await repositories.commerce?.loadQuotes() ?? const [],
     importJobs: await repositories.commerce?.loadImportJobs() ?? const [],
+    attributeDefinitions:
+        await repositories.attributes?.loadAllDefinitions() ?? const [],
+    attributeValues: await repositories.attributes?.loadAllValues() ?? const [],
+    attributeGroups: await repositories.attributes?.loadAllGroups() ?? const [],
+    attributeGroupItems:
+        await repositories.attributes?.loadAllGroupItems() ?? const [],
   );
 
   // ── validate ─────────────────────────────────────────────────────────────
@@ -755,6 +806,34 @@ class TongtaiBackupService {
                 const <Map<String, Object?>>[])
           ?BackupCodec.decodeImportJob(raw),
       ],
+      // Optional dataset (WTM-334): absent là bình thường — mọi file phát hành
+      // trước v27 đều không có bốn dataset này, và chúng phải restore được. Một
+      // dòng không đọc được bị BỎ (mã kiểu lạ chẳng hạn) chứ không làm hỏng cả
+      // gói: mất một thuộc tính spec không được kéo theo mất đơn hàng.
+      attributeDefinitions: [
+        for (final raw
+            in payload.datasets[BackupDatasets.attributeDefinitions] ??
+                const <Map<String, Object?>>[])
+          ?BackupCodec.decodeAttributeDefinition(raw),
+      ],
+      attributeValues: [
+        for (final raw
+            in payload.datasets[BackupDatasets.attributeValues] ??
+                const <Map<String, Object?>>[])
+          ?BackupCodec.decodeAttributeValue(raw),
+      ],
+      attributeGroups: [
+        for (final raw
+            in payload.datasets[BackupDatasets.attributeGroups] ??
+                const <Map<String, Object?>>[])
+          ?BackupCodec.decodeAttributeGroup(raw),
+      ],
+      attributeGroupItems: [
+        for (final raw
+            in payload.datasets[BackupDatasets.attributeGroupItems] ??
+                const <Map<String, Object?>>[])
+          ?BackupCodec.decodeAttributeGroupItem(raw),
+      ],
     );
   }
 
@@ -864,6 +943,7 @@ class TongtaiBackupService {
         await repositories.opportunityReactions?.deleteAll();
         await repositories.businessInputs?.deleteAll();
         await repositories.commerce?.deleteAll();
+        await repositories.attributes?.deleteAll();
 
         // …and back in dependency order: a customer must exist before an order
         // may reference it.
@@ -889,6 +969,15 @@ class TongtaiBackupService {
         }
         await repositories.commerce?.upsertVariants(contents.productVariants);
         await repositories.commerce?.upsertQuotes(contents.supplierQuotes);
+        // Thuộc tính động — cha trước con (restoreAll tự xếp thứ tự). Không có
+        // khoá ngoại tới products, nên vị trí so với products không quan trọng;
+        // xếp sau miền thương mại chỉ cho dễ đọc.
+        await repositories.attributes?.restoreAll(
+          groups: contents.attributeGroups,
+          definitions: contents.attributeDefinitions,
+          values: contents.attributeValues,
+          groupItems: contents.attributeGroupItems,
+        );
         await repositories.opportunityReactions?.replaceAll(
           contents.opportunityReactions,
         );

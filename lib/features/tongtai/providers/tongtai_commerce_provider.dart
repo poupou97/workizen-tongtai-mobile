@@ -8,6 +8,7 @@ import '../commerce/commerce_opportunity_service.dart';
 import '../commerce/commerce_profit.dart';
 import '../commerce/supplier_comparison.dart';
 import '../commerce/commerce_repository.dart';
+import '../commerce/attributes/attribute_repository.dart';
 import '../commerce/import/commerce_import.dart';
 import '../commerce/import/commerce_importer.dart';
 import '../commerce/import/xlsx_commerce_source.dart';
@@ -24,6 +25,14 @@ import 'tongtai_orders_provider.dart';
 /// Riverpod-only (ADR-TON-002).
 final commerceRepositoryProvider = Provider<CommerceRepository>(
   (ref) => CommerceRepository(ref.watch(tongtaiDatabaseProvider)),
+);
+
+/// **Tầng thuộc tính động (DYNAMIC)** — WTM-334 (Epic WTM-324).
+///
+/// Riverpod-only (ADR-TON-002). Đọc từ CÙNG một database provider như phần còn
+/// lại của app, nên backup không bao giờ đọc từ một database khác.
+final attributeRepositoryProvider = Provider<AttributeRepository>(
+  (ref) => AttributeRepository(ref.watch(tongtaiDatabaseProvider)),
 );
 
 /// Đối soát — WTM-231 dựng miền nhưng chưa có provider nào, nên nó chưa có

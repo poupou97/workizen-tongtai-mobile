@@ -569,4 +569,108 @@ void main() {
     expect(customers, hasLength(1), reason: 'không mất dòng nào');
     expect(tasks, isEmpty);
   });
+  test(
+    'v26 CÓ DỮ LIỆU → v27: bốn bảng thuộc tính + chỉ mục UNIQUE, không mất gì',
+    () async {
+      // WTM-334 — tầng thuộc tính động, thuần thêm bốn bảng. Bài học WTM-227:
+      // chuỗi nâng cấp phải chạy trên DB CÓ DÒNG, không chỉ trên DB mới tạo.
+      final dir = await Directory.systemTemp.createTemp('tongtai_upgrade27');
+      final file = File('${dir.path}/t.sqlite');
+      addTearDown(() => dir.delete(recursive: true));
+
+      var raw = NativeDatabase(file);
+      var db = AppDatabase.forExecutor(raw);
+      await const LocalWorkspace().ensureBusinessId(db);
+      const businessId = LocalWorkspace.localBusinessId;
+
+      // Hạ về hình dạng v26-trừ-bốn: xoá đúng bốn bảng v27 thêm vào. `PRAGMA
+      // foreign_keys` đang BẬT (beforeOpen), nên xoá bảng CHA trước khi xoá con
+      // để lại tham chiếu khoá ngoại treo — xoá con trước.
+      for (final t in [
+        'attribute_group_items_table',
+        'attribute_values_table',
+        'attribute_definitions_table',
+        'attribute_groups_table',
+      ]) {
+        await db.customStatement('DROP TABLE IF EXISTS $t');
+      }
+      await db.customStatement(
+        "INSERT INTO products_table (id, business_id, sku, name, list_price, "
+        "updated_at, created_at) "
+        "VALUES ('p1', '$businessId', 'SKU-1', 'Loa bluetooth', 450000, 1, 1)",
+      );
+      await db.customStatement('PRAGMA user_version = 26');
+
+      // Chống PASS GIẢ: chứng minh điểm xuất phát đúng là v26.
+      final before = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'table' "
+            "AND name LIKE 'attribute_%'",
+          )
+          .get();
+      expect(
+        before,
+        isEmpty,
+        reason:
+            'bốn bảng thuộc tính không tồn tại ở v26 — migration phải tạo ra',
+      );
+      await db.close();
+
+      // Mở lại ⇒ v27 chạy thật.
+      raw = NativeDatabase(file);
+      db = AppDatabase.forExecutor(raw);
+      final version = await db.customSelect('PRAGMA user_version').getSingle();
+      final tables =
+          (await db
+                  .customSelect(
+                    "SELECT name FROM sqlite_master WHERE type = 'table' "
+                    "AND name LIKE 'attribute_%' ORDER BY name",
+                  )
+                  .get())
+              .map((r) => r.read<String>('name'))
+              .toSet();
+      final indexes =
+          (await db
+                  .customSelect(
+                    "SELECT name FROM sqlite_master WHERE type = 'index' "
+                    "AND name NOT LIKE 'sqlite_autoindex%'",
+                  )
+                  .get())
+              .map((r) => r.read<String>('name'))
+              .toSet();
+      final products = await db.select(db.productsTable).get();
+      final definitions = await db.select(db.attributeDefinitionsTable).get();
+      await db.close();
+
+      expect(version.read<int>('user_version'), kTongtaiSchemaVersion);
+      expect(
+        tables,
+        containsAll([
+          'attribute_definitions_table',
+          'attribute_groups_table',
+          'attribute_values_table',
+          'attribute_group_items_table',
+        ]),
+      );
+      // ⭐ Chỉ mục UNIQUE phải có mặt — không chỉ bảng. `createTable` không tạo
+      // chỉ mục (P-32); mất `attribute_definitions_code` là mất luật "trùng code
+      // trong cùng scope ⇒ chặn" trên máy nâng cấp.
+      expect(
+        indexes,
+        containsAll([
+          'attribute_definitions_code',
+          'attribute_groups_code',
+          'attribute_values_unique',
+          'attribute_group_items_unique',
+        ]),
+      );
+      expect(
+        products,
+        hasLength(1),
+        reason: 'nâng cấp không được làm mất sản phẩm',
+      );
+      expect(products.single.name, 'Loa bluetooth');
+      expect(definitions, isEmpty, reason: 'bảng mới, chưa ai tạo thuộc tính');
+    },
+  );
 }
