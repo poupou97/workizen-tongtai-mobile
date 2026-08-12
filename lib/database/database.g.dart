@@ -25137,6 +25137,2092 @@ class DemoEventsTableCompanion extends UpdateCompanion<DemoEventsTableData> {
   }
 }
 
+class $AttributeDefinitionsTableTable extends AttributeDefinitionsTable
+    with
+        TableInfo<
+          $AttributeDefinitionsTableTable,
+          AttributeDefinitionsTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AttributeDefinitionsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scopeCodeMeta = const VerificationMeta(
+    'scopeCode',
+  );
+  @override
+  late final GeneratedColumn<String> scopeCode = GeneratedColumn<String>(
+    'scope_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vendorNameMeta = const VerificationMeta(
+    'vendorName',
+  );
+  @override
+  late final GeneratedColumn<String> vendorName = GeneratedColumn<String>(
+    'vendor_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _typeCodeMeta = const VerificationMeta(
+    'typeCode',
+  );
+  @override
+  late final GeneratedColumn<String> typeCode = GeneratedColumn<String>(
+    'type_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _enumOptionsMeta = const VerificationMeta(
+    'enumOptions',
+  );
+  @override
+  late final GeneratedColumn<String> enumOptions = GeneratedColumn<String>(
+    'enum_options',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: Constant(DateTime.now()),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: Constant(DateTime.now()),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    code,
+    scopeCode,
+    vendorName,
+    typeCode,
+    label,
+    unit,
+    enumOptions,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'attribute_definitions_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AttributeDefinitionsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codeMeta);
+    }
+    if (data.containsKey('scope_code')) {
+      context.handle(
+        _scopeCodeMeta,
+        scopeCode.isAcceptableOrUnknown(data['scope_code']!, _scopeCodeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scopeCodeMeta);
+    }
+    if (data.containsKey('vendor_name')) {
+      context.handle(
+        _vendorNameMeta,
+        vendorName.isAcceptableOrUnknown(data['vendor_name']!, _vendorNameMeta),
+      );
+    }
+    if (data.containsKey('type_code')) {
+      context.handle(
+        _typeCodeMeta,
+        typeCode.isAcceptableOrUnknown(data['type_code']!, _typeCodeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeCodeMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    }
+    if (data.containsKey('enum_options')) {
+      context.handle(
+        _enumOptionsMeta,
+        enumOptions.isAcceptableOrUnknown(
+          data['enum_options']!,
+          _enumOptionsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AttributeDefinitionsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AttributeDefinitionsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      scopeCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_code'],
+      )!,
+      vendorName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vendor_name'],
+      ),
+      typeCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type_code'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      ),
+      enumOptions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}enum_options'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AttributeDefinitionsTableTable createAlias(String alias) {
+    return $AttributeDefinitionsTableTable(attachedDatabase, alias);
+  }
+}
+
+class AttributeDefinitionsTableData extends DataClass
+    implements Insertable<AttributeDefinitionsTableData> {
+  final String id;
+  final String businessId;
+
+  /// Fully-namespaced canonical code — `system.*` / `user.*` /
+  /// `vendor.<name>.*`. Unique per business.
+  final String code;
+
+  /// The namespace root — canonical `AttributeScope` code (`system` / `user` /
+  /// `vendor`). Stored so scans and the "user may not override system"
+  /// governance rule do not have to re-parse `code` on every row.
+  final String scopeCode;
+
+  /// Vendor slug when [scopeCode] is `vendor`; `null` otherwise.
+  final String? vendorName;
+
+  /// One of nine canonical `AttributeType` codes (TEXT · INTEGER · DECIMAL ·
+  /// BOOLEAN · DATE · DATETIME · ENUM · MULTI_ENUM · URL).
+  final String typeCode;
+
+  /// Human label shown on the detail screen. Display only.
+  final String label;
+
+  /// Unit of measure for a numeric attribute (`W`, `V`, `months`…); `null`
+  /// when the type has no unit. `null` ≠ empty string.
+  final String? unit;
+
+  /// Allowed option codes for `ENUM` / `MULTI_ENUM`, as a JSON string array.
+  /// `null` for every other type. This is bounded metadata of the definition,
+  /// not an arbitrary-JSON *value*.
+  final String? enumOptions;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const AttributeDefinitionsTableData({
+    required this.id,
+    required this.businessId,
+    required this.code,
+    required this.scopeCode,
+    this.vendorName,
+    required this.typeCode,
+    required this.label,
+    this.unit,
+    this.enumOptions,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['code'] = Variable<String>(code);
+    map['scope_code'] = Variable<String>(scopeCode);
+    if (!nullToAbsent || vendorName != null) {
+      map['vendor_name'] = Variable<String>(vendorName);
+    }
+    map['type_code'] = Variable<String>(typeCode);
+    map['label'] = Variable<String>(label);
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
+    }
+    if (!nullToAbsent || enumOptions != null) {
+      map['enum_options'] = Variable<String>(enumOptions);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AttributeDefinitionsTableCompanion toCompanion(bool nullToAbsent) {
+    return AttributeDefinitionsTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      code: Value(code),
+      scopeCode: Value(scopeCode),
+      vendorName: vendorName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vendorName),
+      typeCode: Value(typeCode),
+      label: Value(label),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      enumOptions: enumOptions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(enumOptions),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AttributeDefinitionsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AttributeDefinitionsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      code: serializer.fromJson<String>(json['code']),
+      scopeCode: serializer.fromJson<String>(json['scopeCode']),
+      vendorName: serializer.fromJson<String?>(json['vendorName']),
+      typeCode: serializer.fromJson<String>(json['typeCode']),
+      label: serializer.fromJson<String>(json['label']),
+      unit: serializer.fromJson<String?>(json['unit']),
+      enumOptions: serializer.fromJson<String?>(json['enumOptions']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'code': serializer.toJson<String>(code),
+      'scopeCode': serializer.toJson<String>(scopeCode),
+      'vendorName': serializer.toJson<String?>(vendorName),
+      'typeCode': serializer.toJson<String>(typeCode),
+      'label': serializer.toJson<String>(label),
+      'unit': serializer.toJson<String?>(unit),
+      'enumOptions': serializer.toJson<String?>(enumOptions),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AttributeDefinitionsTableData copyWith({
+    String? id,
+    String? businessId,
+    String? code,
+    String? scopeCode,
+    Value<String?> vendorName = const Value.absent(),
+    String? typeCode,
+    String? label,
+    Value<String?> unit = const Value.absent(),
+    Value<String?> enumOptions = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => AttributeDefinitionsTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    code: code ?? this.code,
+    scopeCode: scopeCode ?? this.scopeCode,
+    vendorName: vendorName.present ? vendorName.value : this.vendorName,
+    typeCode: typeCode ?? this.typeCode,
+    label: label ?? this.label,
+    unit: unit.present ? unit.value : this.unit,
+    enumOptions: enumOptions.present ? enumOptions.value : this.enumOptions,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AttributeDefinitionsTableData copyWithCompanion(
+    AttributeDefinitionsTableCompanion data,
+  ) {
+    return AttributeDefinitionsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      code: data.code.present ? data.code.value : this.code,
+      scopeCode: data.scopeCode.present ? data.scopeCode.value : this.scopeCode,
+      vendorName: data.vendorName.present
+          ? data.vendorName.value
+          : this.vendorName,
+      typeCode: data.typeCode.present ? data.typeCode.value : this.typeCode,
+      label: data.label.present ? data.label.value : this.label,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      enumOptions: data.enumOptions.present
+          ? data.enumOptions.value
+          : this.enumOptions,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttributeDefinitionsTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('code: $code, ')
+          ..write('scopeCode: $scopeCode, ')
+          ..write('vendorName: $vendorName, ')
+          ..write('typeCode: $typeCode, ')
+          ..write('label: $label, ')
+          ..write('unit: $unit, ')
+          ..write('enumOptions: $enumOptions, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    code,
+    scopeCode,
+    vendorName,
+    typeCode,
+    label,
+    unit,
+    enumOptions,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AttributeDefinitionsTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.code == this.code &&
+          other.scopeCode == this.scopeCode &&
+          other.vendorName == this.vendorName &&
+          other.typeCode == this.typeCode &&
+          other.label == this.label &&
+          other.unit == this.unit &&
+          other.enumOptions == this.enumOptions &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AttributeDefinitionsTableCompanion
+    extends UpdateCompanion<AttributeDefinitionsTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> code;
+  final Value<String> scopeCode;
+  final Value<String?> vendorName;
+  final Value<String> typeCode;
+  final Value<String> label;
+  final Value<String?> unit;
+  final Value<String?> enumOptions;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AttributeDefinitionsTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.code = const Value.absent(),
+    this.scopeCode = const Value.absent(),
+    this.vendorName = const Value.absent(),
+    this.typeCode = const Value.absent(),
+    this.label = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.enumOptions = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AttributeDefinitionsTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String code,
+    required String scopeCode,
+    this.vendorName = const Value.absent(),
+    required String typeCode,
+    required String label,
+    this.unit = const Value.absent(),
+    this.enumOptions = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       code = Value(code),
+       scopeCode = Value(scopeCode),
+       typeCode = Value(typeCode),
+       label = Value(label);
+  static Insertable<AttributeDefinitionsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? code,
+    Expression<String>? scopeCode,
+    Expression<String>? vendorName,
+    Expression<String>? typeCode,
+    Expression<String>? label,
+    Expression<String>? unit,
+    Expression<String>? enumOptions,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (code != null) 'code': code,
+      if (scopeCode != null) 'scope_code': scopeCode,
+      if (vendorName != null) 'vendor_name': vendorName,
+      if (typeCode != null) 'type_code': typeCode,
+      if (label != null) 'label': label,
+      if (unit != null) 'unit': unit,
+      if (enumOptions != null) 'enum_options': enumOptions,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AttributeDefinitionsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? code,
+    Value<String>? scopeCode,
+    Value<String?>? vendorName,
+    Value<String>? typeCode,
+    Value<String>? label,
+    Value<String?>? unit,
+    Value<String?>? enumOptions,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AttributeDefinitionsTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      code: code ?? this.code,
+      scopeCode: scopeCode ?? this.scopeCode,
+      vendorName: vendorName ?? this.vendorName,
+      typeCode: typeCode ?? this.typeCode,
+      label: label ?? this.label,
+      unit: unit ?? this.unit,
+      enumOptions: enumOptions ?? this.enumOptions,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (scopeCode.present) {
+      map['scope_code'] = Variable<String>(scopeCode.value);
+    }
+    if (vendorName.present) {
+      map['vendor_name'] = Variable<String>(vendorName.value);
+    }
+    if (typeCode.present) {
+      map['type_code'] = Variable<String>(typeCode.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (enumOptions.present) {
+      map['enum_options'] = Variable<String>(enumOptions.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttributeDefinitionsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('code: $code, ')
+          ..write('scopeCode: $scopeCode, ')
+          ..write('vendorName: $vendorName, ')
+          ..write('typeCode: $typeCode, ')
+          ..write('label: $label, ')
+          ..write('unit: $unit, ')
+          ..write('enumOptions: $enumOptions, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AttributeValuesTableTable extends AttributeValuesTable
+    with TableInfo<$AttributeValuesTableTable, AttributeValuesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AttributeValuesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _definitionIdMeta = const VerificationMeta(
+    'definitionId',
+  );
+  @override
+  late final GeneratedColumn<String> definitionId = GeneratedColumn<String>(
+    'definition_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES attribute_definitions_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _entityTypeMeta = const VerificationMeta(
+    'entityType',
+  );
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityIdMeta = const VerificationMeta(
+    'entityId',
+  );
+  @override
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
+    'entity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueRawMeta = const VerificationMeta(
+    'valueRaw',
+  );
+  @override
+  late final GeneratedColumn<String> valueRaw = GeneratedColumn<String>(
+    'value_raw',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: Constant(DateTime.now()),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: Constant(DateTime.now()),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    definitionId,
+    entityType,
+    entityId,
+    valueRaw,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'attribute_values_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AttributeValuesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('definition_id')) {
+      context.handle(
+        _definitionIdMeta,
+        definitionId.isAcceptableOrUnknown(
+          data['definition_id']!,
+          _definitionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_definitionIdMeta);
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+        _entityTypeMeta,
+        entityType.isAcceptableOrUnknown(data['entity_type']!, _entityTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
+    }
+    if (data.containsKey('entity_id')) {
+      context.handle(
+        _entityIdMeta,
+        entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityIdMeta);
+    }
+    if (data.containsKey('value_raw')) {
+      context.handle(
+        _valueRawMeta,
+        valueRaw.isAcceptableOrUnknown(data['value_raw']!, _valueRawMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueRawMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AttributeValuesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AttributeValuesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      definitionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}definition_id'],
+      )!,
+      entityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_type'],
+      )!,
+      entityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_id'],
+      )!,
+      valueRaw: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value_raw'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AttributeValuesTableTable createAlias(String alias) {
+    return $AttributeValuesTableTable(attachedDatabase, alias);
+  }
+}
+
+class AttributeValuesTableData extends DataClass
+    implements Insertable<AttributeValuesTableData> {
+  final String id;
+  final String businessId;
+
+  /// The definition this value realizes. Cascades: delete the definition and
+  /// its values go with it — no orphan.
+  final String definitionId;
+
+  /// The kind of entity this value hangs on (`product` for MVP). Kept generic.
+  final String entityType;
+
+  /// The entity id (a `products_table.id` today).
+  final String entityId;
+
+  /// Canonical string encoding of the value, interpreted by the definition's
+  /// type. Never a display label, never localized.
+  final String valueRaw;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const AttributeValuesTableData({
+    required this.id,
+    required this.businessId,
+    required this.definitionId,
+    required this.entityType,
+    required this.entityId,
+    required this.valueRaw,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['definition_id'] = Variable<String>(definitionId);
+    map['entity_type'] = Variable<String>(entityType);
+    map['entity_id'] = Variable<String>(entityId);
+    map['value_raw'] = Variable<String>(valueRaw);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AttributeValuesTableCompanion toCompanion(bool nullToAbsent) {
+    return AttributeValuesTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      definitionId: Value(definitionId),
+      entityType: Value(entityType),
+      entityId: Value(entityId),
+      valueRaw: Value(valueRaw),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AttributeValuesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AttributeValuesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      definitionId: serializer.fromJson<String>(json['definitionId']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      valueRaw: serializer.fromJson<String>(json['valueRaw']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'definitionId': serializer.toJson<String>(definitionId),
+      'entityType': serializer.toJson<String>(entityType),
+      'entityId': serializer.toJson<String>(entityId),
+      'valueRaw': serializer.toJson<String>(valueRaw),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AttributeValuesTableData copyWith({
+    String? id,
+    String? businessId,
+    String? definitionId,
+    String? entityType,
+    String? entityId,
+    String? valueRaw,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => AttributeValuesTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    definitionId: definitionId ?? this.definitionId,
+    entityType: entityType ?? this.entityType,
+    entityId: entityId ?? this.entityId,
+    valueRaw: valueRaw ?? this.valueRaw,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AttributeValuesTableData copyWithCompanion(
+    AttributeValuesTableCompanion data,
+  ) {
+    return AttributeValuesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      definitionId: data.definitionId.present
+          ? data.definitionId.value
+          : this.definitionId,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      entityId: data.entityId.present ? data.entityId.value : this.entityId,
+      valueRaw: data.valueRaw.present ? data.valueRaw.value : this.valueRaw,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttributeValuesTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('definitionId: $definitionId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('valueRaw: $valueRaw, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    businessId,
+    definitionId,
+    entityType,
+    entityId,
+    valueRaw,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AttributeValuesTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.definitionId == this.definitionId &&
+          other.entityType == this.entityType &&
+          other.entityId == this.entityId &&
+          other.valueRaw == this.valueRaw &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AttributeValuesTableCompanion
+    extends UpdateCompanion<AttributeValuesTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> definitionId;
+  final Value<String> entityType;
+  final Value<String> entityId;
+  final Value<String> valueRaw;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AttributeValuesTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.definitionId = const Value.absent(),
+    this.entityType = const Value.absent(),
+    this.entityId = const Value.absent(),
+    this.valueRaw = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AttributeValuesTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String definitionId,
+    required String entityType,
+    required String entityId,
+    required String valueRaw,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       definitionId = Value(definitionId),
+       entityType = Value(entityType),
+       entityId = Value(entityId),
+       valueRaw = Value(valueRaw);
+  static Insertable<AttributeValuesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? definitionId,
+    Expression<String>? entityType,
+    Expression<String>? entityId,
+    Expression<String>? valueRaw,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (definitionId != null) 'definition_id': definitionId,
+      if (entityType != null) 'entity_type': entityType,
+      if (entityId != null) 'entity_id': entityId,
+      if (valueRaw != null) 'value_raw': valueRaw,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AttributeValuesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? definitionId,
+    Value<String>? entityType,
+    Value<String>? entityId,
+    Value<String>? valueRaw,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AttributeValuesTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      definitionId: definitionId ?? this.definitionId,
+      entityType: entityType ?? this.entityType,
+      entityId: entityId ?? this.entityId,
+      valueRaw: valueRaw ?? this.valueRaw,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (definitionId.present) {
+      map['definition_id'] = Variable<String>(definitionId.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
+    }
+    if (entityId.present) {
+      map['entity_id'] = Variable<String>(entityId.value);
+    }
+    if (valueRaw.present) {
+      map['value_raw'] = Variable<String>(valueRaw.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttributeValuesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('definitionId: $definitionId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('valueRaw: $valueRaw, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AttributeGroupsTableTable extends AttributeGroupsTable
+    with TableInfo<$AttributeGroupsTableTable, AttributeGroupsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AttributeGroupsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: Constant(DateTime.now()),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: Constant(DateTime.now()),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    code,
+    label,
+    sortOrder,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'attribute_groups_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AttributeGroupsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codeMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AttributeGroupsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AttributeGroupsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AttributeGroupsTableTable createAlias(String alias) {
+    return $AttributeGroupsTableTable(attachedDatabase, alias);
+  }
+}
+
+class AttributeGroupsTableData extends DataClass
+    implements Insertable<AttributeGroupsTableData> {
+  final String id;
+  final String businessId;
+
+  /// Stable code (e.g. `system.inventory`, `user.custom`). Unique per business.
+  final String code;
+
+  /// Human label shown on the detail screen. Display only — never a key.
+  final String label;
+
+  /// Ordering hint so groups render in a deliberate order, not insertion order.
+  final int sortOrder;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const AttributeGroupsTableData({
+    required this.id,
+    required this.businessId,
+    required this.code,
+    required this.label,
+    required this.sortOrder,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['code'] = Variable<String>(code);
+    map['label'] = Variable<String>(label);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AttributeGroupsTableCompanion toCompanion(bool nullToAbsent) {
+    return AttributeGroupsTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      code: Value(code),
+      label: Value(label),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AttributeGroupsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AttributeGroupsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      code: serializer.fromJson<String>(json['code']),
+      label: serializer.fromJson<String>(json['label']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'code': serializer.toJson<String>(code),
+      'label': serializer.toJson<String>(label),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AttributeGroupsTableData copyWith({
+    String? id,
+    String? businessId,
+    String? code,
+    String? label,
+    int? sortOrder,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => AttributeGroupsTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    code: code ?? this.code,
+    label: label ?? this.label,
+    sortOrder: sortOrder ?? this.sortOrder,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AttributeGroupsTableData copyWithCompanion(
+    AttributeGroupsTableCompanion data,
+  ) {
+    return AttributeGroupsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      code: data.code.present ? data.code.value : this.code,
+      label: data.label.present ? data.label.value : this.label,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttributeGroupsTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('code: $code, ')
+          ..write('label: $label, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, businessId, code, label, sortOrder, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AttributeGroupsTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.code == this.code &&
+          other.label == this.label &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AttributeGroupsTableCompanion
+    extends UpdateCompanion<AttributeGroupsTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> code;
+  final Value<String> label;
+  final Value<int> sortOrder;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AttributeGroupsTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.code = const Value.absent(),
+    this.label = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AttributeGroupsTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String code,
+    required String label,
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       code = Value(code),
+       label = Value(label);
+  static Insertable<AttributeGroupsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? code,
+    Expression<String>? label,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (code != null) 'code': code,
+      if (label != null) 'label': label,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AttributeGroupsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? code,
+    Value<String>? label,
+    Value<int>? sortOrder,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AttributeGroupsTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      code: code ?? this.code,
+      label: label ?? this.label,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttributeGroupsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('code: $code, ')
+          ..write('label: $label, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AttributeGroupItemsTableTable extends AttributeGroupItemsTable
+    with
+        TableInfo<
+          $AttributeGroupItemsTableTable,
+          AttributeGroupItemsTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AttributeGroupItemsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES attribute_groups_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _definitionIdMeta = const VerificationMeta(
+    'definitionId',
+  );
+  @override
+  late final GeneratedColumn<String> definitionId = GeneratedColumn<String>(
+    'definition_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES attribute_definitions_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    businessId,
+    groupId,
+    definitionId,
+    sortOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'attribute_group_items_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AttributeGroupItemsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('definition_id')) {
+      context.handle(
+        _definitionIdMeta,
+        definitionId.isAcceptableOrUnknown(
+          data['definition_id']!,
+          _definitionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_definitionIdMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AttributeGroupItemsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AttributeGroupItemsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      definitionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}definition_id'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+    );
+  }
+
+  @override
+  $AttributeGroupItemsTableTable createAlias(String alias) {
+    return $AttributeGroupItemsTableTable(attachedDatabase, alias);
+  }
+}
+
+class AttributeGroupItemsTableData extends DataClass
+    implements Insertable<AttributeGroupItemsTableData> {
+  final String id;
+  final String businessId;
+  final String groupId;
+  final String definitionId;
+
+  /// Position within the group. Display only.
+  final int sortOrder;
+  const AttributeGroupItemsTableData({
+    required this.id,
+    required this.businessId,
+    required this.groupId,
+    required this.definitionId,
+    required this.sortOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['business_id'] = Variable<String>(businessId);
+    map['group_id'] = Variable<String>(groupId);
+    map['definition_id'] = Variable<String>(definitionId);
+    map['sort_order'] = Variable<int>(sortOrder);
+    return map;
+  }
+
+  AttributeGroupItemsTableCompanion toCompanion(bool nullToAbsent) {
+    return AttributeGroupItemsTableCompanion(
+      id: Value(id),
+      businessId: Value(businessId),
+      groupId: Value(groupId),
+      definitionId: Value(definitionId),
+      sortOrder: Value(sortOrder),
+    );
+  }
+
+  factory AttributeGroupItemsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AttributeGroupItemsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      businessId: serializer.fromJson<String>(json['businessId']),
+      groupId: serializer.fromJson<String>(json['groupId']),
+      definitionId: serializer.fromJson<String>(json['definitionId']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'businessId': serializer.toJson<String>(businessId),
+      'groupId': serializer.toJson<String>(groupId),
+      'definitionId': serializer.toJson<String>(definitionId),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+    };
+  }
+
+  AttributeGroupItemsTableData copyWith({
+    String? id,
+    String? businessId,
+    String? groupId,
+    String? definitionId,
+    int? sortOrder,
+  }) => AttributeGroupItemsTableData(
+    id: id ?? this.id,
+    businessId: businessId ?? this.businessId,
+    groupId: groupId ?? this.groupId,
+    definitionId: definitionId ?? this.definitionId,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
+  AttributeGroupItemsTableData copyWithCompanion(
+    AttributeGroupItemsTableCompanion data,
+  ) {
+    return AttributeGroupItemsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      definitionId: data.definitionId.present
+          ? data.definitionId.value
+          : this.definitionId,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttributeGroupItemsTableData(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('groupId: $groupId, ')
+          ..write('definitionId: $definitionId, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, businessId, groupId, definitionId, sortOrder);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AttributeGroupItemsTableData &&
+          other.id == this.id &&
+          other.businessId == this.businessId &&
+          other.groupId == this.groupId &&
+          other.definitionId == this.definitionId &&
+          other.sortOrder == this.sortOrder);
+}
+
+class AttributeGroupItemsTableCompanion
+    extends UpdateCompanion<AttributeGroupItemsTableData> {
+  final Value<String> id;
+  final Value<String> businessId;
+  final Value<String> groupId;
+  final Value<String> definitionId;
+  final Value<int> sortOrder;
+  final Value<int> rowid;
+  const AttributeGroupItemsTableCompanion({
+    this.id = const Value.absent(),
+    this.businessId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.definitionId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AttributeGroupItemsTableCompanion.insert({
+    required String id,
+    required String businessId,
+    required String groupId,
+    required String definitionId,
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       businessId = Value(businessId),
+       groupId = Value(groupId),
+       definitionId = Value(definitionId);
+  static Insertable<AttributeGroupItemsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? businessId,
+    Expression<String>? groupId,
+    Expression<String>? definitionId,
+    Expression<int>? sortOrder,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (businessId != null) 'business_id': businessId,
+      if (groupId != null) 'group_id': groupId,
+      if (definitionId != null) 'definition_id': definitionId,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AttributeGroupItemsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? businessId,
+    Value<String>? groupId,
+    Value<String>? definitionId,
+    Value<int>? sortOrder,
+    Value<int>? rowid,
+  }) {
+    return AttributeGroupItemsTableCompanion(
+      id: id ?? this.id,
+      businessId: businessId ?? this.businessId,
+      groupId: groupId ?? this.groupId,
+      definitionId: definitionId ?? this.definitionId,
+      sortOrder: sortOrder ?? this.sortOrder,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (definitionId.present) {
+      map['definition_id'] = Variable<String>(definitionId.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttributeGroupItemsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('businessId: $businessId, ')
+          ..write('groupId: $groupId, ')
+          ..write('definitionId: $definitionId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -25202,6 +27288,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DemoEventsTableTable demoEventsTable = $DemoEventsTableTable(
     this,
   );
+  late final $AttributeDefinitionsTableTable attributeDefinitionsTable =
+      $AttributeDefinitionsTableTable(this);
+  late final $AttributeValuesTableTable attributeValuesTable =
+      $AttributeValuesTableTable(this);
+  late final $AttributeGroupsTableTable attributeGroupsTable =
+      $AttributeGroupsTableTable(this);
+  late final $AttributeGroupItemsTableTable attributeGroupItemsTable =
+      $AttributeGroupItemsTableTable(this);
   late final Index producersBusinessId = Index(
     'producers_business_id',
     'CREATE INDEX producers_business_id ON producers_table (business_id)',
@@ -25418,6 +27512,46 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'demo_events_correlation',
     'CREATE INDEX demo_events_correlation ON demo_events_table (correlation_id)',
   );
+  late final Index attributeDefinitionsBusinessId = Index(
+    'attribute_definitions_business_id',
+    'CREATE INDEX attribute_definitions_business_id ON attribute_definitions_table (business_id)',
+  );
+  late final Index attributeDefinitionsCode = Index(
+    'attribute_definitions_code',
+    'CREATE UNIQUE INDEX attribute_definitions_code ON attribute_definitions_table (business_id, code)',
+  );
+  late final Index attributeValuesBusinessId = Index(
+    'attribute_values_business_id',
+    'CREATE INDEX attribute_values_business_id ON attribute_values_table (business_id)',
+  );
+  late final Index attributeValuesEntity = Index(
+    'attribute_values_entity',
+    'CREATE INDEX attribute_values_entity ON attribute_values_table (entity_type, entity_id)',
+  );
+  late final Index attributeValuesUnique = Index(
+    'attribute_values_unique',
+    'CREATE UNIQUE INDEX attribute_values_unique ON attribute_values_table (business_id, definition_id, entity_type, entity_id)',
+  );
+  late final Index attributeGroupsBusinessId = Index(
+    'attribute_groups_business_id',
+    'CREATE INDEX attribute_groups_business_id ON attribute_groups_table (business_id)',
+  );
+  late final Index attributeGroupsCode = Index(
+    'attribute_groups_code',
+    'CREATE UNIQUE INDEX attribute_groups_code ON attribute_groups_table (business_id, code)',
+  );
+  late final Index attributeGroupItemsBusinessId = Index(
+    'attribute_group_items_business_id',
+    'CREATE INDEX attribute_group_items_business_id ON attribute_group_items_table (business_id)',
+  );
+  late final Index attributeGroupItemsGroup = Index(
+    'attribute_group_items_group',
+    'CREATE INDEX attribute_group_items_group ON attribute_group_items_table (group_id)',
+  );
+  late final Index attributeGroupItemsUnique = Index(
+    'attribute_group_items_unique',
+    'CREATE UNIQUE INDEX attribute_group_items_unique ON attribute_group_items_table (business_id, group_id, definition_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -25457,6 +27591,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     importJobsTable,
     shipmentsTable,
     demoEventsTable,
+    attributeDefinitionsTable,
+    attributeValuesTable,
+    attributeGroupsTable,
+    attributeGroupItemsTable,
     producersBusinessId,
     productsBusinessId,
     productsSku,
@@ -25511,6 +27649,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     demoEventsBusinessId,
     demoEventsOccurredAt,
     demoEventsCorrelation,
+    attributeDefinitionsBusinessId,
+    attributeDefinitionsCode,
+    attributeValuesBusinessId,
+    attributeValuesEntity,
+    attributeValuesUnique,
+    attributeGroupsBusinessId,
+    attributeGroupsCode,
+    attributeGroupItemsBusinessId,
+    attributeGroupItemsGroup,
+    attributeGroupItemsUnique,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -25726,6 +27874,63 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('demo_events_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('attribute_definitions_table', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('attribute_values_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'attribute_definitions_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('attribute_values_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('attribute_groups_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('attribute_group_items_table', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'attribute_groups_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('attribute_group_items_table', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'attribute_definitions_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('attribute_group_items_table', kind: UpdateKind.delete),
+      ],
     ),
   ]);
 }
@@ -26263,6 +28468,108 @@ final class $$BusinessesTableTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _demoEventsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AttributeDefinitionsTableTable,
+    List<AttributeDefinitionsTableData>
+  >
+  _attributeDefinitionsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.attributeDefinitionsTable,
+        aliasName:
+            'businesses_table__id__attribute_definitions_table__business_id',
+      );
+
+  $$AttributeDefinitionsTableTableProcessedTableManager
+  get attributeDefinitionsTableRefs {
+    final manager = $$AttributeDefinitionsTableTableTableManager(
+      $_db,
+      $_db.attributeDefinitionsTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _attributeDefinitionsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AttributeValuesTableTable,
+    List<AttributeValuesTableData>
+  >
+  _attributeValuesTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.attributeValuesTable,
+        aliasName: 'businesses_table__id__attribute_values_table__business_id',
+      );
+
+  $$AttributeValuesTableTableProcessedTableManager
+  get attributeValuesTableRefs {
+    final manager = $$AttributeValuesTableTableTableManager(
+      $_db,
+      $_db.attributeValuesTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _attributeValuesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AttributeGroupsTableTable,
+    List<AttributeGroupsTableData>
+  >
+  _attributeGroupsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.attributeGroupsTable,
+        aliasName: 'businesses_table__id__attribute_groups_table__business_id',
+      );
+
+  $$AttributeGroupsTableTableProcessedTableManager
+  get attributeGroupsTableRefs {
+    final manager = $$AttributeGroupsTableTableTableManager(
+      $_db,
+      $_db.attributeGroupsTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _attributeGroupsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AttributeGroupItemsTableTable,
+    List<AttributeGroupItemsTableData>
+  >
+  _attributeGroupItemsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.attributeGroupItemsTable,
+        aliasName:
+            'businesses_table__id__attribute_group_items_table__business_id',
+      );
+
+  $$AttributeGroupItemsTableTableProcessedTableManager
+  get attributeGroupItemsTableRefs {
+    final manager = $$AttributeGroupItemsTableTableTableManager(
+      $_db,
+      $_db.attributeGroupItemsTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _attributeGroupItemsTableRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -26926,6 +29233,110 @@ class $$BusinessesTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> attributeDefinitionsTableRefs(
+    Expression<bool> Function($$AttributeDefinitionsTableTableFilterComposer f)
+    f,
+  ) {
+    final $$AttributeDefinitionsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeDefinitionsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeDefinitionsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.attributeDefinitionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> attributeValuesTableRefs(
+    Expression<bool> Function($$AttributeValuesTableTableFilterComposer f) f,
+  ) {
+    final $$AttributeValuesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attributeValuesTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttributeValuesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.attributeValuesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> attributeGroupsTableRefs(
+    Expression<bool> Function($$AttributeGroupsTableTableFilterComposer f) f,
+  ) {
+    final $$AttributeGroupsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attributeGroupsTable,
+      getReferencedColumn: (t) => t.businessId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttributeGroupsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.attributeGroupsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> attributeGroupItemsTableRefs(
+    Expression<bool> Function($$AttributeGroupItemsTableTableFilterComposer f)
+    f,
+  ) {
+    final $$AttributeGroupItemsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeGroupItemsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupItemsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.attributeGroupItemsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -27663,6 +30074,112 @@ class $$BusinessesTableTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> attributeDefinitionsTableRefs<T extends Object>(
+    Expression<T> Function($$AttributeDefinitionsTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$AttributeDefinitionsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeDefinitionsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeDefinitionsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeDefinitionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> attributeValuesTableRefs<T extends Object>(
+    Expression<T> Function($$AttributeValuesTableTableAnnotationComposer a) f,
+  ) {
+    final $$AttributeValuesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeValuesTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeValuesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeValuesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> attributeGroupsTableRefs<T extends Object>(
+    Expression<T> Function($$AttributeGroupsTableTableAnnotationComposer a) f,
+  ) {
+    final $$AttributeGroupsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeGroupsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeGroupsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> attributeGroupItemsTableRefs<T extends Object>(
+    Expression<T> Function($$AttributeGroupItemsTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$AttributeGroupItemsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeGroupItemsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupItemsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeGroupItemsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$BusinessesTableTableTableManager
@@ -27703,6 +30220,10 @@ class $$BusinessesTableTableTableManager
             bool importJobsTableRefs,
             bool shipmentsTableRefs,
             bool demoEventsTableRefs,
+            bool attributeDefinitionsTableRefs,
+            bool attributeValuesTableRefs,
+            bool attributeGroupsTableRefs,
+            bool attributeGroupItemsTableRefs,
           })
         > {
   $$BusinessesTableTableTableManager(
@@ -27808,6 +30329,10 @@ class $$BusinessesTableTableTableManager
                 importJobsTableRefs = false,
                 shipmentsTableRefs = false,
                 demoEventsTableRefs = false,
+                attributeDefinitionsTableRefs = false,
+                attributeValuesTableRefs = false,
+                attributeGroupsTableRefs = false,
+                attributeGroupItemsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -27835,6 +30360,12 @@ class $$BusinessesTableTableTableManager
                     if (importJobsTableRefs) db.importJobsTable,
                     if (shipmentsTableRefs) db.shipmentsTable,
                     if (demoEventsTableRefs) db.demoEventsTable,
+                    if (attributeDefinitionsTableRefs)
+                      db.attributeDefinitionsTable,
+                    if (attributeValuesTableRefs) db.attributeValuesTable,
+                    if (attributeGroupsTableRefs) db.attributeGroupsTable,
+                    if (attributeGroupItemsTableRefs)
+                      db.attributeGroupItemsTable,
                   ],
                   addJoins:
                       <
@@ -28355,6 +30886,90 @@ class $$BusinessesTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (attributeDefinitionsTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          AttributeDefinitionsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._attributeDefinitionsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attributeDefinitionsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (attributeValuesTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          AttributeValuesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._attributeValuesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attributeValuesTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (attributeGroupsTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          AttributeGroupsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._attributeGroupsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attributeGroupsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (attributeGroupItemsTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          AttributeGroupItemsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._attributeGroupItemsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attributeGroupItemsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -28400,6 +31015,10 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool importJobsTableRefs,
         bool shipmentsTableRefs,
         bool demoEventsTableRefs,
+        bool attributeDefinitionsTableRefs,
+        bool attributeValuesTableRefs,
+        bool attributeGroupsTableRefs,
+        bool attributeGroupItemsTableRefs,
       })
     >;
 typedef $$UsersTableTableCreateCompanionBuilder =
@@ -44956,6 +47575,2204 @@ typedef $$DemoEventsTableTableProcessedTableManager =
       DemoEventsTableData,
       PrefetchHooks Function({bool businessId})
     >;
+typedef $$AttributeDefinitionsTableTableCreateCompanionBuilder =
+    AttributeDefinitionsTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String code,
+      required String scopeCode,
+      Value<String?> vendorName,
+      required String typeCode,
+      required String label,
+      Value<String?> unit,
+      Value<String?> enumOptions,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AttributeDefinitionsTableTableUpdateCompanionBuilder =
+    AttributeDefinitionsTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> code,
+      Value<String> scopeCode,
+      Value<String?> vendorName,
+      Value<String> typeCode,
+      Value<String> label,
+      Value<String?> unit,
+      Value<String?> enumOptions,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$AttributeDefinitionsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AttributeDefinitionsTableTable,
+          AttributeDefinitionsTableData
+        > {
+  $$AttributeDefinitionsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) =>
+      db.businessesTable.createAlias(
+        'attribute_definitions_table__business_id__businesses_table__id',
+      );
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AttributeValuesTableTable,
+    List<AttributeValuesTableData>
+  >
+  _attributeValuesTableRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.attributeValuesTable,
+    aliasName:
+        'attribute_definitions_table__id__attribute_values_table__definition_id',
+  );
+
+  $$AttributeValuesTableTableProcessedTableManager
+  get attributeValuesTableRefs {
+    final manager = $$AttributeValuesTableTableTableManager(
+      $_db,
+      $_db.attributeValuesTable,
+    ).filter((f) => f.definitionId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _attributeValuesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AttributeGroupItemsTableTable,
+    List<AttributeGroupItemsTableData>
+  >
+  _attributeGroupItemsTableRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.attributeGroupItemsTable,
+    aliasName:
+        'attribute_definitions_table__id__attribute_group_items_table__definition_id',
+  );
+
+  $$AttributeGroupItemsTableTableProcessedTableManager
+  get attributeGroupItemsTableRefs {
+    final manager = $$AttributeGroupItemsTableTableTableManager(
+      $_db,
+      $_db.attributeGroupItemsTable,
+    ).filter((f) => f.definitionId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _attributeGroupItemsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AttributeDefinitionsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AttributeDefinitionsTableTable> {
+  $$AttributeDefinitionsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scopeCode => $composableBuilder(
+    column: $table.scopeCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vendorName => $composableBuilder(
+    column: $table.vendorName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get typeCode => $composableBuilder(
+    column: $table.typeCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get enumOptions => $composableBuilder(
+    column: $table.enumOptions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> attributeValuesTableRefs(
+    Expression<bool> Function($$AttributeValuesTableTableFilterComposer f) f,
+  ) {
+    final $$AttributeValuesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attributeValuesTable,
+      getReferencedColumn: (t) => t.definitionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttributeValuesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.attributeValuesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> attributeGroupItemsTableRefs(
+    Expression<bool> Function($$AttributeGroupItemsTableTableFilterComposer f)
+    f,
+  ) {
+    final $$AttributeGroupItemsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeGroupItemsTable,
+          getReferencedColumn: (t) => t.definitionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupItemsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.attributeGroupItemsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AttributeDefinitionsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AttributeDefinitionsTableTable> {
+  $$AttributeDefinitionsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scopeCode => $composableBuilder(
+    column: $table.scopeCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get vendorName => $composableBuilder(
+    column: $table.vendorName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get typeCode => $composableBuilder(
+    column: $table.typeCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get enumOptions => $composableBuilder(
+    column: $table.enumOptions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AttributeDefinitionsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AttributeDefinitionsTableTable> {
+  $$AttributeDefinitionsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  GeneratedColumn<String> get scopeCode =>
+      $composableBuilder(column: $table.scopeCode, builder: (column) => column);
+
+  GeneratedColumn<String> get vendorName => $composableBuilder(
+    column: $table.vendorName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get typeCode =>
+      $composableBuilder(column: $table.typeCode, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get enumOptions => $composableBuilder(
+    column: $table.enumOptions,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> attributeValuesTableRefs<T extends Object>(
+    Expression<T> Function($$AttributeValuesTableTableAnnotationComposer a) f,
+  ) {
+    final $$AttributeValuesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeValuesTable,
+          getReferencedColumn: (t) => t.definitionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeValuesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeValuesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> attributeGroupItemsTableRefs<T extends Object>(
+    Expression<T> Function($$AttributeGroupItemsTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$AttributeGroupItemsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeGroupItemsTable,
+          getReferencedColumn: (t) => t.definitionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupItemsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeGroupItemsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AttributeDefinitionsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AttributeDefinitionsTableTable,
+          AttributeDefinitionsTableData,
+          $$AttributeDefinitionsTableTableFilterComposer,
+          $$AttributeDefinitionsTableTableOrderingComposer,
+          $$AttributeDefinitionsTableTableAnnotationComposer,
+          $$AttributeDefinitionsTableTableCreateCompanionBuilder,
+          $$AttributeDefinitionsTableTableUpdateCompanionBuilder,
+          (
+            AttributeDefinitionsTableData,
+            $$AttributeDefinitionsTableTableReferences,
+          ),
+          AttributeDefinitionsTableData,
+          PrefetchHooks Function({
+            bool businessId,
+            bool attributeValuesTableRefs,
+            bool attributeGroupItemsTableRefs,
+          })
+        > {
+  $$AttributeDefinitionsTableTableTableManager(
+    _$AppDatabase db,
+    $AttributeDefinitionsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AttributeDefinitionsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$AttributeDefinitionsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$AttributeDefinitionsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> code = const Value.absent(),
+                Value<String> scopeCode = const Value.absent(),
+                Value<String?> vendorName = const Value.absent(),
+                Value<String> typeCode = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String?> unit = const Value.absent(),
+                Value<String?> enumOptions = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttributeDefinitionsTableCompanion(
+                id: id,
+                businessId: businessId,
+                code: code,
+                scopeCode: scopeCode,
+                vendorName: vendorName,
+                typeCode: typeCode,
+                label: label,
+                unit: unit,
+                enumOptions: enumOptions,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String code,
+                required String scopeCode,
+                Value<String?> vendorName = const Value.absent(),
+                required String typeCode,
+                required String label,
+                Value<String?> unit = const Value.absent(),
+                Value<String?> enumOptions = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttributeDefinitionsTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                code: code,
+                scopeCode: scopeCode,
+                vendorName: vendorName,
+                typeCode: typeCode,
+                label: label,
+                unit: unit,
+                enumOptions: enumOptions,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AttributeDefinitionsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                businessId = false,
+                attributeValuesTableRefs = false,
+                attributeGroupItemsTableRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (attributeValuesTableRefs) db.attributeValuesTable,
+                    if (attributeGroupItemsTableRefs)
+                      db.attributeGroupItemsTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (businessId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.businessId,
+                                    referencedTable:
+                                        $$AttributeDefinitionsTableTableReferences
+                                            ._businessIdTable(db),
+                                    referencedColumn:
+                                        $$AttributeDefinitionsTableTableReferences
+                                            ._businessIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (attributeValuesTableRefs)
+                        await $_getPrefetchedData<
+                          AttributeDefinitionsTableData,
+                          $AttributeDefinitionsTableTable,
+                          AttributeValuesTableData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$AttributeDefinitionsTableTableReferences
+                                  ._attributeValuesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AttributeDefinitionsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attributeValuesTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.definitionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (attributeGroupItemsTableRefs)
+                        await $_getPrefetchedData<
+                          AttributeDefinitionsTableData,
+                          $AttributeDefinitionsTableTable,
+                          AttributeGroupItemsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$AttributeDefinitionsTableTableReferences
+                                  ._attributeGroupItemsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AttributeDefinitionsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attributeGroupItemsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.definitionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AttributeDefinitionsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AttributeDefinitionsTableTable,
+      AttributeDefinitionsTableData,
+      $$AttributeDefinitionsTableTableFilterComposer,
+      $$AttributeDefinitionsTableTableOrderingComposer,
+      $$AttributeDefinitionsTableTableAnnotationComposer,
+      $$AttributeDefinitionsTableTableCreateCompanionBuilder,
+      $$AttributeDefinitionsTableTableUpdateCompanionBuilder,
+      (
+        AttributeDefinitionsTableData,
+        $$AttributeDefinitionsTableTableReferences,
+      ),
+      AttributeDefinitionsTableData,
+      PrefetchHooks Function({
+        bool businessId,
+        bool attributeValuesTableRefs,
+        bool attributeGroupItemsTableRefs,
+      })
+    >;
+typedef $$AttributeValuesTableTableCreateCompanionBuilder =
+    AttributeValuesTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String definitionId,
+      required String entityType,
+      required String entityId,
+      required String valueRaw,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AttributeValuesTableTableUpdateCompanionBuilder =
+    AttributeValuesTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> definitionId,
+      Value<String> entityType,
+      Value<String> entityId,
+      Value<String> valueRaw,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$AttributeValuesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AttributeValuesTableTable,
+          AttributeValuesTableData
+        > {
+  $$AttributeValuesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
+      .businessesTable
+      .createAlias('attribute_values_table__business_id__businesses_table__id');
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AttributeDefinitionsTableTable _definitionIdTable(
+    _$AppDatabase db,
+  ) => db.attributeDefinitionsTable.createAlias(
+    'attribute_values_table__definition_id__attribute_definitions_table__id',
+  );
+
+  $$AttributeDefinitionsTableTableProcessedTableManager get definitionId {
+    final $_column = $_itemColumn<String>('definition_id')!;
+
+    final manager = $$AttributeDefinitionsTableTableTableManager(
+      $_db,
+      $_db.attributeDefinitionsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_definitionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AttributeValuesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AttributeValuesTableTable> {
+  $$AttributeValuesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get valueRaw => $composableBuilder(
+    column: $table.valueRaw,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AttributeDefinitionsTableTableFilterComposer get definitionId {
+    final $$AttributeDefinitionsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.definitionId,
+          referencedTable: $db.attributeDefinitionsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeDefinitionsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.attributeDefinitionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AttributeValuesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AttributeValuesTableTable> {
+  $$AttributeValuesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get valueRaw => $composableBuilder(
+    column: $table.valueRaw,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AttributeDefinitionsTableTableOrderingComposer get definitionId {
+    final $$AttributeDefinitionsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.definitionId,
+          referencedTable: $db.attributeDefinitionsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeDefinitionsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.attributeDefinitionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AttributeValuesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AttributeValuesTableTable> {
+  $$AttributeValuesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get entityId =>
+      $composableBuilder(column: $table.entityId, builder: (column) => column);
+
+  GeneratedColumn<String> get valueRaw =>
+      $composableBuilder(column: $table.valueRaw, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AttributeDefinitionsTableTableAnnotationComposer get definitionId {
+    final $$AttributeDefinitionsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.definitionId,
+          referencedTable: $db.attributeDefinitionsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeDefinitionsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeDefinitionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AttributeValuesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AttributeValuesTableTable,
+          AttributeValuesTableData,
+          $$AttributeValuesTableTableFilterComposer,
+          $$AttributeValuesTableTableOrderingComposer,
+          $$AttributeValuesTableTableAnnotationComposer,
+          $$AttributeValuesTableTableCreateCompanionBuilder,
+          $$AttributeValuesTableTableUpdateCompanionBuilder,
+          (AttributeValuesTableData, $$AttributeValuesTableTableReferences),
+          AttributeValuesTableData,
+          PrefetchHooks Function({bool businessId, bool definitionId})
+        > {
+  $$AttributeValuesTableTableTableManager(
+    _$AppDatabase db,
+    $AttributeValuesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AttributeValuesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AttributeValuesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$AttributeValuesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> definitionId = const Value.absent(),
+                Value<String> entityType = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
+                Value<String> valueRaw = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttributeValuesTableCompanion(
+                id: id,
+                businessId: businessId,
+                definitionId: definitionId,
+                entityType: entityType,
+                entityId: entityId,
+                valueRaw: valueRaw,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String definitionId,
+                required String entityType,
+                required String entityId,
+                required String valueRaw,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttributeValuesTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                definitionId: definitionId,
+                entityType: entityType,
+                entityId: entityId,
+                valueRaw: valueRaw,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AttributeValuesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false, definitionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$AttributeValuesTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$AttributeValuesTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (definitionId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.definitionId,
+                                referencedTable:
+                                    $$AttributeValuesTableTableReferences
+                                        ._definitionIdTable(db),
+                                referencedColumn:
+                                    $$AttributeValuesTableTableReferences
+                                        ._definitionIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AttributeValuesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AttributeValuesTableTable,
+      AttributeValuesTableData,
+      $$AttributeValuesTableTableFilterComposer,
+      $$AttributeValuesTableTableOrderingComposer,
+      $$AttributeValuesTableTableAnnotationComposer,
+      $$AttributeValuesTableTableCreateCompanionBuilder,
+      $$AttributeValuesTableTableUpdateCompanionBuilder,
+      (AttributeValuesTableData, $$AttributeValuesTableTableReferences),
+      AttributeValuesTableData,
+      PrefetchHooks Function({bool businessId, bool definitionId})
+    >;
+typedef $$AttributeGroupsTableTableCreateCompanionBuilder =
+    AttributeGroupsTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String code,
+      required String label,
+      Value<int> sortOrder,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AttributeGroupsTableTableUpdateCompanionBuilder =
+    AttributeGroupsTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> code,
+      Value<String> label,
+      Value<int> sortOrder,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$AttributeGroupsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AttributeGroupsTableTable,
+          AttributeGroupsTableData
+        > {
+  $$AttributeGroupsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) => db
+      .businessesTable
+      .createAlias('attribute_groups_table__business_id__businesses_table__id');
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AttributeGroupItemsTableTable,
+    List<AttributeGroupItemsTableData>
+  >
+  _attributeGroupItemsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.attributeGroupItemsTable,
+        aliasName:
+            'attribute_groups_table__id__attribute_group_items_table__group_id',
+      );
+
+  $$AttributeGroupItemsTableTableProcessedTableManager
+  get attributeGroupItemsTableRefs {
+    final manager = $$AttributeGroupItemsTableTableTableManager(
+      $_db,
+      $_db.attributeGroupItemsTable,
+    ).filter((f) => f.groupId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _attributeGroupItemsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AttributeGroupsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AttributeGroupsTableTable> {
+  $$AttributeGroupsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> attributeGroupItemsTableRefs(
+    Expression<bool> Function($$AttributeGroupItemsTableTableFilterComposer f)
+    f,
+  ) {
+    final $$AttributeGroupItemsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeGroupItemsTable,
+          getReferencedColumn: (t) => t.groupId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupItemsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.attributeGroupItemsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AttributeGroupsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AttributeGroupsTableTable> {
+  $$AttributeGroupsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AttributeGroupsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AttributeGroupsTableTable> {
+  $$AttributeGroupsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> attributeGroupItemsTableRefs<T extends Object>(
+    Expression<T> Function($$AttributeGroupItemsTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$AttributeGroupItemsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.attributeGroupItemsTable,
+          getReferencedColumn: (t) => t.groupId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupItemsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeGroupItemsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AttributeGroupsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AttributeGroupsTableTable,
+          AttributeGroupsTableData,
+          $$AttributeGroupsTableTableFilterComposer,
+          $$AttributeGroupsTableTableOrderingComposer,
+          $$AttributeGroupsTableTableAnnotationComposer,
+          $$AttributeGroupsTableTableCreateCompanionBuilder,
+          $$AttributeGroupsTableTableUpdateCompanionBuilder,
+          (AttributeGroupsTableData, $$AttributeGroupsTableTableReferences),
+          AttributeGroupsTableData,
+          PrefetchHooks Function({
+            bool businessId,
+            bool attributeGroupItemsTableRefs,
+          })
+        > {
+  $$AttributeGroupsTableTableTableManager(
+    _$AppDatabase db,
+    $AttributeGroupsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AttributeGroupsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AttributeGroupsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$AttributeGroupsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> code = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttributeGroupsTableCompanion(
+                id: id,
+                businessId: businessId,
+                code: code,
+                label: label,
+                sortOrder: sortOrder,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String code,
+                required String label,
+                Value<int> sortOrder = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttributeGroupsTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                code: code,
+                label: label,
+                sortOrder: sortOrder,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AttributeGroupsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({businessId = false, attributeGroupItemsTableRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (attributeGroupItemsTableRefs)
+                      db.attributeGroupItemsTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (businessId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.businessId,
+                                    referencedTable:
+                                        $$AttributeGroupsTableTableReferences
+                                            ._businessIdTable(db),
+                                    referencedColumn:
+                                        $$AttributeGroupsTableTableReferences
+                                            ._businessIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (attributeGroupItemsTableRefs)
+                        await $_getPrefetchedData<
+                          AttributeGroupsTableData,
+                          $AttributeGroupsTableTable,
+                          AttributeGroupItemsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AttributeGroupsTableTableReferences
+                              ._attributeGroupItemsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AttributeGroupsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attributeGroupItemsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.groupId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AttributeGroupsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AttributeGroupsTableTable,
+      AttributeGroupsTableData,
+      $$AttributeGroupsTableTableFilterComposer,
+      $$AttributeGroupsTableTableOrderingComposer,
+      $$AttributeGroupsTableTableAnnotationComposer,
+      $$AttributeGroupsTableTableCreateCompanionBuilder,
+      $$AttributeGroupsTableTableUpdateCompanionBuilder,
+      (AttributeGroupsTableData, $$AttributeGroupsTableTableReferences),
+      AttributeGroupsTableData,
+      PrefetchHooks Function({
+        bool businessId,
+        bool attributeGroupItemsTableRefs,
+      })
+    >;
+typedef $$AttributeGroupItemsTableTableCreateCompanionBuilder =
+    AttributeGroupItemsTableCompanion Function({
+      required String id,
+      required String businessId,
+      required String groupId,
+      required String definitionId,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+typedef $$AttributeGroupItemsTableTableUpdateCompanionBuilder =
+    AttributeGroupItemsTableCompanion Function({
+      Value<String> id,
+      Value<String> businessId,
+      Value<String> groupId,
+      Value<String> definitionId,
+      Value<int> sortOrder,
+      Value<int> rowid,
+    });
+
+final class $$AttributeGroupItemsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AttributeGroupItemsTableTable,
+          AttributeGroupItemsTableData
+        > {
+  $$AttributeGroupItemsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) =>
+      db.businessesTable.createAlias(
+        'attribute_group_items_table__business_id__businesses_table__id',
+      );
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AttributeGroupsTableTable _groupIdTable(_$AppDatabase db) =>
+      db.attributeGroupsTable.createAlias(
+        'attribute_group_items_table__group_id__attribute_groups_table__id',
+      );
+
+  $$AttributeGroupsTableTableProcessedTableManager get groupId {
+    final $_column = $_itemColumn<String>('group_id')!;
+
+    final manager = $$AttributeGroupsTableTableTableManager(
+      $_db,
+      $_db.attributeGroupsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_groupIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AttributeDefinitionsTableTable _definitionIdTable(
+    _$AppDatabase db,
+  ) => db.attributeDefinitionsTable.createAlias(
+    'attribute_group_items_table__definition_id__attribute_definitions_table__id',
+  );
+
+  $$AttributeDefinitionsTableTableProcessedTableManager get definitionId {
+    final $_column = $_itemColumn<String>('definition_id')!;
+
+    final manager = $$AttributeDefinitionsTableTableTableManager(
+      $_db,
+      $_db.attributeDefinitionsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_definitionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AttributeGroupItemsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AttributeGroupItemsTableTable> {
+  $$AttributeGroupItemsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AttributeGroupsTableTableFilterComposer get groupId {
+    final $$AttributeGroupsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.attributeGroupsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttributeGroupsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.attributeGroupsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AttributeDefinitionsTableTableFilterComposer get definitionId {
+    final $$AttributeDefinitionsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.definitionId,
+          referencedTable: $db.attributeDefinitionsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeDefinitionsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.attributeDefinitionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AttributeGroupItemsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AttributeGroupItemsTableTable> {
+  $$AttributeGroupItemsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AttributeGroupsTableTableOrderingComposer get groupId {
+    final $$AttributeGroupsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.groupId,
+          referencedTable: $db.attributeGroupsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.attributeGroupsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AttributeDefinitionsTableTableOrderingComposer get definitionId {
+    final $$AttributeDefinitionsTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.definitionId,
+          referencedTable: $db.attributeDefinitionsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeDefinitionsTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.attributeDefinitionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AttributeGroupItemsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AttributeGroupItemsTableTable> {
+  $$AttributeGroupItemsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AttributeGroupsTableTableAnnotationComposer get groupId {
+    final $$AttributeGroupsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.groupId,
+          referencedTable: $db.attributeGroupsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeGroupsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeGroupsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AttributeDefinitionsTableTableAnnotationComposer get definitionId {
+    final $$AttributeDefinitionsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.definitionId,
+          referencedTable: $db.attributeDefinitionsTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AttributeDefinitionsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.attributeDefinitionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AttributeGroupItemsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AttributeGroupItemsTableTable,
+          AttributeGroupItemsTableData,
+          $$AttributeGroupItemsTableTableFilterComposer,
+          $$AttributeGroupItemsTableTableOrderingComposer,
+          $$AttributeGroupItemsTableTableAnnotationComposer,
+          $$AttributeGroupItemsTableTableCreateCompanionBuilder,
+          $$AttributeGroupItemsTableTableUpdateCompanionBuilder,
+          (
+            AttributeGroupItemsTableData,
+            $$AttributeGroupItemsTableTableReferences,
+          ),
+          AttributeGroupItemsTableData,
+          PrefetchHooks Function({
+            bool businessId,
+            bool groupId,
+            bool definitionId,
+          })
+        > {
+  $$AttributeGroupItemsTableTableTableManager(
+    _$AppDatabase db,
+    $AttributeGroupItemsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AttributeGroupItemsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$AttributeGroupItemsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$AttributeGroupItemsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> businessId = const Value.absent(),
+                Value<String> groupId = const Value.absent(),
+                Value<String> definitionId = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttributeGroupItemsTableCompanion(
+                id: id,
+                businessId: businessId,
+                groupId: groupId,
+                definitionId: definitionId,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String businessId,
+                required String groupId,
+                required String definitionId,
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttributeGroupItemsTableCompanion.insert(
+                id: id,
+                businessId: businessId,
+                groupId: groupId,
+                definitionId: definitionId,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AttributeGroupItemsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({businessId = false, groupId = false, definitionId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (businessId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.businessId,
+                                    referencedTable:
+                                        $$AttributeGroupItemsTableTableReferences
+                                            ._businessIdTable(db),
+                                    referencedColumn:
+                                        $$AttributeGroupItemsTableTableReferences
+                                            ._businessIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (groupId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.groupId,
+                                    referencedTable:
+                                        $$AttributeGroupItemsTableTableReferences
+                                            ._groupIdTable(db),
+                                    referencedColumn:
+                                        $$AttributeGroupItemsTableTableReferences
+                                            ._groupIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (definitionId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.definitionId,
+                                    referencedTable:
+                                        $$AttributeGroupItemsTableTableReferences
+                                            ._definitionIdTable(db),
+                                    referencedColumn:
+                                        $$AttributeGroupItemsTableTableReferences
+                                            ._definitionIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AttributeGroupItemsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AttributeGroupItemsTableTable,
+      AttributeGroupItemsTableData,
+      $$AttributeGroupItemsTableTableFilterComposer,
+      $$AttributeGroupItemsTableTableOrderingComposer,
+      $$AttributeGroupItemsTableTableAnnotationComposer,
+      $$AttributeGroupItemsTableTableCreateCompanionBuilder,
+      $$AttributeGroupItemsTableTableUpdateCompanionBuilder,
+      (AttributeGroupItemsTableData, $$AttributeGroupItemsTableTableReferences),
+      AttributeGroupItemsTableData,
+      PrefetchHooks Function({bool businessId, bool groupId, bool definitionId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -45046,4 +49863,18 @@ class $AppDatabaseManager {
       $$ShipmentsTableTableTableManager(_db, _db.shipmentsTable);
   $$DemoEventsTableTableTableManager get demoEventsTable =>
       $$DemoEventsTableTableTableManager(_db, _db.demoEventsTable);
+  $$AttributeDefinitionsTableTableTableManager get attributeDefinitionsTable =>
+      $$AttributeDefinitionsTableTableTableManager(
+        _db,
+        _db.attributeDefinitionsTable,
+      );
+  $$AttributeValuesTableTableTableManager get attributeValuesTable =>
+      $$AttributeValuesTableTableTableManager(_db, _db.attributeValuesTable);
+  $$AttributeGroupsTableTableTableManager get attributeGroupsTable =>
+      $$AttributeGroupsTableTableTableManager(_db, _db.attributeGroupsTable);
+  $$AttributeGroupItemsTableTableTableManager get attributeGroupItemsTable =>
+      $$AttributeGroupItemsTableTableTableManager(
+        _db,
+        _db.attributeGroupItemsTable,
+      );
 }

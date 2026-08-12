@@ -38,6 +38,10 @@ import 'tables/business_inputs.dart';
 import 'tables/business_profiles.dart';
 import 'tables/business_journeys.dart';
 import 'tables/opportunity_reactions.dart';
+import 'tables/attribute_definitions.dart';
+import 'tables/attribute_values.dart';
+import 'tables/attribute_groups.dart';
+import 'tables/attribute_group_items.dart';
 
 import 'migrations/tongtai_migrations.dart';
 
@@ -108,6 +112,10 @@ part 'database.g.dart';
     ImportJobsTable,
     ShipmentsTable,
     DemoEventsTable,
+    AttributeDefinitionsTable,
+    AttributeValuesTable,
+    AttributeGroupsTable,
+    AttributeGroupItemsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {

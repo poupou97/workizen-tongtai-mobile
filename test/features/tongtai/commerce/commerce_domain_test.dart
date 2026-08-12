@@ -62,10 +62,10 @@ void main() {
         );
   }
 
-  group('lược đồ v24→v26', () {
-    test('phiên bản hiện tại là 26', () {
-      expect(kTongtaiSchemaVersion, 26);
-      expect(db.schemaVersion, 26);
+  group('lược đồ v24→v27', () {
+    test('phiên bản hiện tại là 27', () {
+      expect(kTongtaiSchemaVersion, 27);
+      expect(db.schemaVersion, 27);
     });
 
     test('ba bảng mới tồn tại và có chỉ mục (P-32)', () async {
@@ -118,7 +118,7 @@ void main() {
   });
 
   group('nâng cấp từ v23 thật', () {
-    test('dữ liệu v23 sống sót qua v24 · v25 · v26', () async {
+    test('dữ liệu v23 sống sót qua v24 · v25 · v26 · v27', () async {
       final dir = await Directory.systemTemp.createTemp('tongtai-v23-');
       final file = File('${dir.path}/tongtai.db');
       addTearDown(() async {
@@ -157,7 +157,7 @@ void main() {
       final version = await upgraded
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(version.data.values.first, 26);
+      expect(version.data.values.first, 27);
     });
   });
 

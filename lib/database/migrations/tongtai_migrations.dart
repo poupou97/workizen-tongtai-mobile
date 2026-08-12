@@ -138,7 +138,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 26;
+const int kTongtaiSchemaVersion = 27;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -431,6 +431,23 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 27) {
+        // v27 (WTM-334 · Epic WTM-324 — Commerce Attribute Model, tầng DYNAMIC).
+        // Bốn bảng, thuần thêm mới: không đụng cột nào đang có, không rebuild
+        // bảng nào (bài học v14 — thêm và rebuild không đi chung vô tư).
+        //
+        // Thứ tự tạo theo phụ thuộc khoá ngoại: `groups` và `definitions`
+        // trước, rồi `values` (trỏ tới definitions) và `group_items` (trỏ tới
+        // cả hai). Mỗi bảng đi qua `_createTableWithIndexes` — `createTable`
+        // KHÔNG tạo chỉ mục (P-32), mà chính chỉ mục UNIQUE là thứ giữ luật
+        // "trùng code trong cùng scope ⇒ chặn" và "một value cho mỗi
+        // (definition, entity)". Thiếu chúng thì máy nâng cấp mất ràng buộc mà
+        // máy cài mới vẫn có — đúng lỗi 2026-08-08.
+        await _createTableWithIndexes(db, m, 'attribute_definitions_table');
+        await _createTableWithIndexes(db, m, 'attribute_groups_table');
+        await _createTableWithIndexes(db, m, 'attribute_values_table');
+        await _createTableWithIndexes(db, m, 'attribute_group_items_table');
       }
       if (from < 26) {
         // v26 (WTM-337 — Connected Business Experience). Một bảng, thuần thêm.

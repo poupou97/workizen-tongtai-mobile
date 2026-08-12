@@ -17,6 +17,7 @@ import '../profile/business_profile.dart';
 import '../orders/order.dart';
 import '../producer/supplier_favorite.dart';
 import '../producer/business_input.dart';
+import '../commerce/attributes/attribute_models.dart';
 
 /// Domain ⇄ JSON for the `.ttbk` v2 payload (WTM-164, ADR-TON-018).
 ///
@@ -806,6 +807,126 @@ class BackupCodec {
       warnings: _strings(json['warnings']) ?? const [],
       isDemo: json['isDemo'] == true,
       importedAt: importedAt,
+    );
+  }
+
+  // ── tầng thuộc tính động (WTM-334 · v27) ─────────────────────────────────
+
+  /// Kiểu lưu bằng **mã canonical** (`TEXT`, `MULTI_ENUM`…), không bằng nhãn.
+  static Map<String, Object?> encodeAttributeDefinition(
+    AttributeDefinition d,
+  ) => {
+    'id': d.id,
+    'code': d.code,
+    'type': d.type.code,
+    'label': d.label,
+    'unit': d.unit,
+    'enumOptions': d.enumOptions,
+    'createdAt': _iso(d.createdAt),
+    'updatedAt': _iso(d.updatedAt),
+  };
+
+  static AttributeDefinition? decodeAttributeDefinition(
+    Map<String, Object?> json,
+  ) {
+    final id = _str(json['id']);
+    final code = _str(json['code']);
+    final type = AttributeType.fromCode(_str(json['type']));
+    final label = _str(json['label']);
+    if (id == null || code == null || type == null || label == null) {
+      return null;
+    }
+    return AttributeDefinition(
+      id: id,
+      code: code,
+      type: type,
+      label: label,
+      unit: _str(json['unit']),
+      enumOptions: _strings(json['enumOptions']) ?? const [],
+      createdAt: _date(json['createdAt']),
+      updatedAt: _date(json['updatedAt']),
+    );
+  }
+
+  static Map<String, Object?> encodeAttributeValue(AttributeValue v) => {
+    'id': v.id,
+    'definitionId': v.definitionId,
+    'entityType': v.entityType,
+    'entityId': v.entityId,
+    'valueRaw': v.valueRaw,
+    'createdAt': _iso(v.createdAt),
+    'updatedAt': _iso(v.updatedAt),
+  };
+
+  static AttributeValue? decodeAttributeValue(Map<String, Object?> json) {
+    final id = _str(json['id']);
+    final definitionId = _str(json['definitionId']);
+    final entityType = _str(json['entityType']);
+    final entityId = _str(json['entityId']);
+    final valueRaw = _str(json['valueRaw']);
+    if (id == null ||
+        definitionId == null ||
+        entityType == null ||
+        entityId == null ||
+        valueRaw == null) {
+      return null;
+    }
+    return AttributeValue(
+      id: id,
+      definitionId: definitionId,
+      entityType: entityType,
+      entityId: entityId,
+      valueRaw: valueRaw,
+      createdAt: _date(json['createdAt']),
+      updatedAt: _date(json['updatedAt']),
+    );
+  }
+
+  static Map<String, Object?> encodeAttributeGroup(AttributeGroup g) => {
+    'id': g.id,
+    'code': g.code,
+    'label': g.label,
+    'sortOrder': g.sortOrder,
+    'createdAt': _iso(g.createdAt),
+    'updatedAt': _iso(g.updatedAt),
+  };
+
+  static AttributeGroup? decodeAttributeGroup(Map<String, Object?> json) {
+    final id = _str(json['id']);
+    final code = _str(json['code']);
+    final label = _str(json['label']);
+    if (id == null || code == null || label == null) return null;
+    return AttributeGroup(
+      id: id,
+      code: code,
+      label: label,
+      sortOrder: _int(json['sortOrder']) ?? 0,
+      createdAt: _date(json['createdAt']),
+      updatedAt: _date(json['updatedAt']),
+    );
+  }
+
+  static Map<String, Object?> encodeAttributeGroupItem(
+    AttributeGroupItem item,
+  ) => {
+    'id': item.id,
+    'groupId': item.groupId,
+    'definitionId': item.definitionId,
+    'sortOrder': item.sortOrder,
+  };
+
+  static AttributeGroupItem? decodeAttributeGroupItem(
+    Map<String, Object?> json,
+  ) {
+    final id = _str(json['id']);
+    final groupId = _str(json['groupId']);
+    final definitionId = _str(json['definitionId']);
+    if (id == null || groupId == null || definitionId == null) return null;
+    return AttributeGroupItem(
+      id: id,
+      groupId: groupId,
+      definitionId: definitionId,
+      sortOrder: _int(json['sortOrder']) ?? 0,
     );
   }
 }

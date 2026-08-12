@@ -41,6 +41,7 @@ final tongtaiBackupRepositoriesProvider = Provider<TongtaiBackupRepositories>(
     opportunityReactions: ref.watch(opportunityReactionRepositoryProvider),
     businessInputs: ref.watch(businessInputRepositoryProvider),
     commerce: ref.watch(commerceRepositoryProvider),
+    attributes: ref.watch(attributeRepositoryProvider),
   ),
 );
 
