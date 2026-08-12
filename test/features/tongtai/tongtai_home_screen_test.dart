@@ -2,6 +2,7 @@ import 'package:tongtai/database/database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tongtai/core/l10n/app_strings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_repository.dart';
@@ -297,7 +298,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text("Today's Missions"), findsOneWidget);
+    // WTM-388: khẳng định qua khoá l10n, không qua chuỗi viết cứng — câu chữ
+    // đổi được, nghĩa thì không. Khối này nay tên "Goal journey" vì nó nói về
+    // hành trình mục tiêu, chứ không nhận mình là "việc hôm nay" (câu đó có
+    // đúng một chủ, ở hero).
+    expect(find.text(AppStringsEn().homeTodaysMissions), findsOneWidget);
     // WTM-210: no goal means there is nothing to plan a journey for, and the
     // block says exactly that instead of showing goals dressed as missions.
     expect(find.textContaining('Create a goal first'), findsOneWidget);

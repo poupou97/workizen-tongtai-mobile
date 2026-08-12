@@ -38,7 +38,7 @@ import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../journey/journey_metric.dart';
 import 'tongtai_opportunity_feed_screen.dart';
-import '../../metrics/home_headline.dart';
+import '../../metrics/top_actions.dart';
 import '../widgets/tongtai_brief_card.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import 'tongtai_business_inputs_screen.dart';
@@ -468,7 +468,9 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           // hỏng thì nói ra. Nó KHÔNG đi qua `_data` vì brief là một đường
           // đọc khác nhịp — Rule Twin trên toàn sổ sách, không phải năm con
           // số của Home.
-          TongtaiBriefCard(clock: widget.clock),
+          // `showCount: false` — WTM-388. Trên Home thẻ này là nguồn phía
+          // sau, không phải một bảng đếm thứ hai.
+          TongtaiBriefCard(clock: widget.clock, showCount: false),
           const SizedBox(height: 16),
 
           // ── Today's missions — from the JOURNEY (WTM-210 · D-11) ──
@@ -483,6 +485,16 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           // The tiles read the JOURNEY, not goals wearing a mission label
           // (WTM-210) — Home and the journey screen describe "today's work"
           // from one source.
+          // ⭐ WTM-388: khối này nói về **hành trình mục tiêu**, không phải
+          // "việc hôm nay".
+          //
+          // Nó từng mang tiêu đề *"Việc hôm nay"* và hiện *"Chưa có nhiệm vụ
+          // nào"* — đứng ngay dưới câu *"Hôm nay có 5 việc đáng làm nhất"*.
+          // Hai câu cùng nhận là "hôm nay", nói ngược nhau, cách nhau một màn
+          // hình.
+          //
+          // Nội dung không đổi; thứ đổi là nó **thôi nhận mình là câu trả lời
+          // cho "hôm nay làm gì"** — câu đó nay chỉ có một chủ, ở hero.
           _SectionHeader(
             title: context.l10n.homeTodaysMissions,
             actionKey: const Key('home-open-journey'),
@@ -940,49 +952,51 @@ class _ModuleSummaryGrid extends StatelessWidget {
       mainAxisSpacing: 12,
       childAspectRatio: 2.4,
       children: [
+        // ⭐ WTM-389 — bốn ô này là **con số**, không phải phán quyết.
+        //
+        // Trước đây chúng mang màu năng lực: Nguồn hàng xanh lá, Kho hổ phách,
+        // Khách xanh dương. Trên máy Founder ô đầu hiện *"Nguồn hàng **0**"*
+        // bằng màu **xanh lá** — số không mang màu tin tốt, đúng lỗi
+        // `XÁM ≠ XANH`.
+        //
+        // Quyết định Founder 2026-08-12: giữ màu năng lực để **định vị** (thanh
+        // điều hướng), tuyệt đối không dùng chúng biểu diễn **giá trị hay trạng
+        // thái**. Ô đếm nay trung tính.
         _ModuleCard(
           cardKey: const Key('home-tile-producer'),
           title: context.l10n.navProducer,
           count: '$producers',
-          color: TtColors.success,
         ),
         _ModuleCard(
           cardKey: const Key('home-tile-inventory'),
           title: context.l10n.navInventory,
           count: '$inventory',
-          color: TtColors.warning,
         ),
         _ModuleCard(
           cardKey: const Key('home-tile-consumer'),
           title: context.l10n.navConsumer,
           count: '$consumers',
-          color: TtColors.info,
         ),
         _ModuleCard(
           cardKey: const Key('home-tile-journey'),
           title: context.l10n.tileJourney,
           count: '$journeys',
-          // Hành trình là **việc đang chờ làm**, không phải một cảnh báo —
-          // trước đây nó mang một mã màu hổ phách viết thẳng, không ai sở hữu.
-          color: TtColors.warning,
         ),
       ],
     );
   }
 }
 
+/// Ô đếm của một năng lực — **con số, không phán quyết** (WTM-389).
+///
+/// Xem chú thích ở [_KpiTile]: *"Nguồn hàng **0**"* từng hiện màu xanh lá, tức
+/// số không mang màu tin tốt.
 class _ModuleCard extends StatelessWidget {
-  const _ModuleCard({
-    this.cardKey,
-    required this.title,
-    required this.count,
-    required this.color,
-  });
+  const _ModuleCard({this.cardKey, required this.title, required this.count});
 
   final Key? cardKey;
   final String title;
   final String count;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -990,7 +1004,8 @@ class _ModuleCard extends StatelessWidget {
       key: cardKey,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color, width: 2),
+        color: TtColors.surface,
+        border: Border.all(color: TtColors.border, width: 2),
       ),
       // FittedBox: the grid's fixed aspect ratio cannot grow with the text
       // scale — shrink the content instead of overflowing (P0 §3).
@@ -1004,7 +1019,10 @@ class _ModuleCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontWeight: FontWeight.bold, color: color),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: TtColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -1041,7 +1059,6 @@ class _KpiRow extends StatelessWidget {
             tileKey: const Key('home-kpi-revenue'),
             label: context.l10n.kpiRevenue,
             value: TongtaiFormatters.vndShort(metrics.revenue),
-            color: TtColors.ai,
           ),
         ),
         const SizedBox(width: 12),
@@ -1050,7 +1067,6 @@ class _KpiRow extends StatelessWidget {
             tileKey: const Key('home-kpi-orders'),
             label: context.l10n.kpiOrders,
             value: '${metrics.ordersCount}',
-            color: TtColors.info,
           ),
         ),
         const SizedBox(width: 12),
@@ -1059,7 +1075,6 @@ class _KpiRow extends StatelessWidget {
             tileKey: const Key('home-kpi-aov'),
             label: context.l10n.kpiAovShort,
             value: TongtaiFormatters.vndShort(metrics.averageOrderValue),
-            color: TtColors.success,
           ),
         ),
       ],
@@ -1067,18 +1082,21 @@ class _KpiRow extends StatelessWidget {
   }
 }
 
+/// Một ô KPI — **con số, không phán quyết** (WTM-389).
+///
+/// Trước đây mỗi ô mang màu của một năng lực: Doanh thu **tím**, Đơn hàng xanh
+/// dương, Đơn TB xanh lá. Tím là màu của *"AI đang nói"* — nên ô Doanh thu ngầm
+/// bảo rằng **AI tạo ra con số ấy**, trong khi doanh thu là sự thật cộng từ đơn
+/// của chính người bán.
+///
+/// Quyết định Founder 2026-08-12: màu năng lực chỉ để **định vị**; giá trị và
+/// trạng thái dùng token trung tính hoặc ngữ nghĩa. Ô KPI không mang cả hai.
 class _KpiTile extends StatelessWidget {
-  const _KpiTile({
-    this.tileKey,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
+  const _KpiTile({this.tileKey, required this.label, required this.value});
 
   final Key? tileKey;
   final String label;
   final String value;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -1086,9 +1104,9 @@ class _KpiTile extends StatelessWidget {
       key: tileKey,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.06),
+        color: TtColors.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        border: Border.all(color: TtColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1207,15 +1225,20 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final headline = switch (homeHeadlineKind(
-      opportunityCount: opportunityCount,
+    // ⭐ WTM-388 — MỘT con số, và nó đã cắt ngưỡng.
+    //
+    // Trước đây câu này công bố **tổng** số cơ hội (43 trên máy Founder), rồi
+    // thẻ brief nói 17 và khối nhiệm vụ nói "chưa có" — ba con số, một màn.
+    // Nay Home chỉ nói *"N việc đáng làm nhất"*; 43 cơ hội vẫn còn nguyên ở
+    // tab Cơ hội, chỉ thôi bị ném cả vào mặt người bán ở cửa trước.
+    final top = TopActions.from(
+      signalCount: opportunityCount,
       hasData: hasData,
-    )) {
-      HomeHeadlineKind.opportunities => l10n.homeHeadlineOpportunities(
-        opportunityCount,
-      ),
-      HomeHeadlineKind.noneToday => l10n.homeHeadlineNoneToday,
-      HomeHeadlineKind.notEnoughData => l10n.homeHeadlineNotEnoughData,
+    );
+    final headline = switch (top.state) {
+      TopActionsState.hasWork => l10n.homeHeadlineTopActions(top.count),
+      TopActionsState.noneToday => l10n.homeHeadlineNoneToday,
+      TopActionsState.notEnoughData => l10n.homeHeadlineNotEnoughData,
     };
 
     return Column(

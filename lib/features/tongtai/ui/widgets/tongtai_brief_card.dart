@@ -34,12 +34,23 @@ import 'tongtai_fox_mascot.dart';
 /// Nhưng **hỏng thì phải nói** — im lặng ở đây sẽ đọc thành *"hôm nay không có
 /// gì đáng chú ý"*, và đó là câu dối nguy hiểm nhất màn hình này có thể nói.
 class TongtaiBriefCard extends ConsumerWidget {
-  const TongtaiBriefCard({super.key, this.clock, this.maxItems = 3});
+  const TongtaiBriefCard({
+    super.key,
+    this.clock,
+    this.maxItems = 3,
+    this.showCount = true,
+  });
 
   /// Đồng hồ tiêm được — lời chào theo buổi phải test được lúc 3 giờ sáng.
   final DateTime Function()? clock;
 
   final int maxItems;
+
+  /// Có công bố con số của riêng thẻ này không.
+  ///
+  /// `false` trên **Trang chủ** (WTM-388): ở đó thẻ là **nguồn**, và Home chỉ
+  /// được nói một con số. `true` ở mọi nơi khác, nơi nó là chủ của câu chuyện.
+  final bool showCount;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,16 +65,25 @@ class TongtaiBriefCard extends ConsumerWidget {
     return _BriefCardBody(
       items: items.take(maxItems).toList(),
       total: items.length,
+      showCount: showCount,
       clock: clock,
     );
   }
 }
 
 class _BriefCardBody extends StatelessWidget {
-  const _BriefCardBody({required this.items, required this.total, this.clock});
+  const _BriefCardBody({
+    required this.items,
+    required this.total,
+    required this.showCount,
+    this.clock,
+  });
 
   final List<BriefItem> items;
   final int total;
+
+  /// `false` trên Trang chủ — xem WTM-388.
+  final bool showCount;
   final DateTime Function()? clock;
 
   @override
@@ -103,7 +123,15 @@ class _BriefCardBody extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.briefHeadline(total),
+                      // ⭐ WTM-388: trên Trang chủ thẻ này là **nguồn**, không
+                      // phải một bảng đếm cạnh tranh. Nó từng nói "Có 17 việc
+                      // đáng chú ý" ngay dưới câu "43 cơ hội" — hai con số,
+                      // một màn, và người bán không biết tin cái nào.
+                      //
+                      // Con số vẫn còn ở màn Brief đầy đủ; ở đây nó nhường.
+                      showCount
+                          ? l10n.briefHeadline(total)
+                          : l10n.briefHeadlineNoCount,
                       key: const Key('home-brief-headline'),
                       style: const TextStyle(
                         fontSize: 16,
