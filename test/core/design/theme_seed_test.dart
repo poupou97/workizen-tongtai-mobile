@@ -35,10 +35,21 @@ void main() {
   /// `fromSeed` bằng tay ở đây.
   final scheme = tongtaiTheme.colorScheme;
 
-  test('⛔ hạt giống là CAM thương hiệu, không phải xanh lá', () {
-    // `fromSeed` không giữ nguyên hạt giống, nên không so bằng nhau được. Thứ
-    // so được — và cũng là thứ có nghĩa — là **sắc**: một lược đồ gieo từ cam
-    // không thể có primary nằm ở vùng xanh lá.
+  test('sắc của primary nằm ở vùng cam — ⚠️ CHỈ bắt được đổi SẮC', () {
+    // ⚠️ **Đọc kỹ giới hạn của test này trước khi tin nó.**
+    //
+    // Nó bắt được *"ai đó gieo lại bằng xanh lá"* (sắc 130°). Nó **KHÔNG** bắt
+    // được lỗi WTM-380 — nâu đất `#8D4E2A` mà `fromSeed` sinh ra có sắc
+    // **21,8°**, tức **nằm gọn trong khoảng 5–55 này**, nên test vẫn xanh
+    // trong khi hộp thoại trên máy màu nâu.
+    //
+    // Khác biệt thật giữa nâu và cam không nằm ở sắc mà ở **độ bão hoà**:
+    // 0,541 so với 0,883. Khẳng định của test thuộc một trục, còn cái hỏng
+    // thuộc trục khác — nên nó đúng mà vô dụng.
+    //
+    // Cửa thật sự bảo vệ là test dưới (`primary == brandOnDark`) và ca âm tính
+    // ở cuối file. Dòng này ở lại vì nó vẫn rẻ và vẫn bắt được một dạng lỗi —
+    // nhưng nó **không** phải cái đang giữ cửa.
     final hue = HSLColor.fromColor(scheme.primary).hue;
     expect(
       hue,
@@ -131,6 +142,42 @@ void main() {
         reason: '${pair.key} chỉ đạt ${contrast(fg, bg).toStringAsFixed(2)}:1',
       );
     }
+  });
+
+  group('⭐ ca ÂM TÍNH — chính màu đã lên máy sáng 12/08', () {
+    // Cách duy nhất biết một chốt có đo đúng thứ cần đo: **đưa cho nó đúng cái
+    // đã hỏng** và xem nó có đỏ không.
+    //
+    // `#8D4E2A` không phải màu nghĩ ra: đó là `ColorScheme.fromSeed(brand)
+    // .primary` — thứ Material sinh ra và thứ người dùng nhìn thấy trên nút
+    // *"Nạp mẫu"* trước WTM-380.
+    final brown = ColorScheme.fromSeed(seedColor: TtColors.brand).primary;
+
+    test('màu nâu ấy KHÁC token DS ⇒ cửa hiện tại đỏ với nó', () {
+      expect(
+        scheme.primary,
+        isNot(brown),
+        reason: 'theme đang mang chính màu nâu của lỗi WTM-380',
+      );
+      expect(scheme.primary, TtColors.brandOnDark);
+    });
+
+    test('⚠️ và ĐÂY là lý do khoá theo sắc là chưa đủ', () {
+      // Ghi lại phép đo, không phải một lời khẳng định suông: nếu Material đổi
+      // thuật toán tông màu, con số này đổi và ai đó sẽ phải đọc lại đoạn văn
+      // ở đầu file thay vì tin nó.
+      final h = HSLColor.fromColor(brown);
+      expect(
+        h.hue,
+        inInclusiveRange(5, 55),
+        reason: 'nâu đất VẪN nằm trong vùng sắc "cam" — nên sắc không cứu được',
+      );
+      expect(
+        h.saturation,
+        lessThan(HSLColor.fromColor(TtColors.brandOnDark).saturation - 0.2),
+        reason: 'khác biệt thật nằm ở độ bão hoà, không ở sắc',
+      );
+    });
   });
 
   test('⭐ phép đo tương phản tự nó đúng (chống PASS giả)', () {
