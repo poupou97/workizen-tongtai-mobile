@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
 import '../../consumer/customer.dart';
+import '../../consumer/customer_segment.dart';
 import '../../core/provenance.dart';
 import '../../core/tongtai_enums.dart';
 import '../../finance/settlement.dart';
@@ -412,8 +413,11 @@ class XlsxCommerceSource implements CommerceImportSource {
           // bao giờ mua thành một khách vừa mua sáng nay.
           lastPurchaseDate: sheet.date(row, 'last_order'),
           segments: [
-            if (sheet.cell(row, 'segment').isNotEmpty)
-              sheet.cell(row, 'segment'),
+            // WTM-381: quy về mã canonical ngay tại cửa nhập. Ô của bảng tính
+            // mang mã máy (`one_time`, `dormant`); in thẳng lên màn là đưa chữ
+            // của máy cho người bán đọc.
+            if (sheet.cell(row, 'segment').trim().isNotEmpty)
+              CustomerSegment.normalise(sheet.cell(row, 'segment')),
           ],
         ),
       );
