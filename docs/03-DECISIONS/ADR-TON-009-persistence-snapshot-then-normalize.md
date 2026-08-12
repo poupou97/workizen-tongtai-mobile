@@ -85,3 +85,34 @@ Lightweight — no heavy governance process (WTM-122 tracks promotions).
 Apply B now; continue Autonomous Product Build. Do **not** stop a sprint for
 wholesale normalization — pull a promotion into a sprint only when a business
 trigger is clear or it directly concerns the capability under development.
+
+## Amendment 2 (WTM-333, 2026-08-12) — the attribute layer replaces the snapshot as Product's **primary** extension mechanism
+
+**Founder-directed (2026-08-09), recorded here per WTM-333 decision ②.** Còn hiệu lực
+với `Customer`/`BusinessGoal`; **thay đổi cách mở rộng của `Product`.**
+
+Bối cảnh: hôm nay một trường của `Product` có thể ở **hai nhà** — cột typed và
+`domainSnapshot` (JSON). Story WTM-334 thêm một **tầng thuộc tính động**
+(`attribute_definitions/values/groups`). Nếu snapshot vẫn tiếp tục nhận field mở rộng
+mới thì cùng một dữ liệu có **ba nhà** (cột · snapshot · attribute) — đúng hình dạng
+lỗi P-27/P-28 (*"trường đã lưu vs. luật dẫn xuất"*, hai nguồn một câu hỏi).
+
+Quyết định cho **`Product`**:
+
+1. Cơ chế mở rộng **chính** của `Product` từ nay = **tầng thuộc tính động** (spec ·
+   phân loại · metadata theo ngành), theo phân loại trong
+   [`docs/05-DATA/COMMERCE-ATTRIBUTE-MODEL.md`](../05-DATA/COMMERCE-ATTRIBUTE-MODEL.md).
+2. `Product.domainSnapshot` **chỉ còn hai việc**: (a) tương thích ngược cho dữ liệu
+   đã lưu; (b) giữ `imagePaths` **tới khi** thực thể `Media` thay thế.
+3. ⛔ **Không thêm extension field mới vào `Product.domainSnapshot`.** Trường mở rộng
+   mới của Product: nếu **load-bearing** (chạm inventory/price/profit/order/settlement/
+   identity/listing-lifecycle/automation) ⇒ **promote thành cột** (con đường "promote"
+   ở trên vẫn nguyên); nếu **spec/metadata theo ngành** ⇒ **tầng thuộc tính**, không
+   phải snapshot.
+4. **Snapshot pattern (option B) không bị supersede** — nó vẫn là cơ chế transitional
+   cho các domain lệch schema khác; chỉ riêng vai trò *"nơi chứa extension mới của
+   Product"* được chuyển sang tầng thuộc tính.
+
+Ràng buộc kỹ thuật của tầng thuộc tính (WTM-334) — tải on-demand ở màn chi tiết, ⛔
+không join vào list/summary/Capability Context (ADR-TON-019) — đứng độc lập với ADR
+này; xem WTM-334.
