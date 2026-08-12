@@ -8,6 +8,7 @@ import '../../analytics/customer_rfm.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../consumer/customer.dart';
+import '../../consumer/customer_segment.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../providers/tongtai_consumer_provider.dart';
@@ -121,11 +122,21 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
     final active = customers.where(_isActive).length;
     final fresh = customers.where((c) => c.orderCount == 0).length;
 
+    // ⚠️ WTM-381: gộp theo phân khúc **đã phân giải**, không theo chuỗi thô.
+    //
+    // Trước đây khoá của bảng đếm là chính chuỗi lưu trong `segments`, mà chuỗi
+    // ấy có hai nguồn ghi bằng hai hệ đặt tên — nên *"Khách mới"* và *"new"*
+    // thành hai dòng, với hai con số. Người bán không biết mình có 6 hay 8
+    // khách mới.
+    //
+    // Khoá nay là mã canonical (hoặc chính chuỗi người dùng tự đặt, khi không
+    // phân giải được), nên một phân khúc chỉ còn **một** chip và **một** số.
     final segmentTally = <String, int>{};
     for (final c in customers) {
       for (final s in c.segments) {
         if (s.trim().isEmpty) continue;
-        segmentTally[s] = (segmentTally[s] ?? 0) + 1;
+        final key = CustomerSegment.normalise(s);
+        segmentTally[key] = (segmentTally[key] ?? 0) + 1;
       }
     }
 
@@ -259,7 +270,12 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                 for (final entry
                     in (segmentTally.entries.toList()
                       ..sort((a, b) => b.value.compareTo(a.value))))
-                  Chip(label: Text('${entry.key} (${entry.value})')),
+                  Chip(
+                    label: Text(
+                      '${CustomerSegment.display(entry.key, l10n.languageCode)}'
+                      ' (${entry.value})',
+                    ),
+                  ),
               ],
             ),
           const SizedBox(height: 24),

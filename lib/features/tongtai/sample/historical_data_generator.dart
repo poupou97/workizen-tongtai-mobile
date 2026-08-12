@@ -1,5 +1,6 @@
 library;
 
+import '../consumer/customer_segment.dart';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -154,6 +155,19 @@ enum CustomerBehaviour {
     CustomerBehaviour.slowing => 'Slowing down',
     CustomerBehaviour.atRisk => 'At risk',
     CustomerBehaviour.churned => 'Churned',
+  };
+
+  /// Phân khúc canonical tương ứng — WTM-381.
+  ///
+  /// Bộ sinh dữ liệu **không** tự đặt tên phân khúc nữa: nó dịch sang bộ từ
+  /// vựng đóng, để thứ ghi xuống ổ đĩa là **mã**, không phải nhãn tiếng Việt.
+  CustomerSegment get segment => switch (this) {
+    CustomerBehaviour.newcomer => CustomerSegment.newcomer,
+    CustomerBehaviour.loyal => CustomerSegment.loyal,
+    CustomerBehaviour.returning => CustomerSegment.returning,
+    CustomerBehaviour.slowing => CustomerSegment.slowing,
+    CustomerBehaviour.atRisk => CustomerSegment.atRisk,
+    CustomerBehaviour.churned => CustomerSegment.churned,
   };
 
   String get labelVi => switch (this) {
@@ -626,7 +640,10 @@ class HistoricalDataGenerator {
           // The behaviour is readable from the orders; the segment simply
           // names what the data already shows, so the Consumer facets and the
           // predictive rules agree instead of contradicting each other.
-          segments: [plan.behaviour.labelVi],
+          // ⚠️ WTM-381: lưu **mã canonical**, không lưu nhãn hiển thị.
+          // ADR-TON-018 cấm nhãn hiển thị nằm trong dữ liệu — nhãn tiếng Việt
+          // ở đây từng đi thẳng xuống SQLite và vào cả `.ttbk`.
+          segments: [plan.behaviour.segment.code],
         ),
       );
     }
