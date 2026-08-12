@@ -33,6 +33,9 @@ abstract class AppStrings {
   /// "Có N việc đáng chú ý hôm nay".
   String briefHeadline(int count);
 
+  /// Cùng thẻ, **không** con số — dùng trên Trang chủ (WTM-388).
+  String get briefHeadlineNoCount;
+
   String get briefNothingTitle;
   String get briefNothingBody;
   String get briefSeeAll;
@@ -525,6 +528,12 @@ abstract class AppStrings {
   /// một hàng số. Ba câu, ba trạng thái phân biệt.
   String get homeGreeting;
   String homeHeadlineOpportunities(int count);
+
+  /// ⭐ WTM-388 — câu **duy nhất** Trang chủ nói về "hôm nay làm gì".
+  ///
+  /// Thay `homeHeadlineOpportunities`, vốn công bố **tổng** số cơ hội (43) rồi
+  /// để hai con số khác trên cùng màn nói ngược lại.
+  String homeHeadlineTopActions(int count);
   String get homeHeadlineNoneToday;
   String get homeHeadlineNotEnoughData;
   String get homeAskHint;
@@ -1923,6 +1932,8 @@ class AppStringsVi extends AppStrings {
   @override
   String briefHeadline(int count) => 'Có $count việc đáng chú ý hôm nay';
   @override
+  String get briefHeadlineNoCount => 'Tôi đã xem qua doanh nghiệp sáng nay';
+  @override
   String get briefNothingTitle => 'Chưa có việc nào cần bạn quyết';
   @override
   String get briefNothingBody =>
@@ -2101,6 +2112,9 @@ class AppStringsVi extends AppStrings {
   String homeHeadlineOpportunities(int count) =>
       'Hôm nay tôi tìm được $count cơ hội cho bạn.';
   @override
+  String homeHeadlineTopActions(int count) =>
+      'Hôm nay có $count việc đáng làm nhất.';
+  @override
   String get homeHeadlineNoneToday =>
       'Hôm nay chưa có cơ hội nào nổi bật. Cứ ghi việc kinh doanh như thường, '
       'tôi vẫn đang theo dõi.';
@@ -2232,7 +2246,7 @@ class AppStringsVi extends AppStrings {
   String supplierMinOrder(int units, String leadTime) =>
       'Tối thiểu $units • $leadTime';
   @override
-  String get homeTodaysMissions => 'Việc hôm nay';
+  String get homeTodaysMissions => 'Hành trình mục tiêu';
   @override
   String homeRoiMultiple(String multiple) => 'ROI ×$multiple';
   @override
@@ -4036,6 +4050,8 @@ class AppStringsEn extends AppStrings {
   @override
   String briefHeadline(int count) => '$count things worth your attention today';
   @override
+  String get briefHeadlineNoCount => 'I looked over your business this morning';
+  @override
   String get briefNothingTitle => 'Nothing needs your decision yet';
   @override
   String get briefNothingBody =>
@@ -4216,6 +4232,9 @@ class AppStringsEn extends AppStrings {
   String homeHeadlineOpportunities(int count) =>
       'I found $count opportunities for you today.';
   @override
+  String homeHeadlineTopActions(int count) =>
+      '$count things worth doing today.';
+  @override
   String get homeHeadlineNoneToday =>
       'Nothing stands out today. Keep recording your business — I am still '
       'watching.';
@@ -4349,7 +4368,7 @@ class AppStringsEn extends AppStrings {
   String supplierMinOrder(int units, String leadTime) =>
       'Min $units • $leadTime';
   @override
-  String get homeTodaysMissions => "Today's Missions";
+  String get homeTodaysMissions => 'Goal journey';
   @override
   String homeRoiMultiple(String multiple) => 'ROI ×$multiple';
   @override

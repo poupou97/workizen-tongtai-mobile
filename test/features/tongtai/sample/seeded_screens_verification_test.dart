@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tongtai/core/l10n/app_strings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtai/core/prefs.dart';
@@ -144,7 +145,12 @@ void main() {
     tester,
   ) async {
     await pump(tester, const TongtaiHomeScreen());
-    await pumpUntilFound(tester, find.textContaining('Việc hôm nay'));
+    // WTM-388: khối này đổi tên thành "Hành trình mục tiêu" — nó thôi nhận
+    // mình là câu trả lời cho "hôm nay làm gì", vì câu đó nay chỉ có một chủ.
+    await pumpUntilFound(
+      tester,
+      find.textContaining(AppStringsVi().homeTodaysMissions),
+    );
 
     expectNoEnglishCounts(tester);
     // Thẻ đỏ của WTM-342 không được quay lại: brief phải dựng được.

@@ -221,6 +221,42 @@ void main() {
     }
   });
 
+  test('⛔ ô ĐẾM trên Trang chủ không mang màu năng lực (WTM-389)', () {
+    // ⭐ Quyết định Founder 2026-08-12:
+    //
+    //   *"Giữ capability/navigation colors để ĐỊNH VỊ, nhưng tuyệt đối không
+    //   dùng chúng biểu diễn trạng thái/value. KPI phải dùng neutral/semantic
+    //   tokens; AI color chỉ cho AI semantics."*
+    //
+    // Trên Nokia 6.1, Trang chủ hiện *"Nguồn hàng **0**"* màu **xanh lá** — số
+    // không mang màu tin tốt — và ô *"Doanh thu"* màu **tím**, tức ngầm bảo AI
+    // tạo ra con số ấy, trong khi doanh thu là tổng các đơn của chính người
+    // bán.
+    //
+    // Thanh điều hướng KHÔNG nằm trong luật này: ở đó màu để định vị, không
+    // nói gì về giá trị.
+    final home = File('$uiDir/screens/tongtai_home_screen.dart');
+    final code = codeOf(home);
+    for (final tile in const ['_KpiTile(', '_ModuleCard(']) {
+      for (var i = 0; i < code.length;) {
+        final at = code.indexOf(tile, i);
+        if (at < 0) break;
+        final block = code.substring(at, (at + 220).clamp(0, code.length));
+        final hit = RegExp(
+          r'color:\s*TtColors\.(ai|info|success|warning)\b',
+        ).firstMatch(block);
+        expect(
+          hit,
+          isNull,
+          reason:
+              'ô đếm Trang chủ mang ${hit?.group(0)} — màu năng lực để định vị, '
+              'không để nói giá trị',
+        );
+        i = at + 1;
+      }
+    }
+  });
+
   group('⭐ `readableOn` với đối số cố định — dùng HẰNG, không gọi hàm', () {
     // ⚠️ Lỗi đã xảy ra thật (WTM-374): phép thay sinh ra
     // `TtColors.readableOn(TtColors.danger)` bên trong một widget `const`, và
