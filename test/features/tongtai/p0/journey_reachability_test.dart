@@ -75,6 +75,9 @@ void main() {
     'tongtai_chat_search_screen.dart': 3,
     'tongtai_unified_search_screen.dart': 3,
     'tongtai_customer_history_screen.dart': 3,
+    // WTM-335 — read-only grouped attribute view, reached by tapping a product
+    // row on the Inventory screen.
+    'tongtai_product_detail_screen.dart': 3,
     'tongtai_business_profile_screen.dart': 3,
     'tongtai_feedback_screen.dart': 3,
     'tongtai_journey_screen.dart': 3,

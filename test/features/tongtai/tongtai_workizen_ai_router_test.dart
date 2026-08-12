@@ -250,6 +250,34 @@ void main() {
       expect(prompt, contains('Tồn kho:'));
     });
 
+    test('WTM-335 §14: a mentioned product injects its GROUPED attributes', () {
+      // The grouped attribute context is injected as already-grouped text
+      // (never a raw key/value dump), keyed by product id ('p01' = the fan).
+      final grouped = WorkizenAiContextBuilder(
+        products: kSampleProducts,
+        productAttributeContext: const {
+          'p01': '## Điện tử\n- Công suất: 350 W\n- Điện áp: 220 V',
+        },
+      );
+      final prompt = grouped.build('Quạt mini cầm tay dùng điện áp nào?');
+      expect(prompt, contains('## Điện tử'));
+      expect(prompt, contains('- Công suất: 350 W'));
+      expect(prompt, contains('- Điện áp: 220 V'));
+      // No internal metadata leaks into the prompt.
+      expect(prompt, isNot(contains('system.')));
+      expect(prompt, isNot(contains('definitionId')));
+    });
+
+    test(
+      'WTM-335 §14: no attribute context ⇒ no grouped block in the prompt',
+      () {
+        // The default (whole-business chat) leaves the map empty, so nothing is
+        // appended — no dangling "## " heading.
+        final prompt = builder.build('Quạt mini cầm tay còn hàng không?');
+        expect(prompt, isNot(contains('## Điện tử')));
+      },
+    );
+
     test('router forwards the built system prompt to the provider', () async {
       await keys.write(TongtaiAiProviderKind.xai, 'xai-key');
 

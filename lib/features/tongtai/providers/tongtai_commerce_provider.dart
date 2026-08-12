@@ -8,7 +8,10 @@ import '../commerce/commerce_opportunity_service.dart';
 import '../commerce/commerce_profit.dart';
 import '../commerce/supplier_comparison.dart';
 import '../commerce/commerce_repository.dart';
+import '../commerce/attributes/attribute_models.dart';
 import '../commerce/attributes/attribute_repository.dart';
+import '../commerce/attributes/product_attribute_enricher.dart';
+import '../commerce/attributes/product_attribute_view.dart';
 import '../commerce/import/commerce_import.dart';
 import '../commerce/import/commerce_importer.dart';
 import '../commerce/import/xlsx_commerce_source.dart';
@@ -144,3 +147,45 @@ final supplierComparisonProvider =
           .loadQuotes(productId: productId);
       return SupplierComparison.from(productId: productId, quotes: quotes);
     });
+
+// ── C6 · thuộc tính động theo nhóm (WTM-335) ──────────────────────────────────
+
+/// Thuộc tính động của **một** sản phẩm, đã gom theo nhóm — tải **on-demand ở
+/// màn chi tiết** (ADR-TON-019). Đây là đường đọc DUY NHẤT của tầng value: nó
+/// nằm ở một provider file được phép (`tongtai_commerce_provider.dart`), nên
+/// governance `lib/`-scan vẫn xanh, và không màn danh sách/summary nào chạm tới.
+///
+/// Trả về danh sách rỗng khi sản phẩm không có thuộc tính nào ⇒ màn chi tiết
+/// **không dựng khối rỗng** (§15).
+final productAttributeGroupsProvider =
+    FutureProvider.family<List<AttributeDisplayGroup>, String>((
+      ref,
+      productId,
+    ) async {
+      final repo = ref.watch(attributeRepositoryProvider);
+      final values = await repo.loadValuesForEntity(
+        kProductAttributeEntityType,
+        productId,
+      );
+      // Không có giá trị thì dừng ngay: khỏi tải định nghĩa/nhóm cho một sản
+      // phẩm chẳng có thuộc tính nào.
+      if (values.isEmpty) return const [];
+      final definitions = await repo.loadDefinitions();
+      final groups = await repo.loadGroups();
+      final groupItems = <AttributeGroupItem>[
+        for (final group in groups) ...await repo.loadGroupItems(group.id),
+      ];
+      return buildAttributeDisplayGroups(
+        values: values,
+        definitions: definitions,
+        groups: groups,
+        groupItems: groupItems,
+      );
+    });
+
+/// Bộ làm giàu thuộc tính cho dataset mẫu (WTM-335). Sống ở tầng attribute nên
+/// governance scan cho phép; `SampleBusinessSeeder` chỉ giữ nó qua kiểu
+/// **không bị canh** [ProductAttributeEnricher], không tự chạm value store.
+final productAttributeEnricherProvider = Provider<ProductAttributeEnricher>(
+  (ref) => ProductAttributeEnricher(ref.watch(attributeRepositoryProvider)),
+);

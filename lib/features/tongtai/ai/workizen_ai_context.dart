@@ -21,13 +21,27 @@ class WorkizenAiContextBuilder {
     List<Customer>? customers,
     List<Product>? products,
     CustomerOrderHistoryService? orderHistory,
+    Map<String, String>? productAttributeContext,
   }) : _customers = customers ?? const [],
        _products = products ?? const [],
-       _orderHistory = orderHistory ?? CustomerOrderHistoryService(const []);
+       _orderHistory = orderHistory ?? CustomerOrderHistoryService(const []),
+       _productAttributeContext = productAttributeContext ?? const {};
 
   final List<Customer> _customers;
   final List<Product> _products;
   final CustomerOrderHistoryService _orderHistory;
+
+  /// Per-product **grouped** attribute context (WTM-335 §14), keyed by product
+  /// id. Each value is already grouped text (`## <group>` / `- field: value`)
+  /// produced by `buildAttributeAiContext` — never a raw key/value dump, and
+  /// never carrying codes, ids or scope.
+  ///
+  /// It is *injected*, not read here: attributes load only on demand at the
+  /// detail screen (ADR-TON-019), so a caller with a product in focus builds
+  /// this map from that one read and passes it in. The whole-business chat
+  /// leaves it empty, and the prompt simply omits the section — no list-path
+  /// attribute read ever happens.
+  final Map<String, String> _productAttributeContext;
 
   /// Customers whose name appears in [prompt] (case-insensitive).
   List<Customer> customersMentionedIn(String prompt) {
@@ -140,11 +154,20 @@ class WorkizenAiContextBuilder {
           'thúc ép.',
   };
 
-  String _productContext(Product product) =>
-      '- SKU ${product.sku} · ${product.category}\n'
-      '- Giá bán: ${TongtaiFormatters.vnd(product.pricePerUnit)}'
-      // Sản phẩm không có tồn kho thì KHÔNG nhắc tồn kho với AI: một dòng
-      // "Tồn kho: 0" trong prompt là lời nói dối đi thẳng vào mô hình.
-      '${product.quantity == null ? '' : ' · Tồn kho: ${product.quantity}'}'
-      '${product.needsRestock ? ' (DƯỚI mức đặt lại ${product.reorderLevel} — cần nhập thêm)' : ''}';
+  String _productContext(Product product) {
+    final core =
+        '- SKU ${product.sku} · ${product.category}\n'
+        '- Giá bán: ${TongtaiFormatters.vnd(product.pricePerUnit)}'
+        // Sản phẩm không có tồn kho thì KHÔNG nhắc tồn kho với AI: một dòng
+        // "Tồn kho: 0" trong prompt là lời nói dối đi thẳng vào mô hình.
+        '${product.quantity == null ? '' : ' · Tồn kho: ${product.quantity}'}'
+        '${product.needsRestock ? ' (DƯỚI mức đặt lại ${product.reorderLevel} — cần nhập thêm)' : ''}';
+
+    // §14: thuộc tính động đi vào prompt **đã gom nhóm**, không phải một đống
+    // key-value thô — và chỉ khi sản phẩm này thật sự có (map rỗng ⇒ bỏ qua,
+    // không thêm tiêu đề trống).
+    final attributes = _productAttributeContext[product.id];
+    if (attributes == null || attributes.trim().isEmpty) return core;
+    return '$core\n$attributes';
+  }
 }

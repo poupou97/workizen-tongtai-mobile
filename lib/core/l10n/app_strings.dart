@@ -648,6 +648,18 @@ abstract class AppStrings {
   String get stockAllHealthy;
   String get stockAllHealthyBody;
 
+  // ── Product detail (WTM-335) — read-only grouped attribute view ──────────
+  String get productDetailTitle;
+  String get productDetailCoreSection;
+  String get productDetailSpecSection;
+  String get productDetailEdit;
+  String get productDetailSku;
+  String get productDetailCategory;
+  String get productDetailPrice;
+  String get productDetailStock;
+  String get productDetailKind;
+  String get productDetailBrand;
+
   // ── More sections/entries (WTM-33) ──────────────────────────────────────
   String get moreSettings;
   String get moreNotifications;
@@ -2290,6 +2302,28 @@ class AppStringsVi extends AppStrings {
   @override
   String get stockAllHealthyBody =>
       'Không có sản phẩm nào chạm ngưỡng đặt lại.';
+
+  // ── Product detail (WTM-335) ──────────────────────────────────────────────
+  @override
+  String get productDetailTitle => 'Chi tiết sản phẩm';
+  @override
+  String get productDetailCoreSection => 'Thông tin chính';
+  @override
+  String get productDetailSpecSection => 'Thông số kỹ thuật';
+  @override
+  String get productDetailEdit => 'Sửa';
+  @override
+  String get productDetailSku => 'SKU';
+  @override
+  String get productDetailCategory => 'Danh mục';
+  @override
+  String get productDetailPrice => 'Giá bán';
+  @override
+  String get productDetailStock => 'Tồn kho';
+  @override
+  String get productDetailKind => 'Loại';
+  @override
+  String get productDetailBrand => 'Thương hiệu';
 
   @override
   String get moreSettings => 'Cài đặt';
@@ -4413,6 +4447,28 @@ class AppStringsEn extends AppStrings {
   @override
   String get stockAllHealthyBody =>
       'No products are at or below their reorder threshold.';
+
+  // ── Product detail (WTM-335) ──────────────────────────────────────────────
+  @override
+  String get productDetailTitle => 'Product detail';
+  @override
+  String get productDetailCoreSection => 'Key information';
+  @override
+  String get productDetailSpecSection => 'Specifications';
+  @override
+  String get productDetailEdit => 'Edit';
+  @override
+  String get productDetailSku => 'SKU';
+  @override
+  String get productDetailCategory => 'Category';
+  @override
+  String get productDetailPrice => 'Price';
+  @override
+  String get productDetailStock => 'Stock';
+  @override
+  String get productDetailKind => 'Type';
+  @override
+  String get productDetailBrand => 'Brand';
 
   @override
   String get moreSettings => 'Settings';
