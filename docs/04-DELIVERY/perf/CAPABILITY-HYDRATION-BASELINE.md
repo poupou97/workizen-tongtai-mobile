@@ -38,6 +38,31 @@ xác nhận đọc lặp là **thuộc tính của cách nối dây**, không ph
 liệu. Nghĩa là nó sửa được ở tầng kiến trúc, và mọi hướng trong ADR-TON-019 đều
 phải hạ được đúng bộ số này.
 
+## Aggregation fan-out — ai đọc bảng nào, mấy lần, trong MỘT hydration
+
+Khoá ở `capability_aggregation_baseline_test.dart` (WTM-391). Bổ sung cho query
+counts ở trên: query counts nói *cả cold start đọc mỗi bảng mấy lần*; fan-out nói
+*mỗi Capability Context góp bao nhiêu lần đọc vào MỘT hydration*. Bất biến ở
+3/12/24/60 tháng — fan-out là thuộc tính của cách nối dây, không phải của dữ liệu.
+
+| Capability | customers | products | orders | goals | finance |
+|---|:-:|:-:|:-:|:-:|:-:|
+| `metrics` (KPI SoT) | 1 | · | 1 | · | · |
+| `customer` | 1 | · | · | · | · |
+| `order` | · | · | 1 | · | · |
+| `inventory` | · | 1 | · | · | · |
+| `opportunity` | 1 | 1 | 1 | 1 | · |
+| `journey` | · | · | 1 | 1 | · |
+| `finance` | · | · | 1 | · | 1 |
+| `timeline` | · | · | 1 | 1 | 1 |
+| **Tổng / hydration** | **3** | **2** | **6** | **3** | **2** |
+
+`orders` bị đọc **6 lần** trong một hydration, bởi sáu người tiêu thụ — đây là
+bảng "ai đọc `orders`" của ADR-TON-019 bằng số khoá được. Con số cold start toàn
+cục cao hơn ở `customers`/`goals`/`products` vì các tab Inventory/Consumer/Home
+đọc thêm **ngoài** hydration. Test còn assert `hydrationTotal == Σ(per-capability)`
+để không có lần đọc ẩn nào lọt khỏi bảng này.
+
 ## Baseline theo khối lượng (host — dùng làm tỉ lệ)
 
 | tháng | orders | customers | finance | products | 1 lượt đọc | hydration | **tỉ lệ** |
@@ -112,6 +137,7 @@ seed 24 và 60 tháng trên máy thật, chạy bản release có
 | test | khoá cái gì |
 |---|---|
 | `capability_hydration_benchmark_test` | query counts ở **cả 4 mốc** |
+| `capability_aggregation_baseline_test` | aggregation fan-out mỗi capability ở **cả 4 mốc** + `hydrationTotal == Σ(parts)` |
 | `cold_start_read_amplification_test` | query counts ở đường cold start |
 | `cold_start_scale_probe_test` | tỉ lệ ở 12 tháng < 6× |
 
