@@ -291,7 +291,7 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
                       dense: true,
                       title: Text(o.title),
                       subtitle: Text(
-                        '+${TongtaiFormatters.vnd(o.expectedImpact)}'
+                        '${tongtaiImpactLabel(o, estimatePrefix: l10n.oppEstimatePrefix, observedPrefix: l10n.oppObservedPrefix, money: TongtaiFormatters.vnd)}'
                         ' · ${l10n.oppScoreLabel} '
                         '${o.score.value?.round() ?? '—'}',
                       ),

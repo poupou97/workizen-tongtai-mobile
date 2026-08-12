@@ -24,7 +24,12 @@ String opportunityPromptBlock(Opportunity o) =>
     '# Cơ hội cần đánh giá\n'
     '- Tiêu đề: ${o.title}\n'
     '- Mô tả: ${o.description}\n'
-    '- Tác động kỳ vọng: ${TongtaiFormatters.vnd(o.expectedImpact)}\n'
+    // ⚠️ WTM-384: nói THẬT con số là gì. Trước đây mọi cơ hội đều gắn nhãn
+    // "tác động kỳ vọng", kể cả khi con số là doanh thu ĐÃ QUA — nên AI đi
+    // giải thích một lời hứa không có thật.
+    '${o.impactBasis.isEstimate ? '- Tác động ƯỚC TÍNH nếu làm việc này' : '- Doanh thu ĐÃ ĐẠT trong 60 ngày qua (KHÔNG phải khoản thêm vào; '
+              'không được hứa đây là tiền sẽ kiếm thêm)'}'
+    ': ${TongtaiFormatters.vnd(o.expectedImpact)}\n'
     '- Điểm rule-based: ${_scoreText(o)}';
 
 /// Parses the trailing `ĐIỂM: NN` line of an AI answer; null when absent or
@@ -66,7 +71,8 @@ class OpportunityAiInsight {
 /// every provider fails. Score = the rule score (the authoritative one).
 String ruleBasedOpportunityInsight(Opportunity o) =>
     '${o.description}\n'
-    'Đánh giá rule-based: điểm ${_scoreText(o)} · tác động '
+    'Đánh giá rule-based: điểm ${_scoreText(o)} · '
+    '${o.impactBasis.isEstimate ? 'ước tính thêm' : 'doanh thu 60 ngày qua'} '
     '${TongtaiFormatters.vnd(o.expectedImpact)}.\n'
     '(Thêm API key trong More → AI Assistant để nhận đánh giá AI sâu hơn.)';
 

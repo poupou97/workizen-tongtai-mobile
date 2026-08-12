@@ -34,6 +34,7 @@ void main() {
     title: 'Cơ hội $id',
     description: 'mô tả',
     expectedImpact: 1000000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: OpportunityScore.fixed(70),
     discoveredAt: DateTime(2026, 8, 1),
   );

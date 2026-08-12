@@ -457,11 +457,13 @@ class _OpportunityCard extends StatelessWidget {
             ),
             const SizedBox(height: TtSpace.x2),
             Text(
-              '${context.l10n.oppEstimatePrefix} '
               // ROI dropped (WTM-193): it came from a constant. The score
               // shows a dash when nothing could be computed — a dash reads as
               // "unknown", a 0 would read as "worthless".
-              '+${TongtaiFormatters.vnd(opportunity.expectedImpact)}'
+              //
+              // WTM-384: nhãn và dấu `+` do `tongtaiImpactLabel` quyết, vì con
+              // số này có thể là doanh thu ĐÃ QUA.
+              '${tongtaiImpactLabel(opportunity, estimatePrefix: context.l10n.oppEstimatePrefix, observedPrefix: context.l10n.oppObservedPrefix, money: TongtaiFormatters.vnd)}'
               ' • ${context.l10n.oppScoreLabel} '
               '${opportunity.score.value?.round() ?? '—'}',
               style: TtType.caption.copyWith(

@@ -16,6 +16,7 @@ void main() {
     title: id,
     description: id,
     expectedImpact: 1000000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: OpportunityScore.fixed(80),
     discoveredAt: DateTime(2026, 8, 1),
   );

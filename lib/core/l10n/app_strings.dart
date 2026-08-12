@@ -310,6 +310,10 @@ abstract class AppStrings {
   String get sectionSuggestions;
   String get aiScoreLabel;
   String get oppEstimatePrefix;
+
+  /// Nhãn cho con số **đã đo được**, không phải khoản thêm vào — WTM-384.
+  /// Cố ý KHÔNG có dấu `+`: đây là tiền đã kiếm, không phải tiền sẽ kiếm.
+  String get oppObservedPrefix;
   String get oppScoreLabel;
   String oppDismissedSnack(String title);
   String oppInterestedSnack(String title);
@@ -1592,6 +1596,8 @@ class AppStringsVi extends AppStrings {
   String get aiScoreLabel => 'điểm AI';
   @override
   String get oppEstimatePrefix => 'Ước tính';
+  @override
+  String get oppObservedPrefix => 'Doanh thu 60 ngày';
   @override
   String get oppScoreLabel => 'Điểm';
   @override
@@ -3706,6 +3712,8 @@ class AppStringsEn extends AppStrings {
   String get aiScoreLabel => 'AI score';
   @override
   String get oppEstimatePrefix => 'Est.';
+  @override
+  String get oppObservedPrefix => 'Revenue, last 60 days';
   @override
   String get oppScoreLabel => 'Score';
   @override

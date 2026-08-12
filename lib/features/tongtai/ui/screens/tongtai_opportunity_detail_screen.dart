@@ -268,8 +268,11 @@ class _TongtaiOpportunityDetailScreenState
             children: [
               Expanded(
                 child: _StatTile(
-                  label: l10n.oppImpact,
-                  value: '+${TongtaiFormatters.vndShort(_o.expectedImpact)}',
+                  // WTM-384: nhãn nói con số là quan sát hay ước tính.
+                  label: _o.impactBasis.isEstimate
+                      ? l10n.oppImpact
+                      : l10n.oppObservedPrefix,
+                  value: tongtaiImpactAmount(_o, TongtaiFormatters.vndShort),
                   accent: TtColors.ai,
                 ),
               ),

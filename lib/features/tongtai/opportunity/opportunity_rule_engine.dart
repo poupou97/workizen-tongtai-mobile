@@ -116,7 +116,10 @@ class OpportunityRuleEngine {
             '$momentumWindowDays ngày qua nhưng tồn kho còn ${p.quantity} '
             '(mức đặt lại ${p.reorderLevel}). '
             '${out ? 'Hết hàng là doanh thu bỏ lỡ mỗi ngày.' : 'Nhập thêm trước khi đứt hàng.'}',
+        // ⚠️ WTM-384: `recent` là doanh thu **60 ngày qua**, không phải khoản
+        // thêm vào. Khai đúng cơ sở để UI thôi gắn dấu `+` vào nó.
         expectedImpact: recent,
+        impactBasis: OpportunityImpactBasis.observedRevenue,
         roi: roi,
         score: scoreOpportunity(
           impact: recent,
@@ -182,7 +185,10 @@ class OpportunityRuleEngine {
             '${c.name} đã mua ${theirOrders.length} đơn (AOV ${_vnd(aov)}) '
             'nhưng đã im lặng lâu hơn nhịp mua thường thấy của họ. Một tin nhắn '
             'kèm ưu đãi quay lại thường rẻ hơn nhiều so với tìm khách mới.',
+        // Một lần win-back ≈ giá trị đơn trung bình của **chính khách này** —
+        // cơ sở thật để gọi là ước tính (WTM-384).
         expectedImpact: aov,
+        impactBasis: OpportunityImpactBasis.estimatedGain,
         score: scoreOpportunity(
           impact: aov,
           baseline: baseline,
@@ -219,7 +225,9 @@ class OpportunityRuleEngine {
             '(${(derived.progress * 100).round()}% sau '
             '${(derived.timelineElapsed(now) * 100).round()}% thời gian). '
             'Cân nhắc khuyến mãi ngắn hoặc mở thêm kênh bán.',
+        // Mục tiêu đang chậm bao nhiêu thì đó chính là phần phải bù.
         expectedImpact: gap,
+        impactBasis: OpportunityImpactBasis.estimatedGain,
         score: scoreOpportunity(
           impact: gap,
           baseline: baseline,
@@ -264,7 +272,9 @@ class OpportunityRuleEngine {
           'Nhóm ${top.key} dẫn đầu doanh thu $momentumWindowDays ngày qua '
           '(${_vnd(top.value)}). Cân nhắc thêm mẫu mới hoặc tăng hiển thị '
           'nhóm này khi đà còn tốt.',
+      // WTM-384: doanh thu quá khứ của nhóm — bằng chứng, không phải dự đoán.
       expectedImpact: top.value,
+      impactBasis: OpportunityImpactBasis.observedRevenue,
       score: scoreOpportunity(
         impact: top.value,
         baseline: baseline,

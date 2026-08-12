@@ -45,6 +45,7 @@ class Opportunity {
     required this.title,
     required this.description,
     required this.expectedImpact,
+    required this.impactBasis,
     required this.score,
     this.roi,
     required this.discoveredAt,
@@ -63,8 +64,15 @@ class Opportunity {
   /// What the opportunity is and why it exists (AC1).
   final String description;
 
-  /// Expected impact in đồng of additional revenue (AC1).
+  /// Số tiền gắn với cơ hội, tính bằng đồng.
+  ///
+  /// ⚠️ **Đọc [impactBasis] trước khi hiện con số này.** Nó có thể là tiền
+  /// **đã kiếm được** (bằng chứng) hoặc tiền **có thể kiếm thêm** (ước tính) —
+  /// và hai thứ đó không được hiện giống nhau.
   final double expectedImpact;
+
+  /// [expectedImpact] là **quan sát** hay **ước tính** — WTM-384.
+  final OpportunityImpactBasis impactBasis;
 
   /// How this opportunity scored, and which factors had no data (WTM-193).
   ///
@@ -109,6 +117,7 @@ class Opportunity {
     title: title,
     description: description,
     expectedImpact: expectedImpact,
+    impactBasis: impactBasis,
     score: score,
     roi: roi,
     discoveredAt: discoveredAt,
@@ -143,6 +152,7 @@ final List<Opportunity> kSampleOpportunities = [
         'Tìm kiếm "quạt tích điện" tăng mạnh trước hè; tồn kho của bạn còn '
         'thấp so với nhịp bán tháng trước.',
     expectedImpact: 45000000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: scoreOpportunity(
       impact: 45000000,
       baseline: _sampleBaseline,
@@ -158,6 +168,7 @@ final List<Opportunity> kSampleOpportunities = [
         'Nguồn Quảng Châu đang rẻ hơn nguồn hiện tại ~18% cho cùng phân khúc '
         '500ml.',
     expectedImpact: 12000000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: scoreOpportunity(
       impact: 12000000,
       baseline: _sampleBaseline,
@@ -173,6 +184,7 @@ final List<Opportunity> kSampleOpportunities = [
         'Xu hướng nội dung "căn hộ nhỏ" kéo nhu cầu đồ gia dụng cỡ nhỏ; phù '
         'hợp danh mục Home hiện có.',
     expectedImpact: 28000000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: scoreOpportunity(
       impact: 28000000,
       baseline: _sampleBaseline,
@@ -188,6 +200,7 @@ final List<Opportunity> kSampleOpportunities = [
         'Nhóm khách SG hỏi mua khăn lụa qua kênh chat; chưa có kênh giao '
         'xuyên biên giới.',
     expectedImpact: 15000000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: scoreOpportunity(
       impact: 15000000,
       baseline: _sampleBaseline,
@@ -203,6 +216,7 @@ final List<Opportunity> kSampleOpportunities = [
         'Khách sỉ bắt đầu gom đơn quà Trung thu sớm; biên tốt khi chốt trước '
         'tháng 8.',
     expectedImpact: 60000000,
+    impactBasis: OpportunityImpactBasis.estimatedGain,
     score: scoreOpportunity(
       impact: 60000000,
       baseline: _sampleBaseline,
@@ -211,3 +225,73 @@ final List<Opportunity> kSampleOpportunities = [
     discoveredAt: DateTime(2026, 7, 19),
   ),
 ];
+
+/// [Opportunity.expectedImpact] là **bằng chứng** hay **dự đoán** — WTM-384.
+///
+/// ## Vì sao phải phân biệt
+///
+/// Trên Nokia 6.1, một thẻ cơ hội nói hai lần cùng một con số:
+///
+/// > Nhóm Home dẫn đầu doanh thu 60 ngày qua **(15.270.000 đ)** …
+/// > **Ước tính +15.270.000 đ**
+///
+/// Dấu `+` hứa *"làm việc này, bạn được thêm 15 triệu"*. Nhưng con số ấy là
+/// doanh thu **đã xảy ra**, chép nguyên từ chính câu bên trên. Luật tồn kho và
+/// luật nhóm đều gán doanh thu quá khứ vào một trường tên là *"expected
+/// impact"*.
+///
+/// Đó là bịa tác động bằng tiền — điều §9 FLOW G cấm thẳng. Nặng hơn: con số
+/// chảy vào prompt AI dưới nhãn *"tác động kỳ vọng"*, nên AI đi giải thích một
+/// lời hứa không có thật.
+///
+/// ## Vì sao KHÔNG bịa một công thức mới
+///
+/// Cách sửa dễ nhất là nhân doanh thu quá khứ với một hệ số nào đó rồi gọi nó
+/// là ước tính. Nhưng một hệ số nghĩ ra cũng là bịa, chỉ khó phát hiện hơn.
+///
+/// Repo này đã chọn đúng đường một lần rồi: ADR-TON-022 gỡ `estimatedRoi` vì
+/// nó là hằng số theo luật, và `roi` nay để `null` khi không biết — *"`null`
+/// nghĩa là **không ai biết**"*. Đây là lần áp dụng thứ hai của cùng nguyên
+/// tắc: nói **thật** con số là gì, thay vì đổi nó thành thứ nghe hay hơn.
+enum OpportunityImpactBasis {
+  /// Tiền **đã kiếm được** trong cửa sổ phân tích — một sự thật đo được.
+  ///
+  /// Hiện thành *"Doanh thu 60 ngày: X"*. ⛔ **Không dấu `+`**: nó không phải
+  /// khoản thêm vào.
+  observedRevenue,
+
+  /// Tiền **có thể kiếm thêm** nếu người bán làm việc này.
+  ///
+  /// Chỉ dùng khi luật có cơ sở thật để ước tính: một lần win-back ≈ giá trị
+  /// đơn trung bình của **chính khách đó**; một mục tiêu đang chậm ⇒ khoảng
+  /// chậm chính là phần phải bù.
+  ///
+  /// Hiện thành *"Ước tính +X"*.
+  estimatedGain;
+
+  bool get isEstimate => this == OpportunityImpactBasis.estimatedGain;
+}
+
+/// Con số tác động, **đã kèm đúng nhãn của nó** — WTM-384.
+///
+/// Một chỗ duy nhất quyết định có dấu `+` hay không, để bốn màn đang hiện con
+/// số này không thể nói bốn kiểu. Trước WTM-384 ba trong bốn chỗ tự gắn `+`
+/// vào một con số có thể là doanh thu quá khứ.
+String tongtaiImpactLabel(
+  Opportunity o, {
+  required String estimatePrefix,
+  required String observedPrefix,
+  required String Function(double) money,
+}) =>
+    '${o.impactBasis.isEstimate ? estimatePrefix : observedPrefix} '
+    '${tongtaiImpactAmount(o, money)}';
+
+/// Con số kèm **dấu của nó**, và không màn nào được tự viết dấu ấy.
+///
+/// Tách khỏi [tongtaiImpactLabel] vì màn chi tiết hiện nhãn và số ở hai ô
+/// riêng — nhưng dấu `+` thì vẫn chỉ có **một** chủ.
+String tongtaiImpactAmount(Opportunity o, String Function(double) money) =>
+    o.impactBasis.isEstimate
+    ? '+${money(o.expectedImpact)}'
+    // ⛔ Không dấu `+`: tiền ĐÃ kiếm, không phải tiền sẽ kiếm thêm.
+    : money(o.expectedImpact);
