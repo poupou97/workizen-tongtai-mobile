@@ -4,6 +4,7 @@ import '../profile/business_profile.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_directory_service.dart';
 import '../consumer/customer_order.dart';
+import '../inventory/product_category.dart';
 import '../metrics/business_metrics.dart';
 
 /// Revenue booked in one calendar month — a single bar in the dashboard's
@@ -539,11 +540,14 @@ class ReportsService {
 
   /// Per-category YTD revenue (from order line items), highest first.
   List<CategoryRevenue> _categorySeries(List<CustomerOrder> ytd) {
+    // Group by canonical category (WTM-393): otherwise "Điện tử" (imported) and
+    // "electronics" (generated) split one category into two bars. The screen
+    // localizes the key back to a label for display.
     final byCategory = <String, double>{};
     for (final order in ytd) {
       for (final item in order.items) {
         byCategory.update(
-          item.category,
+          ProductCategory.normalise(item.category),
           (running) => running + item.lineTotal,
           ifAbsent: () => item.lineTotal,
         );

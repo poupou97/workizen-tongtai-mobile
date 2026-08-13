@@ -147,13 +147,18 @@ void main() {
       );
     });
 
-    test('categoriesFor lists distinct categories, sorted', () {
-      expect(CustomerOrderHistoryService.sample().categoriesFor('c01'), [
-        'Electronics',
-        'Fashion',
-        'Home',
-      ]);
-    });
+    test(
+      'categoriesFor lists distinct canonical categories, sorted by label',
+      () {
+        // WTM-393: facet values are canonical codes now (the screen localizes),
+        // sorted by their Vietnamese label — Gia dụng · Thời trang · Điện tử.
+        expect(CustomerOrderHistoryService.sample().categoriesFor('c01'), [
+          'home_appliances',
+          'fashion',
+          'electronics',
+        ]);
+      },
+    );
   });
 
   group('metricsFor (AC5)', () {

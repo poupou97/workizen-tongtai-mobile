@@ -220,7 +220,8 @@ void main() {
     expect(result!.id, 'new-id');
     expect(result!.name, 'Mini fan');
     expect(result!.sku, 'SKU-EL-001');
-    expect(result!.category, 'Electronics');
+    // WTM-393: typing "Electronics" canonicalizes to the stored code.
+    expect(result!.category, 'electronics');
     expect(result!.pricePerUnit, 89000);
     expect(result!.quantity, 20);
     expect(result!.history, isEmpty);
@@ -464,12 +465,14 @@ void main() {
     tester,
   ) async {
     useTallViewport(tester);
-    await pumpForm(tester, categories: const ['Electronics', 'Beauty']);
+    // WTM-393: suggestions are canonical codes; the chip shows the localized
+    // label and fills the field with it (stored back as a code on save).
+    await pumpForm(tester, categories: const ['electronics', 'cosmetics']);
 
-    await tester.tap(find.widgetWithText(ActionChip, 'Beauty'));
+    await tester.tap(find.widgetWithText(ActionChip, 'Cosmetics'));
     await tester.pumpAndSettle();
 
-    expect(fieldText(tester, 'product-category-field'), 'Beauty');
+    expect(fieldText(tester, 'product-category-field'), 'Cosmetics');
   });
 
   testWidgets('Cancel pops without returning a product', (tester) async {

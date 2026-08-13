@@ -105,11 +105,17 @@ void main() {
     });
 
     test('exposes distinct, sorted categories', () {
+      // WTM-393: categories are canonical codes now, ordered by their Vietnamese
+      // label — Gia dụng · Mỹ phẩm · Phụ kiện · Thời trang · Điện tử.
       final categories = service.categories;
-      expect(categories, contains('Electronics'));
+      expect(categories, [
+        'home_appliances',
+        'cosmetics',
+        'accessories',
+        'fashion',
+        'electronics',
+      ]);
       expect(categories.toSet().length, categories.length);
-      final sorted = [...categories]..sort();
-      expect(categories, sorted);
     });
 
     test('every SKU is unique', () {
@@ -144,10 +150,12 @@ void main() {
       expect(results.map((p) => p.sku), contains('SKU-EL-001'));
     });
 
-    test('matches category text', () {
-      final results = service.filter(const ProductQuery(text: 'beauty'));
+    test('matches category text (via the localized label)', () {
+      // WTM-393: data stores the code 'cosmetics'; a seller searches the VN
+      // label, which the free-text match localizes and matches.
+      final results = service.filter(const ProductQuery(text: 'mỹ phẩm'));
       expect(results, isNotEmpty);
-      expect(results.every((p) => p.category == 'Beauty'), isTrue);
+      expect(results.every((p) => p.category == 'cosmetics'), isTrue);
     });
 
     test('no match yields an empty list', () {
@@ -160,19 +168,19 @@ void main() {
 
     test('keeps only products in that category', () {
       final results = service.filter(
-        const ProductQuery(category: 'Electronics'),
+        const ProductQuery(category: 'electronics'),
       );
       expect(results, isNotEmpty);
-      expect(results.every((p) => p.category == 'Electronics'), isTrue);
+      expect(results.every((p) => p.category == 'electronics'), isTrue);
     });
 
     test('facet combines (AND) with the search text', () {
       final results = service.filter(
-        const ProductQuery(text: 'bluetooth', category: 'Electronics'),
+        const ProductQuery(text: 'bluetooth', category: 'electronics'),
       );
       expect(results, isNotEmpty);
       for (final p in results) {
-        expect(p.category, 'Electronics');
+        expect(p.category, 'electronics');
         expect(p.name.toLowerCase(), contains('bluetooth'));
       }
     });

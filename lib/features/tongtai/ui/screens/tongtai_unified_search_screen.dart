@@ -10,6 +10,7 @@ import '../../../../database/search/tongtai_search_service.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../inventory/product_category.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../producer/supplier_favorites_store.dart';
 import '../../providers/tongtai_identity_provider.dart';
@@ -431,7 +432,9 @@ class _AdvancedFilters extends StatelessWidget {
               children: [
                 for (final category in categories)
                   ChoiceChip(
-                    label: Text(category),
+                    label: Text(
+                      ProductCategory.display(category, l10n.languageCode),
+                    ),
                     selected: filters.category == category,
                     onSelected: (selected) => onChanged(
                       selected
@@ -804,7 +807,7 @@ class _ProductResultCard extends StatelessWidget {
       title: product.name,
       subtitle: [
         if (product.category != null && product.category!.isNotEmpty)
-          product.category!,
+          ProductCategory.display(product.category!, context.l10n.languageCode),
         // Không có tồn kho ⇒ bỏ hẳn dòng, không hiện "Tồn: 0" (ADR-TON-023).
         if (product.stock case final stock?)
           '${context.l10n.labelStock}: ${stock.toStringAsFixed(0)}',

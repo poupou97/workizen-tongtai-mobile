@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../inventory/product_category.dart';
 import '../metrics/business_metrics.dart';
 import 'customer_order.dart';
 
@@ -110,11 +111,21 @@ class CustomerOrderHistoryService {
   /// Distinct item categories across [customerId]'s orders, sorted — the AC4
   /// category filter facet.
   List<String> categoriesFor(String customerId) {
+    // Canonical values (WTM-393): item categories snapshot the product's stored
+    // category, which is a code for generated data and a VI label for imported
+    // data — collapse both so one category is one chip.
     final set = <String>{
       for (final order in _orders)
-        if (order.customerId == customerId) ...order.categories,
+        if (order.customerId == customerId)
+          for (final c in order.categories) ProductCategory.normalise(c),
     };
-    final list = set.toList()..sort();
+    final list = set.toList()
+      ..sort(
+        (a, b) => ProductCategory.display(
+          a,
+          'vi',
+        ).compareTo(ProductCategory.display(b, 'vi')),
+      );
     return list;
   }
 
@@ -140,7 +151,12 @@ class CustomerOrderHistoryService {
     final to = query.to;
     if (to != null && order.date.isAfter(to)) return false;
     final category = query.category;
-    if (category != null && !order.categories.contains(category)) return false;
+    if (category != null &&
+        !order.categories
+            .map(ProductCategory.normalise)
+            .contains(ProductCategory.normalise(category))) {
+      return false;
+    }
     return true;
   }
 }

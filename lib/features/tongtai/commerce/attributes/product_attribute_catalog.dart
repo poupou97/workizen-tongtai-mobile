@@ -16,6 +16,7 @@
 ///   user- or vendor-authored.
 library;
 
+import '../../inventory/product_category.dart';
 import 'attribute_models.dart';
 
 /// One catalog group (§18). `code` is a stable `system.*` code; `label` is the
@@ -271,10 +272,15 @@ List<ProductAttributeValueSpec> attributesForProduct({
   required String category,
   required String seed,
 }) {
-  final normalized = category.trim().toLowerCase();
+  // WTM-393: khớp theo **mã canonical**, không theo nhãn hiển thị — nên một sản
+  // phẩm dù mang mã ('electronics'), nhãn VI ('Điện tử') hay nhãn EN cũ
+  // ('Electronics') đều nhận đúng thuộc tính. Trước đây chỉ khớp nhãn VI, nên
+  // ~14 sản phẩm bộ sinh (danh mục tiếng Anh) không bao giờ được enrich.
+  final normalized =
+      ProductCategory.parse(category)?.code ?? category.trim().toLowerCase();
   final n = _seedInt(seed);
   switch (normalized) {
-    case 'thời trang':
+    case 'fashion':
       return [
         ProductAttributeValueSpec(
           code: kAttrMaterial,
@@ -291,7 +297,7 @@ List<ProductAttributeValueSpec> attributesForProduct({
             valueRaw: kSeasonOptions[n % kSeasonOptions.length],
           ),
       ];
-    case 'điện tử':
+    case 'electronics':
       return [
         ProductAttributeValueSpec(
           code: kAttrWattage,
@@ -312,7 +318,7 @@ List<ProductAttributeValueSpec> attributesForProduct({
             valueRaw: '${[13.3, 15.6, 24.0, 27.0][n % 4]}',
           ),
       ];
-    case 'gia dụng':
+    case 'home_appliances':
       // §table: kích thước · chất liệu. "Kích thước" here is the *display* spec
       // (dung tích / đường chéo), which is DYNAMIC — distinct from shipping
       // dims (§6.2). Modelled as the display-size field + a fixed material.
@@ -327,7 +333,7 @@ List<ProductAttributeValueSpec> attributesForProduct({
             valueRaw: '${[1.5, 2.0, 3.5, 5.0][n % 4]}',
           ),
       ];
-    case 'thực phẩm':
+    case 'food':
       return [
         ProductAttributeValueSpec(
           code: kAttrStorageGuidance,

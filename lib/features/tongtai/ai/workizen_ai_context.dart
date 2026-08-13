@@ -3,6 +3,7 @@ import '../consumer/customer_order.dart';
 import '../consumer/customer_order_history_service.dart';
 import '../core/tongtai_formatters.dart';
 import '../inventory/product.dart';
+import '../inventory/product_category.dart';
 
 /// Builds the system prompt Workizen AI sends with every chat turn (WTM-82
 /// AC2/AC3/AC4) — deterministic, local-only, no network.
@@ -156,7 +157,7 @@ class WorkizenAiContextBuilder {
 
   String _productContext(Product product) {
     final core =
-        '- SKU ${product.sku} · ${product.category}\n'
+        '- SKU ${product.sku} · ${ProductCategory.display(product.category, 'vi')}\n'
         '- Giá bán: ${TongtaiFormatters.vnd(product.pricePerUnit)}'
         // Sản phẩm không có tồn kho thì KHÔNG nhắc tồn kho với AI: một dòng
         // "Tồn kho: 0" trong prompt là lời nói dối đi thẳng vào mô hình.

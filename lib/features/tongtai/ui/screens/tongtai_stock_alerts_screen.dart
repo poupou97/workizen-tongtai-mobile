@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../inventory/product.dart';
+import '../../inventory/product_category.dart';
 import '../../inventory/product_catalog_controller.dart';
 import '../../inventory/product_image_source.dart';
 import '../../inventory/stock_alert.dart';
@@ -269,7 +270,8 @@ class _AlertRow extends StatelessWidget {
                     ),
                     const SizedBox(height: TtSpace.x1),
                     Text(
-                      '${product.sku} • ${product.category}',
+                      '${product.sku} • '
+                      '${ProductCategory.display(product.category, context.l10n.languageCode)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TtType.caption.copyWith(

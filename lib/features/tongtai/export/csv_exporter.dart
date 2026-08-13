@@ -2,6 +2,7 @@ import '../consumer/customer.dart';
 import '../consumer/customer_order.dart';
 import '../core/tongtai_formatters.dart';
 import '../inventory/product.dart';
+import '../inventory/product_category.dart';
 
 /// Which business data set an export covers (WTM-99 AC1 — every major data
 /// type shipped so far). Bilingual labels per WTM-60 convention.
@@ -127,7 +128,7 @@ class TongtaiCsvExporter {
           p.id,
           p.sku,
           p.name,
-          p.category,
+          ProductCategory.display(p.category, 'vi'),
           p.quantity,
           p.pricePerUnit.round(),
           p.reorderLevel,
@@ -173,7 +174,7 @@ class TongtaiCsvExporter {
             o.status.labelVi,
             o.customerId,
             item.productName,
-            item.category,
+            ProductCategory.display(item.category, 'vi'),
             item.quantity,
             item.unitPrice.round(),
             item.lineTotal.round(),

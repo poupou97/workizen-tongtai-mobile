@@ -135,12 +135,16 @@ void main() {
     await tester.pumpWidget(host());
     await tester.pumpAndSettle();
 
+    // WTM-393: category chips show localized labels now; the row scrolls
+    // horizontally, so the Fashion chip can sit off-screen — reveal it first.
+    await tester.ensureVisible(find.text('Fashion'));
     await tester.tap(find.text('Fashion'));
     await tester.pumpAndSettle();
 
     expect(visibleOrderNumbers(tester).toList(), ['DH-2026-0086']);
 
-    // Back to all categories.
+    // Back to all categories (the All chip may have scrolled off-screen left).
+    await tester.ensureVisible(find.text('All'));
     await tester.tap(find.text('All'));
     await tester.pumpAndSettle();
     expect(visibleOrderNumbers(tester), hasLength(3));

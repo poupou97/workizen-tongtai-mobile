@@ -573,6 +573,40 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-34 · Hai taxonomy cho một khái niệm — nhãn hiển thị đi thẳng xuống ổ đĩa
+
+- **Root cause:** một trường phân loại tự do (`Product.category`, trước đó
+  `Customer.segments`) có **nhiều nguồn ghi**, mỗi nguồn dùng một hệ đặt tên:
+  bộ nhập XLSX ghi nhãn tiếng Việt (`"Điện tử"`), bộ sinh lịch sử ghi nhãn
+  tiếng Anh (`"Electronics"`), catalog mẫu ghi nhãn Anh khác (`"Home Goods"`).
+  Màn hình in **nguyên văn** thứ nó nhận, nên chip lọc hiện `"Accessories"`
+  đứng cạnh `"Điện tử"` — hai hệ danh mục song song, một cái lọt UI. Đây đúng
+  hình dạng [[P-27]]/[[P-28]] (một khái niệm, hai chủ) cộng vi phạm ADR-TON-007
+  (UI một locale) — và nó **không** nằm ở cái nhãn hiện trên màn, mà ở **dữ liệu
+  ghi xuống**.
+- **Regression:** WTM-393 — audit thiết bị WTM-392 (Nokia 6.1, seed sạch) thấy
+  chip `"Electronics"/"Accessories"` và sản phẩm `SKU-HO-108 • Home` trong màn
+  Kho. `historical_data_generator` gieo ~14 sản phẩm danh mục tiếng Anh cạnh 100
+  sản phẩm XLSX danh mục tiếng Việt; `kSampleProducts` và `kSampleCustomerOrders`
+  cũng mang nhãn Anh. 2690 test xanh **không thấy** vì mọi test khẳng định đúng
+  cái chuỗi thô đang hỏng — *"UI hiện đúng chữ"* không phải *"chữ đúng"*. Cùng
+  họ: WTM-381 (`CustomerSegment`) — cùng bệnh, cùng thuốc.
+- **Test pattern:** governance ở **tầng dữ liệu**, không ở tầng UI. Với mọi
+  nguồn seed (`HistoricalDataGenerator` mọi `BusinessProfile`, `kSampleProducts`,
+  `kSampleCustomerOrders`) khẳng định `category` là **mã canonical chính xác**
+  (`ProductCategory.values.any((c) => c.code == raw)`). Seed lại một **nhãn**
+  (`"Electronics"`) ⇒ đỏ. Khẳng định `parse()` chữa mọi biến thể cũ đã thật sự
+  nằm trên máy (`"Home"`, `"Home Goods"`, `"Smart Home"`, nhãn VI) và chuỗi tự
+  đặt của người bán vẫn giữ nguyên văn. Xem
+  `test/features/tongtai/commerce/product_category_governance_test.dart`.
+- **Prevention:** một khái niệm phân loại = **một enum canonical** (mã lưu, nhãn
+  sinh lúc hiển thị, `parse` chữa dữ liệu cũ) — đúng khuôn `CustomerSegment`
+  (WTM-381). Ghi = `normalise(raw)`, hiện = `display(raw, lang)`, gom/lọc =
+  `normalise` cả hai vế. Cấm test khoá bằng chuỗi nhãn thô; hỏi *"nếu ai seed
+  lại nhãn tiếng Anh, test còn xanh không?"* — nếu còn, test đang canh sai chỗ.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:
@@ -627,6 +661,7 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `export/backup_codec_test.dart` | format giữ **mọi trường** (kể cả history) · mã canonical · decoder từ chối thay vì đoán |
 | `export/backup_screen_test.dart` | preview không chạm DB · xác nhận phá huỷ · file hỏng không có nút phá huỷ · file mã hoá xin mật khẩu |
 | `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
+| `../commerce/product_category_governance_test.dart` | **một taxonomy canonical** (WTM-393/P-34): mọi nguồn seed lưu **mã**, không nhãn; `parse` chữa nhãn Anh/VI cũ; chuỗi tự đặt giữ nguyên |
 
 ## Khi sửa bug mới — checklist
 

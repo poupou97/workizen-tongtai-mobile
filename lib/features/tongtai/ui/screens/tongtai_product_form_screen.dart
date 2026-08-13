@@ -9,6 +9,7 @@ import '../../../../core/design/tt.dart';
 
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
+import '../../inventory/product_category.dart';
 import '../../inventory/product_form.dart';
 import '../../inventory/product_history.dart';
 import '../../inventory/product_image_source.dart';
@@ -100,7 +101,11 @@ class _TongtaiProductFormScreenState extends State<TongtaiProductFormScreen> {
     _kind = data.kind;
     _name = TextEditingController(text: data.name);
     _sku = TextEditingController(text: data.sku);
-    _category = TextEditingController(text: data.category);
+    // WTM-393: hiện **nhãn** cho người bán, dù thứ lưu là mã canonical. Chuỗi
+    // tự đặt (không phân giải được) vẫn hiện nguyên văn.
+    _category = TextEditingController(
+      text: ProductCategory.display(data.category, 'vi'),
+    );
     _price = TextEditingController(text: data.priceText);
     _costPrice = TextEditingController(text: data.costPriceText);
     _quantity = TextEditingController(text: data.quantityText);
@@ -504,8 +509,12 @@ class _CategorySuggestions extends StatelessWidget {
         children: [
           for (final category in categories)
             ActionChip(
-              label: Text(category),
-              onPressed: () => onSelected(category),
+              label: Text(
+                ProductCategory.display(category, context.l10n.languageCode),
+              ),
+              onPressed: () => onSelected(
+                ProductCategory.display(category, context.l10n.languageCode),
+              ),
             ),
         ],
       ),

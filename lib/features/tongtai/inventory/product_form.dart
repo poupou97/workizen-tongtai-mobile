@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'product.dart';
+import 'product_category.dart';
 import 'product_history.dart';
 
 /// Immutable snapshot of the Add/Edit Product form (WTM-69).
@@ -181,7 +182,11 @@ class ProductFormData {
       id: id,
       sku: sku.trim(),
       name: name.trim(),
-      category: category.trim(),
+      // WTM-393: store the canonical code. The field shows a localized label; a
+      // seller's own words (unresolved) survive as-is via normalise. This also
+      // keeps the change history honest — editing another field never records a
+      // phantom "Điện tử → electronics" category change.
+      category: ProductCategory.normalise(category),
       kind: kind,
       quantity: tracksStock ? (_tryParseInt(quantityText) ?? 0) : null,
       pricePerUnit: _tryParseNumber(priceText) ?? 0,
@@ -243,7 +248,14 @@ abstract final class ProductEditor {
 
     compare(ProductField.name, before.name, after.name);
     compare(ProductField.sku, before.sku, after.sku);
-    compare(ProductField.category, before.category, after.category);
+    // WTM-393: compare categories canonically, so a legacy product stored as
+    // 'Electronics' and the same product re-saved as the code 'electronics' is
+    // NOT recorded as a change — only a genuine category switch is.
+    compare(
+      ProductField.category,
+      ProductCategory.normalise(before.category),
+      ProductCategory.normalise(after.category),
+    );
     compare(ProductField.description, before.description, after.description);
     // Đổi loại là đổi ý nghĩa của mọi con số còn lại trên sản phẩm (tồn kho
     // biến mất, "giá vốn" thành "chi phí mỗi lượt bán") — đúng thứ lịch sử

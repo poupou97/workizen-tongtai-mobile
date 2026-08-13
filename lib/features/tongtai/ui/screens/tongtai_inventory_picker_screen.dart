@@ -4,6 +4,7 @@ import '../../../../core/design/tt.dart';
 
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
+import '../../inventory/product_category.dart';
 import '../../../../core/l10n/app_strings.dart';
 
 /// Inventory Picker (WTM-126) — the only way to add an order line: the seller
@@ -40,7 +41,11 @@ class _TongtaiInventoryPickerScreenState
           (p) =>
               p.name.toLowerCase().contains(q) ||
               p.sku.toLowerCase().contains(q) ||
-              p.category.toLowerCase().contains(q),
+              p.category.toLowerCase().contains(q) ||
+              ProductCategory.display(
+                p.category,
+                'vi',
+              ).toLowerCase().contains(q),
         )
         .toList();
   }
@@ -100,7 +105,8 @@ class _TongtaiInventoryPickerScreenState
                           contentPadding: EdgeInsets.zero,
                           title: Text(p.name),
                           subtitle: Text(
-                            '${p.sku} • ${p.category} • '
+                            '${p.sku} • '
+                            '${ProductCategory.display(p.category, context.l10n.languageCode)} • '
                             '${TongtaiFormatters.vnd(p.pricePerUnit)}',
                             style: TtType.caption.copyWith(
                               color: TtColors.textSecondary,
