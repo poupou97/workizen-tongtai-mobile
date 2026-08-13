@@ -37,7 +37,13 @@ class TongtaiConsumerScreen extends ConsumerStatefulWidget {
 }
 
 class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
-  static const _blue = TtColors.info;
+  // ⛔ WTM-407 — hằng `_blue = TtColors.info` đã bị **xoá**, không chỉ thôi
+  // dùng.
+  //
+  // Nó là cái bình đựng sẵn: chừng nào còn một hằng tên "_blue" trong màn này,
+  // con số tiếp theo ai đó thêm vào sẽ được tô bằng nó — và luật A2 lại thủng ở
+  // đúng chỗ vừa vá. Màu định vị của Khách hàng nay chỉ sống ở thanh nav, nơi
+  // nó làm đúng việc của mình: chỉ đường, không phán xét.
 
   late final DateTime Function() _clock;
 
@@ -186,8 +192,11 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                           horizontal: 12,
                           vertical: 6,
                         ),
+                        // WTM-407 — huy hiệu đếm thôi mặc màu năng lực. Một
+                        // viên xanh dương đặc chứa con số đọc như một trạng
+                        // thái INFO; nó chỉ là **tổng số khách**.
                         decoration: BoxDecoration(
-                          color: _blue,
+                          color: TtColors.surfaceTertiary,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -196,7 +205,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: TtColors.textPrimary,
                           ),
                         ),
                       ),
@@ -212,21 +221,15 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                         child: _CustomerStat(
                           label: l10n.segActive,
                           value: '$active',
-                          color: _blue,
                         ),
                       ),
                       Expanded(
-                        child: _CustomerStat(
-                          label: l10n.segVip,
-                          value: '$vip',
-                          color: _blue,
-                        ),
+                        child: _CustomerStat(label: l10n.segVip, value: '$vip'),
                       ),
                       Expanded(
                         child: _CustomerStat(
                           label: l10n.segNew,
                           value: '$fresh',
-                          color: _blue,
                         ),
                       ),
                     ],
@@ -341,25 +344,21 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                 _LifecycleStage(
                   stage: l10n.lifecycleAwareness,
                   count: '$total',
-                  color: _blue,
                 ),
                 const SizedBox(height: 12),
                 _LifecycleStage(
                   stage: l10n.lifecycleConsideration,
                   count: '$fresh',
-                  color: _blue,
                 ),
                 const SizedBox(height: 12),
                 _LifecycleStage(
                   stage: l10n.lifecyclePurchase,
                   count: '$purchased',
-                  color: _blue,
                 ),
                 const SizedBox(height: 12),
                 _LifecycleStage(
                   stage: l10n.lifecycleRetention,
                   count: '$retained',
-                  color: _blue,
                 ),
               ],
             ),
@@ -370,16 +369,22 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
   }
 }
 
+/// Một ô đếm phân khúc — **con số, không phán quyết** (WTM-407).
+///
+/// ⛔ **Không có tham số `color`, và đó là chủ đích.**
+///
+/// Trước đây cả ba số `75 / 0 / 4` tô **xanh dương** vì xanh dương là màu định
+/// vị của năng lực Khách hàng. Trên máy Founder, ô `VIP` hiện **0** bằng màu
+/// ấy — mà xanh dương = INFO trong luật màu, nên một con số không mặc áo một
+/// phán quyết. Đúng lỗi WTM-389 đã dọn ở Home, còn sót lại ở đây.
+///
+/// Bỏ hẳn tham số thay vì đổi giá trị mặc định: một tham số `Color` sẽ được
+/// truyền lại màu năng lực vào lần sau, bởi người không đọc ghi chú này.
 class _CustomerStat extends StatelessWidget {
   final String label;
   final String value;
-  final Color color;
 
-  const _CustomerStat({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
+  const _CustomerStat({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -387,10 +392,10 @@ class _CustomerStat extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: color,
+            color: TtColors.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
@@ -403,16 +408,13 @@ class _CustomerStat extends StatelessWidget {
   }
 }
 
+/// Một chặng vòng đời — cũng **con số, không phán quyết** (WTM-407).
+/// Xem chú thích ở [_CustomerStat]: không có tham số `color`, có chủ đích.
 class _LifecycleStage extends StatelessWidget {
   final String stage;
   final String count;
-  final Color color;
 
-  const _LifecycleStage({
-    required this.stage,
-    required this.count,
-    required this.color,
-  });
+  const _LifecycleStage({required this.stage, required this.count});
 
   @override
   Widget build(BuildContext context) {
@@ -432,10 +434,10 @@ class _LifecycleStage extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           count,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: color,
+            color: TtColors.textPrimary,
           ),
         ),
       ],

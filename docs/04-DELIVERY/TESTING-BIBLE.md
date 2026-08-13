@@ -816,6 +816,7 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `export/backup_screen_test.dart` | preview không chạm DB · xác nhận phá huỷ · file hỏng không có nút phá huỷ · file mã hoá xin mật khẩu |
 | `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
 | `../commerce/product_category_governance_test.dart` | **một taxonomy canonical** (WTM-393/P-34): mọi nguồn seed lưu **mã**, không nhãn; `parse` chữa nhãn Anh/VI cũ; chuỗi tự đặt giữ nguyên |
+| `value_colour_governance_test.dart` | **màu định vị không tô lên con số** (A2 · WTM-389 · WTM-407): widget hiện số **không được nhận tham số `Color`** · màn Khách hàng không còn hằng `_blue`. 2 đột biến đã chứng minh đỏ |
 | `tongtai_tab_persistence_test.dart` | **giá trị bền vào từ đường ĐỌC** (WTM-405/P-39): chỉ số tab ngoài khoảng ⇒ về Trang chủ · mọi chỉ số hợp lệ giữ nguyên. 2 đột biến ngược chiều đã chứng minh đỏ |
 | `ui/home_concept_cards_test.dart` | **luật đứng sau thẻ concept-1** (WTM-404): thiếu mốc ⇒ không phần trăm (mốc = 0 cũng vậy) · dưới 3 điểm ⇒ không vẽ đường · màu định vị không chạm con số/mũi tên · mức ưu tiên là **thứ hạng**, không phải ngưỡng điểm. 5 đột biến đã chứng minh đỏ |
 | `semantics_route_header_test.dart` | **vai trò semantics** (WTM-277/P-36): mọi màn nội dung có `isHeader`+`namesRoute`, màn tìm kiếm có `isTextField` — đọc cây bằng `ensureSemantics()` (không `flutter run`+`S`/uiautomator); nhãn/48dp/contrast đã ở `accessibility_test.dart` |
