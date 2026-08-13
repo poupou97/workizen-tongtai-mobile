@@ -962,7 +962,17 @@ class _SectionHeader extends StatelessWidget {
             // đủ chữ nên thu nhỏ mới đúng.
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleLarge,
+            // ⭐ `TtType.h3` (18sp), không phải `titleLarge` (22sp).
+            //
+            // Đo trên Nokia 6.1 sau khi ép một dòng: *"Hành trình mục tiêu"* ở
+            // 22sp cắt thành *"Hành trình mục ti…"* — một dòng nhưng **không
+            // đọc được**, tức đổi một lỗi lấy một lỗi khác.
+            //
+            // 18sp là đúng bậc concept-1 dùng cho tiêu đề mục (nhỏ hơn hẳn câu
+            // hero) — và tình cờ cũng là bậc làm cả bốn tiêu đề vừa dòng. Cỡ
+            // chữ ở đây là **thang bậc**, không phải trang trí: hero to nhất vì
+            // nó là câu app nói; tiêu đề mục chỉ cần đủ để mắt bám.
+            style: TtType.h3,
           ),
         ),
         // Flexible + FittedBox: at large text scales the action label must
