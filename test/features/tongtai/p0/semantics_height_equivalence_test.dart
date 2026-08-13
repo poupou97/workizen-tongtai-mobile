@@ -250,10 +250,21 @@ void main() {
                 '${differing.join(", ")}** ⇒ bản audit cũ chưa phủ được chúng.',
     );
 
-    final out = File(
-      '${Platform.environment['HOME']}/Desktop/WTM-399-height-equivalence.md',
-    );
+    // ⚠️ KHÔNG ghi vào `~/Desktop`.
+    //
+    // Bản đầu ghi thẳng vào `$HOME/Desktop` — thư mục chỉ tồn tại trên máy tôi.
+    // CI trên Linux runner nổ `PathNotFoundException: /home/runner/Desktop/...`
+    // và cả suite 2789 test đỏ vì MỘT dòng tiện tay. Một bài test xanh trên máy
+    // mình và đỏ ở mọi nơi khác thì không phải một bài test.
+    //
+    // Thư mục tạm của hệ thống có ở mọi nơi. Ai muốn bản báo cáo ở chỗ dễ đọc
+    // thì đặt `WTM399_REPORT_DIR`; mặc định không phụ thuộc máy ai cả.
+    final dir =
+        Platform.environment['WTM399_REPORT_DIR'] ?? Directory.systemTemp.path;
+    final out = File('$dir/WTM-399-height-equivalence.md');
     out.writeAsStringSync(report.toString());
+    // ignore: avoid_print
+    print('[WTM-399] báo cáo: ${out.path}');
     // ignore: avoid_print
     print(report.toString());
     handle.dispose();
