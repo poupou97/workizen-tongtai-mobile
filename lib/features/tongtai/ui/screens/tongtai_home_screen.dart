@@ -12,6 +12,7 @@ import '../../providers/tongtai_profile_provider.dart';
 import '../../journey/business_goal.dart';
 import '../../metrics/business_health.dart';
 import '../../metrics/business_metrics.dart';
+import '../../metrics/home_trend.dart';
 import '../../core/screen_data_controller.dart';
 import '../../../../core/design/tt.dart';
 import '../../navigation/tongtai_design_tokens.dart' show TongtaiTabs;
@@ -21,6 +22,10 @@ import '../../providers/tongtai_orders_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_more_action.dart';
 import '../../opportunity/opportunity.dart';
+import '../../opportunity/opportunity_priority.dart';
+import '../widgets/tt_metric_card.dart';
+import 'tongtai_opportunity_detail_screen.dart';
+import '../../providers/tongtai_capability_provider.dart';
 import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../../providers/tongtai_journey_provider.dart';
@@ -155,6 +160,13 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     final favoritesStore = ref.read(tongtaiSearchFavoritesStoreProvider);
     final seeder = ref.read(sampleDataSeederProvider);
     final opportunitiesFuture = ref.read(generatedOpportunitiesProvider.future);
+    // WTM-404 — đường xu hướng trên thẻ KPI đọc **Capability Context** của
+    // doanh thu, đúng đường ADR-TON-016 dựng cho phân tích chuyên sâu:
+    // BusinessContext chỉ giữ summary nhẹ (`metrics.revenue` là MỘT số), còn
+    // hình dạng theo tháng nằm ở capability và tải on-demand. Home không tự
+    // cộng lại chuỗi từ đơn hàng — làm vậy là câu trả lời thứ hai cho cùng câu
+    // hỏi, và hai câu trả lời sẽ lệch nhau đúng vào ngày ai đó sửa một bên.
+    final revenueCapabilityFuture = ref.read(revenueCapabilityProvider.future);
     final context = await contextService.load();
     // WTM-200: derive goal progress from real orders, exactly as the Goals
     // screen does. Reading the persisted `achievedAmount` gave Home a second,
@@ -173,6 +185,14 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     // work". The tiles used to render goals wearing a mission label, so Home
     // and the Journey screen described the same idea from two sources.
     final journey = await ref.read(journeyRepositoryProvider).loadActive();
+    // WTM-404 — lợi nhuận và tỉ suất lãi gộp trên thẻ "Sức khoẻ doanh nghiệp".
+    // Cùng `FinanceService` mà màn Tài chính và planner hành trình dùng
+    // (WTM-211), nên Home không thể nói một con số lợi nhuận khác với màn Tài
+    // chính cho cùng một ngày.
+    final finance = FinanceService(
+      await ref.read(financeRepositoryProvider).loadAll(),
+      orders: await ref.read(orderRepositoryProvider).loadAll(),
+    ).summaryAsOf(DateTime.now());
     return _HomeData(
       metrics: context.metrics,
       health: context.health,
@@ -184,6 +204,13 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       hasSamples: await seeder.hasSamples(),
       hasData: context.hasData,
       journey: journey,
+      trend: HomeTrend.from(
+        (await revenueCapabilityFuture).series,
+        // Lợi nhuận cần **chi phí**; chuỗi doanh thu không có nó. Đây là cùng
+        // `FinanceService` mà màn Tài chính dùng — Home không tự trừ thu-chi.
+        profitByMonth: [for (final m in finance.monthly) m.net],
+      ),
+      finance: finance,
     );
   }
 
@@ -410,7 +437,19 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
     return Scaffold(
       backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
-        title: Text(context.l10n.titleHomeDashboard),
+        // ⭐ WTM-404 — cửa trước mang TÊN SẢN PHẨM, không phải chữ "Bảng điều
+        // khiển".
+        //
+        // Founder mở app cạnh `cp_home.png` và thấy một thanh tiêu đề nói
+        // *"Bảng điều khiển"*. Đó là tên một **loại màn hình** — mọi phần mềm
+        // quản lý đều có một cái. Concept mở bằng linh vật + *"Tổng Tài AI"* +
+        // huy hiệu *"AI Business OS"*: ba thứ nói app này **là ai**, ngay dòng
+        // đầu tiên người xem demo nhìn thấy.
+        //
+        // `titleHomeDashboard` vẫn còn: nó là nhãn **điều hướng** (route,
+        // semantics, lịch sử) chứ không phải nhãn thương hiệu.
+        title: const _BrandTitle(),
+        titleSpacing: TtSpace.x4,
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -532,55 +571,36 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           // Hai thứ giữ lại để rủi ro "nhầm mẫu là số của mình" không thành
           // mất mát: mỗi bản ghi vẫn mang dấu `sample-` / `importJobId`, và
           // "Xóa dữ liệu mẫu" vẫn xoá đúng chúng mà không đụng dữ liệu thật.
-          // ── Welcome + health + module counts ──────────────────────
-          Card(
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          context.l10n.homeWelcome,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      // Scale down instead of overflowing on narrow
-                      // screens at accessibility text sizes (P0 §3).
-                      // Flexible bounds the width — a bare FittedBox in a
-                      // Row gets unbounded constraints and never shrinks.
-                      Flexible(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: _HealthBadge(health: _health),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.homeAiSubtitle,
-                    style: TtType.body.copyWith(color: TtColors.textSecondary),
-                  ),
-                  const SizedBox(height: 16),
-                  _ModuleSummaryGrid(
-                    producers: _producers,
-                    inventory: _inventory,
-                    consumers: _consumer,
-                    journeys: _journey,
-                  ),
-                ],
-              ),
-            ),
+          // ── Bốn năng lực, mỗi cái một thẻ (WTM-404) ───────────────
+          //
+          // ⭐ Trước đây khối này là một `Card` mang tiêu đề *"Chào mừng…"*, một
+          // dòng phụ, một huy hiệu sức khoẻ, và bên trong là lưới 2×2 những ô
+          // chỉ có tên + con số. Founder mở app cạnh concept và nói *"demo như
+          // này thì không ai muốn xem"* — đây là khối khiến Home trông như một
+          // **trang quản trị**: bốn con số trần, không cái nào nói mình đang đi
+          // lên hay xuống, không cái nào có lối đi tiếp.
+          //
+          // Concept-1 vẽ chúng thành **một hàng thẻ cuộn ngang**, mỗi thẻ có ô
+          // biểu tượng · con số · đơn vị · mức đổi · đường xu hướng · "Xem
+          // ngay →". Giữ hàng cuộn ngang chứ không đổi thành lưới: bốn thẻ đủ
+          // rộng để đọc được trên 411dp chỉ khi chúng KHÔNG phải chia đôi màn.
+          //
+          // Câu *"Chào mừng…"* bỏ hẳn — hero ngay trên đã chào rồi, và hai lời
+          // chào cách nhau một màn hình là thứ WTM-388 vừa dọn ở chỗ khác.
+          // Huy hiệu sức khoẻ chuyển xuống cạnh tiêu đề "Sức khoẻ doanh
+          // nghiệp", nơi nó nói về đúng thứ nó đo.
+          _CapabilityRail(
+            producers: _producers,
+            inventory: _inventory,
+            consumers: _consumer,
+            journeys: _journey,
+            finance: data.finance,
+            onProducer: () =>
+                _push(context, const TongtaiBusinessInputsScreen()),
+            onInventory: () => _push(context, const TongtaiInventoryScreen()),
+            onConsumer: () => _push(context, const TongtaiCustomerListScreen()),
+            onJourney: () => _push(context, const TongtaiJourneyScreen()),
+            onFinance: () => _push(context, const TongtaiFinanceScreen()),
           ),
           const SizedBox(height: 24),
 
@@ -637,27 +657,13 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             const SizedBox(height: 24),
           ],
 
-          // ── Business KPIs — real values, zero is valid (WTM-128) ──
-          _SectionHeader(
-            title: context.l10n.sectionBusinessKpis,
-            actionKey: const Key('home-open-reports'),
-            actionLabel: context.l10n.homeViewReports,
-            onAction: () => _push(context, const TongtaiReportsScreen()),
-            // WTM-206: Finance was reachable only through More — three taps
-            // into the toolbox — while this very row shows the revenue and the
-            // journey now asks the seller to record expenses (WTM-198).
-            // Telling someone to do a thing and hiding the door is a design
-            // arguing with itself.
-            secondaryActionKey: const Key('home-open-finance'),
-            secondaryActionLabel: context.l10n.titleFinance,
-            onSecondaryAction: () =>
-                _push(context, const TongtaiFinanceScreen()),
-          ),
-          const SizedBox(height: 12),
-          _KpiRow(metrics: _metrics),
-          const SizedBox(height: 24),
-
-          // ── Top opportunities (AI-generated; empty for new users) ─
+          // ── Việc Tổng Tài đề xuất — TRƯỚC các con số ──────────────
+          //
+          // ⭐ WTM-404: khối này đổi chỗ với "Sức khoẻ doanh nghiệp". Concept-1
+          // đặt việc-phải-làm trên KPI, và đó là cùng lập luận WTM-222 đã dùng
+          // để đưa nhiệm vụ lên trên KPI: **thứ tự trên màn hình LÀ một lời
+          // khẳng định về thứ gì quan trọng.** Một AI Business OS mở ra bằng
+          // *"làm cái này đi"*, không phải bằng bảng số để tự đọc lấy.
           _SectionHeader(
             title: context.l10n.sectionTopOpportunities,
             actionKey: const Key('home-open-opportunities'),
@@ -674,9 +680,41 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           if (topOpportunities.isEmpty)
             _EmptyBox(context.l10n.homeNoOpportunities)
           else
-            ...topOpportunities
-                .take(3)
-                .map((o) => _OpportunityTile(opportunity: o)),
+            _SuggestedActionsCard(
+              opportunities: topOpportunities.take(3).toList(),
+              onOpen: (o) => _push(
+                context,
+                TongtaiOpportunityDetailScreen(opportunity: o),
+              ),
+            ),
+          const SizedBox(height: 24),
+
+          // ── Sức khoẻ doanh nghiệp — real values, zero is valid (WTM-128) ──
+          _SectionHeader(
+            title: context.l10n.sectionBusinessKpis,
+            actionKey: const Key('home-open-reports'),
+            actionLabel: context.l10n.homeViewReports,
+            onAction: () => _push(context, const TongtaiReportsScreen()),
+            // ⛔ WTM-404 — bỏ nút "Tài chính" thứ hai ở đây.
+            //
+            // WTM-206 thêm nó vì lúc ấy Tài chính chỉ vào được qua More — ba
+            // cú chạm trong hộp công cụ. Lý do ấy **đã hết**: thẻ "Tài chính"
+            // trong hàng năng lực phía trên mở đúng màn ấy bằng một cú chạm, và
+            // nó còn nói luôn công nợ đang là bao nhiêu.
+            //
+            // Giữ cả hai thì tiêu đề mục gãy làm đôi trên Nokia 6.1 — hai cửa
+            // vào cùng một phòng, trả giá bằng cái tiêu đề.
+          ),
+          const SizedBox(height: 8),
+          // Huy hiệu sức khoẻ đứng ngay dưới tiêu đề đo đúng thứ nó nói. Trước
+          // WTM-404 nó nằm cạnh câu "Chào mừng…", tức một phán quyết về doanh
+          // nghiệp treo cạnh một lời chào.
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _HealthBadge(health: _health),
+          ),
+          const SizedBox(height: 12),
+          _KpiRow(metrics: _metrics, trend: data.trend, finance: data.finance),
           const SizedBox(height: 24),
         ],
       ),
@@ -702,6 +740,8 @@ class _HomeData {
     required this.hasSamples,
     required this.hasData,
     this.journey,
+    this.trend = HomeTrend.none,
+    this.finance,
   });
 
   static const _HomeData empty = _HomeData(
@@ -715,6 +755,14 @@ class _HomeData {
     hasSamples: false,
     hasData: false,
   );
+
+  /// Chuỗi tháng đứng sau các đường xu hướng trên thẻ KPI (WTM-404).
+  final HomeTrend trend;
+
+  /// Lợi nhuận + tỉ suất, từ cùng `FinanceService` màn Tài chính dùng.
+  /// `null` khi Home chạy ở chế độ tiêm dữ liệu (test/preview) — thẻ tương ứng
+  /// **biến mất**, không hiện số 0 giả.
+  final FinanceSummary? finance;
 
   /// The one active journey, or `null` when the seller has not started one
   /// (WTM-210). What "Nhiệm vụ hôm nay" is actually made of.
@@ -889,9 +937,6 @@ class _SectionHeader extends StatelessWidget {
     required this.actionKey,
     required this.actionLabel,
     required this.onAction,
-    this.secondaryActionKey,
-    this.secondaryActionLabel,
-    this.onSecondaryAction,
   });
 
   final String title;
@@ -899,34 +944,34 @@ class _SectionHeader extends StatelessWidget {
   final String actionLabel;
   final VoidCallback onAction;
 
-  /// Optional second action (WTM-206). The KPI header shows the money, so it
-  /// carries the two doors money leads to: Reports and Finance.
-  final Key? secondaryActionKey;
-  final String? secondaryActionLabel;
-  final VoidCallback? onSecondaryAction;
-
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+          child: Text(
+            title,
+            // ⭐ WTM-404 — MỘT dòng. Trên Nokia 6.1 *"Chỉ số kinh doanh"* xuống
+            // hai dòng và ôm lấy hai nút bên phải; đọc ra thành *"Chỉ số kinh /
+            // doanh · Tài chính · Xem báo cáo"*. Tiêu đề mục là một mốc để mắt
+            // bám, và một cái mốc gãy đôi thì thôi làm mốc.
+            //
+            // Cắt bằng `…` chứ không thu nhỏ: ở đây tiêu đề đứng cạnh chữ khác
+            // cùng cỡ, một tiêu đề nhỏ dần theo độ dài sẽ làm cả trang mất
+            // thang bậc — khác trường hợp `_BrandTitle`, nơi cái tên phải giữ
+            // đủ chữ nên thu nhỏ mới đúng.
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
         ),
         // Flexible + FittedBox: at large text scales the action label must
         // shrink rather than push the Row past its bounds (P0 §3).
-        // Flexible + FittedBox: at large text scales the action labels must
-        // shrink rather than push the Row past its bounds (P0 §3).
-        if (secondaryActionLabel case final label?)
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: TextButton(
-                key: secondaryActionKey,
-                onPressed: onSecondaryAction,
-                child: Text(label),
-              ),
-            ),
-          ),
+        //
+        // ⛔ WTM-404 bỏ khả năng "hành động thứ hai": chỗ duy nhất dùng nó là
+        // nút Tài chính, mà nút ấy nay thừa (thẻ năng lực đã mở đúng màn). Giữ
+        // lại một tham số không ai truyền là để dành sẵn chỗ cho lần sau ai đó
+        // nhét thêm một cửa nữa vào cùng cái tiêu đề.
         Flexible(
           child: FittedBox(
             fit: BoxFit.scaleDown,
@@ -942,244 +987,343 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// The four module tiles with live counts.
-class _ModuleSummaryGrid extends StatelessWidget {
-  const _ModuleSummaryGrid({
+/// Revenue YTD + order count + AOV, pulled from the reports aggregator.
+/// The headline KPIs on Home — read straight from [BusinessMetrics] (the KPI
+/// source of truth, WTM-127). Real values are always shown; **zero is valid
+/// business data** and is never replaced with a "No Data" placeholder (WTM-128).
+class _KpiRow extends StatelessWidget {
+  const _KpiRow({
+    required this.metrics,
+    required this.trend,
+    required this.finance,
+  });
+
+  final BusinessMetrics metrics;
+  final HomeTrend trend;
+  final FinanceSummary? finance;
+
+  /// Nhãn mức đổi, hoặc `null` khi **không có mốc để so**.
+  ///
+  /// Ba luật ở [HomeTrend] quyết định `null`; ở đây chỉ định dạng. Tách như vậy
+  /// để luật kiểm được bằng unit test không cần dựng widget.
+  static (String, TtTrend)? _delta(AppStrings l10n, double? percent) {
+    if (percent == null) return null;
+    final rounded = percent.abs() < 0.5 ? 0 : percent.round();
+    if (rounded == 0) return null; // tròn về 0 ⇒ không có gì để khoe
+    final sign = rounded > 0 ? '+' : '−';
+    return (
+      l10n.homeVsPrevMonth('$sign${rounded.abs()}%'),
+      rounded > 0 ? TtTrend.up : TtTrend.down,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final revenueDelta = _delta(l10n, trend.revenueChangePercent);
+    final ordersDelta = _delta(l10n, trend.ordersChangePercent);
+    final profitDelta = _delta(l10n, trend.profitChangePercent);
+    final f = finance;
+    return _CardRail(
+      children: [
+        TtMetricCard(
+          key: const Key('home-kpi-revenue'),
+          label: l10n.kpiRevenue,
+          value: TongtaiFormatters.vndShort(metrics.revenue),
+          iconData: Icons.trending_up,
+          iconColor: TtColors.brandOnDark,
+          deltaLabel: revenueDelta?.$1,
+          trend: revenueDelta?.$2 ?? TtTrend.unknown,
+          series: trend.revenue,
+        ),
+        if (f != null)
+          TtMetricCard(
+            key: const Key('home-kpi-profit'),
+            label: l10n.kpiProfit,
+            value: TongtaiFormatters.vndShort(f.profitYtd),
+            iconData: Icons.savings_outlined,
+            iconColor: TtColors.aiOnLight,
+            deltaLabel: profitDelta?.$1,
+            trend: profitDelta?.$2 ?? TtTrend.unknown,
+            series: trend.profit,
+          ),
+        TtMetricCard(
+          key: const Key('home-kpi-orders'),
+          label: l10n.kpiOrders,
+          value: '${metrics.ordersCount}',
+          iconData: Icons.receipt_long_outlined,
+          iconColor: TtColors.infoOnLight,
+          deltaLabel: ordersDelta?.$1,
+          trend: ordersDelta?.$2 ?? TtTrend.unknown,
+          series: trend.orders,
+        ),
+        TtMetricCard(
+          key: const Key('home-kpi-aov'),
+          label: l10n.kpiAovShort,
+          value: TongtaiFormatters.vndShort(metrics.averageOrderValue),
+          iconData: Icons.calculate_outlined,
+          iconColor: TtColors.successOnLight,
+          // ⛔ Không có đường: đơn trung bình theo tháng KHÔNG phải
+          // `revenue[i] / orders[i]` lấy từ hai chuỗi này rồi chia — nó có
+          // luật riêng ở `MonthlyRevenuePoint.averageOrderValue`. Chia tay ở
+          // đây là dựng câu trả lời thứ hai cho cùng một chỉ số, đúng hình
+          // dạng P-27/P-28. Thà thiếu một đường còn hơn thêm một chủ.
+        ),
+      ],
+    );
+  }
+}
+
+/// Bốn thẻ năng lực ở đầu Home — concept-1 hàng cuộn ngang (WTM-404).
+class _CapabilityRail extends StatelessWidget {
+  const _CapabilityRail({
     required this.producers,
     required this.inventory,
     required this.consumers,
     required this.journeys,
+    required this.finance,
+    required this.onProducer,
+    required this.onInventory,
+    required this.onConsumer,
+    required this.onJourney,
+    required this.onFinance,
   });
 
   final int producers;
   final int inventory;
   final int consumers;
   final int journeys;
+  final FinanceSummary? finance;
+  final VoidCallback onProducer;
+  final VoidCallback onInventory;
+  final VoidCallback onConsumer;
+  final VoidCallback onJourney;
+  final VoidCallback onFinance;
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 2.4,
+    final l10n = context.l10n;
+    final f = finance;
+    // ⚠️ Bốn thẻ này KHÔNG có `deltaLabel` và KHÔNG có `series`.
+    //
+    // Concept vẽ chúng kèm *"↑ 20% so với hôm qua"* và một đường. Chúng ta
+    // chưa đo được: không repository nào giữ ảnh chụp "số sản phẩm hôm qua",
+    // và một chuỗi nội suy từ ngày tạo bản ghi sẽ là **một xu hướng bịa**
+    // (WTM-384, `estimatedGain` đội lốt `observedRevenue`).
+    //
+    // Vậy nên thẻ hiện đúng thứ đo được: con số, đơn vị, và lối đi tiếp. Ô
+    // "Doanh thu" có mốc so ở khối Sức khoẻ bên dưới, nên ở đây nó cũng chỉ
+    // nói con số — hai chỗ cùng một chỉ số phải nói cùng một điều.
+    return _CardRail(
       children: [
-        // ⭐ WTM-389 — bốn ô này là **con số**, không phải phán quyết.
+        TtMetricCard(
+          key: const Key('home-tile-producer'),
+          label: l10n.navProducer,
+          value: '$producers',
+          unitLabel: l10n.homeUnitInputs,
+          iconData: Icons.shopping_bag_outlined,
+          iconColor: TtColors.successOnLight,
+          tint: TtColors.successSoft,
+          actionLabel: l10n.actionOpen,
+          onTap: onProducer,
+        ),
+        TtMetricCard(
+          key: const Key('home-tile-inventory'),
+          label: l10n.navInventory,
+          value: '$inventory',
+          unitLabel: l10n.homeUnitProducts,
+          iconData: Icons.warehouse_outlined,
+          iconColor: TtColors.infoOnLight,
+          tint: TtColors.infoSoft,
+          actionLabel: l10n.actionOpen,
+          onTap: onInventory,
+        ),
+        TtMetricCard(
+          key: const Key('home-tile-consumer'),
+          label: l10n.navConsumer,
+          value: '$consumers',
+          unitLabel: l10n.homeUnitCustomers,
+          iconData: Icons.people_outline,
+          iconColor: TtColors.brandOnDark,
+          tint: TtColors.brandSoft,
+          actionLabel: l10n.actionOpen,
+          onTap: onConsumer,
+        ),
+        // ⭐ Thẻ thứ năm — concept vẽ bốn, ở đây phải là năm.
         //
-        // Trước đây chúng mang màu năng lực: Nguồn hàng xanh lá, Kho hổ phách,
-        // Khách xanh dương. Trên máy Founder ô đầu hiện *"Nguồn hàng **0**"*
-        // bằng màu **xanh lá** — số không mang màu tin tốt, đúng lỗi
-        // `XÁM ≠ XANH`.
+        // Bỏ nó đi thì `count_list_contract_test` đỏ ngay: hợp đồng
+        // ADR-TON-015 (*Summary Count == Domain Visible Records*) có một cặp
+        // cho **mục tiêu**, và cặp ấy chỉ kiểm được khi Home còn công bố con
+        // số. Hàng cuộn ngang nên thẻ thứ năm không tốn chỗ nào — đây là lý do
+        // chọn hàng cuộn thay vì lưới 2×2 cố định.
         //
-        // Quyết định Founder 2026-08-12: giữ màu năng lực để **định vị** (thanh
-        // điều hướng), tuyệt đối không dùng chúng biểu diễn **giá trị hay trạng
-        // thái**. Ô đếm nay trung tính.
-        _ModuleCard(
-          cardKey: const Key('home-tile-producer'),
-          title: context.l10n.navProducer,
-          count: '$producers',
+        // ⛔ Cách sai là xoá cặp khỏi suite cho test xanh: khối "Nhiệm vụ hôm
+        // nay" phía trên nói về **hành trình đang chạy**, không công bố tổng số
+        // mục tiêu, nên nó KHÔNG thay thế được phép kiểm này.
+        TtMetricCard(
+          key: const Key('home-tile-journey'),
+          label: l10n.journeyTitle,
+          value: '$journeys',
+          unitLabel: l10n.homeUnitGoals,
+          iconData: Icons.flag_outlined,
+          iconColor: TtColors.warningOnDark,
+          tint: TtColors.warningSoft,
+          actionLabel: l10n.actionOpen,
+          onTap: onJourney,
         ),
-        _ModuleCard(
-          cardKey: const Key('home-tile-inventory'),
-          title: context.l10n.navInventory,
-          count: '$inventory',
-        ),
-        _ModuleCard(
-          cardKey: const Key('home-tile-consumer'),
-          title: context.l10n.navConsumer,
-          count: '$consumers',
-        ),
-        _ModuleCard(
-          cardKey: const Key('home-tile-journey'),
-          title: context.l10n.tileJourney,
-          count: '$journeys',
-        ),
+        // ⛔ Thẻ này KHÔNG hiện doanh thu.
+        //
+        // Bản đầu của WTM-404 để nó hiện `metrics.revenue`, và suite bắt ngay:
+        // *"Found 2 widgets with text 4,06tr ₫"* — cùng một con số, hai chỗ,
+        // một màn hình. Concept có vẻ làm thế, nhưng hai con số của nó là hai
+        // **cửa sổ khác nhau** (*doanh thu hôm nay* ở thẻ năng lực vs *doanh
+        // thu* ở khối sức khoẻ); chép hình mà bỏ mất khác biệt ấy là dựng đúng
+        // lỗi "hai câu trả lời cho một câu hỏi".
+        //
+        // Công nợ là con số **chỉ Tài chính có**, và nó đáng một cú chạm: tiền
+        // đã bán nhưng chưa về.
+        if (f != null)
+          TtMetricCard(
+            key: const Key('home-tile-finance'),
+            label: l10n.titleFinance,
+            value: TongtaiFormatters.vndShort(f.receivables),
+            unitLabel: l10n.financeReceivablesTitle,
+            iconData: Icons.account_balance_wallet_outlined,
+            iconColor: TtColors.aiOnLight,
+            tint: TtColors.aiSoft,
+            actionLabel: l10n.actionOpen,
+            onTap: onFinance,
+          ),
       ],
     );
   }
 }
 
-/// Ô đếm của một năng lực — **con số, không phán quyết** (WTM-389).
+/// Hàng thẻ cuộn ngang — nhịp của concept-1.
 ///
-/// Xem chú thích ở [_KpiTile]: *"Nguồn hàng **0**"* từng hiện màu xanh lá, tức
-/// số không mang màu tin tốt.
-class _ModuleCard extends StatelessWidget {
-  const _ModuleCard({this.cardKey, required this.title, required this.count});
+/// ## Vì sao cuộn ngang chứ không lưới 2×2
+///
+/// Trên 411dp một lưới hai cột cho mỗi thẻ ~186dp; trừ viền và đệm còn ~160dp
+/// cho một con số cỡ `h1`, một đơn vị, một mức đổi và một đường. Thẻ nào cũng
+/// chật, và thẻ tiền (`24,56tr đ`) tràn trước tiên. Hàng cuộn cho mỗi thẻ
+/// [cardWidth] cố định, đọc được ở mọi bề rộng máy.
+///
+/// ⚠️ **`IntrinsicHeight` bọc `Row`, không phải `ListView`.** Thẻ cao thấp khác
+/// nhau tuỳ có mũi tên/đường hay không; để chúng tự do sẽ cho một hàng răng
+/// cưa. Không dùng `childAspectRatio` cố định — nó cắt cụt thẻ cao nhất, đúng
+/// lỗi tràn Home mà đợt P0 phải sửa.
+class _CardRail extends StatelessWidget {
+  const _CardRail({required this.children});
 
-  final Key? cardKey;
-  final String title;
-  final String count;
+  final List<Widget> children;
+
+  /// Đủ cho `24,56tr đ` ở cỡ `h1` mà không phải thu nhỏ.
+  static const double cardWidth = 168;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: cardKey,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: TtColors.surface,
-        border: Border.all(color: TtColors.border, width: 2),
-      ),
-      // FittedBox: the grid's fixed aspect ratio cannot grow with the text
-      // scale — shrink the content instead of overflowing (P0 §3).
-      child: Center(
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: TtColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  count,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      // Không thêm đệm: trang đã có `padding: 16`. Trên Nokia 6.1 (411dp) phần
+      // còn lại là 379dp, tức hai thẻ đủ + ~31dp của thẻ thứ ba ló ra — đúng
+      // tín hiệu "còn nữa, cuộn đi" mà concept vẽ bằng cách cắt ngang thẻ cuối.
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < children.length; i++) ...[
+              if (i > 0) const SizedBox(width: TtSpace.x3),
+              SizedBox(width: cardWidth, child: children[i]),
+            ],
+          ],
         ),
       ),
     );
   }
 }
 
-/// Revenue YTD + order count + AOV, pulled from the reports aggregator.
-/// The headline KPIs on Home — read straight from [BusinessMetrics] (the KPI
-/// source of truth, WTM-127). Real values are always shown; **zero is valid
-/// business data** and is never replaced with a "No Data" placeholder (WTM-128).
-class _KpiRow extends StatelessWidget {
-  const _KpiRow({required this.metrics});
-
-  final BusinessMetrics metrics;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _KpiTile(
-            tileKey: const Key('home-kpi-revenue'),
-            label: context.l10n.kpiRevenue,
-            value: TongtaiFormatters.vndShort(metrics.revenue),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _KpiTile(
-            tileKey: const Key('home-kpi-orders'),
-            label: context.l10n.kpiOrders,
-            value: '${metrics.ordersCount}',
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _KpiTile(
-            tileKey: const Key('home-kpi-aov'),
-            label: context.l10n.kpiAovShort,
-            value: TongtaiFormatters.vndShort(metrics.averageOrderValue),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Một ô KPI — **con số, không phán quyết** (WTM-389).
+/// "Việc Tổng Tài đề xuất" — ba dòng trong MỘT thẻ (WTM-404, concept-1).
 ///
-/// Trước đây mỗi ô mang màu của một năng lực: Doanh thu **tím**, Đơn hàng xanh
-/// dương, Đơn TB xanh lá. Tím là màu của *"AI đang nói"* — nên ô Doanh thu ngầm
-/// bảo rằng **AI tạo ra con số ấy**, trong khi doanh thu là sự thật cộng từ đơn
-/// của chính người bán.
+/// Trước đây mỗi cơ hội là một hộp viền riêng, mở đầu bằng một vòng tròn điểm
+/// số trần (`61`, `47`, `44`). Trên máy Founder ba con số ấy là thứ nổi nhất
+/// trong khối — mà chúng **không nói được phải làm gì**, và người bán không có
+/// thang nào để biết 61 là cao hay thấp.
 ///
-/// Quyết định Founder 2026-08-12: màu năng lực chỉ để **định vị**; giá trị và
-/// trạng thái dùng token trung tính hoặc ngữ nghĩa. Ô KPI không mang cả hai.
-class _KpiTile extends StatelessWidget {
-  const _KpiTile({this.tileKey, required this.label, required this.value});
+/// Concept chuyển trọng tâm sang **hành động**: một ô biểu tượng theo loại cơ
+/// hội, tiêu đề, một dòng nói vì sao, một chip mức ưu tiên, và một nút. Điểm số
+/// vẫn còn — nó là thứ **xếp thứ tự** ba dòng này — nhưng thôi làm nhân vật
+/// chính.
+class _SuggestedActionsCard extends StatelessWidget {
+  const _SuggestedActionsCard({
+    required this.opportunities,
+    required this.onOpen,
+  });
 
-  final Key? tileKey;
-  final String label;
-  final String value;
+  final List<Opportunity> opportunities;
+  final void Function(Opportunity) onOpen;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: tileKey,
-      padding: const EdgeInsets.all(12),
+      key: const Key('home-suggested-actions'),
       decoration: BoxDecoration(
         color: TtColors.surface,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(TtRadius.lg),
         border: Border.all(color: TtColors.border),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: TtColors.textPrimary,
+          for (var i = 0; i < opportunities.length; i++) ...[
+            if (i > 0) const Divider(height: 1, color: TtColors.divider),
+            _SuggestedActionRow(
+              opportunity: opportunities[i],
+              // Thứ hạng trong danh sách ĐANG HIỆN — xem
+              // [OpportunityPriority]: điểm chỉ chống đỡ được thứ tự, không
+              // chống đỡ được một ngưỡng tuyệt đối.
+              rank: i,
+              onOpen: () => onOpen(opportunities[i]),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 11, color: TtColors.textSecondary),
-          ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// One AI-scored opportunity, with its relevance score and ROI.
-class _OpportunityTile extends StatelessWidget {
-  const _OpportunityTile({required this.opportunity});
+class _SuggestedActionRow extends StatelessWidget {
+  const _SuggestedActionRow({
+    required this.opportunity,
+    required this.rank,
+    required this.onOpen,
+  });
 
   final Opportunity opportunity;
+  final int rank;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: TtColors.border),
-      ),
+    final l10n = context.l10n;
+    final code = Localizations.localeOf(context).languageCode;
+    final priority = OpportunityPriority.at(opportunity, rank);
+    return Padding(
+      padding: const EdgeInsets.all(TtSpace.x3),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.all(TtSpace.x2),
             decoration: BoxDecoration(
-              color: TtColors.ai.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(999),
+              color: TtColors.aiSoft,
+              borderRadius: BorderRadius.circular(TtRadius.sm),
             ),
-            child: Text(
-              // '—' when nothing could be scored: a dash reads as "unknown",
-              // a 0 would read as "worthless" (WTM-193).
-              opportunity.score.value?.round().toString() ?? '—',
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                color: TtColors.ai,
-              ),
+            child: const Icon(
+              Icons.auto_awesome,
+              size: 18,
+              color: TtColors.aiOnLight,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: TtSpace.x3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1188,25 +1332,107 @@ class _OpportunityTile extends StatelessWidget {
                   opportunity.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TtType.body.copyWith(
                     fontWeight: FontWeight.w600,
                     color: TtColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  // WTM-193: was `ROI ×2.5` from a constant. Expected impact is
-                  // a real number from the seller's own orders.
-                  TongtaiFormatters.vnd(opportunity.expectedImpact),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: TtColors.textSecondary,
-                  ),
+                  // WTM-384: nhãn nói con số là **quan sát** hay **ước tính** —
+                  // cùng luật màn chi tiết dùng. Một con số tiền không có nhãn
+                  // ấy là một ước tính mặc áo phép đo.
+                  '${opportunity.impactBasis.isEstimate ? l10n.oppImpact : l10n.oppObservedPrefix}: '
+                  '${TongtaiFormatters.vndShort(opportunity.expectedImpact)}'
+                  ' · ${opportunity.type.label(code)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TtType.caption.copyWith(color: TtColors.textSecondary),
+                ),
+                const SizedBox(height: TtSpace.x2),
+                // ⚠️ `Flexible` + `spaceBetween`, KHÔNG phải `Spacer`.
+                //
+                // Với `Spacer`, chip giữ nguyên bề rộng tự nhiên và ở 320dp ·
+                // cỡ chữ 1.3× hàng này tràn 33px — *"Ưu tiên: Trung bình"* +
+                // nút *"Xử lý ngay"* rộng hơn dòng. `Flexible` cho chip co lại
+                // (và cắt bằng `…`) trong khi nút giữ nguyên: nút là **lối
+                // thoát**, mất chữ trên nút là mất đường đi.
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(child: _PriorityChip(priority: priority)),
+                    TextButton(
+                      key: Key('home-action-${opportunity.id}'),
+                      onPressed: onOpen,
+                      style: TextButton.styleFrom(
+                        foregroundColor: TtColors.brandOnDark,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: TtSpace.x3,
+                        ),
+                        minimumSize: const Size(0, TtButtonMetrics.height),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(TtRadius.sm),
+                          side: const BorderSide(color: TtColors.brand),
+                        ),
+                      ),
+                      child: Text(l10n.actionHandleNow),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Chip mức ưu tiên — *"Ưu tiên: Cao / Trung bình / Thấp"*.
+class _PriorityChip extends StatelessWidget {
+  const _PriorityChip({required this.priority});
+
+  final OpportunityPriority priority;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final (label, fg, bg) = switch (priority) {
+      OpportunityPriority.high => (
+        l10n.oppPriorityHigh,
+        TtColors.dangerOnLight,
+        TtColors.dangerSoft,
+      ),
+      OpportunityPriority.medium => (
+        l10n.oppPriorityMedium,
+        TtColors.warningOnDark,
+        TtColors.warningSoft,
+      ),
+      OpportunityPriority.low => (
+        l10n.oppPriorityLow,
+        TtColors.infoOnLight,
+        TtColors.infoSoft,
+      ),
+      OpportunityPriority.unknown => (
+        l10n.oppPriorityUnknown,
+        TtColors.textSecondary,
+        TtColors.unknownSoft,
+      ),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TtSpace.x2,
+        vertical: TtSpace.x1,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(TtRadius.full),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TtType.caption.copyWith(color: fg, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -1225,6 +1451,84 @@ class _OpportunityTile extends StatelessWidget {
 ///
 /// No microphone: voice input is a Future Capability (Founder, WTM-208), and a
 /// mic that does nothing is the WTM-169 defect wearing a new icon.
+/// Tên sản phẩm ở đầu Trang chủ — linh vật · "Tổng Tài AI" · huy hiệu
+/// "AI Business OS" (WTM-404, concept-1).
+///
+/// ⚠️ **Vẫn phải là tiêu đề tuyến đường.** Thay `Text` bằng một `Row` sẽ làm
+/// TalkBack đọc rời từng mảnh và mất vai *header*; `Semantics(header: true,
+/// label: …)` gộp chúng lại thành một nhãn, và `excludeSemantics` chặn các
+/// mảnh con phát ra lần nữa (P-36: cây semantics là thứ phải kiểm bằng
+/// `tester.ensureSemantics()`, không phải bằng mắt).
+class _BrandTitle extends StatelessWidget {
+  const _BrandTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Semantics(
+      key: const Key('home-brand-title'),
+      header: true,
+      label: '${l10n.startupBrand} — ${l10n.brandTagline}',
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const TongtaiFoxMascot.face(size: 30),
+          const SizedBox(width: TtSpace.x2),
+          // Thu nhỏ thay vì tràn ở màn hẹp / cỡ chữ trợ năng — cùng khuôn P0
+          // §3 mà `_HealthBadge` dùng. `Flexible` chặn bề rộng: một `FittedBox`
+          // trần trong `Row` nhận ràng buộc vô hạn và không bao giờ co lại.
+          //
+          // ⚠️ Chọn co chữ chứ KHÔNG cắt bằng `ellipsis`: *"Tổng Tài A…"* là
+          // một cái tên sai, còn chữ nhỏ vẫn là đúng cái tên ấy.
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.startupBrand,
+                    style: TtType.title.copyWith(
+                      color: TtColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                      height: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: TtSpace.x2,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      // Viên cam giống concept. Cam = màu THƯƠNG HIỆU ở đây,
+                      // và nó gắn với một cái tên — không gắn với một con số
+                      // hay một trạng thái, nên không phạm luật A2.
+                      color: TtColors.brandSoft,
+                      borderRadius: BorderRadius.circular(TtRadius.full),
+                    ),
+                    child: Text(
+                      l10n.brandTagline,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.brandOnDark,
+                        fontWeight: FontWeight.w600,
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Hero extends StatelessWidget {
   const _Hero({
     required this.opportunityCount,

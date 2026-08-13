@@ -97,7 +97,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Home Dashboard'), findsOneWidget);
+      // WTM-404: cửa trước mang TÊN SẢN PHẨM, không phải chữ "Home Dashboard".
+      // Tìm bằng **Key**, không bằng chuỗi hiển thị — chuỗi đổi theo locale và
+      // theo thương hiệu, Key thì không (luật stable test IDs).
+      expect(find.byKey(const Key('home-brand-title')), findsOneWidget);
 
       // Test Producer Screen — reads the favourites store + the
       // rule-generated opportunities (P0 correction: no more static shell).

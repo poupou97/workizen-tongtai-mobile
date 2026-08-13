@@ -173,9 +173,19 @@ void main() {
     }
 
     // One tap off Home: Reports, Finance, Journey (WTM-187), Chat (AI).
+    //
+    // ⚠️ WTM-404 đổi **cánh cửa**, không đổi **lời hứa**. Nút chữ "Tài chính"
+    // trong tiêu đề mục KPI bị bỏ vì thẻ năng lực `home-tile-finance` mở đúng
+    // màn ấy bằng một cú chạm — và còn nói luôn công nợ đang là bao nhiêu. Hai
+    // cửa vào cùng một phòng làm gãy tiêu đề mục trên Nokia 6.1.
+    //
+    // Nên phép kiểm giữ nguyên câu hỏi (*"Tài chính có nằm cách Home một cú
+    // chạm không"*) và chỉ đổi khoá của phần tử đang trả lời nó. ⛔ KHÔNG được
+    // xoá `finance` khỏi danh sách này: cái nó canh là "đừng chôn năng lực vào
+    // hộp More", và điều đó không hết hạn.
     for (final key in const [
       'home-open-reports',
-      'home-open-finance',
+      'home-tile-finance',
       'home-open-journey',
       'home-open-chat',
     ]) {
