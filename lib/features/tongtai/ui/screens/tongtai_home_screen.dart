@@ -716,7 +716,95 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
           const SizedBox(height: 12),
           _KpiRow(metrics: _metrics, trend: data.trend, finance: data.finance),
           const SizedBox(height: 24),
+
+          // ── Khối đóng (WTM-406, concept-1) ────────────────────────
+          //
+          // Trước đây trang kết thúc bằng danh sách cơ hội rồi hết — người xem
+          // cuộn tới đáy và **rơi hẫng**. Concept đóng lại bằng chính nhân vật
+          // đã mở đầu: linh vật mời hỏi tiếp.
+          //
+          // Nó không thêm dữ liệu nào; việc của nó là nói *"vẫn còn người ở
+          // đây"* sau khi người bán đọc xong hết số.
+          _CloserCard(onAsk: () => _openChat(context)),
+          const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+}
+
+/// Khối đóng cuối Trang chủ — linh vật mời hỏi tiếp (WTM-406).
+///
+/// ## ⛔ Nút tròn KHÔNG mang biểu tượng micro
+///
+/// Concept vẽ một hình sóng âm, tức **nhập bằng giọng nói**. App không có. Một
+/// nút micro không ghi âm là affordance giả: người bán bấm, chờ, không có gì
+/// xảy ra — và lần sau họ thôi tin những nút khác. Biểu tượng ở đây là trò
+/// chuyện, và cả khối mở Chat, thứ có thật.
+class _CloserCard extends StatelessWidget {
+  const _CloserCard({required this.onAsk});
+
+  final VoidCallback onAsk;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Material(
+      color: TtColors.aiSoft,
+      borderRadius: BorderRadius.circular(TtRadius.lg),
+      child: InkWell(
+        key: const Key('home-closer'),
+        onTap: onAsk,
+        borderRadius: BorderRadius.circular(TtRadius.lg),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(TtRadius.lg),
+            border: Border.all(color: TtColors.aiBorder),
+          ),
+          padding: const EdgeInsets.all(TtSpace.x4),
+          child: Row(
+            children: [
+              const TongtaiFoxMascot.avatar(size: 44),
+              const SizedBox(width: TtSpace.x3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.homeCloserTitle,
+                      style: TtType.title.copyWith(
+                        color: TtColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.homeCloserBody,
+                      style: TtType.caption.copyWith(
+                        color: TtColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: TtSpace.x3),
+              Container(
+                width: TtButtonMetrics.height,
+                height: TtButtonMetrics.height,
+                decoration: const BoxDecoration(
+                  color: TtColors.ai,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.chat_bubble_outline,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
