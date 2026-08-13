@@ -641,6 +641,44 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-36 · Đọc cây semantics Flutter bằng `flutter run`+`S` (hoặc uiautomator) — cây rỗng giả
+
+- **Root cause:** cách "hiển nhiên" để kiểm thứ tự đọc / nhãn của TalkBack là
+  `flutter run [--profile]` rồi bấm `S` (`debugDumpSemanticsTreeInTraversalOrder`).
+  Nhưng Flutter **chỉ dựng cây semantics khi nền tảng yêu cầu** — tức khi một
+  screen-reader (TalkBack/VoiceOver) đang chạy. Không bật thì `S` trả thẳng
+  *"Semantics not generated… try turning on an assistive technology"* ⇒ trông y
+  như *"màn không có gì để đọc"*, một **cây rỗng giả**. Mà bật TalkBack để lấp
+  chỗ đó thì lại **cướp tiền cảnh + phá chính phép đo** (đúng PASS giả 2026-08-07).
+  Cùng họ [[P-35]] (gfxinfo=0) và [[P-34]]: Flutter **không đi qua đường Android
+  tiêu chuẩn**, nên dụng cụ Android tiêu chuẩn nói dối **im lặng** — `uiautomator
+  dump` một app Flutter trả `text=""` ở **mọi** node (chữ nằm trong
+  `content-desc`), grep `text=` ra rỗng = một FAIL giả sạch sẽ.
+- **Regression:** WTM-277 Option C — live `S` dump trên Nokia 6.1 trả "Semantics
+  not generated for _ReusableRenderView"; `uiautomator` cũng mù. Cả hai đường
+  trên thiết bị đều là ngõ cụt **nếu không** bật TalkBack — và bật thì hỏng đo.
+- **Test / method pattern:** đọc cây semantics **trong tiến trình** bằng
+  `tester.ensureSemantics()` (widget test) — nó dựng đúng cây TalkBack sẽ đọc,
+  **không** cần bật dịch vụ trợ năng nào, **không** cướp tiền cảnh. Duyệt theo
+  `DebugSemanticsDumpOrder.traversalOrder` (thứ tự TalkBack đọc), hoặc đọc
+  `flagsCollection` trên từng `SemanticsData`. Pump ở đúng kích thước máy
+  (Nokia 411×823dp) nếu cần trung thực với thiết bị. Guard đã khoá **vai trò máy
+  chứng minh được** mà bộ guideline WTM-168 không kiểm:
+  `p0/semantics_route_header_test.dart` — mọi màn nội dung có node
+  `isHeader`+`namesRoute` (thông báo tên màn + nhảy theo tiêu đề), màn tìm kiếm
+  có `isTextField`. Nhãn không-rỗng đã khoá bởi `labeledTapTargetGuideline`
+  (WTM-168). Bằng chứng dump: `~/Desktop/WTM-277-Semantics-Audit-2026-08-13/`.
+- **Prevention:** audit thứ tự đọc / nhãn của app Flutter ⇒ dùng
+  `ensureSemantics()` trong test, **không** `flutter run`+`S` (cần TalkBack) và
+  **không** `uiautomator` (đọc rỗng). Ranh giới phải giữ đúng tên (bài học
+  [[P-35]] họ TalkBack + WTM-384 "bản ghi tự xưng là thứ nó không phải"): máy
+  chứng minh được **vai trò · thứ tự duyệt · nhãn có/rỗng · focus/48dp**;
+  **đọc lên nghe có xuôi không · rườm rà · đủ ngữ cảnh khi không nhìn** vẫn là
+  **tai người** (Founder/device gate). Đừng gọi audit cây semantics là "nghiệm
+  thu TalkBack hoàn chỉnh".
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:
@@ -696,6 +734,7 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `export/backup_screen_test.dart` | preview không chạm DB · xác nhận phá huỷ · file hỏng không có nút phá huỷ · file mã hoá xin mật khẩu |
 | `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
 | `../commerce/product_category_governance_test.dart` | **một taxonomy canonical** (WTM-393/P-34): mọi nguồn seed lưu **mã**, không nhãn; `parse` chữa nhãn Anh/VI cũ; chuỗi tự đặt giữ nguyên |
+| `semantics_route_header_test.dart` | **vai trò semantics** (WTM-277/P-36): mọi màn nội dung có `isHeader`+`namesRoute`, màn tìm kiếm có `isTextField` — đọc cây bằng `ensureSemantics()` (không `flutter run`+`S`/uiautomator); nhãn/48dp/contrast đã ở `accessibility_test.dart` |
 
 ## Khi sửa bug mới — checklist
 
