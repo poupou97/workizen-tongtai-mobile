@@ -41,3 +41,28 @@ Production Screen trong khi mới là Static UI).
 Doc là DONE khi: một kỹ sư Flutter đủ năng lực build được từ doc mà không phải
 hỏi thêm câu hỏi sản phẩm. Code task là DONE khi build chạy và feature hoạt
 động **trên thiết bị thật**.
+
+## Dựng artefact — luôn qua `tool/build_release.sh` (WTM-401)
+
+Mọi APK/AAB rời khỏi máy phải mang **một số build chưa từng dùng**, và phải có
+một mục trong [BUILD-LOG.md](BUILD-LOG.md) nói bản ấy **có gì mà bản trước
+không có**.
+
+```bash
+tool/build_release.sh apk "smoke-launch trên Nokia"
+tool/build_release.sh aab "nộp closed beta"
+```
+
+Script tự: `bump` → dựng → `record OK|FAILED` → in SHA256 của artefact.
+
+⛔ **Dựng hỏng KHÔNG hoàn lại số build.** Số đã đốt là một sự kiện đã xảy ra;
+dùng lại nó nghĩa là hai artefact khác nhau mang cùng một số, và nếu bản hỏng lỡ
+ra khỏi máy thì không ai phân biệt được nữa. Thủng dãy số vô hại — Play chỉ đòi
+**tăng dần**.
+
+Cổng cơ học: `test/build_version_governance_test.dart` đỏ khi số build lùi, trùng,
+log sai thứ tự, hoặc còn một mục treo ở *"ĐANG DỰNG"*. Một dòng tài liệu nói
+"nhớ tăng versionCode" không làm gì đỏ cả.
+
+⛔ Script **không** tag, **không** tạo release, **không** upload — release · tag ·
+deploy production vẫn Founder-only.
