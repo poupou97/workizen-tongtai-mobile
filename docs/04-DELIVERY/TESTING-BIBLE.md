@@ -607,6 +607,40 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-35 · Đo jank Flutter bằng công cụ Android mặc định — số 0 giả và trung bình giả
+
+- **Root cause:** công cụ đo jank "hiển nhiên" là `dumpsys gfxinfo <pkg>`, nhưng
+  Flutter vẽ qua engine riêng vào một `SurfaceView` và **không** đi qua
+  `HardwareRenderer` mà gfxinfo đọc ⇒ nó luôn báo `Total frames rendered: 0`.
+  *"0 khung ⇒ 0 jank"* là một **PASS giả** — cùng họ với PASS giả TalkBack (đo
+  overlay của screen-reader chứ không đo app). Cạm bẫy thứ hai đến ngay sau khi
+  chuyển sang `dumpsys SurfaceFlinger --latency`: bộ đệm ~128 khung gồm cả
+  **khoảng nghỉ** giữa các cú vuốt; Flutter **đúng** khi không vẽ lúc màn tĩnh,
+  nên mỗi khoảng nghỉ 100–900ms bị tính thành "khung rớt" ⇒ **JANK giả**
+  (mean 45ms, worst 933ms) — ngược dấu với PASS giả nhưng cùng gốc: đo nhầm thứ.
+- **Regression:** WTM-277 — đo scroll jank trên Nokia 6.1 (máy tầm thấp mốc
+  tham chiếu). gfxinfo báo 0 khung (suýt kết luận "không đo được"); fling rời rạc
+  báo 5.6% "dropped", worst 933ms (jank giả từ khoảng nghỉ + một mẫu biên âm sau
+  `--latency-clear` làm hỏng cả trung bình). Sự thật sau khi tách chuyển-động
+  khỏi nghỉ: Kho (114 sp) và Khách hàng (82 kh) đều **0 khung rớt, worst ~17ms,
+  60fps bền**. Không có bug sản phẩm — bug nằm ở **phép đo**.
+- **Test / method pattern:** (1) layer đúng là `SurfaceView - <pkg>/<Activity>#0`
+  — xác nhận bằng cột 2 (actualPresentTime) khác 0; layer `AppWindowToken{…}` và
+  `<pkg>/<Activity>` trả toàn số 0. (2) `--latency-clear` → **một cú kéo liên tục**
+  (finger-down, `input swipe x y x y 1500`) chứ không fling rời rạc → `--latency`.
+  (3) parse cột 2: bỏ `d<=0` (mẫu biên sau clear) và `d>100ms` (khoảng nghỉ,
+  không phải jank); chỉ đếm jank `>25ms` / rớt `>33ms` trên khung **đang chuyển
+  động**. (4) báo cáo **đếm khung rớt + worst interval**, không assert mili-giây
+  (P-16). Bằng chứng mẫu: `~/Desktop/WTM-277-Device-Evidence-2026-08-13/`.
+- **Prevention:** đo hiệu năng thiết bị của app Flutter ⇒ **không** dùng gfxinfo
+  cho jank (chỉ đúng với app View thuần); dùng SurfaceFlinger latency trên layer
+  `SurfaceView` + lọc khoảng nghỉ. Hỏi *"0 khung / mean 45ms là app mượt, app
+  đứng hình, hay tôi đo nhầm layer?"* trước khi ghi PASS/FAIL. Cùng bài học
+  [[P-16]] và họ TalkBack: một phép đo có thể **xanh mà vô nghĩa** nếu đo nhầm
+  bề mặt (overlay thay vì app · nghỉ thay vì kéo).
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:
