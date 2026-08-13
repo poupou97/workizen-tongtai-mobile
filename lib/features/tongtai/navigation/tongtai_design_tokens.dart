@@ -250,10 +250,31 @@ abstract final class TongtaiTabs {
   ///
   /// The index is **reused rather than appended** on purpose: a seller with
   /// tab 4 already persisted lands on Opportunity instead of an out-of-range
-  /// index, and the bar stays at five — six tabs is cramped on a small phone,
-  /// and the Concept has eight capabilities, so tabs were never going to
-  /// represent all of them anyway.
+  /// index.
   static const int opportunity = 4;
+
+  /// Slot 5 — "Thêm" (WTM-405, concept-1).
+  ///
+  /// ## ⚠️ Điều này ĐẢO một câu đã ghi ở đây
+  ///
+  /// Ghi chú của WTM-192 từng nói thêm: *"thanh giữ ở năm — sáu tab thì chật
+  /// trên máy nhỏ"*. Câu ấy là một **dự đoán**, không phải một phép đo, và
+  /// concept-1 vẽ đúng sáu mục.
+  ///
+  /// Nên nó được **đo** thay vì tranh luận: sáu mục trên Nokia 6.1 (411dp) là
+  /// 68,5dp mỗi mục. Vùng chạm tối thiểu 48dp vẫn thoả, biểu tượng giữ nguyên
+  /// cỡ, nhãn dài nhất ("Khách hàng") thu nhỏ theo `FittedBox` như năm mục
+  /// trước đó vẫn làm. Bằng chứng: ảnh chụp trong PR + `overflow_test` ở
+  /// 320px/1.3×/2.0×.
+  ///
+  /// Điều KHÔNG đổi: tab **không** đại diện cho cả tám năng lực. Chính vì thế
+  /// mục thứ sáu là **"Thêm"** — cánh cửa vào danh mục đầy đủ — chứ không phải
+  /// năng lực thứ sáu được thăng hạng.
+  static const int more = 5;
+
+  /// Số tab trên thanh. Dùng cái này thay vì viết `<= opportunity` — đúng vòng
+  /// lặp ấy đã phải sửa tay ở mọi suite khi thanh đổi từ 5 lên 6.
+  static const int count = 6;
 }
 
 /// Get color for a specific tab
@@ -286,6 +307,8 @@ String getTabName(int tabIndex) {
       return 'Consumer';
     case TongtaiTabs.opportunity:
       return 'Opportunity';
+    case TongtaiTabs.more:
+      return 'More';
     default:
       return 'Unknown';
   }

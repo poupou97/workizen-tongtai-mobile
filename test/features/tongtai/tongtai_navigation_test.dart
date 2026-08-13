@@ -32,7 +32,7 @@ void main() {
       // Every tab is present, found by **key**: the labels are localized, and
       // WTM-192 renamed the fifth one — a test reading labels checks the
       // translation, not the navigation.
-      for (var tab = TongtaiTabs.home; tab <= TongtaiTabs.opportunity; tab++) {
+      for (var tab = TongtaiTabs.home; tab < TongtaiTabs.count; tab++) {
         expect(
           find.byKey(Key('nav-tab-$tab')),
           findsOneWidget,

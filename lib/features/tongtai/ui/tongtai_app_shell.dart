@@ -6,6 +6,7 @@ import '../providers/tongtai_navigation_provider.dart';
 import 'screens/tongtai_consumer_screen.dart';
 import 'screens/tongtai_home_screen.dart';
 import 'screens/tongtai_inventory_screen.dart';
+import 'screens/tongtai_more_screen.dart';
 import 'screens/tongtai_opportunity_feed_screen.dart';
 import 'screens/tongtai_producer_screen.dart';
 import 'tongtai_bottom_nav.dart';
@@ -63,6 +64,13 @@ class TongtaiAppShell extends ConsumerWidget {
           TongtaiInventoryScreen(),
           TongtaiConsumerScreen(),
           TongtaiOpportunityFeedScreen(),
+          // WTM-405 — "Thêm" là **tab**, không phải màn được push.
+          //
+          // Push sẽ cho người bán hai bản của cùng một danh mục với hai trạng
+          // thái cuộn/lọc độc lập, đúng thứ One Data Path (ADR-TON-015) dựng ra
+          // để chặn — và đúng lý do WTM-192 bắt Home "chuyển tab" thay vì đẩy
+          // một bản sao màn Cơ hội.
+          TongtaiMoreScreen(),
         ],
       ),
       bottomNavigationBar: TongtaiBottomNav(

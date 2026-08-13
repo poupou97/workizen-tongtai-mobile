@@ -129,7 +129,7 @@ void main() {
 
     // Every tab is present, found by key so the assertion survives
     // translation (WTM-192 — the labels are localized now).
-    for (var tab = TongtaiTabs.home; tab <= TongtaiTabs.opportunity; tab++) {
+    for (var tab = TongtaiTabs.home; tab < TongtaiTabs.count; tab++) {
       expect(
         find.byKey(Key('nav-tab-$tab')),
         findsOneWidget,
@@ -164,7 +164,7 @@ void main() {
     await pumpShell(tester);
 
     // On the tab bar (WTM-192): Producer, Inventory, Consumer, Opportunity.
-    for (var tab = TongtaiTabs.home; tab <= TongtaiTabs.opportunity; tab++) {
+    for (var tab = TongtaiTabs.home; tab < TongtaiTabs.count; tab++) {
       expect(
         find.byKey(Key('nav-tab-$tab')),
         findsOneWidget,

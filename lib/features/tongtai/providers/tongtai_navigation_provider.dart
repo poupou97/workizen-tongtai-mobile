@@ -18,13 +18,28 @@ class TongtaiSelectedTabNotifier extends Notifier<int> {
   int build() {
     // Load the last selected tab from preferences synchronously
     final prefs = ref.watch(sharedPreferencesProvider);
-    return prefs.getInt(_prefsKey) ?? _defaultTab;
+    final saved = prefs.getInt(_prefsKey) ?? _defaultTab;
+    // ⭐ WTM-405 — kẹp về khoảng hợp lệ khi ĐỌC, không chỉ khi ghi.
+    //
+    // Giá trị này sống trong SharedPreferences qua các lần cài đặt, nên nó có
+    // thể **cũ hơn thanh nav hiện tại**. `assert` ở `select()` chỉ chạy trong
+    // bản debug và chỉ canh đường GHI — một chỉ số lạc từ bản trước đi thẳng
+    // vào `IndexedStack` và làm sập app ở bản release, ngay lần mở đầu tiên,
+    // trước cả khi người dùng chạm được gì.
+    //
+    // Chưa xảy ra vì thanh mới chỉ dài thêm. Lần thanh **ngắn lại** thì nó xảy
+    // ra — và đó là kiểu lỗi chỉ gặp ở người đã dùng app từ trước, tức đúng
+    // những người ít bị test chạm tới nhất.
+    if (saved < TongtaiTabs.home || saved >= TongtaiTabs.count) {
+      return _defaultTab;
+    }
+    return saved;
   }
 
   /// Select a tab by index and persist the selection
   Future<void> select(int tabIndex) async {
     assert(
-      tabIndex >= TongtaiTabs.home && tabIndex <= TongtaiTabs.opportunity,
+      tabIndex >= TongtaiTabs.home && tabIndex < TongtaiTabs.count,
       'Invalid tab index: $tabIndex',
     );
     state = tabIndex;
