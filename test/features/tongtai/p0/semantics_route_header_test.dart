@@ -32,6 +32,31 @@ import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dar
     show kSampleProducts;
 import 'package:tongtai/database/database.dart';
 
+/// **Nokia 6.1 — máy tham chiếu tầm thấp.** Số đo THẬT, không phải số nhớ được.
+///
+/// ```
+/// adb shell wm size     → Physical size: 1080x1920
+/// adb shell wm density  → Physical density: 420      ⇒ ratio 420/160 = 2.625
+///                       ⇒ 1080/2.625 x 1920/2.625 = 411.4 x 731.4 dp
+/// ```
+///
+/// ⚠️ **WTM-399.** Bản đầu ghi `Size(1080, 2160)` — chiều cao 18:9 của một lớp
+/// máy khác, trong khi Nokia 6.1 là **16:9**. `2160/2.625 = 823 dp`, và bản tóm
+/// tắt audit gọi đó là *"kích thước logic của Nokia"*. Rộng đúng, **cao sai 92 dp
+/// (12,6%)**.
+///
+/// Kết luận "thứ tự đọc sạch" nhiều khả năng vẫn đúng — thứ tự duyệt hiếm khi
+/// phụ thuộc chiều cao. Nhưng guard khi ấy đo ở một kích thước **không máy nào
+/// có**: màn cao hơn chứa được nhiều nội dung hơn trước khi phải cuộn, nên một
+/// khiếm khuyết chỉ lộ khi nội dung dồn ở chiều cao thật sẽ lọt qua.
+///
+/// Đặt tên cho con số vì **số chép tay là chỗ sai lần sau**. Test nào cần trung
+/// thực với thiết bị thì dùng hằng này; test nào chỉ cần một khung cao để tránh
+/// tràn thì cứ khai thẳng như vậy — một khung nói *"tôi là canvas cao"* là trung
+/// thực, một khung nói *"tôi là Nokia"* mà không phải thì không.
+const double kNokia61PixelRatio = 2.625;
+const Size kNokia61PhysicalSize = Size(1080, 1920);
+
 /// WTM-277 (Option C) — a screen reader's *structural* affordances, read from
 /// Flutter's own semantics tree.
 ///
@@ -170,9 +195,8 @@ void main() {
     Widget screen,
     String locale,
   ) async {
-    // Nokia 6.1 (the low-end reference device): 1080x2160 px @420dpi.
-    tester.view.devicePixelRatio = 2.625;
-    tester.view.physicalSize = const Size(1080, 2160);
+    tester.view.devicePixelRatio = kNokia61PixelRatio;
+    tester.view.physicalSize = kNokia61PhysicalSize;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(await host(screen, locale));
