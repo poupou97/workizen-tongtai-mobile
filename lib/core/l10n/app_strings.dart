@@ -235,7 +235,6 @@ abstract class AppStrings {
   String get titleKeyScan;
 
   // ── Home ────────────────────────────────────────────────────────────────
-  String get homeWelcome;
   String get homeEmptyBody;
   String get homeSampleLoadedSnack;
   String get homeAddCustomer;
@@ -500,9 +499,7 @@ abstract class AppStrings {
   String get goalNew;
 
   // ── Home extras (WTM-128) ───────────────────────────────────────────────
-  String get titleHomeDashboard;
   String get homeChatTooltip;
-  String get homeAiSubtitle;
   String get sectionBusinessKpis;
   String get sectionTopOpportunities;
   String get homeCtaCustomer;
@@ -510,7 +507,41 @@ abstract class AppStrings {
   String get homeCtaOrder;
   String get homeCtaGoal;
   String get homeCtaDemo;
-  String get tileJourney;
+
+  // ── Concept-1 shell + thẻ chỉ số (WTM-404) ─────────────────────────────
+  /// Dòng phụ dưới tên sản phẩm ở đầu Trang chủ. Concept mở bằng **thương
+  /// hiệu**, không phải bằng chữ "Bảng điều khiển" — một bảng điều khiển là
+  /// thứ người ta *dùng*, một sản phẩm là thứ người ta *nhớ*.
+  String get brandTagline;
+
+  /// Nhãn đường dẫn tiếp trên thẻ chỉ số — "Xem kho", "Xem khách"…
+  String get actionOpen;
+
+  /// Nút trên mỗi dòng cơ hội ở Trang chủ.
+  String get actionHandleNow;
+
+  /// Đơn vị dưới con số trên thẻ năng lực — *"12 sản phẩm"*, *"82 khách"*.
+  String get homeUnitInputs;
+  String get homeUnitProducts;
+  String get homeUnitCustomers;
+  String get homeUnitGoals;
+
+  /// Chip mức ưu tiên trên dòng "Việc Tổng Tài đề xuất".
+  ///
+  /// ⚠️ Đây là **thứ hạng trong danh sách đang hiện**, không phải một ngưỡng
+  /// điểm — xem `OpportunityPriority`. Nhãn phải đọc như *"làm trước"*, không
+  /// như *"nghiêm trọng"*.
+  String get oppPriorityHigh;
+  String get oppPriorityMedium;
+  String get oppPriorityLow;
+  String get oppPriorityUnknown;
+
+  /// Mức đổi của một chỉ số so với **tháng liền trước đã kết thúc**.
+  ///
+  /// ⚠️ "tháng trước" chứ không phải "hôm qua": chuỗi Home đọc là chuỗi
+  /// **tháng** (`RevenueSeries`, tháng đang chạy bị loại vì một tháng dở luôn
+  /// trông như sụp đổ cạnh các tháng đủ). Nhãn phải nói đúng mốc mình so.
+  String homeVsPrevMonth(String percent);
 
   // ── inventory (WTM-68/70) ───────────────────────────────────────────────
   String get pickerTitle;
@@ -1463,8 +1494,6 @@ class AppStringsVi extends AppStrings {
   String get titleKeyScan => 'Quét QR chứa API key';
 
   @override
-  String get homeWelcome => 'Chào mừng đến Tổng Tài';
-  @override
   String get homeEmptyBody => 'Nhập dữ liệu kinh doanh đầu tiên của bạn.';
   @override
   String get homeSampleLoadedSnack =>
@@ -2081,12 +2110,7 @@ class AppStringsVi extends AppStrings {
   String get goalNew => 'Mục tiêu mới';
 
   @override
-  String get titleHomeDashboard => 'Bảng điều khiển';
-  @override
   String get homeChatTooltip => 'Trò chuyện Workizen AI';
-  @override
-  String get homeAiSubtitle =>
-      'Trợ lý kinh doanh AI của bạn — nguồn hàng, kho, khách hàng và hơn nữa.';
   @override
   String get sectionBusinessKpis => 'Chỉ số kinh doanh';
   @override
@@ -2102,7 +2126,29 @@ class AppStringsVi extends AppStrings {
   @override
   String get homeCtaDemo => 'Khám phá dữ liệu mẫu';
   @override
-  String get tileJourney => 'Hành trình';
+  String get brandTagline => 'AI Business OS';
+  @override
+  String get actionOpen => 'Xem';
+  @override
+  String get actionHandleNow => 'Xử lý ngay';
+  @override
+  String get homeUnitInputs => 'đầu vào';
+  @override
+  String get homeUnitProducts => 'sản phẩm';
+  @override
+  String get homeUnitCustomers => 'khách hàng';
+  @override
+  String get homeUnitGoals => 'mục tiêu';
+  @override
+  String get oppPriorityHigh => 'Ưu tiên: Cao';
+  @override
+  String get oppPriorityMedium => 'Ưu tiên: Trung bình';
+  @override
+  String get oppPriorityLow => 'Ưu tiên: Thấp';
+  @override
+  String get oppPriorityUnknown => 'Chưa xếp được';
+  @override
+  String homeVsPrevMonth(String percent) => '$percent so với tháng trước';
 
   @override
   String get pickerTitle => 'Chọn sản phẩm';
@@ -3607,8 +3653,6 @@ class AppStringsEn extends AppStrings {
   String get titleKeyScan => 'Scan API-key QR';
 
   @override
-  String get homeWelcome => 'Welcome to Tổng Tài';
-  @override
   String get homeEmptyBody => 'Enter your first business data.';
   @override
   String get homeSampleLoadedSnack =>
@@ -4222,13 +4266,7 @@ class AppStringsEn extends AppStrings {
   String get goalNew => 'New goal';
 
   @override
-  String get titleHomeDashboard => 'Home Dashboard';
-  @override
   String get homeChatTooltip => 'Workizen AI chat';
-  @override
-  String get homeAiSubtitle =>
-      'Your AI-powered business assistant for sourcing, '
-      'inventory, customers, and more.';
   @override
   String get sectionBusinessKpis => 'Business KPIs';
   @override
@@ -4244,7 +4282,29 @@ class AppStringsEn extends AppStrings {
   @override
   String get homeCtaDemo => 'Explore Demo Mode';
   @override
-  String get tileJourney => 'Journey';
+  String get brandTagline => 'AI Business OS';
+  @override
+  String get actionOpen => 'Open';
+  @override
+  String get actionHandleNow => 'Handle now';
+  @override
+  String get homeUnitInputs => 'inputs';
+  @override
+  String get homeUnitProducts => 'products';
+  @override
+  String get homeUnitCustomers => 'customers';
+  @override
+  String get homeUnitGoals => 'goals';
+  @override
+  String get oppPriorityHigh => 'Priority: High';
+  @override
+  String get oppPriorityMedium => 'Priority: Medium';
+  @override
+  String get oppPriorityLow => 'Priority: Low';
+  @override
+  String get oppPriorityUnknown => 'Not ranked';
+  @override
+  String homeVsPrevMonth(String percent) => '$percent vs last month';
 
   @override
   String get pickerTitle => 'Pick a product';

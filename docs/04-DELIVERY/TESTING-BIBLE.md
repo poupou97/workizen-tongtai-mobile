@@ -679,6 +679,61 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
 
 ---
 
+## P-37 · Dựng lại một màn ⇒ **cánh cửa đổi khoá**, và guard chết theo — im lặng
+
+- **Root cause:** governance của repo này neo vào **khoá widget** (`home-open-finance`,
+  `home-tile-journey`). Khi một màn được dựng lại, phần tử mang khoá ấy có thể
+  **biến mất trong khi lời hứa vẫn còn** — Tài chính vẫn cách Home một cú chạm,
+  chỉ là qua thẻ năng lực thay vì nút chữ. Lúc ấy suite đỏ, và phản xạ sai là
+  **xoá mục khỏi danh sách guard cho xanh**. Làm thế là bỏ đúng phép kiểm đang
+  canh *"đừng chôn năng lực vào hộp More"* — mất một cách âm thầm, vì sau đó
+  không có gì đỏ nữa.
+  Chiều ngược lại cũng có: bỏ ô đếm **Hành trình** khỏi Home làm gãy cặp
+  *Summary Count == Visible Records* của mục tiêu — và cách sửa đúng là **trả ô
+  đếm về**, không phải bỏ cặp khỏi hợp đồng ADR-TON-015.
+- **Regression:** WTM-404 (dựng Home theo concept-1). Ba guard đỏ cùng lúc:
+  `nav_availability_test` (`home-open-finance` mất), `count_list_contract_test`
+  (`home-tile-journey` mất), `localization_test` (4 khoá chuỗi thành mồ côi).
+  Cả ba **đều đúng** — không cái nào là nhiễu.
+- **Test / method pattern:** khi guard đỏ vì dựng lại giao diện, hỏi đúng **hai**
+  câu, theo thứ tự:
+  1. *Lời hứa còn không?* — còn ⇒ **đổi khoá trong test**, giữ nguyên câu hỏi,
+     ghi chú vì sao cửa đổi chỗ (xem chú thích `home-tile-finance` trong
+     `nav_availability_test.dart`).
+  2. *Lời hứa mất rồi?* — thì **trả nó về**, đừng gỡ guard. Ô "Hành trình" quay
+     lại làm thẻ thứ năm của hàng cuộn (concept vẽ bốn) chính vì lý do này.
+  ⛔ Không có câu thứ ba. "Xoá dòng ấy khỏi danh sách" chỉ đúng khi năng lực
+  thật sự rời sản phẩm — và khi đó phải có ADR, không phải một dòng diff.
+  Chuỗi mồ côi thì ngược lại: `localization_test` bắt **key không ai dùng**, và
+  cách sửa đúng là **xoá key** (cả 3 chỗ), không phải nhét lại một `Text` chết.
+- **Prevention:** trước khi dựng lại một màn, `grep` khoá của nó trong `test/`
+  để biết mình sắp đụng bao nhiêu guard. Sau khi dựng xong, chạy **`p0/` trước
+  tiên** — nó là bộ hỏi *"lời hứa còn không"*, và trả lời nó khi còn nhớ vì sao
+  vừa đổi rẻ hơn nhiều so với ba tuần sau.
+
+## P-38 · `git checkout <file>` giữa lúc đột biến — bản vá chưa `git add` biến mất im lặng
+
+- **Root cause:** vòng kiểm đột biến chạy `sửa lib/ → test → git checkout lib/…`
+  để khôi phục. `git checkout <path>` khôi phục từ **INDEX**, không phải từ bản
+  làm việc. Nếu sau lần `git add` cuối ta còn sửa thêm, lần khôi phục ấy **xoá
+  luôn phần sửa thật** — và nó xoá *lặng*: analyzer xanh, suite xanh, vì bản cũ
+  vốn cũng xanh. Cùng họ [[P-33]] (đổi keystore ⇒ mất dữ liệu) — một thao tác
+  dọn dẹp nuốt mất thứ không ai đang nhìn.
+- **Regression:** WTM-404. Bản vá "nhãn mức đổi cho phép **hai dòng**" (do máy
+  thật bắt: *"+17% so với tháng tr…"* nuốt mất cái mốc) bị hai lần đột biến sau
+  đó khôi phục đè. Không test nào đỏ — chính vì cái nó sửa là thứ **chỉ nhìn
+  thấy trên thiết bị**.
+- **Test / method pattern:** đột biến phải **stash-an-toàn**, không `checkout`:
+  chép file ra `$TMPDIR` trước khi sửa và chép ngược lại, hoặc `git stash` toàn
+  bộ trước vòng đột biến. Và sau mỗi vòng, **grep lại dấu hiệu của từng bản vá
+  do máy thật bắt** — chúng là loại duy nhất suite không canh hộ:
+  `grep -n "maxLines: 2," lib/…/tt_metric_card.dart`.
+- **Prevention:** `git add -A` **ngay trước** vòng đột biến, để index == bản làm
+  việc và `checkout` trở nên vô hại. Nếu quên: coi mọi bản vá "sửa sau lần add
+  cuối" là đã mất cho tới khi grep chứng minh ngược lại.
+
+---
+
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
 
 `<screen>-<role>[-<qualifier>]`, kebab-case:
@@ -734,6 +789,7 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `export/backup_screen_test.dart` | preview không chạm DB · xác nhận phá huỷ · file hỏng không có nút phá huỷ · file mã hoá xin mật khẩu |
 | `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
 | `../commerce/product_category_governance_test.dart` | **một taxonomy canonical** (WTM-393/P-34): mọi nguồn seed lưu **mã**, không nhãn; `parse` chữa nhãn Anh/VI cũ; chuỗi tự đặt giữ nguyên |
+| `ui/home_concept_cards_test.dart` | **luật đứng sau thẻ concept-1** (WTM-404): thiếu mốc ⇒ không phần trăm (mốc = 0 cũng vậy) · dưới 3 điểm ⇒ không vẽ đường · màu định vị không chạm con số/mũi tên · mức ưu tiên là **thứ hạng**, không phải ngưỡng điểm. 5 đột biến đã chứng minh đỏ |
 | `semantics_route_header_test.dart` | **vai trò semantics** (WTM-277/P-36): mọi màn nội dung có `isHeader`+`namesRoute`, màn tìm kiếm có `isTextField` — đọc cây bằng `ensureSemantics()` (không `flutter run`+`S`/uiautomator); nhãn/48dp/contrast đã ở `accessibility_test.dart` |
 
 ## Khi sửa bug mới — checklist
