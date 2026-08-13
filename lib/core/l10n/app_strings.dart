@@ -536,6 +536,10 @@ abstract class AppStrings {
   String get oppPriorityLow;
   String get oppPriorityUnknown;
 
+  /// Khối đóng cuối Trang chủ (WTM-406, concept-1) — linh vật mời hỏi.
+  String get homeCloserTitle;
+  String get homeCloserBody;
+
   /// Mức đổi của một chỉ số so với **tháng liền trước đã kết thúc**.
   ///
   /// ⚠️ "tháng trước" chứ không phải "hôm qua": chuỗi Home đọc là chuỗi
@@ -2147,6 +2151,11 @@ class AppStringsVi extends AppStrings {
   String get oppPriorityLow => 'Ưu tiên: Thấp';
   @override
   String get oppPriorityUnknown => 'Chưa xếp được';
+  @override
+  String get homeCloserTitle => 'Tổng Tài sẵn sàng hỗ trợ bạn!';
+  @override
+  String get homeCloserBody =>
+      'Phân tích lợi nhuận? Tìm cơ hội mới? Hỏi tôi nhé.';
   @override
   String homeVsPrevMonth(String percent) => '$percent so với tháng trước';
 
@@ -4303,6 +4312,10 @@ class AppStringsEn extends AppStrings {
   String get oppPriorityLow => 'Priority: Low';
   @override
   String get oppPriorityUnknown => 'Not ranked';
+  @override
+  String get homeCloserTitle => 'Tổng Tài is ready to help!';
+  @override
+  String get homeCloserBody => 'Profit analysis? New opportunities? Just ask.';
   @override
   String homeVsPrevMonth(String percent) => '$percent vs last month';
 

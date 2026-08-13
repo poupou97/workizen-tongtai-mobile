@@ -732,6 +732,33 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   việc và `checkout` trở nên vô hại. Nếu quên: coi mọi bản vá "sửa sau lần add
   cuối" là đã mất cho tới khi grep chứng minh ngược lại.
 
+## P-39 · `assert` canh đường GHI, còn giá trị hỏng đi vào từ đường ĐỌC
+
+- **Root cause:** một giá trị **sống lâu hơn bản cài đặt** (SharedPreferences,
+  DB, file cấu hình) được ghi hợp lệ hôm nay và đọc lại ở một bản có **luật
+  khác**. `assert` đặt ở hàm ghi không canh được gì: nó không chạy khi đọc, và
+  ở bản **release** nó bị gỡ bỏ hoàn toàn. Đảo chiều của [[P-31]] (*"thêm trường
+  xong nửa dưới — đường GHI vẫn viết bằng mô hình cũ"*).
+- **Regression:** WTM-405/406, Nokia 6.1, 2026-08-13. Cài bản **6 tab**, chạm
+  "Thêm" (index 5), rồi cài đè một bản dựng **cũ hơn chỉ có 5 tab**. App mở lên
+  là **màn đỏ**:
+  `indexed_stack.dart: Failed assertion: 'index >= 0 && index < children.length'`.
+  `run-as … cat shared_prefs/FlutterSharedPreferences.xml` xác nhận
+  `tongtai_selected_tab" value="5"`. Sập **trước khi** người dùng chạm được gì —
+  không cú chạm nào cứu được. Người gặp: **người đã dùng app từ trước**, tức
+  nhóm ít bị test chạm tới nhất và là nhóm duy nhất có giá trị cũ trong máy.
+- **Test / method pattern:** kiểm ở **đường đọc**, với giá trị bền nằm sẵn:
+  `SharedPreferences.setMockInitialValues({...})` rồi đọc provider —
+  `tongtai_tab_persistence_test.dart`. Bắt buộc **hai chiều**, vì mỗi chiều bắt
+  một cách hỏng khác nhau: (a) giá trị ngoài khoảng ⇒ về mặc định; (b) **mọi**
+  giá trị hợp lệ ⇒ giữ nguyên. Thiếu (b) thì `return _defaultTab;` vô điều kiện
+  cũng xanh — và app **quên** tab đang xem ở mọi lần mở, một lỗi im lặng thay
+  cho một lỗi ồn ào. Cả hai chiều đã chứng minh bằng đột biến.
+- **Prevention:** với mọi giá trị bền dùng làm **chỉ số / khoá / enum**, kẹp
+  hoặc `parse` ở **đường đọc** và trả về mặc định khi lạ — cùng luật ADR-TON-018
+  đặt cho decoder `.ttbk` (*"từ chối thay vì đoán"*). Coi `assert` là ghi chú cho
+  lập trình viên, **không** phải một cổng: nó không tồn tại ở bản người dùng chạy.
+
 ---
 
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
@@ -789,6 +816,7 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `export/backup_screen_test.dart` | preview không chạm DB · xác nhận phá huỷ · file hỏng không có nút phá huỷ · file mã hoá xin mật khẩu |
 | `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
 | `../commerce/product_category_governance_test.dart` | **một taxonomy canonical** (WTM-393/P-34): mọi nguồn seed lưu **mã**, không nhãn; `parse` chữa nhãn Anh/VI cũ; chuỗi tự đặt giữ nguyên |
+| `tongtai_tab_persistence_test.dart` | **giá trị bền vào từ đường ĐỌC** (WTM-405/P-39): chỉ số tab ngoài khoảng ⇒ về Trang chủ · mọi chỉ số hợp lệ giữ nguyên. 2 đột biến ngược chiều đã chứng minh đỏ |
 | `ui/home_concept_cards_test.dart` | **luật đứng sau thẻ concept-1** (WTM-404): thiếu mốc ⇒ không phần trăm (mốc = 0 cũng vậy) · dưới 3 điểm ⇒ không vẽ đường · màu định vị không chạm con số/mũi tên · mức ưu tiên là **thứ hạng**, không phải ngưỡng điểm. 5 đột biến đã chứng minh đỏ |
 | `semantics_route_header_test.dart` | **vai trò semantics** (WTM-277/P-36): mọi màn nội dung có `isHeader`+`namesRoute`, màn tìm kiếm có `isTextField` — đọc cây bằng `ensureSemantics()` (không `flutter run`+`S`/uiautomator); nhãn/48dp/contrast đã ở `accessibility_test.dart` |
 
