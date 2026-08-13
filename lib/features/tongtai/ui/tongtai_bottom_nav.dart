@@ -85,6 +85,23 @@ class TongtaiBottomNav extends ConsumerWidget {
                 color: TtColors.ai,
                 onTap: onTabSelected,
               ),
+              // ⭐ WTM-405 — mục thứ sáu, đúng concept-1.
+              //
+              // "Thêm" từng chỉ sống ở nút `…` góc trên phải: một cửa ở chỗ mắt
+              // không tìm. Nó là **danh mục đầy đủ** của tám năng lực, tức là
+              // thứ người dùng mới cần nhất — và là thứ khó thấy nhất.
+              //
+              // ⚠️ Không tô màu: năm mục kia mang màu để **định vị** một năng
+              // lực. "Thêm" không phải một năng lực; cho nó một màu là hứa một
+              // thứ nó không có.
+              _NavTab(
+                index: TongtaiTabs.more,
+                selectedIndex: selectedIndex,
+                icon: Icons.grid_view_outlined,
+                selectedIcon: Icons.grid_view,
+                label: context.l10n.navMore,
+                onTap: onTabSelected,
+              ),
             ],
           ),
         ),
