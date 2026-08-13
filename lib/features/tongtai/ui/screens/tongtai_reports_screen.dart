@@ -9,6 +9,7 @@ import '../../ai/business_plan.dart';
 import '../../ai/business_recommendation.dart';
 import '../../ai/business_summary.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../inventory/product_category.dart';
 import '../../metrics/business_metrics.dart';
 import '../../core/screen_data_controller.dart';
 import '../../providers/tongtai_navigation_provider.dart';
@@ -1153,7 +1154,10 @@ class _CategoryBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              category.category,
+              ProductCategory.display(
+                category.category,
+                context.l10n.languageCode,
+              ),
               style: TtType.body.copyWith(
                 color: TtColors.textPrimary,
                 fontWeight: FontWeight.w600,

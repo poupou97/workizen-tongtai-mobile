@@ -7,6 +7,7 @@ import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/inventory_context.dart';
 import '../../inventory/product.dart';
+import '../../inventory/product_category.dart';
 import '../../inventory/product_catalog_controller.dart';
 import '../../inventory/product_image_source.dart';
 import '../../inventory/product_inventory_service.dart';
@@ -756,7 +757,9 @@ class _CategoryFilter extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: TtSpace.x2),
             child: ChoiceChip(
-              label: Text(category),
+              label: Text(
+                ProductCategory.display(category, context.l10n.languageCode),
+              ),
               selected: selected == category,
               onSelected: (isSelected) =>
                   onSelected(isSelected ? category : null),
@@ -938,7 +941,8 @@ class _ProductRow extends StatelessWidget {
                     ),
                     const SizedBox(height: TtSpace.x1),
                     Text(
-                      '${product.sku} • ${product.category}',
+                      '${product.sku} • '
+                      '${ProductCategory.display(product.category, context.l10n.languageCode)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TtType.caption.copyWith(

@@ -162,7 +162,8 @@ void main() {
       final original = product(
         name: 'Speaker',
         sku: 'SKU-EL-027',
-        category: 'Electronics',
+        // WTM-393: stored categories are canonical codes; round-trip uses one.
+        category: 'electronics',
         quantity: 95,
         pricePerUnit: 299000,
         reorderLevel: 30,

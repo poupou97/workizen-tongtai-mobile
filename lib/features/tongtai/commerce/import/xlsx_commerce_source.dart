@@ -8,6 +8,7 @@ import '../../core/provenance.dart';
 import '../../core/tongtai_enums.dart';
 import '../../finance/settlement.dart';
 import '../../inventory/product.dart';
+import '../../inventory/product_category.dart';
 import '../../logistics/shipment.dart';
 import '../../orders/order.dart';
 import '../../profile/business_profile.dart' show SalesChannel;
@@ -262,7 +263,10 @@ class XlsxCommerceSource implements CommerceImportSource {
           id: 'import-${externalId.isEmpty ? sku : externalId}',
           sku: sku,
           name: name,
-          category: sheet.cell(row, 'category'),
+          // WTM-393: quy danh mục về **mã canonical** ngay lúc nhập — đúng khuôn
+          // `CustomerSegment.normalise` ở dòng segment. Nhãn lạ/tự đặt của người
+          // bán được `normalise` giữ nguyên văn, không nuốt mất.
+          category: ProductCategory.normalise(sheet.cell(row, 'category')),
           description: sheet.cell(row, 'description'),
           pricePerUnit: price,
           costPrice: cost,

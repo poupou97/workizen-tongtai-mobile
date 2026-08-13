@@ -105,13 +105,14 @@ void main() {
     await tester.pumpWidget(host());
     await tester.pumpAndSettle();
 
+    // WTM-393: bars show the localized category label; 'Home' → 'Home appliances'.
     await tester.scrollUntilVisible(
-      find.text('Home'),
+      find.text('Home appliances'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
 
-    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Home appliances'), findsOneWidget);
     expect(find.text('Fashion'), findsOneWidget);
     expect(find.text('Electronics'), findsOneWidget);
     expect(find.textContaining('1.970.000 ₫'), findsOneWidget);

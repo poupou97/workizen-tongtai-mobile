@@ -84,7 +84,12 @@ void main() {
 
     test('top categories are ordered by YTD revenue and sum to YTD', () {
       final cats = report.topCategories;
-      expect(cats.map((c) => c.category), ['Home', 'Fashion', 'Electronics']);
+      // WTM-393: categories group by canonical code (English inputs heal on read).
+      expect(cats.map((c) => c.category), [
+        'home_appliances',
+        'fashion',
+        'electronics',
+      ]);
       expect(cats.map((c) => c.revenue), [1970000, 1240000, 848000]);
       expect(cats.fold<double>(0, (s, c) => s + c.revenue), report.revenueYtd);
     });
@@ -244,8 +249,8 @@ void main() {
       expect(b.revenue, 700000);
       expect(b.orders, 2);
       expect(b.topCategories.map((c) => c.category), [
-        'Fashion',
-        'Electronics',
+        'fashion',
+        'electronics',
       ]);
       expect(b.hasSales, isTrue);
     });
@@ -261,11 +266,11 @@ void main() {
       expect(b.revenue, 1000000); // 300k (Home) + 500k (Fashion) + 200k (Elec)
       expect(b.orders, 3);
       // Fashion (500k) leads this year; Home is only 300k here.
-      expect(b.topCategories.first.category, 'Fashion');
+      expect(b.topCategories.first.category, 'fashion');
       expect(b.topCategories.map((c) => c.category), [
-        'Fashion',
-        'Home',
-        'Electronics',
+        'fashion',
+        'home_appliances',
+        'electronics',
       ]);
     });
 
@@ -274,7 +279,7 @@ void main() {
       expect(b.revenue, 1900000); // + 900k from Nov 2025
       expect(b.orders, 4);
       // Home now leads with 1.2M (300k + 900k).
-      expect(b.topCategories.first.category, 'Home');
+      expect(b.topCategories.first.category, 'home_appliances');
       expect(b.topCategories.first.revenue, 1200000);
     });
 

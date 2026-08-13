@@ -5,6 +5,7 @@ import '../../consumer/customer_order_history_service.dart';
 import '../../core/tongtai_enums.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
+import '../../inventory/product_category.dart';
 import '../../core/screen_data_controller.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../../orders/order.dart';
@@ -212,7 +213,12 @@ class _TongtaiCustomerHistoryScreenState
                     Padding(
                       padding: const EdgeInsets.only(right: TtSpace.x2),
                       child: ChoiceChip(
-                        label: Text(category),
+                        label: Text(
+                          ProductCategory.display(
+                            category,
+                            context.l10n.languageCode,
+                          ),
+                        ),
                         selected: _category == category,
                         onSelected: (selected) => setState(
                           () => _category = selected ? category : null,

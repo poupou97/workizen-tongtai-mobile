@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'product.dart';
+import 'product_category.dart';
 
 /// How the product list is ordered (WTM-68 AC: sort by name, price, quantity, or
 /// last updated).
@@ -152,10 +153,25 @@ class ProductInventoryService {
   /// The full, unfiltered catalog.
   List<Product> get all => _products;
 
-  /// Distinct categories across the catalog, alphabetically sorted.
+  /// Distinct categories across the catalog as **canonical values** (WTM-393),
+  /// sorted by their Vietnamese label.
+  ///
+  /// Two sources write `Product.category` — the XLSX (nhãn VI) and the history
+  /// generator (mã canonical). Grouping by the raw string would show "Điện tử"
+  /// and "electronics" as two chips for one concept. Collapsing through
+  /// [ProductCategory.normalise] gives **one chip per category**; the UI turns
+  /// each back into a label with [ProductCategory.display].
   List<String> get categories {
-    final set = <String>{for (final p in _products) p.category};
-    final list = set.toList()..sort();
+    final set = <String>{
+      for (final p in _products) ProductCategory.normalise(p.category),
+    };
+    final list = set.toList()
+      ..sort(
+        (a, b) => ProductCategory.display(
+          a,
+          'vi',
+        ).compareTo(ProductCategory.display(b, 'vi')),
+      );
     return list;
   }
 
@@ -191,10 +207,19 @@ class ProductInventoryService {
   }
 
   bool _matches(Product p, String q, ProductQuery query) {
-    if (query.category != null && p.category != query.category) return false;
+    // Facet compares canonical values so a chip selected as "Điện tử" still
+    // matches a product stored as the code "electronics" (WTM-393).
+    if (query.category != null &&
+        ProductCategory.normalise(p.category) !=
+            ProductCategory.normalise(query.category!)) {
+      return false;
+    }
     if (q.isEmpty) return true;
+    // Free text matches the localized label too, so searching "điện tử" finds a
+    // product whose stored category is the code "electronics".
     return p.name.toLowerCase().contains(q) ||
         p.category.toLowerCase().contains(q) ||
+        ProductCategory.display(p.category, 'vi').toLowerCase().contains(q) ||
         p.sku.toLowerCase().contains(q);
   }
 
@@ -238,7 +263,7 @@ final List<Product> kSampleProducts = [
     id: 'p01',
     sku: 'SKU-EL-001',
     name: 'Quạt mini cầm tay',
-    category: 'Electronics',
+    category: 'electronics', // ProductCategory.electronics.code (WTM-393)
     quantity: 195,
     pricePerUnit: 89000,
     reorderLevel: 50,
@@ -248,7 +273,7 @@ final List<Product> kSampleProducts = [
     id: 'p02',
     sku: 'SKU-AC-002',
     name: 'Túi chống nước du lịch',
-    category: 'Accessories',
+    category: 'accessories', // ProductCategory.accessories.code (WTM-393)
     quantity: 40,
     pricePerUnit: 145000,
     reorderLevel: 50,
@@ -258,7 +283,7 @@ final List<Product> kSampleProducts = [
     id: 'p03',
     sku: 'SKU-EL-003',
     name: 'Máy pha cà phê mini',
-    category: 'Electronics',
+    category: 'electronics', // ProductCategory.electronics.code (WTM-393)
     quantity: 0,
     pricePerUnit: 349000,
     reorderLevel: 30,
@@ -268,7 +293,7 @@ final List<Product> kSampleProducts = [
     id: 'p04',
     sku: 'SKU-TX-004',
     name: 'Áo thun cotton',
-    category: 'Textiles',
+    category: 'fashion', // ProductCategory.fashion.code (WTM-393)
     quantity: 320,
     pricePerUnit: 120000,
     reorderLevel: 80,
@@ -278,7 +303,8 @@ final List<Product> kSampleProducts = [
     id: 'p05',
     sku: 'SKU-HG-005',
     name: 'Bộ nồi inox 5 món',
-    category: 'Home Goods',
+    category:
+        'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
     quantity: 60,
     pricePerUnit: 890000,
     reorderLevel: 20,
@@ -288,7 +314,7 @@ final List<Product> kSampleProducts = [
     id: 'p06',
     sku: 'SKU-BE-006',
     name: 'Son dưỡng môi',
-    category: 'Beauty',
+    category: 'cosmetics', // ProductCategory.cosmetics.code (WTM-393)
     quantity: 15,
     pricePerUnit: 65000,
     reorderLevel: 40,
@@ -298,7 +324,7 @@ final List<Product> kSampleProducts = [
     id: 'p07',
     sku: 'SKU-EL-007',
     name: 'Tai nghe bluetooth',
-    category: 'Electronics',
+    category: 'electronics', // ProductCategory.electronics.code (WTM-393)
     quantity: 210,
     pricePerUnit: 259000,
     reorderLevel: 60,
@@ -308,7 +334,7 @@ final List<Product> kSampleProducts = [
     id: 'p08',
     sku: 'SKU-AC-008',
     name: 'Ví da nam',
-    category: 'Accessories',
+    category: 'accessories', // ProductCategory.accessories.code (WTM-393)
     quantity: 8,
     pricePerUnit: 199000,
     reorderLevel: 25,
@@ -318,7 +344,7 @@ final List<Product> kSampleProducts = [
     id: 'p09',
     sku: 'SKU-TX-009',
     name: 'Khăn tắm cotton',
-    category: 'Textiles',
+    category: 'fashion', // ProductCategory.fashion.code (WTM-393)
     quantity: 0,
     pricePerUnit: 85000,
     reorderLevel: 40,
@@ -328,7 +354,8 @@ final List<Product> kSampleProducts = [
     id: 'p10',
     sku: 'SKU-HG-010',
     name: 'Đèn ngủ LED',
-    category: 'Home Goods',
+    category:
+        'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
     quantity: 145,
     pricePerUnit: 175000,
     reorderLevel: 50,
@@ -338,7 +365,7 @@ final List<Product> kSampleProducts = [
     id: 'p11',
     sku: 'SKU-BE-011',
     name: 'Kem chống nắng SPF50',
-    category: 'Beauty',
+    category: 'cosmetics', // ProductCategory.cosmetics.code (WTM-393)
     quantity: 88,
     pricePerUnit: 235000,
     reorderLevel: 30,
@@ -348,7 +375,7 @@ final List<Product> kSampleProducts = [
     id: 'p12',
     sku: 'SKU-EL-012',
     name: 'Sạc dự phòng 20000mAh',
-    category: 'Electronics',
+    category: 'electronics', // ProductCategory.electronics.code (WTM-393)
     quantity: 30,
     pricePerUnit: 399000,
     reorderLevel: 30,
@@ -358,7 +385,7 @@ final List<Product> kSampleProducts = [
     id: 'p13',
     sku: 'SKU-TX-013',
     name: 'Chăn lông cừu',
-    category: 'Textiles',
+    category: 'fashion', // ProductCategory.fashion.code (WTM-393)
     quantity: 52,
     pricePerUnit: 450000,
     reorderLevel: 15,
@@ -368,7 +395,7 @@ final List<Product> kSampleProducts = [
     id: 'p14',
     sku: 'SKU-AC-014',
     name: 'Kính râm thời trang',
-    category: 'Accessories',
+    category: 'accessories', // ProductCategory.accessories.code (WTM-393)
     quantity: 120,
     pricePerUnit: 159000,
     reorderLevel: 40,
@@ -378,7 +405,8 @@ final List<Product> kSampleProducts = [
     id: 'p15',
     sku: 'SKU-HG-015',
     name: 'Thảm chùi chân',
-    category: 'Home Goods',
+    category:
+        'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
     quantity: 5,
     pricePerUnit: 55000,
     reorderLevel: 30,
@@ -388,7 +416,7 @@ final List<Product> kSampleProducts = [
     id: 'p16',
     sku: 'SKU-BE-016',
     name: 'Nước hoa mini',
-    category: 'Beauty',
+    category: 'cosmetics', // ProductCategory.cosmetics.code (WTM-393)
     quantity: 0,
     pricePerUnit: 320000,
     reorderLevel: 20,
@@ -398,7 +426,7 @@ final List<Product> kSampleProducts = [
     id: 'p17',
     sku: 'SKU-EL-017',
     name: 'Chuột không dây',
-    category: 'Electronics',
+    category: 'electronics', // ProductCategory.electronics.code (WTM-393)
     quantity: 260,
     pricePerUnit: 149000,
     reorderLevel: 70,
@@ -408,7 +436,7 @@ final List<Product> kSampleProducts = [
     id: 'p18',
     sku: 'SKU-TX-018',
     name: 'Áo khoác gió',
-    category: 'Textiles',
+    category: 'fashion', // ProductCategory.fashion.code (WTM-393)
     quantity: 90,
     pricePerUnit: 289000,
     reorderLevel: 35,
@@ -418,7 +446,7 @@ final List<Product> kSampleProducts = [
     id: 'p19',
     sku: 'SKU-AC-019',
     name: 'Dây đồng hồ da',
-    category: 'Accessories',
+    category: 'accessories', // ProductCategory.accessories.code (WTM-393)
     quantity: 34,
     pricePerUnit: 99000,
     reorderLevel: 40,
@@ -428,7 +456,8 @@ final List<Product> kSampleProducts = [
     id: 'p20',
     sku: 'SKU-HG-020',
     name: 'Bình giữ nhiệt 500ml',
-    category: 'Home Goods',
+    category:
+        'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
     quantity: 175,
     pricePerUnit: 189000,
     reorderLevel: 45,
@@ -438,7 +467,7 @@ final List<Product> kSampleProducts = [
     id: 'p21',
     sku: 'SKU-BE-021',
     name: 'Mặt nạ dưỡng da (hộp 10)',
-    category: 'Beauty',
+    category: 'cosmetics', // ProductCategory.cosmetics.code (WTM-393)
     quantity: 47,
     pricePerUnit: 129000,
     reorderLevel: 25,
@@ -448,7 +477,7 @@ final List<Product> kSampleProducts = [
     id: 'p22',
     sku: 'SKU-EL-022',
     name: 'Đồng hồ thông minh',
-    category: 'Electronics',
+    category: 'electronics', // ProductCategory.electronics.code (WTM-393)
     quantity: 12,
     pricePerUnit: 1290000,
     reorderLevel: 20,
@@ -458,7 +487,7 @@ final List<Product> kSampleProducts = [
     id: 'p23',
     sku: 'SKU-TX-023',
     name: 'Quần jeans nam',
-    category: 'Textiles',
+    category: 'fashion', // ProductCategory.fashion.code (WTM-393)
     quantity: 205,
     pricePerUnit: 349000,
     reorderLevel: 60,
@@ -468,7 +497,7 @@ final List<Product> kSampleProducts = [
     id: 'p24',
     sku: 'SKU-AC-024',
     name: 'Balo laptop 15 inch',
-    category: 'Accessories',
+    category: 'accessories', // ProductCategory.accessories.code (WTM-393)
     quantity: 68,
     pricePerUnit: 459000,
     reorderLevel: 25,
@@ -478,7 +507,8 @@ final List<Product> kSampleProducts = [
     id: 'p25',
     sku: 'SKU-HG-025',
     name: 'Chảo chống dính 26cm',
-    category: 'Home Goods',
+    category:
+        'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
     quantity: 0,
     pricePerUnit: 259000,
     reorderLevel: 20,
@@ -488,7 +518,7 @@ final List<Product> kSampleProducts = [
     id: 'p26',
     sku: 'SKU-BE-026',
     name: 'Sữa rửa mặt',
-    category: 'Beauty',
+    category: 'cosmetics', // ProductCategory.cosmetics.code (WTM-393)
     quantity: 130,
     pricePerUnit: 115000,
     reorderLevel: 40,
@@ -498,7 +528,7 @@ final List<Product> kSampleProducts = [
     id: 'p27',
     sku: 'SKU-EL-027',
     name: 'Loa bluetooth mini',
-    category: 'Electronics',
+    category: 'electronics', // ProductCategory.electronics.code (WTM-393)
     quantity: 95,
     pricePerUnit: 299000,
     reorderLevel: 30,
@@ -508,7 +538,7 @@ final List<Product> kSampleProducts = [
     id: 'p28',
     sku: 'SKU-TX-028',
     name: 'Tất cổ ngắn (set 5)',
-    category: 'Textiles',
+    category: 'fashion', // ProductCategory.fashion.code (WTM-393)
     quantity: 18,
     pricePerUnit: 79000,
     reorderLevel: 50,

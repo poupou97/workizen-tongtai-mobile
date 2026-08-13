@@ -7,6 +7,7 @@ import '../../../../core/l10n/app_strings.dart';
 import '../../commerce/attributes/product_attribute_view.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
+import '../../inventory/product_category.dart';
 import '../../providers/tongtai_commerce_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
 
@@ -126,7 +127,8 @@ class _ProductHeader extends StatelessWidget {
               ),
               const SizedBox(height: TtSpace.x1),
               Text(
-                '${product.sku} • ${product.category}',
+                '${product.sku} • '
+                '${ProductCategory.display(product.category, context.l10n.languageCode)}',
                 style: TtType.body.copyWith(color: TtColors.textSecondary),
               ),
             ],
@@ -155,7 +157,9 @@ class _CoreSection extends StatelessWidget {
           _CoreRow(label: l10n.productDetailSku, value: product.sku),
           _CoreRow(
             label: l10n.productDetailCategory,
-            value: product.category.isEmpty ? '—' : product.category,
+            value: product.category.isEmpty
+                ? '—'
+                : ProductCategory.display(product.category, l10n.languageCode),
           ),
           _CoreRow(
             label: l10n.productDetailPrice,

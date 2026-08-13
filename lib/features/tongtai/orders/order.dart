@@ -217,13 +217,13 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     items: const [
       OrderItem(
         productName: 'Quạt mini cầm tay',
-        category: 'Electronics',
+        category: 'electronics', // ProductCategory.electronics.code (WTM-393)
         quantity: 2,
         unitPrice: 89000,
       ),
       OrderItem(
         productName: 'Sạc dự phòng 10k mAh',
-        category: 'Electronics',
+        category: 'electronics', // ProductCategory.electronics.code (WTM-393)
         quantity: 1,
         unitPrice: 250000,
       ),
@@ -238,7 +238,7 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     items: const [
       OrderItem(
         productName: 'Áo thun cotton',
-        category: 'Fashion',
+        category: 'fashion', // ProductCategory.fashion.code (WTM-393)
         quantity: 3,
         unitPrice: 120000,
       ),
@@ -253,7 +253,8 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     items: const [
       OrderItem(
         productName: 'Đèn ngủ LED',
-        category: 'Home',
+        category:
+            'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
         quantity: 1,
         unitPrice: 145000,
       ),
@@ -269,7 +270,8 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     items: const [
       OrderItem(
         productName: 'Bình giữ nhiệt 500ml',
-        category: 'Home',
+        category:
+            'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
         quantity: 2,
         unitPrice: 165000,
       ),
@@ -285,7 +287,7 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     items: const [
       OrderItem(
         productName: 'Tai nghe bluetooth',
-        category: 'Electronics',
+        category: 'electronics', // ProductCategory.electronics.code (WTM-393)
         quantity: 1,
         unitPrice: 420000,
       ),
@@ -300,13 +302,13 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     items: const [
       OrderItem(
         productName: 'Váy linen',
-        category: 'Fashion',
+        category: 'fashion', // ProductCategory.fashion.code (WTM-393)
         quantity: 2,
         unitPrice: 350000,
       ),
       OrderItem(
         productName: 'Khăn lụa',
-        category: 'Fashion',
+        category: 'fashion', // ProductCategory.fashion.code (WTM-393)
         quantity: 1,
         unitPrice: 180000,
       ),
@@ -321,7 +323,8 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     items: const [
       OrderItem(
         productName: 'Nồi chiên không dầu',
-        category: 'Home',
+        category:
+            'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
         quantity: 1,
         unitPrice: 1250000,
       ),
@@ -336,7 +339,8 @@ final List<CustomerOrder> kSampleCustomerOrders = [
     items: const [
       OrderItem(
         productName: 'Bộ dao nhà bếp',
-        category: 'Home',
+        category:
+            'home_appliances', // ProductCategory.homeAppliances.code (WTM-393)
         quantity: 1,
         unitPrice: 390000,
       ),

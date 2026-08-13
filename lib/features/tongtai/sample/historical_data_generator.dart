@@ -10,6 +10,7 @@ import '../consumer/customer.dart';
 import '../core/tongtai_enums.dart';
 import '../finance/finance_transaction.dart';
 import '../inventory/product.dart';
+import '../inventory/product_category.dart';
 import '../journey/business_goal.dart';
 import '../orders/order.dart';
 import 'sample_data_seeder.dart';
@@ -480,13 +481,16 @@ class HistoricalDataGenerator {
           id: '${kHistoricalIdPrefix}p${_pad(i + 1, 3)}',
           sku: catalogue[i].sku,
           name: catalogue[i].name,
-          category: catalogue[i].category,
+          // ⚠️ WTM-393: lưu **mã canonical**, không lưu nhãn hiển thị — cùng kỷ
+          // luật với `CustomerSegment.code` (WTM-381) và ADR-TON-018. Nhãn tiếng
+          // Anh từng đi thẳng xuống SQLite rồi lọt lên chip Kho.
+          category: catalogue[i].category.code,
           quantity: 0,
           pricePerUnit: catalogue[i].price,
           reorderLevel: 0,
           updatedAt: windowEnd,
           description:
-              '${catalogue[i].name} — ${catalogue[i].category}, '
+              '${catalogue[i].name} — ${catalogue[i].category.labelVi}, '
               'đơn vị: ${catalogue[i].unit}.',
         ),
     ];
@@ -1263,7 +1267,11 @@ class _CatalogueEntry {
 
   final String sku;
   final String name;
-  final String category;
+
+  /// Danh mục canonical (WTM-393). Giữ **enum**, không phải chuỗi: bộ sinh chỉ
+  /// lưu `category.code` xuống `Product.category`, nên không thể lỡ tay gieo một
+  /// nhãn tiếng Anh như 'Electronics' — đó chính là lỗi vé này chữa.
+  final ProductCategory category;
   final String unit;
   final double price;
 }
@@ -1349,56 +1357,98 @@ const List<_CatalogueEntry> _kRetailCatalogue = [
   _CatalogueEntry(
     'SKU-EL-101',
     'Quạt tích điện mini',
-    'Electronics',
+    ProductCategory.electronics,
     'cái',
     289000,
   ),
   _CatalogueEntry(
     'SKU-EL-102',
     'Sạc dự phòng 10.000mAh',
-    'Electronics',
+    ProductCategory.electronics,
     'cái',
     250000,
   ),
   _CatalogueEntry(
     'SKU-EL-103',
     'Tai nghe bluetooth',
-    'Electronics',
+    ProductCategory.electronics,
     'cái',
     420000,
   ),
   _CatalogueEntry(
     'SKU-EL-104',
     'Máy pha cà phê mini',
-    'Electronics',
+    ProductCategory.electronics,
     'cái',
     349000,
   ),
-  _CatalogueEntry('SKU-HO-105', 'Đèn ngủ LED cảm ứng', 'Home', 'cái', 145000),
-  _CatalogueEntry('SKU-HO-106', 'Bình giữ nhiệt 500ml', 'Home', 'cái', 165000),
   _CatalogueEntry(
-    'SKU-HO-107',
-    'Nồi chiên không dầu 4L',
-    'Home',
-    'cái',
-    1250000,
-  ),
-  _CatalogueEntry('SKU-HO-108', 'Bộ dao nhà bếp', 'Home', 'bộ', 390000),
-  _CatalogueEntry('SKU-TX-109', 'Áo thun cotton', 'Textiles', 'cái', 120000),
-  _CatalogueEntry('SKU-FA-110', 'Váy linen', 'Fashion', 'cái', 350000),
-  _CatalogueEntry('SKU-FA-111', 'Khăn lụa', 'Fashion', 'cái', 180000),
-  _CatalogueEntry(
-    'SKU-AC-112',
-    'Túi chống nước du lịch',
-    'Accessories',
+    'SKU-HO-105',
+    'Đèn ngủ LED cảm ứng',
+    ProductCategory.homeAppliances,
     'cái',
     145000,
   ),
-  _CatalogueEntry('SKU-AC-113', 'Ví da nam', 'Accessories', 'cái', 260000),
+  _CatalogueEntry(
+    'SKU-HO-106',
+    'Bình giữ nhiệt 500ml',
+    ProductCategory.homeAppliances,
+    'cái',
+    165000,
+  ),
+  _CatalogueEntry(
+    'SKU-HO-107',
+    'Nồi chiên không dầu 4L',
+    ProductCategory.homeAppliances,
+    'cái',
+    1250000,
+  ),
+  _CatalogueEntry(
+    'SKU-HO-108',
+    'Bộ dao nhà bếp',
+    ProductCategory.homeAppliances,
+    'bộ',
+    390000,
+  ),
+  _CatalogueEntry(
+    'SKU-TX-109',
+    'Áo thun cotton',
+    ProductCategory.fashion,
+    'cái',
+    120000,
+  ),
+  _CatalogueEntry(
+    'SKU-FA-110',
+    'Váy linen',
+    ProductCategory.fashion,
+    'cái',
+    350000,
+  ),
+  _CatalogueEntry(
+    'SKU-FA-111',
+    'Khăn lụa',
+    ProductCategory.fashion,
+    'cái',
+    180000,
+  ),
+  _CatalogueEntry(
+    'SKU-AC-112',
+    'Túi chống nước du lịch',
+    ProductCategory.accessories,
+    'cái',
+    145000,
+  ),
+  _CatalogueEntry(
+    'SKU-AC-113',
+    'Ví da nam',
+    ProductCategory.accessories,
+    'cái',
+    260000,
+  ),
   _CatalogueEntry(
     'SKU-AC-114',
     'Giá đỡ điện thoại',
-    'Accessories',
+    ProductCategory.accessories,
     'cái',
     65000,
   ),
@@ -1408,88 +1458,160 @@ const List<_CatalogueEntry> _kWholesaleCatalogue = [
   _CatalogueEntry(
     'SKU-WS-201',
     'Thùng quạt tích điện (20 cái)',
-    'Electronics',
+    ProductCategory.electronics,
     'thùng',
     4800000,
   ),
   _CatalogueEntry(
     'SKU-WS-202',
     'Thùng sạc dự phòng (30 cái)',
-    'Electronics',
+    ProductCategory.electronics,
     'thùng',
     5400000,
   ),
   _CatalogueEntry(
     'SKU-WS-203',
     'Thùng áo thun cotton (50 cái)',
-    'Textiles',
+    ProductCategory.fashion,
     'thùng',
     3900000,
   ),
   _CatalogueEntry(
     'SKU-WS-204',
     'Kiện khăn bông (100 cái)',
-    'Textiles',
+    ProductCategory.fashion,
     'kiện',
     5200000,
   ),
   _CatalogueEntry(
     'SKU-WS-205',
     'Thùng nồi chiên không dầu (6 cái)',
-    'Home',
+    ProductCategory.homeAppliances,
     'thùng',
     6300000,
   ),
   _CatalogueEntry(
     'SKU-WS-206',
     'Thùng bình giữ nhiệt (40 cái)',
-    'Home',
+    ProductCategory.homeAppliances,
     'thùng',
     4600000,
   ),
   _CatalogueEntry(
     'SKU-WS-207',
     'Thùng ly giữ nhiệt (24 cái)',
-    'Home',
+    ProductCategory.homeAppliances,
     'thùng',
     3600000,
   ),
   _CatalogueEntry(
     'SKU-WS-208',
     'Thùng bột giặt 5kg (12 túi)',
-    'Home',
+    ProductCategory.homeAppliances,
     'thùng',
     1850000,
   ),
   _CatalogueEntry(
     'SKU-WS-209',
     'Kiện dép nhựa (200 đôi)',
-    'Fashion',
+    ProductCategory.fashion,
     'kiện',
     3400000,
   ),
   _CatalogueEntry(
     'SKU-WS-210',
     'Kiện túi vải không dệt (500 cái)',
-    'Accessories',
+    ProductCategory.accessories,
     'kiện',
     2750000,
   ),
 ];
 
 const List<_CatalogueEntry> _kFoodAndBeverageCatalogue = [
-  _CatalogueEntry('SKU-FB-301', 'Cà phê sữa đá', 'Đồ uống', 'ly', 29000),
-  _CatalogueEntry('SKU-FB-302', 'Trà đào cam sả', 'Đồ uống', 'ly', 45000),
-  _CatalogueEntry('SKU-FB-303', 'Trà sữa trân châu', 'Đồ uống', 'ly', 39000),
-  _CatalogueEntry('SKU-FB-304', 'Sinh tố bơ', 'Đồ uống', 'ly', 42000),
-  _CatalogueEntry('SKU-FB-305', 'Nước ép cam tươi', 'Đồ uống', 'chai', 38000),
-  _CatalogueEntry('SKU-FB-306', 'Bánh mì thịt nướng', 'Đồ ăn', 'ổ', 35000),
-  _CatalogueEntry('SKU-FB-307', 'Cơm gà xối mỡ', 'Đồ ăn', 'phần', 55000),
-  _CatalogueEntry('SKU-FB-308', 'Bún bò Huế', 'Đồ ăn', 'tô', 60000),
-  _CatalogueEntry('SKU-FB-309', 'Combo cơm văn phòng', 'Combo', 'phần', 89000),
-  _CatalogueEntry('SKU-FB-310', 'Set tiệc nhỏ 4 người', 'Combo', 'set', 450000),
-  _CatalogueEntry('SKU-FB-311', 'Chè khúc bạch', 'Tráng miệng', 'ly', 30000),
-  _CatalogueEntry('SKU-FB-312', 'Bánh flan', 'Tráng miệng', 'cái', 20000),
+  _CatalogueEntry(
+    'SKU-FB-301',
+    'Cà phê sữa đá',
+    ProductCategory.beverages,
+    'ly',
+    29000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-302',
+    'Trà đào cam sả',
+    ProductCategory.beverages,
+    'ly',
+    45000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-303',
+    'Trà sữa trân châu',
+    ProductCategory.beverages,
+    'ly',
+    39000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-304',
+    'Sinh tố bơ',
+    ProductCategory.beverages,
+    'ly',
+    42000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-305',
+    'Nước ép cam tươi',
+    ProductCategory.beverages,
+    'chai',
+    38000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-306',
+    'Bánh mì thịt nướng',
+    ProductCategory.food,
+    'ổ',
+    35000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-307',
+    'Cơm gà xối mỡ',
+    ProductCategory.food,
+    'phần',
+    55000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-308',
+    'Bún bò Huế',
+    ProductCategory.food,
+    'tô',
+    60000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-309',
+    'Combo cơm văn phòng',
+    ProductCategory.combo,
+    'phần',
+    89000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-310',
+    'Set tiệc nhỏ 4 người',
+    ProductCategory.combo,
+    'set',
+    450000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-311',
+    'Chè khúc bạch',
+    ProductCategory.dessert,
+    'ly',
+    30000,
+  ),
+  _CatalogueEntry(
+    'SKU-FB-312',
+    'Bánh flan',
+    ProductCategory.dessert,
+    'cái',
+    20000,
+  ),
 ];
 
 const List<String> _kLocations = [
