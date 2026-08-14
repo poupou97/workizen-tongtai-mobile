@@ -49,7 +49,7 @@ với *không đọc được dữ liệu*" đã sinh ra bug Consumer.
 | Màn | Data | CRUD | Keys | Err | Ghi chú |
 |---|---|---|---|---|---|
 | `tongtai_reports_screen` | BusinessContext + BusinessMetrics + orders repo | – | ✅ 19 | ✅ seam | AI G-3A→D đã ship, mỗi tính năng có rule twin |
-| `tongtai_opportunity_detail_screen` | generated opportunities + goal repo + journey repo | tạo goal · **đưa vào hành trình** (cả hai guarded) | ✅ 11 | ✅ seam | AI insight (WTM-141) + rule score authoritative · WTM-191: cơ hội → node `origin = user`, chưa có hành trình thì **nói phải làm gì trước** |
+| `tongtai_opportunity_detail_screen` | generated opportunities + goal repo + journey repo **+ `OpportunityScore.factors`** | tạo goal · **đưa vào hành trình** (cả hai guarded) | ✅ 11 | ✅ seam | AI insight (WTM-141) + rule score authoritative · WTM-191: cơ hội → node `origin = user`, chưa có hành trình thì **nói phải làm gì trước** |
 
 ### L3 — Interactive (đủ CRUD + error handling)
 

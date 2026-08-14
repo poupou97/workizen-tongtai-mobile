@@ -520,6 +520,32 @@ abstract class AppStrings {
   /// Nút trên mỗi dòng cơ hội ở Trang chủ.
   String get actionHandleNow;
 
+  /// Khối so sánh nhà cung cấp trên màn sản phẩm (WTM-409, cp11).
+  ///
+  /// ⚠️ `supplierUnknown*` KHÔNG được ghép thành một câu chung. Mỗi thứ chưa
+  /// biết là một câu riêng, vì gộp lại sẽ ra *"chưa biết thời gian giao, số
+  /// lượng tối thiểu"* — đọc như một danh sách thiếu sót của người bán, trong
+  /// khi nó là điều **app** chưa hỏi.
+  String get supplierSectionTitle;
+  String get supplierCurrent;
+  String get supplierAlternatives;
+  String get supplierUnknownLeadTime;
+  String get supplierUnknownMoq;
+  String get supplierUnknownRating;
+
+  /// *"Rẻ hơn 12%"* — chỉ hiện khi thật sự rẻ hơn.
+  String supplierCheaperBy(int percent);
+
+  /// *"Giao chậm hơn 6 ngày"* / *"Giao nhanh hơn 3 ngày"*.
+  String supplierSlowerByDays(int days);
+  String supplierFasterByDays(int days);
+
+  /// *"Phải đặt thêm 50"* — khi MOQ nguồn kia cao hơn.
+  String supplierExtraMoq(String quantity);
+
+  /// Câu nhắc rằng đây là **đánh đổi**, không phải câu trả lời.
+  String get supplierTradeOffNote;
+
   /// Khối "vì sao điểm này" trên màn chi tiết cơ hội (WTM-408, cp5b).
   ///
   /// ⚠️ `oppFactorDemand` phải nói **khách của chính người bán**, KHÔNG nói
@@ -2174,6 +2200,29 @@ class AppStringsVi extends AppStrings {
   String get oppPriorityUnknown => 'Chưa xếp được';
   @override
   String get oppWhyThisScore => 'Vì sao điểm này';
+  @override
+  String get supplierSectionTitle => 'Nguồn hàng';
+  @override
+  String get supplierCurrent => 'Đang nhập';
+  @override
+  String get supplierAlternatives => 'Lựa chọn khác';
+  @override
+  String get supplierUnknownLeadTime => 'chưa biết thời gian giao';
+  @override
+  String get supplierUnknownMoq => 'chưa biết số lượng tối thiểu';
+  @override
+  String get supplierUnknownRating => 'chưa có đánh giá';
+  @override
+  String supplierCheaperBy(int percent) => 'Rẻ hơn $percent%';
+  @override
+  String supplierSlowerByDays(int days) => 'Giao chậm hơn $days ngày';
+  @override
+  String supplierFasterByDays(int days) => 'Giao nhanh hơn $days ngày';
+  @override
+  String supplierExtraMoq(String quantity) => 'Phải đặt thêm $quantity';
+  @override
+  String get supplierTradeOffNote =>
+      'Rẻ hơn chưa chắc tốt hơn — bạn là người quyết.';
   @override
   String get oppFactorProfit => 'Tiềm năng lợi nhuận';
   @override
@@ -4358,6 +4407,29 @@ class AppStringsEn extends AppStrings {
   String get oppPriorityUnknown => 'Not ranked';
   @override
   String get oppWhyThisScore => 'Why this score';
+  @override
+  String get supplierSectionTitle => 'Sourcing';
+  @override
+  String get supplierCurrent => 'Currently buying from';
+  @override
+  String get supplierAlternatives => 'Other options';
+  @override
+  String get supplierUnknownLeadTime => 'lead time unknown';
+  @override
+  String get supplierUnknownMoq => 'minimum order unknown';
+  @override
+  String get supplierUnknownRating => 'no rating yet';
+  @override
+  String supplierCheaperBy(int percent) => '$percent% cheaper';
+  @override
+  String supplierSlowerByDays(int days) => '$days days slower';
+  @override
+  String supplierFasterByDays(int days) => '$days days faster';
+  @override
+  String supplierExtraMoq(String quantity) => 'Order $quantity more';
+  @override
+  String get supplierTradeOffNote =>
+      'Cheaper is not always better — the call is yours.';
   @override
   String get oppFactorProfit => 'Profit potential';
   @override

@@ -10,6 +10,7 @@ import '../../inventory/product.dart';
 import '../../inventory/product_category.dart';
 import '../../providers/tongtai_commerce_provider.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_supplier_comparison.dart';
 
 /// Product Detail — read-only, grouped attribute view (WTM-335, `L3`).
 ///
@@ -99,10 +100,38 @@ class _DetailBody extends StatelessWidget {
             const SizedBox(height: TtSpace.x4),
             _SpecSection(groups: groups),
           ],
+
+          // ── So sánh nhà cung cấp (WTM-409 · concept-1 cp11) ──────────
+          //
+          // Luật `SupplierComparison` chạy từ WTM-329 nhưng chưa màn nào bày:
+          // người bán mở sản phẩm mà không thấy có nguồn khác rẻ hơn. Khối tự
+          // biến mất khi chỉ có một báo giá — không có gì để **so**.
+          const SizedBox(height: TtSpace.x4),
+          _SupplierSection(productId: product.id),
           const SizedBox(height: TtSpace.x6),
         ],
       ),
     );
+  }
+}
+
+/// Tải so sánh nhà cung cấp theo `productId` (WTM-409).
+///
+/// ⚠️ Lỗi tải **không** biến thành một khối trống im lặng: `AsyncValue.error`
+/// trả về `SizedBox.shrink()` **cùng** hành vi với "chưa có gì để so", nên chỗ
+/// này cố tình chỉ dựng khi có dữ liệu — mọi trạng thái khác nhường cho seam
+/// của màn cha (ADR-TON-017), không tự chế spinner riêng.
+class _SupplierSection extends ConsumerWidget {
+  const _SupplierSection({required this.productId});
+
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(supplierComparisonProvider(productId));
+    final comparison = async.asData?.value;
+    if (comparison == null) return const SizedBox.shrink();
+    return TongtaiSupplierComparison(comparison: comparison);
   }
 }
 
