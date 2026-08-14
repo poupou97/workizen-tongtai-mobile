@@ -33,6 +33,8 @@
 // thao tác đã làm hỏng đợt đo trước (vé WTM-403 ghi rõ cửa sổ không tin được).
 // Ở đây dựng thẳng cấu hình ấy trong tiến trình: đặt `systemGestureInsets` lớn
 // hơn `viewPadding`, rồi đo **toạ độ thật** của hàng cuối.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -141,5 +143,53 @@ void main() {
       );
     }
     expect(checked, greaterThan(0), reason: 'không hàng nào trong khung nhìn');
+  });
+
+  test('⭐ MỌI bề mặt vuốt đều nằm trong danh sách được canh', () {
+    // ## Vì sao cần ca này ngoài ca đo ở trên
+    //
+    // Ca đo chỉ chứng minh **một** màn (Cơ hội) chừa đúng vùng cử chỉ. Nó không
+    // nói gì về bề mặt vuốt **thứ hai** ai đó thêm vào ngày mai — và bề mặt ấy
+    // sẽ mang đúng khuyết tật, im lặng y như lần đầu.
+    //
+    // Bài học đến từ phiên Hub (2026-08-14): ở đó cơ chế xử lý vùng cử chỉ có
+    // sẵn, lý lẽ ghi rõ trong tài liệu, mà **13 ca test không ca nào chạm tới
+    // `systemGestureInsets`** — không gì chứng minh cơ chế còn chạy. Cùng họ
+    // P-37: một lời hứa không có cổng cơ học là một lời hứa hết hạn lặng lẽ.
+    //
+    // ⚠️ Grep phải loại `barrierDismissible:` / `isDismissible:` — đó là **tham
+    // số hộp thoại**, không phải widget `Dismissible`. Chính phép grep lẫn hai
+    // thứ ấy đã khiến phiên Hub báo nhầm "7 bề mặt vuốt" khi thực tế là 0.
+    const covered = <String>{
+      'lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart',
+    };
+
+    final swipeSurfaces = <String>[];
+    for (final entity in Directory('lib').listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final src = entity.readAsStringSync();
+      final hasSwipe =
+          RegExp(r'(?<!barrier)(?<!is)Dismissible\(').hasMatch(src) ||
+          src.contains('onHorizontalDrag') ||
+          src.contains('onPanUpdate');
+      if (hasSwipe) swipeSurfaces.add(entity.path);
+    }
+
+    expect(
+      swipeSurfaces.toSet().difference(covered),
+      isEmpty,
+      reason:
+          'có bề mặt vuốt mới chưa được canh vùng cử chỉ hệ thống. Thêm phép đo '
+          'cho nó (đặt `systemGestureInsets` > `viewPadding` rồi kiểm mép DƯỚI), '
+          'rồi thêm đường dẫn vào `covered`. ⛔ Đừng chỉ thêm vào `covered`.',
+    );
+
+    // Ngược lại: một tệp rời khỏi danh sách mà không ai để ý cũng là lỗi —
+    // `covered` thành một danh sách nói về quá khứ.
+    expect(
+      covered.difference(swipeSurfaces.toSet()),
+      isEmpty,
+      reason: 'danh sách `covered` nhắc tới tệp không còn bề mặt vuốt nào',
+    );
   });
 }

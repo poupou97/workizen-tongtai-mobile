@@ -791,6 +791,14 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   Đột biến (trả đệm về `TtSpace.x4`) chứng minh đỏ.
   Mặc định của widget test là `systemGestureInsets = 0`, nên **không màn nào từng
   được dựng ở cấu hình lộ lỗi** — phải đặt tay.
+- **⚠️ Cơ chế không có cổng thì hết hạn lặng lẽ.** Phiên Hub (2026-08-14) báo về:
+  ở đó cách xử lý vùng cử chỉ **đã có sẵn và đúng**, lý lẽ ghi rõ trong tài liệu,
+  mà **13 ca test không ca nào chạm `systemGestureInsets`** — không gì chứng minh
+  nó còn chạy. Nên `swipe_gesture_inset_test.dart` có **hai** phần: một ca **đo**
+  màn đang có, và một **scan** bắt mọi bề mặt vuốt mới chưa được canh.
+  ⚠️ Scan phải loại `barrierDismissible:` / `isDismissible:` — đó là **tham số hộp
+  thoại**, không phải widget. Chính phép grep lẫn hai thứ ấy khiến phiên Hub báo
+  *"7 bề mặt vuốt"* khi thực tế là **0**.
 - **Prevention:** danh sách có **vuốt** (`Dismissible`, swipe-to-action) phải
   chừa đáy theo `systemGestureInsets`, không theo `SafeArea` là xong. Danh sách
   chỉ chạm thì `SafeArea` đủ — thêm 93px đệm vô cớ là một khoảng trống không ai
@@ -857,7 +865,7 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `../commerce/product_category_governance_test.dart` | **một taxonomy canonical** (WTM-393/P-34): mọi nguồn seed lưu **mã**, không nhãn; `parse` chữa nhãn Anh/VI cũ; chuỗi tự đặt giữ nguyên |
 | `ui/supplier_comparison_widget_test.dart` | **so sánh nhà cung cấp** (WTM-409): `null` = *chưa biết* (KHÔNG in dòng so sánh, phải hiện "chưa biết") · nêu **cả hai mặt** đánh đổi · một báo giá ⇒ không dựng khung rỗng · có câu nhắc người bán quyết. 3 đột biến đã chứng minh đỏ |
 | `ui/score_breakdown_test.dart` | **bung điểm cơ hội** (WTM-408): yếu tố vắng hiện `—` + LÝ DO (không hiện `0`) · trọng số hiện cả khi vắng · độ phủ hiện khi `isPartial` · nhãn nhu cầu nói *"khách của bạn"* không nói *"thị trường"*. 3 đột biến đã chứng minh đỏ |
-| `swipe_gesture_inset_test.dart` | **vùng cử chỉ hệ thống** (WTM-403/P-40): mọi `Dismissible` phải nằm trên dải `mandatorySystemGestures`; đo **mép dưới**. Đột biến đã chứng minh đỏ (77dp chồng lấn) |
+| `swipe_gesture_inset_test.dart` | **vùng cử chỉ hệ thống** (WTM-403/P-40): mọi `Dismissible` phải nằm trên dải `mandatorySystemGestures`; đo **mép dưới**. **+ scan**: bề mặt vuốt MỚI chưa được canh ⇒ đỏ (grep loại `barrierDismissible`/`isDismissible` — chính chỗ phiên Hub đếm nhầm 7 thành 0). 2 đột biến đã chứng minh đỏ |
 | `value_colour_governance_test.dart` | **màu định vị không tô lên con số** (A2 · WTM-389 · WTM-407): widget hiện số **không được nhận tham số `Color`** · màn Khách hàng không còn hằng `_blue`. 2 đột biến đã chứng minh đỏ |
 | `tongtai_tab_persistence_test.dart` | **giá trị bền vào từ đường ĐỌC** (WTM-405/P-39): chỉ số tab ngoài khoảng ⇒ về Trang chủ · mọi chỉ số hợp lệ giữ nguyên. 2 đột biến ngược chiều đã chứng minh đỏ |
 | `ui/home_concept_cards_test.dart` | **luật đứng sau thẻ concept-1** (WTM-404): thiếu mốc ⇒ không phần trăm (mốc = 0 cũng vậy) · dưới 3 điểm ⇒ không vẽ đường · màu định vị không chạm con số/mũi tên · mức ưu tiên là **thứ hạng**, không phải ngưỡng điểm. 5 đột biến đã chứng minh đỏ |
