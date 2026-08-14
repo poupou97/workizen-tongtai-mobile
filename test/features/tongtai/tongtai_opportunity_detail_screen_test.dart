@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/ui/widgets/tongtai_score_breakdown.dart';
 import 'package:tongtai/features/tongtai/opportunity/opportunity_score.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
@@ -50,9 +51,41 @@ void main() {
 
     expect(find.byKey(const Key('opportunity-detail-title')), findsOneWidget);
     expect(find.text('Quạt tích điện sắp vào mùa nóng'), findsOneWidget);
-    expect(find.text('92'), findsOneWidget); // AI score badge
-    // The ROI tile is gone (WTM-193): it displayed a constant.
-    expect(find.textContaining('%'), findsNothing);
+    // WTM-408: điểm nay xuất hiện HAI chỗ — huy hiệu và dòng "lợi nhuận"
+    // trong khối bung trọng số. Chỉ đúng huy hiệu bằng Key thay vì tìm chuỗi
+    // trần, nếu không phép kiểm sẽ đo một thứ mơ hồ.
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('opportunity-detail-score')),
+        matching: find.text('92'),
+      ),
+      findsOneWidget,
+    );
+    // ⛔ Ô ROI vẫn phải vắng (WTM-193: nó hiện một hằng số).
+    //
+    // Giữ nguyên phép kiểm ấy nhưng **loại trừ khối bung trọng số**: các phần
+    // trăm ở đó là **trọng số của công thức** (40/30/20/10), không phải một ROI
+    // bịa. Nới lỏng thành `findsWidgets` sẽ giết mất cái guard WTM-193 dựng ra.
+    expect(
+      find
+          .descendant(
+            of: find.byKey(const Key('opportunity-detail-list')),
+            matching: find.textContaining('%'),
+          )
+          .evaluate()
+          .where((e) {
+            return find
+                .ancestor(
+                  of: find.byWidget(e.widget),
+                  matching: find.byKey(TongtaiScoreBreakdown.sectionKey),
+                )
+                .evaluate()
+                .isEmpty;
+          }),
+      isEmpty,
+      reason:
+          'có một phần trăm NGOÀI khối bung trọng số — ROI hằng số quay lại?',
+    );
     expect(find.text('+5,2tr ₫'), findsOneWidget); // expected impact, compact
     expect(find.byKey(const Key('opportunity-detail-plan')), findsOneWidget);
     // A seasonal plan starts with demand forecasting and ends on the scale gate.

@@ -16,6 +16,7 @@ import '../../opportunity/opportunity_theme.dart';
 import '../../providers/tongtai_ai_provider.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../widgets/tongtai_opportunity_signal_badges.dart';
+import '../widgets/tongtai_score_breakdown.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import 'tongtai_journey_screen.dart';
@@ -239,7 +240,14 @@ class _TongtaiOpportunityDetailScreenState
                 color: color,
               ),
               const Spacer(),
-              _ScoreBadge(score: _o.aiScore),
+              // Key ổn định (WTM-408): sau khi khối bung trọng số ra đời, con
+              // số điểm xuất hiện **hai chỗ** trên màn — huy hiệu và dòng yếu
+              // tố lợi nhuận. `find.text('92')` trần thành mơ hồ, nên phép
+              // kiểm phải chỉ đúng chỗ nó muốn nói tới.
+              _ScoreBadge(
+                key: const Key('opportunity-detail-score'),
+                score: _o.aiScore,
+              ),
             ],
           ),
           const SizedBox(height: TtSpace.x3),
@@ -387,6 +395,22 @@ class _TongtaiOpportunityDetailScreenState
           ),
           const SizedBox(height: TtSpace.x6),
 
+          // ── Bung điểm ra bốn yếu tố (WTM-408 · concept-1 cp5b) ────────
+          //
+          // ⚠️ Đứng **SAU** kế hoạch hành động, không đứng trước.
+          //
+          // Bản đầu tôi đặt nó ngay dưới câu "vì sao đáng làm" — đọc thì thuận,
+          // nhưng nó đẩy kế hoạch xuống xa hơn một màn. Đó đúng là thứ WTM-404
+          // vừa sửa ở Trang chủ theo hướng ngược lại: **việc trước số**. Một
+          // màn chi tiết cơ hội tồn tại để người bán *làm gì đó*; bảng trọng số
+          // là thứ trả lời khi họ hỏi lại, không phải thứ chặn đường họ.
+          //
+          // Test `opportunity_detail_screen_test` bắt được: `-plan` rơi khỏi
+          // vùng dựng của danh sách lười. Nó báo đúng một vấn đề thật, không
+          // phải một phiền toái cần né.
+          TongtaiScoreBreakdown(score: _o.score),
+          const SizedBox(height: TtSpace.x6),
+
           // ── Opportunity Action (WTM-94): opportunity → Journey goal ──
           OutlinedButton.icon(
             key: const Key('opportunity-create-goal'),
@@ -526,7 +550,7 @@ class _TypeBadge extends StatelessWidget {
 }
 
 class _ScoreBadge extends StatelessWidget {
-  const _ScoreBadge({required this.score});
+  const _ScoreBadge({required this.score, super.key});
 
   /// `null` when nothing could be computed (WTM-193).
   final double? score;
