@@ -520,6 +520,27 @@ abstract class AppStrings {
   /// Nút trên mỗi dòng cơ hội ở Trang chủ.
   String get actionHandleNow;
 
+  /// Khối "vì sao điểm này" trên màn chi tiết cơ hội (WTM-408, cp5b).
+  ///
+  /// ⚠️ `oppFactorDemand` phải nói **khách của chính người bán**, KHÔNG nói
+  /// "thị trường" — trên máy này yếu tố ấy đọc từ lịch sử đơn của họ, và
+  /// `OpportunityFactorKind.demandVolume` ghi rõ ràng buộc đó.
+  String get oppWhyThisScore;
+  String get oppFactorProfit;
+  String get oppFactorDemand;
+  String get oppFactorSupplier;
+  String get oppFactorCompetition;
+  String get oppFactorNoData;
+
+  /// *"Chấm được 70% các yếu tố"* — hiện khi điểm chưa đủ độ phủ.
+  String oppScoreCoverage(int percent);
+
+  /// Lý do một yếu tố không chấm được. Mỗi mã một câu, không ghép chuỗi.
+  String get oppUnavailSupplierSample;
+  String get oppUnavailNeedsMarket;
+  String get oppUnavailNoBaseline;
+  String get oppUnavailNoDemandHistory;
+
   /// Đơn vị dưới con số trên thẻ năng lực — *"12 sản phẩm"*, *"82 khách"*.
   String get homeUnitInputs;
   String get homeUnitProducts;
@@ -2151,6 +2172,29 @@ class AppStringsVi extends AppStrings {
   String get oppPriorityLow => 'Ưu tiên: Thấp';
   @override
   String get oppPriorityUnknown => 'Chưa xếp được';
+  @override
+  String get oppWhyThisScore => 'Vì sao điểm này';
+  @override
+  String get oppFactorProfit => 'Tiềm năng lợi nhuận';
+  @override
+  String get oppFactorDemand => 'Nhu cầu từ khách của bạn';
+  @override
+  String get oppFactorSupplier => 'Chất lượng nhà cung cấp';
+  @override
+  String get oppFactorCompetition => 'Mức cạnh tranh';
+  @override
+  String get oppFactorNoData => 'chưa có dữ liệu';
+  @override
+  String oppScoreCoverage(int percent) => 'Chấm được $percent% các yếu tố';
+  @override
+  String get oppUnavailSupplierSample =>
+      'danh bạ nhà cung cấp hiện là dữ liệu mẫu';
+  @override
+  String get oppUnavailNeedsMarket => 'cần dữ liệu thị trường';
+  @override
+  String get oppUnavailNoBaseline => 'chưa có mốc doanh thu để so';
+  @override
+  String get oppUnavailNoDemandHistory => 'chưa có lịch sử đơn hàng';
   @override
   String get homeCloserTitle => 'Tổng Tài sẵn sàng hỗ trợ bạn!';
   @override
@@ -4312,6 +4356,29 @@ class AppStringsEn extends AppStrings {
   String get oppPriorityLow => 'Priority: Low';
   @override
   String get oppPriorityUnknown => 'Not ranked';
+  @override
+  String get oppWhyThisScore => 'Why this score';
+  @override
+  String get oppFactorProfit => 'Profit potential';
+  @override
+  String get oppFactorDemand => 'Demand from your customers';
+  @override
+  String get oppFactorSupplier => 'Supplier quality';
+  @override
+  String get oppFactorCompetition => 'Competition';
+  @override
+  String get oppFactorNoData => 'no data yet';
+  @override
+  String oppScoreCoverage(int percent) => 'Scored on $percent% of factors';
+  @override
+  String get oppUnavailSupplierSample =>
+      'the supplier directory is sample data';
+  @override
+  String get oppUnavailNeedsMarket => 'needs market data';
+  @override
+  String get oppUnavailNoBaseline => 'no revenue baseline to compare against';
+  @override
+  String get oppUnavailNoDemandHistory => 'no order history yet';
   @override
   String get homeCloserTitle => 'Tổng Tài is ready to help!';
   @override
