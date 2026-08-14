@@ -8,6 +8,7 @@ import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../action/business_action_executor.dart';
 import '../../connection/connection_capability.dart';
 import '../../connection/connection_catalog.dart';
+import '../../connection/connection_tone.dart';
 import '../../connection/connection_service.dart';
 import '../../connection/google/drive_backup_service.dart';
 import '../../core/connection.dart';
@@ -468,7 +469,7 @@ class _ConnectorCard extends StatelessWidget {
                   ),
                 ),
               ),
-              _StatusChip(status: state.status),
+              _ConnectionStatusBadge(status: state.status),
             ],
           ),
           const SizedBox(height: 10),
@@ -674,47 +675,6 @@ class _DriveFileRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-
-  final ConnectionStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    // `setupRequired` cố ý mang màu trung tính: chưa xong không phải là hỏng.
-    final (label, color) = switch (status) {
-      ConnectionStatus.setupRequired => (
-        l10n.connectionSetupRequired,
-        TtColors.textSecondary,
-      ),
-      ConnectionStatus.active => (l10n.connectionActive, Colors.green),
-      ConnectionStatus.paused => (
-        l10n.connectionPaused,
-        TtColors.textSecondary,
-      ),
-      ConnectionStatus.error => (l10n.connectionError, Colors.orange),
-    };
-
-    return Container(
-      key: Key('connections-status-${status.code}'),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
       ),
     );
   }
@@ -1252,69 +1212,14 @@ class _SourceGroup extends StatelessWidget {
                   ),
                 ),
               ),
-              _ReadinessChip(readiness: readinessWithDemo(source, live)),
+              _ConnectionReadinessBadge(
+                readiness: readinessWithDemo(source, live),
+              ),
             ],
           ),
         ),
     ],
   );
-}
-
-class _ReadinessChip extends StatelessWidget {
-  const _ReadinessChip({required this.readiness});
-
-  final ConnectionReadiness readiness;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    // Chỉ `connected` được màu xanh. `fileBridge` là màu trung tính chứ không
-    // phải xanh nhạt: "nhập qua file" là một cách dùng thật, nhưng nó không
-    // phải "đã nối", và màu không được nói khác chữ.
-    final (label, color) = switch (readiness) {
-      ConnectionReadiness.connected => (l10n.readinessConnected, Colors.green),
-      ConnectionReadiness.fileBridge => (
-        l10n.readinessFileBridge,
-        TtColors.textPrimary,
-      ),
-      ConnectionReadiness.demo => (l10n.readinessDemo, TtColors.textSecondary),
-      // Tím, KHÔNG xanh. Màu là thứ người ta đọc trước chữ, nên một nhãn demo
-      // màu xanh lá đã nói dối xong trước khi ai kịp đọc nó.
-      ConnectionReadiness.demoConnected => (
-        l10n.readinessDemoConnected,
-        const Color(0xFF7A4FCF),
-      ),
-      ConnectionReadiness.researched => (
-        l10n.readinessResearched,
-        TtColors.textSecondary,
-      ),
-      ConnectionReadiness.partnerRequired => (
-        l10n.readinessPartnerRequired,
-        Colors.orange,
-      ),
-      ConnectionReadiness.apiFuture => (
-        l10n.readinessApiFuture,
-        TtColors.textSecondary,
-      ),
-    };
-
-    return Container(
-      key: Key('connections-readiness-${readiness.code}'),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
-    );
-  }
 }
 
 /// Giờ:phút trên máy người bán — mốc "vừa xong" chỉ cần tới phút.
@@ -1340,3 +1245,62 @@ String _capabilityName(AppStrings l10n, ConnectionCapability capability) =>
       ConnectionCapability.confluenceKnowledge =>
         l10n.capabilityConfluenceKnowledge,
     };
+
+/// Huy hiệu trạng thái kết nối — **adapter mỏng** trên `TtStatusBadge`.
+///
+/// Chỉ làm hai việc: lấy **nhãn** từ `AppStrings`, lấy **sắc thái** từ
+/// `tongtaiConnectionStatusTone`. Hình dạng thuộc về Design System.
+///
+/// ⛔ Bản trước tự dựng `Container` riêng **và** tự chọn màu bằng
+/// `Colors.green`/`Colors.orange` thô — bỏ qua cả tầng token lẫn tầng semantic.
+/// Nặng nhất: `error` mang màu **cam**, tức màu Brand/Primary Action, nên chỗ
+/// đang hỏng lại đọc ra *"bấm vào đây"*.
+class _ConnectionStatusBadge extends StatelessWidget {
+  const _ConnectionStatusBadge({required this.status});
+
+  final ConnectionStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return TtStatusBadge(
+      // ⚠️ Key ổn định phải theo huy hiệu sang nhà mới.
+      //
+      // Bản đầu của lần chuyển này làm mất nó, và `connections_screen_test`
+      // đỏ ngay — đúng việc của nó. Test hành vi tìm bằng Key, không bằng chữ
+      // hiển thị; đổi component mà bỏ Key là cắt đường tìm của mọi phép kiểm.
+      key: Key('connections-status-${status.code}'),
+      status: tongtaiConnectionStatusTone(status),
+      label: switch (status) {
+        ConnectionStatus.setupRequired => l10n.connectionSetupRequired,
+        ConnectionStatus.active => l10n.connectionActive,
+        ConnectionStatus.paused => l10n.connectionPaused,
+        ConnectionStatus.error => l10n.connectionError,
+      },
+    );
+  }
+}
+
+/// Huy hiệu mức sẵn sàng — cùng khuôn adapter mỏng như trên.
+class _ConnectionReadinessBadge extends StatelessWidget {
+  const _ConnectionReadinessBadge({required this.readiness});
+
+  final ConnectionReadiness readiness;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return TtStatusBadge(
+      status: tongtaiConnectionReadinessTone(readiness),
+      label: switch (readiness) {
+        ConnectionReadiness.connected => l10n.readinessConnected,
+        ConnectionReadiness.fileBridge => l10n.readinessFileBridge,
+        ConnectionReadiness.demo => l10n.readinessDemo,
+        ConnectionReadiness.demoConnected => l10n.readinessDemoConnected,
+        ConnectionReadiness.researched => l10n.readinessResearched,
+        ConnectionReadiness.partnerRequired => l10n.readinessPartnerRequired,
+        ConnectionReadiness.apiFuture => l10n.readinessApiFuture,
+      },
+    );
+  }
+}

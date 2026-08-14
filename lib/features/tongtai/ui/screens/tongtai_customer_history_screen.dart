@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../consumer/customer.dart';
 import '../../consumer/customer_order_history_service.dart';
 import '../../core/tongtai_enums.dart';
+import '../../orders/order_tone.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
 import '../../inventory/product_category.dart';
@@ -25,12 +26,9 @@ import '../../providers/tongtai_data_invalidation.dart';
 /// Color for an [OrderStatus] chip. Pure function so the mapping is directly
 /// unit-testable without pumping a widget (same convention as
 /// `tongtaiCustomerTierColor`).
-Color tongtaiOrderStatusColor(OrderStatus status) => switch (status) {
-  OrderStatus.pending => TtColors.warning,
-  OrderStatus.confirmed || OrderStatus.shipped => TtColors.info,
-  OrderStatus.delivered => TtColors.success,
-  OrderStatus.cancelled => TtColors.danger,
-};
+// ⛔ WTM-414 (DS-2) — ánh xạ chuyển sang `orders/order_tone.dart`
+// (`tongtaiOrderStatusTone`), trả `TtStatus`. Trạng thái một đơn hàng không
+// phải khái niệm của màn lịch sử khách.
 
 /// Date-range presets for the AC4 filter. Fixed windows relative to an
 /// injectable clock so tests are deterministic.
@@ -401,7 +399,12 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ),
               ),
-              _StatusChip(status: order.status),
+              TtStatusBadge(
+                status: tongtaiOrderStatusTone(order.status),
+                label: order.status.label(
+                  Localizations.localeOf(context).languageCode,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: TtSpace.x1),
@@ -432,32 +435,6 @@ class _OrderCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-
-  final OrderStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = tongtaiOrderStatusColor(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TtRadius.full),
-        border: Border.all(color: color),
-      ),
-      child: Text(
-        status.label(context.l10n.languageCode),
-        style: TtType.caption.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }

@@ -115,9 +115,10 @@ class _ConversationTile extends StatelessWidget {
           for (final channel in conversation.channels.take(2))
             Padding(
               padding: const EdgeInsets.only(left: 6),
-              child: _Chip(
-                DemoVendor.displayName(channel),
-                const Color(0xFF3B6FD4),
+              // Kênh bán là **thông tin**, không phải phán quyết ⇒ `info`.
+              child: TtStatusBadge(
+                status: TtStatus.info,
+                label: DemoVendor.displayName(channel),
               ),
             ),
         ],
@@ -142,12 +143,30 @@ class _ConversationTile extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
+              // ⛔ WTM-414 (DS-2) — ba mã hex tự chọn đã bị thay bằng sắc thái.
+              //
+              // Bản cũ truyền `0xFFB3261E` / `0xFF7A4FCF` / `0xFF8A6100` — màn
+              // **tự dựng một bảng màu riêng** cho một vai **trạng thái**, bỏ
+              // qua cả tầng token lẫn tầng semantic. Ba mã ấy không có trong
+              // `TtColors`, nên không ai đổi được chúng từ một chỗ.
+              //
+              // Nghĩa giữ nguyên: cần duyệt = việc chặn (`danger`) · bản nháp
+              // do AI soạn (`ai`) · đang chờ khách trả lời (`warning`).
               if (draft != null && draft.needsApproval)
-                _Chip(l10n.conversationNeedsApproval, const Color(0xFFB3261E))
+                TtStatusBadge(
+                  status: TtStatus.danger,
+                  label: l10n.conversationNeedsApproval,
+                )
               else if (draft != null)
-                _Chip(l10n.conversationDraftReady, const Color(0xFF7A4FCF))
+                TtStatusBadge(
+                  status: TtStatus.ai,
+                  label: l10n.conversationDraftReady,
+                )
               else if (conversation.awaitingReply)
-                _Chip(l10n.conversationAwaiting, const Color(0xFF8A6100)),
+                TtStatusBadge(
+                  status: TtStatus.warning,
+                  label: l10n.conversationAwaiting,
+                ),
             ],
           ),
         ],
@@ -160,24 +179,4 @@ class _ConversationTile extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip(this.label, this.color);
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
-    ),
-  );
 }

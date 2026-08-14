@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/orders/order_tone.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_directory_controller.dart';
 import 'package:tongtai/features/tongtai/consumer/customer_order.dart';
@@ -228,11 +229,17 @@ void main() {
   testWidgets('status chip colors map by status (pure function)', (
     tester,
   ) async {
-    expect(tongtaiOrderStatusColor(OrderStatus.pending), TtColors.warning);
-    expect(tongtaiOrderStatusColor(OrderStatus.confirmed), TtColors.info);
-    expect(tongtaiOrderStatusColor(OrderStatus.shipped), TtColors.info);
-    expect(tongtaiOrderStatusColor(OrderStatus.delivered), TtColors.success);
-    expect(tongtaiOrderStatusColor(OrderStatus.cancelled), TtColors.danger);
+    expect(tongtaiOrderStatusTone(OrderStatus.pending).color, TtColors.warning);
+    expect(tongtaiOrderStatusTone(OrderStatus.confirmed).color, TtColors.info);
+    expect(tongtaiOrderStatusTone(OrderStatus.shipped).color, TtColors.info);
+    expect(
+      tongtaiOrderStatusTone(OrderStatus.delivered).color,
+      TtColors.success,
+    );
+    expect(
+      tongtaiOrderStatusTone(OrderStatus.cancelled).color,
+      TtColors.danger,
+    );
   });
 
   testWidgets(
