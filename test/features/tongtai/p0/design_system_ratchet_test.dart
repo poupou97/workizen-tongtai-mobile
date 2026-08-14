@@ -101,7 +101,9 @@ void main() {
         'lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_producer_screen.dart',
-        'lib/features/tongtai/ui/screens/tongtai_startup_screen.dart',
+        // `tongtai_startup_screen.dart` RA KHỎI danh sách ở WTM-416: hàng ba
+        // cột `_Value(color:)` bị gỡ cùng lúc màn dựng lại theo nhận diện mới.
+        // Nợ giảm thì baseline phải giảm theo — chính cổng này bắt tôi hạ.
         'lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart',
