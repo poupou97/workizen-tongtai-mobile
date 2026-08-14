@@ -7,7 +7,6 @@ import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/inventory_context.dart';
 import '../../inventory/product.dart';
-import '../../inventory/category_icon.dart';
 import '../../inventory/inventory_tone.dart';
 import '../../inventory/product_category.dart';
 import '../../inventory/product_catalog_controller.dart';
@@ -19,6 +18,7 @@ import '../../providers/tongtai_inventory_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import 'tongtai_product_detail_screen.dart';
 import 'tongtai_product_form_screen.dart';
+import '../widgets/tongtai_product_thumbnail.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_screen_header.dart';
 import 'tongtai_stock_alerts_screen.dart';
@@ -936,12 +936,7 @@ class _ProductRow extends StatelessWidget {
               // WTM-414 — ô ảnh lấp khoảng trắng của danh sách 100 dòng.
               // Ảnh người bán tự thêm thắng placeholder; placeholder trung tính,
               // phân biệt bằng biểu tượng danh mục chứ không bằng màu.
-              TtThumbnail(
-                icon: tongtaiCategoryIcon(product.category),
-                imagePath: product.imagePaths.isEmpty
-                    ? null
-                    : product.imagePaths.first,
-              ),
+              TongtaiProductThumbnail(product: product),
               const SizedBox(width: TtSpace.x3),
               Expanded(
                 child: Column(

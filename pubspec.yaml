@@ -88,6 +88,8 @@ flutter:
     # Bộ dữ liệu thương mại demo (WTM-325). Đóng gói vào app để Founder nhập
     # được ngay cả khi chưa nối Google Drive — cùng file, cùng đường import.
     - assets/demo/
+    # WTM-414 — ảnh bộ demo, bundle để chạy offline và cùng SKU luôn ra cùng ảnh.
+    - assets/demo/products/
 
 # App launcher icon — WTM-366 (Epic WTM-362).
 #

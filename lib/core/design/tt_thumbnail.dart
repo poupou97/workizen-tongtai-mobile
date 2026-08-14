@@ -6,49 +6,51 @@ import 'tt_tokens.dart';
 
 /// **Ô ảnh sản phẩm** — WTM-414.
 ///
-/// Thứ tự dự phòng: ảnh người bán tự thêm → ô placeholder trung tính.
+/// Thứ tự dự phòng: **ảnh máy → ảnh mạng → ảnh mặc định**.
 ///
-/// ## ⛔ Vì sao placeholder KHÔNG tô màu theo danh mục
+/// ## Vì sao có ảnh mặc định, và vì sao nó không phải một cái icon
 ///
-/// Cách hiển nhiên là cho mỗi danh mục một màu để nhìn phát biết. Nhưng luật
-/// Founder 2026-08-14 nói thẳng: *"không dùng semantic color để trang trí;
-/// không để mỗi domain tự có một palette riêng nếu màu không mang semantic
-/// meaning"*.
+/// Founder xem bản đầu (chỉ có biểu tượng danh mục) và nói *"trông như icon
+/// ý :("* — đúng, vì nó **là** một cái icon. Ô ảnh mặc định nay có nền chuyển
+/// sắc, một khung ảnh mờ phía sau và biểu tượng danh mục chồng lên: đủ chất
+/// liệu để mắt đọc ra *"chỗ này là ảnh, chỉ chưa có ảnh"*.
 ///
-/// Một ô hàng tạp hoá màu xanh lá không có nghĩa *"tốt"*, và một ô mỹ phẩm màu
-/// đỏ không có nghĩa *"nguy hiểm"* — nhưng mắt đã học sáu màu ấy ở khắp app rồi,
-/// nên nó sẽ đọc ra nghĩa không ai định nói. 13 danh mục cũng không có 13 màu
-/// nào trong DS để mượn mà không đụng vào bảng ngữ nghĩa.
+/// Nó là **đường lui bắt buộc**, không phải tuỳ chọn: ảnh theo URL sẽ trắng khi
+/// mất mạng, và Founder yêu cầu đúng điều này — *"tạo sẵn 1 cái ảnh default
+/// phòng khi không có ảnh hoặc bị mất mạng"*.
 ///
-/// Nên: nền **trung tính**, phân biệt bằng **biểu tượng**. Biểu tượng mang thông
-/// tin mà không mượn một kênh đã có chủ.
+/// ## Vẫn trung tính về màu
 ///
-/// ## Vì sao là placeholder chứ không phải ảnh thật tải về
-///
-/// Ảnh chụp thật gắn vào một sản phẩm **không có thật** là một bản ghi tự xưng
-/// là thứ nó không phải. Thêm nữa: Phase 2 local-first (D-5) — ảnh theo URL sẽ
-/// trắng đúng lúc demo mất mạng.
+/// Luật màu của app đã có chủ (cam = hành động, tím = AI, xanh lá = tích cực…).
+/// Một ô ảnh trống **không mang phán quyết nào**, nên nó không mượn màu nào cả —
+/// nó phân biệt bằng biểu tượng.
 class TtThumbnail extends StatelessWidget {
   const TtThumbnail({
     super.key,
     required this.icon,
     this.imagePath,
+    this.assetPath,
+    this.imageUrl,
     this.size = 56,
   });
 
-  /// Biểu tượng của danh mục — thứ **duy nhất** phân biệt các ô với nhau.
+  /// Biểu tượng danh mục — dùng cho ô mặc định.
   final IconData icon;
 
-  /// Ảnh cục bộ người bán đã thêm. Có thì nó thắng placeholder.
+  /// Ảnh cục bộ người bán tự thêm — **thắng mọi thứ khác**.
   final String? imagePath;
+
+  /// Ảnh đóng gói trong app — **không cần mạng**, bố cục không đổi khi offline.
+  final String? assetPath;
+
+  /// Ảnh theo URL do một nguồn ngoài cung cấp.
+  final String? imageUrl;
 
   final double size;
 
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(TtRadius.md);
-    final path = imagePath;
-
     return SizedBox(
       width: size,
       height: size,
@@ -56,32 +58,81 @@ class TtThumbnail extends StatelessWidget {
         borderRadius: radius,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: TtColors.surfaceTertiary,
             borderRadius: radius,
             border: Border.all(color: TtColors.border),
           ),
-          child: path != null && path.isNotEmpty && File(path).existsSync()
-              ? Image.file(
-                  File(path),
-                  fit: BoxFit.cover,
-                  width: size,
-                  height: size,
-                  // Ảnh hỏng ⇒ quay về placeholder, không hiện ô vỡ.
-                  errorBuilder: (_, _, _) => _Placeholder(icon: icon),
-                )
-              : _Placeholder(icon: icon),
+          child: _content(),
         ),
       ),
     );
   }
+
+  Widget _content() {
+    final fallback = _DefaultThumbnail(icon: icon, size: size);
+
+    final path = imagePath;
+    if (path != null && path.isNotEmpty && File(path).existsSync()) {
+      return Image.file(
+        File(path),
+        fit: BoxFit.cover,
+        width: size,
+        height: size,
+        errorBuilder: (_, _, _) => fallback,
+      );
+    }
+
+    final asset = assetPath;
+    if (asset != null && asset.isNotEmpty) {
+      return Image.asset(
+        asset,
+        fit: BoxFit.cover,
+        width: size,
+        height: size,
+        errorBuilder: (_, _, _) => fallback,
+      );
+    }
+
+    final url = imageUrl;
+    if (url != null && url.isNotEmpty) {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        width: size,
+        height: size,
+        // Đang tải ⇒ giữ ô mặc định, KHÔNG nháy vòng xoay: danh sách 100 dòng
+        // mà mỗi dòng một spinner thì trông như app đang hỏng.
+        loadingBuilder: (context, child, progress) =>
+            progress == null ? child : fallback,
+        // ⛔ Mất mạng hoặc URL chết ⇒ ảnh mặc định, không để ô vỡ.
+        errorBuilder: (_, _, _) => fallback,
+      );
+    }
+
+    return fallback;
+  }
 }
 
-class _Placeholder extends StatelessWidget {
-  const _Placeholder({required this.icon});
+class _DefaultThumbnail extends StatelessWidget {
+  const _DefaultThumbnail({required this.icon, required this.size});
 
   final IconData icon;
+  final double size;
 
   @override
-  Widget build(BuildContext context) =>
-      Center(child: Icon(icon, size: 22, color: TtColors.textTertiary));
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [TtColors.surfaceSecondary, TtColors.surfaceTertiary],
+      ),
+    ),
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        Icon(Icons.image_outlined, size: size * 0.62, color: TtColors.border),
+        Icon(icon, size: size * 0.30, color: TtColors.textTertiary),
+      ],
+    ),
+  );
 }
