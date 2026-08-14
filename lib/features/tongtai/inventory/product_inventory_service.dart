@@ -46,6 +46,7 @@ class ProductQuery {
     this.ascending = true,
     this.pageIndex = 0,
     this.pageSize = kMinProductPageSize,
+    this.onlyIds,
   });
 
   /// Free text, matched (case-insensitive) against name, category and SKU.
@@ -67,8 +68,18 @@ class ProductQuery {
   /// by the service).
   final int pageSize;
 
+  /// Giới hạn kết quả về đúng tập mặt hàng này. `null` = không giới hạn.
+  ///
+  /// Dùng cho những lát cắt **do dữ liệu quyết định** chứ không do người dùng
+  /// gõ — ví dụ "hàng chậm bán" (WTM-411): tập ấy tính từ đơn hàng, không diễn
+  /// đạt được bằng một chuỗi tìm kiếm hay một danh mục.
+  final Set<String>? onlyIds;
+
   /// Whether a category facet is applied.
   bool get hasCategory => category != null;
+
+  /// Đang xem một lát cắt do dữ liệu quyết định.
+  bool get hasIdFilter => onlyIds != null;
 
   /// Copy with individual overrides. Pass `clearCategory: true` to reset the
   /// category facet to null (a plain null argument can't distinguish "leave
@@ -81,6 +92,8 @@ class ProductQuery {
     bool? ascending,
     int? pageIndex,
     int? pageSize,
+    Set<String>? onlyIds,
+    bool clearOnlyIds = false,
   }) {
     return ProductQuery(
       text: text ?? this.text,
@@ -89,6 +102,7 @@ class ProductQuery {
       ascending: ascending ?? this.ascending,
       pageIndex: pageIndex ?? this.pageIndex,
       pageSize: pageSize ?? this.pageSize,
+      onlyIds: clearOnlyIds ? null : (onlyIds ?? this.onlyIds),
     );
   }
 }
@@ -207,6 +221,12 @@ class ProductInventoryService {
   }
 
   bool _matches(Product p, String q, ProductQuery query) {
+    // Lát cắt do dữ liệu quyết định đứng TRƯỚC mọi tiêu chí gõ tay: nó là câu
+    // hỏi người dùng vừa đặt ("cho tôi xem hàng đang nằm"), còn tìm kiếm và
+    // danh mục chỉ thu hẹp bên trong câu hỏi ấy.
+    final only = query.onlyIds;
+    if (only != null && !only.contains(p.id)) return false;
+
     // Facet compares canonical values so a chip selected as "Điện tử" still
     // matches a product stored as the code "electronics" (WTM-393).
     if (query.category != null &&

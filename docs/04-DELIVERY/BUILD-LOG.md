@@ -5,6 +5,18 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +16 — 2026-08-14T16:41:24Z
+
+- Version: `0.1.0+16` (trước: `0.1.0+15`)
+- Lý do: WTM-418 — kiểm ảnh sản phẩm sau khi lọc URL giữ chỗ
+- SHA: `795209da6c57e16696713632490757c7a2cbad6a`
+- Nhánh: `feat/wtm-414-product-thumbnails`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `a57f5f624b08df91…`
+
+### Thay đổi kể từ `3440ae4b0134d3e1641d5aea986ca69ffd2ebae0`
+
+- 795209d fix(WTM-418): ảnh giữ chỗ không được tự xưng là ảnh sản phẩm
+
 ## build +15 — 2026-08-14T15:45:09Z
 
 - Version: `0.1.0+15` (trước: `0.1.0+14`)

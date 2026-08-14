@@ -18,7 +18,11 @@ import '../../providers/tongtai_inventory_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import 'tongtai_product_detail_screen.dart';
 import 'tongtai_product_form_screen.dart';
+import '../../inventory/slow_moving_capital.dart';
+import '../../inventory/slow_moving_capital_loader.dart';
+import '../../providers/tongtai_commerce_provider.dart';
 import '../widgets/tongtai_product_thumbnail.dart';
+import '../widgets/tongtai_tied_up_capital_card.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_screen_header.dart';
 import 'tongtai_stock_alerts_screen.dart';
@@ -107,9 +111,38 @@ class _TongtaiInventoryScreenState
     )..start();
   }
 
+  /// Vốn chôn trong hàng chậm bán (WTM-411 · cp3).
+  ///
+  /// Tính SAU khi danh mục đã nạp, và **không bao giờ làm hỏng** trạng thái
+  /// màn: nguồn dữ liệu của nó là đơn hàng, còn danh sách sản phẩm thì không
+  /// cần đơn hàng. Xem `slow_moving_capital_loader.dart`.
+  SlowMovingCapital _capital = SlowMovingCapital.none;
+
   Future<ProductCatalogController> _read() async {
     await _catalog.hydrate();
+    _capital = await loadSlowMovingCapital(
+      profit: ref.read(commerceProfitProvider.future),
+      products: _catalog.service.all,
+    );
     return _catalog;
+  }
+
+  /// Lọc danh sách về đúng tập hàng chậm bán — hành động của thẻ cp3.
+  ///
+  /// Đây là lát cắt do **dữ liệu** quyết định, nên nó không đi qua ô tìm kiếm
+  /// hay chip danh mục: không chuỗi nào diễn đạt được "không bán được cái nào
+  /// trong 30 ngày".
+  void _showSlowMoving() {
+    setState(() {
+      _query = _query.copyWith(pageIndex: 0, onlyIds: _capital.productIds);
+    });
+  }
+
+  /// Bỏ lát cắt, quay lại toàn danh mục.
+  void _clearSlowMoving() {
+    setState(() {
+      _query = _query.copyWith(pageIndex: 0, clearOnlyIds: true);
+    });
   }
 
   @override
@@ -259,7 +292,17 @@ class _TongtaiInventoryScreenState
                         onSort: _selectSort,
                         onToggleDirection: _toggleDirection,
                       ),
-                      _ResultsHeader(count: page.totalCount),
+                      TongtaiTiedUpCapitalCard(
+                        capital: _capital,
+                        onViewList: _showSlowMoving,
+                      ),
+                      _ResultsHeader(
+                        count: page.totalCount,
+                        // Lối vào lát cắt phải có lối ra ngay cạnh con số nó
+                        // vừa đổi — người bán bấm thẻ rồi thấy 12/114 mà không
+                        // có cách quay lại sẽ tưởng mất hàng.
+                        onClearSlice: _query.hasIdFilter ? _clearSlowMoving : null,
+                      ),
                     ],
                   ),
                 ),
@@ -858,9 +901,12 @@ class _ChipsRow extends StatelessWidget {
 }
 
 class _ResultsHeader extends StatelessWidget {
-  const _ResultsHeader({required this.count});
+  const _ResultsHeader({required this.count, this.onClearSlice});
 
   final int count;
+
+  /// `null` = đang xem toàn danh mục, không có gì để bỏ.
+  final VoidCallback? onClearSlice;
 
   @override
   Widget build(BuildContext context) {
@@ -871,10 +917,23 @@ class _ResultsHeader extends StatelessWidget {
         TtSpace.x4,
         TtSpace.x2,
       ),
-      child: Text(
-        context.l10n.invProductCount(count),
-        key: const Key('inventory-count-badge'),
-        style: TtType.body.copyWith(color: TtColors.textSecondary),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              context.l10n.invProductCount(count),
+              key: const Key('inventory-count-badge'),
+              style: TtType.body.copyWith(color: TtColors.textSecondary),
+            ),
+          ),
+          if (onClearSlice != null)
+            TextButton.icon(
+              key: const Key('inventory-clear-slice'),
+              onPressed: onClearSlice,
+              icon: const Icon(Icons.close, size: 16),
+              label: Text(context.l10n.invShowAll),
+            ),
+        ],
       ),
     );
   }

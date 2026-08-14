@@ -866,6 +866,20 @@ abstract class AppStrings {
   // ── Màn khởi động (WTM-367 · nhận diện mới WTM-416) ──────────────────────
 
   /// Chủ sở hữu sản phẩm, đặt trên tên sản phẩm — theo bố cục Founder giao.
+  // ── Vốn chôn trong hàng chậm bán (WTM-411 · concept-1 cp3) ──────────────
+
+  String get invShowAll;
+  String get invTiedUpTitle;
+
+  /// `count` mặt hàng không bán được cái nào trong `days` ngày.
+  String invTiedUpBody(int count, int days);
+
+  /// Phần **chưa tính được** vì thiếu giá vốn. Câu chữ MỜI khai, không trách:
+  /// thiếu giá vốn là điều app chưa hỏi, không phải lỗi người bán.
+  String invTiedUpUnknownCost(int count);
+
+  String get invTiedUpAction;
+
   String get startupBrandOwner;
 
   /// Nhãn nền tảng ở đường kẻ ngang. KHÔNG dịch: đây là một phần của khoá
@@ -2716,6 +2730,18 @@ class AppStringsVi extends AppStrings {
   @override
   String get obV2SkipProfile => 'Bỏ qua, tôi khai sau';
   @override
+  String get invShowAll => 'Xem tất cả';
+  @override
+  String get invTiedUpTitle => 'Vốn đang nằm trong hàng chậm bán';
+  @override
+  String invTiedUpBody(int count, int days) =>
+      '$count mặt hàng còn tồn, không bán được cái nào trong $days ngày qua';
+  @override
+  String invTiedUpUnknownCost(int count) =>
+      'Chưa tính $count mặt hàng — khai giá vốn để thấy con số đủ';
+  @override
+  String get invTiedUpAction => 'Xem hàng chậm bán';
+  @override
   String get startupBrandOwner => 'Workizen';
   @override
   String get startupPlatform => 'AI Platform';
@@ -3589,6 +3615,19 @@ class AppStringsVi extends AppStrings {
 
 class AppStringsEn extends AppStrings {
   const AppStringsEn();
+
+  @override
+  String get invShowAll => 'Show all';
+  @override
+  String get invTiedUpTitle => 'Capital sitting in slow-moving stock';
+  @override
+  String invTiedUpBody(int count, int days) =>
+      '$count items in stock with no sales in the last $days days';
+  @override
+  String invTiedUpUnknownCost(int count) =>
+      '$count items not counted — add cost price to see the full number';
+  @override
+  String get invTiedUpAction => 'View slow-moving stock';
 
   @override
   String get actionViewAll => 'View all';
