@@ -7,6 +7,7 @@ import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/inventory_context.dart';
 import '../../inventory/product.dart';
+import '../../inventory/inventory_tone.dart';
 import '../../inventory/product_category.dart';
 import '../../inventory/product_catalog_controller.dart';
 import '../../inventory/product_image_source.dart';
@@ -26,11 +27,16 @@ import '../../../../core/telemetry/tongtai_telemetry.dart';
 /// Color for a [StockStatus] badge (WTM-68 AC: color-coded in stock / low /
 /// out). Pulled out as a pure function so the mapping is directly unit-testable
 /// without pumping a widget.
-Color tongtaiStockStatusColor(StockStatus status) => switch (status) {
-  StockStatus.inStock => TtColors.success,
-  StockStatus.lowStock => TtColors.warning,
-  StockStatus.outOfStock => TtColors.danger,
-};
+// ⛔ WTM-414 (DS-2) — `tongtaiStockStatusColor` đã bị XOÁ khỏi đây.
+//
+// Nó là một ánh xạ **miền → token**, tức khái niệm của tầng semantic, mà lại
+// sống trong tệp màn. Hai màn cùng hỏi *"hết hàng nghĩa là gì"* thì phải nhận
+// cùng một câu trả lời, và câu ấy không thể thuộc về một trong hai.
+//
+// Nay: `tongtaiStockStatusTone()` trong `inventory/inventory_tone.dart`, trả
+// **`TtStatus`** chứ không trả `Color` — màn không còn cầm token thô để đặt vào
+// bất cứ đâu. Chỗ nào thật sự cần `Color` (biểu đồ) thì gọi `tone.color`, nên
+// vẫn chỉ có **một** bảng ánh xạ.
 
 /// Inventory / product list screen (WTM-68) — Product & Warehouse hub.
 ///
@@ -418,7 +424,7 @@ class _OverviewCard extends StatelessWidget {
                       segments: [
                         for (final (status, count) in segments)
                           if (count > 0)
-                            (tongtaiStockStatusColor(status), count),
+                            (tongtaiStockStatusTone(status).color, count),
                       ],
                       trackColor: TtColors.border,
                     ),
@@ -435,7 +441,7 @@ class _OverviewCard extends StatelessWidget {
               children: [
                 for (final (status, count) in segments)
                   _LegendEntry(
-                    color: tongtaiStockStatusColor(status),
+                    color: tongtaiStockStatusTone(status).color,
                     label: status.label(l10n.languageCode),
                     percent: summary.productCount == 0
                         ? 0
@@ -638,10 +644,10 @@ class _LowStockCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = tongtaiStockStatusColor(switch (alert.level) {
-      StockAlertLevel.outOfStock => StockStatus.outOfStock,
-      StockAlertLevel.lowStock => StockStatus.lowStock,
-    });
+    // ⚠️ Thẻ này vẽ **nền + viền** theo mức cảnh báo, tức dùng token cho một
+    // bề mặt — không phải một huy hiệu. Nên nó lấy `Color` từ tone, và tone vẫn
+    // là chủ duy nhất của ánh xạ.
+    final color = tongtaiStockAlertTone(alert.level).color;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -990,39 +996,18 @@ class _ProductRow extends StatelessWidget {
                     ],
                     if (product.stockStatus case final status?) ...[
                       const SizedBox(height: TtSpace.x2),
-                      _StatusChip(status: status),
+                      TtStatusBadge(
+                        status: tongtaiStockStatusTone(status),
+                        label: status.label(
+                          Localizations.localeOf(context).languageCode,
+                        ),
+                      ),
                     ],
                   ],
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-
-  final StockStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = tongtaiStockStatusColor(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TtRadius.full),
-        border: Border.all(color: color),
-      ),
-      child: Text(
-        status.label(context.l10n.languageCode),
-        style: TtType.caption.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );

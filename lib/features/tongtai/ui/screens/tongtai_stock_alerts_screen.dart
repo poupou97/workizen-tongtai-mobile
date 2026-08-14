@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../inventory/product.dart';
+import '../../inventory/inventory_tone.dart';
 import '../../inventory/product_category.dart';
 import '../../inventory/product_catalog_controller.dart';
 import '../../inventory/product_image_source.dart';
@@ -19,10 +20,9 @@ import 'tongtai_opportunity_detail_screen.dart';
 /// Color for a [StockAlertLevel] badge (WTM-70): out of stock is the error red,
 /// low stock the warning amber. Pure function so the mapping is unit-testable
 /// without pumping a widget.
-Color tongtaiStockAlertColor(StockAlertLevel level) => switch (level) {
-  StockAlertLevel.outOfStock => TtColors.danger,
-  StockAlertLevel.lowStock => TtColors.warning,
-};
+// ⛔ WTM-414 (DS-2) — ánh xạ chuyển sang `inventory/inventory_tone.dart`
+// (`tongtaiStockAlertTone`), trả `TtStatus` thay vì `Color`. Xem chú thích ở
+// tệp ấy: trả `Color` là nhảy qua tầng semantic.
 
 /// Stock Alerts screen (WTM-70) — "notify the user when qty falls below the
 /// threshold".
@@ -227,7 +227,7 @@ class _AlertRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = tongtaiStockAlertColor(alert.level);
+    final color = tongtaiStockAlertTone(alert.level).color;
     final product = alert.product;
     return Material(
       key: Key('stock-item-${product.id}'),
@@ -293,7 +293,12 @@ class _AlertRow extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _LevelChip(level: alert.level),
+                  TtStatusBadge(
+                    status: tongtaiStockAlertTone(alert.level),
+                    label: alert.level.label(
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                  ),
                   const SizedBox(height: TtSpace.x2),
                   Text(
                     context.l10n.stockQtyOfThreshold(
@@ -341,32 +346,6 @@ class _AlertRow extends StatelessWidget {
       alert.shortfall > 0
       ? l10n.stockRestockBy(alert.shortfall)
       : l10n.stockRestockNeeded;
-}
-
-class _LevelChip extends StatelessWidget {
-  const _LevelChip({required this.level});
-
-  final StockAlertLevel level;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = tongtaiStockAlertColor(level);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TtRadius.full),
-        border: Border.all(color: color),
-      ),
-      child: Text(
-        level.label(context.l10n.languageCode),
-        style: TtType.caption.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
 }
 
 class _HealthyState extends StatelessWidget {

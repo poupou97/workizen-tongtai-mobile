@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/inventory/inventory_tone.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_catalog_controller.dart';
@@ -218,7 +219,13 @@ void main() {
   });
 
   test('tongtaiStockAlertColor maps each level to its token', () {
-    expect(tongtaiStockAlertColor(StockAlertLevel.outOfStock), TtColors.danger);
-    expect(tongtaiStockAlertColor(StockAlertLevel.lowStock), TtColors.warning);
+    expect(
+      tongtaiStockAlertTone(StockAlertLevel.outOfStock).color,
+      TtColors.danger,
+    );
+    expect(
+      tongtaiStockAlertTone(StockAlertLevel.lowStock).color,
+      TtColors.warning,
+    );
   });
 }

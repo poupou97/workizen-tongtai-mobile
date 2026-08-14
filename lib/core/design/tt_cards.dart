@@ -155,7 +155,24 @@ class TtStatusBadge extends StatelessWidget {
           Icon(icon, size: 14, color: status.color),
           const SizedBox(width: TtSpace.x1),
         ],
-        Text(label, style: TtType.label.copyWith(color: status.color)),
+        // ⭐ WTM-414 (DS-2) — nhãn PHẢI co được.
+        //
+        // Một component dùng chung mà có thể làm **tràn bất kỳ hàng nào** đặt
+        // nó vào là khuyết tật của Design System, không phải của màn. Khi 5 màn
+        // bỏ chip tự chế để dùng huy hiệu này, hàng sản phẩm của Kho tràn 8px —
+        // vì huy hiệu chung rộng hơn bản tự chế (đệm x3 + viền) và nhãn không
+        // chịu co.
+        //
+        // Sửa ở đây thay vì bọc `Flexible` ở từng chỗ gọi: chỗ gọi thứ sáu sẽ
+        // không nhớ phải bọc.
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TtType.label.copyWith(color: status.color),
+          ),
+        ),
       ],
     ),
   );
