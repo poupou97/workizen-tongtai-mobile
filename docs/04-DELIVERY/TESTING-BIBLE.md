@@ -759,6 +759,22 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   đặt cho decoder `.ttbk` (*"từ chối thay vì đoán"*). Coi `assert` là ghi chú cho
   lập trình viên, **không** phải một cổng: nó không tồn tại ở bản người dùng chạy.
 
+
+### ⚠️ Tái phát 2026-08-15 — WTM-418, ảnh sản phẩm
+
+Cùng hình dạng, khác miền. WTM-414 gỡ **đường ghi** URL ảnh demo (xoá tệp sinh
+URL, xoá đoạn seeder ghi vào `Product.imageUrl`) và coi thế là xong.
+
+Nhưng bộ dữ liệu mẫu XLSX có sẵn cột `image_url` điền `picsum.photos/seed/…`,
+máy Founder đã nạp từ 2026-08-09, nên giá trị hỏng **nằm sẵn trong cơ sở dữ
+liệu** và đi vào bằng **đường đọc**. Danh sách Kho hiện ảnh phong cảnh cho từng
+món hàng — **2845 test xanh, analyzer sạch, không gì kêu**.
+
+Bài học thêm vào P-39: *"đã gỡ chỗ sinh ra nó"* **không** đồng nghĩa với *"nó
+không còn"*. Câu hỏi đúng là **"giá trị này đã kịp nằm ở đâu chưa"** — và nếu
+rồi, phải chặn ở đường đọc (hoặc di trú dữ liệu), vì đường ghi không chạm được
+vào quá khứ.
+
 ## P-40 · `SafeArea` trả lời câu "thanh nav ở đâu", KHÔNG trả lời "vuốt ở đâu thì tới app"
 
 - **Root cause:** Android đời mới có **hai** vùng inset ở đáy. `viewPadding` (=
