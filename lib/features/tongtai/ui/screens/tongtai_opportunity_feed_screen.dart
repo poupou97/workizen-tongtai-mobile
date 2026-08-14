@@ -51,6 +51,37 @@ class TongtaiOpportunityFeedScreen extends ConsumerStatefulWidget {
       _TongtaiOpportunityFeedScreenState();
 }
 
+/// Đệm đáy cho một danh sách **vuốt được** — WTM-403.
+///
+/// ## Vì sao không dùng `SafeArea` là đủ
+///
+/// `SafeArea` trừ `viewPadding.bottom`, tức chiều cao **thanh điều hướng**. Đó
+/// là con số trả lời câu *"chỗ nào bị thanh nav che"* — **không** phải câu
+/// *"vuốt ở đâu thì tới app"*.
+///
+/// Hai câu ấy có cùng đáp án ở chế độ **ba nút**, và lệch nhau ở chế độ **cử
+/// chỉ**. Đo trên S24 Ultra:
+///
+/// | chế độ | `navigationBars` | `mandatorySystemGestures` | hở |
+/// |---|---|---|---|
+/// | ba nút (2026-08-14) | 135px | 135px | 0 |
+/// | cử chỉ (2026-08-13) | 42px | 135px | **93px** |
+///
+/// Trong 93px ấy, hệ điều hành **cướp thao tác vuốt** trước khi app thấy —
+/// nhưng **chạm thì vẫn tới**. Nên mọi phép kiểm tap-target vẫn xanh, và không
+/// chốt nào của repo bắt được: cùng họ P-35/P-36, một API đứng cạnh thứ mình
+/// cần, trả về dữ liệu trông giống, và sai một cách im lặng.
+///
+/// ⚠️ Chỉ dùng cho danh sách có `Dismissible`/vuốt. Danh sách chỉ chạm thì
+/// `SafeArea` là đủ, và thêm 93px đệm sẽ chỉ tạo một khoảng trống vô cớ.
+double _swipeSafeBottom(BuildContext context) {
+  final media = MediaQuery.of(context);
+  // `SafeArea` bao ngoài đã trừ `viewPadding.bottom` rồi, nên ở đây chỉ cần bù
+  // **phần dôi ra** của vùng cử chỉ. Trừ hai lần sẽ đẩy hàng cuối lên vô cớ.
+  final extra = media.systemGestureInsets.bottom - media.viewPadding.bottom;
+  return TtSpace.x4 + (extra > 0 ? extra : 0);
+}
+
 class _TongtaiOpportunityFeedScreenState
     extends ConsumerState<TongtaiOpportunityFeedScreen> {
   late OpportunityFeedController _controller;
@@ -286,11 +317,32 @@ class _TongtaiOpportunityFeedScreenState
                     emptyBuilder: (_) =>
                         _EmptyState(savedOnly: _query.savedOnly),
                     builder: (context, _) => ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(
+                      // ⭐ WTM-403 — đáy chừa theo **vùng cử chỉ hệ thống**,
+                      // không theo `viewPadding`.
+                      //
+                      // `SafeArea` bọc ngoài đã trừ `viewPadding.bottom` =
+                      // chiều cao **thanh điều hướng**. Ở chế độ **ba nút** hai
+                      // con số ấy trùng nhau (S24 đo 2026-08-14: cả hai đều
+                      // 135px) nên không sao. Ở chế độ **cử chỉ** thì:
+                      //
+                      //     navigationBars           42px  ← SafeArea trừ ngần này
+                      //     mandatorySystemGestures 135px  ← hệ thống nuốt VUỐT
+                      //
+                      // ⇒ hở **93px**, và mỗi hàng ở đó là một `Dismissible`.
+                      // Người bán vuốt để phản hồi cơ hội; trong dải ấy hệ điều
+                      // hành cướp thao tác trước khi app thấy. **Chạm thì vẫn
+                      // tới** — nên mọi phép kiểm tap-target vẫn xanh, đúng lý
+                      // do không chốt nào bắt được (P-35/P-36: một API đứng
+                      // cạnh thứ mình cần và sai một cách im lặng).
+                      //
+                      // `systemGestureInsets` trả lời đúng câu ta hỏi — *"vuốt
+                      // ở đâu thì tới app"* — nên nó là con số đúng ở đây.
+                      // `max` với đệm thường: không bao giờ ít hơn nhịp cũ.
+                      padding: EdgeInsets.fromLTRB(
                         TtSpace.x4,
                         0,
                         TtSpace.x4,
-                        TtSpace.x4,
+                        _swipeSafeBottom(context),
                       ),
                       itemCount: items.length,
                       separatorBuilder: (context, _) =>

@@ -759,6 +759,45 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   đặt cho decoder `.ttbk` (*"từ chối thay vì đoán"*). Coi `assert` là ghi chú cho
   lập trình viên, **không** phải một cổng: nó không tồn tại ở bản người dùng chạy.
 
+## P-40 · `SafeArea` trả lời câu "thanh nav ở đâu", KHÔNG trả lời "vuốt ở đâu thì tới app"
+
+- **Root cause:** Android đời mới có **hai** vùng inset ở đáy. `viewPadding` (=
+  `navigationBars`) là chiều cao **thanh điều hướng**; `systemGestureInsets` (=
+  `mandatorySystemGestures`) là dải hệ điều hành **cướp thao tác vuốt**. Ở chế độ
+  **ba nút** hai con số trùng nhau nên `SafeArea` che đủ; ở chế độ **cử chỉ**
+  chúng lệch, và phần lệch vẫn nhận widget. Trong dải ấy **chạm vẫn tới app**,
+  chỉ **vuốt** bị nuốt — nên mọi phép kiểm tap-target vẫn xanh.
+  Cùng họ [[P-35]] / [[P-36]]: một API đứng cạnh thứ mình cần, trả về dữ liệu
+  **trông giống** thứ mình cần, và sai **im lặng**.
+- **Regression:** WTM-403. Đo trên S24 Ultra (`R5CX62RCBNB`):
+
+  | chế độ | `navigationBars` | `mandatorySystemGestures` | hở |
+  |---|---|---|---|
+  | ba nút (2026-08-14) | 135px | 135px | 0 |
+  | cử chỉ (2026-08-13) | 42px | 135px | **93px** |
+
+  Màn Cơ hội dùng `Dismissible` làm thao tác chính và chỉ bọc `SafeArea`. Đo
+  trong test: hàng cuối kéo xuống tới **y=722** trong khi dải cử chỉ bắt đầu ở
+  **645** ⇒ **77dp chồng lấn**.
+  ⚠️ Vé gốc chép số 42px vào mô tả **không kèm điều kiện**, nên nó đọc như *"S24
+  luôn có khoảng hở"* — sai. Rủi ro không thuộc về **máy**, nó thuộc về **chế độ
+  điều hướng người dùng bật**.
+- **Test / method pattern:** `p0/swipe_gesture_inset_test.dart` — đặt
+  `tester.view.systemGestureInsets` **lớn hơn** `viewPadding`, dựng màn, cuộn tới
+  đáy, rồi khẳng định **mép DƯỚI** của mọi `Dismissible` nằm trên dải.
+  ⛔ **Đo mép dưới, không đo mép trên.** Bản đầu của phép kiểm này so mép trên và
+  **xanh cả trên mã chưa sửa**: hàng cao ~100dp có mép trên ngoài dải trong khi
+  nửa dưới đã nằm trong — và ngón tay đặt vào nửa dưới ấy mới là cú vuốt bị nuốt.
+  Đột biến (trả đệm về `TtSpace.x4`) chứng minh đỏ.
+  Mặc định của widget test là `systemGestureInsets = 0`, nên **không màn nào từng
+  được dựng ở cấu hình lộ lỗi** — phải đặt tay.
+- **Prevention:** danh sách có **vuốt** (`Dismissible`, swipe-to-action) phải
+  chừa đáy theo `systemGestureInsets`, không theo `SafeArea` là xong. Danh sách
+  chỉ chạm thì `SafeArea` đủ — thêm 93px đệm vô cớ là một khoảng trống không ai
+  giải thích được. Và đừng đổi `navigation_mode` trên máy Founder để đo: chính
+  thao tác ấy đã làm hỏng một đợt đo trước (cửa sổ không tin được ghi trong
+  WTM-403).
+
 ---
 
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
@@ -816,6 +855,7 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `export/backup_screen_test.dart` | preview không chạm DB · xác nhận phá huỷ · file hỏng không có nút phá huỷ · file mã hoá xin mật khẩu |
 | `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
 | `../commerce/product_category_governance_test.dart` | **một taxonomy canonical** (WTM-393/P-34): mọi nguồn seed lưu **mã**, không nhãn; `parse` chữa nhãn Anh/VI cũ; chuỗi tự đặt giữ nguyên |
+| `swipe_gesture_inset_test.dart` | **vùng cử chỉ hệ thống** (WTM-403/P-40): mọi `Dismissible` phải nằm trên dải `mandatorySystemGestures`; đo **mép dưới**. Đột biến đã chứng minh đỏ (77dp chồng lấn) |
 | `value_colour_governance_test.dart` | **màu định vị không tô lên con số** (A2 · WTM-389 · WTM-407): widget hiện số **không được nhận tham số `Color`** · màn Khách hàng không còn hằng `_blue`. 2 đột biến đã chứng minh đỏ |
 | `tongtai_tab_persistence_test.dart` | **giá trị bền vào từ đường ĐỌC** (WTM-405/P-39): chỉ số tab ngoài khoảng ⇒ về Trang chủ · mọi chỉ số hợp lệ giữ nguyên. 2 đột biến ngược chiều đã chứng minh đỏ |
 | `ui/home_concept_cards_test.dart` | **luật đứng sau thẻ concept-1** (WTM-404): thiếu mốc ⇒ không phần trăm (mốc = 0 cũng vậy) · dưới 3 điểm ⇒ không vẽ đường · màu định vị không chạm con số/mũi tên · mức ưu tiên là **thứ hạng**, không phải ngưỡng điểm. 5 đột biến đã chứng minh đỏ |
