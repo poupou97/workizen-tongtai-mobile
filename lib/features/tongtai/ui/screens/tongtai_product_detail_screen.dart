@@ -6,6 +6,7 @@ import '../../../../core/design/tt.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../commerce/attributes/product_attribute_view.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../inventory/category_icon.dart';
 import '../../inventory/product.dart';
 import '../../inventory/product_category.dart';
 import '../../providers/tongtai_commerce_provider.dart';
@@ -146,6 +147,15 @@ class _ProductHeader extends StatelessWidget {
       key: const Key('product-detail-header'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // WTM-414 — cùng ô ảnh với danh sách Kho: một vai, một component.
+        TtThumbnail(
+          icon: tongtaiCategoryIcon(product.category),
+          imagePath: product.imagePaths.isEmpty
+              ? null
+              : product.imagePaths.first,
+          size: 64,
+        ),
+        const SizedBox(width: TtSpace.x3),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

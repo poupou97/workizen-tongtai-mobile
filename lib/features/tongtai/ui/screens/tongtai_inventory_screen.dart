@@ -7,6 +7,7 @@ import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
 import '../../inventory/inventory_context.dart';
 import '../../inventory/product.dart';
+import '../../inventory/category_icon.dart';
 import '../../inventory/inventory_tone.dart';
 import '../../inventory/product_category.dart';
 import '../../inventory/product_catalog_controller.dart';
@@ -932,6 +933,16 @@ class _ProductRow extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // WTM-414 — ô ảnh lấp khoảng trắng của danh sách 100 dòng.
+              // Ảnh người bán tự thêm thắng placeholder; placeholder trung tính,
+              // phân biệt bằng biểu tượng danh mục chứ không bằng màu.
+              TtThumbnail(
+                icon: tongtaiCategoryIcon(product.category),
+                imagePath: product.imagePaths.isEmpty
+                    ? null
+                    : product.imagePaths.first,
+              ),
+              const SizedBox(width: TtSpace.x3),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
