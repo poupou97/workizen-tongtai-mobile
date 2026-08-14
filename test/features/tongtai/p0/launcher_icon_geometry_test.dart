@@ -35,8 +35,21 @@ const _safeZone = 66 / 108;
 /// Mặt nạ tròn của splash Android 12: 768/1152.
 const _splashMask = 768 / 1152;
 
-/// Dưới ngưỡng này thì icon trông lọt thỏm trong khung — vẫn "đúng" nhưng yếu.
-const _tooSmall = 0.50;
+/// Phần khung mà launcher thật sự cho nhìn thấy: 72dp trên 108dp.
+const _viewport = 72 / 108;
+
+/// Tỉ lệ mà `tool/build_brand_assets.py` **tự khai** — đọc từ chính script.
+///
+/// So với một ngưỡng cứng viết tay thì cách này mạnh hơn hẳn: nó bắt **mọi**
+/// lần tệp sinh ra không khớp ý định, bất kể ý định là bao nhiêu. Đúng con
+/// đường mà quầng alpha vô hình đã đi qua — script khai 0,58 mà tệp ra 0,52, và
+/// không có gì trên đời báo cho ai biết.
+double _declaredTarget() {
+  final src = File('tool/build_brand_assets.py').readAsStringSync();
+  final m = RegExp(r'^TARGET = ([\d.]+)', multiLine: true).firstMatch(src);
+  expect(m, isNotNull, reason: 'không đọc được TARGET trong script sinh ảnh');
+  return double.parse(m!.group(1)!);
+}
 
 /// Tỉ lệ bề ngang phần **nhìn thấy được** (alpha đủ đục) trên bề ngang tệp.
 Future<double> _visibleWidthRatio(String path) async {
@@ -87,12 +100,25 @@ void main() {
           'an toàn 66dp ⇒ mặt nạ tròn sẽ cắt cụt. Hạ tỉ lệ trong '
           'tool/build_brand_assets.py rồi sinh lại.',
     );
+    final target = _declaredTarget();
     expect(
       effective,
-      greaterThanOrEqualTo(_tooSmall),
-      reason: 'logo chỉ ${(effective * 108).toStringAsFixed(1)}dp — lọt thỏm '
-          'trong khung. Thường là dấu hiệu quầng alpha vô hình lại lọt vào '
-          'phép cắt (xem `_logo()` trong tool/build_brand_assets.py).',
+      closeTo(target, 0.02),
+      reason:
+          'script khai ${(target * 100).toStringAsFixed(0)}% nhưng tệp sinh ra '
+          '${(effective * 100).toStringAsFixed(1)}%. Lệch giữa ý định và kết quả '
+          '— lần trước là do quầng alpha = 1 vô hình lọt vào phép cắt. Sinh lại '
+          'bằng tool/build_brand_assets.py.',
+    );
+
+    // Con số Founder thấy được: logo chiếm bao nhiêu phần NHÌN THẤY. Vùng an
+    // toàn nói cái gì không bị cắt; con số này nói cái gì trông cân.
+    expect(
+      effective / _viewport,
+      lessThanOrEqualTo(0.80),
+      reason: 'logo chiếm ${(effective / _viewport * 100).toStringAsFixed(0)}% '
+          'phần nhìn thấy — đo trên S24, bản 88% trông chật và chữ CRM sát đáy, '
+          'trong khi ô icon bản vẽ Founder ~72%.',
     );
   });
 
@@ -106,7 +132,7 @@ void main() {
       reason: 'splash Android 12 cắt tròn ở 66,7% khung — logo rộng hơn thế sẽ '
           'mất chữ CRM ở hai đầu.',
     );
-    expect(ratio, greaterThanOrEqualTo(_tooSmall * 0.8));
+    expect(ratio, greaterThanOrEqualTo(0.35));
   });
 
   test('splash nền tối dùng ảnh RIÊNG, không dùng lại ảnh nền sáng', () async {

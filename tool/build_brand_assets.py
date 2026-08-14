@@ -48,7 +48,16 @@ SRC = ROOT / 'assets/new-icon'
 OUT = ROOT / 'assets/branding'      # nguồn để SINH icon native — không bundle
 RUNTIME = ROOT / 'assets/startup'   # asset app đọc LÚC CHẠY — có bundle
 SIZE = 1024
-TARGET = 0.58            # tỉ lệ MONG MUỐN sau khi mọi thứ cắt xong
+# Tỉ lệ MONG MUỐN sau khi mọi thứ cắt xong, tính trên khung 108dp.
+#
+# 0,48 không phải con số cho đẹp: nó **đo từ máy thật**. Bản 0,58 nằm gọn trong
+# vùng an toàn và không bị cắt gì — nhưng đo trên ảnh chụp S24 thì logo chiếm
+# **88%** bề ngang phần nhìn thấy, trong khi ô icon bản vẽ Founder chỉ ~72%.
+# Icon vẫn "đúng luật" mà trông chật, chữ CRM sát đáy. Vùng an toàn nói *cái gì
+# KHÔNG bị cắt*, nó không nói *cái gì trông cân*.
+#
+#   logo / phần nhìn thấy = TARGET ÷ (72/108) ⇒ 0,48 ÷ 0,667 = 72%.
+TARGET = 0.48
 GEN_INSET = 0.16         # inset flutter_launcher_icons tự chèn vào foreground
 FG_RATIO = TARGET / (1 - 2 * GEN_INSET)   # 0,853 — bù lại phần bị inset ăn mất
 SPLASH_RATIO = TARGET    # splash không có inset ⇒ dùng thẳng tỉ lệ mong muốn

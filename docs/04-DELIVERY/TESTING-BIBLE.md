@@ -903,6 +903,51 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `ui/home_concept_cards_test.dart` | **luật đứng sau thẻ concept-1** (WTM-404): thiếu mốc ⇒ không phần trăm (mốc = 0 cũng vậy) · dưới 3 điểm ⇒ không vẽ đường · màu định vị không chạm con số/mũi tên · mức ưu tiên là **thứ hạng**, không phải ngưỡng điểm. 5 đột biến đã chứng minh đỏ |
 | `semantics_route_header_test.dart` | **vai trò semantics** (WTM-277/P-36): mọi màn nội dung có `isHeader`+`namesRoute`, màn tìm kiếm có `isTextField` — đọc cây bằng `ensureSemantics()` (không `flutter run`+`S`/uiautomator); nhãn/48dp/contrast đã ở `accessibility_test.dart` |
 
+## P-42 · Giấy phép "cho dùng thương mại" ≠ "cho sửa" — ND lọt vào bundle
+
+**Root-Cause.** Lọc ảnh Openverse bằng `license_type=commercial`. Bộ lọc ấy
+đúng nghĩa **được dùng**, nhưng **by-nd** (NoDerivatives) cũng nằm trong nhóm
+đó: nó cho dùng thương mại và **cấm tác phẩm phái sinh**. Công cụ thì cắt vuông
+400×400 **mọi** tấm — nên tấm nào cũng là phái sinh. Bốn ảnh ND đã vào
+`assets/demo/products/`.
+
+**Regression.** Không có triệu chứng nào trong app: ảnh hiển thị bình thường,
+test xanh, analyzer sạch. Chỉ lộ ra khi đọc `ATTRIBUTION.json` bằng mắt.
+
+**Test Pattern.** `demo_media_governance_test.dart` §1 — quét manifest, đỏ nếu
+có giấy phép bắt đầu bằng `by-nd`. Kèm §2 (manifest Dart == đúng tập tệp) và §3
+(mọi ảnh có nguồn + giấy phép + trang gốc).
+
+**Prevention Rule.** Với tài nguyên bên thứ ba, **liệt kê giấy phép được phép**
+(`license=cc0,pdm,by,by-sa`), đừng lọc theo *mục đích sử dụng*. Và nếu công cụ
+biến đổi tài nguyên (cắt · đổi màu · ghép), thì quyền **sửa** mới là quyền cần
+kiểm, không phải quyền dùng.
+
+## P-43 · Icon không phạm luật nào mà vẫn sai — vùng an toàn không nói "trông cân"
+
+**Root-Cause.** Adaptive icon dựng ở 58% khung 108dp: nằm gọn trong vùng an toàn
+66dp, không nét nào bị cắt, cổng hình học xanh. Nhưng đo trên ảnh chụp S24 thì
+logo chiếm **88% phần nhìn thấy** — chật, chữ CRM sát đáy — trong khi ô icon bản
+vẽ Founder chỉ ~72%. Vùng an toàn trả lời *"cái gì KHÔNG bị cắt"*; nó không trả
+lời *"cái gì trông cân"*, và tôi đã dùng câu trả lời thứ nhất cho câu hỏi thứ hai.
+
+**Regression.** Ba phép nhân chồng nhau và không phép nào báo gì: generator tự
+chèn `inset="16%"` · launcher chỉ cho thấy 72/108 khung · hãng máy tự chọn hình
+mặt nạ. Trước đó còn hai lần trượt cùng họ — ghi chú cũ chép **66dp** thành
+**66%** (mặt nạ tròn cắt cụt chấm chữ "i"), và quầng alpha = 1 vô hình trong ảnh
+gốc làm `getbbox()` rộng hơn logo thật 10%.
+
+**Test Pattern.** `launcher_icon_geometry_test.dart` — đo phần **nhìn thấy được
+thật** (alpha > 8, không phải > 0) trong tệp đã sinh, rồi nhân đúng những gì
+Android nhân. Ba khẳng định: ≤ vùng an toàn · **khớp con số script tự khai**
+(bắt mọi co ngót âm thầm, bất kể ý định là bao nhiêu) · ≤ 80% phần nhìn thấy
+(trần lấy từ phép đo trên máy thật).
+
+**Prevention Rule.** Với thứ chỉ tồn tại sau khi hệ điều hành biến đổi (icon ·
+splash · widget), **đo trên ảnh chụp máy thật rồi mới chốt con số**, và cho cổng
+so với *ý định đã khai* thay vì một ngưỡng viết tay. Một hằng số viết tay chỉ
+kiểm được điều mình đã nghĩ tới; so với ý định thì kiểm được cả điều mình quên.
+
 ## Khi sửa bug mới — checklist
 
 1. Reproduce trên **đúng môi trường người dùng gặp** (release/máy thật nếu cần).
