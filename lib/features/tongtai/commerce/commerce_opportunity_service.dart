@@ -32,15 +32,21 @@ import 'supplier_comparison.dart';
 class CommerceOpportunityService {
   const CommerceOpportunityService({
     this.maxPerKind = 3,
-    this.deadStockDays = 90,
     this.thinMarginRatio = 0.15,
   });
 
   /// Nhiều nhất bao nhiêu việc mỗi loại.
   final int maxPerKind;
 
-  /// Bao lâu không bán được coi là hàng nằm.
-  final int deadStockDays;
+  // ⛔ WTM-411 — `deadStockDays = 90` đã bị XOÁ, không phải chuyển chỗ.
+  //
+  // Nó được khai kèm tài liệu *"bao lâu không bán được coi là hàng nằm"* và
+  // **không dòng mã nào đọc nó**. Ngưỡng thật là cửa sổ của
+  // `CommerceProfitContext` (30 ngày), đến từ một nơi hoàn toàn khác — nên bất
+  // kỳ ai đọc lớp này đều tin ngưỡng là 90 trong khi hành vi là 30.
+  //
+  // Một hằng số cấu hình không ai đọc còn tệ hơn không có: nó **trông như** chỗ
+  // để chỉnh, và người chỉnh nó sẽ không thấy gì thay đổi.
 
   final double thinMarginRatio;
 
@@ -68,7 +74,16 @@ class CommerceOpportunityService {
     items
       ..addAll(_losingAfterFees(profit, products, now))
       ..addAll(_runningOut(products, now))
-      ..addAll(_deadStock(products, soldProductIds, now))
+      ..addAll(
+        _deadStock(
+          products,
+          soldProductIds,
+          now,
+          // Chủ DUY NHẤT của ngưỡng: cửa sổ mà bối cảnh lời đã dùng để biết
+          // mặt hàng nào có bán.
+          _windowDays(profit),
+        ),
+      )
       ..addAll(_cheaperSupplier(products, quotesByProduct, profit, now))
       ..addAll(_shipments(shipments, orders, now))
       ..addAll(_seasonal(orders, products, now));
@@ -85,11 +100,17 @@ class CommerceOpportunityService {
   ///
   /// Nó là thứ **không nhìn thấy được** bằng mắt thường: sản phẩm vẫn bán
   /// chạy, bảng doanh thu vẫn xanh, và tiền vẫn chảy ra.
+  /// Số ngày của cửa sổ mà bối cảnh lời đã dùng — **chủ duy nhất** của ngưỡng
+  /// thời gian trong cả lớp này (WTM-411).
+  int _windowDays(CommerceProfitContext profit) =>
+      profit.to.difference(profit.from).inDays;
+
   List<BriefItem> _losingAfterFees(
     CommerceProfitContext profit,
     List<Product> products,
     DateTime now,
   ) {
+    final windowDays = _windowDays(profit);
     final costOf = {for (final p in products) p.id: p.costPrice};
     final out = <BriefItem>[];
 
@@ -107,8 +128,8 @@ class CommerceOpportunityService {
               // Câu này phải nói ra cái nghịch lý, vì chính nghịch lý mới là
               // thông tin: nhìn thì lời, thật ra thì lỗ.
               ? '${entry.name} nhìn thì có lãi nhưng sau phí sàn đang lỗ '
-                    '${_money(loss)} trong 30 ngày'
-              : '${entry.name} đang lỗ ${_money(loss)} trong 30 ngày',
+                    '${_money(loss)} trong $windowDays ngày'
+              : '${entry.name} đang lỗ ${_money(loss)} trong $windowDays ngày',
           suggestion: 'Tăng giá bán, đổi nguồn hàng rẻ hơn, hoặc ngừng bán',
           evidence: [
             IdentityEvidence(
@@ -213,12 +234,23 @@ class CommerceOpportunityService {
     List<Product> products,
     Set<String> soldProductIds,
     DateTime now,
+    // ⭐ WTM-411 — cửa sổ đi VÀO thay vì được viết cứng trong câu chữ.
+    //
+    // Trước đây câu thông báo nói *"30 ngày qua"* bằng một số cứng, trong khi
+    // ngưỡng thật đến từ `CommerceProfitContext`. Hai thứ khớp nhau **do may**,
+    // và sẽ lệch ngay lần đầu ai đó đổi cửa sổ — lúc ấy app nói một con số nó
+    // không còn dùng.
+    int windowDays,
   ) {
     final candidates = [
+      // ⛔ WTM-411 — đã bỏ `if (now.difference(p.updatedAt).inDays.abs() >= 0)`.
+      //
+      // `.abs()` không bao giờ âm ⇒ điều kiện **luôn đúng** ⇒ nó lọc rỗng. Nó
+      // chỉ có hình dạng của một bộ lọc ngày, và hình dạng ấy đủ để người đọc
+      // (kể cả `ANALYSIS.md`) tin rằng ngưỡng ngày được canh ở đây.
       for (final p in products)
         if (p.quantity != null && p.quantity! > 0)
-          if (!soldProductIds.contains(p.id))
-            if (now.difference(p.updatedAt).inDays.abs() >= 0) p,
+          if (!soldProductIds.contains(p.id)) p,
     ]..sort((a, b) => _tiedUp(b).compareTo(_tiedUp(a)));
 
     return [
@@ -230,14 +262,15 @@ class CommerceOpportunityService {
           subjectId: p.id,
           subjectLabel: p.name,
           headline:
-              '${p.name} còn ${p.quantity} món, 30 ngày qua không bán được '
-              'cái nào — ${_money(_tiedUp(p))} đang nằm trong kho',
+              '${p.name} còn ${p.quantity} món, $windowDays ngày qua không bán '
+              'được cái nào — ${_money(_tiedUp(p))} đang nằm trong kho',
           suggestion: 'Giảm giá xả hàng hoặc bán kèm sản phẩm chạy',
           evidence: [
             IdentityEvidence(
               kind: IdentityEvidenceKind.businessRecordObservation,
               source: 'rule:dead-stock',
-              detail: 'Tồn ${p.quantity} · không có đơn nào trong 30 ngày',
+              detail:
+                  'Tồn ${p.quantity} · không có đơn nào trong $windowDays ngày',
             ),
           ],
           observedAt: now,
@@ -267,6 +300,7 @@ class CommerceOpportunityService {
     CommerceProfitContext profit,
     DateTime now,
   ) {
+    final windowDays = _windowDays(profit);
     final unitsSold = {for (final p in profit.byProduct) p.productId: p.units};
     final out = <BriefItem>[];
 
@@ -309,7 +343,7 @@ class CommerceOpportunityService {
               // Có bán được thì nói bằng tiền thật của kỳ vừa rồi — con số đó
               // thuyết phục hơn một tỷ lệ phần trăm.
               ? 'Đổi nguồn — tiết kiệm khoảng ${_money(win.savingFor(units))} '
-                    'với mức bán 30 ngày qua'
+                    'với mức bán $windowDays ngày qua'
               // Chưa bán được món nào thì **không** bịa ra một khoản tiết kiệm
               // của kỳ. Nói theo đơn vị, vì đó là điều duy nhất biết chắc.
               : 'Đổi nguồn — rẻ hơn '

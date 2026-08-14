@@ -806,6 +806,37 @@ Bổ trợ: [TEST-STRATEGY.md](TEST-STRATEGY.md) (tầng test, luật cứng) ·
   thao tác ấy đã làm hỏng một đợt đo trước (cửa sổ không tin được ghi trong
   WTM-403).
 
+## P-41 · Một ngưỡng khai ở BỐN chỗ, chỉ một chỗ có thật
+
+- **Root cause:** cùng một ngưỡng nghiệp vụ được viết ra nhiều lần bằng nhiều
+  hình thức — một hằng cấu hình, một tham số ở lớp khác, một điều kiện lọc, và
+  một con số **viết cứng trong câu chữ**. Chỉ một trong số đó thật sự điều khiển
+  hành vi; những cái còn lại vẫn **đọc như luật** với bất kỳ ai mở tệp ra xem.
+  Nguy hiểm hơn P-27/P-28 (*hai chủ*) ở chỗ: các bản sao đây **không chạy**, nên
+  không có gì lệch để ai phát hiện — chúng chỉ dạy sai người đọc.
+- **Regression:** WTM-411, `commerce_opportunity_service.dart`:
+
+  | Nơi | Nói gì | Thực tế |
+  |---|---|---|
+  | `deadStockDays = 90` + doc *"bao lâu không bán được coi là hàng nằm"* | 90 ngày | **không dòng mã nào đọc** |
+  | `CommerceProfitContext.window` | 30 ngày | ✅ ngưỡng thật |
+  | `if (now.difference(p.updatedAt).inDays.abs() >= 0)` | trông như lọc ngày | `.abs()` luôn ≥ 0 ⇒ **lọc rỗng** |
+  | chuỗi `'30 ngày qua không bán được'` (và 2 câu khác) | 30 | số cứng, khớp **do may** |
+
+  Chính `docs/01-PRODUCT/concept-1/ANALYSIS.md` cũng đọc nhầm: nó ghi
+  `deadStockDays` như một ngưỡng đang dùng. Một hằng số không ai đọc còn tệ hơn
+  không có — nó **trông như chỗ để chỉnh**, và người chỉnh sẽ không thấy gì đổi.
+- **Test / method pattern:** đừng kiểm "hằng số có đúng giá trị không" — kiểm
+  **hành vi ở ranh giới**, và **nối câu chữ vào chính con số điều khiển hành vi**
+  (`'$windowDays ngày'`, không phải `'30 ngày'`). Khi câu chữ nội suy từ nguồn
+  thật, một bản sao chết sẽ lộ ra ngay lần đầu ai đổi ngưỡng.
+  `SlowMovingCapital` nhận `windowDays` **từ phía gọi** và mang nó theo, cố tình
+  **không** tự đặt ngưỡng — một lớp mới tự đặt ngưỡng là chủ thứ năm.
+- **Prevention:** trước khi thêm một hằng cấu hình, `grep` xem có ai đọc nó
+  không. Trước khi tin một hằng, `grep` xem nó có được đọc không — kể cả khi nó
+  có tên đẹp và một dòng tài liệu. Và điều kiện lọc phải **đọc được thành câu**:
+  `.abs() >= 0` không đọc thành câu nào cả, đó là dấu hiệu.
+
 ---
 
 ## Quy ước Stable Test IDs (bắt buộc cho L2+)
@@ -863,6 +894,7 @@ test l10n hoặc khi chính nội dung là thứ đang kiểm.
 | `export/backup_screen_test.dart` | preview không chạm DB · xác nhận phá huỷ · file hỏng không có nút phá huỷ · file mã hoá xin mật khẩu |
 | `../core/screen_state_test.dart` | phân loại lỗi SQLite **thật** (787) · bất biến `ScreenState` · race response lạc thế hệ · `toString()` không mang `detail` |
 | `../commerce/product_category_governance_test.dart` | **một taxonomy canonical** (WTM-393/P-34): mọi nguồn seed lưu **mã**, không nhãn; `parse` chữa nhãn Anh/VI cũ; chuỗi tự đặt giữ nguyên |
+| `inventory/slow_moving_capital_test.dart` | **vốn chôn trong hàng chậm bán** (WTM-411/P-41): thiếu giá vốn ⇒ KHÔNG cộng thành 0, đếm riêng · hết hàng ≠ hàng nằm · cửa sổ đi vào từ phía gọi. 3 đột biến đã chứng minh đỏ |
 | `ui/supplier_comparison_widget_test.dart` | **so sánh nhà cung cấp** (WTM-409): `null` = *chưa biết* (KHÔNG in dòng so sánh, phải hiện "chưa biết") · nêu **cả hai mặt** đánh đổi · một báo giá ⇒ không dựng khung rỗng · có câu nhắc người bán quyết. 3 đột biến đã chứng minh đỏ |
 | `ui/score_breakdown_test.dart` | **bung điểm cơ hội** (WTM-408): yếu tố vắng hiện `—` + LÝ DO (không hiện `0`) · trọng số hiện cả khi vắng · độ phủ hiện khi `isPartial` · nhãn nhu cầu nói *"khách của bạn"* không nói *"thị trường"*. 3 đột biến đã chứng minh đỏ |
 | `swipe_gesture_inset_test.dart` | **vùng cử chỉ hệ thống** (WTM-403/P-40): mọi `Dismissible` phải nằm trên dải `mandatorySystemGestures`; đo **mép dưới**. **+ scan**: bề mặt vuốt MỚI chưa được canh ⇒ đỏ (grep loại `barrierDismissible`/`isDismissible` — chính chỗ phiên Hub đếm nhầm 7 thành 0). 2 đột biến đã chứng minh đỏ |
