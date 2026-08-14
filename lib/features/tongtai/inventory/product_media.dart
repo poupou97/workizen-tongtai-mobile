@@ -1,3 +1,4 @@
+import 'placeholder_media.dart';
 import 'product.dart';
 
 /// **Ảnh của một sản phẩm, đã phân giải** — WTM-414.
@@ -67,7 +68,15 @@ class ConnectorProductMediaProvider implements ProductMediaProvider {
   @override
   ProductMedia? mediaFor(Product product) {
     final url = product.imageUrl;
-    return url == null || url.isEmpty ? null : ProductMediaUrl(url);
+    if (url == null || url.isEmpty) return null;
+    // ⚠️ Lọc ở đường ĐỌC, không chỉ ở đường nhập.
+    //
+    // WTM-414 gỡ đường ghi rồi coi là xong — nhưng máy Founder đã nạp mẫu từ
+    // 2026-08-09, nên URL giữ chỗ nằm sẵn trong cơ sở dữ liệu và đi vào qua
+    // đây. Suốt 2845 test xanh không có gì kêu; danh sách Kho trên máy thật
+    // hiện ảnh phong cảnh cho từng món hàng (P-39).
+    if (isPlaceholderMediaUrl(url)) return null;
+    return ProductMediaUrl(url);
   }
 }
 

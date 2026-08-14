@@ -7,6 +7,7 @@ import '../../consumer/customer_segment.dart';
 import '../../core/provenance.dart';
 import '../../core/tongtai_enums.dart';
 import '../../finance/settlement.dart';
+import '../../inventory/placeholder_media.dart';
 import '../../inventory/product.dart';
 import '../../inventory/product_category.dart';
 import '../../logistics/shipment.dart';
@@ -278,7 +279,9 @@ class XlsxCommerceSource implements CommerceImportSource {
           reorderLevel: sheet.integer(row, 'reorder_level'),
           updatedAt: sheet.date(row, 'updated_at') ?? now,
           brand: _blankToNull(sheet.cell(row, 'brand')),
-          imageUrl: _blankToNull(sheet.cell(row, 'image_url')),
+          // URL từ dịch vụ ảnh ngẫu nhiên KHÔNG phải ảnh sản phẩm — kể cả khi
+          // nó nằm trong file của người bán thật. Xem `placeholder_media.dart`.
+          imageUrl: _productImageUrl(sheet.cell(row, 'image_url')),
           externalId: _blankToNull(externalId),
           provenance: ProvenanceSource.fileBridge,
         ),
@@ -712,4 +715,15 @@ class XlsxCommerceSource implements CommerceImportSource {
       };
 
   static String? _blankToNull(String value) => value.isEmpty ? null : value;
+
+  /// URL ảnh sản phẩm — **rỗng nếu là dịch vụ ảnh giữ chỗ**.
+  ///
+  /// Bộ dữ liệu demo điền cột này bằng `picsum.photos/seed/…`, và một hàng như
+  /// thế giống hệt URL thật: đúng lược đồ, tải được, ra ảnh 400×400. Cái sai
+  /// nằm ở **nguồn** chứ không ở định dạng, nên chỗ duy nhất chặn được là danh
+  /// sách host.
+  static String? _productImageUrl(String value) {
+    final url = _blankToNull(value);
+    return isPlaceholderMediaUrl(url) ? null : url;
+  }
 }

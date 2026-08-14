@@ -5,6 +5,19 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +15 — 2026-08-14T15:45:09Z
+
+- Version: `0.1.0+15` (trước: `0.1.0+14`)
+- Lý do: WTM-417 — nhìn linh vật mới trên Home/Chat/onboarding
+- SHA: `3440ae4b0134d3e1641d5aea986ca69ffd2ebae0`
+- Nhánh: `feat/wtm-414-product-thumbnails`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `e7267f2107dc498b…`
+
+### Thay đổi kể từ `071ee9cbad894ba49ce6a6c454969c5a7e587e16`
+
+- 3440ae4 feat(WTM-417): thay linh vật toàn app sang bộ cáo Ai CRM
+- e2ebf1d fix(WTM-416): icon về đúng tỉ lệ bản vẽ sau khi đo trên S24
+
 ## build +14 — 2026-08-14T15:19:26Z
 
 - Version: `0.1.0+14` (trước: `0.1.0+13`)
