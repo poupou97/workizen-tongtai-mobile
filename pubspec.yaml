@@ -84,7 +84,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/mascot/
-    - assets/mascot/poses/
+    # WTM-417 — bộ linh vật Ai CRM, cắt từ tờ art Founder giao bằng
+    # `tool/cut_mascot_set.py`. Bộ origami cũ (`assets/mascot/poses/`) KHÔNG
+    # còn khai ở đây: 25 PNG không ai dùng thì không có lý do đi vào APK. Tệp
+    # vẫn nằm trong repo, gỡ khai báo là việc đảo ngược được.
+    - assets/mascot/brand/
     # Bộ dữ liệu thương mại demo (WTM-325). Đóng gói vào app để Founder nhập
     # được ngay cả khi chưa nối Google Drive — cùng file, cùng đường import.
     - assets/demo/
