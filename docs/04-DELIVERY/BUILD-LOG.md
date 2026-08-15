@@ -5,6 +5,20 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +23 — 2026-08-15T11:17:54Z
+
+- Version: `0.1.0+23` (trước: `0.1.0+22`)
+- Lý do: WTM-425/429/430 — dựng lại sau rebase
+- SHA: `113f8d5964f09f975d20f56cc9863456233ead12`
+- Nhánh: `refactor/wtm-425-ds5-neutral-role`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `ab002305a3824aa5…`
+
+### Thay đổi kể từ `6cae2ff9af4e5dca4153f66dde159d108512bc83`
+
+- 113f8d5 chore: versionCode +22 · bản demo kiểm mắt nhìn WTM-425/429/430 trên Nokia
+- d2895a5 refactor(WTM-425): TtStatus thiếu một vai, và bốn chỗ đã mượn tạm 'unknown'
+- ec702ad fix(WTM-430): gỡ băng-rôn DEMO — và dựng cổng, vì luật này đã rò BA lần (#275)
+
 ## build +22 — 2026-08-15T11:12:07Z
 
 - Version: `0.1.0+22` (trước: `0.1.0+21`)

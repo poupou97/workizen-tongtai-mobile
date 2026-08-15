@@ -1075,6 +1075,49 @@ Và luật cuối, rẻ nhất: **tên test phải bằng đúng thứ nó kiể
 đi viết; chưa viết được thì nói thẳng trong test là chưa dò được và tại sao —
 đừng để cái tên đứng canh thay cho mã.
 
+## P-46 · Máy thật nói đúng sự thật — về **bản bạn dựng**, không về `main`
+
+**Root-Cause.** Founder chốt gỡ băng-rôn `DEMO` (WTM-430). Merge xong, dựng bản
+demo, cài lên Nokia — **băng-rôn vẫn còn nguyên**. Suýt đi tìm lỗi trong một
+bản sửa không hề hỏng.
+
+Nguyên nhân: nhánh đang làm dở (`refactor/wtm-425-…`) được tách từ commit
+**trước** khi WTM-430 merge. APK dựng từ nhánh ấy đơn giản là chưa chứa bản
+sửa. Ảnh chụp màn hình đúng 100% — nó chỉ đang trả lời một câu hỏi khác câu
+tôi tưởng mình đang hỏi.
+
+**Regression.** Đây là **lỗ ngược** của [P-33] và của toàn bộ doctrine *"máy
+thật thấy thứ suite không thấy"*: ta tin ảnh chụp hơn mọi thứ, nên khi ảnh chụp
+mâu thuẫn với mã, phản xạ đầu tiên là nghi mã. Suite thì xanh (nó chạy trên cây
+làm việc, có bản sửa), CI cũng xanh — **không cổng nào mâu thuẫn**, vì không
+cổng nào biết cái APK trên tay có gì.
+
+**Test Pattern.** Không phải một test — một **câu lệnh trước khi kết luận**:
+
+```bash
+git merge-base --is-ancestor <commit-của-bản-sửa> HEAD && echo "✓ có" || echo "✗ THIẾU"
+```
+
+Rẻ hơn nhiều so với nửa giờ tìm một lỗi không tồn tại. Cùng họ với luật *"kiểm
+trạng thái hệ bên ngoài trước khi khẳng định"*.
+
+**Prevention Rule.** Trước khi cài bản dựng để **xác minh một bản sửa cụ thể**,
+trả lời hai câu:
+
+1. *Bản dựng này có chứa commit ấy không?* — kiểm bằng lệnh trên, đừng suy từ
+   trí nhớ về thứ tự merge.
+2. *Nếu thấy lỗi cũ còn nguyên, giả thuyết ĐẦU TIÊN là gì?* Phải là **"tôi dựng
+   nhầm bản"**, không phải "bản sửa hỏng" — vì giả thuyết đầu tiên quyết định
+   nửa giờ tiếp theo đi đâu.
+
+⚠️ Kèm theo, hai luật thiết bị rút ra cùng lượt ấy:
+
+* **Kiểm hướng màn hình trước khi tap.** Máy đang nằm ngang thì mọi toạ độ nhớ
+  sẵn đều sai, và tap rơi ra ngoài app — lần này mở nhầm **ứng dụng cá nhân của
+  Founder**. Chụp một ảnh và nhìn trước, đừng tap theo trí nhớ.
+* **Cổng tiền cảnh trước VÀ sau mỗi tap**, không chỉ lúc mở app. Rơi khỏi app
+  giữa chừng thì mọi ảnh chụp sau đó là ảnh của máy người khác đang dùng.
+
 ## Khi sửa bug mới — checklist
 
 1. Reproduce trên **đúng môi trường người dùng gặp** (release/máy thật nếu cần).
