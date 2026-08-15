@@ -49,7 +49,9 @@ import '../widgets/tongtai_screen_data.dart';
 ///
 /// ## §33 · §40
 ///
-/// Ba nút đẩy đồng hồ đổi **miền thật**. Băng-rôn DEMO nằm trên cùng.
+/// Ba nút đẩy đồng hồ đổi **miền thật**. Đồng hồ mô phỏng ("Ngày 16 / 30")
+/// nằm ở AppBar — §40 cấm giấu **trạng thái kỹ thuật**, còn nhãn *"dữ liệu này
+/// là mẫu"* thì Founder cấm hiện (WTM-430).
 class TongtaiBusinessLifeScreen extends ConsumerStatefulWidget {
   const TongtaiBusinessLifeScreen({super.key, this.clock});
 
@@ -167,11 +169,33 @@ class _TongtaiBusinessLifeScreenState
         elevation: 0,
         backgroundColor: TtColors.surfaceSecondary,
         foregroundColor: TtColors.textPrimary,
+        // ⭐ Đồng hồ của trình mô phỏng — thứ DUY NHẤT còn lại từ băng-rôn cũ.
+        //
+        // Nó KHÔNG nói *"dữ liệu của bạn là giả"* (thứ Founder cấm ở WTM-430);
+        // nó nói *"bạn đang ở ngày mấy của 30 ngày mô phỏng"* — tức **trạng
+        // thái kỹ thuật**, đúng thứ §40 bắt buộc không được giấu. Người bán
+        // đang tự bấm "Ngày tiếp" mà không biết mình ở ngày mấy thì màn này
+        // mất nghĩa.
+        actions: [
+          if (day != null)
+            Padding(
+              padding: const EdgeInsets.only(right: TtSpace.x4),
+              child: Center(
+                child: Text(
+                  l10n.demoDayOf(day + 1, 30),
+                  key: const Key('business-life-day'),
+                  style: TtType.caption.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: TtColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            _DemoBanner(day: day),
             _Controls(
               busy: _busy,
               started: day != null,
@@ -247,64 +271,23 @@ class _TongtaiBusinessLifeScreenState
   }
 }
 
-class _DemoBanner extends StatelessWidget {
-  const _DemoBanner({required this.day});
-
-  final int? day;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Container(
-      key: const Key('business-life-demo-banner'),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      // Vai **warning** (dữ liệu này là demo, đừng tưởng là thật). Bản trước
-      // dùng `Colors.amber` thô — cùng sắc, nhưng không ai đổi được từ một chỗ
-      // và cổng ratchet không nhìn thấy nó (WTM-424).
-      color: TtStatus.warning.color.withValues(alpha: 0.16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                l10n.demoTag,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1,
-                  color: Color(0xFF8A6100),
-                ),
-              ),
-              const Spacer(),
-              if (day != null)
-                Text(
-                  l10n.demoDayOf(day! + 1, 30),
-                  key: const Key('business-life-day'),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF8A6100),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.demoBanner,
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1.4,
-              color: Color(0xFF6B4E00),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// ⛔ WTM-430 — KHÔNG còn băng-rôn `DEMO` ở đây.
+//
+// Founder chốt luật này **ba lần**: WTM-343 (gỡ băng-rôn Trang chủ) · WTM-348
+// (gỡ nhãn trên từng thẻ brief, sót ngay hôm gỡ băng-rôn kia) · và 2026-08-15
+// khi băng-rôn này vẫn còn. *"Bản demo phải trông như thật"* — nó là thứ mang
+// đi cho đối tác xem.
+//
+// Nhãn nói về **dữ liệu**, không nói về **trạng thái kỹ thuật**, nên gỡ nó
+// không phạm §40. Ba thứ giữ nguyên để rủi ro "nhầm mẫu là số của mình" không
+// thành mất mát:
+//   * mỗi bản ghi vẫn mang tiền tố `sample-` / `importJobId`;
+//   * "Xoá dữ liệu mẫu" vẫn xoá đúng chúng, không đụng dữ liệu thật;
+//   * **đồng hồ mô phỏng** ("Ngày 16 / 30") chuyển lên AppBar — đó là trạng
+//     thái kỹ thuật, §40 cấm giấu.
+//
+// ⚠️ Rò ba lần vì luật chỉ nằm trong chú thích. Nay có cổng:
+// `test/features/tongtai/p0/no_demo_label_gate_test.dart`.
 
 class _Controls extends StatelessWidget {
   const _Controls({

@@ -1276,7 +1276,6 @@ abstract class AppStrings {
   String get titleBusinessLife;
 
   /// Câu nói rõ đây là mô phỏng — §40 cấm fake trạng thái kỹ thuật.
-  String get demoBanner;
 
   String get demoStart;
   String get demoNextEvent;
@@ -1295,7 +1294,6 @@ abstract class AppStrings {
   String demoAdvanced(int count);
 
   /// Nhãn ngắn gắn trên mọi bề mặt mô phỏng.
-  String get demoTag;
 
   /// Ba chủ thể trên dòng thời gian. `actorPlatform` là nhãn dự phòng khi
   /// không biết sàn nào — tên sàn đã biết thì hiện tên riêng của nó.
@@ -3426,10 +3424,6 @@ class AppStringsVi extends AppStrings {
   @override
   String get titleBusinessLife => 'Doanh nghiệp của bạn';
   @override
-  String get demoBanner =>
-      'Đây là doanh nghiệp mô phỏng. Dữ liệu và kết nối đều là demo — không có '
-      'gì gửi ra ngoài máy này.';
-  @override
   String get demoStart => 'Bắt đầu doanh nghiệp demo';
   @override
   String get demoNextEvent => 'Việc tiếp';
@@ -3450,8 +3444,6 @@ class AppStringsVi extends AppStrings {
   String get demoNotStarted => 'Chưa bắt đầu doanh nghiệp demo.';
   @override
   String demoAdvanced(int count) => 'Đã đi tới $count việc mới';
-  @override
-  String get demoTag => 'DEMO';
   @override
   String get actorPlatform => 'Sàn';
   @override
@@ -5668,10 +5660,6 @@ class AppStringsEn extends AppStrings {
   @override
   String get titleBusinessLife => 'Your business';
   @override
-  String get demoBanner =>
-      'This is a simulated business. Data and connections are demo — nothing '
-      'leaves this device.';
-  @override
   String get demoStart => 'Start the demo business';
   @override
   String get demoNextEvent => 'Next event';
@@ -5693,8 +5681,6 @@ class AppStringsEn extends AppStrings {
   String get demoNotStarted => 'The demo business has not started.';
   @override
   String demoAdvanced(int count) => 'Advanced through $count new events';
-  @override
-  String get demoTag => 'DEMO';
   @override
   String get actorPlatform => 'Marketplace';
   @override
