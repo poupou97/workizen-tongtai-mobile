@@ -667,17 +667,24 @@ class _PeriodSelector extends StatelessWidget {
       spacing: TtSpace.x2,
       runSpacing: TtSpace.x1,
       children: [
+        // ⚠️ KHÔNG ghi đè `selectedColor`/`labelStyle` (WTM-429).
+        //
+        // Bản trước tô kỳ đang chọn bằng **tím AI**. Nhưng chọn "30 ngày" là
+        // thao tác lọc bình thường của người bán — không có AI nào tham gia.
+        // Nặng nhất là nó xảy ra ở **đúng màn có phần AI thật**: nếu tím vừa
+        // nghĩa là *"AI viết đoạn này"* vừa nghĩa là *"kỳ đang chọn"*, người
+        // bán mất luôn tín hiệu để biết chỗ nào là AI.
+        //
+        // Đo trước khi sửa: 18 tệp dùng `ChoiceChip`/`FilterChip`, **17 tệp
+        // dùng theo theme**. Đây là màn DUY NHẤT tự định nghĩa lại — nên đây
+        // không phải nợ hệ thống, mà là một màn đi lệch. Muốn kỳ đang chọn nổi
+        // hơn thì giải ở **tầng theme**, để mọi chip cùng đổi.
         for (final p in ReportPeriod.values)
           ChoiceChip(
             key: Key('reports-period-${p.name}'),
             label: Text(p.label(context.l10n.languageCode)),
             selected: p == period,
             onSelected: (_) => onChanged(p),
-            selectedColor: TtColors.ai.withValues(alpha: 0.15),
-            labelStyle: TtType.body.copyWith(
-              color: p == period ? TtColors.ai : TtColors.textSecondary,
-              fontWeight: p == period ? FontWeight.w700 : FontWeight.w500,
-            ),
           ),
       ],
     );
