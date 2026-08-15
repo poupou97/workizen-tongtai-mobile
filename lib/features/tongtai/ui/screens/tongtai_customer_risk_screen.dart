@@ -605,7 +605,10 @@ class _RiskEmpty extends StatelessWidget {
     return _CenteredNotice(
       noticeKey: const Key('risk-empty'),
       icon: Icons.people_outline,
-      color: TtColors.unknown,
+      // Danh bạ rỗng là **biết chắc bằng 0** — "a fact about the business,
+      // not a failure" như chú thích của chính lớp này. Không phải thiếu
+      // dữ liệu (WTM-431).
+      color: TtColors.neutral,
       title: l10n.riskEmpty,
       body: l10n.riskEmptyBody,
     );

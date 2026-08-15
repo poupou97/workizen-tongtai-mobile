@@ -256,7 +256,8 @@ class _StatusChip extends StatelessWidget {
     final color = switch (decision) {
       BriefDecision.pending => TtColors.info,
       BriefDecision.accepted => TtColors.success,
-      BriefDecision.dismissed => TtColors.unknown,
+      // Người dùng ĐÃ bỏ qua — quyết định có rồi (WTM-431).
+      BriefDecision.dismissed => TtColors.neutral,
       BriefDecision.postponed => TtColors.warning,
     };
     return Container(

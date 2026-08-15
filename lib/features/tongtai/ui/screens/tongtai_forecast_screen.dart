@@ -176,7 +176,9 @@ Color tongtaiForecastDirectionColor(RevenueTrendDirection direction) =>
     switch (direction) {
       RevenueTrendDirection.growing => TtColors.success,
       RevenueTrendDirection.declining => TtColors.danger,
-      RevenueTrendDirection.flat => TtColors.unknown,
+      // Chú thích ngay trên đã nói "flat is neutral on purpose" — ý định
+      // đúng từ đầu, chỉ thiếu hằng để diễn đạt cho tới WTM-425.
+      RevenueTrendDirection.flat => TtColors.neutral,
     };
 
 IconData tongtaiForecastDirectionIcon(RevenueTrendDirection direction) =>
