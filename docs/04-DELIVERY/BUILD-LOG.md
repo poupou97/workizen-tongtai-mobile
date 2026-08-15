@@ -5,6 +5,22 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +22 — 2026-08-15T11:12:07Z
+
+- Version: `0.1.0+22` (trước: `0.1.0+21`)
+- Lý do: WTM-425/429/430 kiểm mắt nhìn trên Nokia
+- SHA: `6cae2ff9af4e5dca4153f66dde159d108512bc83`
+- Nhánh: `refactor/wtm-425-ds5-neutral-role`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `027888e094d51c39…`
+
+### Thay đổi kể từ `348db656546308d2cc63097004c2cce33714568e`
+
+- 6cae2ff refactor(WTM-425): TtStatus thiếu một vai, và bốn chỗ đã mượn tạm 'unknown'
+- 0d5781c fix(WTM-429): kỳ báo cáo thôi tô TÍM AI — chọn '30 ngày' không phải việc của AI (#274)
+- dfaf6e5 refactor(WTM-427): cổng thấy 9 tệp, sự thật là 17 — và §2 chỉ có tên (#273)
+- 71230ea fix(WTM-424): cảnh báo thôi tô CAM — và cổng thôi mù với `Colors.<tên>` (#272)
+- 8e00b81 refactor(WTM-423): DS-3 — hai widget về đúng vai ngữ nghĩa, ratchet 13→11 (#271)
+
 ## build +21 — 2026-08-15T06:56:44Z
 
 - Version: `0.1.0+21` (trước: `0.1.0+20`)
