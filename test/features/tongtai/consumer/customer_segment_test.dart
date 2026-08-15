@@ -101,18 +101,34 @@ void main() {
       expect(code, contains('plan.behaviour.segment.code'));
     });
 
-    test('⛔ màn Khách hàng KHÔNG in thẳng phần tử segments', () {
-      // Cửa chặn đúng chỗ lỗi đã xảy ra: `Text('${entry.key} (…)')` in nguyên
-      // xi chuỗi thô. Nay nó phải đi qua `CustomerSegment.display`.
+    test('⛔ màn Khách hàng KHÔNG in mã lưu trữ như thể là nhãn', () {
+      // ⚠️ Cửa này ĐỔI KHOÁ ở WTM-419, không bị gỡ (P-37).
+      //
+      // Mối nguy vẫn y nguyên: một **mã** lưu dưới SQLite (`vip`, `at_risk`)
+      // bị in thẳng lên chip như thể nó là chữ cho người đọc. Nhưng cách khoá
+      // đã đổi: màn không còn phân giải chuỗi nữa, nó đọc thẳng **enum** từ
+      // phép suy RFM, nên `CustomerSegment.display`/`normalise` biến mất một
+      // cách hợp lệ — bậc thang ấy chỉ tồn tại để cứu một chuỗi.
+      //
+      // Cửa mới canh đúng hai điều còn lại:
+      //   1. phân khúc canonical phải đi qua `.label(` (theo ngôn ngữ), và
+      //   2. KHÔNG được lặp thẳng trên `c.segments` để in ra.
       final code = File(
         'lib/features/tongtai/ui/screens/tongtai_consumer_screen.dart',
       ).readAsStringSync();
-      expect(code, contains('CustomerSegment.display'));
-      expect(code, contains('CustomerSegment.normalise'));
+
       expect(
-        code.contains(r"Text('${entry.key} (${entry.value})')"),
+        code,
+        contains('.label(l10n.languageCode)'),
+        reason: 'phân khúc canonical phải ra chữ theo ngôn ngữ, không ra mã',
+      );
+      expect(
+        RegExp(r'for \(final \w+ in c\.segments\)').hasMatch(code),
         isFalse,
-        reason: 'in thẳng chuỗi thô — đúng dòng đã đẻ ra lỗi WTM-381',
+        reason:
+            'lặp thẳng trên `segments` rồi in ra — đúng hình dạng WTM-381. '
+            'Nhãn người bán tự đặt đi qua `CustomerSegmentView.customLabels`, '
+            'nơi mã canonical đã bị loại trước.',
       );
     });
   });
