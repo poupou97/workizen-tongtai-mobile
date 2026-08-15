@@ -67,7 +67,10 @@ Map<String, CustomerSegment> customerSegmentsFrom({
   required List<CustomerRfm> profiles,
   required DateTime now,
 }) {
-  final buyers = [for (final p in profiles) if (p.hasOrders) p];
+  final buyers = [
+    for (final p in profiles)
+      if (p.hasOrders) p,
+  ];
   if (buyers.isEmpty) return const {};
 
   // Phân vị tính TRÊN NGƯỜI ĐÃ MUA. Gộp cả người chưa mua (chi tiêu 0) sẽ kéo

@@ -62,13 +62,15 @@ void main() {
       expect(
         kDemoProductImageSkus.difference(onDisk),
         isEmpty,
-        reason: 'manifest kê một SKU không có tệp ⇒ app hỏi asset không tồn '
+        reason:
+            'manifest kê một SKU không có tệp ⇒ app hỏi asset không tồn '
             'tại ⇒ ô ảnh vỡ. Chạy `tool/fetch_demo_product_images.py dart`.',
       );
       expect(
         onDisk.difference(kDemoProductImageSkus),
         isEmpty,
-        reason: 'có tệp ảnh nhưng manifest không kê ⇒ ảnh nằm không trong '
+        reason:
+            'có tệp ảnh nhưng manifest không kê ⇒ ảnh nằm không trong '
             'bundle mà không ai dùng, và app vẫn hiện ô mặc định.',
       );
     });
@@ -83,7 +85,8 @@ void main() {
           expect(
             (row![field] as String?)?.isNotEmpty,
             isTrue,
-            reason: '$sku thiếu "$field" — không truy được nguồn thì không '
+            reason:
+                '$sku thiếu "$field" — không truy được nguồn thì không '
                 'chứng minh được quyền dùng',
           );
         }

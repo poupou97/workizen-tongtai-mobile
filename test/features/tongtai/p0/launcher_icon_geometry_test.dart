@@ -96,7 +96,8 @@ void main() {
     expect(
       effective,
       lessThanOrEqualTo(_safeZone),
-      reason: 'logo chiếm ${(effective * 108).toStringAsFixed(1)}dp — vượt vùng '
+      reason:
+          'logo chiếm ${(effective * 108).toStringAsFixed(1)}dp — vượt vùng '
           'an toàn 66dp ⇒ mặt nạ tròn sẽ cắt cụt. Hạ tỉ lệ trong '
           'tool/build_brand_assets.py rồi sinh lại.',
     );
@@ -116,7 +117,8 @@ void main() {
     expect(
       effective / _viewport,
       lessThanOrEqualTo(0.80),
-      reason: 'logo chiếm ${(effective / _viewport * 100).toStringAsFixed(0)}% '
+      reason:
+          'logo chiếm ${(effective / _viewport * 100).toStringAsFixed(0)}% '
           'phần nhìn thấy — đo trên S24, bản 88% trông chật và chữ CRM sát đáy, '
           'trong khi ô icon bản vẽ Founder ~72%.',
     );
@@ -129,7 +131,8 @@ void main() {
     expect(
       ratio,
       lessThanOrEqualTo(_splashMask),
-      reason: 'splash Android 12 cắt tròn ở 66,7% khung — logo rộng hơn thế sẽ '
+      reason:
+          'splash Android 12 cắt tròn ở 66,7% khung — logo rộng hơn thế sẽ '
           'mất chữ CRM ở hai đầu.',
     );
     expect(ratio, greaterThanOrEqualTo(0.35));
@@ -147,7 +150,8 @@ void main() {
     expect(
       light.length == dark.length && light.first == dark.first,
       isFalse,
-      reason: 'splash sáng và tối đang là cùng một ảnh — trên nền tối chữ CRM '
+      reason:
+          'splash sáng và tối đang là cùng một ảnh — trên nền tối chữ CRM '
           'sẽ biến mất',
     );
   });

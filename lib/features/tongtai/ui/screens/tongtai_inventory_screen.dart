@@ -301,7 +301,9 @@ class _TongtaiInventoryScreenState
                         // Lối vào lát cắt phải có lối ra ngay cạnh con số nó
                         // vừa đổi — người bán bấm thẻ rồi thấy 12/114 mà không
                         // có cách quay lại sẽ tưởng mất hàng.
-                        onClearSlice: _query.hasIdFilter ? _clearSlowMoving : null,
+                        onClearSlice: _query.hasIdFilter
+                            ? _clearSlowMoving
+                            : null,
                       ),
                     ],
                   ),

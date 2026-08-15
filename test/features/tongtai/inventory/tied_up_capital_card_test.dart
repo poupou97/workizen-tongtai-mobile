@@ -55,7 +55,8 @@ void main() {
     expect(
       find.byKey(const Key('inventory-tied-up-unknown-cost')),
       findsOneWidget,
-      reason: 'còn 3 mặt hàng chưa khai giá vốn mà thẻ im lặng ⇒ con số thấp '
+      reason:
+          'còn 3 mặt hàng chưa khai giá vốn mà thẻ im lặng ⇒ con số thấp '
           'hơn sự thật lại trông như con số đủ',
     );
   });
@@ -77,7 +78,10 @@ void main() {
         ),
       ),
     );
-    expect(find.byKey(const Key('inventory-tied-up-unknown-cost')), findsNothing);
+    expect(
+      find.byKey(const Key('inventory-tied-up-unknown-cost')),
+      findsNothing,
+    );
   });
 
   testWidgets('§2 không có hàng chậm ⇒ không dựng thẻ rỗng', (tester) async {
@@ -125,7 +129,8 @@ void main() {
       expect(
         capital.hasSlowMoving,
         isFalse,
-        reason: 'lỗi ở nguồn dữ liệu PHỤ mà xoá sạch danh mục thì người bán mở '
+        reason:
+            'lỗi ở nguồn dữ liệu PHỤ mà xoá sạch danh mục thì người bán mở '
             'Kho ra không thấy hàng của mình',
       );
       expect(

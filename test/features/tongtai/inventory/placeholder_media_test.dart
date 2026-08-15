@@ -37,7 +37,10 @@ void main() {
         isPlaceholderMediaUrl('https://picsum.photos/seed/tongtai1/400/400'),
         isTrue,
       );
-      expect(isPlaceholderMediaUrl('https://loremflickr.com/400/400/fox'), isTrue);
+      expect(
+        isPlaceholderMediaUrl('https://loremflickr.com/400/400/fox'),
+        isTrue,
+      );
       expect(isPlaceholderMediaUrl('https://via.placeholder.com/400'), isTrue);
       expect(isPlaceholderMediaUrl('https://dummyimage.com/400x400'), isTrue);
     });
@@ -46,10 +49,15 @@ void main() {
       // So theo **host**. Một ảnh thật hoàn toàn có thể có chữ "placeholder"
       // trong tên tệp — bắt bằng `contains` là xoá ảnh thật của người bán.
       expect(
-        isPlaceholderMediaUrl('https://cdn.shopify.com/s/files/placeholder.jpg'),
+        isPlaceholderMediaUrl(
+          'https://cdn.shopify.com/s/files/placeholder.jpg',
+        ),
         isFalse,
       );
-      expect(isPlaceholderMediaUrl('https://cf.shopee.vn/file/abc123'), isFalse);
+      expect(
+        isPlaceholderMediaUrl('https://cf.shopee.vn/file/abc123'),
+        isFalse,
+      );
       expect(isPlaceholderMediaUrl(null), isFalse);
       expect(isPlaceholderMediaUrl(''), isFalse);
       expect(isPlaceholderMediaUrl('không-phải-url'), isFalse);
@@ -65,7 +73,8 @@ void main() {
           _product(imageUrl: 'https://picsum.photos/seed/tongtai7/400/400'),
         ),
         isNull,
-        reason: 'ảnh ngẫu nhiên vẫn hiện ⇒ mỗi món hàng mang một tấm ảnh không '
+        reason:
+            'ảnh ngẫu nhiên vẫn hiện ⇒ mỗi món hàng mang một tấm ảnh không '
             'liên quan, và người xem kết luận dữ liệu là giả',
       );
     });
@@ -80,23 +89,27 @@ void main() {
   });
 
   group('§3 chuỗi phân giải — ảnh đã duyệt không bị URL rác đè', () {
-    test('sản phẩm có ảnh demo duyệt ⇒ dùng ảnh ấy, KHÔNG dùng URL giữ chỗ', () {
-      const resolver = ProductMediaResolver([
-        SellerProductMediaProvider(),
-        ConnectorProductMediaProvider(),
-        DemoAssetMediaProvider({'TH-069'}),
-      ]);
+    test(
+      'sản phẩm có ảnh demo duyệt ⇒ dùng ảnh ấy, KHÔNG dùng URL giữ chỗ',
+      () {
+        const resolver = ProductMediaResolver([
+          SellerProductMediaProvider(),
+          ConnectorProductMediaProvider(),
+          DemoAssetMediaProvider({'TH-069'}),
+        ]);
 
-      final media = resolver.resolve(
-        _product(imageUrl: 'https://picsum.photos/seed/tongtai7/400/400'),
-      );
+        final media = resolver.resolve(
+          _product(imageUrl: 'https://picsum.photos/seed/tongtai7/400/400'),
+        );
 
-      expect(
-        media,
-        isA<ProductMediaAsset>(),
-        reason: 'connector đứng TRƯỚC demo asset trong chuỗi, nên một URL rác '
-            'còn sống sẽ đè lên đúng những ảnh đã ngồi duyệt bằng mắt',
-      );
-    });
+        expect(
+          media,
+          isA<ProductMediaAsset>(),
+          reason:
+              'connector đứng TRƯỚC demo asset trong chuỗi, nên một URL rác '
+              'còn sống sẽ đè lên đúng những ảnh đã ngồi duyệt bằng mắt',
+        );
+      },
+    );
   });
 }

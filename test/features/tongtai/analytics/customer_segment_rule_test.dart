@@ -49,8 +49,14 @@ void main() {
     final segments = customerSegmentsFrom(
       profiles: [
         const CustomerRfm.noOrders('c-chua-mua'),
-        _rfm('c-da-mua', recencyDays: 5, frequency: 2, monetary: 1000000,
-            medianGapDays: 20, firstOrderDaysAgo: 60),
+        _rfm(
+          'c-da-mua',
+          recencyDays: 5,
+          frequency: 2,
+          monetary: 1000000,
+          medianGapDays: 20,
+          firstOrderDaysAgo: 60,
+        ),
       ],
       now: _now,
     );
@@ -58,7 +64,8 @@ void main() {
     expect(
       segments.containsKey('c-chua-mua'),
       isFalse,
-      reason: 'một liên hệ chưa từng mua có mọi tín hiệu VẮNG, không phải bằng '
+      reason:
+          'một liên hệ chưa từng mua có mọi tín hiệu VẮNG, không phải bằng '
           '0 — xếp họ vào "khách mới" là thổi phồng số khách',
     );
     expect(segments['c-da-mua'], isNotNull);
@@ -68,8 +75,14 @@ void main() {
     // 10 đơn, nhịp 20 ngày, nhưng im lặng 200 ngày = 10× nhịp ⇒ churned.
     final segments = customerSegmentsFrom(
       profiles: [
-        _rfm('c1', recencyDays: 200, frequency: 10, monetary: 50000000,
-            medianGapDays: 20, firstOrderDaysAgo: 400),
+        _rfm(
+          'c1',
+          recencyDays: 200,
+          frequency: 10,
+          monetary: 50000000,
+          medianGapDays: 20,
+          firstOrderDaysAgo: 400,
+        ),
       ],
       now: _now,
     );
@@ -85,8 +98,14 @@ void main() {
       (50, CustomerLifecycleStage.atRisk, CustomerSegment.atRisk),
       (200, CustomerLifecycleStage.churned, CustomerSegment.churned),
     ]) {
-      final profile = _rfm('c', recencyDays: recency, frequency: 5,
-          monetary: 1000000, medianGapDays: 20, firstOrderDaysAgo: 300);
+      final profile = _rfm(
+        'c',
+        recencyDays: recency,
+        frequency: 5,
+        monetary: 1000000,
+        medianGapDays: 20,
+        firstOrderDaysAgo: 300,
+      );
 
       expect(
         customerLifecycleStage(profile),
@@ -96,7 +115,8 @@ void main() {
       expect(
         customerSegmentsFrom(profiles: [profile], now: _now)['c'],
         segment,
-        reason: 'phân khúc nói khác vòng đời ở độ trễ $recency ngày — hai con '
+        reason:
+            'phân khúc nói khác vòng đời ở độ trễ $recency ngày — hai con '
             'số cạnh nhau trên cùng một màn sẽ mâu thuẫn',
       );
     }
@@ -105,10 +125,22 @@ void main() {
   test('§3 VIP là phân vị của tệp, không phải mốc tiền cố định', () {
     final profiles = [
       for (var i = 0; i < 9; i++)
-        _rfm('nho$i', recencyDays: 5, frequency: 4, monetary: 1000000,
-            medianGapDays: 20, firstOrderDaysAgo: 300),
-      _rfm('to', recencyDays: 5, frequency: 4, monetary: 90000000,
-          medianGapDays: 20, firstOrderDaysAgo: 300),
+        _rfm(
+          'nho$i',
+          recencyDays: 5,
+          frequency: 4,
+          monetary: 1000000,
+          medianGapDays: 20,
+          firstOrderDaysAgo: 300,
+        ),
+      _rfm(
+        'to',
+        recencyDays: 5,
+        frequency: 4,
+        monetary: 90000000,
+        medianGapDays: 20,
+        firstOrderDaysAgo: 300,
+      ),
     ];
 
     final segments = customerSegmentsFrom(profiles: profiles, now: _now);
@@ -122,10 +154,22 @@ void main() {
     final segments = customerSegmentsFrom(
       profiles: [
         for (var i = 0; i < 20; i++) CustomerRfm.noOrders('trong$i'),
-        _rfm('a', recencyDays: 5, frequency: 4, monetary: 5000000,
-            medianGapDays: 20, firstOrderDaysAgo: 300),
-        _rfm('b', recencyDays: 5, frequency: 4, monetary: 5000000,
-            medianGapDays: 20, firstOrderDaysAgo: 300),
+        _rfm(
+          'a',
+          recencyDays: 5,
+          frequency: 4,
+          monetary: 5000000,
+          medianGapDays: 20,
+          firstOrderDaysAgo: 300,
+        ),
+        _rfm(
+          'b',
+          recencyDays: 5,
+          frequency: 4,
+          monetary: 5000000,
+          medianGapDays: 20,
+          firstOrderDaysAgo: 300,
+        ),
       ],
       now: _now,
     );
@@ -133,7 +177,8 @@ void main() {
     expect(
       segments.values.where((s) => s == CustomerSegment.vip).length,
       lessThan(2),
-      reason: 'hai khách chi tiêu y hệt nhau mà cả hai đều VIP nghĩa là mốc đã '
+      reason:
+          'hai khách chi tiêu y hệt nhau mà cả hai đều VIP nghĩa là mốc đã '
           'bị nhóm chưa mua kéo xuống 0',
     );
   });
@@ -142,8 +187,13 @@ void main() {
     test('đơn đầu trong 30 ngày ⇒ khách mới', () {
       final segments = customerSegmentsFrom(
         profiles: [
-          _rfm('c', recencyDays: 3, frequency: 1, monetary: 500000,
-              firstOrderDaysAgo: 3),
+          _rfm(
+            'c',
+            recencyDays: 3,
+            frequency: 1,
+            monetary: 500000,
+            firstOrderDaysAgo: 3,
+          ),
         ],
         now: _now,
       );
@@ -156,8 +206,13 @@ void main() {
       // dùng đơn đầu 100 ngày và đơn duy nhất cách đây 20 ngày.
       final segments = customerSegmentsFrom(
         profiles: [
-          _rfm('c', recencyDays: 20, frequency: 1, monetary: 500000,
-              firstOrderDaysAgo: 100),
+          _rfm(
+            'c',
+            recencyDays: 20,
+            frequency: 1,
+            monetary: 500000,
+            firstOrderDaysAgo: 100,
+          ),
         ],
         now: _now,
       );
@@ -170,8 +225,13 @@ void main() {
       profiles: [
         const CustomerRfm.noOrders('x'),
         const CustomerRfm.noOrders('y'),
-        _rfm('c', recencyDays: 3, frequency: 1, monetary: 500000,
-            firstOrderDaysAgo: 3),
+        _rfm(
+          'c',
+          recencyDays: 3,
+          frequency: 1,
+          monetary: 500000,
+          firstOrderDaysAgo: 3,
+        ),
       ],
       now: _now,
     );

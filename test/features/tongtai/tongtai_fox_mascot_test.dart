@@ -35,8 +35,14 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(TongtaiFoxMascot).first), const Size(80, 80));
-    expect(tester.getSize(find.byType(TongtaiFoxMascot).last), const Size(40, 40));
+    expect(
+      tester.getSize(find.byType(TongtaiFoxMascot).first),
+      const Size(80, 80),
+    );
+    expect(
+      tester.getSize(find.byType(TongtaiFoxMascot).last),
+      const Size(40, 40),
+    );
 
     // Đĩa chỉ có ở avatar. Nếu cả hai cùng có (hoặc cùng không), hai dạng đã
     // mất phần phân biệt vai và chỉ còn khác nhau con số kích thước.
@@ -60,7 +66,8 @@ void main() {
     expect(
       (await rootBundle.load(TongtaiFoxMascot.headAsset)).lengthInBytes,
       greaterThan(0),
-      reason: '${TongtaiFoxMascot.headAsset} không có trong bundle — thiếu khai '
+      reason:
+          '${TongtaiFoxMascot.headAsset} không có trong bundle — thiếu khai '
           'trong pubspec.yaml. `Image.asset` không ném lỗi, nó chỉ vẽ ô trống.',
     );
   });
@@ -72,7 +79,8 @@ void main() {
       expect(
         (await rootBundle.load(pose.asset)).lengthInBytes,
         greaterThan(0),
-        reason: 'tư thế "${pose.name}" trỏ tới ${pose.asset} nhưng tệp không '
+        reason:
+            'tư thế "${pose.name}" trỏ tới ${pose.asset} nhưng tệp không '
             'vào bundle. Enum liệt kê VIỆC — một việc không có hình là một chỗ '
             'trống giữa màn onboarding.',
       );
@@ -88,7 +96,8 @@ void main() {
       expect(
         cheerful.any(pose.asset.contains),
         isFalse,
-        reason: '"${pose.name}" đang dùng ${pose.asset} — một hình vui mừng ở '
+        reason:
+            '"${pose.name}" đang dùng ${pose.asset} — một hình vui mừng ở '
             'trạng thái không có gì để mừng thì hình nói dối trước cả chữ',
       );
     }
