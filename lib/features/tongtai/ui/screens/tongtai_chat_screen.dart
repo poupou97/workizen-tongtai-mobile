@@ -177,7 +177,8 @@ class _TongtaiChatScreenState extends ConsumerState<TongtaiChatScreen> {
                           decoration: BoxDecoration(
                             color: _controller.assistantOnline
                                 ? TtColors.success
-                                : TtColors.unknown,
+                                // Offline là biết rõ, không mù mờ (WTM-431).
+                                : TtColors.neutral,
                             shape: BoxShape.circle,
                           ),
                         ),

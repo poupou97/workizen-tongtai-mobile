@@ -691,7 +691,8 @@ class _ChangeHistory extends StatelessWidget {
             child: _ChangeList(
               title: TongtaiFormatters.isoDate(revision.timestamp),
               changes: revision.changes,
-              accent: TtColors.unknown,
+              // Sắc nền cho danh sách thay đổi — dữ liệu thường (WTM-431).
+              accent: TtColors.neutral,
             ),
           ),
       ],

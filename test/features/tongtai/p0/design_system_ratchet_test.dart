@@ -298,26 +298,39 @@ void main() {
     // WTM-425 tách `neutral` ra. Cổng này giữ cho hai nghĩa không nhập lại:
     // `unknown` chỉ còn được dùng ở **thẻ thiếu dữ liệu** trong DS.
     //
-    // ⚠️ **Cổng này CHỈ bắt `TtStatus.unknown`, KHÔNG bắt `TtColors.unknown`**
-    // — và tôi ghi ra thay vì để cái tên đứng canh thay cho mã (P-45, kiểu
-    // thứ tư). Đo thật: còn **12 chỗ** dùng thẳng `TtColors.unknown`, phần
-    // lớn cũng là *"biết rõ mà không phán xét"* (`CustomerTier.silver` ·
-    // `BriefDecision.dismissed` · xu hướng `flat` · `neverPurchased`). Mỗi
-    // chỗ phải audit riêng — cùng hình dáng chưa chắc cùng vai — nên chúng
-    // đi theo **WTM-431**, không nhét vội vào đây. Ít nhất một chỗ (`home:885`)
-    // có vẻ KHÔNG phải neutral — *"không khoẻ"* là một phán xét, tô xám là
-    // làm nhẹ một cảnh báo. Đổi hàng loạt sẽ nuốt đúng chỗ ấy.
+    // ⭐ WTM-431 — cổng nay bắt **cả** `TtStatus.unknown` **và**
+    // `TtColors.unknown`. Bản đầu chỉ bắt cái trước, và tôi ghi thẳng lỗ ấy ra
+    // thay vì để cái tên đứng canh (P-45, kiểu thứ tư). Audit 12 chỗ:
+    // 7 đổi · 2 giữ · 1 chờ Founder · 2 đã xong ở WTM-425.
+    //
+    // ⚠️ Hai chỗ GIỮ NGUYÊN, và chúng chứng minh vì sao cấm quét mù:
+    //
+    //   * `home_screen` — `healthy ? success : unknown`. Tôi ĐOÁN trong ticket
+    //     rằng *"không khoẻ"* là phán xét bị tô xám nhầm. **Sai:**
+    //     `BusinessHealthStatus` chỉ có `healthy` và `notEnoughData` — nhánh
+    //     kia đúng nghĩa **thiếu dữ liệu**. Đổi nó thành `neutral` là biến
+    //     *"chưa đủ dữ liệu"* thành *"bình thường"*: nói dối bằng màu.
+    //   * `OpportunityPriority.unknown` — **đúng là chưa biết ưu tiên**.
+    //
+    // ⚠️ `CustomerTier.silver` KHÔNG về `neutral`: bạc không nói *"không phán
+    // xét"*, nó nói **bạc**. Nó nhận hằng kim loại riêng, cùng họ vàng/đồng.
     const allowed = <String>{
-      // Thẻ "chưa đủ dữ liệu" — icon dấu hỏi. Đây là nghĩa DUY NHẤT còn lại.
+      // Thẻ "chưa đủ dữ liệu" — icon dấu hỏi. Nghĩa gốc, giữ nguyên.
       'lib/core/design/tt_cards.dart',
       // Nơi khai enum + bảng ánh xạ.
       'lib/core/design/tt_tokens.dart',
+      // `BusinessHealthStatus.notEnoughData` + `OpportunityPriority.unknown`.
+      'lib/features/tongtai/ui/screens/tongtai_home_screen.dart',
+      // ⛔ CHỜ FOUNDER — WTM-426. `color ?? unknown` là mặc định cho tab không
+      // màu; không đụng cho tới khi chốt A/B/C.
+      'lib/features/tongtai/ui/tongtai_bottom_nav.dart',
     };
 
     final offenders = _filesWhere(
       (path, src) =>
           path.startsWith('lib/') &&
-          _stripComments(src).contains('TtStatus.unknown'),
+          (_stripComments(src).contains('TtStatus.unknown') ||
+              _stripComments(src).contains('TtColors.unknown')),
     ).toSet();
 
     expect(

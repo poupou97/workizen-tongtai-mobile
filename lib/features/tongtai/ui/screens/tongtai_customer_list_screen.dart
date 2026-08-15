@@ -35,7 +35,15 @@ import 'tongtai_opportunity_detail_screen.dart';
 Color tongtaiCustomerTierColor(CustomerTier tier) => switch (tier) {
   CustomerTier.vip => const Color(0xFFD4AF37), // gold
   CustomerTier.gold => TtColors.warning, // amber
-  CustomerTier.silver => TtColors.unknown, // gray
+  // ⭐ WTM-431 — bạc là **hằng kim loại**, không phải vai ngữ nghĩa.
+  //
+  // Ba hạng kia viết thẳng mã màu kim loại; riêng bạc mượn `TtColors.unknown`.
+  // Một khái niệm, hai chủ (P-27): đổi màu "chưa biết" ở Design System sẽ lặng
+  // lẽ đổi màu hạng Bạc, mà hai thứ ấy chẳng liên quan gì nhau.
+  //
+  // Và `neutral` cũng KHÔNG đúng: bạc không nói "không phán xét", nó nói
+  // **bạc**. `#A8A9AD` là sắc bạc thật, cùng họ với vàng/đồng ở trên dưới.
+  CustomerTier.silver => const Color(0xFFA8A9AD), // silver
   CustomerTier.bronze => const Color(0xFFB45309), // bronze
 };
 

@@ -108,9 +108,31 @@ void main() {
   });
 
   group('tongtaiCustomerTierColor', () {
-    test('maps each tier to its color', () {
+    test('⭐ hạng là KIM LOẠI, không phải mức ngữ nghĩa (WTM-431)', () {
+      // Bản trước ghim `silver == TtColors.unknown` — tức khẳng định rằng màu
+      // hạng Bạc **chính là** token ngữ nghĩa "chưa biết". Đó đúng là chỗ
+      // coupling cần gỡ: đổi màu "chưa biết" ở Design System sẽ lặng lẽ đổi
+      // màu hạng Bạc, mà hai thứ ấy chẳng liên quan gì nhau (P-27).
+      //
+      // **Rekey chứ không xoá** (P-37): kiểm đúng thứ vẫn còn giá trị — bạc
+      // không được mượn một vai ngữ nghĩa.
+      expect(
+        tongtaiCustomerTierColor(CustomerTier.silver),
+        isNot(TtColors.unknown),
+        reason: 'bạc không nói "chưa biết", nó nói **bạc**',
+      );
+      expect(
+        tongtaiCustomerTierColor(CustomerTier.silver),
+        isNot(TtColors.neutral),
+        reason: 'bạc cũng không nói "không phán xét" — nó là một tên kim loại',
+      );
+
+      // ⚠️ NỢ CÒN LẠI, ghi ra thay vì im lặng: `gold` vẫn mượn
+      // `TtColors.warning`. Cùng hình dạng với lỗi vừa sửa cho bạc, nhưng
+      // ngoài phạm vi WTM-431 (ticket ấy chỉ nói về `TtColors.unknown`) và
+      // phải audit riêng — đổi nó là đổi màu nhìn thấy được của một hạng
+      // khách. Chốt lại ở đây để lần sau khỏi phải đo lại.
       expect(tongtaiCustomerTierColor(CustomerTier.gold), TtColors.warning);
-      expect(tongtaiCustomerTierColor(CustomerTier.silver), TtColors.unknown);
     });
 
     test('the four tiers have distinct colors', () {
