@@ -83,6 +83,13 @@ void main() {
       // ⛔ KHÔNG tính vào đây: chip **lọc/chọn** (bấm được, đổi truy vấn) và
       // dải phân loại kết quả — *cùng hình dáng KHÔNG phải cùng vai*, ép chúng
       // vào huy hiệu là lỗi ngược lại.
+      // ⚠️ DS-3 (WTM-423) hạ 2 tệp, mỗi tệp một lý do khác nhau:
+      //   * `stock_alerts` truyền đúng `danger`/`warning` — tức VAI ngữ nghĩa,
+      //     mà mapper `tongtaiStockAlertTone` đã có chủ từ DS-2. Màn đang tự
+      //     dịch lại một thứ đã được trả lời.
+      //   * `producer` truyền CÙNG MỘT màu ở cả sáu lời gọi ⇒ tham số không
+      //     phân biệt được gì, chỉ mở đường cho một sắc lạ đi vào sau này.
+      //
       // ⚠️ Baseline này ĐO THẬT, không đoán. Bản đầu tôi viết 5 tệp theo trí
       // nhớ và cổng đỏ ngay — con số thật là 13. Một baseline đoán sẽ hoặc chặn
       // oan, hoặc (tệ hơn) bỏ lọt nợ đang có.
@@ -100,11 +107,9 @@ void main() {
         'lib/features/tongtai/ui/screens/tongtai_onboarding_v2_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart',
-        'lib/features/tongtai/ui/screens/tongtai_producer_screen.dart',
         // `tongtai_startup_screen.dart` RA KHỎI danh sách ở WTM-416: hàng ba
         // cột `_Value(color:)` bị gỡ cùng lúc màn dựng lại theo nhận diện mới.
         // Nợ giảm thì baseline phải giảm theo — chính cổng này bắt tôi hạ.
-        'lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart',
       };
