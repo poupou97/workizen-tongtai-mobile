@@ -47,6 +47,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.home_outlined,
                 selectedIcon: Icons.home,
                 label: context.l10n.navHome,
+                capability: TtCapability.home,
                 onTap: onTabSelected,
               ),
               _NavTab(
@@ -55,7 +56,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.shopping_bag_outlined,
                 selectedIcon: Icons.shopping_bag,
                 label: context.l10n.navProducer,
-                color: TtColors.success,
+                capability: TtCapability.producer,
                 onTap: onTabSelected,
               ),
               _NavTab(
@@ -64,7 +65,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.warehouse_outlined,
                 selectedIcon: Icons.warehouse,
                 label: context.l10n.navInventory,
-                color: TtColors.warning,
+                capability: TtCapability.inventory,
                 onTap: onTabSelected,
               ),
               _NavTab(
@@ -73,7 +74,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.people_outline,
                 selectedIcon: Icons.people,
                 label: context.l10n.navConsumer,
-                color: TtColors.info,
+                capability: TtCapability.consumer,
                 onTap: onTabSelected,
               ),
               _NavTab(
@@ -82,7 +83,7 @@ class TongtaiBottomNav extends ConsumerWidget {
                 icon: Icons.lightbulb_outline,
                 selectedIcon: Icons.lightbulb,
                 label: context.l10n.navOpportunity,
-                color: TtColors.ai,
+                capability: TtCapability.opportunity,
                 onTap: onTabSelected,
               ),
               // ⭐ WTM-405 — mục thứ sáu, đúng concept-1.
@@ -91,15 +92,18 @@ class TongtaiBottomNav extends ConsumerWidget {
               // không tìm. Nó là **danh mục đầy đủ** của tám năng lực, tức là
               // thứ người dùng mới cần nhất — và là thứ khó thấy nhất.
               //
-              // ⚠️ Không tô màu: năm mục kia mang màu để **định vị** một năng
-              // lực. "Thêm" không phải một năng lực; cho nó một màu là hứa một
-              // thứ nó không có.
+              // ⚠️ Không có sắc định danh riêng: năm mục kia mang màu để
+              // **định vị** một năng lực. "Thêm" không phải một năng lực; cho
+              // nó một sắc riêng là hứa một thứ nó không có. Nó nhận
+              // `TtCapability.more` → `TtColors.neutral` (WTM-426): trung tính
+              // là *biết rõ mà không phán xét*, đúng thứ cần ở đây.
               _NavTab(
                 index: TongtaiTabs.more,
                 selectedIndex: selectedIndex,
                 icon: Icons.grid_view_outlined,
                 selectedIcon: Icons.grid_view,
                 label: context.l10n.navMore,
+                capability: TtCapability.more,
                 onTap: onTabSelected,
               ),
             ],
@@ -117,7 +121,12 @@ class _NavTab extends StatelessWidget {
   final IconData icon;
   final IconData selectedIcon;
   final String label;
-  final Color? color;
+
+  /// **Định danh năng lực** — *"đây là khu vực nào"*, không phải trạng thái
+  /// (WTM-426). Bản trước nhận `Color?` và phía gọi truyền thẳng
+  /// `TtColors.success`/`warning`/`info`/`ai`, nên tab Kho vĩnh viễn mang màu
+  /// Cảnh báo — trùng đúng sắc với chú giải "sắp hết hàng" trên chính màn ấy.
+  final TtCapability capability;
   final ValueChanged<int> onTap;
 
   const _NavTab({
@@ -126,7 +135,7 @@ class _NavTab extends StatelessWidget {
     required this.icon,
     required this.selectedIcon,
     required this.label,
-    this.color,
+    required this.capability,
     required this.onTap,
   });
 
@@ -134,7 +143,7 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tabColor = color ?? TtColors.unknown;
+    final tabColor = capability.color;
     final isActive = isSelected;
 
     // `Expanded`: five tabs share the width evenly instead of each taking its

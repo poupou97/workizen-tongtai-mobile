@@ -157,13 +157,9 @@ void main() {
         //
         // Vai **visualization** — `Color` là màu thật của một dải dữ liệu:
         'lib/features/tongtai/ui/widgets/tt_sparkline.dart',
-        // ⛔ **ĐANG CHỜ QUYẾT ĐỊNH FOUNDER — WTM-426.** Thanh tab gán một màu
-        // TRẠNG THÁI cho mỗi tab làm màu ĐỊNH DANH: tab "Kho" mang
-        // `TtColors.warning`, trong khi chấm chú giải "sắp hết hàng" trên cùng
-        // màn cũng `#F59E0B`. Một sắc, hai nghĩa, một khung hình. Không tự sửa
-        // được vì đây là hai chỉ dẫn của Founder chỏi nhau (luật màu vs. chỉ
-        // đường bằng màu). Gỡ khỏi baseline này khi WTM-426 chốt A/B/C.
-        'lib/features/tongtai/ui/tongtai_bottom_nav.dart',
+        // `tongtai_bottom_nav.dart` RA KHỎI danh sách ở WTM-426 (Founder chốt
+        // Option B): `_NavTab` nhận `TtCapability` thay `Color?`. Chỉ đường
+        // bằng màu được GIỮ — nó chỉ thôi mượn hằng số của tầng trạng thái.
         // Nợ đã đo, **chưa audit vai** — trường tên `accent`/`iconColor`/`tint`
         // nên bộ dò cũ (chỉ tìm chữ `color`) không thấy:
         'lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart',
@@ -431,9 +427,9 @@ void main() {
       'lib/core/design/tt_tokens.dart',
       // `BusinessHealthStatus.notEnoughData` + `OpportunityPriority.unknown`.
       'lib/features/tongtai/ui/screens/tongtai_home_screen.dart',
-      // ⛔ CHỜ FOUNDER — WTM-426. `color ?? unknown` là mặc định cho tab không
-      // màu; không đụng cho tới khi chốt A/B/C.
-      'lib/features/tongtai/ui/tongtai_bottom_nav.dart',
+      // `tongtai_bottom_nav.dart` RA KHỎI danh sách ở WTM-426: không còn
+      // `color ?? unknown` — tab "Thêm" nhận `TtCapability.more` → `neutral`,
+      // đúng vai *biết rõ mà không phán xét*.
     };
 
     final offenders = _filesWhere(

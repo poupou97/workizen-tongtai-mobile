@@ -114,6 +114,65 @@ void main() {
       expect(TtStatus.ai.color, TtColors.ai);
     });
 
+    test('⭐ màu ĐỊNH DANH tách hẳn khỏi màu TRẠNG THÁI (WTM-426)', () {
+      // Founder chốt Option B: chỉ đường bằng màu được giữ, nhưng nó phải có
+      // **bảng riêng**. Cái sai cũ không phải *dùng màu để chỉ đường*, mà là
+      // mượn hằng số của tầng trạng thái — nên sửa màu cảnh báo sẽ lặng lẽ đổi
+      // màu tab Kho, và ngược lại.
+      final semantic = <Color>{
+        TtColors.success,
+        TtColors.info,
+        TtColors.warning,
+        TtColors.danger,
+        TtColors.ai,
+        TtColors.brand,
+      };
+
+      for (final c in TtCapability.values) {
+        if (c == TtCapability.more) continue; // cố ý là `neutral`
+        expect(
+          semantic.contains(c.color),
+          isFalse,
+          reason:
+              '${c.name} đang mượn một hằng NGỮ NGHĨA làm màu định danh. Đó '
+              'đúng là lỗi WTM-426: tab Kho từng mang `warning` và trùng sắc '
+              'với chú giải "sắp hết hàng" trên cùng màn hình.',
+        );
+      }
+
+      // Và chúng phải phân biệt được VỚI NHAU — hai năng lực cùng sắc thì màu
+      // thôi không chỉ đường được nữa, tức mất luôn lý do tồn tại của bảng này.
+      final identities = {for (final c in TtCapability.values) c.color};
+      expect(identities, hasLength(TtCapability.values.length));
+    });
+
+    test('⭐ mọi màu định danh đọc được trên nền trắng (WCAG AA)', () {
+      // Nhãn tab dùng chính sắc này làm màu chữ, trên nền `#FFFFFF`. Đo thật,
+      // không tin ước lượng bằng mắt — repo này đã trả giá một lần ở WTM-169
+      // vì đoán một tỉ lệ tương phản.
+      double lum(Color c) {
+        double f(double v) => v <= 0.03928
+            ? v / 12.92
+            : math.pow((v + 0.055) / 1.055, 2.4) as double;
+        return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+      }
+
+      double ratio(Color a, Color b) {
+        final l = [lum(a), lum(b)]..sort();
+        return (l[1] + 0.05) / (l[0] + 0.05);
+      }
+
+      for (final c in TtCapability.values) {
+        expect(
+          ratio(c.color, TtColors.surface),
+          greaterThanOrEqualTo(4.5),
+          reason:
+              'nhãn tab ${c.name} không đạt AA trên nền trắng — người bán đọc '
+              'thanh nav ở mọi màn, đây không phải chỗ để hy sinh tương phản',
+        );
+      }
+    });
+
     test('mọi mức đều có màu và nền riêng, không mức nào rơi về mặc định', () {
       final colors = {for (final s in TtStatus.values) s.color};
       final softs = {for (final s in TtStatus.values) s.soft};
