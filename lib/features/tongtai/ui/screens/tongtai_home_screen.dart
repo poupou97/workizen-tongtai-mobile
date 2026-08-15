@@ -465,6 +465,54 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             icon: const Icon(Icons.chat_bubble_outline),
             onPressed: () => _openChat(context),
           ),
+          // ⭐ WTM-437 — chuông + avatar, đúng như `cp_home.png` vẽ.
+          //
+          // ⚠️ Chuông **KHÔNG có con số**, dù concept vẽ huy hiệu "3".
+          //
+          // Con số ấy phải đến từ dữ liệu thật (số việc đáng làm hôm nay), mà
+          // chỗ dựng `AppBar` nằm NGOÀI builder có dữ liệu — với tới nó cần
+          // dựng lại `Scaffold`. Viết đại một số vào đây là đúng thứ WTM-421 đã
+          // dọn: một con số không nguồn, và người bán không phân biệt được nó
+          // với số thật.
+          //
+          // Thà thiếu huy hiệu còn hơn có một huy hiệu nói dối. Nối số thật là
+          // việc riêng, đã ghi trong WTM-437.
+          IconButton(
+            key: const Key('home-open-missions'),
+            tooltip: context.l10n.homeTodaysMissions,
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () => _openChat(context),
+          ),
+          // ⭐ Avatar người dùng — Founder chốt *"cho giống concept đi, fake
+          // cũng được"* (WTM-434).
+          //
+          // Ảnh cắt từ **chính `cp_home.png`**, không phải ảnh lấy trên mạng:
+          // nó là tài sản Founder giao, nên không có chuyện giấy phép.
+          //
+          // ⚠️ App **chưa có tài khoản** (D-4). Đây là ảnh mô phỏng cho bản
+          // demo; ngày có đăng nhập thật thì đổi nguồn ảnh, không đổi chỗ này.
+          // ⚠️ `IconButton`, KHÔNG phải `InkWell` bọc ảnh 32dp.
+          //
+          // Bản đầu tôi dùng `InkWell` ôm sát ảnh ⇒ vùng chạm chỉ 32dp, dưới
+          // ngưỡng 48dp, và **không có nhãn** cho trình đọc màn hình. Ba cổng
+          // accessibility đỏ cùng lúc. `IconButton` cho cả hai thứ đó sẵn.
+          IconButton(
+            key: const Key('home-open-profile'),
+            tooltip: context.l10n.navMore,
+            icon: ClipOval(
+              child: Image.asset(
+                'assets/new-icon/user-avatar.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) =>
+                    const Icon(Icons.account_circle_outlined, size: 30),
+              ),
+            ),
+            onPressed: () => ref
+                .read(tongtaiSelectedTabProvider.notifier)
+                .select(TongtaiTabs.more),
+          ),
           const TongtaiMoreAction(),
         ],
       ),
@@ -1632,10 +1680,20 @@ class _Hero extends StatelessWidget {
       key: const Key('home-hero'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ⛔ WTM-437 — KHÔNG có linh vật ở dòng chào, và concept là lý do.
+        //
+        // `cp_home.png` chỉ có **MỘT** con cáo, ở header. Dòng chào của concept
+        // là **chữ trơn**: *"Chào Phương! 👋"*.
+        //
+        // App từng có cáo ở cả hai chỗ, cộng thêm avatar cũng vẽ cáo ⇒ **ba
+        // khuôn mặt giống hệt nhau trên một khung hình**. Founder nhìn bản dựng
+        // và nói *"ba logo mascot trùng nhau không ra sao cả"* — đúng, và nó
+        // chỉ lộ ra khi nhìn màn thật.
+        //
+        // Nay: **một** cáo (header) · **một** avatar người (concept) · dòng chào
+        // chữ trơn.
         Row(
           children: [
-            const TongtaiFoxMascot.avatar(size: 40),
-            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: Text(
                 // No name: the product has no account (D-4), so it does not
@@ -1690,6 +1748,17 @@ class _Hero extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // ⭐ WTM-437 — biểu tượng mic, đúng như concept vẽ.
+                  //
+                  // ⚠️ Nó **KHÔNG** bật ghi âm: app chưa có nhập bằng giọng
+                  // nói. Bấm vào mở đúng ô chat như cả thanh này — tức nó là
+                  // một **lối vào**, không phải một lời hứa đang nghe.
+                  //
+                  // Vẽ một cái mic rồi để nó im khi bấm là nút chết; vẽ nó rồi
+                  // giả vờ đang nghe là nói dối về năng lực (§40). Cách này
+                  // không phạm cái nào: hình đúng concept, hành vi đúng sự thật.
+                  const SizedBox(width: TtSpace.x2),
+                  Icon(Icons.mic_none, size: 18, color: TtColors.textSecondary),
                 ],
               ),
             ),

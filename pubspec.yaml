@@ -93,6 +93,9 @@ flutter:
     # cho màn chào. Chỉ khai đúng tệp cần, không khai cả thư mục: tấm concept
     # gốc nặng ~1MB và không có lý do đi vào APK.
     - assets/new-icon/wordmark.png
+    # WTM-437 — avatar người dùng cắt từ chính concept. App chưa có tài khoản;
+    # Founder chốt "fake cũng được" để bám concept (WTM-434).
+    - assets/new-icon/user-avatar.png
     # Bộ dữ liệu thương mại demo (WTM-325). Đóng gói vào app để Founder nhập
     # được ngay cả khi chưa nối Google Drive — cùng file, cùng đường import.
     - assets/demo/
