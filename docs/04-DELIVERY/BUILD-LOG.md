@@ -5,6 +5,23 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +24 — 2026-08-15T12:45:08Z
+
+- Version: `0.1.0+24` (trước: `0.1.0+23`)
+- Lý do: WTM-426 kiểm tab Kho cạnh chỉ báo cảnh báo
+- SHA: `50646ed9eb189fea2a0311b68d02939e5042018f`
+- Nhánh: `main`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `7f6aaeec6f3db7e8…`
+
+### Thay đổi kể từ `113f8d5964f09f975d20f56cc9863456233ead12`
+
+- 50646ed fix(WTM-432): nút xoá dòng đơn hàng không có tên — cổng a11y mù về TRẠNG THÁI (#281)
+- 8d47ef1 feat(WTM-426): màu ĐỊNH DANH tách khỏi màu TRẠNG THÁI (Founder chốt Option B) (#280)
+- e52ac08 fix(WTM-422): 'Nhà cung cấp đã xác minh' — app không xác minh gì cả (#279)
+- e61fd8c refactor(WTM-428): §2 có bộ dò thật — ratchet chặn TĂNG, cố ý không phân loại (#278)
+- c3b8d67 refactor(WTM-431): 12 chỗ 'TtColors.unknown' — 7 đổi, 2 GIỮ NGUYÊN, 1 chờ Founder (#277)
+- ef34467 refactor(WTM-425): TtStatus thiếu một vai, và bốn chỗ đã mượn tạm `unknown` (#276)
+
 ## build +23 — 2026-08-15T11:17:54Z
 
 - Version: `0.1.0+23` (trước: `0.1.0+22`)
