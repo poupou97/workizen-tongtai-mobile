@@ -201,6 +201,116 @@ void main() {
       );
     });
 
+    test('⭐ §2 KHÔNG dựng thêm viên bo tròn tự chế (ratchet, WTM-428)', () {
+      // ## Vì sao cổng này CHỈ chặn tăng, không ép migrate
+      //
+      // Tên test cũ hứa *"§2 không tự dựng huy hiệu trạng thái"* nhưng không có
+      // mã nào kiểm (WTM-427 đã đổi tên cho đúng). Đây là bộ dò thật — nhưng nó
+      // cố ý **không** cố phân biệt huy hiệu với chip, vì **không phân biệt
+      // được bằng cú pháp**, và một bộ dò gần đúng ở đây nguy hiểm hơn không có:
+      // nó sẽ đỏ ở chip lọc hợp lệ, người sau sửa cho xanh bằng cách **migrate
+      // sai**, và cổng tự tạo ra đúng lỗi nó định ngăn.
+      //
+      // Viên bo tròn nền nhạt là hình dáng chung của **ít nhất bốn vai**:
+      //
+      //   | vai | ví dụ | có phải huy hiệu |
+      //   |---|---|---|
+      //   | huy hiệu trạng thái | "Hết hàng" · "Đã thanh toán" | ✅ `TtStatusBadge` |
+      //   | chip **lọc/chọn** | "Tất cả" · "Xu hướng" | ❌ bấm được, đổi truy vấn |
+      //   | nhãn phân loại | "Gia dụng" · "Mẹ & Bé" | ❌ không mang mức nghiêm trọng |
+      //   | dải năng lực | "Chấm điểm cơ hội" | ❌ định danh |
+      //
+      // ## Đo lại vì số cũ SAI
+      //
+      // Ticket WTM-428 ghi "16 tệp". Sai: phép đếm ấy quét mọi
+      // `BorderRadius.circular(TtRadius.full)`, nên nó đếm cả **thanh tiến độ**
+      // (`ClipRRect` bọc `LinearProgressIndicator`) ở màn Tài chính · Khởi động ·
+      // Tổng kết tuần. Ba "huy hiệu" ấy không phải huy hiệu, mà là thanh bo
+      // tròn. Số thật: **21 viên / 15 tệp**, chỉ tính viên dựng bằng
+      // `BoxDecoration`.
+      //
+      // Bài học lặp lại của cả đợt: *bộ đếm trả lời đúng câu hỏi nó được viết
+      // ra, không phải câu mình tưởng mình đang hỏi.*
+      const baseline = <String, int>{
+        'lib/features/tongtai/ui/screens/tongtai_autonomy_screen.dart': 1,
+        'lib/features/tongtai/ui/screens/tongtai_customer_list_screen.dart': 1,
+        'lib/features/tongtai/ui/screens/tongtai_customer_risk_screen.dart': 3,
+        'lib/features/tongtai/ui/screens/tongtai_forecast_screen.dart': 2,
+        'lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart': 1,
+        'lib/features/tongtai/ui/screens/tongtai_goals_screen.dart': 1,
+        'lib/features/tongtai/ui/screens/tongtai_home_screen.dart': 4,
+        'lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart':
+            1,
+        'lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart':
+            1,
+        'lib/features/tongtai/ui/screens/tongtai_reports_screen.dart': 2,
+        'lib/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart': 1,
+        'lib/features/tongtai/ui/screens/tongtai_supplier_search_screen.dart':
+            1,
+        'lib/features/tongtai/ui/widgets/tongtai_brief_widgets.dart': 1,
+        'lib/features/tongtai/ui/widgets/tongtai_opportunity_signal_badges.dart':
+            1,
+        'lib/features/tongtai/ui/widgets/tongtai_screen_data.dart': 1,
+      };
+
+      /// Đếm viên dựng bằng `BoxDecoration` — **bỏ** `ClipRRect` (thanh tiến độ).
+      int pills(String src) {
+        var n = 0;
+        for (final m in RegExp(
+          r'BorderRadius\.circular\(TtRadius\.full\)',
+        ).allMatches(src)) {
+          final before = src.substring(
+            m.start - 220 < 0 ? 0 : m.start - 220,
+            m.start,
+          );
+          if (before.contains('BoxDecoration') &&
+              !before
+                  .substring(before.length - 120 < 0 ? 0 : before.length - 120)
+                  .contains('ClipRRect')) {
+            n++;
+          }
+        }
+        return n;
+      }
+
+      final counts = <String, int>{};
+      for (final f in _filesWhere(
+        (path, src) => path.contains('/features/tongtai/ui/'),
+      )) {
+        final n = pills(_stripComments(File(f).readAsStringSync()));
+        if (n > 0) counts[f] = n;
+      }
+
+      for (final e in counts.entries) {
+        expect(
+          e.value,
+          lessThanOrEqualTo(baseline[e.key] ?? 0),
+          reason:
+              'viên bo tròn tự chế MỚI trong ${e.key}. Trước khi thêm, hỏi nó '
+              'đóng vai nào trong bảng ở đầu test: nếu là **huy hiệu trạng '
+              'thái** thì dùng `TtStatusBadge`; nếu là chip lọc / nhãn phân '
+              'loại / dải năng lực thì nó KHÔNG phải huy hiệu — thêm vào '
+              'baseline kèm lý do.',
+        );
+      }
+      // ⚠️ Chiều NÀY, không phải chiều kia. Bản đầu tôi viết
+      // `counts <= baseline` — trùng đúng khẳng định ở trên, nên khai baseline
+      // = 9 cho một tệp có 1 viên vẫn XANH. Đột biến bắt được.
+      //
+      // Một baseline nói quá nợ là **chỗ trống để nợ mới mọc lại** đúng vào
+      // vùng vừa dọn, mà không cổng nào kêu.
+      for (final e in baseline.entries) {
+        expect(
+          e.value,
+          lessThanOrEqualTo(counts[e.key] ?? 0),
+          reason:
+              'baseline khai ${e.value} viên ở ${e.key} nhưng thật chỉ có '
+              '${counts[e.key] ?? 0} — hạ nó xuống, nếu không phần dôi ra là '
+              'chỗ trống cho nợ mới mọc lại mà không ai thấy',
+        );
+      }
+    });
+
     test('§3b KHÔNG mã màu thô trong tệp màn', () {
       // `Color(0xFF...)` trong một màn nghĩa là màn tự dựng bảng màu riêng —
       // không ai đổi được nó từ một chỗ, và nó không mang tên ngữ nghĩa nào.
