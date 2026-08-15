@@ -300,14 +300,24 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
               ),
             ),
           const SizedBox(height: 24),
-          // Suppliers — the persisted favourites Home's Producer tile
-          // counts; names from the curated catalog.
+          // Suppliers — the persisted favourites Home's Producer tile counts;
+          // names from the curated catalog.
+          //
+          // ⚠️ WTM-422 — nhãn TRƯỚC ĐÂY là *"Nhà cung cấp đã xác minh"*, mà con
+          // số bên cạnh là `favorites.length`: **số NCC người bán đã lưu**.
+          // App không có bước xác minh nào cả, nên nhãn đang tuyên bố một việc
+          // nó không làm — cùng họ WTM-421 (gỡ mọi tuyên bố không có nguồn).
+          //
+          // Nó còn đẻ ra một mâu thuẫn nhìn thấy được: *"đã xác minh: 0"* đứng
+          // cạnh màn sản phẩm liệt kê **ba báo giá NCC có tên và giá**. Người
+          // bán không đọc theo định nghĩa miền — họ thấy 0 chọi 3 và mất tin
+          // vào MỌI con số trên app, không riêng ô này.
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
-                  l10n.producerVerifiedSuppliers,
+                  l10n.producerSavedSuppliers,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
