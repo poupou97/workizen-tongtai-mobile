@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tongtai/core/l10n/app_strings.dart';
 import 'package:tongtai/core/prefs.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/consumer/customer.dart';
@@ -293,6 +294,38 @@ void main() {
         reason: 'Producer tab must show the same favourites Home counts',
       );
       expect(find.text('TechPro Wholesale'), findsOneWidget);
+
+      // ── WTM-422 · nhãn phải nói ĐÚNG thứ con số đếm ───────────────────
+      //
+      // Ô này đếm `favorites.length` — nhà cung cấp người bán **đã lưu**. Nhãn
+      // cũ là *"Nhà cung cấp đã xác minh"*, tuyên bố một bước app KHÔNG làm
+      // (cùng họ WTM-421).
+      //
+      // Hậu quả nhìn thấy được trên máy thật: *"đã xác minh: 0"* đứng cạnh màn
+      // sản phẩm liệt kê **ba báo giá NCC có tên và giá**. Về miền thì không
+      // mâu thuẫn — hai khái niệm khác nhau — nhưng người bán đọc là 0 chọi 3
+      // và mất tin vào MỌI con số, không riêng ô này.
+      //
+      // Đây là cổng **ngữ nghĩa của nhãn**, thứ mà cổng đếm ở trên không thấy:
+      // nó kiểm hai con số khớp nhau, không kiểm con số ấy **tên là gì**.
+      // ⚠️ Suite này chạy locale **EN** (`supportedLocales` đặt `en` trước),
+      // nên kiểm chuỗi tiếng Việt ở đây sẽ đỏ vì lý do không liên quan. Đọc
+      // nhãn qua `AppStrings` của chính cây widget — nó đúng với mọi locale.
+      const l10n = AppStringsEn();
+      expect(
+        find.text(l10n.producerSavedSuppliers),
+        findsOneWidget,
+        reason:
+            'nhãn phải nói đúng thứ được đếm. Nếu đổi nhãn, đổi cả ở đây và '
+            'nói rõ con số mới đếm gì.',
+      );
+      expect(
+        find.textContaining('Verified'),
+        findsNothing,
+        reason:
+            'app KHÔNG có bước xác minh nhà cung cấp nào — nhãn nói "verified" '
+            'là tuyên bố không nguồn (WTM-421/422)',
+      );
 
       // The summary line carries the SAME generated-opportunity count the
       // feed/Home read (rule engine over these repositories).

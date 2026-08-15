@@ -986,7 +986,13 @@ abstract class AppStrings {
   String get producerCapDelivery;
   String get producerRecentOpps;
   String get producerEmptyOpps;
-  String get producerVerifiedSuppliers;
+
+  /// ⚠️ Nhãn của ô đếm ở màn Nguồn hàng. Con số phía dưới là **số nhà cung cấp
+  /// người bán đã lưu** (`favorites.length`) — KHÔNG có bước xác minh nào.
+  ///
+  /// Tên cũ là *"Nhà cung cấp đã xác minh"*, tuyên bố một việc app không làm
+  /// (WTM-422, cùng họ WTM-421).
+  String get producerSavedSuppliers;
   String get producerEmptySuppliers;
 
   // ── product form extras (WTM-69) ────────────────────────────────────────
@@ -2980,7 +2986,7 @@ class AppStringsVi extends AppStrings {
   @override
   String get producerEmptyOpps => 'Chưa phát hiện cơ hội nào';
   @override
-  String get producerVerifiedSuppliers => 'Nhà cung cấp đã xác minh';
+  String get producerSavedSuppliers => 'Nhà cung cấp đã lưu';
   @override
   String get producerEmptySuppliers => 'Chưa kết nối nhà cung cấp nào';
 
@@ -5211,7 +5217,7 @@ class AppStringsEn extends AppStrings {
   @override
   String get producerEmptyOpps => 'No opportunities discovered yet';
   @override
-  String get producerVerifiedSuppliers => 'Verified Suppliers';
+  String get producerSavedSuppliers => 'Saved suppliers';
   @override
   String get producerEmptySuppliers => 'No suppliers connected yet';
 
