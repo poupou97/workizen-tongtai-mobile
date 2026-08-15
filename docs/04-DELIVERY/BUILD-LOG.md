@@ -5,6 +5,21 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +17 — 2026-08-15T04:07:37Z
+
+- Version: `0.1.0+17` (trước: `0.1.0+16`)
+- Lý do: WTM-414/418/411 — dogfood Nokia: ảnh sản phẩm + thẻ vốn chôn
+- SHA: `d696244afb2499009228afa913f8bf92b758845f`
+- Nhánh: `feat/wtm-414-product-thumbnails`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `8dbf6c2192d448d5…`
+
+### Thay đổi kể từ `795209da6c57e16696713632490757c7a2cbad6a`
+
+- d696244 style: dart format 8 tệp mới (hook pre-push chặn đúng)
+- 733a767 docs(WTM-418): ghi lần tái phát của P-39 vào chính mục cũ
+- 0595223 feat(WTM-419): cp4 — phân khúc khách suy từ đơn thật, một chủ cho một khái niệm
+- 46abdf2 feat(WTM-411): cp3 — thẻ vốn chôn trong hàng chậm bán, bấm được
+
 ## build +16 — 2026-08-14T16:41:24Z
 
 - Version: `0.1.0+16` (trước: `0.1.0+15`)
