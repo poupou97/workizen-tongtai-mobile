@@ -11,6 +11,7 @@ import '../../consumer/customer.dart';
 import '../../consumer/customer_segment.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../analytics/customer_segment_view.dart';
 import '../../providers/tongtai_consumer_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
@@ -52,6 +53,9 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
   /// exactly like "you have no customers".
   late final ScreenDataController<List<Customer>> _data;
 
+  /// Bảng đếm phân khúc — nguồn DUY NHẤT cho cả ô tóm tắt lẫn chip.
+  CustomerSegmentView _segments = CustomerSegmentView.unknown;
+
   @override
   void initState() {
     super.initState();
@@ -61,11 +65,20 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
       // `orderCount`/`totalSpent` showed "0 đơn · ₫0" for a customer who had
       // just bought something — nothing writes those fields when an order is
       // recorded, while RFM, Reports and the lifecycle ladder all count it.
-      () async => deriveCustomerCounters(
-        await ref.read(customerRepositoryProvider).loadAll(),
-        await ref.read(orderRepositoryProvider).loadAll(),
-        now: _clock(),
-      ),
+      () async {
+        final now = _clock();
+        final customers = await ref.read(customerRepositoryProvider).loadAll();
+        final orders = await ref.read(orderRepositoryProvider).loadAll();
+        // WTM-419: MỘT nguồn cho mọi con số phân khúc trên màn này. Đơn hàng
+        // vốn đã nạp ở đây cho `deriveCustomerCounters`, nên việc suy phân
+        // khúc không thêm bề mặt lỗi nào.
+        _segments = CustomerSegmentView.derive(
+          customers: customers,
+          profiles: CustomerRfmService.compute(customers, orders, now: now),
+          now: now,
+        );
+        return deriveCustomerCounters(customers, orders, now: now);
+      },
       telemetry: () => ref.read(tongtaiTelemetryProvider),
       screen: 'consumer',
     )..load();
@@ -84,11 +97,6 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
     // The user may have created/edited/deleted customers in the list — refresh
     // (not reload) so the tab stays consistent without blanking on the way.
     await _data.refresh();
-  }
-
-  bool _isActive(Customer c) {
-    final last = c.lastPurchaseDate;
-    return last != null && _clock().difference(last).inDays <= 90;
   }
 
   @override
@@ -124,9 +132,13 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
   Widget _body(BuildContext context, List<Customer> customers) {
     final l10n = context.l10n;
     final total = customers.length;
-    final vip = customers.where((c) => c.tier == CustomerTier.vip).length;
-    final active = customers.where(_isActive).length;
-    final fresh = customers.where((c) => c.orderCount == 0).length;
+    // ⛔ Ba dòng cũ ở đây đọc BA nguồn khác nhau và đội chung nhãn phân khúc:
+    // `c.tier` (trường xếp hạng không ai ghi ⇒ luôn 0) · `orderCount == 0` gắn
+    // nhãn "Mới" (thật ra là CHƯA MUA — gần như ngược nghĩa) · và chip thì đếm
+    // nhãn lưu sẵn. Trên máy: `VIP 0` ngay trên `Khách VIP (8)`.
+    final vip = _segments.of(CustomerSegment.vip);
+    final active = _segments.active;
+    final newcomers = _segments.of(CustomerSegment.newcomer);
 
     // ⚠️ WTM-381: gộp theo phân khúc **đã phân giải**, không theo chuỗi thô.
     //
@@ -137,14 +149,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
     //
     // Khoá nay là mã canonical (hoặc chính chuỗi người dùng tự đặt, khi không
     // phân giải được), nên một phân khúc chỉ còn **một** chip và **một** số.
-    final segmentTally = <String, int>{};
-    for (final c in customers) {
-      for (final s in c.segments) {
-        if (s.trim().isEmpty) continue;
-        final key = CustomerSegment.normalise(s);
-        segmentTally[key] = (segmentTally[key] ?? 0) + 1;
-      }
-    }
+    final segmentTally = _segments.tally;
 
     final recent = customers.where((c) => c.lastPurchaseDate != null).toList()
       ..sort((a, b) => b.lastPurchaseDate!.compareTo(a.lastPurchaseDate!));
@@ -229,7 +234,10 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                       Expanded(
                         child: _CustomerStat(
                           label: l10n.segNew,
-                          value: '$fresh',
+                          // Khách MỚI = đơn đầu tiên trong 30 ngày qua. Trước
+                          // đây ô này đếm `orderCount == 0` — tức khách CHƯA
+                          // MUA, gần như ngược nghĩa với nhãn của nó.
+                          value: '$newcomers',
                         ),
                       ),
                     ],
@@ -255,7 +263,7 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
-          if (segmentTally.isEmpty)
+          if (segmentTally.isEmpty && _segments.customLabels.isEmpty)
             Container(
               height: 120,
               width: double.infinity,
@@ -275,10 +283,19 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                       ..sort((a, b) => b.value.compareTo(a.value))))
                   Chip(
                     label: Text(
-                      '${CustomerSegment.display(entry.key, l10n.languageCode)}'
+                      // Khoá nay là chính enum, không còn là chuỗi — nên
+                      // không còn chỗ nào phải "phân giải" một nhãn nữa.
+                      '${entry.key.label(l10n.languageCode)}'
                       ' (${entry.value})',
                     ),
                   ),
+                // Nhãn người bán TỰ ĐẶT — giữ nguyên chữ họ gõ. Chúng không
+                // mâu thuẫn với RFM vì trả lời một câu hỏi khác: "người bán
+                // gọi khách này là gì".
+                for (final entry
+                    in (_segments.customLabels.entries.toList()
+                      ..sort((a, b) => b.value.compareTo(a.value))))
+                  Chip(label: Text('${entry.key} (${entry.value})')),
               ],
             ),
           const SizedBox(height: 24),
@@ -348,7 +365,9 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                 const SizedBox(height: 12),
                 _LifecycleStage(
                   stage: l10n.lifecycleConsideration,
-                  count: '$fresh',
+                  // Ở phễu thì "chưa mua" mới là nghĩa đúng của bậc cân nhắc —
+                  // cùng một con số, nhưng ở đây nó được gọi đúng tên.
+                  count: '${_segments.notPurchased}',
                 ),
                 const SizedBox(height: 12),
                 _LifecycleStage(
