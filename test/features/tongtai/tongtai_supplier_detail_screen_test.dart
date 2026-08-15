@@ -55,46 +55,6 @@ void main() {
     expect(find.textContaining('7-14 days'), findsOneWidget);
   });
 
-  testWidgets('renders ratings and certification badges (AC3)', (tester) async {
-    await pumpScreen(tester);
-
-    expect(find.text('Ratings & Certifications'), findsOneWidget);
-    expect(find.text('(245 reviews)'), findsOneWidget);
-    // Every supplier carries the baseline certification.
-    expect(find.text('ISO 9001'), findsOneWidget);
-    // Electronics implies CE + RoHS.
-    expect(find.text('CE'), findsOneWidget);
-    expect(find.text('RoHS'), findsOneWidget);
-  });
-
-  testWidgets('renders the product catalog breakdown (AC2)', (tester) async {
-    await pumpScreen(tester);
-
-    expect(find.text('Product Catalog'), findsOneWidget);
-    expect(
-      find.textContaining('${profile.productCount} products across'),
-      findsOneWidget,
-    );
-    // A row per category, with a per-category product count.
-    expect(find.text('Electronics'), findsOneWidget);
-    expect(find.text('Accessories'), findsOneWidget);
-    for (final row in profile.catalog) {
-      expect(find.text('${row.count} products'), findsWidgets);
-    }
-  });
-
-  testWidgets('renders the transaction summary (AC5)', (tester) async {
-    await pumpScreen(tester);
-
-    expect(find.text('Transaction History'), findsOneWidget);
-    expect(find.text('Total volume'), findsOneWidget);
-    expect(find.text('Total orders'), findsOneWidget);
-    expect(find.text('Avg order'), findsOneWidget);
-    expect(find.text('Repeat buyers'), findsOneWidget);
-    // Order-frequency figure is shown.
-    expect(find.text('${profile.transactions.totalOrders}'), findsOneWidget);
-  });
-
   testWidgets('renders contact details and the message button (AC4)', (
     tester,
   ) async {
@@ -147,6 +107,50 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('TechPro Wholesale'), findsOneWidget);
-    expect(find.text('Product Catalog'), findsOneWidget);
+  });
+
+  // ── WTM-421 · Founder chốt 2026-08-15 ──────────────────────────────────
+  //
+  // Ba test AC cũ ở đây từng khẳng định màn PHẢI bày chứng chỉ, danh mục và
+  // lịch sử giao dịch. Hợp đồng ấy đã bị thu hồi: cả ba khối hiện những giá
+  // trị sinh bằng công thức trên `reviewCount`/`rating`, không đọc nguồn nào.
+  //
+  // Không xoá trắng (P-37: dựng lại một màn thì cửa đổi khoá, đừng bỏ guard) —
+  // ba khẳng định dưới đây canh đúng **chiều ngược lại**, để không ai dựng lại
+  // chúng mà không đọc WTM-421.
+  testWidgets('⛔ KHÔNG bày chứng chỉ / danh mục / lịch sử giao dịch bịa', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(home: TongtaiSupplierDetailScreen.forSupplier(supplier)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('ISO 9001'),
+      findsNothing,
+      reason:
+          'chứng chỉ gán cho MỌI nhà cung cấp — một tuyên bố pháp lý mà '
+          'app không kiểm, và người bán có thể xuống tiền vì tin nó',
+    );
+    expect(find.byKey(const Key('supplier-detail-catalog')), findsNothing);
+    expect(find.byKey(const Key('supplier-detail-transactions')), findsNothing);
+  });
+
+  testWidgets('§ đánh giá sao thì GIỮ — có nguồn, dù nguồn là bên thứ ba', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(home: TongtaiSupplierDetailScreen.forSupplier(supplier)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('supplier-detail-ratings')),
+      findsOneWidget,
+      reason:
+          'gỡ luôn cả rating là phản ứng thái quá: nó đến từ hồ sơ NCC đã '
+          'nhập, và màn nói rõ "từ N đánh giá"',
+    );
   });
 }

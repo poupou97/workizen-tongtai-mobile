@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/design/tt.dart';
 
-import '../../core/tongtai_formatters.dart';
 import '../../producer/supplier.dart';
 import '../../producer/supplier_profile.dart';
 import '../../../../core/l10n/app_strings.dart';
@@ -75,10 +74,12 @@ class TongtaiSupplierDetailScreen extends StatelessWidget {
                         _AboutSection(description: profile.description),
                         const SizedBox(height: TtSpace.x4),
                         _RatingsSection(profile: profile),
-                        const SizedBox(height: TtSpace.x4),
-                        _CatalogSection(profile: profile),
-                        const SizedBox(height: TtSpace.x4),
-                        _TransactionsSection(summary: profile.transactions),
+                        // ⛔ WTM-421: KHÔNG dựng lại khối "danh mục sản phẩm"
+                        // và "lịch sử giao dịch" ở đây. Cả hai từng hiện những
+                        // con số sinh bằng công thức từ `reviewCount` —
+                        // `4 + ((reviewCount + len(category) + i*7) % 24)` và
+                        // `reviewCount + 20` — mà giao diện trình bày y hệt
+                        // giá bán hay tồn kho. Xem `supplier_profile.dart`.
                         const SizedBox(height: TtSpace.x4),
                         _ContactSection(
                           profile: profile,
@@ -240,7 +241,7 @@ class _RatingsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return _DetailSection(
       sectionKey: const Key('supplier-detail-ratings'),
-      title: context.l10n.supRatingsCerts,
+      title: context.l10n.supRatings,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -265,54 +266,15 @@ class _RatingsSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: TtSpace.x3),
-          Wrap(
-            spacing: TtSpace.x2,
-            runSpacing: TtSpace.x2,
-            children: [
-              for (final cert in profile.certifications)
-                _CertificationBadge(label: cert),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CertificationBadge extends StatelessWidget {
-  const _CertificationBadge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TtSpace.x3,
-        vertical: TtSpace.x1,
-      ),
-      decoration: BoxDecoration(
-        color: TtColors.success.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(TtRadius.full),
-        border: Border.all(color: TtColors.success.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.verified_outlined,
-            size: 14,
-            color: TtColors.successOnLight,
-          ),
-          const SizedBox(width: TtSpace.x1),
-          Text(
-            label,
-            style: TtType.caption.copyWith(
-              color: TtColors.successOnLight,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          // ⛔ WTM-421: huy hiệu chứng chỉ đã bị gỡ.
+          //
+          // `ISO 9001` được gán cho **mọi** nhà cung cấp, phần còn lại suy từ
+          // danh mục sản phẩm. Đó là một tuyên bố về pháp lý và chất lượng mà
+          // app không hề kiểm — nặng hơn mọi con số bịa khác trên màn, vì
+          // người bán có thể nhập hàng dựa vào nó.
+          //
+          // Đánh giá sao ở trên thì GIỮ: nó đến từ hồ sơ nhà cung cấp được
+          // nhập vào, tức có nguồn, dù nguồn ấy là bên thứ ba.
         ],
       ),
     );
@@ -321,144 +283,7 @@ class _CertificationBadge extends StatelessWidget {
 
 // ── Product catalog (AC2) ─────────────────────────────────────────────────────
 
-class _CatalogSection extends StatelessWidget {
-  const _CatalogSection({required this.profile});
-
-  final SupplierProfile profile;
-
-  @override
-  Widget build(BuildContext context) {
-    final categoryCount = profile.catalog.length;
-    return _DetailSection(
-      sectionKey: const Key('supplier-detail-catalog'),
-      title: context.l10n.supProductCatalog,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.supplierCatalogSummary(
-              profile.productCount,
-              categoryCount,
-            ),
-            style: TtType.body.copyWith(color: TtColors.textSecondary),
-          ),
-          const SizedBox(height: TtSpace.x3),
-          for (final row in profile.catalog)
-            Padding(
-              padding: const EdgeInsets.only(bottom: TtSpace.x2),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.category_outlined,
-                    size: 16,
-                    color: TtColors.successOnLight,
-                  ),
-                  const SizedBox(width: TtSpace.x2),
-                  Expanded(
-                    child: Text(
-                      row.category,
-                      style: TtType.bodyLarge.copyWith(
-                        color: TtColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    context.l10n.supplierProductCount(row.count),
-                    style: TtType.body.copyWith(
-                      color: TtColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 // ── Historical transaction summary (AC5) ──────────────────────────────────────
-
-class _TransactionsSection extends StatelessWidget {
-  const _TransactionsSection({required this.summary});
-
-  final SupplierTransactionSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final repeatPercent = (summary.repeatBuyerRate * 100).round();
-    return _DetailSection(
-      sectionKey: const Key('supplier-detail-transactions'),
-      title: context.l10n.supTransactionHistory,
-      child: Wrap(
-        spacing: TtSpace.x3,
-        runSpacing: TtSpace.x3,
-        children: [
-          _MetricTile(
-            icon: Icons.inventory_2_outlined,
-            label: context.l10n.supTotalVolume,
-            value:
-                '${TongtaiFormatters.compact(summary.totalVolumeUnits)} units',
-          ),
-          _MetricTile(
-            icon: Icons.repeat,
-            label: context.l10n.supTotalOrders,
-            value: '${summary.totalOrders}',
-          ),
-          _MetricTile(
-            icon: Icons.local_shipping_outlined,
-            label: context.l10n.kpiAovShort,
-            value:
-                '${TongtaiFormatters.compact(summary.averageOrderVolume.round())} units',
-          ),
-          _MetricTile(
-            icon: Icons.people_alt_outlined,
-            label: context.l10n.supRepeatBuyers,
-            value: '$repeatPercent%',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 148,
-      padding: const EdgeInsets.all(TtSpace.x3),
-      decoration: BoxDecoration(
-        color: TtColors.surfaceTertiary,
-        borderRadius: BorderRadius.circular(TtRadius.md),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: TtColors.success),
-          const SizedBox(height: TtSpace.x2),
-          Text(value, style: TtType.h2.copyWith(color: TtColors.textPrimary)),
-          const SizedBox(height: TtSpace.x1),
-          Text(
-            label,
-            style: TtType.caption.copyWith(color: TtColors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ── Contact + messaging (AC4) ─────────────────────────────────────────────────
 
