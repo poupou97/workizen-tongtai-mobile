@@ -1043,6 +1043,38 @@ nửa — và mỗi nửa đều đủ để đưa màu Brand vào chỗ báo l�
 Cùng họ P-44 (*test kiểm một con số không bắt được hai con số nói ngược nhau*):
 cả hai đều là **cổng nhìn đúng chỗ nó được chỉ, và mù với phần còn lại**.
 
+### Ba lần trong một phiên — và lần thứ ba lộ ra kiểu nguy hiểm nhất
+
+Cùng ngày 2026-08-15, đúng hình dạng này xuất hiện **ba lần**, mỗi lần một tầng:
+
+1. **Cú pháp khác** — `Colors.orange` lọt cổng cấm `Color(0xFF..)` (WTM-424).
+2. **Giá trị sai, cú pháp đúng** — `tone: TtStatus.ai` cho khối cảnh báo lọt cổng
+   cú pháp (WTM-424, đo bằng đột biến).
+3. **Phạm vi quét quá hẹp** — cổng `§3` chỉ nhìn `/ui/screens/`, chỉ nhận
+   `final Color color;`. Thật ra có **17 tệp**, cổng thấy **9** (WTM-427). Ba
+   giả định ngầm: component chỉ ở `screens/` · trường không nullable · trường
+   luôn tên `color`. Tám tệp vô hình — trong đó có đúng tệp mà **mắt người tìm
+   ra trên máy thật** (WTM-426) chứ cổng thì không.
+
+**Kiểu thứ tư, tệ nhất: cổng hứa mà không kiểm.** Test ấy tên là *"§2+§3 KHÔNG
+tự dựng huy hiệu trạng thái, KHÔNG tiêm `Color` thô"* — nhưng trong thân **chỉ
+có một bộ dò**. Phần §2 không có mã nào kiểm cả. Một cổng mang tên hứa nhiều
+hơn nó làm thì **tệ hơn không có cổng**: người đọc danh sách test tin rằng vùng
+ấy đã được canh, nên **thôi không canh nữa**. Không có cổng thì người ta còn
+biết là mình đang không có gì.
+
+**Prevention Rule bổ sung.** Khi viết hoặc sửa một cổng, chạy đủ ba câu hỏi:
+
+1. *Còn CÁCH VIẾT nào khác cho ra cùng hậu quả?* (kiểu 1)
+2. *Một giá trị hợp lệ về cú pháp nhưng sai vai thì cổng có đỏ không?* (kiểu 2)
+3. *Bộ lọc phạm vi của tôi dựa trên giả định gì về vị trí / kiểu / tên?*
+   Mỗi giả định là một vùng mù — **đo** số tệp trước và sau khi bỏ giả định,
+   đừng ước lượng. (kiểu 3)
+
+Và luật cuối, rẻ nhất: **tên test phải bằng đúng thứ nó kiểm.** Thiếu cổng thì
+đi viết; chưa viết được thì nói thẳng trong test là chưa dò được và tại sao —
+đừng để cái tên đứng canh thay cho mã.
+
 ## Khi sửa bug mới — checklist
 
 1. Reproduce trên **đúng môi trường người dùng gặp** (release/máy thật nếu cần).
