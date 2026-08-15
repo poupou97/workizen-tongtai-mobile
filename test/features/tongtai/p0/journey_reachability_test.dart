@@ -84,6 +84,16 @@ void main() {
     'tongtai_onboarding_v2_screen.dart': 3,
     // Màn khởi động: đọc CSDL + đếm danh mục/đơn, hiện tiến trình THẬT.
     'tongtai_startup_screen.dart': 3,
+    // Màn CHÀO (WTM-433) — **L1**, và đó là mức đúng chứ không phải nợ.
+    //
+    // Nó cố ý KHÔNG đọc dữ liệu nào: đây là lời chào thương hiệu, hiện đúng
+    // một khoảng rồi nhường chỗ. Người bán tới đây bằng đúng một đường — mở
+    // app — và không có gì để tương tác. Nâng nó lên L3 sẽ là hứa một đường
+    // dữ liệu không tồn tại.
+    //
+    // Phân biệt với 'tongtai_startup_screen' ngay trên: màn ấy hiện tiến trình
+    // NẠP DỮ LIỆU thật và chỉ chen lên khi việc hâm nóng lâu.
+    'tongtai_splash_screen.dart': 1,
     'tongtai_supplier_search_screen.dart': 3,
     'tongtai_supplier_favorites_screen.dart': 3,
     'tongtai_business_inputs_screen.dart': 3,

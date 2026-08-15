@@ -1,7 +1,7 @@
 name: tongtai
 description: "Tổng Tài — AI-First Business OS for SME entrepreneurs (Workizen)."
 publish_to: 'none'
-version: 0.1.0+24
+version: 0.1.0+25
 
 environment:
   sdk: ^3.12.2
@@ -89,6 +89,10 @@ flutter:
     # còn khai ở đây: 25 PNG không ai dùng thì không có lý do đi vào APK. Tệp
     # vẫn nằm trong repo, gỡ khai báo là việc đảo ngược được.
     - assets/mascot/brand/
+    # WTM-433 — chữ ký thương hiệu cắt từ tấm concept `loading-screen.png`
+    # cho màn chào. Chỉ khai đúng tệp cần, không khai cả thư mục: tấm concept
+    # gốc nặng ~1MB và không có lý do đi vào APK.
+    - assets/new-icon/wordmark.png
     # Bộ dữ liệu thương mại demo (WTM-325). Đóng gói vào app để Founder nhập
     # được ngay cả khi chưa nối Google Drive — cùng file, cùng đường import.
     - assets/demo/

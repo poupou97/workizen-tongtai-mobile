@@ -5,6 +5,18 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +25 — 2026-08-15T14:06:55Z
+
+- Version: `0.1.0+25` (trước: `0.1.0+24`)
+- Lý do: kiểm thành quả 2026-08-15 trên S24 — bản production
+- SHA: `85ef5e3ca15d71b71622f977c6c4a9fe23470322`
+- Nhánh: `main`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `27c532d564adb4f5…`
+
+### Thay đổi kể từ `50646ed9eb189fea2a0311b68d02939e5042018f`
+
+- 85ef5e3 chore: versionCode +24 · bản demo xác minh WTM-426 trên Nokia
+
 ## build +24 — 2026-08-15T12:45:08Z
 
 - Version: `0.1.0+24` (trước: `0.1.0+23`)

@@ -5,6 +5,7 @@ import '../providers/tongtai_onboarding_provider.dart';
 import '../providers/tongtai_startup_provider.dart';
 import '../startup/startup_pipeline.dart';
 import 'screens/tongtai_onboarding_v2_screen.dart';
+import 'screens/tongtai_splash_screen.dart';
 import 'screens/tongtai_startup_screen.dart';
 import 'tongtai_app_shell.dart';
 
@@ -73,8 +74,35 @@ class _TongtaiRootGateState extends ConsumerState<TongtaiRootGate> {
     if (mounted) setState(() => _booting = false);
   }
 
+  /// Thời gian giữ màn chào — đổi được lúc dựng, **không** đổi mã sản phẩm:
+  ///
+  /// ```
+  /// flutter build apk --dart-define=SPLASH_HOLD_MS=10000
+  /// ```
+  ///
+  /// Mặc định 1600ms: đủ đọc một dòng, không đủ sốt ruột. Founder muốn xem kỹ
+  /// thì dựng một bản 10s — nhưng bản phát hành **không** được kéo dài như thế,
+  /// người bán mở app để làm việc chứ không để xem màn chào (WTM-433).
+  static const int _splashHoldMs = int.fromEnvironment(
+    'SPLASH_HOLD_MS',
+    defaultValue: 1600,
+  );
+
+  bool _splashDone = false;
+
   @override
   Widget build(BuildContext context) {
+    // ⭐ Màn chào đứng TRƯỚC mọi thứ — nó là lời chào thương hiệu, không phải
+    // một cửa chờ. Việc hâm nóng vẫn chạy song song bên dưới, nên giữ màn chào
+    // 1,6 giây KHÔNG làm app mở chậm thêm 1,6 giây: phần lớn thời gian ấy
+    // pipeline đang làm việc thật.
+    if (!_splashDone) {
+      return TongtaiSplashScreen(
+        minimumHold: const Duration(milliseconds: _splashHoldMs),
+        onDone: () => setState(() => _splashDone = true),
+      );
+    }
+
     // ⭐ Màn đích quyết định **ngay**, từ cờ onboarding đọc đồng bộ được.
     //
     // Bản đầu chặn màn đích cho tới khi khởi động xong. Sai ở hai chỗ: một

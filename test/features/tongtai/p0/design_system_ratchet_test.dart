@@ -157,6 +157,11 @@ void main() {
         //
         // Vai **visualization** — `Color` là màu thật của một dải dữ liệu:
         'lib/features/tongtai/ui/widgets/tt_sparkline.dart',
+        // Vai **visualization** — bảy chấm màn chào chuyển sắc liên tục từ
+        // `brand` sang `ai` bằng `Color.lerp`. Đây là một dải màu, không phải
+        // một mức nghiêm trọng: không `TtStatus` nào diễn đạt được "chấm thứ
+        // tư trong bảy" (WTM-433).
+        'lib/features/tongtai/ui/screens/tongtai_splash_screen.dart',
         // `tongtai_bottom_nav.dart` RA KHỎI danh sách ở WTM-426 (Founder chốt
         // Option B): `_NavTab` nhận `TtCapability` thay `Color?`. Chỉ đường
         // bằng màu được GIỮ — nó chỉ thôi mượn hằng số của tầng trạng thái.

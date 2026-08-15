@@ -1297,6 +1297,13 @@ abstract class AppStrings {
   /// nào — mà đây là hành động **phá huỷ** (WTM-432).
   String orderRemoveLine(String product);
 
+  /// ── Màn chào lúc mở app (WTM-433) — theo `loading-screen.png` ──
+  String get splashOwner;
+  String get splashProduct;
+  String get splashPlatform;
+  String get splashLoading;
+  String get splashTagline;
+
   String demoDayOf(int day, int total);
 
   String get demoNeedsCatalogue;
@@ -3448,6 +3455,18 @@ class AppStringsVi extends AppStrings {
   String get demoReset => 'Bắt đầu lại';
   @override
   String orderRemoveLine(String product) => 'Xoá $product khỏi đơn';
+
+  @override
+  @override
+  String get splashOwner => 'Workizen';
+  @override
+  String get splashProduct => 'Quản lý Quan hệ Khách hàng';
+  @override
+  String get splashPlatform => 'Nền tảng AI';
+  @override
+  String get splashLoading => 'Đang khởi động AI…';
+  @override
+  String get splashTagline => 'Mỗi mối quan hệ một thông minh hơn';
 
   @override
   String demoDayOf(int day, int total) => 'Ngày $day / $total';
@@ -5687,6 +5706,18 @@ class AppStringsEn extends AppStrings {
   String get demoReset => 'Start over';
   @override
   String orderRemoveLine(String product) => 'Remove $product from the order';
+
+  @override
+  @override
+  String get splashOwner => 'Workizen';
+  @override
+  String get splashProduct => 'Customer Relationship Management';
+  @override
+  String get splashPlatform => 'AI Platform';
+  @override
+  String get splashLoading => 'Loading AI Power…';
+  @override
+  String get splashTagline => 'Making every relationship smarter';
 
   @override
   String demoDayOf(int day, int total) => 'Day $day / $total';
