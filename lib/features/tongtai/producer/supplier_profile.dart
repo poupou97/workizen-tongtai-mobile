@@ -143,6 +143,23 @@ String supplierInitials(String name) {
   return (words[0][0] + words[1][0]).toUpperCase();
 }
 
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║ ⛔ WTM-421 — BA HÀM DƯỚI ĐÂY KHÔNG PHẢI SỰ THẬT KINH DOANH               ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// `supplierCertifications` · `supplierCatalog` · `supplierTransactions` sinh
+// giá trị bằng **công thức trên `reviewCount`/`rating`/danh mục**, không đọc
+// bất kỳ nguồn nào. Chúng từng được bày thẳng lên `supplier_detail_screen` như
+// dữ liệu thật: huy hiệu `ISO 9001` cho **mọi** nhà cung cấp, "đã hoàn thành
+// N đơn" với `N = reviewCount + 20`, "tỉ lệ mua lại" suy từ số sao.
+//
+// Founder chốt 2026-08-15: **gỡ khỏi giao diện**, không thay bằng `0`/`N/A`
+// giả, và không render một tuyên bố kinh doanh nào khi không truy được nguồn.
+//
+// ⚠️ Chúng còn ở đây vì hồ sơ mẫu/onboarding vẫn dùng để dựng dữ liệu minh
+// hoạ. **Không được gọi từ `ui/`** — có cổng chặn:
+// `test/features/tongtai/p0/business_truth_gate_test.dart`.
+
 /// Certifications implied by each product category (extra to the baseline
 /// "ISO 9001" every supplier carries). Local-first sample mapping.
 const Map<String, List<String>> _categoryCertifications = {

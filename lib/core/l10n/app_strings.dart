@@ -1011,12 +1011,7 @@ abstract class AppStrings {
   // ── supplier screens (WTM-63/64/65 — chrome only, catalog stays data) ───
   String get labelSupplier;
   String get supAbout;
-  String get supRatingsCerts;
-  String get supProductCatalog;
-  String get supTransactionHistory;
-  String get supTotalVolume;
-  String get supTotalOrders;
-  String get supRepeatBuyers;
+  String get supRatings;
   String get supContact;
   String get supMessage;
   String get supAskHint;
@@ -3030,17 +3025,7 @@ class AppStringsVi extends AppStrings {
   @override
   String get supAbout => 'Giới thiệu';
   @override
-  String get supRatingsCerts => 'Đánh giá & chứng nhận';
-  @override
-  String get supProductCatalog => 'Danh mục sản phẩm';
-  @override
-  String get supTransactionHistory => 'Lịch sử giao dịch';
-  @override
-  String get supTotalVolume => 'Tổng khối lượng';
-  @override
-  String get supTotalOrders => 'Tổng đơn hàng';
-  @override
-  String get supRepeatBuyers => 'Khách mua lại';
+  String get supRatings => 'Đánh giá';
   @override
   String get supContact => 'Liên hệ';
   @override
@@ -5277,17 +5262,7 @@ class AppStringsEn extends AppStrings {
   @override
   String get supAbout => 'About';
   @override
-  String get supRatingsCerts => 'Ratings & Certifications';
-  @override
-  String get supProductCatalog => 'Product Catalog';
-  @override
-  String get supTransactionHistory => 'Transaction History';
-  @override
-  String get supTotalVolume => 'Total volume';
-  @override
-  String get supTotalOrders => 'Total orders';
-  @override
-  String get supRepeatBuyers => 'Repeat buyers';
+  String get supRatings => 'Ratings';
   @override
   String get supContact => 'Contact';
   @override
