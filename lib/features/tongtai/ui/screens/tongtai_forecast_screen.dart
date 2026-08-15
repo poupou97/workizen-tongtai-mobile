@@ -290,7 +290,7 @@ class _HeadlineCard extends StatelessWidget {
                 label:
                     '${l10n.forecastConfidence}: '
                     '${twin.confidence.label(l10n.languageCode)}',
-                color: TtColors.textSecondary,
+                tone: TtStatus.neutral,
               ),
               // Provenance: this figure is arithmetic. No AI, no network, no
               // BYOK key was involved in producing it (ADR-TON-016).
@@ -298,7 +298,7 @@ class _HeadlineCard extends StatelessWidget {
                 chipKey: const Key('forecast-provenance'),
                 icon: Icons.calculate_outlined,
                 label: l10n.forecastRuleBased,
-                color: TtColors.textSecondary,
+                tone: TtStatus.neutral,
               ),
             ],
           ),
@@ -622,7 +622,7 @@ class _ComparisonCard extends StatelessWidget {
                     ? Icons.arrow_upward
                     : Icons.arrow_downward,
                 label: capabilityPercent(comparison.revenueChange),
-                color: _deltaColor(comparison.revenueDelta),
+                tone: _deltaTone(comparison.revenueDelta),
               ),
             ],
           ],
@@ -631,11 +631,15 @@ class _ComparisonCard extends StatelessWidget {
     );
   }
 
-  Color _deltaColor(double delta) => delta > 0
-      ? TtColors.success
+  Color _deltaColor(double delta) => _deltaTone(delta).color;
+
+  /// ⭐ `delta == 0` là **`neutral`**, không phải `unknown` (WTM-425): bằng
+  /// phẳng là một kết quả đã biết, không phải thiếu dữ liệu.
+  TtStatus _deltaTone(double delta) => delta > 0
+      ? TtStatus.success
       : delta < 0
-      ? TtColors.danger
-      : TtColors.unknown;
+      ? TtStatus.danger
+      : TtStatus.neutral;
 }
 
 // ── Why: the reason codes and the months the number came from ───────────────
@@ -733,13 +737,18 @@ class _Chip extends StatelessWidget {
     required this.chipKey,
     required this.icon,
     required this.label,
-    required this.color,
+    required this.tone,
   });
 
   final Key chipKey;
   final IconData icon;
   final String label;
-  final Color color;
+
+  /// **Vai**, không phải màu (WTM-425). Ba lời gọi: hai nhãn *trung tính* (độ
+  /// tin cậy · xuất xứ "số này do quy tắc tính") và một *có phán xét* (mức đổi
+  /// tăng/giảm). Trước khi `TtStatus.neutral` tồn tại, hai cái đầu không có vai
+  /// nào để nhận nên phải truyền `Color` thô.
+  final TtStatus tone;
 
   @override
   Widget build(BuildContext context) {
@@ -757,13 +766,13 @@ class _Chip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          Icon(icon, size: 14, color: tone.color),
           const SizedBox(width: TtSpace.x2),
           Flexible(
             child: Text(
               label,
               style: TtType.caption.copyWith(
-                color: color,
+                color: tone.color,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -34,9 +34,22 @@ void main() {
             v.reduce((a, b) => a < b ? a : b);
       }
 
+      // ⚠️ WTM-425 — so với **các mức CÓ PHÁN XÉT**, không phải mọi mức.
+      //
+      // Bản trước quét cả `TtStatus.values` và đỏ ngay khi `neutral` ra đời, vì
+      // `neutral` (#475569) còn ÍT sắc hơn `unknown` (#94A3B8). Test không sai;
+      // **tiền đề của nó đã đổi**: nay có HAI vai cố ý không mang sắc — *chưa
+      // biết* và *biết mà không phán xét*. Rekey chứ không xoá (P-37).
+      const judging = <TtStatus>{
+        TtStatus.success,
+        TtStatus.info,
+        TtStatus.warning,
+        TtStatus.danger,
+        TtStatus.ai,
+      };
+
       final unknown = chroma(TtStatus.unknown.color);
-      for (final s in TtStatus.values) {
-        if (s == TtStatus.unknown) continue;
+      for (final s in judging) {
         expect(
           unknown,
           lessThan(chroma(s.color)),
@@ -45,6 +58,24 @@ void main() {
               'đó về chất lượng, trong khi nghĩa của nó là CHƯA BIẾT',
         );
       }
+
+      // ⭐ Và `neutral` phải KHÔNG mang sắc, **đo bằng chính `unknown`**.
+      //
+      // ⚠️ Bản đầu tôi viết `chroma(neutral) < chroma(mỗi mức phán xét)` và
+      // đột biến cho thấy nó MÙ: gieo một sắc lục mờ `#4A7C59` (chroma 0,196)
+      // vẫn xanh, vì mọi mức phán xét đều trên 0,55. Một khẳng định "ít sắc
+      // hơn thứ rất đậm sắc" gần như không chặn gì.
+      //
+      // Neo vào `unknown` — mức đã được khai là **nhạt sắc nhất** ở ngay trên.
+      // Hai vai cố ý không phán xét thì phải cùng nằm ở đáy thang sắc.
+      // Ngưỡng tuyệt đối là cái bẫy đã được ghi trong chính test này.
+      expect(
+        chroma(TtStatus.neutral.color),
+        lessThanOrEqualTo(chroma(TtStatus.unknown.color)),
+        reason:
+            'neutral ngả sắc hơn unknown ⇒ "dữ liệu thường" đang được tô như '
+            'một lời khen hoặc chê. Trung tính phải trung tính thật.',
+      );
     });
 
     test('⭐ nền nút mang chữ trắng phải qua WCAG AA', () {

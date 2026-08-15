@@ -81,6 +81,32 @@ abstract final class TtColors {
   static const Color unknown = Color(0xFF94A3B8);
   static const Color unknownSoft = Color(0xFFF1F5F9);
 
+  /// ⭐ **BIẾT RÕ, KHÔNG PHÁN XÉT** — *"dữ liệu thường"* trong luật màu Founder
+  /// (WTM-425). Tạm dừng · đang là demo · đã rời bỏ · không có mức đổi để so.
+  ///
+  /// **Đậm hơn [unknown] có chủ ý.** `unknown` nhạt (`#94A3B8`) vì nó nói *"tôi
+  /// không biết"* — mờ là đúng. Trung tính thì **biết rất rõ**, chỉ là không
+  /// khen không chê, nên nó phải đọc được như một khẳng định bình thường.
+  /// Cùng một sắc cho cả hai là xoá mất đúng chỗ khác nhau ấy.
+  static const Color neutral = textSecondary;
+
+  /// ⚠️ **KHÔNG** dùng lại `surfaceTertiary` cho nền này.
+  ///
+  /// Bản đầu tôi viết `neutralSoft = surfaceTertiary`, mà `surfaceTertiary`
+  /// đúng bằng [unknownSoft] (`#F1F5F9`) — nên *"trung tính"* và *"chưa biết"*
+  /// dùng chung một nền, tức vừa tách xong hai nghĩa ở tầng chữ thì lại nhập
+  /// chúng ở tầng nền. Cổng `tt_tokens_test` bắt được ngay ("mọi mức đều có
+  /// màu và nền riêng").
+  ///
+  /// Bản thứ hai `#F8FAFC` cũng sai, và sai theo kiểu **test không bắt được**:
+  /// nó đúng bằng [surfaceSecondary] — **nền trang của hầu hết màn** — nên huy
+  /// hiệu sẽ tàng hình đúng ở chỗ nó hay đứng nhất. Cổng chỉ hỏi *"các mức có
+  /// khác nhau không"*, không hỏi *"có nhìn thấy không"*.
+  ///
+  /// `#E8EDF3` đậm hơn một bậc: khác [unknownSoft], và đọc được trên cả
+  /// [surface] lẫn [surfaceSecondary]. Chữ [neutral] trên nền này đạt ~6,4:1.
+  static const Color neutralSoft = Color(0xFFE8EDF3);
+
   // ── Chữ ────────────────────────────────────────────────────────────────
   static const Color textPrimary = Color(0xFF0F172A);
   static const Color textSecondary = Color(0xFF475569);
@@ -159,7 +185,28 @@ enum TtStatus {
   /// "màu ngữ nghĩa" nên nằm ở đây để không ai chế thêm bảng thứ hai.
   ai,
 
-  /// Chưa biết. **Không** phải success.
+  /// **Biết rõ, nhưng không phán xét** — dữ liệu thường (WTM-425).
+  ///
+  /// Luật màu Founder có khai vai này (*"Neutral = dữ liệu thường"*), nhưng
+  /// enum thì không, nên bốn chỗ đã **mượn tạm `unknown`** cho nó:
+  ///
+  ///   * `ConnectionStatus.paused` — người dùng chủ động dừng, biết rất rõ;
+  ///   * `ConnectionReadiness.demo` — biết chắc đây là demo;
+  ///   * `CustomerSegment.churned`/`dormant` — kết luận đã có, chỉ là không nên
+  ///     tô đỏ;
+  ///   * mức đổi **bằng 0** — đã so và biết là bằng phẳng.
+  ///
+  /// ⚠️ Ranh giới hẹp: *đã so, bằng phẳng* là [neutral]; *chưa có kỳ trước để
+  /// so* vẫn là [unknown]. Tôi đã trượt đúng chỗ này một lần ở WTM-425 và
+  /// `tt_components_test` bắt lại.
+  ///
+  /// Một chủ gánh hai khái niệm là **P-27 lộn ngược**, và hậu quả cùng loại:
+  /// sửa màu cho *"thiếu dữ liệu"* sẽ lặng lẽ đổi màu của *"tạm dừng"*, không
+  /// ai thấy cho tới lúc nhìn màn hình.
+  neutral,
+
+  /// **Chưa biết** — thiếu dữ liệu để kết luận. **Không** phải success, và
+  /// cũng **không** phải [neutral]: *không biết* khác *biết mà không phán xét*.
   unknown;
 
   Color get color => switch (this) {
@@ -168,6 +215,7 @@ enum TtStatus {
     TtStatus.warning => TtColors.warning,
     TtStatus.danger => TtColors.danger,
     TtStatus.ai => TtColors.ai,
+    TtStatus.neutral => TtColors.neutral,
     TtStatus.unknown => TtColors.unknown,
   };
 
@@ -177,6 +225,7 @@ enum TtStatus {
     TtStatus.warning => TtColors.warningSoft,
     TtStatus.danger => TtColors.dangerSoft,
     TtStatus.ai => TtColors.aiSoft,
+    TtStatus.neutral => TtColors.neutralSoft,
     TtStatus.unknown => TtColors.unknownSoft,
   };
 }

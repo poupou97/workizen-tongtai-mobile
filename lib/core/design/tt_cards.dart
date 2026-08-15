@@ -218,6 +218,14 @@ class TtMetric extends StatelessWidget {
         Text(
           d,
           style: TtType.label.copyWith(
+            // ⚠️ `unknown` ở đây là ĐÚNG — tôi đã đổi nhầm sang `neutral` ở
+            // WTM-425 và `tt_components_test` bắt lại.
+            //
+            // `deltaStatus == null` KHÔNG phải "biết mà không phán xét"; nó là
+            // **chưa có kỳ trước để so** (xem `weekly_review_screen`). Thiếu
+            // dữ liệu thì mang màu thiếu dữ liệu. Ranh giới hẹp và dễ trượt:
+            // *không có gì để so* ≠ *so rồi, bằng phẳng* — cái sau mới là
+            // `neutral`, và nó nằm ở `_deltaStatus` của màn tổng kết tuần.
             color: (deltaStatus ?? TtStatus.unknown).color,
           ),
         ),
