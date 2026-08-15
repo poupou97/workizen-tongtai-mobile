@@ -162,4 +162,56 @@ void main() {
     await tester.pumpAndSettle();
     expect(captured.single.items, hasLength(1));
   });
+
+  testWidgets('⭐ nút xoá dòng phải NÓI RA nó xoá gì (WTM-432)', (tester) async {
+    // ## Vì sao suite accessibility không bắt được lỗi này
+    //
+    // `accessibility_test.dart` chạy `labeledTapTargetGuideline` — *"mọi thứ
+    // bấm được đều có tên"* — trên **28 màn**, cả hai locale, và màn này CÓ
+    // trong danh sách. Nó vẫn bỏ lọt, vì nó quét màn ở **trạng thái KHỞI ĐẦU**:
+    // `_items` rỗng ⇒ `itemBuilder` không dựng dòng nào ⇒ **nút xoá không tồn
+    // tại** ⇒ guideline không có gì để kiểm.
+    //
+    // Cổng không mù về *màn*, nó mù về **trạng thái**. Mọi widget chỉ sinh ra
+    // sau tương tác — dòng đơn, kết quả tìm kiếm, thẻ lỗi — đều nằm ngoài tầm
+    // nó, dù màn "đã được phủ". Nên khẳng định phải sống ở ĐÂY, nơi test đã
+    // lái màn vào đúng trạng thái ấy.
+    //
+    // ## Vì sao nhãn phải kèm TÊN SẢN PHẨM
+    //
+    // Đây là hành động **phá huỷ**, và có nhiều nút `×` giống hệt nhau xếp
+    // chồng. Một nhãn *"Xoá"* trần khiến người dùng khiếm thị nghe ba nút y
+    // như nhau và không biết cái nào xoá cái gì.
+    useTallViewport(tester);
+    await pumpForm(tester);
+    await addLine(tester, productId: 'p1', quantity: '1');
+
+    // Tên sản phẩm lấy từ chính dòng vừa thêm, không viết tay: một chuỗi ghim
+    // sẽ đỏ vì đổi dữ liệu mẫu chứ không vì mất nhãn.
+    final line = tester.widget<ListTile>(
+      find.ancestor(
+        of: find.byKey(const Key('order-line-remove-0')),
+        matching: find.byType(ListTile),
+      ),
+    );
+    final productName = (line.title! as Text).data!;
+
+    final button = tester.widget<IconButton>(
+      find.byKey(const Key('order-line-remove-0')),
+    );
+    expect(
+      button.tooltip,
+      isNotNull,
+      reason:
+          'nút xoá dòng không có tên — trình đọc màn hình chỉ đọc ra một biểu '
+          'tượng, không nói nó xoá cái gì',
+    );
+    expect(
+      button.tooltip,
+      contains(productName),
+      reason:
+          'nhãn phải chứa TÊN sản phẩm: nhiều nút xoá giống hệt nhau xếp '
+          'chồng, "Xoá" trần không phân biệt được cái nào',
+    );
+  });
 }
