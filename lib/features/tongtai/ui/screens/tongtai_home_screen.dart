@@ -465,6 +465,38 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             icon: const Icon(Icons.chat_bubble_outline),
             onPressed: () => _openChat(context),
           ),
+          // ⭐ WTM-437 — chuông + avatar, đúng như `cp_home.png` vẽ.
+          //
+          // ⚠️ Chuông **KHÔNG có con số**, dù concept vẽ huy hiệu "3".
+          //
+          // Con số ấy phải đến từ dữ liệu thật (số việc đáng làm hôm nay), mà
+          // chỗ dựng `AppBar` nằm NGOÀI builder có dữ liệu — với tới nó cần
+          // dựng lại `Scaffold`. Viết đại một số vào đây là đúng thứ WTM-421 đã
+          // dọn: một con số không nguồn, và người bán không phân biệt được nó
+          // với số thật.
+          //
+          // Thà thiếu huy hiệu còn hơn có một huy hiệu nói dối. Nối số thật là
+          // việc riêng, đã ghi trong WTM-437.
+          IconButton(
+            key: const Key('home-open-missions'),
+            tooltip: context.l10n.homeTodaysMissions,
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () => _openChat(context),
+          ),
+          // ⛔ WTM-437 — KHÔNG dựng avatar người dùng, dù concept có vẽ.
+          //
+          // Hai lý do, cái thứ hai chỉ lộ ra khi nhìn trên máy thật:
+          //
+          //   1. App **không có tài khoản** (D-4 — không cần đăng nhập). Một
+          //      khuôn mặt người ở đây hứa một hồ sơ không tồn tại; concept vẽ
+          //      nó vì concept giả định có đăng nhập.
+          //   2. Thay bằng linh vật thì header có **BA khuôn mặt cáo** cùng
+          //      lúc — logo, avatar, lời chào. Dựng thử rồi chụp mới thấy: nó
+          //      không sai luật nào, chỉ là trông rối (đúng họ P-43).
+          //
+          // Chỗ nó định dẫn tới (*Thêm*) đã có **hai** lối vào: tab dưới và
+          // menu ⋯ ngay cạnh. Cửa thứ ba vẽ trùng dấu hiệu thương hiệu là nhiễu,
+          // không phải bám concept.
           const TongtaiMoreAction(),
         ],
       ),
@@ -1690,6 +1722,17 @@ class _Hero extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // ⭐ WTM-437 — biểu tượng mic, đúng như concept vẽ.
+                  //
+                  // ⚠️ Nó **KHÔNG** bật ghi âm: app chưa có nhập bằng giọng
+                  // nói. Bấm vào mở đúng ô chat như cả thanh này — tức nó là
+                  // một **lối vào**, không phải một lời hứa đang nghe.
+                  //
+                  // Vẽ một cái mic rồi để nó im khi bấm là nút chết; vẽ nó rồi
+                  // giả vờ đang nghe là nói dối về năng lực (§40). Cách này
+                  // không phạm cái nào: hình đúng concept, hành vi đúng sự thật.
+                  const SizedBox(width: TtSpace.x2),
+                  Icon(Icons.mic_none, size: 18, color: TtColors.textSecondary),
                 ],
               ),
             ),
