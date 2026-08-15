@@ -465,6 +465,13 @@ abstract class AppStrings {
   String get segActive;
   String get segVip;
   String get segNew;
+
+  /// Dòng dưới con số trên thẻ phân khúc: "khách".
+  String get segCardUnit;
+
+  /// Thay đổi so với 30 ngày trước, ví dụ "+3 so với 30 ngày trước".
+  String segCardDelta(int delta);
+
   String get sectionCustomerSegments;
   String get emptyCustomerSegments;
   String get sectionRecentInteractions;
@@ -2122,6 +2129,11 @@ class AppStringsVi extends AppStrings {
   String get segVip => 'VIP';
   @override
   String get segNew => 'Mới';
+  @override
+  String get segCardUnit => 'khách';
+  @override
+  String segCardDelta(int delta) =>
+      '${delta > 0 ? '+' : ''}$delta so với 30 ngày trước';
   @override
   String get sectionCustomerSegments => 'Phân khúc khách hàng';
   @override
@@ -4344,6 +4356,11 @@ class AppStringsEn extends AppStrings {
   String get segVip => 'VIP';
   @override
   String get segNew => 'New';
+  @override
+  String get segCardUnit => 'customers';
+  @override
+  String segCardDelta(int delta) =>
+      '${delta > 0 ? '+' : ''}$delta vs 30 days ago';
   @override
   String get sectionCustomerSegments => 'Customer Segments';
   @override

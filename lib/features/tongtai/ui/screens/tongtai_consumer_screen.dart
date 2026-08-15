@@ -15,6 +15,7 @@ import '../../analytics/customer_segment_view.dart';
 import '../../providers/tongtai_consumer_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../widgets/tongtai_screen_data.dart';
+import '../widgets/tongtai_segment_cards.dart';
 import '../widgets/tongtai_screen_header.dart';
 import 'tongtai_customer_list_screen.dart';
 
@@ -72,10 +73,20 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
         // WTM-419: MỘT nguồn cho mọi con số phân khúc trên màn này. Đơn hàng
         // vốn đã nạp ở đây cho `deriveCustomerCounters`, nên việc suy phân
         // khúc không thêm bề mặt lỗi nào.
+        // Mốc so sánh: chấm lại phân khúc ở 30 ngày trước, TỪ CHÍNH đơn hàng
+        // thật. Không nội suy, không đoán — và nếu mốc ấy rỗng thì màn không
+        // vẽ mũi tên nào (xem `TongtaiSegmentCards`).
+        final before = now.subtract(const Duration(days: 30));
         _segments = CustomerSegmentView.derive(
           customers: customers,
           profiles: CustomerRfmService.compute(customers, orders, now: now),
           now: now,
+          profilesBefore: CustomerRfmService.compute(
+            customers,
+            orders,
+            now: before,
+          ),
+          beforeAt: before,
         );
         return deriveCustomerCounters(customers, orders, now: now);
       },
@@ -263,7 +274,9 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
-          if (segmentTally.isEmpty && _segments.customLabels.isEmpty)
+          if (segmentTally.isNotEmpty)
+            TongtaiSegmentCards(view: _segments)
+          else if (_segments.customLabels.isEmpty)
             Container(
               height: 120,
               width: double.infinity,
@@ -272,32 +285,22 @@ class _TongtaiConsumerScreenState extends ConsumerState<TongtaiConsumerScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(child: Text(l10n.emptyCustomerSegments)),
-            )
-          else
+            ),
+          if (_segments.customLabels.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            // Nhãn người bán TỰ ĐẶT — giữ nguyên chữ họ gõ, và giữ dạng chip:
+            // chúng không thuộc vòng đời nên không được xếp vào dải thẻ.
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final entry
-                    in (segmentTally.entries.toList()
-                      ..sort((a, b) => b.value.compareTo(a.value))))
-                  Chip(
-                    label: Text(
-                      // Khoá nay là chính enum, không còn là chuỗi — nên
-                      // không còn chỗ nào phải "phân giải" một nhãn nữa.
-                      '${entry.key.label(l10n.languageCode)}'
-                      ' (${entry.value})',
-                    ),
-                  ),
-                // Nhãn người bán TỰ ĐẶT — giữ nguyên chữ họ gõ. Chúng không
-                // mâu thuẫn với RFM vì trả lời một câu hỏi khác: "người bán
-                // gọi khách này là gì".
                 for (final entry
                     in (_segments.customLabels.entries.toList()
                       ..sort((a, b) => b.value.compareTo(a.value))))
                   Chip(label: Text('${entry.key} (${entry.value})')),
               ],
             ),
+          ],
           const SizedBox(height: 24),
           // Recent interactions — latest purchases, newest first.
           Text(

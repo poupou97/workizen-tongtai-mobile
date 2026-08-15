@@ -340,3 +340,50 @@ class TtSectionHeader extends StatelessWidget {
     ],
   );
 }
+
+/// **Dải thẻ cuộn ngang** — bố cục dùng chung của mọi hàng thẻ số liệu.
+///
+/// ## Vì sao KHÔNG đóng cứng chiều cao
+///
+/// Thẻ có thể có hoặc không có dòng delta, đường xu hướng, nhãn đơn vị. Đặt một
+/// `SizedBox(height: …)` quanh chúng là đoán trước tổ hợp nào sẽ xuất hiện —
+/// và WTM-419 đã đoán trượt đúng 22px ngay lần đầu, ở đúng ca có delta.
+///
+/// `IntrinsicHeight` để **thẻ tự khai chiều cao**, còn dải chỉ lo bề ngang và
+/// việc cuộn. Mọi thẻ trong hàng cao bằng nhau vì `stretch`, không vì ai đó
+/// nhớ đúng con số.
+///
+/// ## Vì sao không thêm đệm ngang
+///
+/// Trang đã có đệm riêng. Trên Nokia 6.1 (411dp) phần còn lại là 379dp — hai
+/// thẻ đủ và thẻ thứ ba ló ra ~31dp, đúng tín hiệu *"còn nữa, cuộn đi"* mà
+/// concept vẽ bằng cách cắt ngang thẻ cuối.
+class TtCardRail extends StatelessWidget {
+  const TtCardRail({
+    required this.children,
+    this.cardWidth = defaultCardWidth,
+    super.key,
+  });
+
+  /// Đủ cho `24,56tr đ` ở cỡ `h1` mà không phải thu nhỏ.
+  static const double defaultCardWidth = 168;
+
+  final List<Widget> children;
+  final double cardWidth;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const SizedBox(width: TtSpace.x3),
+            SizedBox(width: cardWidth, child: children[i]),
+          ],
+        ],
+      ),
+    ),
+  );
+}
