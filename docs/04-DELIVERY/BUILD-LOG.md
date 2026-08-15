@@ -5,6 +5,22 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +21 — 2026-08-15T06:56:44Z
+
+- Version: `0.1.0+21` (trước: `0.1.0+20`)
+- Lý do: WTM-424 kiểm màu cảnh báo màn Nhập liệu trên S24
+- SHA: `348db656546308d2cc63097004c2cce33714568e`
+- Nhánh: `fix/wtm-424-color-law-import`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `83d623e9ac115bcc…`
+
+### Thay đổi kể từ `a89863844ecbef53f02b99ee9cce5fc4e400652b`
+
+- 348db65 fix(WTM-424): cảnh báo thôi tô CAM — và cổng thôi mù với `Colors.<tên>`
+- 6f968c4 refactor(WTM-423): DS-3 — hai widget về đúng vai ngữ nghĩa, ratchet 13→11
+- 84daa04 fix(WTM-421): gỡ mọi tuyên bố về nhà cung cấp không có nguồn thật (#270)
+- 492ad34 feat(WTM-420): cp6 — phần Tài chính của màn sản phẩm (#269)
+- 50f1909 feat(WTM-419): dải thẻ phân khúc cp4 + xu hướng thật (#267)
+
 ## build +20 — 2026-08-15T05:29:15Z
 
 - Version: `0.1.0+20` (trước: `0.1.0+19`)

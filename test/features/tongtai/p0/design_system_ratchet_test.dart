@@ -91,13 +91,32 @@ void main() {
       );
     });
 
-    test('⭐ §2+§3 KHÔNG tự dựng huy hiệu trạng thái, KHÔNG tiêm Color thô', () {
-      // Huy hiệu trạng thái = viên bo tròn, nền nhạt, chữ màu, **không tương
-      // tác**, do một enum miền quyết định. `TtStatusBadge` phủ đúng vai đó.
+    test('⭐ §3 KHÔNG tiêm `Color` thô vào component (toàn `ui/`)', () {
+      // ⚠️ WTM-427 — tên test này TRƯỚC ĐÂY là "§2+§3 KHÔNG tự dựng huy hiệu
+      // trạng thái, KHÔNG tiêm Color thô", nhưng trong thân chỉ có MỘT bộ dò
+      // (`final Color color;`). Phần "§2 không tự dựng huy hiệu" **không có mã
+      // nào kiểm cả**.
       //
-      // ⛔ KHÔNG tính vào đây: chip **lọc/chọn** (bấm được, đổi truy vấn) và
-      // dải phân loại kết quả — *cùng hình dáng KHÔNG phải cùng vai*, ép chúng
-      // vào huy hiệu là lỗi ngược lại.
+      // Một cổng mang tên hứa nhiều hơn nó làm thì **tệ hơn không có cổng**:
+      // người đọc danh sách test tin rằng vùng ấy đã được canh, nên không ai đi
+      // canh nữa. Nên tên đã đổi cho đúng thứ nó kiểm. Bộ dò §2 thật cần một
+      // đợt audit riêng (16 tệp tự dựng viên bo tròn, mà **chip lọc không phải
+      // huy hiệu** — cùng hình dáng ≠ cùng vai, cấm quét mù) → **WTM-428**.
+      //
+      // ## Ba giả định ngầm đã bỏ (WTM-427)
+      //
+      // Bộ dò cũ chỉ nhìn `/ui/screens/` + đúng chữ `final Color color;`. Cả ba
+      // giả định đều sai, và đo được: cổng thấy **9 tệp**, sự thật là **17**.
+      //
+      //   * component không chỉ sống trong `screens/` — `tongtai_bottom_nav`
+      //     nằm ở gốc `ui/`, `tt_metric_card` ở `ui/widgets/`;
+      //   * `final Color? color;` (**có dấu hỏi**) đi lọt hoàn toàn;
+      //   * trường không phải lúc nào cũng tên `color` — thực tế còn `accent`
+      //     (5 tệp), `iconColor` (3), `trackColor`, `tint`, `paceColor`.
+      //
+      // Tám tệp vô hình, trong đó có đúng cái mà WTM-426 tìm ra **bằng mắt trên
+      // máy thật** chứ không phải bằng cổng. Lần thứ ba trong một phiên gặp
+      // P-45: *cổng chỉ bắt thứ nó được viết để tìm*.
       // ⚠️ DS-3 (WTM-423) hạ 2 tệp, mỗi tệp một lý do khác nhau:
       //   * `stock_alerts` truyền đúng `danger`/`warning` — tức VAI ngữ nghĩa,
       //     mà mapper `tongtaiStockAlertTone` đã có chủ từ DS-2. Màn đang tự
@@ -129,12 +148,37 @@ void main() {
         // Nợ giảm thì baseline phải giảm theo — chính cổng này bắt tôi hạ.
         'lib/features/tongtai/ui/screens/tongtai_transaction_form_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_unified_search_screen.dart',
+        // ── Tám tệp dưới đây lộ ra khi nới bộ dò ở WTM-427 ────────────────
+        // Chúng KHÔNG phải nợ mới; chúng luôn ở đó, chỉ là cổng không nhìn tới.
+        //
+        // Vai **visualization** — `Color` là màu thật của một dải dữ liệu:
+        'lib/features/tongtai/ui/widgets/tt_sparkline.dart',
+        // ⛔ **ĐANG CHỜ QUYẾT ĐỊNH FOUNDER — WTM-426.** Thanh tab gán một màu
+        // TRẠNG THÁI cho mỗi tab làm màu ĐỊNH DANH: tab "Kho" mang
+        // `TtColors.warning`, trong khi chấm chú giải "sắp hết hàng" trên cùng
+        // màn cũng `#F59E0B`. Một sắc, hai nghĩa, một khung hình. Không tự sửa
+        // được vì đây là hai chỉ dẫn của Founder chỏi nhau (luật màu vs. chỉ
+        // đường bằng màu). Gỡ khỏi baseline này khi WTM-426 chốt A/B/C.
+        'lib/features/tongtai/ui/tongtai_bottom_nav.dart',
+        // Nợ đã đo, **chưa audit vai** — trường tên `accent`/`iconColor`/`tint`
+        // nên bộ dò cũ (chỉ tìm chữ `color`) không thấy:
+        'lib/features/tongtai/ui/screens/tongtai_customer_form_screen.dart',
+        'lib/features/tongtai/ui/screens/tongtai_finance_screen.dart',
+        'lib/features/tongtai/ui/screens/tongtai_product_form_screen.dart',
+        'lib/features/tongtai/ui/screens/tongtai_reports_screen.dart',
+        'lib/features/tongtai/ui/widgets/tongtai_screen_data.dart',
+        'lib/features/tongtai/ui/widgets/tt_metric_card.dart',
       };
 
+      // Bắt **mọi tên trường**, kể cả nullable, trên **toàn** `ui/` — không chỉ
+      // `screens/`. Ba giả định cũ đã nêu ở đầu test.
       final offenders = _filesWhere(
         (path, src) =>
-            path.contains('/ui/screens/') &&
-            RegExp(r'\n\s+final Color color;').hasMatch(src),
+            path.contains('/features/tongtai/ui/') &&
+            RegExp(
+              r'^\s+final Color\??\s+\w+;',
+              multiLine: true,
+            ).hasMatch(_stripComments(src)),
       ).toSet();
 
       expect(
