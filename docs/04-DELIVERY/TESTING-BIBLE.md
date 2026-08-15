@@ -964,6 +964,34 @@ splash · widget), **đo trên ảnh chụp máy thật rồi mới chốt con s
 so với *ý định đã khai* thay vì một ngưỡng viết tay. Một hằng số viết tay chỉ
 kiểm được điều mình đã nghĩ tới; so với ý định thì kiểm được cả điều mình quên.
 
+## P-44 · Test kiểm MỘT con số không bao giờ bắt được HAI con số nói ngược nhau
+
+**Root-Cause.** Màn Khách hàng hiện `VIP: 0` ở ô tóm tắt và `Khách VIP (8)` ở
+chip **cách đó 600px trên cùng một màn hình**; `Mới: 4` đứng cạnh
+`Khách mới (14)`. Ba nguồn khác nhau đội chung một cái nhãn: `c.tier` (trường
+xếp hạng không đường ghi nào set ⇒ luôn 0) · `orderCount == 0` gắn nhãn *"Mới"*
+(thật ra là **chưa mua**, gần như ngược nghĩa) · và nhãn lưu sẵn từ file nhập.
+
+**Regression.** **2863 test xanh.** Mỗi con số đều có test, và mỗi test đều
+xanh — vì mỗi cái đúng với **nguồn của riêng nó**. Không test nào hỏi câu duy
+nhất bị phá: *"hai con số này có nói cùng một chuyện không?"* Founder nhìn một
+giây là thấy; suite chạy 2 phút thì không.
+
+**Test Pattern.** `tongtai_consumer_segment_consistency_test.dart` — dựng màn
+thật với dữ liệu thật, rồi **đọc lại chính hai chỗ ấy trên cây widget** và bắt
+chúng khớp. Không assert một giá trị cụ thể (giá trị đổi theo dữ liệu), mà
+assert **quan hệ**. Kèm bất biến đếm: `segmented + notPurchased == total`.
+
+**Prevention Rule.** Khi một khái niệm xuất hiện **hai lần trở lên trên cùng
+một màn**, viết test cho **quan hệ giữa chúng**, không chỉ cho từng cái. Câu hỏi
+để tự vấn: *"nếu hai chỗ này lấy số từ hai nguồn khác nhau thì có test nào đỏ
+không?"* — nếu không, chưa có cổng nào cả.
+
+⚠️ Hệ quả kèm theo: khi gộp về một nguồn, **đừng gộp quá tay**. Bản sửa đầu ở
+đây xoá luôn nhãn người bán tự đặt ("bán sỉ") vì tưởng chúng cùng loại; cổng
+`count_list_contract_test` bắt được. Hai thứ **trùng chỗ hiển thị** chưa chắc
+**trùng khái niệm** — cùng họ với luật DS *"cùng hình dáng không phải cùng vai"*.
+
 ## Khi sửa bug mới — checklist
 
 1. Reproduce trên **đúng môi trường người dùng gặp** (release/máy thật nếu cần).

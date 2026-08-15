@@ -72,6 +72,7 @@ class TtMetricCard extends StatelessWidget {
     this.tint,
     this.deltaLabel,
     this.trend = TtTrend.unknown,
+    this.upIsGood = true,
     this.series = const [],
     this.actionLabel,
     this.onTap,
@@ -99,7 +100,20 @@ class TtMetricCard extends StatelessWidget {
   /// Ví dụ *"+20% so với tháng trước"*. `null` ⇒ không có mốc để so.
   final String? deltaLabel;
 
+  /// Hướng của con số: mũi tên **luôn đi theo dấu của delta**.
   final TtTrend trend;
+
+  /// Tăng có phải tin tốt cho chỉ số NÀY không.
+  ///
+  /// ⚠️ Tách khỏi [trend] vì hai thứ này là hai câu khác nhau: mũi tên nói
+  /// **con số đi hướng nào**, màu nói **thế là tốt hay xấu**. Gộp làm một thì ở
+  /// những chỉ số "tăng là xấu" (khách rời bỏ, hàng hỏng, chi phí) ta buộc phải
+  /// chọn: hoặc mũi tên chỉ sai hướng, hoặc màu mừng cho một tin xấu.
+  ///
+  /// Đã chọn sai một lần: thẻ *"Nguy cơ rời bỏ 13"* hiện `↓ +7` — mũi tên
+  /// xuống cạnh con số tăng, và người đọc rất dễ hiểu thành *"giảm 7"*.
+  /// Chỉ nhìn trên máy thật mới thấy.
+  final bool upIsGood;
 
   /// Chuỗi giá trị cũ → mới. Dưới 3 điểm ⇒ không vẽ đường.
   final List<double> series;
@@ -109,8 +123,8 @@ class TtMetricCard extends StatelessWidget {
 
   /// Màu của delta và của đường — **ngữ nghĩa**, không phải định vị.
   Color get _semanticColor => switch (trend) {
-    TtTrend.up => TtColors.success,
-    TtTrend.down => TtColors.danger,
+    TtTrend.up => upIsGood ? TtColors.success : TtColors.danger,
+    TtTrend.down => upIsGood ? TtColors.danger : TtColors.success,
     TtTrend.unknown => TtColors.textTertiary,
   };
 

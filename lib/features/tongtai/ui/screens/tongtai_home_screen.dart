@@ -1122,7 +1122,7 @@ class _KpiRow extends StatelessWidget {
     final ordersDelta = _delta(l10n, trend.ordersChangePercent);
     final profitDelta = _delta(l10n, trend.profitChangePercent);
     final f = finance;
-    return _CardRail(
+    return TtCardRail(
       children: [
         TtMetricCard(
           key: const Key('home-kpi-revenue'),
@@ -1212,7 +1212,7 @@ class _CapabilityRail extends StatelessWidget {
     // Vậy nên thẻ hiện đúng thứ đo được: con số, đơn vị, và lối đi tiếp. Ô
     // "Doanh thu" có mốc so ở khối Sức khoẻ bên dưới, nên ở đây nó cũng chỉ
     // nói con số — hai chỗ cùng một chỉ số phải nói cùng một điều.
-    return _CardRail(
+    return TtCardRail(
       children: [
         TtMetricCard(
           key: const Key('home-tile-producer'),
@@ -1310,35 +1310,6 @@ class _CapabilityRail extends StatelessWidget {
 /// nhau tuỳ có mũi tên/đường hay không; để chúng tự do sẽ cho một hàng răng
 /// cưa. Không dùng `childAspectRatio` cố định — nó cắt cụt thẻ cao nhất, đúng
 /// lỗi tràn Home mà đợt P0 phải sửa.
-class _CardRail extends StatelessWidget {
-  const _CardRail({required this.children});
-
-  final List<Widget> children;
-
-  /// Đủ cho `24,56tr đ` ở cỡ `h1` mà không phải thu nhỏ.
-  static const double cardWidth = 168;
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      // Không thêm đệm: trang đã có `padding: 16`. Trên Nokia 6.1 (411dp) phần
-      // còn lại là 379dp, tức hai thẻ đủ + ~31dp của thẻ thứ ba ló ra — đúng
-      // tín hiệu "còn nữa, cuộn đi" mà concept vẽ bằng cách cắt ngang thẻ cuối.
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < children.length; i++) ...[
-              if (i > 0) const SizedBox(width: TtSpace.x3),
-              SizedBox(width: cardWidth, child: children[i]),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 /// "Việc Tổng Tài đề xuất" — ba dòng trong MỘT thẻ (WTM-404, concept-1).
 ///

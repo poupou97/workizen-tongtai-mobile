@@ -39,6 +39,7 @@ class CustomerSegmentView {
     required this.customLabels,
     required this.notPurchased,
     required this.total,
+    this.previous,
   });
 
   /// Không đọc được đơn hàng ⇒ **không đếm gì**, và màn nói ra là chưa biết.
@@ -71,12 +72,37 @@ class CustomerSegmentView {
 
   final int total;
 
+  /// Bảng đếm ở **một mốc quá khứ**, để nói được *"tăng 3 so với 30 ngày
+  /// trước"*. `null` ⇒ **không có mốc** ⇒ màn KHÔNG vẽ mũi tên nào.
+  ///
+  /// ⚠️ Đây là chỗ dễ bịa nhất trên cả màn. RFM nhận mốc thời gian làm tham số
+  /// nên tính lại được quá khứ **từ chính đơn hàng thật** — không phải nội suy,
+  /// không phải đoán. Nhưng nếu người bán mới dùng app được hai tuần thì mốc 30
+  /// ngày trước là một tệp rỗng, và "tăng 100%" từ số 0 là một câu vô nghĩa.
+  /// Nên [deltaOf] trả `null` khi mốc cũ chưa có ai — cùng kỷ luật với
+  /// `HomeTrend.changePercent` (WTM-404): **không có mốc thì không có phần
+  /// trăm**.
+  final Map<CustomerSegment, int>? previous;
+
+  /// Thay đổi so với mốc cũ. `null` = không có mốc để so.
+  int? deltaOf(CustomerSegment segment) {
+    final before = previous;
+    if (before == null || before.values.every((v) => v == 0)) return null;
+    return of(segment) - (before[segment] ?? 0);
+  }
+
   /// Suy từ danh bạ + đơn hàng thật.
   factory CustomerSegmentView.derive({
     required List<Customer> customers,
     required List<CustomerRfm> profiles,
     required DateTime now,
+    List<CustomerRfm>? profilesBefore,
+    DateTime? beforeAt,
   }) {
+    assert(
+      (profilesBefore == null) == (beforeAt == null),
+      'mốc quá khứ phải đi kèm NGÀY của chính nó',
+    );
     final segments = customerSegmentsFrom(profiles: profiles, now: now);
     final tally = <CustomerSegment, int>{};
     for (final s in segments.values) {
@@ -95,11 +121,27 @@ class CustomerSegmentView {
       }
     }
 
+    Map<CustomerSegment, int>? before;
+    if (profilesBefore != null) {
+      before = <CustomerSegment, int>{};
+      // ⚠️ Xếp phân khúc quá khứ bằng NGÀY QUÁ KHỨ, không phải hôm nay.
+      // `isNewCustomer` so đơn đầu tiên với mốc thời gian được truyền vào —
+      // đưa `now` vào đây thì một khách "mới" của 30 ngày trước bị chấm bằng
+      // thước của hôm nay, và xu hướng "khách mới" sai ngay từ số bị trừ.
+      for (final s in customerSegmentsFrom(
+        profiles: profilesBefore,
+        now: beforeAt!,
+      ).values) {
+        before[s] = (before[s] ?? 0) + 1;
+      }
+    }
+
     return CustomerSegmentView(
       tally: Map.unmodifiable(tally),
       customLabels: Map.unmodifiable(custom),
       notPurchased: customers.length - segments.length,
       total: customers.length,
+      previous: before == null ? null : Map.unmodifiable(before),
     );
   }
 
