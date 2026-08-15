@@ -74,11 +74,11 @@ class TongtaiGoalDetailScreen extends StatelessWidget {
             children: [
               _Badge(
                 label: goal.type.label(context.l10n.languageCode),
-                color: TtColors.ai,
+                tone: TtStatus.ai,
               ),
               _Badge(
                 label: pace.label(context.l10n.languageCode),
-                color: paceColor,
+                tone: tongtaiGoalPaceTone(pace),
               ),
             ],
           ),
@@ -330,23 +330,29 @@ class _MiniStat extends StatelessWidget {
 }
 
 class _Badge extends StatelessWidget {
-  const _Badge({required this.label, required this.color});
+  const _Badge({required this.label, required this.tone});
 
   final String label;
-  final Color color;
+
+  /// **Vai**, không phải màu (WTM-425). Hai lời gọi truyền hai vai thật —
+  /// `ai` (loại mục tiêu do Tổng Tài phân) và nhịp độ từ `tongtaiGoalPaceTone`.
+  final TtStatus tone;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: TtSpace.x3, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: tone.color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(TtRadius.full),
-        border: Border.all(color: color),
+        border: Border.all(color: tone.color),
       ),
       child: Text(
         label,
-        style: TtType.body.copyWith(color: color, fontWeight: FontWeight.w600),
+        style: TtType.body.copyWith(
+          color: TtColors.readableOn(tone.color),
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

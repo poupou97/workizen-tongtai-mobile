@@ -74,7 +74,10 @@ class TongtaiSegmentCards extends StatelessWidget {
     CustomerSegment.oneTime => TtStatus.info,
     CustomerSegment.slowing => TtStatus.warning,
     CustomerSegment.atRisk => TtStatus.danger,
-    CustomerSegment.churned || CustomerSegment.dormant => TtStatus.unknown,
+    // **Kết luận đã có**, không phải thiếu dữ liệu: khách này đã rời bỏ /
+    // ngủ đông. Không tô đỏ (không phải nguy cấp), nhưng cũng không mờ như
+    // *"chưa biết"* — WTM-425.
+    CustomerSegment.churned || CustomerSegment.dormant => TtStatus.neutral,
   };
 
   @override

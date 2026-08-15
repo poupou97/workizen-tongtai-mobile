@@ -135,7 +135,11 @@ void main() {
         // Nợ đã đo, **chưa audit vai** — mỗi tệp phải xét riêng trước khi đổi,
         // vì cùng hình dáng chưa chắc cùng vai.
         'lib/features/tongtai/ui/screens/tongtai_customer_risk_screen.dart',
-        'lib/features/tongtai/ui/screens/tongtai_forecast_screen.dart',
+        // `tongtai_forecast_screen.dart` RA KHỎI danh sách ở WTM-425: `_Chip`
+        // nhận `TtStatus`. Nó mắc kẹt với `Color` thô vì hai trong ba lời gọi
+        // là nhãn **trung tính** (độ tin cậy · xuất xứ "số này do quy tắc
+        // tính") — và trước WTM-425, `TtStatus` KHÔNG CÓ vai trung tính để
+        // nhận. Thiếu một vai trong enum đẻ ra nợ ở tầng màn.
         'lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart',
         // `tongtai_import_screen.dart` RA KHỎI danh sách ở WTM-424: `_IssueBlock`
         // nhận `TtStatus` thay `Color`, vì hai lời gọi của nó truyền đúng hai
@@ -275,5 +279,60 @@ void main() {
             'cảnh báo). Dùng `TtStatus.<vai>` hoặc `TtColors.<tên ngữ nghĩa>`.',
       );
     });
+  });
+
+  test('⭐ §5 `TtStatus.unknown` chỉ mang MỘT nghĩa: thiếu dữ liệu (WTM-425)', () {
+    // ## Vì sao cần cổng cho một enum
+    //
+    // Luật màu Founder khai **hai** vai xám khác nhau: *"Chưa biết"* và
+    // *"Neutral = dữ liệu thường"*. Enum chỉ có `unknown`, nên **4/5 chỗ dùng
+    // đã mượn nó** cho vai còn lại: `paused` (người dùng tự dừng) ·
+    // `ConnectionReadiness.demo` (biết chắc là demo) · `churned`/`dormant`
+    // (kết luận đã có) · thẻ không có mức đổi để so.
+    //
+    // Đó là **P-27 lộn ngược**: thay vì một khái niệm nhiều chủ, ở đây **một
+    // chủ gánh hai khái niệm**. Hậu quả cùng loại — sửa màu cho *"thiếu dữ
+    // liệu"* sẽ lặng lẽ đổi màu của *"tạm dừng"*, và không ai thấy cho tới
+    // lúc nhìn màn hình.
+    //
+    // WTM-425 tách `neutral` ra. Cổng này giữ cho hai nghĩa không nhập lại:
+    // `unknown` chỉ còn được dùng ở **thẻ thiếu dữ liệu** trong DS.
+    //
+    // ⚠️ **Cổng này CHỈ bắt `TtStatus.unknown`, KHÔNG bắt `TtColors.unknown`**
+    // — và tôi ghi ra thay vì để cái tên đứng canh thay cho mã (P-45, kiểu
+    // thứ tư). Đo thật: còn **12 chỗ** dùng thẳng `TtColors.unknown`, phần
+    // lớn cũng là *"biết rõ mà không phán xét"* (`CustomerTier.silver` ·
+    // `BriefDecision.dismissed` · xu hướng `flat` · `neverPurchased`). Mỗi
+    // chỗ phải audit riêng — cùng hình dáng chưa chắc cùng vai — nên chúng
+    // đi theo **WTM-431**, không nhét vội vào đây. Ít nhất một chỗ (`home:885`)
+    // có vẻ KHÔNG phải neutral — *"không khoẻ"* là một phán xét, tô xám là
+    // làm nhẹ một cảnh báo. Đổi hàng loạt sẽ nuốt đúng chỗ ấy.
+    const allowed = <String>{
+      // Thẻ "chưa đủ dữ liệu" — icon dấu hỏi. Đây là nghĩa DUY NHẤT còn lại.
+      'lib/core/design/tt_cards.dart',
+      // Nơi khai enum + bảng ánh xạ.
+      'lib/core/design/tt_tokens.dart',
+    };
+
+    final offenders = _filesWhere(
+      (path, src) =>
+          path.startsWith('lib/') &&
+          _stripComments(src).contains('TtStatus.unknown'),
+    ).toSet();
+
+    expect(
+      offenders.difference(allowed),
+      isEmpty,
+      reason:
+          '`TtStatus.unknown` nghĩa là **thiếu dữ liệu để kết luận**. Nếu chỗ '
+          'này thật ra BIẾT RÕ mà chỉ không phán xét (tạm dừng · đã rời bỏ · '
+          'không có mức đổi để so · nhãn xuất xứ), dùng `TtStatus.neutral`. '
+          'Hai nghĩa trên một hằng là P-27 lộn ngược.',
+    );
+    expect(
+      allowed.difference(offenders),
+      isEmpty,
+      reason: 'đã dọn bớt mà chưa hạ danh sách',
+    );
   });
 }

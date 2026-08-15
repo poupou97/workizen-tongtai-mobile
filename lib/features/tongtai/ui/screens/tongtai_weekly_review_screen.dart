@@ -272,13 +272,17 @@ class _Numbers extends StatelessWidget {
     return '$sign$percent% ${context.l10n.weeklyReviewVsPrevious}';
   }
 
-  /// Chưa biết chiều ⇒ `null` ⇒ [TtMetric] hiện **xám**. Một con số không so
-  /// được không phải một tin tốt (UNKNOWN ≠ SUCCESS).
+  /// Chưa biết chiều ⇒ `null` ⇒ [TtMetric] hiện **trung tính**. Một con số
+  /// không so được không phải một tin tốt (KHÔNG PHÁN XÉT ≠ SUCCESS).
+  ///
+  /// ⭐ WTM-425 — nhánh `_` bắt **không đổi** (`change == 0`). Đó là *biết rõ
+  /// và bằng phẳng*, không phải *thiếu dữ liệu*, nên nó là `neutral` chứ không
+  /// `unknown`. Thiếu dữ liệu đã có đường riêng: `null`.
   static TtStatus? _deltaStatus(double? change) => switch (change) {
     null => null,
     > 0 => TtStatus.success,
     < 0 => TtStatus.danger,
-    _ => TtStatus.unknown,
+    _ => TtStatus.neutral,
   };
 }
 
@@ -357,9 +361,12 @@ class _Why extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(l10n.weeklyReviewWhy, style: TtType.title)),
+              // Nhãn **xuất xứ**: con số này do Rule Twin tính, không phải AI
+              // viết (ADR-TON-016). Đó là một sự thật bình thường, không phải
+              // "chưa biết" — WTM-425.
               TtStatusBadge(
                 label: l10n.forecastRuleBased,
-                status: TtStatus.unknown,
+                status: TtStatus.neutral,
               ),
             ],
           ),

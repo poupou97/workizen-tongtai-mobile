@@ -183,12 +183,20 @@ String tongtaiRiskStageKey(CustomerLifecycleStage stage) => switch (stage) {
 
 /// Semantic colour of a [stage] — the same ladder the rule scores on, so the
 /// colour can never contradict the number next to it.
-Color tongtaiRiskStageColor(CustomerLifecycleStage stage) => switch (stage) {
-  CustomerLifecycleStage.neverPurchased => TtColors.unknown,
-  CustomerLifecycleStage.active => TtColors.success,
-  CustomerLifecycleStage.cooling => TtColors.info,
-  CustomerLifecycleStage.atRisk => TtColors.warning,
-  CustomerLifecycleStage.churned => TtColors.danger,
+Color tongtaiRiskStageColor(CustomerLifecycleStage stage) =>
+    tongtaiRiskStageTone(stage).color;
+
+/// **Vai ngữ nghĩa** của một [stage] (WTM-425). `tongtaiRiskStageColor` nay chỉ
+/// chuyển tiếp về đây — một thang, một chủ, không thể lệch nhau.
+///
+/// ⭐ `neverPurchased` là **`neutral`, không phải `unknown`**: *chưa mua bao
+/// giờ* là một sự thật đã biết chắc, không phải thiếu dữ liệu.
+TtStatus tongtaiRiskStageTone(CustomerLifecycleStage stage) => switch (stage) {
+  CustomerLifecycleStage.neverPurchased => TtStatus.neutral,
+  CustomerLifecycleStage.active => TtStatus.success,
+  CustomerLifecycleStage.cooling => TtStatus.info,
+  CustomerLifecycleStage.atRisk => TtStatus.warning,
+  CustomerLifecycleStage.churned => TtStatus.danger,
 };
 
 // ── Header: summary band + provenance + why ─────────────────────────────────
@@ -408,10 +416,10 @@ class _RiskRow extends StatelessWidget {
             children: [
               _Pill(
                 label: tongtaiRiskStageLabel(l10n, entry.stage),
-                color: color,
+                tone: tongtaiRiskStageTone(entry.stage),
               ),
               if (entry.winBackCandidate)
-                _Pill(label: l10n.riskWinBack, color: TtColors.ai),
+                _Pill(label: l10n.riskWinBack, tone: TtStatus.ai),
               Text(
                 // The score is the twin's, rounded for display only — the
                 // ranking above is still the twin's exact order.
@@ -557,24 +565,27 @@ class _Suggestion extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({required this.label, required this.color});
+  const _Pill({required this.label, required this.tone});
 
   final String label;
-  final Color color;
+
+  /// **Vai**, không phải màu (WTM-425): giai đoạn rủi ro, hoặc `ai` cho dải
+  /// "nên kéo lại" do Tổng Tài đề xuất.
+  final TtStatus tone;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: TtSpace.x2, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: tone.color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(TtRadius.full),
-        border: Border.all(color: color),
+        border: Border.all(color: tone.color),
       ),
       child: Text(
         label,
         style: TtType.caption.copyWith(
-          color: color,
+          color: TtColors.readableOn(tone.color),
           fontWeight: FontWeight.w600,
         ),
       ),
