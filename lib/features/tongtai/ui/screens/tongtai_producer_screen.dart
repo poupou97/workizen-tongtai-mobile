@@ -252,12 +252,12 @@ class _TongtaiProducerScreenState extends ConsumerState<TongtaiProducerScreen> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _CapabilityPill(label: l10n.producerCapScoring, color: _ai),
-              _CapabilityPill(label: l10n.producerCapRanking, color: _ai),
-              _CapabilityPill(label: l10n.producerCapTrends, color: _ai),
-              _CapabilityPill(label: l10n.producerCapPrice, color: _ai),
-              _CapabilityPill(label: l10n.producerCapQuality, color: _ai),
-              _CapabilityPill(label: l10n.producerCapDelivery, color: _ai),
+              _CapabilityPill(label: l10n.producerCapScoring),
+              _CapabilityPill(label: l10n.producerCapRanking),
+              _CapabilityPill(label: l10n.producerCapTrends),
+              _CapabilityPill(label: l10n.producerCapPrice),
+              _CapabilityPill(label: l10n.producerCapQuality),
+              _CapabilityPill(label: l10n.producerCapDelivery),
             ],
           ),
           const SizedBox(height: 24),
@@ -380,29 +380,37 @@ typedef _ProducerData = ({
   List<BusinessInput> inputs,
 });
 
+/// Viên "năng lực AI" trên trung tâm nguồn hàng.
+///
+/// ⛔ **Không có tham số màu, và đó là chủ đích.**
+///
+/// Cả năm lời gọi trước đây đều truyền cùng một màu (`TtColors.ai`), nên tham
+/// số ấy không phân biệt được gì — nó chỉ mở đường cho lần sau ai đó truyền
+/// một sắc khác vào một dải vốn **luôn** là AI, và luật màu mất một mảnh.
+///
+/// Vai ở đây cố định: mọi viên trong dải này nói *"đây là việc AI làm"*.
 class _CapabilityPill extends StatelessWidget {
   final String label;
-  final Color color;
 
-  const _CapabilityPill({required this.label, required this.color});
+  const _CapabilityPill({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: TtStatus.ai.soft,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color),
+        border: Border.all(color: TtStatus.ai.color),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          // The pill keeps the capability colour for its tint and border; the
-          // label needs the readable twin or it sits at 2.31:1 (WTM-169).
-          color: TtColors.readableOn(color),
+          // Nền nhạt + viền mang màu AI; chữ phải dùng bản đọc được, nếu không
+          // nó ngồi ở 2,31:1 (WTM-169).
+          color: TtColors.readableOn(TtStatus.ai.color),
         ),
       ),
     );

@@ -147,7 +147,9 @@ class _AlertSummary extends StatelessWidget {
               statKey: const Key('stock-summary-out-of-stock'),
               count: outOfStock,
               label: context.l10n.stockOut,
-              color: TtColors.danger,
+              // Vai, không phải màu: mapper của miền đã trả lời "hết hàng
+              // nghĩa là gì" từ DS-2 (WTM-415). Màn chỉ hỏi, không tự dịch.
+              tone: tongtaiStockAlertTone(StockAlertLevel.outOfStock),
             ),
           ),
           const SizedBox(width: TtSpace.x3),
@@ -156,7 +158,7 @@ class _AlertSummary extends StatelessWidget {
               statKey: const Key('stock-summary-low-stock'),
               count: lowStock,
               label: context.l10n.stockLow,
-              color: TtColors.warning,
+              tone: tongtaiStockAlertTone(StockAlertLevel.lowStock),
             ),
           ),
         ],
@@ -170,14 +172,20 @@ class _SummaryStat extends StatelessWidget {
     this.statKey,
     required this.count,
     required this.label,
-    required this.color,
+    required this.tone,
   });
 
   /// Stable test id applied to the tile root (P0 §5).
   final Key? statKey;
   final int count;
   final String label;
-  final Color color;
+
+  /// ⛔ **Vai ngữ nghĩa**, không phải `Color`.
+  ///
+  /// Nhận `Color` là mở cửa cho màn tự đặt màu: từ giây đó ô này có thể mang
+  /// bất kỳ sắc nào, kể cả sắc của một phán quyết nó không có. `TtStatus` giữ
+  /// ánh xạ sang token ở đúng một chỗ (DS-2 · WTM-415).
+  final TtStatus tone;
 
   @override
   Widget build(BuildContext context) {
@@ -185,9 +193,9 @@ class _SummaryStat extends StatelessWidget {
       key: statKey,
       padding: const EdgeInsets.all(TtSpace.x3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
+        color: tone.soft,
         borderRadius: BorderRadius.circular(TtRadius.md),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        border: Border.all(color: tone.color.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +203,7 @@ class _SummaryStat extends StatelessWidget {
           Text(
             '$count',
             style: TtType.bodyLarge.copyWith(
-              color: color,
+              color: tone.color,
               fontWeight: FontWeight.w700,
               fontSize: 22,
             ),
