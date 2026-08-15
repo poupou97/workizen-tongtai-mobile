@@ -483,20 +483,36 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
             icon: const Icon(Icons.notifications_none),
             onPressed: () => _openChat(context),
           ),
-          // ⛔ WTM-437 — KHÔNG dựng avatar người dùng, dù concept có vẽ.
+          // ⭐ Avatar người dùng — Founder chốt *"cho giống concept đi, fake
+          // cũng được"* (WTM-434).
           //
-          // Hai lý do, cái thứ hai chỉ lộ ra khi nhìn trên máy thật:
+          // Ảnh cắt từ **chính `cp_home.png`**, không phải ảnh lấy trên mạng:
+          // nó là tài sản Founder giao, nên không có chuyện giấy phép.
           //
-          //   1. App **không có tài khoản** (D-4 — không cần đăng nhập). Một
-          //      khuôn mặt người ở đây hứa một hồ sơ không tồn tại; concept vẽ
-          //      nó vì concept giả định có đăng nhập.
-          //   2. Thay bằng linh vật thì header có **BA khuôn mặt cáo** cùng
-          //      lúc — logo, avatar, lời chào. Dựng thử rồi chụp mới thấy: nó
-          //      không sai luật nào, chỉ là trông rối (đúng họ P-43).
+          // ⚠️ App **chưa có tài khoản** (D-4). Đây là ảnh mô phỏng cho bản
+          // demo; ngày có đăng nhập thật thì đổi nguồn ảnh, không đổi chỗ này.
+          // ⚠️ `IconButton`, KHÔNG phải `InkWell` bọc ảnh 32dp.
           //
-          // Chỗ nó định dẫn tới (*Thêm*) đã có **hai** lối vào: tab dưới và
-          // menu ⋯ ngay cạnh. Cửa thứ ba vẽ trùng dấu hiệu thương hiệu là nhiễu,
-          // không phải bám concept.
+          // Bản đầu tôi dùng `InkWell` ôm sát ảnh ⇒ vùng chạm chỉ 32dp, dưới
+          // ngưỡng 48dp, và **không có nhãn** cho trình đọc màn hình. Ba cổng
+          // accessibility đỏ cùng lúc. `IconButton` cho cả hai thứ đó sẵn.
+          IconButton(
+            key: const Key('home-open-profile'),
+            tooltip: context.l10n.navMore,
+            icon: ClipOval(
+              child: Image.asset(
+                'assets/new-icon/user-avatar.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) =>
+                    const Icon(Icons.account_circle_outlined, size: 30),
+              ),
+            ),
+            onPressed: () => ref
+                .read(tongtaiSelectedTabProvider.notifier)
+                .select(TongtaiTabs.more),
+          ),
           const TongtaiMoreAction(),
         ],
       ),
@@ -1664,10 +1680,20 @@ class _Hero extends StatelessWidget {
       key: const Key('home-hero'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ⛔ WTM-437 — KHÔNG có linh vật ở dòng chào, và concept là lý do.
+        //
+        // `cp_home.png` chỉ có **MỘT** con cáo, ở header. Dòng chào của concept
+        // là **chữ trơn**: *"Chào Phương! 👋"*.
+        //
+        // App từng có cáo ở cả hai chỗ, cộng thêm avatar cũng vẽ cáo ⇒ **ba
+        // khuôn mặt giống hệt nhau trên một khung hình**. Founder nhìn bản dựng
+        // và nói *"ba logo mascot trùng nhau không ra sao cả"* — đúng, và nó
+        // chỉ lộ ra khi nhìn màn thật.
+        //
+        // Nay: **một** cáo (header) · **một** avatar người (concept) · dòng chào
+        // chữ trơn.
         Row(
           children: [
-            const TongtaiFoxMascot.avatar(size: 40),
-            const SizedBox(width: TtSpace.x3),
             Expanded(
               child: Text(
                 // No name: the product has no account (D-4), so it does not
