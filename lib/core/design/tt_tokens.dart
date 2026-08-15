@@ -107,18 +107,53 @@ abstract final class TtColors {
   /// [surface] lẫn [surfaceSecondary]. Chữ [neutral] trên nền này đạt ~6,4:1.
   static const Color neutralSoft = Color(0xFFE8EDF3);
 
-  // ── ĐỊNH DANH năng lực (WTM-426) ───────────────────────────────────────
+  // ── ĐỊNH DANH năng lực (WTM-426 · sắc theo concept ở WTM-439) ──────────
   //
   // ⛔ KHÔNG mang nghĩa trạng thái. Xem `TtCapability` để biết vì sao chúng
   // phải là hằng riêng chứ không dùng lại `success`/`warning`/`info`/`ai`.
   //
-  // Mọi sắc dưới đây đạt ≥ 4,5:1 trên nền trắng — cổng `tt_tokens_test` đo
-  // thật, không tin ước lượng.
+  // Sắc **đo bằng pixel** từ `docs/01-PRODUCT/concept-1/cp_home.png` (WTM-439,
+  // Founder: *"màu nav bám sát concept"*) — không phải sắc tôi tự chọn.
+  //
+  // ⚠️ Mỗi năng lực có **HAI** hằng, và đó không phải trùng lặp:
+  //
+  //   * `capabilityX`        — **biểu tượng**. Đồ hoạ chỉ cần 3:1 (WCAG).
+  //   * `capabilityXOnLight` — **chữ nhãn**. Chữ cần **4,5:1**.
+  //
+  // Vì sao phải tách: đo trên nền trắng, sắc concept đạt lần lượt **3,91 ·
+  // 4,46 · 2,57 · 5,18**. Ba trong bốn **trượt AA cho chữ** — cam tệ nhất, chỉ
+  // 2,57:1. Bê thẳng vào nhãn tab là làm hỏng đúng thứ Founder yêu cầu kiểm ở
+  // WTM-426 (*"accessibility/contrast"*).
+  //
+  // Khuôn này đã có tiền lệ: `brand` + chữ trắng chỉ 2,80:1 ⇒ sinh `brandOnDark`
+  // (WTM-169). Cùng cách giải, cùng lý do.
   static const Color capabilityHome = Color(0xFF334155); // đá 700 — phi sắc
-  static const Color capabilityProducer = Color(0xFF4D7C0F); // chanh 700
-  static const Color capabilityInventory = Color(0xFF0F766E); // mòng két 700
-  static const Color capabilityConsumer = Color(0xFF4338CA); // chàm 700
-  static const Color capabilityOpportunity = Color(0xFFA21CAF); // đỗ quyên 700
+  static const Color capabilityHomeOnLight = Color(0xFF334155); // 10,9:1
+
+  static const Color capabilityProducer = Color(0xFF00953E); // lục concept
+  static const Color capabilityProducerOnLight = Color(0xFF008839); // 4,58:1
+
+  static const Color capabilityInventory = Color(0xFF206EFD); // lam concept
+  static const Color capabilityInventoryOnLight = Color(0xFF1D6CFD); // 4,55:1
+
+  /// ⚠️ Lệch khỏi concept **một bậc**, và đây là lý do đo được.
+  ///
+  /// Cam concept là `#FD7E00` — nhưng nó chỉ đạt **2,57:1** trên nền trắng, tức
+  /// trượt **cả ngưỡng 3:1 dành cho ĐỒ HOẠ**, không riêng ngưỡng chữ. Một biểu
+  /// tượng tab ở mức ấy là mờ với người mắt kém, ngoài nắng, hoặc trên màn rẻ.
+  ///
+  /// `#E97400` là sắc **sáng nhất còn qua được 3:1** (3,02:1) — giữ đúng hue
+  /// cam của concept, chỉ hạ độ sáng đúng mức tối thiểu.
+  ///
+  /// Cùng loại lệch đã ghi cho `brandOnDark`: **spec thắng, trừ khi một cổng
+  /// chất lượng có sẵn nói không.**
+  static const Color capabilityConsumer = Color(
+    0xFFE97400,
+  ); // cam concept, hạ 1 bậc
+  static const Color capabilityConsumerOnLight = Color(0xFFB85C00); // 4,60:1
+
+  static const Color capabilityOpportunity = Color(0xFF853DFB); // tím concept
+  static const Color capabilityOpportunityOnLight = Color(0xFF853DFB); // 5,18:1
 
   // ── Chữ ────────────────────────────────────────────────────────────────
   static const Color textPrimary = Color(0xFF0F172A);
@@ -226,12 +261,24 @@ enum TtCapability {
   /// định danh là hứa một thứ nó không có.
   more;
 
+  /// Sắc cho **biểu tượng** — đồ hoạ, ngưỡng WCAG là 3:1.
   Color get color => switch (this) {
     TtCapability.home => TtColors.capabilityHome,
     TtCapability.producer => TtColors.capabilityProducer,
     TtCapability.inventory => TtColors.capabilityInventory,
     TtCapability.consumer => TtColors.capabilityConsumer,
     TtCapability.opportunity => TtColors.capabilityOpportunity,
+    TtCapability.more => TtColors.neutral,
+  };
+
+  /// Sắc cho **chữ nhãn** — ngưỡng 4,5:1, nên ba năng lực phải đậm hơn sắc
+  /// concept. Xem `TtColors` để biết số đo và lý do (WTM-439).
+  Color get labelColor => switch (this) {
+    TtCapability.home => TtColors.capabilityHomeOnLight,
+    TtCapability.producer => TtColors.capabilityProducerOnLight,
+    TtCapability.inventory => TtColors.capabilityInventoryOnLight,
+    TtCapability.consumer => TtColors.capabilityConsumerOnLight,
+    TtCapability.opportunity => TtColors.capabilityOpportunityOnLight,
     TtCapability.more => TtColors.neutral,
   };
 }
