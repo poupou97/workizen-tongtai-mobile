@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/core/design/tt.dart';
 import 'package:tongtai/features/tongtai/ai/business_recommendation.dart';
 import 'package:tongtai/features/tongtai/ai/business_summary.dart';
 import 'package:tongtai/features/tongtai/ai/tongtai_ai_key_store.dart';
@@ -230,6 +231,41 @@ void main() {
     );
     expect(find.text('JulyCat'), findsOneWidget);
     expect(find.text('JuneCat'), findsNothing);
+
+    // ── WTM-429 · kỳ đang chọn KHÔNG được mang màu AI ────────────────────
+    //
+    // Bản trước tô kỳ đang chọn bằng tím AI. Chọn "tháng này" là thao tác lọc
+    // bình thường — không có AI nào tham gia. Và đây là **màn có phần AI thật**:
+    // nếu tím vừa nghĩa là *"AI viết đoạn này"* vừa nghĩa là *"kỳ đang chọn"*,
+    // người bán mất luôn tín hiệu để biết chỗ nào là AI.
+    //
+    // Khẳng định ở tầng HÀNH VI, không phải cú pháp: một cổng cấm
+    // `selectedColor:` sẽ xanh nếu ai đó đạt cùng hậu quả bằng `labelStyle`,
+    // `ChipTheme`, hay một component tự dựng (P-45).
+    final chosen = tester.widget<ChoiceChip>(
+      find.byKey(const Key('reports-period-thisMonth')),
+    );
+    expect(
+      chosen.selected,
+      isTrue,
+      reason:
+          'chip vừa bấm phải đang ở trạng thái chọn — nếu không, hai '
+          'expect dưới đây kiểm một chip bỏ chọn và luôn xanh vô nghĩa',
+    );
+    expect(
+      chosen.selectedColor,
+      isNull,
+      reason:
+          'màn KHÔNG được tự đặt sắc chọn — 17/18 tệp còn lại nhận từ '
+          'theme, và tím là vai AI chứ không phải "đang chọn"',
+    );
+    expect(
+      chosen.labelStyle?.color,
+      isNot(TtColors.ai),
+      reason:
+          'chữ kỳ đang chọn mang màu AI ⇒ trên chính màn có AI thật, '
+          'người bán không còn phân biệt được đâu là AI nói',
+    );
   });
 
   testWidgets(
