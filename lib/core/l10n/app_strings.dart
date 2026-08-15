@@ -1290,6 +1290,13 @@ abstract class AppStrings {
   String get demoReset;
 
   /// "Ngày 12 / 30".
+  /// Nhãn nút xoá MỘT DÒNG trong đơn đang tạo — nói rõ **xoá cái gì**.
+  ///
+  /// Trình đọc màn hình chỉ đọc được thứ ta đặt tên. Một nút mang biểu tượng
+  /// `×` không nhãn thì người khiếm thị nghe ra "nút", không biết nó xoá dòng
+  /// nào — mà đây là hành động **phá huỷ** (WTM-432).
+  String orderRemoveLine(String product);
+
   String demoDayOf(int day, int total);
 
   String get demoNeedsCatalogue;
@@ -3439,6 +3446,9 @@ class AppStringsVi extends AppStrings {
   String get demoNextWeek => 'Tuần tiếp';
   @override
   String get demoReset => 'Bắt đầu lại';
+  @override
+  String orderRemoveLine(String product) => 'Xoá $product khỏi đơn';
+
   @override
   String demoDayOf(int day, int total) => 'Ngày $day / $total';
   @override
@@ -5675,6 +5685,9 @@ class AppStringsEn extends AppStrings {
   String get demoNextWeek => 'Next week';
   @override
   String get demoReset => 'Start over';
+  @override
+  String orderRemoveLine(String product) => 'Remove $product from the order';
+
   @override
   String demoDayOf(int day, int total) => 'Day $day / $total';
   @override

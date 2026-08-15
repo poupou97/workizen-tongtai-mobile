@@ -141,6 +141,20 @@ void main() {
     ),
   );
 
+  // ⚠️ **GIỚI HẠN ĐÃ BIẾT — cổng này quét TRẠNG THÁI KHỞI ĐẦU** (WTM-432).
+  //
+  // Mỗi mục dưới đây dựng màn ở trạng thái vừa mở. Widget chỉ sinh ra **sau
+  // tương tác** — một dòng đơn hàng vừa thêm, kết quả tìm kiếm, thẻ lỗi sau khi
+  // bấm — **không tồn tại** lúc guideline chạy, nên cổng không thể kiểm chúng.
+  //
+  // Đã trả giá một lần: nút xoá dòng ở `create-order` sống suốt mà không có
+  // nhãn, dù màn ấy CÓ trong danh sách này. `_items` khởi tạo rỗng ⇒
+  // `itemBuilder` không dựng dòng nào ⇒ không có nút để kiểm.
+  //
+  // ⇒ Màn "đã được phủ" ở đây **không** có nghĩa là mọi trạng thái của nó đã
+  // được kiểm. Khẳng định cho trạng thái sau tương tác phải sống trong test
+  // riêng của màn, nơi test đã lái được màn tới đó — khuôn mẫu:
+  // `orders/tongtai_create_order_screen_test.dart` (WTM-432).
   final screens = <String, Widget Function()>{
     'home': () => TongtaiHomeScreen(clock: () => DateTime(2026, 7, 30)),
     'producer': () => const TongtaiProducerScreen(),

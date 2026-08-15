@@ -279,6 +279,12 @@ class _TongtaiCreateOrderScreenState extends State<TongtaiCreateOrderScreen> {
                           trailing: IconButton(
                             key: Key('order-line-remove-$i'),
                             icon: const Icon(Icons.close, size: 18),
+                            // Nói rõ XOÁ CÁI GÌ, không chỉ "Xoá" (WTM-432):
+                            // đây là hành động phá huỷ, và trình đọc màn hình
+                            // chỉ đọc được thứ ta đặt tên.
+                            tooltip: context.l10n.orderRemoveLine(
+                              item.productName,
+                            ),
                             onPressed: () => _removeItem(i),
                           ),
                         );
