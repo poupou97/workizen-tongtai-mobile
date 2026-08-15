@@ -36,6 +36,7 @@ class SlowMovingCapital {
     required this.slowMovingCount,
     required this.unknownCostCount,
     required this.windowDays,
+    this.productIds = const {},
   });
 
   static const SlowMovingCapital none = SlowMovingCapital(
@@ -55,8 +56,8 @@ class SlowMovingCapital {
     required int windowDays,
   }) {
     var amount = 0.0;
-    var slow = 0;
     var unknownCost = 0;
+    final ids = <String>{};
 
     for (final p in products) {
       final quantity = p.quantity;
@@ -65,7 +66,7 @@ class SlowMovingCapital {
       if (quantity == null || quantity <= 0) continue;
       if (soldProductIds.contains(p.id)) continue;
 
-      slow++;
+      ids.add(p.id);
       final cost = p.costPrice;
       if (cost == null) {
         unknownCost++;
@@ -76,9 +77,10 @@ class SlowMovingCapital {
 
     return SlowMovingCapital(
       tiedUpAmount: amount,
-      slowMovingCount: slow,
+      slowMovingCount: ids.length,
       unknownCostCount: unknownCost,
       windowDays: windowDays,
+      productIds: Set.unmodifiable(ids),
     );
   }
 
@@ -98,6 +100,13 @@ class SlowMovingCapital {
   /// Độ dài cửa sổ, để câu thông báo nói đúng con số nó dựa vào — thay vì viết
   /// cứng một số rồi lệch khi ai đó đổi cửa sổ.
   final int windowDays;
+
+  /// Đúng những mặt hàng đã đếm ở [slowMovingCount].
+  ///
+  /// Có mặt ở đây để thẻ **làm được việc gì đó**, không chỉ để đọc: bấm vào là
+  /// danh sách Kho lọc về đúng tập này. Một con số tiền đang nằm mà không dẫn
+  /// tới danh sách thì chỉ là một nỗi lo mới (ANALYSIS.md điều 2).
+  final Set<String> productIds;
 
   bool get hasSlowMoving => slowMovingCount > 0;
 

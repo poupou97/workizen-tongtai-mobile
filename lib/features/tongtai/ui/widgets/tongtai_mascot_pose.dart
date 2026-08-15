@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 /// **Con cáo, và chỉ ở nơi nó đang làm gì đó** — Epic WTM-349 §17.
 ///
-/// Bộ 25 tư thế do Founder cung cấp (`docs/01-PRODUCT/concept-1/icon
-/// mascot.png`), cắt bằng phân tích thành phần liên thông trên kênh alpha —
-/// không cắt theo lưới 5×5 đều, vì lưới đó không đều và cách ấy làm mỗi ảnh
-/// dính một mẩu của tư thế bên cạnh.
+/// Bộ **Ai CRM** 24 tư thế do Founder giao (`assets/mascot/new-mascot.png`,
+/// 2026-08-14), cắt bằng `tool/cut_mascot_set.py` — phân tích thành phần liên
+/// thông, không cắt theo lưới, vì ô trong tờ art không đều và cắt lưới làm mỗi
+/// ảnh dính một mẩu của tư thế bên cạnh.
+///
+/// Thay bộ origami cũ (WTM-111) **một lượt, không để lẫn**: hai con cáo vẽ khác
+/// nhau trong cùng một app là cách chắc chắn để người dùng nghĩ họ đang nhìn
+/// hai sản phẩm.
 ///
 /// ## Luật dùng
 ///
@@ -24,28 +28,34 @@ enum MascotPose {
   working('at_laptop'),
 
   /// Vừa hiểu ra điều gì đó, đang trình bày con số.
-  explaining('chart_tablet'),
+  explaining('analyzing'),
 
   /// Đưa ra danh sách việc cần làm.
-  planning('checklist'),
+  planning('pointing'),
 
   /// Có chuyện cần chú ý.
-  warning('megaphone'),
+  warning('announcing'),
 
   /// Mừng một mốc thật.
-  celebrating('celebrate'),
+  celebrating('celebrating'),
 
   /// Đã xem và không có gì gấp — bình thản, không phải vui mừng.
-  calm('meditating'),
+  /// Bộ mới: cáo khoanh tay, **không** cáo nhảy mừng.
+  calm('confident'),
 
   /// Chưa có gì để xem.
-  idle('thinking');
+  ///
+  /// Bộ mới dùng cáo cầm kính lúp (*đang tìm*), KHÔNG dùng cáo cười. Màn "chưa
+  /// đủ dữ liệu" mà có một con cáo hớn hở thì hình đã nói dối trước cả chữ —
+  /// và bộ art mới có sẵn cả tư thế buồn lẫn tư thế mừng, nên chọn sai ở đây
+  /// là chọn, không phải thiếu.
+  idle('searching');
 
   const MascotPose(this._file);
 
   final String _file;
 
-  String get asset => 'assets/mascot/poses/$_file.png';
+  String get asset => 'assets/mascot/brand/$_file.png';
 }
 
 /// Một tư thế linh vật, đã có nhãn trợ năng.

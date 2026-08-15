@@ -863,7 +863,29 @@ abstract class AppStrings {
   String get obV2Continue;
   String get obV2SkipProfile;
 
-  // ── Màn khởi động (WTM-367) ─────────────────────────────────────────────
+  // ── Màn khởi động (WTM-367 · nhận diện mới WTM-416) ──────────────────────
+
+  /// Chủ sở hữu sản phẩm, đặt trên tên sản phẩm — theo bố cục Founder giao.
+  // ── Vốn chôn trong hàng chậm bán (WTM-411 · concept-1 cp3) ──────────────
+
+  String get invShowAll;
+  String get invTiedUpTitle;
+
+  /// `count` mặt hàng không bán được cái nào trong `days` ngày.
+  String invTiedUpBody(int count, int days);
+
+  /// Phần **chưa tính được** vì thiếu giá vốn. Câu chữ MỜI khai, không trách:
+  /// thiếu giá vốn là điều app chưa hỏi, không phải lỗi người bán.
+  String invTiedUpUnknownCost(int count);
+
+  String get invTiedUpAction;
+
+  String get startupBrandOwner;
+
+  /// Nhãn nền tảng ở đường kẻ ngang. KHÔNG dịch: đây là một phần của khoá
+  /// nhận diện, giống chữ "Ai CRM" trong logo.
+  String get startupPlatform;
+
   String get startupBrand;
   String get startupTagline;
   String get startupWorking;
@@ -871,12 +893,6 @@ abstract class AppStrings {
   /// Một chặng khởi động THẬT. `count` là số bản ghi thật, `null` khi chặng
   /// đó không đếm gì — và khi đó câu chữ không được bịa ra một con số.
   String startupStep(String stepCode, int? count);
-  String get startupValueUnderstandTitle;
-  String get startupValueUnderstandBody;
-  String get startupValueActTitle;
-  String get startupValueActBody;
-  String get startupValueMeasureTitle;
-  String get startupValueMeasureBody;
   String get startupPrivacy;
 
   /// Nhãn trợ năng cho linh vật — nói **AI đang làm gì**, không tả con cáo.
@@ -2714,6 +2730,22 @@ class AppStringsVi extends AppStrings {
   @override
   String get obV2SkipProfile => 'Bỏ qua, tôi khai sau';
   @override
+  String get invShowAll => 'Xem tất cả';
+  @override
+  String get invTiedUpTitle => 'Vốn đang nằm trong hàng chậm bán';
+  @override
+  String invTiedUpBody(int count, int days) =>
+      '$count mặt hàng còn tồn, không bán được cái nào trong $days ngày qua';
+  @override
+  String invTiedUpUnknownCost(int count) =>
+      'Chưa tính $count mặt hàng — khai giá vốn để thấy con số đủ';
+  @override
+  String get invTiedUpAction => 'Xem hàng chậm bán';
+  @override
+  String get startupBrandOwner => 'Workizen';
+  @override
+  String get startupPlatform => 'AI Platform';
+  @override
   String get startupBrand => 'Tổng Tài AI';
   @override
   String get startupTagline => 'Trợ lý điều hành doanh nghiệp bằng AI';
@@ -2726,19 +2758,6 @@ class AppStringsVi extends AppStrings {
     'catalog' => 'Đã đọc ${count ?? 0} sản phẩm',
     _ => 'Đã đọc ${count ?? 0} đơn hàng',
   };
-  @override
-  String get startupValueUnderstandTitle => 'Hiểu doanh nghiệp';
-  @override
-  String get startupValueUnderstandBody =>
-      'Phân tích dữ liệu, nhận diện cơ hội';
-  @override
-  String get startupValueActTitle => 'Đề xuất hành động';
-  @override
-  String get startupValueActBody => 'Gợi ý việc cần làm ưu tiên mỗi ngày';
-  @override
-  String get startupValueMeasureTitle => 'Đo lường kết quả';
-  @override
-  String get startupValueMeasureBody => 'Theo dõi hiệu quả và tối ưu liên tục';
   @override
   String get startupPrivacy => 'Dữ liệu của bạn nằm trên máy này';
   @override
@@ -3596,6 +3615,19 @@ class AppStringsVi extends AppStrings {
 
 class AppStringsEn extends AppStrings {
   const AppStringsEn();
+
+  @override
+  String get invShowAll => 'Show all';
+  @override
+  String get invTiedUpTitle => 'Capital sitting in slow-moving stock';
+  @override
+  String invTiedUpBody(int count, int days) =>
+      '$count items in stock with no sales in the last $days days';
+  @override
+  String invTiedUpUnknownCost(int count) =>
+      '$count items not counted — add cost price to see the full number';
+  @override
+  String get invTiedUpAction => 'View slow-moving stock';
 
   @override
   String get actionViewAll => 'View all';
@@ -4923,6 +4955,10 @@ class AppStringsEn extends AppStrings {
   @override
   String get obV2SkipProfile => 'Skip, I will fill this in later';
   @override
+  String get startupBrandOwner => 'Workizen';
+  @override
+  String get startupPlatform => 'AI Platform';
+  @override
   String get startupBrand => 'Tổng Tài AI';
   @override
   String get startupTagline => 'The AI assistant that runs your business';
@@ -4935,18 +4971,6 @@ class AppStringsEn extends AppStrings {
     'catalog' => 'Read ${count ?? 0} products',
     _ => 'Read ${count ?? 0} orders',
   };
-  @override
-  String get startupValueUnderstandTitle => 'Understand the business';
-  @override
-  String get startupValueUnderstandBody => 'Analyse data, spot opportunities';
-  @override
-  String get startupValueActTitle => 'Suggest what to do';
-  @override
-  String get startupValueActBody => 'Prioritised work, every day';
-  @override
-  String get startupValueMeasureTitle => 'Measure results';
-  @override
-  String get startupValueMeasureBody => 'Track what worked and keep tuning';
   @override
   String get startupPrivacy => 'Your data stays on this device';
   @override

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/design/tt.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../startup/startup_pipeline.dart';
-import '../widgets/tongtai_mascot_pose.dart';
 
 /// **Màn khởi động** — WTM-367 (Epic WTM-362).
 ///
@@ -27,6 +26,22 @@ import '../widgets/tongtai_mascot_pose.dart';
 /// Màn này chỉ được dựng khi khởi động lâu hơn ngưỡng của
 /// `StartupRun.visibleThreshold`. Một màn loading chớp qua làm app trông giật —
 /// tức là thứ để trấn an lại thành thứ gây lo.
+///
+/// ## Nhận diện mới (WTM-416) — chép bố cục, KHÔNG chép câu chữ
+///
+/// Founder giao `assets/new-icon/loading-screen.png`. Màn này lấy đúng bố cục
+/// ấy: logo trên cùng · chủ sở hữu · tên sản phẩm · đường kẻ "AI Platform" ·
+/// linh vật · dòng trạng thái.
+///
+/// ⚠️ Một chỗ **cố ý lệch bản vẽ**: bản vẽ ghi *"Customer Relationship
+/// Management"*. Tổng Tài không phải một CRM — nó có tám năng lực, trong đó
+/// quan hệ khách hàng chỉ là một. In dòng ấy lên màn đầu tiên là **hứa sai sản
+/// phẩm** với chính người sắp dùng nó, nên chỗ đó dùng câu mô tả đã có sẵn của
+/// app. Tên hiển thị, logo, và nhãn nền tảng thì giữ nguyên bản vẽ.
+///
+/// ⚠️ Linh vật ở đây là **ảnh cắt thẳng từ bản vẽ**, không phải một tư thế
+/// trong `MascotPose`: hai bộ cáo vẽ khác nhau, và trộn chúng trên cùng một màn
+/// làm người xem thấy hai sản phẩm. Bộ 25 tư thế vẫn dùng cho trong app.
 class TongtaiStartupScreen extends StatelessWidget {
   const TongtaiStartupScreen({super.key, required this.progress});
 
@@ -43,31 +58,62 @@ class TongtaiStartupScreen extends StatelessWidget {
         : progress.last.total;
 
     return Scaffold(
-      backgroundColor: TtColors.surfaceSecondary,
+      // Nền trắng theo bản vẽ. Dải linh vật mang sẵn nền chuyển sắc của chính
+      // nó, mép đo được 250–254 nên ghép vào đây không lộ đường.
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: TtSpace.screenH),
           child: Column(
             children: [
-              const Spacer(),
-              TongtaiMascotPose(
-                MascotPose.working,
-                height: 170,
-                semanticsLabel: l10n.startupWorking,
+              const Spacer(flex: 2),
+              // Logo co được, không cố định chiều cao: ở 320px với chữ 1,3×
+              // phần chữ nở ra và bản cố định 132px làm tràn 32px — test §3
+              // bắt đúng chỗ này. Trần 132 giữ cho máy lớn không phóng to logo.
+              Flexible(
+                flex: 3,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 132),
+                  child: Image.asset(
+                    'assets/startup/logo_lockup.png',
+                    fit: BoxFit.contain,
+                    // Logo đã mang sẵn tên thương hiệu; đọc lại tên ấy bằng
+                    // giọng nói là thừa, nên nhãn trợ năng nói việc đang diễn ra.
+                    semanticLabel: l10n.startupWorking,
+                  ),
+                ),
               ),
-              const SizedBox(height: TtSpace.x5),
-              Text(l10n.startupBrand, style: TtType.display),
+              const SizedBox(height: TtSpace.x4),
+              Text(
+                l10n.startupBrandOwner,
+                style: TtType.label.copyWith(color: TtColors.ai),
+              ),
+              const SizedBox(height: TtSpace.x1),
+              Text(
+                l10n.startupBrand,
+                textAlign: TextAlign.center,
+                style: TtType.display,
+              ),
               const SizedBox(height: TtSpace.x2),
+              _PlatformDivider(label: l10n.startupPlatform),
+              const SizedBox(height: TtSpace.x3),
               Text(
                 l10n.startupTagline,
                 textAlign: TextAlign.center,
                 style: TtType.body.copyWith(color: TtColors.textSecondary),
               ),
-              const SizedBox(height: TtSpace.x8),
-              _ProgressCard(progress: progress, done: done, total: total),
-              const SizedBox(height: TtSpace.x8),
-              const _ValueRow(),
               const Spacer(),
+              Flexible(
+                flex: 8,
+                child: Image.asset(
+                  'assets/startup/startup_mascot.png',
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true,
+                ),
+              ),
+              const Spacer(),
+              _ProgressCard(progress: progress, done: done, total: total),
+              const SizedBox(height: TtSpace.x4),
               Padding(
                 padding: const EdgeInsets.only(bottom: TtSpace.x4),
                 child: Text(
@@ -83,6 +129,23 @@ class TongtaiStartupScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Đường kẻ hai bên một nhãn ngắn — đúng khoá nhận diện Founder giao.
+class _PlatformDivider extends StatelessWidget {
+  const _PlatformDivider({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const Expanded(child: Divider(color: TtColors.border, endIndent: 12)),
+      Text(label, style: TtType.label.copyWith(color: TtColors.brand)),
+      const Expanded(child: Divider(color: TtColors.border, indent: 12)),
+    ],
+  );
 }
 
 class _ProgressCard extends StatelessWidget {
@@ -154,67 +217,4 @@ class _ProgressCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ValueRow extends StatelessWidget {
-  const _ValueRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _Value(
-          icon: Icons.psychology_outlined,
-          color: TtColors.ai,
-          title: l10n.startupValueUnderstandTitle,
-          body: l10n.startupValueUnderstandBody,
-        ),
-        _Value(
-          icon: Icons.track_changes,
-          color: TtColors.brand,
-          title: l10n.startupValueActTitle,
-          body: l10n.startupValueActBody,
-        ),
-        _Value(
-          icon: Icons.insights_outlined,
-          color: TtColors.success,
-          title: l10n.startupValueMeasureTitle,
-          body: l10n.startupValueMeasureBody,
-        ),
-      ],
-    );
-  }
-}
-
-class _Value extends StatelessWidget {
-  const _Value({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.body,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-    child: Column(
-      children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(height: TtSpace.x2),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: TtType.label.copyWith(color: TtColors.textPrimary),
-        ),
-        const SizedBox(height: TtSpace.x1),
-        Text(body, textAlign: TextAlign.center, style: TtType.caption),
-      ],
-    ),
-  );
 }

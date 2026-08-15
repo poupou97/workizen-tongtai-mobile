@@ -11,5 +11,6 @@ library;
 export 'tt_ai_story.dart';
 export 'tt_buttons.dart';
 export 'tt_cards.dart';
+export 'tt_thumbnail.dart';
 export 'tt_theme.dart';
 export 'tt_tokens.dart';

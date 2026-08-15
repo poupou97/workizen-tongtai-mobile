@@ -1,7 +1,7 @@
 name: tongtai
 description: "Tổng Tài — AI-First Business OS for SME entrepreneurs (Workizen)."
 publish_to: 'none'
-version: 0.1.0+12
+version: 0.1.0+16
 
 environment:
   sdk: ^3.12.2
@@ -84,46 +84,61 @@ flutter:
   uses-material-design: true
   assets:
     - assets/mascot/
-    - assets/mascot/poses/
+    # WTM-417 — bộ linh vật Ai CRM, cắt từ tờ art Founder giao bằng
+    # `tool/cut_mascot_set.py`. Bộ origami cũ (`assets/mascot/poses/`) KHÔNG
+    # còn khai ở đây: 25 PNG không ai dùng thì không có lý do đi vào APK. Tệp
+    # vẫn nằm trong repo, gỡ khai báo là việc đảo ngược được.
+    - assets/mascot/brand/
     # Bộ dữ liệu thương mại demo (WTM-325). Đóng gói vào app để Founder nhập
     # được ngay cả khi chưa nối Google Drive — cùng file, cùng đường import.
     - assets/demo/
+    # WTM-414 — ảnh bộ demo, bundle để chạy offline và cùng SKU luôn ra cùng ảnh.
+    - assets/demo/products/
+    # WTM-416 — asset màn khởi động. KHÔNG bundle `assets/branding/`: những tệp
+    # ấy chỉ để generator sinh icon native, đưa vào APK là 5 ảnh 1024px chết.
+    - assets/startup/
 
-# App launcher icon — WTM-366 (Epic WTM-362).
+# App launcher icon — WTM-416. Thay bộ cáo-mặc-vest-trên-nền-tối của WTM-366.
 #
-# Nguồn: docs/01-PRODUCT/concept-1/news-icon.png (Founder cung cấp, bản thứ
-# hai) — cáo mặc vest giơ ngón cái, cầm máy tính bảng, trước khung bo góc phát
-# sáng trên nền TỐI. Thay bộ Origami-trên-navy của WTM-110: hai hình cáo khác
-# nhau giữa icon và trong app là cách người dùng không nhận ra cùng một sản
-# phẩm, và linh vật mới nay có mặt khắp onboarding.
+# ⛔ KHÔNG sửa tay bốn tệp trong `assets/branding/`. Chúng được SINH RA bởi
+# `tool/build_brand_assets.py` từ tệp gốc Founder giao (`assets/new-icon/`), vì
+# một logo phải ra bốn tệp ở bốn tỉ lệ khác nhau và tỉ lệ là chỗ luôn bị nhớ
+# sai. Đổi logo ⇒ thay tệp gốc rồi chạy lại script.
 #
-# ⚠️ Ảnh gốc là ảnh NGANG và chủ thể lệch trái (tâm ngang ở 769/1536). Cắt vuông
-# quanh CHỦ THỂ chứ không quanh tâm ảnh — cắt giữa sẽ đẩy con cáo lệch trong
-# icon.
+# ⚠️ Vùng an toàn của adaptive icon là **58% khung, KHÔNG phải 66%**. Khung
+# 108dp · nhìn thấy 72dp · an toàn 66dp — và 66dp trên khung 108dp là **61%**.
+# Ghi chú trước ở đây chép thẳng số 66 từ dp sang phần trăm; dựng thử đúng 66%
+# thì mặt nạ tròn cắt cụt chấm chữ "i". Lý lẽ đầy đủ nằm trong script.
 #
-# ⚠️ Foreground của adaptive icon thu về 66% khung và đặt giữa. Mặt nạ tròn của
-# Android chỉ chừa ~66% chiều rộng; dán ảnh vuông thẳng vào là mất tai và cằm
-# con cáo — chỗ hỏng phổ biến nhất của icon Android. Nền adaptive đặt đúng màu
-# nền của ảnh (gần đen tuyệt đối, đo được 0–1 ở bốn góc) nên mép ảnh thu nhỏ
-# không để lại đường ghép. Mẹo này chỉ dùng được vì nền TỐI VÀ PHẲNG.
+# ⚠️ Nền adaptive nay là **ẢNH chuyển sắc**, không phải một mã màu: bộ nhận
+# diện mới có nền trắng → tím/hồng nhạt, mà một màu phẳng thì hoặc mất chuyển
+# sắc, hoặc để lộ đường ghép ở mép logo.
 flutter_launcher_icons:
   image_path: "assets/branding/app_icon.png"
   remove_alpha_ios: true
   android: true
   ios: true
   min_sdk_android: 21
-  adaptive_icon_background: "#000000"
+  adaptive_icon_background: "assets/branding/app_icon_background.png"
   adaptive_icon_foreground: "assets/branding/app_icon_foreground.png"
 
-# Native splash — nền cam cùng icon (WTM-366). Splash gốc chỉ là khoảnh khắc
-# trước khi Flutter dựng frame đầu; màn khởi động thật là WTM-367.
+# Native splash — chỉ là khoảnh khắc trước khi Flutter dựng frame đầu; màn khởi
+# động THẬT (logo + linh vật + dòng trạng thái) là màn Flutter, WTM-416 B.
+#
+# ⚠️ Splash dùng tệp RIÊNG, không dùng lại foreground của launcher: launcher bị
+# generator inset 16% còn splash Android 12 bị mặt nạ tròn 66,7% — một tệp
+# không vừa cả hai. Chi tiết trong `tool/build_brand_assets.py`.
+#
+# ⚠️ `image_dark` là một tệp KHÁC, không phải cùng một tệp. Chữ "CRM" trong logo
+# màu navy (1,22,61): đặt lên nền tối thì chữ biến mất và người dùng thấy một
+# logo cụt. Bản tối đổi riêng chữ ấy sang trắng.
 flutter_native_splash:
-  color: "#000000"
-  color_dark: "#000000"
-  image: "assets/branding/app_icon_foreground.png"
-  image_dark: "assets/branding/app_icon_foreground.png"
+  color: "#FFFFFF"
+  color_dark: "#0D1126"
+  image: "assets/branding/app_splash_logo.png"
+  image_dark: "assets/branding/app_splash_logo_dark.png"
   android_12:
-    color: "#000000"
-    color_dark: "#000000"
-    image: "assets/branding/app_icon_foreground.png"
-    image_dark: "assets/branding/app_icon_foreground.png"
+    color: "#FFFFFF"
+    color_dark: "#0D1126"
+    image: "assets/branding/app_splash_logo.png"
+    image_dark: "assets/branding/app_splash_logo_dark.png"
