@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/design/tt.dart';
-
 /// **Khuôn mặt của Workizen AI** — bộ linh vật Ai CRM (WTM-417).
 ///
 /// Hai dạng, và khác nhau ở **vai**, không ở kích thước:
@@ -40,7 +38,17 @@ class TongtaiFoxMascot extends StatelessWidget {
     String? semanticsLabel,
   }) : this._(size, key: key, onDisc: false, semanticsLabel: semanticsLabel);
 
-  /// Đầu cáo trên đĩa — avatar của Workizen AI khi nó đang nói.
+  /// Đầu cáo **không đĩa** — avatar của Workizen AI khi nó đang nói.
+  ///
+  /// ⚠️ WTM-436 — bản trước vẽ một đĩa `brandSoft` sau đầu cáo. Trên nền trang
+  /// nó đọc ra như **một mảng trắng dán sau linh vật**, và Founder gọi đúng tên:
+  /// *"rất thô"*. Ảnh nguồn vốn đã trong suốt (đo 24 tệp: 1,0–6,7% pixel trắng,
+  /// và đó là lông má + áo hoodie của cáo) — cái đĩa là do widget thêm vào.
+  ///
+  /// `cp_home.png` vẽ linh vật nằm **thẳng trên nền**, không đĩa.
+  ///
+  /// Tín hiệu *"AI đang nói"* không mất: nó nằm ở **nền thẻ** (`TtStatus.ai.soft`)
+  /// bao quanh cả khối, đúng như concept vẽ — không cần một vòng tròn quanh đầu.
   const TongtaiFoxMascot.avatar({
     Key? key,
     double size = 32,
@@ -59,8 +67,8 @@ class TongtaiFoxMascot extends StatelessWidget {
     // Ảnh chồm ra ngoài đĩa một chút cho tai cáo không bị đĩa cắt ngang.
     final head = Image.asset(
       headAsset,
-      width: size * (onDisc ? 0.92 : 1),
-      height: size * (onDisc ? 0.92 : 1),
+      width: size,
+      height: size,
       fit: BoxFit.contain,
       // Ảnh thiếu ⇒ khoảng trống, KHÔNG phải ô báo lỗi đỏ giữa màn.
       errorBuilder: (_, _, _) => SizedBox(width: size, height: size),
@@ -69,18 +77,7 @@ class TongtaiFoxMascot extends StatelessWidget {
     return Semantics(
       label: semanticsLabel ?? 'Workizen AI',
       image: true,
-      child: onDisc
-          ? Container(
-              width: size,
-              height: size,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                color: TtColors.brandSoft,
-                shape: BoxShape.circle,
-              ),
-              child: head,
-            )
-          : SizedBox(width: size, height: size, child: head),
+      child: SizedBox(width: size, height: size, child: head),
     );
   }
 }

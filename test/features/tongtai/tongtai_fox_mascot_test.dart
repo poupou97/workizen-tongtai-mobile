@@ -44,22 +44,33 @@ void main() {
       const Size(40, 40),
     );
 
-    // Đĩa chỉ có ở avatar. Nếu cả hai cùng có (hoặc cùng không), hai dạng đã
-    // mất phần phân biệt vai và chỉ còn khác nhau con số kích thước.
-    expect(
-      find.descendant(
-        of: find.byType(TongtaiFoxMascot).last,
-        matching: find.byType(Container),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byType(TongtaiFoxMascot).first,
-        matching: find.byType(Container),
-      ),
-      findsNothing,
-    );
+    // ⚠️ WTM-436 — bản trước khẳng định **đĩa chỉ có ở avatar**, và ghi rõ:
+    // *"nếu cả hai cùng có (hoặc cùng không), hai dạng đã mất phần phân biệt
+    // vai"*. Founder gọi cái đĩa là *"rất thô"*, concept `cp_home.png` vẽ linh
+    // vật **không đĩa**, nên đĩa bị bỏ — và lời cảnh báo ấy nay thành sự thật.
+    //
+    // **Rekey, không xoá** (P-37). Bất biến mới, và nó kiểm được:
+    // **KHÔNG dạng nào còn đĩa.** Gieo lại một `Container` bọc đầu cáo ⇒ đỏ.
+    for (final at in [0, 1]) {
+      expect(
+        find.descendant(
+          of: find.byType(TongtaiFoxMascot).at(at),
+          matching: find.byType(Container),
+        ),
+        findsNothing,
+        reason:
+            'linh vật lại có nền dán sau lưng. Ảnh nguồn vốn trong suốt; mọi '
+            'mảng đặc quanh nó là do widget thêm vào (WTM-436).',
+      );
+    }
+
+    // ⚠️ NỢ ĐỂ LẠI, ghi ra thay vì im lặng: bỏ đĩa xong thì `.avatar` và
+    // `.face` chỉ còn khác nhau **cỡ mặc định** — hai tên cho một thứ. Tín hiệu
+    // *"AI đang nói"* nay nằm ở **nền thẻ** bao quanh, đúng như concept vẽ.
+    //
+    // Gộp hai constructor là việc riêng: nó chạm 3 chỗ gọi và vài test, và
+    // đang có việc gấp hơn trong Epic WTM-435. Chốt lại ở đây để lần sau khỏi
+    // phải phát hiện lại.
   });
 
   testWidgets('§2 ảnh khuôn mặt nạp được thật từ bundle', (tester) async {
