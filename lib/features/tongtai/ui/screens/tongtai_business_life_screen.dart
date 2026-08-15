@@ -260,7 +260,10 @@ class _DemoBanner extends StatelessWidget {
       key: const Key('business-life-demo-banner'),
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: Colors.amber.withValues(alpha: 0.16),
+      // Vai **warning** (dữ liệu này là demo, đừng tưởng là thật). Bản trước
+      // dùng `Colors.amber` thô — cùng sắc, nhưng không ai đổi được từ một chỗ
+      // và cổng ratchet không nhìn thấy nó (WTM-424).
+      color: TtStatus.warning.color.withValues(alpha: 0.16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

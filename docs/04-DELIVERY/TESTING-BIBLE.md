@@ -992,6 +992,57 @@ không?"* — nếu không, chưa có cổng nào cả.
 `count_list_contract_test` bắt được. Hai thứ **trùng chỗ hiển thị** chưa chắc
 **trùng khái niệm** — cùng họ với luật DS *"cùng hình dáng không phải cùng vai"*.
 
+## P-45 · Cổng chỉ bắt **thứ nó được viết để tìm** — `Colors.orange` đi qua cổng cấm mã hex
+
+**Root-Cause.** Cổng ratchet DS §3b cấm `Color(0xFF...)` trong tệp màn: màu phải
+có tên ngữ nghĩa để đổi được từ một chỗ. Nhưng `Colors.orange` **không phải một
+mã hex** — nó là một cái tên mượn từ bảng màu Material. Nó đi lọt §3b (regex hex)
+lẫn §3 (chỉ bắt component *nhận* `Color`, không bắt màn *chọn* màu tại chỗ),
+trong khi hậu quả hiển thị y hệt: một sắc độ không ai đổi được từ một chỗ.
+
+**Regression.** Màn Nhập liệu tô khối **cảnh báo** bằng `Colors.orange`. Theo
+luật màu Founder, **cam = Brand/Primary Action** — nên chỗ đang báo có vấn đề
+lại đọc ra *"bấm vào đây"*. Nặng hơn: **đây là tái phát**. Chú thích trong
+`tongtai_connections_screen.dart` đã ghi đúng lỗi này khi DS-2 dọn màn Kết nối
+và gọi nó là *"nặng nhất"*. Bài học được viết ra, được lưu lại, và **vẫn tái
+phát** — vì nó nằm trong một chú thích, mà chú thích không chặn được gì.
+
+**Test Pattern.** §3c trong `design_system_ratchet_test.dart`: cấm
+`Colors.<tên>` trong toàn `lib/features/tongtai/ui/`, **không baseline** (đo
+thật chỉ 7 lần dùng ⇒ đóng hẳn thay vì ratchet). Hai chi tiết đáng chép lại:
+
+* **Bỏ chú thích trước khi soi mã.** Cổng suýt tự bắn vào chân mình: mọi chú
+  thích *giải thích* một luật đều phải **trích dẫn thứ luật ấy cấm**. Một cổng
+  đọc văn xuôi như đọc mã sẽ phạt đúng những người ghi lại bài học. Đột biến
+  thứ hai kiểm chính điều này: để `Colors.orange` **chỉ trong chú thích** ⇒ cổng
+  phải vẫn xanh.
+* **`white`/`black`/`transparent` được miễn** — chúng không mang vai ngữ nghĩa
+  nào (nền, lớp phủ, chỗ trống). Ép chúng vào `TtStatus` là lỗi ngược lại.
+
+**Prevention Rule.** Khi viết một cổng, đừng hỏi *"luật là gì"* — hỏi **"còn
+CÁCH VIẾT nào khác cho ra đúng hậu quả ấy?"** Một luật thường có nhiều cú pháp:
+màu có `Color(0xFF..)` · `Colors.<tên>` · `theme.colorScheme.<x>` ·
+`.withOpacity` trên hằng số. Cổng bắt một cú pháp là **lời hứa sai** — nó khiến
+người ta tin vùng ấy đã sạch. Và hệ quả trực tiếp: **một bài học chỉ nằm trong
+chú thích thì không phải là cổng.** Ghi xong thì phải khoá lại bằng test, nếu
+không lần sau nó tái phát ở màn khác — đúng như đã xảy ra ở đây.
+
+⚠️ **Và §3c cũng không đủ — đã đo.** Cổng cú pháp cấm một *cách viết*; nó không
+biết giá trị viết ra có đúng vai không. Gieo `tone: TtStatus.ai` cho khối cảnh
+báo (tím — sai vai, nhưng sạch cú pháp): **§3c vẫn xanh**, chỉ test hành vi
+`import_screen_test.dart` đỏ. Nên phải có **cả hai**:
+
+| Cổng | Bắt được | Mù với |
+|---|---|---|
+| §3c (cú pháp, quét `lib/`) | mọi màu Material ở mọi màn, kể cả màn chưa ai viết test | **giá trị sai vai** viết đúng cú pháp |
+| test hành vi (dựng màn thật, đọc `style.color`) | đúng màu mắt người nhìn thấy | **chỉ màn nào có test** |
+
+Một cổng quét rộng mà nông, một cổng sâu mà hẹp. Bỏ cái nào cũng để lọt một
+nửa — và mỗi nửa đều đủ để đưa màu Brand vào chỗ báo lỗi.
+
+Cùng họ P-44 (*test kiểm một con số không bắt được hai con số nói ngược nhau*):
+cả hai đều là **cổng nhìn đúng chỗ nó được chỉ, và mù với phần còn lại**.
+
 ## Khi sửa bug mới — checklist
 
 1. Reproduce trên **đúng môi trường người dùng gặp** (release/máy thật nếu cần).

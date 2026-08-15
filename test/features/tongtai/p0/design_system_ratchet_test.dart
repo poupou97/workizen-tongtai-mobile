@@ -26,6 +26,21 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+/// Bỏ chú thích trước khi soi mã.
+///
+/// Cổng §3c suýt tự bắn vào chân mình: chú thích trong `connections_screen`
+/// *kể lại* rằng bản cũ dùng `Colors.green`/`Colors.orange` thô — và mọi chú
+/// thích giải thích một luật đều phải trích dẫn thứ mà luật ấy cấm. Một cổng
+/// đọc văn xuôi như đọc mã sẽ phạt đúng những người ghi lại bài học.
+String _stripComments(String src) => src
+    .replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '')
+    .split('\n')
+    .map((l) {
+      final i = l.indexOf('//');
+      return i < 0 ? l : l.substring(0, i);
+    })
+    .join('\n');
+
 /// Đếm số tệp trong `lib/` thoả một điều kiện.
 List<String> _filesWhere(bool Function(String path, String src) test) {
   final out = <String>[];
@@ -103,7 +118,9 @@ void main() {
         'lib/features/tongtai/ui/screens/tongtai_customer_risk_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_forecast_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_goal_detail_screen.dart',
-        'lib/features/tongtai/ui/screens/tongtai_import_screen.dart',
+        // `tongtai_import_screen.dart` RA KHỎI danh sách ở WTM-424: `_IssueBlock`
+        // nhận `TtStatus` thay `Color`, vì hai lời gọi của nó truyền đúng hai
+        // VAI (lỗi · cảnh báo) — mà một trong hai đang truyền **sai màu**.
         'lib/features/tongtai/ui/screens/tongtai_onboarding_v2_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_opportunity_detail_screen.dart',
         'lib/features/tongtai/ui/screens/tongtai_opportunity_feed_screen.dart',
@@ -166,6 +183,52 @@ void main() {
         baseline.difference(offenders),
         isEmpty,
         reason: 'đã dọn bớt mà chưa hạ baseline',
+      );
+    });
+
+    test('⭐ §3c KHÔNG dùng bảng màu Material (`Colors.<tên>`) — KHÔNG baseline', () {
+      // ## Vì sao phải có cổng thứ ba
+      //
+      // §3b bắt `Color(0xFF...)`. Nhưng `Colors.orange` **không phải mã hex**,
+      // nên nó đi lọt cả §3b lẫn §3 (§3 chỉ bắt component *nhận* màu, không bắt
+      // màn *chọn* màu tại chỗ). Hậu quả hiển thị thì y hệt.
+      //
+      // Cùng họ P-44: **cổng chỉ bắt thứ nó được viết để tìm.** Cổng này được
+      // viết cho mã hex, nên một cái tên đi qua tự do suốt từ DS-2.
+      //
+      // ## Nó đã để lọt cái gì (WTM-424)
+      //
+      // Màn Nhập liệu tô khối **cảnh báo** bằng `Colors.orange`. Theo luật màu
+      // Founder, **cam = Brand/Primary Action** — nên chỗ đang báo có vấn đề
+      // lại đọc ra *"bấm vào đây"*. Đúng lỗi mà chú thích trong
+      // `tongtai_connections_screen.dart` đã gọi là *"nặng nhất"* khi DS-2 dọn
+      // màn Kết nối. Dọn một màn không dọn được màn khác, vì không có cổng.
+      //
+      // ## Vì sao KHÔNG baseline
+      //
+      // Đo thật: chỉ 7 lần dùng, 2 tệp có mã chạy (lần ở `connections` nằm
+      // trong chú thích). Số nhỏ ⇒ **đóng hẳn**. Một baseline rỗng là lời hứa
+      // mạnh hơn một baseline nhỏ: không có chỗ nào để nợ mới nấp vào.
+      //
+      // ⚠️ `white`/`black`/`transparent` KHÔNG tính: chúng không mang vai ngữ
+      // nghĩa nào (nền, lớp phủ, chỗ trống). Ép chúng vào `TtStatus` là lỗi
+      // ngược lại — *cùng kiểu dữ liệu KHÔNG phải cùng vai*.
+      final offenders = _filesWhere(
+        (path, src) =>
+            path.startsWith('lib/features/tongtai/ui/') &&
+            RegExp(
+              r'\bColors\.(?!white|black|transparent)[a-z]\w*',
+            ).hasMatch(_stripComments(src)),
+      );
+
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'bảng màu Material trong tầng UI. `Colors.orange` không phải một '
+            'VAI — nó là một sắc độ mượn từ Material, không ai đổi được từ một '
+            'chỗ, và nó có thể mâu thuẫn với luật màu (cam = Brand, KHÔNG phải '
+            'cảnh báo). Dùng `TtStatus.<vai>` hoặc `TtColors.<tên ngữ nghĩa>`.',
       );
     });
   });

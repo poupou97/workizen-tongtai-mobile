@@ -308,7 +308,7 @@ class _PreviewCard extends StatelessWidget {
       key: const Key('import-preview'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: TtColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: TtColors.border),
       ),
@@ -356,7 +356,7 @@ class _PreviewCard extends StatelessWidget {
               key: const Key('import-preview-errors'),
               headline: l10n.importBlocked(preview.errors.length),
               issues: preview.errors,
-              color: Colors.red,
+              tone: TtStatus.danger,
             ),
           ],
           if (preview.warnings.isNotEmpty) ...[
@@ -365,7 +365,7 @@ class _PreviewCard extends StatelessWidget {
               key: const Key('import-preview-warnings'),
               headline: l10n.importWarned(preview.warnings.length),
               issues: preview.warnings,
-              color: Colors.orange,
+              tone: TtStatus.warning,
             ),
           ],
           const SizedBox(height: 12),
@@ -400,12 +400,16 @@ class _IssueBlock extends StatelessWidget {
     super.key,
     required this.headline,
     required this.issues,
-    required this.color,
+    required this.tone,
   });
 
   final String headline;
   final List<ImportIssue> issues;
-  final Color color;
+
+  /// **Vai**, không phải màu. Bản trước nhận `Color` và phía gọi truyền
+  /// `Colors.orange` cho khối *cảnh báo* — mà cam là màu Brand/Primary Action,
+  /// nên chỗ đang báo có vấn đề lại đọc ra *"bấm vào đây"* (WTM-424).
+  final TtStatus tone;
 
   @override
   Widget build(BuildContext context) {
@@ -421,7 +425,7 @@ class _IssueBlock extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: color,
+            color: tone.color,
           ),
         ),
         for (final issue in shown)
@@ -482,9 +486,11 @@ class _ResultCard extends StatelessWidget {
       key: const Key('import-result'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green.withValues(alpha: 0.08),
+        color: TtStatus.success.soft,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: TtStatus.success.color.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
