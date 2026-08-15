@@ -5,6 +5,20 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +18 — 2026-08-15T05:00:28Z
+
+- Version: `0.1.0+18` (trước: `0.1.0+17`)
+- Lý do: WTM-419 — kiểm màn Khách hàng hết mâu thuẫn trên Nokia
+- SHA: `2157f4ae58002811865ed9106035de33acf27426`
+- Nhánh: `main`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `80e1ad74c42fdcfa…`
+
+### Thay đổi kể từ `d696244afb2499009228afa913f8bf92b758845f`
+
+- 2157f4a fix(WTM-419): màn Khách hàng thôi nói hai chuyện về cùng một phân khúc (#266)
+- ab20a6b chore: ghi bản dựng +16/+17 vào BUILD-LOG (#265)
+- 52264b2 Nhận diện Ai CRM + ảnh sản phẩm demo + cp3/cp4 (WTM-414·416·417·418·411·419) (#264)
+
 ## build +17 — 2026-08-15T04:07:37Z
 
 - Version: `0.1.0+17` (trước: `0.1.0+16`)
