@@ -107,6 +107,19 @@ abstract final class TtColors {
   /// [surface] lẫn [surfaceSecondary]. Chữ [neutral] trên nền này đạt ~6,4:1.
   static const Color neutralSoft = Color(0xFFE8EDF3);
 
+  // ── ĐỊNH DANH năng lực (WTM-426) ───────────────────────────────────────
+  //
+  // ⛔ KHÔNG mang nghĩa trạng thái. Xem `TtCapability` để biết vì sao chúng
+  // phải là hằng riêng chứ không dùng lại `success`/`warning`/`info`/`ai`.
+  //
+  // Mọi sắc dưới đây đạt ≥ 4,5:1 trên nền trắng — cổng `tt_tokens_test` đo
+  // thật, không tin ước lượng.
+  static const Color capabilityHome = Color(0xFF334155); // đá 700 — phi sắc
+  static const Color capabilityProducer = Color(0xFF4D7C0F); // chanh 700
+  static const Color capabilityInventory = Color(0xFF0F766E); // mòng két 700
+  static const Color capabilityConsumer = Color(0xFF4338CA); // chàm 700
+  static const Color capabilityOpportunity = Color(0xFFA21CAF); // đỗ quyên 700
+
   // ── Chữ ────────────────────────────────────────────────────────────────
   static const Color textPrimary = Color(0xFF0F172A);
   static const Color textSecondary = Color(0xFF475569);
@@ -168,6 +181,59 @@ abstract final class TtColors {
   static const Color border = Color(0xFFE2E8F0);
   static const Color borderStrong = Color(0xFFCBD5E1);
   static const Color divider = Color(0xFFE5E7EB);
+}
+
+/// ⭐ **Màu ĐỊNH DANH năng lực** — trả lời *"đây là khu vực nào"*, tuyệt đối
+/// không trả lời *"tình hình thế nào"* (WTM-426, Founder chốt Option B).
+///
+/// ## Vì sao phải là một bảng RIÊNG
+///
+/// Thanh điều hướng từng gán cho mỗi tab một màu **trạng thái**: Nguồn hàng =
+/// `success`, Kho = `warning`, Khách hàng = `info`, Cơ hội = `ai`. Đo trên máy
+/// thật thấy hậu quả cụ thể: biểu tượng tab **Kho** và chấm chú giải *"sắp hết
+/// hàng 11%"* **cùng là `#F59E0B`**, trên cùng một khung hình. Người bán học
+/// được *"vàng = sắp hết hàng"* từ vòng tròn tồn kho, rồi nhìn xuống thấy cả
+/// cái tab vàng — trong khi tab chẳng cảnh báo gì. Tab Nguồn hàng thì **luôn**
+/// xanh lá, tức luôn nói *"ổn"*, kể cả khi nguồn hàng đang có vấn đề.
+///
+/// Chỉ đường bằng màu là một quy ước hợp lệ — chú thích trong thanh nav khai
+/// rõ chủ ý ấy. Cái sai không phải *dùng màu để chỉ đường*, mà là **mượn hằng
+/// số của tầng trạng thái** để làm việc đó: sửa màu cảnh báo sẽ lặng lẽ đổi
+/// màu tab Kho, và ngược lại.
+///
+/// ## Chọn sắc thế nào
+///
+/// Sáu sắc ngữ nghĩa đã chiếm: lục 140° · hổ phách 38° · đỏ 0° · lam 220° ·
+/// tím 265° · cam 25°. Bảng này chọn **những dải còn trống** — chanh 80° ·
+/// mòng két 175° · chàm 245° · đỗ quyên 300° — cộng một sắc đá **phi sắc** cho
+/// Trang chủ (nó là "tất cả", không phải một năng lực).
+///
+/// Tông cố ý **trầm** (bậc 700) chứ không rực: màu chỉ đường phải đọc ra là
+/// *"bạn đang ở đây"*, không phải *"nhìn tôi này"*.
+///
+/// ⚠️ Chàm 245° nằm gần lam 220° của `info` nhất trong bảng — 25°. Đây là chỗ
+/// mỏng nhất và tôi ghi ra thay vì giấu: năm sắc phân biệt được, tránh sáu sắc
+/// đã chiếm, là bài toán chật. Nếu người dùng thật báo nhầm lẫn, đổi Khách
+/// hàng sang một dải khác chứ đừng nới luật.
+enum TtCapability {
+  home,
+  producer,
+  inventory,
+  consumer,
+  opportunity,
+
+  /// *"Thêm"* — danh mục đầy đủ, **không phải một năng lực**. Cho nó một sắc
+  /// định danh là hứa một thứ nó không có.
+  more;
+
+  Color get color => switch (this) {
+    TtCapability.home => TtColors.capabilityHome,
+    TtCapability.producer => TtColors.capabilityProducer,
+    TtCapability.inventory => TtColors.capabilityInventory,
+    TtCapability.consumer => TtColors.capabilityConsumer,
+    TtCapability.opportunity => TtColors.capabilityOpportunity,
+    TtCapability.more => TtColors.neutral,
+  };
 }
 
 /// Mức nghiêm trọng — **một chỗ duy nhất** ánh xạ mức sang màu.
