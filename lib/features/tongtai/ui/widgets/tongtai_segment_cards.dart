@@ -100,7 +100,9 @@ class TongtaiSegmentCards extends StatelessWidget {
             iconData: _icon(segment),
             iconColor: _tone(segment).color,
             deltaLabel: _deltaLabel(l10n, segment),
-            trend: _trend(segment),
+            // Mũi tên theo DẤU của delta; màu theo việc tăng là tốt hay xấu.
+            trend: _direction(segment),
+            upIsGood: _moreIsGood(segment),
             onTap: onTap == null ? null : () => onTap!(segment),
           ),
       ],
@@ -118,16 +120,26 @@ class TongtaiSegmentCards extends StatelessWidget {
     return l10n.segCardDelta(delta);
   }
 
-  TtTrend _trend(CustomerSegment segment) {
+  /// Hướng — theo đúng dấu của delta, không theo phán quyết.
+  TtTrend _direction(CustomerSegment segment) {
     final delta = view.deltaOf(segment);
     if (delta == null || delta == 0) return TtTrend.unknown;
-    // ⚠️ "Tăng" KHÔNG đồng nghĩa với "tốt". Thêm khách rời bỏ là tin xấu, và
-    // một mũi tên xanh trên thẻ ấy là hình nói dối trước cả chữ.
-    final more = delta > 0;
-    final goodWhenMore =
-        _tone(segment) != TtStatus.danger &&
-        _tone(segment) != TtStatus.warning &&
-        segment != CustomerSegment.churned;
-    return (more == goodWhenMore) ? TtTrend.up : TtTrend.down;
+    return delta > 0 ? TtTrend.up : TtTrend.down;
   }
+
+  /// Nhiều hơn thì tốt hay xấu — quyết định MÀU, không quyết định mũi tên.
+  ///
+  /// ⚠️ Bản đầu gộp hai câu này vào một, và thẻ "Nguy cơ rời bỏ 13" hiện
+  /// `↓ +7`: mũi tên xuống cạnh con số tăng. Đúng phán quyết, sai hướng.
+  static bool _moreIsGood(CustomerSegment segment) => switch (segment) {
+    CustomerSegment.slowing ||
+    CustomerSegment.atRisk ||
+    CustomerSegment.churned ||
+    CustomerSegment.dormant ||
+    CustomerSegment.oneTime => false,
+    CustomerSegment.newcomer ||
+    CustomerSegment.returning ||
+    CustomerSegment.loyal ||
+    CustomerSegment.vip => true,
+  };
 }

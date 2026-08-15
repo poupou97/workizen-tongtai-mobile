@@ -5,8 +5,10 @@
 //   §1 KHÔNG có mốc so ⇒ KHÔNG mũi tên. Người bán mới dùng app hai tuần thì mốc
 //      "30 ngày trước" là một tệp rỗng; mọi phần trăm dựng trên nó là bịa. Cùng
 //      kỷ luật `HomeTrend.changePercent` (WTM-404).
-//   §2 "Tăng" KHÔNG đồng nghĩa với "tốt". Thêm khách rời bỏ là tin xấu — một
-//      mũi tên xanh trên thẻ ấy là hình nói dối trước cả chữ.
+//   §2 "Tăng" KHÔNG đồng nghĩa với "tốt", nhưng mũi tên vẫn phải đi theo DẤU
+//      của con số. Bản đầu gộp hai câu này làm một và thẻ "Nguy cơ rời bỏ 13"
+//      hiện `↓ +7` — mũi tên xuống cạnh con số tăng, đọc ra thành "giảm 7".
+//      Nay: hướng = dấu delta · màu = tăng-là-tốt-hay-xấu.
 //
 // Kèm §3: thẻ cảnh báo hiện **cả khi bằng 0**, vì sự vắng mặt của một cảnh báo
 // chỉ trấn an được người ta khi nhìn thấy được.
@@ -88,14 +90,25 @@ void main() {
         ),
       );
 
+      final churned = _card(tester, CustomerSegment.churned);
       expect(
-        _card(tester, CustomerSegment.churned).trend,
-        TtTrend.down,
+        churned.trend,
+        TtTrend.up,
         reason:
-            'rời bỏ tăng từ 10 lên 16 mà vẽ mũi tên "tốt" thì hình đang mừng '
-            'cho một tin xấu',
+            'rời bỏ tăng 10 → 16 thì MŨI TÊN phải lên, vì nó nói con số đi '
+            'hướng nào. Cho nó xuống là mâu thuẫn với chính dòng "+6".',
       );
-      expect(_card(tester, CustomerSegment.loyal).trend, TtTrend.up);
+      expect(
+        churned.upIsGood,
+        isFalse,
+        reason:
+            'thêm khách rời bỏ là tin XẤU — màu phải nói điều đó, và đây '
+            'là chỗ duy nhất được nói',
+      );
+
+      final loyal = _card(tester, CustomerSegment.loyal);
+      expect(loyal.trend, TtTrend.up);
+      expect(loyal.upIsGood, isTrue);
     },
   );
 
@@ -108,7 +121,19 @@ void main() {
         ),
       ),
     );
-    expect(_card(tester, CustomerSegment.atRisk).trend, TtTrend.up);
+    final atRisk = _card(tester, CustomerSegment.atRisk);
+    expect(
+      atRisk.trend,
+      TtTrend.down,
+      reason: 'nguy cơ giảm 13 → 4: mũi tên XUỐNG theo con số',
+    );
+    expect(
+      atRisk.upIsGood,
+      isFalse,
+      reason:
+          'ít khách nguy cơ hơn là tin tốt ⇒ mũi tên xuống phải mang màu '
+          'TỐT, không phải màu báo động',
+    );
   });
 
   testWidgets('§3 thẻ cảnh báo hiện cả khi bằng 0', (tester) async {
