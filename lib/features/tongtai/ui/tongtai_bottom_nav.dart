@@ -143,7 +143,11 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tabColor = capability.color;
+    // ⚠️ HAI sắc, không một (WTM-439): biểu tượng là đồ hoạ (ngưỡng WCAG 3:1),
+    // nhãn là chữ (ngưỡng 4,5:1). Sắc concept có ba trong bốn trượt ngưỡng chữ
+    // — cam tệ nhất, chỉ 2,57:1 — nên nhãn dùng biến thể đậm hơn cùng hue.
+    final iconColor = capability.color;
+    final labelColor = capability.labelColor;
     final isActive = isSelected;
 
     // `Expanded`: five tabs share the width evenly instead of each taking its
@@ -168,7 +172,7 @@ class _NavTab extends StatelessWidget {
             Icon(
               isActive ? selectedIcon : icon,
               size: TongtaiDesignTokens.navBarIconSize,
-              color: isActive ? tabColor : TtColors.textSecondary,
+              color: isActive ? iconColor : TtColors.textSecondary,
             ),
             const SizedBox(height: 4),
             Text(
@@ -179,7 +183,8 @@ class _NavTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                color: isActive ? tabColor : TtColors.textSecondary,
+                // Chữ ⇒ biến thể đạt 4,5:1, KHÔNG dùng sắc biểu tượng.
+                color: isActive ? labelColor : TtColors.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
@@ -189,7 +194,8 @@ class _NavTab extends StatelessWidget {
                 width: 4,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: tabColor,
+                  // Chấm chỉ báo là đồ hoạ ⇒ dùng sắc biểu tượng.
+                  color: iconColor,
                   shape: BoxShape.circle,
                 ),
               )

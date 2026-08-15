@@ -146,10 +146,16 @@ void main() {
       expect(identities, hasLength(TtCapability.values.length));
     });
 
-    test('⭐ mọi màu định danh đọc được trên nền trắng (WCAG AA)', () {
-      // Nhãn tab dùng chính sắc này làm màu chữ, trên nền `#FFFFFF`. Đo thật,
-      // không tin ước lượng bằng mắt — repo này đã trả giá một lần ở WTM-169
-      // vì đoán một tỉ lệ tương phản.
+    test('⭐ định danh: biểu tượng ≥3:1 · chữ nhãn ≥4,5:1 (WTM-439)', () {
+      // Hai ngưỡng, không một — và đó là điểm quan trọng nhất của test này.
+      //
+      // WCAG đặt **4,5:1 cho chữ** nhưng chỉ **3:1 cho đồ hoạ**. Sắc concept
+      // (đo pixel từ `cp_home.png`) đạt lần lượt 3,91 · 4,46 · 2,57 · 5,18 —
+      // **ba trong bốn trượt ngưỡng chữ**, cam tệ nhất chỉ 2,57:1.
+      //
+      // Nếu cổng chỉ kiểm một ngưỡng thì hoặc bỏ lọt nhãn khó đọc (nếu lấy
+      // 3:1), hoặc cấm oan sắc concept ở biểu tượng (nếu lấy 4,5:1). Đo đúng
+      // thứ mắt người thật sự phải đọc.
       double lum(Color c) {
         double f(double v) => v <= 0.03928
             ? v / 12.92
@@ -165,10 +171,17 @@ void main() {
       for (final c in TtCapability.values) {
         expect(
           ratio(c.color, TtColors.surface),
+          greaterThanOrEqualTo(3.0),
+          reason:
+              'biểu tượng tab ${c.name} không đạt 3:1 trên nền trắng — người '
+              'bán nhìn thanh nav ở mọi màn',
+        );
+        expect(
+          ratio(c.labelColor, TtColors.surface),
           greaterThanOrEqualTo(4.5),
           reason:
-              'nhãn tab ${c.name} không đạt AA trên nền trắng — người bán đọc '
-              'thanh nav ở mọi màn, đây không phải chỗ để hy sinh tương phản',
+              'CHỮ nhãn tab ${c.name} không đạt 4,5:1. Sắc concept dành cho '
+              'biểu tượng; chữ phải dùng biến thể đậm hơn (`...OnLight`).',
         );
       }
     });
