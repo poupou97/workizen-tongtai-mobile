@@ -279,3 +279,76 @@ Toàn bộ là **A trừ một B**. Không schema mới, không connector, khôn
 đáp án là chip từ từ vựng đóng, nên không gì người bán gõ lọt vào prompt AI), và
 luồng chạy **không cần khoá AI** — vì phần lớn người dùng mục tiêu không có khoá,
 và một màn đầu tiên báo lỗi thiếu khoá là cách tệ nhất để mở đầu sản phẩm.
+
+---
+
+# ⚠️ KIỂM LẠI 2026-08-16 (WTM-438) — ba kết luận ở trên KHÔNG còn đúng
+
+Tài liệu trên viết ngày **2026-08-11**, đối chiếu `main` lúc **2526 test**. Nay
+là `main` **2895 test**, sau **18 story** và **bốn quyết định Founder** mà bản
+gốc chưa biết. Đọc phần trên mà bỏ qua phần này sẽ dẫn tới việc **dựng lại đúng
+thứ vừa bị gỡ**.
+
+## ⛔ 1. `cp11` "DỰNG ĐẦU TIÊN" nay bị CẤM
+
+Bảng ma trận xếp `cp11` — *Chi tiết NCC, điểm 87/100 trên 5 trục* — là **⭐ DỰNG
+ĐẦU TIÊN**, gap **B**.
+
+**WTM-421** (Founder duyệt 2026-08-15) đã **gỡ khỏi sản phẩm** đúng lớp nội dung
+ấy: chứng chỉ ISO gán cho mọi NCC · số sản phẩm sinh bằng công thức · số đơn
+suy từ số sao. Kèm cổng `business_truth_gate_test` chặn nó quay lại.
+
+Founder chốt thêm: ***`cp11` bị CHẶN cho tới khi từng trục có nguồn dữ liệu
+thật*** — không dựng điểm tổng hợp từ dữ liệu bịa hay suy diễn.
+
+⇒ Gap thật của `cp11` **không phải B mà là C**. Bản gốc đánh giá bằng câu hỏi
+*"có dựng được không"*; câu đúng là *"có nguồn thật không"*.
+
+## ✅ 2. §3 "app không có linh vật" — nay CÓ
+
+Bản gốc: *"Linh vật có mặt 12/12 màn concept — app không có… Founder phải cung
+cấp bộ tư thế."*
+
+Đã xong: **WTM-417** cắt 24 tư thế vào `assets/mascot/brand/`. Nay linh vật có ở
+**header Trang chủ** (WTM-437) và **màn chào** (WTM-433, tư thế vẫy tay).
+
+⚠️ Kèm một luật bản gốc chưa biết: **mỗi màn chỉ MỘT con cáo.** Bản dựng đầu có
+cáo ở header + dòng chào + avatar ⇒ ba khuôn mặt giống hệt nhau; Founder nói
+*"không ra sao cả"*. `cp_home` chỉ vẽ một con, dòng chào là chữ trơn.
+
+## ⚠️ 3. Đề xuất thanh nav KHÔNG được chọn
+
+Bản gốc đề xuất 6 ô: *Trang chủ · Nguồn hàng · Kho · Khách hàng · **Tiền** · Thêm*,
+tức **Cơ hội rời nav**.
+
+Thực tế `main` hôm nay: *Trang chủ · Nguồn hàng · Kho · Khách hàng · **Cơ hội** ·
+Thêm*. Đề xuất "Tiền" **chưa bao giờ được chốt**, và Founder đã ra hai quyết
+định khác về nav mà bản gốc không có: **WTM-426** (màu định danh tách khỏi màu
+trạng thái, Option B) và **WTM-439** (sắc lấy theo concept).
+
+⇒ Ai đọc bản gốc rồi đi gộp Báo cáo vào "Tiền" là làm theo một đề xuất **chưa
+được duyệt**.
+
+## Trạng thái các màn còn lại — kiểm nhanh 2026-08-16
+
+| Màn | Bản gốc | Nay |
+|---|---|---|
+| `cp_home` | "GIỮ + nâng", thiếu sparkline | ✅ **có sparkline + delta + chip ưu tiên + nút Xử lý ngay** (WTM-437 xác nhận trên máy) |
+| `cp7` Tài chính | ⭐ DỰNG, `runway`/`breakEven` = 0 kết quả | ⛔ **WTM-410 chờ Founder** — nửa "runway" thiếu **số dư tiền**, không có nguồn |
+| `cp2` Xu hướng | ⛔ TỪ CHỐI | ⛔ giữ nguyên — chưa sàn nào nối thật |
+| `cp6` 4 thị trường | ⛔ TỪ CHỐI | ⛔ giữ nguyên |
+| `cp10` dự kiến +45% | ⛔ HOÃN | ⛔ giữ nguyên — *lời hứa lợi nhuận*, rủi ro cao nhất bộ |
+| `cp12` Thêm | DỰNG (chưa có ô nav) | ✅ **có tab Thêm** (WTM-405) |
+| `cp4` Đánh giá | HOÃN | ⛔ giữ nguyên — chưa có miền review |
+
+## Luật rút ra cho lần rà sau
+
+**Rà concept phải MỞ MÀN THẬT MÀ NHÌN.** Ở WTM-437 tôi lập bảng khác biệt bằng
+cách `grep` tên widget và kết luận *"không thấy ⇒ không có"* — bảng ấy **sai
+4/5**: badge, ô hỏi AI, chip ưu tiên, thanh CTA đều đã tồn tại dưới tên khác.
+Làm theo nó thì Trang chủ đã có hai badge, hai ô hỏi AI, hai thanh CTA.
+
+Và **một tài liệu rà soát có hạn dùng.** Bản gốc đúng vào ngày nó được viết;
+ba tuần sau, ưu tiên số 1 của nó đã thành thứ bị cấm. Trước khi làm theo bất kỳ
+đề xuất nào ở trên, kiểm lại mục ấy còn hợp với quyết định Founder gần nhất
+không.
