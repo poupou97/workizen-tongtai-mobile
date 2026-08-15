@@ -467,6 +467,30 @@ abstract class AppStrings {
   String get segNew;
 
   /// Dòng dưới con số trên thẻ phân khúc: "khách".
+  // ── cp6 · Tài chính của sản phẩm (WTM-420) ─────────────────────────────
+
+  String get finProductSection;
+  String get finSellingPrice;
+  String get finCostPrice;
+  String get finProfitPerUnit;
+  String get finMargin;
+
+  /// Dòng MỜI khai giá vốn — không trách, vì đây là điều app chưa hỏi.
+  String get finCostMissing;
+
+  /// Nhãn của con số DỰ KIẾN, ví dụ "nếu bán hết 34 sản phẩm đang tồn".
+  String finProjectedOnStock(int quantity);
+
+  /// Tiêu đề nhóm con số ĐO ĐƯỢC từ đơn thật.
+  String finMeasuredIn(int days);
+
+  String get finUnitsSold;
+  String get finRevenue;
+  String get finRealProfit;
+
+  /// Chưa bán được cái nào trong cửa sổ.
+  String get finNoSalesYet;
+
   String get segCardUnit;
 
   /// Thay đổi so với 30 ngày trước, ví dụ "+3 so với 30 ngày trước".
@@ -2129,6 +2153,32 @@ class AppStringsVi extends AppStrings {
   String get segVip => 'VIP';
   @override
   String get segNew => 'Mới';
+  @override
+  String get finProductSection => 'Tài chính của sản phẩm';
+  @override
+  String get finSellingPrice => 'Giá bán';
+  @override
+  String get finCostPrice => 'Giá vốn';
+  @override
+  String get finProfitPerUnit => 'Lãi mỗi sản phẩm';
+  @override
+  String get finMargin => 'Biên lợi nhuận';
+  @override
+  String get finCostMissing =>
+      'Chưa khai giá vốn — khai để thấy lãi và biên lợi nhuận';
+  @override
+  String finProjectedOnStock(int quantity) =>
+      'Dự kiến nếu bán hết $quantity sản phẩm đang tồn';
+  @override
+  String finMeasuredIn(int days) => 'Đã bán trong $days ngày qua';
+  @override
+  String get finUnitsSold => 'Số lượng';
+  @override
+  String get finRevenue => 'Doanh thu';
+  @override
+  String get finRealProfit => 'Lợi nhuận thật';
+  @override
+  String get finNoSalesYet => 'Chưa bán được cái nào trong cửa sổ này';
   @override
   String get segCardUnit => 'khách';
   @override
@@ -4356,6 +4406,32 @@ class AppStringsEn extends AppStrings {
   String get segVip => 'VIP';
   @override
   String get segNew => 'New';
+  @override
+  String get finProductSection => 'Product finance';
+  @override
+  String get finSellingPrice => 'Selling price';
+  @override
+  String get finCostPrice => 'Cost price';
+  @override
+  String get finProfitPerUnit => 'Profit per unit';
+  @override
+  String get finMargin => 'Margin';
+  @override
+  String get finCostMissing =>
+      'No cost price yet — add it to see profit and margin';
+  @override
+  String finProjectedOnStock(int quantity) =>
+      'Projected if all $quantity units in stock sell';
+  @override
+  String finMeasuredIn(int days) => 'Sold in the last $days days';
+  @override
+  String get finUnitsSold => 'Units';
+  @override
+  String get finRevenue => 'Revenue';
+  @override
+  String get finRealProfit => 'Real profit';
+  @override
+  String get finNoSalesYet => 'No sales in this window yet';
   @override
   String get segCardUnit => 'customers';
   @override

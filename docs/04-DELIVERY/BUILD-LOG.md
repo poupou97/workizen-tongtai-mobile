@@ -5,6 +5,18 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +20 — 2026-08-15T05:29:15Z
+
+- Version: `0.1.0+20` (trước: `0.1.0+19`)
+- Lý do: WTM-419 — xác nhận mũi tên đi theo dấu con số
+- SHA: `a89863844ecbef53f02b99ee9cce5fc4e400652b`
+- Nhánh: `feat/wtm-419-segment-cards`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk ·  96M · SHA256 `1ae1c10f09f14988…`
+
+### Thay đổi kể từ `102168853d1124ec41a67080fa21924383dc1a59`
+
+- a898638 fix(WTM-419): mũi tên theo DẤU của con số, màu theo phán quyết
+
 ## build +19 — 2026-08-15T05:18:31Z
 
 - Version: `0.1.0+19` (trước: `0.1.0+18`)

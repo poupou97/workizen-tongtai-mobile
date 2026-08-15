@@ -9,6 +9,9 @@ import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
 import '../../inventory/product_category.dart';
 import '../../providers/tongtai_commerce_provider.dart';
+import '../../commerce/commerce_profit.dart';
+import '../../inventory/product_unit_economics.dart';
+import '../widgets/tongtai_product_finance.dart';
 import '../widgets/tongtai_product_thumbnail.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_supplier_comparison.dart';
@@ -107,6 +110,13 @@ class _DetailBody extends StatelessWidget {
           // Luật `SupplierComparison` chạy từ WTM-329 nhưng chưa màn nào bày:
           // người bán mở sản phẩm mà không thấy có nguồn khác rẻ hơn. Khối tự
           // biến mất khi chỉ có một báo giá — không có gì để **so**.
+          // ── Tài chính của sản phẩm (WTM-420 · concept-1 cp6) ─────────
+          //
+          // Màn này trước đó không có một chữ nào về giá vốn hay lợi nhuận:
+          // người bán mở sản phẩm ra mà không biết bán một cái lãi bao nhiêu.
+          const SizedBox(height: TtSpace.x4),
+          _FinanceSection(product: product),
+
           const SizedBox(height: TtSpace.x4),
           _SupplierSection(productId: product.id),
           const SizedBox(height: TtSpace.x6),
@@ -133,6 +143,39 @@ class _SupplierSection extends ConsumerWidget {
     final comparison = async.asData?.value;
     if (comparison == null) return const SizedBox.shrink();
     return TongtaiSupplierComparison(comparison: comparison);
+  }
+}
+
+/// Khối Tài chính — cần bối cảnh lời để có con số ĐO ĐƯỢC.
+///
+/// ⚠️ Lỗi đọc bối cảnh **không** làm hỏng cả màn: phần đo được biến mất, phần
+/// suy từ chính sản phẩm (giá bán · giá vốn · lãi mỗi cái) vẫn hiện. Cùng lý
+/// lẽ với thẻ vốn chôn ở màn Kho (WTM-411): một nguồn phụ hỏng không được kéo
+/// nội dung chính chết theo.
+class _FinanceSection extends ConsumerWidget {
+  const _FinanceSection({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final context0 = ref.watch(commerceProfitProvider).asData?.value;
+    ProductProfit? sold;
+    if (context0 != null) {
+      for (final p in context0.byProduct) {
+        if (p.productId == product.id) {
+          sold = p;
+          break;
+        }
+      }
+    }
+    return TongtaiProductFinance(
+      economics: ProductUnitEconomics.of(product),
+      sold: sold,
+      windowDays: context0 == null
+          ? 30
+          : context0.to.difference(context0.from).inDays,
+    );
   }
 }
 
