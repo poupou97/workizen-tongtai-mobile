@@ -98,14 +98,30 @@ void main() {
     return container;
   }
 
-  testWidgets('⭐ băng-rôn DEMO nằm trên cùng, không giấu (§40)', (
+  testWidgets('⭐ KHÔNG nhãn "dữ liệu là mẫu" — nhưng §40 vẫn nguyên', (
     tester,
   ) async {
     await pumpLife(tester);
 
-    // Fake dữ liệu được phép; fake **trạng thái kỹ thuật** thì không.
-    expect(find.byKey(const Key('business-life-demo-banner')), findsOneWidget);
-    expect(find.text('DEMO'), findsOneWidget);
+    // ⚠️ WTM-430 — test này TRƯỚC ĐÂY khẳng định băng-rôn `DEMO` phải tồn tại,
+    // viện dẫn §40. Founder chốt (lần thứ ba) là KHÔNG hiện nhãn nói dữ liệu là
+    // mẫu: bản demo phải trông như thật.
+    //
+    // **Rekey, không xoá** (P-37). Bất biến §40 vẫn còn nguyên giá trị, chỉ là
+    // nó không nằm ở cái băng-rôn ấy nữa:
+    //
+    //   * fake **dữ liệu** — được phép, Founder đã quyết;
+    //   * fake **trạng thái kỹ thuật** — vẫn cấm tuyệt đối.
+    //
+    // Trên màn này, trạng thái kỹ thuật = *"bạn đang lái một trình mô phỏng và
+    // đang ở ngày mấy"*. Nó hiện qua đồng hồ ở AppBar cộng ba nút đẩy thời
+    // gian — không thể nhầm đây là một app đang chạy thật.
+    expect(find.byKey(const Key('business-life-demo-banner')), findsNothing);
+    expect(find.text('DEMO'), findsNothing);
+
+    // Bằng chứng §40 còn sống: nút điều khiển trình mô phỏng vẫn ở đó, và người
+    // dùng phải tự bấm mới có chuyện gì xảy ra.
+    expect(find.byKey(const Key('business-life-start')), findsOneWidget);
   });
 
   testWidgets('chưa có danh mục ⇒ nói phải làm gì, không bịa sản phẩm', (
