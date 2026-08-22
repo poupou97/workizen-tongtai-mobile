@@ -321,6 +321,56 @@ void main() {
       }
     });
 
+    testWidgets('⭐ WTM-446 · KHÔNG hiện thẻ ngõ cụt cùng lúc với lời mời', (
+      tester,
+    ) async {
+      // Tìm ra trên S24 của Founder, lượt thử đầu tiên. Màn hình nói hai điều
+      // trái ngược theo đúng thứ tự tệ nhất:
+      //   trên → "Không có gì để nhập từ file này."  (ngõ cụt)
+      //   dưới → "Chỉ giúp cột nào là cột nào…"      (phải cuộn mới thấy)
+      // Người ta đọc từ trên xuống, gặp ngõ cụt, đóng app.
+      // ⚠️ Màn cao BẤT THƯỜNG, cố ý. `ListView` dựng LƯỜI: thẻ nằm ngoài
+      // vùng nhìn thì **không được dựng**, nên `findsNothing` sẽ xanh kể cả
+      // khi thẻ vẫn còn nguyên trong code. Bản đầu của test này chính là một
+      // cổng giả như vậy — đột biến "hiện lại cả hai thẻ" vẫn xanh.
+      //
+      // Cho toàn bộ nội dung nằm trong vùng nhìn thì `findsNothing` mới trả
+      // lời đúng câu ta đang hỏi.
+      tester.view.physicalSize = const Size(1080, 6000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await pumpStrangeFile(tester);
+      await tester.tap(find.byKey(const Key('import-pick-file')));
+      await pumpUntilFound(tester, find.byKey(const Key('import-column-map')));
+
+      expect(find.byKey(const Key('import-preview')), findsNothing);
+      expect(find.textContaining('PRODUCTS'), findsNothing);
+    });
+
+    testWidgets('⭐ WTM-446 · file danh mục hỏng THẬT vẫn báo lỗi cũ', (
+      tester,
+    ) async {
+      // Chiều ngược lại của cùng cổng. Sửa bằng cách đổi thứ tự ưu tiên chứ
+      // KHÔNG đổi câu chữ — câu lỗi kia vẫn đúng khi người bán đưa vào một
+      // file danh mục thật sự hỏng (có sheet PRODUCTS nhưng thiếu cột).
+      await pumpImport(
+        tester,
+        pickFile: () async => PickedImportFile(
+          name: 'danhmuc-hong.xlsx',
+          bytes: productsXlsx(const [
+            ['sku', 'ten'],
+            ['TT-001', 'Áo thun'],
+          ]),
+        ),
+      );
+      await tester.tap(find.byKey(const Key('import-pick-file')));
+      await pumpUntilFound(tester, find.byKey(const Key('import-preview')));
+
+      expect(find.byKey(const Key('import-column-map')), findsNothing);
+      expect(find.byKey(const Key('import-preview-errors')), findsOneWidget);
+    });
+
     testWidgets('⭐ chưa ghép đủ vai trò bắt buộc ⇒ nút lưu BỊ CHẶN', (
       tester,
     ) async {

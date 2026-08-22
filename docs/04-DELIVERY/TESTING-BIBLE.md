@@ -1194,6 +1194,59 @@ cổng **đồng thuận** vẫn xanh.
    việc analyzer sẽ nhắc — nó chỉ nhắc ở nơi không có `_`.
 
 
+## P-48 · `findsNothing` trong danh sách dựng LƯỜI là một cổng giả
+
+**Root-Cause.** WTM-446: màn nhập hiện hai thẻ nói ngược nhau. Sửa xong, viết
+test khoá:
+
+```dart
+await pumpUntilFound(tester, find.byKey(const Key('import-column-map')));
+expect(find.byKey(const Key('import-preview')), findsNothing);   // ⬅️ vô dụng
+```
+
+Test xanh. **Đột biến "hiện lại cả hai thẻ" cũng xanh.**
+
+Nguyên nhân: màn dùng `ListView`, và `ListView` **dựng lười** — widget nằm
+ngoài vùng nhìn thì *không được dựng*, nên nó không có mặt trong cây để
+`find` thấy. `findsNothing` vì thế trả lời câu **"thẻ ấy có đang HIỆN không"**,
+chứ không phải câu tôi tưởng mình hỏi: **"thẻ ấy có TỒN TẠI không"**.
+
+Và trớ trêu: thẻ càng bị đẩy xuống xa — tức lỗi càng nặng — thì test càng chắc
+chắn xanh.
+
+**Regression.** Cùng họ [P-45] và [P-46]: một tín hiệu xanh trả lời chính xác
+câu hỏi của **nó**, không phải câu hỏi của tôi. Nhưng hình dạng này nguy hiểm
+riêng vì nó chỉ hỏng theo **một chiều**: `findsOneWidget` sau `pumpUntilFound`
+thì đúng (đã cuộn tới), còn `findsNothing` thì gần như **luôn** xanh trong một
+danh sách dài.
+
+**Test Pattern.** Khi khẳng định một widget **KHÔNG tồn tại** trong màn có
+cuộn, phải cho toàn bộ nội dung vào vùng nhìn trước:
+
+```dart
+tester.view.physicalSize = const Size(1080, 6000);
+tester.view.devicePixelRatio = 1.0;
+addTearDown(tester.view.reset);
+```
+
+Cách khác, khi màn quá dài: khẳng định bằng thứ **không phụ thuộc vùng nhìn** —
+số phần tử trong `CustomScrollView.slivers`, hoặc một cờ trên state, hoặc đếm
+qua `tester.widgetList` sau khi đã cuộn hết.
+
+⚠️ `scrollUntilVisible` **không** thay được: nó ném lỗi khi không tìm thấy, nên
+dùng nó để chứng minh *sự vắng mặt* là biến một khẳng định thành một ngoại lệ.
+
+**Prevention Rule.** Mỗi lần viết `findsNothing` trong widget test, hỏi:
+
+1. *Widget này có nằm trong một danh sách cuộn được không?* Có ⇒ **bắt buộc**
+   nới `physicalSize`, hoặc đổi cách khẳng định.
+2. *Nếu widget ấy vẫn còn nguyên trong code, test này có đỏ không?* Không chắc
+   ⇒ **chạy đột biến**. Đây là loại test mà đọc mắt thường không phát hiện được
+   nó rỗng.
+3. Ngược lại, `findsOneWidget` sau `pumpUntilFound`/`scrollUntilVisible` thì an
+   toàn — cuộn tới được nghĩa là có thật.
+
+
 ## Khi sửa bug mới — checklist
 
 1. Reproduce trên **đúng môi trường người dùng gặp** (release/máy thật nếu cần).
