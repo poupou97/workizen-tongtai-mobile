@@ -28,16 +28,93 @@ chạm quyết định **D-1** đang treo từ 2026-08-02.
 
 ---
 
-## 1. Bảng khả thi
+## 1. Bảng khả thi — **kiểm THẬT 2026-08-22**
 
-| Nền tảng | Cần tài khoản gì | Ai mở được | Cần điểm HTTPS? | File Bridge |
-|---|---|---|---|---|
-| **Shopee** | `open.shopee.com` + xác minh nhà phát triển → Partner ID/Key | **Founder** | ✅ callback OAuth | ✅ **hồ sơ đã có** |
-| **eBay** | eBay Developers Program → Application Keys → **RuName** | **Founder** | ✅ RuName gói accept/decline URL + **URL chính sách quyền riêng tư** | ❌ chưa có hồ sơ |
-| **Amazon** | **Professional selling account** + primary user + developer profile + xác minh danh tính | **Founder** | ✅ và app công khai còn cần **website công khai** | ❌ chưa có hồ sơ |
-| **Alibaba/1688** | `TBD` — chưa kiểm | `TBD` | `TBD` | ❌ chưa có hồ sơ |
-| **Logistics** | tuỳ hãng | `TBD` | `TBD` | ❌ |
-| **Shopify** | Partner account + app | **Founder** | ✅ | ❌ chưa có hồ sơ |
+> ⚠️ Bảng dưới đây viết lại sau khi Founder **tự mở form thật** trên năm nền
+> tảng. Bản đầu (viết bằng tài liệu) **bỏ sót cột quan trọng nhất**: *cổng tư
+> cách*. Không tài liệu nào của họ nói trước điều kiện ấy ở chỗ dễ thấy.
+
+| Nền tảng | ⛔ **Cổng tư cách** (thứ chặn thật) | Cần điểm HTTPS? | File Bridge |
+|---|---|---|---|
+| **Shopee** | 🔴 **shop phải là Mall hoặc Preferred Seller** — form từ chối ngay ở ô username | ✅ callback OAuth | ✅ **hồ sơ đã có** |
+| **eBay** | 🟡 chờ duyệt **≥1 ngày làm việc** sau khi đăng ký | ✅ RuName + **URL chính sách quyền riêng tư công khai** | ⚠️ hồ sơ đoán (WTM-442) |
+| **Amazon** | 🔴 **Professional selling account** (phí tháng) + primary user + duyệt vai trò **≤10 ngày làm việc** | ✅ app công khai còn cần **website công khai** | ⚠️ hồ sơ đoán (WTM-442) |
+| **1688** | 🔴 **giấy phép kinh doanh Trung Quốc**; công ty nước ngoài buộc đăng ký dạng cá nhân; API chỉ qua **ISV được uỷ quyền** | — | ❌ |
+| **TaoWorld** (Alibaba) | 🔴 **ĐÓNG CẢ HAI ĐẦU** — đăng ký đòi **công ty**; và kể cả đăng ký được thì còn phải hoàn tất **≥1 đơn hàng thật** rồi chờ duyệt 2–3 ngày mới mở quyền lấy dữ liệu | OAuth chuẩn, có sandbox `oauth.tbsandbox.com` | ❌ không tới được để kiểm |
+| **Shopify** | `TBD` — chưa kiểm | ✅ | ⚠️ hồ sơ đoán (WTM-442) |
+| **Logistics** | `TBD` — chưa kiểm | `TBD` | ❌ |
+
+### ⭐ Sáu cổng, và KHÔNG cổng nào là kỹ thuật
+
+Hạng người bán · chờ duyệt · pháp nhân Trung Quốc · gói trả phí · giấy tờ tuỳ
+thân · lịch sử giao dịch.
+
+Không cái nào chặn vì code khó. Các sàn **cố ý không mở API cho người bán nhỏ**
+— API là kênh dành cho đối tác lớn và cho ISV, không dành cho một cửa hàng
+tạp hoá bán 30 đơn một tháng.
+
+### Hệ quả với sản phẩm — đây là phần quan trọng nhất của cả tài liệu
+
+Người dùng mục tiêu của Tổng Tài là **SME Việt Nam bán lẻ**. Đó đúng là nhóm:
+
+* không phải Shopee Mall, không phải Preferred Seller;
+* không có pháp nhân Trung Quốc;
+* không sẵn sàng trả phí tháng Amazon chỉ để thử một tích hợp.
+
+⇒ **Kể cả khi dựng xong connector API, phần lớn người dùng mục tiêu vẫn không
+đủ tư cách để dùng nó.**
+
+⇒ **File Bridge không phải giải pháp tạm chờ API.** Với phần lớn người bán
+Việt, nó là **đường duy nhất đi được** — và nó đã chạy từ 2026-08-22
+(WTM-442 · WTM-443), không cần xin phép ai.
+
+Điều này **củng cố** ADR-TON-020 bằng bằng chứng thực địa: *"File Bridge là
+capability chính thức, KHÔNG phải giải pháp tạm"* — quyết định ấy viết
+2026-08-01 bằng lý lẽ; nay có năm cái form từ chối làm chứng.
+
+### 🔴 Sợi chỉ chung: gần như mọi đường API đòi một PHÁP NHÂN
+
+Xếp lại sáu cổng theo bản chất thay vì theo tên sàn:
+
+| Sàn | Cổng | Bản chất |
+|---|---|---|
+| Shopee (đường ISV) | số ĐKKD | **doanh nghiệp** |
+| 1688 | pháp nhân Trung Quốc | **doanh nghiệp** |
+| TaoWorld | công ty | **doanh nghiệp** |
+| Amazon | Professional selling account (khai thuế) | **doanh nghiệp** |
+| Shopee (đường Seller) | hạng Mall/Preferred | quy mô bán hàng |
+| eBay | chờ duyệt ≥1 ngày | ⚠️ **ngoại lệ duy nhất** — cá nhân đăng ký được |
+
+⇒ Câu hỏi mở khoá cả nhánh connector **không phải câu hỏi kỹ thuật**:
+
+> **Workizen có lập pháp nhân không?**
+
+Đó là Founder Gate. Không agent nào tự quyết, và không có đường vòng kỹ thuật
+nào đi qua nó.
+
+### Điều buổi kiểm này thật sự mua được
+
+Vài giờ đổi lấy một kết luận sẽ tốn **hàng tuần** nếu phát hiện sau khi đã xây:
+
+> **Chiến lược tích hợp của sản phẩm không thể dựa vào API sàn — vì chính
+> người dùng mục tiêu cũng không lấy được API.**
+
+Và nó không đến từ tài liệu. Nó đến từ việc Founder **tự đăng ký và bị từ chối
+năm lần** — tức là trải đúng thứ một người bán SME Việt Nam trải. Đó là nghiên
+cứu người dùng, không phải khảo sát kỹ thuật.
+
+⚠️ Ghi lại một khuyết tật của chính tài liệu này: bản đầu (viết 2026-08-22 buổi
+sáng, đọc từ tài liệu nhà cung cấp) kết luận Shopee chỉ vướng *"tài khoản +
+callback OAuth"*. **Sai hoàn toàn** — cổng thật là hạng người bán, và không
+trang tài liệu nào nói trước. Một tài liệu viết bằng tài liệu khác thì kế thừa
+mọi khoảng trống của bản gốc.
+
+### Connector API vẫn có chỗ — chỉ là không phải chỗ ta tưởng
+
+Nó đúng cho **người bán Mall/Preferred** (nhóm lớn hơn, ít hơn về số lượng), và
+đúng cho **đường ISV** — nơi Tổng Tài tự đứng ra làm nhà cung cấp phần mềm được
+uỷ quyền. Đường ISV đòi **số đăng ký kinh doanh**, nên nó là quyết định của
+Founder, không phải việc kỹ thuật.
 
 ### Ba điều khiến P1 không thể xong cuối tuần
 

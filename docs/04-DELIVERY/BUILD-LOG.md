@@ -5,6 +5,20 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +27 — 2026-08-22T07:42:50Z
+
+- Version: `0.1.0+27` (trước: `0.1.0+26`)
+- Lý do: WTM-443 · bước ghép cột để Founder thử file Shopee thật
+- SHA: `c191c61c19e675e86adf7555325f21cab02eb2db`
+- Nhánh: `main`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk · 112M · SHA256 `34fd5af9ca8d1d50…`
+
+### Thay đổi kể từ `599c6d12018ac69c2a596b3ea857c722d87ae270`
+
+- c191c61 feat(WTM-443): người bán tự chỉ cột — app HỌC thay vì ĐOÁN (#287)
+- e522382 feat(WTM-441/442): bốn sàn vào File Bridge — và ba cái bẫy lộ ra khi thêm (#286)
+- f0684ef chore: versionCode +26 · bản đầy đủ 2026-08-16 cài trên S24
+
 ## build +26 — 2026-08-15T17:27:28Z
 
 - Version: `0.1.0+26` (trước: `0.1.0+25`)
