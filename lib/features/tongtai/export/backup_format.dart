@@ -136,6 +136,16 @@ class BackupDatasets {
   static const String attributeGroups = 'attributeGroups';
   static const String attributeGroupItems = 'attributeGroupItems';
 
+  /// Bản đồ cột người bán tự chỉ khi nhập file sàn (WTM-443 · nối ở WTM-445).
+  ///
+  /// Lưu **tên cột**, không một ô nào của file. Mất nó thì người bán chỉ phải
+  /// ghép lại một lần; giữ nó thì không rò rỉ gì — đúng ranh giới khiến nó
+  /// xứng đáng có mặt trong `.ttbk`.
+  ///
+  /// **Optional on purpose** — xem [optional]: mọi file `.ttbk` phát hành
+  /// trước v28 đều không có nó.
+  static const String importColumnMaps = 'importColumnMaps';
+
   /// Every dataset a v2 backup must carry. A file missing any of these is
   /// **not** a complete snapshot and is rejected rather than partially applied.
   ///
@@ -171,6 +181,7 @@ class BackupDatasets {
     attributeValues,
     attributeGroups,
     attributeGroupItems,
+    importColumnMaps,
   ];
 }
 

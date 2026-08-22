@@ -1,6 +1,8 @@
 library;
 
 import '../finance/finance_category.dart';
+import '../commerce/import/import_column_map.dart';
+import '../commerce/import/marketplace_profile.dart';
 import '../opportunity/opportunity.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_history.dart';
@@ -927,6 +929,48 @@ class BackupCodec {
       groupId: groupId,
       definitionId: definitionId,
       sortOrder: _int(json['sortOrder']) ?? 0,
+    );
+  }
+
+  // ── WTM-445 · bản đồ cột người bán tự chỉ ────────────────────────────────
+
+  /// ⚠️ Chỉ **tên cột**, không một ô nào của file người bán.
+  ///
+  /// Ranh giới ấy là lý do bản đồ được phép vào `.ttbk` — file `.ttbk` mặc
+  /// định **không mã hoá**, nên bất cứ thứ gì lọt vào đây là thứ có thể đi
+  /// theo một lần chia sẻ nhầm (sự cố 31/07).
+  static Map<String, Object?> encodeImportColumnMap(ImportColumnMap map) => {
+    'vendor': map.vendor,
+    // Mã canonical, KHÔNG nhãn hiển thị (ADR-TON-018).
+    'fileKind': map.kind.code,
+    'columns': {for (final e in map.columns.entries) e.key.name: e.value},
+  };
+
+  /// Mã `fileKind` lạ ⇒ **bỏ cả bản ghi**, không rơi về `orders`.
+  ///
+  /// Một bản đồ `income` đọc nhầm thành `orders` sẽ ghép cột phí vào vai trò
+  /// đơn hàng — nhập ra doanh thu bịa. Bỏ thì người bán được hỏi lại; đoán thì
+  /// không ai được hỏi gì.
+  static ImportColumnMap? decodeImportColumnMap(Map<String, Object?> json) {
+    final vendor = _str(json['vendor']);
+    final kind = switch (_str(json['fileKind'])) {
+      'orders' => MarketplaceFileKind.orders,
+      'income' => MarketplaceFileKind.income,
+      _ => null,
+    };
+    if (vendor == null || kind == null) return null;
+    final raw = json['columns'];
+    final byName = {for (final f in MarketplaceField.values) f.name: f};
+    return ImportColumnMap(
+      vendor: vendor,
+      kind: kind,
+      columns: raw is! Map
+          ? const {}
+          : {
+              for (final e in raw.entries)
+                if (byName[e.key] != null && e.value is String)
+                  byName[e.key]!: e.value as String,
+            },
     );
   }
 }

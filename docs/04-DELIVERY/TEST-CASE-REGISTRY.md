@@ -27,15 +27,23 @@ Một sổ chỉ dài ra là một sổ không ai đọc.
 
 ## A · Nhập file sàn (Epic WTM-440)
 
-### A-1 · File xuất THẬT của Shopee đọc đúng
-* **Kiểm gì:** xuất file đơn từ Seller Centre → nhập vào app → số đơn và doanh
-  thu khớp với con số Seller Centre hiển thị.
+### A-1 · File xuất THẬT của một sàn đọc đúng
+* **Kiểm gì:** người bán xuất file đơn từ Seller Centre của họ → nhập vào app →
+  số đơn và doanh thu khớp con số sàn hiển thị.
 * **Vì sao chưa tự động:** không có file thật nào trong repo, và **không được
-  phép có** — file đơn Shopee mang tên · số điện thoại · địa chỉ **khách hàng
-  của người bán**. Đưa vào repo là làm lộ dữ liệu cá nhân của bên thứ ba.
-* **Cần gì để tự động:** một file đã **ẩn danh hoàn toàn** (thay mọi ô danh
-  tính bằng dữ liệu bịa) do chính người bán tạo và đồng ý chia sẻ. Ẩn danh phải
-  làm **trên máy họ**, không phải gửi bản gốc rồi ta ẩn danh hộ.
+  phép có** — file đơn mang tên · số điện thoại · địa chỉ **khách hàng của
+  người bán**. Đưa vào repo là làm lộ dữ liệu cá nhân của bên thứ ba.
+* ⚠️ **Đính chính 2026-08-22:** bản đầu ghi *"Founder xuất file từ shop Shopee
+  của mình"*. **Sai — Founder KHÔNG có shop trên sàn nào.** Tôi suy điều đó từ
+  một thông báo lỗi (*"không phải Mall/Preferred Seller"*) thay vì hỏi, và
+  thông báo ấy đúng với cả hai trường hợp *"có shop hạng thấp"* lẫn *"không có
+  shop"*. Cùng hình dạng với [P-45]/[P-46].
+* **Hệ quả:** **không ai trong đội có đường lấy file thật.** Sáu hồ sơ cột
+  (WTM-442) vẫn là **giả định**, và bước ghép cột (WTM-443) là lưới an toàn
+  cho đúng tình huống này.
+* **Cần gì để tự động:** một file đã **ẩn danh hoàn toàn**, do chính người bán
+  tạo trên máy họ và đồng ý chia sẻ. Hoặc: một người bán thật dùng app và kể
+  lại app hiện gì — **file không rời máy họ**.
 
 ### A-2 · Ghép cột trên máy thật với file thật
 * **Kiểm gì:** file sàn app chưa nhận ra → hiện bảng ghép cột → chọn đủ vai trò
@@ -56,14 +64,11 @@ Một sổ chỉ dài ra là một sổ không ai đọc.
 * **Cần gì để tự động:** một reader dạng dài. Đây là vé phát triển, không phải
   vé test.
 
-### A-4 · Bản đồ cột sống sót qua sao lưu/khôi phục
-* **Kiểm gì:** ghép cột → xuất `.ttbk` → khôi phục → bản đồ còn nguyên.
-* **Vì sao chưa tự động:** **chưa nối.** `import_column_maps_table` cố ý
-  **chưa** có dataset trong `BackupDatasets` — khai một tên mà chưa nối đường
-  đọc/ghi thì schema nói dối về thứ nó hỗ trợ, đúng khuyết tật của
-  `integrations_table` đã xoá ở v18.
-* **Cần gì để tự động:** nối dataset (vé riêng). Xong thì mục này thành test
-  tự động trong `backup_service_test`, và **xoá khỏi sổ**.
+> ~~**A-4 · Bản đồ cột sống sót qua sao lưu/khôi phục**~~ — **ĐÃ TỰ ĐỘNG HOÁ
+> (WTM-445), xoá khỏi sổ.** Nay là `test/features/tongtai/export/
+> column_map_backup_roundtrip_test.dart`. Giữ lại một dòng gạch ngang duy nhất
+> ở đây làm ví dụ cho luật *"tự động được thì xoá đi"* — mục kế tiếp được
+> chuyển sang `test/` thì xoá luôn cả dòng này.
 
 ---
 

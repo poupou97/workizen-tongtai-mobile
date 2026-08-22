@@ -42,6 +42,7 @@ final tongtaiBackupRepositoriesProvider = Provider<TongtaiBackupRepositories>(
     businessInputs: ref.watch(businessInputRepositoryProvider),
     commerce: ref.watch(commerceRepositoryProvider),
     attributes: ref.watch(attributeRepositoryProvider),
+    importColumnMaps: ref.watch(importColumnMapRepositoryProvider),
   ),
 );
 
