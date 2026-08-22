@@ -5,6 +5,21 @@ Một mục cho **mỗi bản dựng đã thực sự xảy ra**, mới nhất �
 > ⚠️ Các bản trước `+11` **không có dữ liệu** — chúng được dựng trước khi có file
 > này. Không bịa hồi tố: một mục trống trung thực hơn một mục dựng lại từ trí nhớ.
 
+## build +26 — 2026-08-15T17:27:28Z
+
+- Version: `0.1.0+26` (trước: `0.1.0+25`)
+- Lý do: bản đầy đủ 2026-08-16 cho Founder test trên S24
+- SHA: `599c6d12018ac69c2a596b3ea857c722d87ae270`
+- Nhánh: `main`
+- Trạng thái: ✅ THÀNH CÔNG — build/app/outputs/flutter-apk/app-release.apk · 112M · SHA256 `b8c0f3fe4f1d7e72…`
+
+### Thay đổi kể từ `85ef5e3ca15d71b71622f977c6c4a9fe23470322`
+
+- 599c6d1 docs(WTM-438): kiểm lại 14 ảnh concept — ba kết luận cũ KHÔNG còn đúng (#285)
+- 7cbd897 feat(WTM-437): Trang chủ bám concept — mic · chuông · avatar người (#284)
+- e589ed5 feat(WTM-439): màu định danh nav lấy theo concept — kèm biến thể chữ đạt AA (#283)
+- b3b8788 feat(WTM-433/436): màn chào theo concept · linh vật thôi có đĩa dán sau lưng (#282)
+
 ## build +25 — 2026-08-15T14:06:55Z
 
 - Version: `0.1.0+25` (trước: `0.1.0+24`)
