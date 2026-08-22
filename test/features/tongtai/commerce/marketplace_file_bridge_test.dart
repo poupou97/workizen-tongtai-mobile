@@ -482,4 +482,234 @@ void main() {
       );
     });
   });
+
+  // ── WTM-442 · bốn sàn thêm mới ───────────────────────────────────────────
+
+  group('WTM-442 · nhận dạng bốn sàn thêm mới', () {
+    // Bộ tiêu đề dưới đây mô phỏng bản xuất thật của từng sàn. Chúng vẫn là
+    // **giả định** (không ai có file thật) — nên thứ suite này bảo vệ không
+    // phải "tên cột đúng", mà là *cơ chế phân biệt sáu sàn không lẫn nhau*.
+
+    test('file đơn eBay', () {
+      final match = MarketplaceMatch.detect(const [
+        'Sales Record Number',
+        'Sale Date',
+        'Order Status',
+        'Custom Label',
+        'Item Title',
+        'Quantity',
+        'Sold For',
+        'Buyer Username',
+      ]);
+
+      expect(match?.profile.vendor, 'ebay');
+      expect(match?.kind, MarketplaceFileKind.orders);
+      expect(match?.profile.channel, SalesChannel.ebay);
+    });
+
+    test('file đơn Amazon — tên cột chữ-thường-nối-gạch', () {
+      final match = MarketplaceMatch.detect(const [
+        'amazon-order-id',
+        'purchase-date',
+        'order-status',
+        'sku',
+        'product-name',
+        'quantity-purchased',
+        'item-price',
+        'buyer-name',
+      ]);
+
+      expect(match?.profile.vendor, 'amazon');
+      expect(match?.profile.channel, SalesChannel.amazon);
+    });
+
+    test('file đơn Shopify — bốn cột `Lineitem *` là thứ nhận dạng', () {
+      final match = MarketplaceMatch.detect(const [
+        'Name',
+        'Created at',
+        'Financial Status',
+        'Lineitem sku',
+        'Lineitem name',
+        'Lineitem quantity',
+        'Lineitem price',
+        'Billing Name',
+      ]);
+
+      expect(match?.profile.vendor, 'shopify');
+      expect(match?.profile.channel, SalesChannel.shopify);
+    });
+
+    test('file đơn Lazada', () {
+      final match = MarketplaceMatch.detect(const [
+        'orderNumber',
+        'createTime',
+        'status',
+        'sellerSku',
+        'itemName',
+        'Quantity',
+        'paidPrice',
+        'customerName',
+      ]);
+
+      expect(match?.profile.vendor, 'lazada');
+      expect(match?.profile.channel, SalesChannel.lazada);
+    });
+
+    test('⭐ file eBay KHÔNG bị nhận nhầm thành Shopee', () {
+      // Đây là lỗi mà việc thêm sàn suýt tạo ra: `Order ID` · `Quantity` ·
+      // `SKU` · `Order Status` có ở nhiều sàn, và Shopee đứng đầu `all`.
+      // Nhận nhầm ở đây không làm hỏng file — nó **gán sai kênh cho đơn**, và
+      // doanh thu theo kênh sai vĩnh viễn mà không có dấu hiệu gì.
+      final match = MarketplaceMatch.detect(const [
+        'Order Number',
+        'Sales Record Number',
+        'Sale Date',
+        'Custom Label',
+        'Item Title',
+        'Quantity',
+        'Sold For',
+      ]);
+
+      expect(match?.profile.vendor, isNot('shopee'));
+      expect(match?.profile.vendor, 'ebay');
+    });
+
+    test('⭐ hoà điểm giữa HAI sàn ⇒ không kết luận, không đoán bừa', () {
+      // Chỉ toàn cột dùng chung: bốn cột đủ vượt ngưỡng `isConfident`, nhưng
+      // không cột nào chỉ riêng một sàn có. Đoán bừa lúc này là im lặng gán
+      // sai kênh — nên câu trả lời đúng là "chưa nhận ra".
+      final headers = const [
+        'Order ID',
+        'Order Status',
+        'SKU',
+        'Quantity',
+        'Product Name',
+      ];
+
+      final scores = <String, int>{};
+      for (final profile in MarketplaceProfile.all) {
+        for (final kind in MarketplaceFileKind.values) {
+          final s = profile.scoreFor(headers, kind);
+          if (s > (scores[profile.vendor] ?? 0)) scores[profile.vendor] = s;
+        }
+      }
+      final top = scores.values.reduce((a, b) => a > b ? a : b);
+      final tiedVendors = scores.entries.where((e) => e.value == top).length;
+
+      // Tiền đề của test: bộ tiêu đề này THẬT SỰ hoà. Khẳng định ra để nếu một
+      // ngày bí danh đổi và nó hết hoà, test hỏng ở đây — chứ không lặng lẽ
+      // biến thành một test không kiểm gì.
+      expect(top, greaterThanOrEqualTo(4));
+      expect(tiedVendors, greaterThan(1));
+
+      expect(MarketplaceMatch.detect(headers), isNull);
+    });
+
+    test('sáu hồ sơ, mã vendor không trùng nhau', () {
+      final vendors = MarketplaceProfile.all.map((p) => p.vendor).toList();
+      expect(vendors.toSet().length, vendors.length);
+      expect(vendors, hasLength(6));
+    });
+  });
+
+  group('WTM-442 · phí sàn — MỘT chủ, không bản chép', () {
+    CustomerOrder orderOn(SalesChannel? channel) => CustomerOrder(
+      id: 'o1',
+      customerId: 'c1',
+      orderNumber: 'o1',
+      date: now.subtract(const Duration(days: 2)),
+      status: OrderStatus.delivered,
+      channel: channel,
+      items: [
+        OrderItem(
+          productId: 'p1',
+          productName: 'Áo thun cotton',
+          sku: 'TT-001',
+          category: 'Thời trang',
+          quantity: 1,
+          unitPrice: 250000,
+        ),
+      ],
+    );
+
+    test(
+      '⭐ mọi kênh: CommerceProfit đồng ý với SalesChannel, không tự phán',
+      () {
+        // Trước WTM-442 có HAI bản của cùng luật này — một trên enum, một chép
+        // riêng trong `commerce_profit.dart`. Bản chép mang `_ => false`, nên
+        // thêm sàn mà quên sửa nó thì lợi nhuận sàn đó bị tính THỪA và không
+        // màn nào đỏ. Test này khoá cửa: hai bên phải nói cùng một điều, cho
+        // **mọi** giá trị enum — kể cả giá trị chưa ai nghĩ ra.
+        for (final channel in SalesChannel.values) {
+          final context = CommerceProfitContext.derive(
+            products: [product()],
+            orders: [orderOn(channel)],
+            settlements: const [],
+            now: now,
+          );
+
+          final blocked =
+              context.overall is ProfitInsufficient &&
+              (context.overall as ProfitInsufficient).blockers.contains(
+                ProfitBlocker.missingMarketplaceFees,
+              );
+
+          expect(
+            blocked,
+            channel.chargesPlatformFee,
+            reason:
+                'Kênh ${channel.code}: SalesChannel.chargesPlatformFee = '
+                '${channel.chargesPlatformFee} nhưng CommerceProfit '
+                '${blocked ? "đòi" : "không đòi"} dòng đối soát.',
+          );
+        }
+      },
+    );
+
+    test(
+      '⭐ bốn sàn mới đều bị giữ tiền — quên phân loại là con số đẹp giả',
+      () {
+        for (final channel in [
+          SalesChannel.ebay,
+          SalesChannel.amazon,
+          SalesChannel.shopify,
+          SalesChannel.lazada,
+        ]) {
+          expect(
+            channel.chargesPlatformFee,
+            isTrue,
+            reason: '${channel.code} phải đòi dòng đối soát trước khi báo lời.',
+          );
+        }
+      },
+    );
+
+    test(
+      'kênh chưa ghi (`null`) KHÔNG bị coi là miễn phí sàn một cách im lặng',
+      () {
+        final context = CommerceProfitContext.derive(
+          products: [product()],
+          orders: [orderOn(null)],
+          settlements: const [],
+          now: now,
+        );
+
+        // `null` = chưa ghi kênh. Không biết kênh thì không đòi được dòng đối
+        // soát nào — nhưng đó là *thiếu thông tin*, không phải *đã đủ*.
+        expect(context.overall, isA<ProfitKnown>());
+      },
+    );
+
+    test('mọi kênh trong `MarketplaceProfile` đều thuộc nhóm bị giữ tiền', () {
+      // Một hồ sơ File Bridge tồn tại nghĩa là có sàn ở giữa. Sàn ở giữa thì
+      // luôn cắt một phần trước khi trả tiền.
+      for (final profile in MarketplaceProfile.all) {
+        expect(
+          profile.channel.chargesPlatformFee,
+          isTrue,
+          reason: '${profile.vendor} có hồ sơ nhập file nhưng khai không phí.',
+        );
+      }
+    });
+  });
 }

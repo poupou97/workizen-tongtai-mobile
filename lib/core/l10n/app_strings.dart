@@ -2665,6 +2665,13 @@ class AppStringsVi extends AppStrings {
     'website' => 'Website của mình',
     'app_store' => 'Chợ ứng dụng',
     'direct' => 'Bán trực tiếp',
+    // WTM-442 — bốn sàn thêm cùng hồ sơ File Bridge. Thiếu một mã ở đây thì
+    // chip hiện "Kênh khác" cho một kênh app THỰC SỰ biết: trung thực, nhưng
+    // vẫn sai.
+    'ebay' => 'eBay',
+    'amazon' => 'Amazon',
+    'shopify' => 'Cửa hàng Shopify',
+    'lazada' => 'Lazada',
     // WTM-232: trước đây nhánh này là `_ => 'Bán sỉ'`, nên MỌI mã mới thêm
     // vào sẽ âm thầm hiện thành "Bán sỉ" — một nhãn sai mà không gì báo. Nay
     // mọi mã đều được liệt kê, và mã lạ (từ bản dựng mới hơn) nói thật rằng
@@ -4920,6 +4927,11 @@ class AppStringsEn extends AppStrings {
     'website' => 'Own website',
     'app_store' => 'App store',
     'direct' => 'Direct / contract',
+    // WTM-442 — see the Vietnamese twin.
+    'ebay' => 'eBay',
+    'amazon' => 'Amazon',
+    'shopify' => 'Shopify store',
+    'lazada' => 'Lazada',
     // See the Vietnamese twin: this used to be `_ => 'Wholesale'`, which
     // silently mislabelled every code added afterwards (WTM-232).
     _ => 'Other channel',
