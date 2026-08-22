@@ -100,6 +100,7 @@ class CommerceImportPreview {
     this.settlements = const [],
     this.shipments = const [],
     this.issues = const [],
+    this.unrecognisedHeaders = const [],
   });
 
   /// Xem trước rỗng vì file không đọc được. Không phải "file rỗng" — chỗ gọi
@@ -107,10 +108,12 @@ class CommerceImportPreview {
   factory CommerceImportPreview.rejected({
     required String sourceName,
     required ImportIssue issue,
+    List<String> unrecognisedHeaders = const [],
   }) => CommerceImportPreview(
     sourceName: sourceName,
     checksum: '',
     issues: [issue],
+    unrecognisedHeaders: unrecognisedHeaders,
   );
 
   final String sourceName;
@@ -127,6 +130,17 @@ class CommerceImportPreview {
   final List<Shipment> shipments;
 
   final List<ImportIssue> issues;
+
+  /// Tiêu đề cột **đọc được nhưng chưa hiểu** — WTM-443.
+  ///
+  /// Trước đây danh sách này chỉ tồn tại dưới dạng một câu tiếng Việt nhét vào
+  /// `ImportIssue.detail`. Câu ấy để người bán ĐỌC; danh sách này để màn hình
+  /// **dựng bảng ghép cột**. Hai mục đích khác nhau, nên hai chỗ chứa khác
+  /// nhau — nhặt lại tên cột bằng cách tách chuỗi là cách chắc chắn hỏng lúc
+  /// một tên cột có dấu `·` trong nó.
+  ///
+  /// Rỗng ⇒ không có gì để ghép (file rỗng, hoặc đã nhận ra sàn).
+  final List<String> unrecognisedHeaders;
 
   List<ImportIssue> get errors => [
     for (final i in issues)

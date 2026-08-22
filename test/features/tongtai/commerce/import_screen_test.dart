@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/database/database.dart';
 import 'package:tongtai/features/tongtai/commerce/commerce_repository.dart';
+import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_chat_provider.dart'
     show tongtaiDatabaseProvider;
@@ -101,6 +102,26 @@ void main() {
           '${sheetRows.join()}</sheetData></worksheet>',
     );
     return Uint8List.fromList(ZipEncoder().encode(archive));
+  }
+
+  /// Như [productsXlsx] nhưng sheet mang **tên khác** — dùng để dựng một file
+  /// sàn lạ: không sheet `PRODUCTS`, không bí danh cột nào của sáu hồ sơ.
+  Uint8List strangeXlsx(List<List<String>> rows) {
+    final bytes = productsXlsx(rows);
+    final archive = ZipDecoder().decodeBytes(bytes);
+    final out = Archive();
+    for (final f in archive.files) {
+      if (f.name == 'xl/workbook.xml') {
+        final data = utf8.encode(
+          '<?xml version="1.0"?><workbook><sheets>'
+          '<sheet name="Sheet1" sheetId="1"/></sheets></workbook>',
+        );
+        out.addFile(ArchiveFile(f.name, data.length, data));
+      } else {
+        out.addFile(f);
+      }
+    }
+    return Uint8List.fromList(ZipEncoder().encode(out));
   }
 
   Future<void> reveal(WidgetTester tester, Finder finder) async {
@@ -263,5 +284,112 @@ void main() {
     // `test/features/tongtai/sample/sample_business_seeder_test.dart`.
     expect(find.byKey(const Key('import-use-demo')), findsNothing);
     expect(find.byKey(const Key('import-pick-file')), findsOneWidget);
+  });
+
+  // ── WTM-443 · người bán tự chỉ cột ───────────────────────────────────────
+
+  group('WTM-443 · bước ghép cột', () {
+    const strangeRows = [
+      ['Ma_Don', 'Ma_Hang', 'SL', 'Don_Gia'],
+      ['DH-1', 'TT-001', '2', '250000'],
+    ];
+
+    Future<ProviderContainer> pumpStrangeFile(WidgetTester tester) =>
+        pumpImport(
+          tester,
+          pickFile: () async => PickedImportFile(
+            name: 'sanla.xlsx',
+            bytes: strangeXlsx(strangeRows),
+          ),
+        );
+
+    testWidgets('⭐ file chưa hiểu ⇒ MỜI ghép cột, không dừng ở lời từ chối', (
+      tester,
+    ) async {
+      await pumpStrangeFile(tester);
+      await tester.tap(find.byKey(const Key('import-pick-file')));
+      await pumpUntilFound(tester, find.byKey(const Key('import-column-map')));
+
+      expect(find.byKey(const Key('import-column-map')), findsOneWidget);
+      // Bốn vai trò BẮT BUỘC của file đơn phải có ô chọn.
+      for (final f in const ['orderId', 'sku', 'quantity', 'unitPrice']) {
+        expect(
+          find.byKey(Key('import-column-map-field-$f')),
+          findsOneWidget,
+          reason: 'thiếu ô chọn cho vai trò bắt buộc $f',
+        );
+      }
+    });
+
+    testWidgets('⭐ chưa ghép đủ vai trò bắt buộc ⇒ nút lưu BỊ CHẶN', (
+      tester,
+    ) async {
+      await pumpStrangeFile(tester);
+      await tester.tap(find.byKey(const Key('import-pick-file')));
+      await pumpUntilFound(tester, find.byKey(const Key('import-column-map')));
+
+      // Nhập nửa vời tệ hơn không nhập: một đơn không có mã thì lần nhập sau
+      // đếm nó lần nữa.
+      final save = tester.widget<FilledButton>(
+        find.byKey(const Key('import-column-map-save')),
+      );
+      expect(save.onPressed, isNull);
+      expect(
+        find.byKey(const Key('import-column-map-missing')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('⭐ ghép đủ ⇒ đọc lại được và ra ĐƠN HÀNG', (tester) async {
+      // Gieo sẵn sản phẩm để SKU khớp. Không gieo thì đơn bị chặn vì
+      // `sku_not_found` — hành vi ĐÚNG, nhưng lúc ấy test chỉ chứng minh
+      // "thẻ ghép cột biến mất", không chứng minh "đọc ra đơn hàng". Tên test
+      // hứa vế thứ hai nên nó phải kiểm vế thứ hai (P-45).
+      await DriftProductRepository(db).upsert(
+        Product(
+          id: 'p1',
+          sku: 'TT-001',
+          name: 'Áo thun cotton',
+          category: 'Thời trang',
+          pricePerUnit: 250000,
+          costPrice: 120000,
+          updatedAt: DateTime(2026, 8, 9),
+        ),
+      );
+
+      await pumpStrangeFile(tester);
+      await tester.tap(find.byKey(const Key('import-pick-file')));
+      await pumpUntilFound(tester, find.byKey(const Key('import-column-map')));
+
+      Future<void> choose(String field, String column) async {
+        await reveal(tester, find.byKey(Key('import-column-map-field-$field')));
+        await tester.tap(find.byKey(Key('import-column-map-field-$field')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(column).last);
+        await tester.pumpAndSettle();
+      }
+
+      await choose('orderId', 'Ma_Don');
+      await choose('sku', 'Ma_Hang');
+      await choose('quantity', 'SL');
+      await choose('unitPrice', 'Don_Gia');
+
+      await reveal(tester, find.byKey(const Key('import-column-map-save')));
+      final save = tester.widget<FilledButton>(
+        find.byKey(const Key('import-column-map-save')),
+      );
+      expect(save.onPressed, isNotNull, reason: 'ghép đủ rồi mà vẫn chặn');
+
+      await tester.tap(find.byKey(const Key('import-column-map-save')));
+      await tester.pumpAndSettle();
+
+      // Thẻ ghép cột biến mất ⇒ file đã được đọc lại và đã hiểu.
+      expect(find.byKey(const Key('import-column-map')), findsNothing);
+      // Và nó thật sự ra ĐƠN, không phải chỉ "hết lỗi". Đọc lại đi qua ĐÚNG
+      // đường thật — không có nhánh tắt cho file đã ghép tay — nên mọi luật
+      // cũ (khớp SKU, chống trùng, cảnh báo thiếu báo cáo thu nhập) vẫn chạy.
+      await reveal(tester, find.byKey(const Key('import-preview')));
+      expect(find.textContaining('1 đơn'), findsWidgets);
+    });
   });
 }

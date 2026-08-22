@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import '../../inventory/product.dart';
 import 'commerce_import.dart';
+import 'import_column_map.dart';
 import 'marketplace_export_source.dart';
 import 'marketplace_profile.dart';
 import 'xlsx_commerce_source.dart';
@@ -31,15 +32,17 @@ abstract final class CommerceSourceResolver {
     required DateTime now,
     required List<Product> knownProducts,
     Set<String> existingOrderIds = const {},
+    List<ImportColumnMap> savedMaps = const [],
     XlsxReader reader = const XlsxReader(),
   }) {
-    if (_looksLikeMarketplaceExport(bytes, reader)) {
+    if (_looksLikeMarketplaceExport(bytes, reader, savedMaps)) {
       return MarketplaceExportSource(
         bytes: bytes,
         fileName: fileName,
         now: now,
         knownProducts: knownProducts,
         existingOrderIds: existingOrderIds,
+        savedMaps: savedMaps,
         reader: reader,
       );
     }
@@ -48,7 +51,18 @@ abstract final class CommerceSourceResolver {
 
   /// Đọc tiêu đề một lần để đoán. Hỏng thì trả `false` — bộ đọc danh mục sẽ
   /// gặp lại đúng lỗi đó và nói bằng câu của nó, thay vì hai chỗ cùng nói.
-  static bool _looksLikeMarketplaceExport(Uint8List bytes, XlsxReader reader) {
+  ///
+  /// ⚠️ [savedMaps] phải được tính vào đây, không chỉ ở bên trong
+  /// `MarketplaceExportSource` (WTM-443). Bản đầu chỉ truyền bản đồ vào bộ
+  /// đọc, nhưng **cổng định tuyến này** vẫn hỏi mỗi `detect()` — nên một file
+  /// sàn lạ không bao giờ tới được bộ đọc để mà dùng bản đồ. Test lúc ấy vẫn
+  /// xanh vì chúng dựng `MarketplaceExportSource` thẳng: chúng chứng minh cơ
+  /// chế **chạy được**, không chứng minh nó **tới được**.
+  static bool _looksLikeMarketplaceExport(
+    Uint8List bytes,
+    XlsxReader reader,
+    List<ImportColumnMap> savedMaps,
+  ) {
     try {
       final sheets = reader.read(bytes);
       // File danh mục có sheet tên PRODUCTS — dấu hiệu chắc chắn hơn mọi điểm số.
@@ -58,6 +72,14 @@ abstract final class CommerceSourceResolver {
       for (final rows in sheets.values) {
         if (rows.isEmpty) continue;
         if (MarketplaceMatch.detect(rows.first) != null) return true;
+        // Người bán đã từng chỉ cột cho file dạng này ⇒ đây là file sàn, dù
+        // không hồ sơ đoán sẵn nào nhận ra.
+        final present = rows.first.toSet();
+        for (final map in savedMaps) {
+          if (!map.isUsable) continue;
+          final used = map.columns.values.where((c) => c.trim().isNotEmpty);
+          if (used.isNotEmpty && used.every(present.contains)) return true;
+        }
       }
       return false;
     } on Object {

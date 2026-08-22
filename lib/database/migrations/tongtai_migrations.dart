@@ -138,7 +138,7 @@ import '../search/tongtai_fts_schema.dart';
 /// version recorded by the shared-preferences first-launch check
 /// (see `SchemaVersionStore`). Bump this by exactly one and add a matching
 /// `onUpgrade` step whenever a table or column changes.
-const int kTongtaiSchemaVersion = 27;
+const int kTongtaiSchemaVersion = 28;
 
 /// Thêm cột **chỉ khi nó chưa có** — làm cho một bước migration chạy lại được.
 ///
@@ -431,6 +431,17 @@ MigrationStrategy buildTongtaiMigrationStrategy(GeneratedDatabase db) {
         await db.customStatement(
           'DROP TABLE IF EXISTS $kDroppedOpportunitiesTableName',
         );
+      }
+      if (from < 28) {
+        // v28 (WTM-443 · Epic WTM-440 — bản đồ cột do người bán chỉ). Một
+        // bảng, thuần thêm mới: không đụng cột nào đang có, không rebuild.
+        //
+        // Khoá chính là khoá tự nhiên `(businessId, vendor, fileKind)`, nên
+        // ràng buộc "một bản đồ cho mỗi sàn mỗi loại file" nằm ở **cấu trúc**
+        // chứ không ở mã ứng dụng. Vẫn đi qua `_createTableWithIndexes` vì
+        // `createTable` KHÔNG tạo chỉ mục (P-32) — thiếu nó thì máy nâng cấp
+        // mất chỉ mục `business_id` mà máy cài mới vẫn có, đúng lỗi 2026-08-08.
+        await _createTableWithIndexes(db, m, 'import_column_maps_table');
       }
       if (from < 27) {
         // v27 (WTM-334 · Epic WTM-324 — Commerce Attribute Model, tầng DYNAMIC).

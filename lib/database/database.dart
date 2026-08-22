@@ -24,6 +24,7 @@ import 'tables/documents.dart';
 import 'tables/alerts.dart';
 import 'tables/ai_chats.dart';
 import 'tables/connections.dart';
+import 'tables/import_column_maps.dart';
 import 'tables/external_identities.dart';
 import 'tables/identity_link_events.dart';
 import 'tables/settlement_lines.dart';
@@ -93,6 +94,7 @@ part 'database.g.dart';
     AlertsTable,
     AIChatTable,
     ConnectionsTable,
+    ImportColumnMapsTable,
     ExternalIdentitiesTable,
     IdentityLinkEventsTable,
     SettlementLinesTable,

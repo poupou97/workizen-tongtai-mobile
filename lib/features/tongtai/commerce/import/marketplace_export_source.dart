@@ -8,6 +8,7 @@ import '../../finance/settlement.dart';
 import '../../inventory/product.dart';
 import '../../orders/order.dart';
 import 'commerce_import.dart';
+import 'import_column_map.dart';
 import 'marketplace_profile.dart';
 import 'xlsx_reader.dart';
 
@@ -46,6 +47,7 @@ class MarketplaceExportSource implements CommerceImportSource {
     required this.now,
     required this.knownProducts,
     this.existingOrderIds = const {},
+    this.savedMaps = const [],
     this.reader = const XlsxReader(),
   });
 
@@ -55,6 +57,14 @@ class MarketplaceExportSource implements CommerceImportSource {
 
   /// Danh mục hiện có — dùng để khớp SKU. Đơn không khớp thì **không** nhập.
   final List<Product> knownProducts;
+
+  /// Bản đồ cột người bán đã tự chỉ trước đây — WTM-443.
+  ///
+  /// Dùng **sau** khi nhận dạng tự động thất bại, không phải trước: hồ sơ đoán
+  /// sẵn vẫn là phát đầu tiên. Bản đồ tay là lưới an toàn, không phải đường
+  /// chính — nếu nó đi trước thì một hồ sơ đã sửa đúng vẫn bị một bản đồ cũ
+  /// ghi đè.
+  final List<ImportColumnMap> savedMaps;
 
   /// Mã đơn đã có trong sổ. Nhập lại cùng file ⇒ không đếm hai lần.
   final Set<String> existingOrderIds;
@@ -109,7 +119,11 @@ class MarketplaceExportSource implements CommerceImportSource {
       );
     }
 
-    final match = MarketplaceMatch.detect(table.headers);
+    var match = MarketplaceMatch.detect(table.headers);
+
+    // Nhận dạng trượt ⇒ hỏi lại những bản đồ người bán đã tự chỉ (WTM-443).
+    match ??= _matchFromSavedMap(table.headers);
+
     if (match == null) {
       // ⭐ Không nhận ra ⇒ **nói ra những cột đã nhìn thấy**.
       //
@@ -128,6 +142,9 @@ class MarketplaceExportSource implements CommerceImportSource {
               'Chưa nhận ra đây là file của sàn nào. Các cột đọc được: $seen',
           sheet: table.name,
         ),
+        // Danh sách ĐẦY ĐỦ, không cắt còn 8 như câu đọc ở trên: màn hình cần
+        // mọi cột để người bán ghép, kể cả cột thứ 30.
+        unrecognisedHeaders: table.headers,
       );
     }
 
@@ -135,6 +152,41 @@ class MarketplaceExportSource implements CommerceImportSource {
       MarketplaceFileKind.orders => _readOrders(table, match),
       MarketplaceFileKind.income => _readIncome(table, match),
     };
+  }
+
+  /// Bản đồ người bán đã chỉ có khớp file này không — WTM-443.
+  ///
+  /// Một bản đồ **áp dụng được** khi mọi cột nó nhắc tới đều thật sự có mặt
+  /// trong file. Đó là điều kiện chặt hơn "vài cột trùng": bản đồ do người
+  /// thật chỉ, nên nếu file thiếu cột họ từng chỉ thì đây là **file khác**,
+  /// không phải file cũ thiếu vài cột.
+  ///
+  /// ⚠️ Hai bản đồ cùng khớp ⇒ trả `null`, giống hệt luật hoà điểm giữa hai
+  /// sàn: thà nói *chưa nhận ra* và hỏi lại, còn hơn im lặng chọn một cái rồi
+  /// gán sai kênh cho cả mẻ đơn.
+  MarketplaceMatch? _matchFromSavedMap(List<String> headers) {
+    final present = headers.toSet();
+    final usable = [
+      for (final map in savedMaps)
+        if (map.isUsable &&
+            map.columns.values.every(
+              (c) => c.trim().isEmpty || present.contains(c),
+            ) &&
+            map.columns.values.any((c) => c.trim().isNotEmpty))
+          map,
+    ];
+    if (usable.length != 1) return null;
+
+    final map = usable.single;
+    final base = MarketplaceProfile.byVendor(map.vendor);
+    return MarketplaceMatch(
+      profile: map.toProfile(base),
+      kind: map.kind,
+      // Điểm không dùng để so nữa — bản đồ đã do người thật xác nhận. Đặt bằng
+      // số vai trò đã chỉ để `isConfident` không chặn nhầm.
+      score: map.columns.length,
+      headers: headers,
+    );
   }
 
   // ── file đơn hàng ────────────────────────────────────────────────────────

@@ -5,6 +5,8 @@ import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtai/features/tongtai/commerce/commerce_profit.dart';
 import 'package:tongtai/features/tongtai/commerce/import/commerce_import.dart';
+import 'package:tongtai/features/tongtai/commerce/import/commerce_source_resolver.dart';
+import 'package:tongtai/features/tongtai/commerce/import/import_column_map.dart';
 import 'package:tongtai/features/tongtai/commerce/import/marketplace_export_source.dart';
 import 'package:tongtai/features/tongtai/commerce/import/marketplace_profile.dart';
 import 'package:tongtai/features/tongtai/core/provenance.dart';
@@ -94,12 +96,14 @@ void main() {
     List<List<String>> rows, {
     List<Product> products = const [],
     Set<String> existing = const {},
+    List<ImportColumnMap> savedMaps = const [],
   }) => MarketplaceExportSource(
     bytes: xlsx(rows),
     fileName: 'export.xlsx',
     now: now,
     knownProducts: products,
     existingOrderIds: existing,
+    savedMaps: savedMaps,
   ).read();
 
   // ── nhận dạng ────────────────────────────────────────────────────────────
@@ -710,6 +714,251 @@ void main() {
           reason: '${profile.vendor} có hồ sơ nhập file nhưng khai không phí.',
         );
       }
+    });
+  });
+
+  // ── WTM-443 · người bán tự chỉ cột ───────────────────────────────────────
+
+  group('WTM-443 · bản đồ cột do người bán chỉ', () {
+    // Một file sàn lạ: không bí danh nào của sáu hồ sơ khớp.
+    const strangeHeaders = [
+      'Ma_Don',
+      'Ngay',
+      'Ma_Hang',
+      'SL',
+      'Don_Gia',
+      'Ghi_Chu',
+    ];
+
+    ImportColumnMap mapFor({
+      String vendor = ImportColumnMap.kOtherMarketplaceVendor,
+      Map<MarketplaceField, String>? columns,
+    }) => ImportColumnMap(
+      vendor: vendor,
+      kind: MarketplaceFileKind.orders,
+      columns:
+          columns ??
+          const {
+            MarketplaceField.orderId: 'Ma_Don',
+            MarketplaceField.orderDate: 'Ngay',
+            MarketplaceField.sku: 'Ma_Hang',
+            MarketplaceField.quantity: 'SL',
+            MarketplaceField.unitPrice: 'Don_Gia',
+          },
+    );
+
+    test('⭐ file sàn lạ + bản đồ đã lưu ⇒ đọc được', () async {
+      final preview = await readFile(
+        [
+          strangeHeaders,
+          ['DH-1', '2026-08-09', 'TT-001', '2', '250000', ''],
+        ],
+        products: [product()],
+        savedMaps: [mapFor()],
+      );
+
+      expect(preview.errors, isEmpty);
+      expect(preview.orders, hasLength(1));
+      expect(preview.orders.single.orderNumber, 'DH-1');
+      expect(preview.orders.single.items.single.quantity, 2);
+    });
+
+    test('⭐ sàn lạ vẫn bị coi là CÓ phí sàn', () async {
+      final preview = await readFile(
+        [
+          strangeHeaders,
+          ['DH-1', '2026-08-09', 'TT-001', '1', '250000', ''],
+        ],
+        products: [product()],
+        savedMaps: [mapFor()],
+      );
+
+      // Không biết sàn nào KHÔNG có nghĩa là không có sàn. Rơi vào một kênh
+      // miễn phí sàn là đúng khuyết tật P-47 vừa gỡ.
+      expect(preview.orders.single.channel, SalesChannel.marketplaceOther);
+      expect(SalesChannel.marketplaceOther.chargesPlatformFee, isTrue);
+    });
+
+    test(
+      '⭐ bản đồ thiếu vai trò BẮT BUỘC ⇒ không dùng, không nhập nửa vời',
+      () async {
+        final broken = mapFor(
+          columns: const {
+            MarketplaceField.orderId: 'Ma_Don',
+            MarketplaceField.sku: 'Ma_Hang',
+            // thiếu quantity + unitPrice
+          },
+        );
+        expect(broken.isUsable, isFalse);
+        expect(
+          broken.missingRequired,
+          containsAll(<MarketplaceField>[
+            MarketplaceField.quantity,
+            MarketplaceField.unitPrice,
+          ]),
+        );
+
+        final preview = await readFile(
+          [
+            strangeHeaders,
+            ['DH-1', '2026-08-09', 'TT-001', '2', '250000', ''],
+          ],
+          products: [product()],
+          savedMaps: [broken],
+        );
+
+        expect(preview.errors.single.code, 'unknown_marketplace_file');
+        expect(preview.orders, isEmpty);
+      },
+    );
+
+    test('⭐ HAI bản đồ cùng khớp ⇒ không đoán bừa', () async {
+      final preview = await readFile(
+        [
+          strangeHeaders,
+          ['DH-1', '2026-08-09', 'TT-001', '2', '250000', ''],
+        ],
+        products: [product()],
+        savedMaps: [
+          mapFor(),
+          mapFor(vendor: 'shopee'),
+        ],
+      );
+
+      // Cùng luật với hoà điểm giữa hai sàn: thà hỏi lại còn hơn gán sai kênh
+      // cho cả mẻ đơn.
+      expect(preview.errors.single.code, 'unknown_marketplace_file');
+    });
+
+    test('bản đồ nhắc một cột KHÔNG có trong file ⇒ không áp dụng', () async {
+      final other = mapFor(
+        columns: const {
+          MarketplaceField.orderId: 'Ma_Don',
+          MarketplaceField.sku: 'Ma_Hang',
+          MarketplaceField.quantity: 'SL',
+          MarketplaceField.unitPrice: 'Don_Gia',
+          MarketplaceField.buyerName: 'Ten_Khach', // file này không có
+        },
+      );
+
+      final preview = await readFile(
+        [
+          strangeHeaders,
+          ['DH-1', '2026-08-09', 'TT-001', '2', '250000', ''],
+        ],
+        products: [product()],
+        savedMaps: [other],
+      );
+
+      expect(preview.errors.single.code, 'unknown_marketplace_file');
+    });
+
+    test('⭐ bản đồ KHÔNG ghi đè khi nhận dạng tự động đã thành công', () async {
+      // Bản đồ tay là lưới an toàn, không phải đường chính. Nếu nó đi trước,
+      // một hồ sơ đã sửa đúng vẫn bị bản đồ cũ ghi đè.
+      final preview = await readFile(
+        [
+          const [
+            'Mã đơn hàng',
+            'Ngày đặt hàng',
+            'SKU phân loại hàng',
+            'Số lượng',
+            'Giá gốc',
+          ],
+          ['SP-9', '2026-08-09', 'TT-001', '1', '250000'],
+        ],
+        products: [product()],
+        savedMaps: [mapFor(vendor: 'lazada')],
+      );
+
+      expect(preview.orders.single.channel, SalesChannel.shopee);
+    });
+
+    test('⭐ cột chưa hiểu được trả ĐỦ, không cắt còn 8', () async {
+      // 12 cột, không phải 30: helper `xlsx()` đặt tên ô bằng
+      // `String.fromCharCode(65 + col)` nên chỉ dựng được tới cột Z. Giới hạn
+      // của công cụ dựng file, không phải của sản phẩm — nhưng 12 > 8 là đủ
+      // để chứng minh điều test này quan tâm.
+      final many = List.generate(12, (i) => 'Cot_$i');
+      final preview = await readFile([many, List.filled(12, 'x')]);
+
+      expect(preview.errors.single.code, 'unknown_marketplace_file');
+      // Câu tiếng Việt chỉ kể 8 cột đầu cho dễ đọc; danh sách cho màn hình
+      // ghép cột phải đủ, kể cả cột thứ 12.
+      expect(preview.unrecognisedHeaders, hasLength(12));
+      expect(preview.unrecognisedHeaders.last, 'Cot_11');
+    });
+
+    test(
+      'mã vai trò lạ trong bản đồ đã lưu ⇒ BỎ QUA, không rơi về vai trò khác',
+      () {
+        final decoded = ImportColumnMap.decodeColumns(
+          '{"orderId":"Ma_Don","vaiTroTuTuongLai":"Cot_X","sku":"Ma_Hang"}',
+        );
+
+        expect(decoded[MarketplaceField.orderId], 'Ma_Don');
+        expect(decoded[MarketplaceField.sku], 'Ma_Hang');
+        expect(decoded, hasLength(2));
+      },
+    );
+
+    test('mã hoá rồi giải mã lại giữ nguyên bản đồ', () {
+      final map = mapFor();
+      expect(ImportColumnMap.decodeColumns(map.encodeColumns()), map.columns);
+    });
+
+    test('⭐⭐ TỚI ĐƯỢC qua resolver, không chỉ chạy được khi gọi thẳng', () async {
+      // Bài học của chính story này. Bản đầu truyền `savedMaps` vào bộ đọc,
+      // và mọi test trên đây đều xanh — vì chúng dựng `MarketplaceExportSource`
+      // THẲNG. Nhưng đường thật đi qua `CommerceSourceResolver`, và cổng định
+      // tuyến ở đó chỉ hỏi `detect()`. Một file sàn lạ vì thế **không bao giờ
+      // tới được** bộ đọc để mà dùng bản đồ.
+      //
+      // Test xanh chứng minh cơ chế CHẠY ĐƯỢC. Nó không chứng minh cơ chế
+      // TỚI ĐƯỢC. Đây là test cho vế thứ hai.
+      final source = CommerceSourceResolver.resolve(
+        bytes: xlsx([
+          strangeHeaders,
+          ['DH-1', '2026-08-09', 'TT-001', '2', '250000', ''],
+        ]),
+        fileName: 'export.xlsx',
+        now: now,
+        knownProducts: [product()],
+        savedMaps: [mapFor()],
+      );
+
+      expect(
+        source,
+        isA<MarketplaceExportSource>(),
+        reason:
+            'resolver phải định tuyến file sàn lạ tới bộ đọc sàn khi đã '
+            'có bản đồ, nếu không thì bản đồ vô dụng',
+      );
+
+      final preview = await source.read();
+      expect(preview.errors, isEmpty);
+      expect(preview.orders.single.orderNumber, 'DH-1');
+    });
+
+    test('không có bản đồ ⇒ resolver KHÔNG đổi hành vi cũ', () {
+      // Cổng định tuyến chỉ được nới đúng bằng phần bản đồ mở ra. File lạ mà
+      // chưa ai chỉ cột thì vẫn đi đường cũ — không âm thầm đổi phân loại.
+      final source = CommerceSourceResolver.resolve(
+        bytes: xlsx([
+          strangeHeaders,
+          ['DH-1', '2026-08-09', 'TT-001', '2', '250000', ''],
+        ]),
+        fileName: 'export.xlsx',
+        now: now,
+        knownProducts: [product()],
+      );
+
+      expect(source, isNot(isA<MarketplaceExportSource>()));
+    });
+
+    test('JSON hỏng ⇒ bản đồ rỗng, không ném lỗi', () {
+      expect(ImportColumnMap.decodeColumns('không phải json'), isEmpty);
+      expect(ImportColumnMap.decodeColumns('[1,2,3]'), isEmpty);
     });
   });
 }

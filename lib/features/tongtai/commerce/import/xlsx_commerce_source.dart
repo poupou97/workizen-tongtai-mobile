@@ -77,6 +77,20 @@ class XlsxCommerceSource implements CommerceImportSource {
 
     final productsSheet = _table(sheets, 'PRODUCTS');
     if (productsSheet == null) {
+      // ⭐ Kèm theo tiêu đề cột đọc được — WTM-443.
+      //
+      // Đây là chỗ một file sàn LẠ rơi vào lần đầu: chưa hồ sơ nào nhận ra nó,
+      // chưa bản đồ nào tồn tại, nên cổng định tuyến gửi nó về bộ đọc danh
+      // mục. Không kèm cột thì màn hình chỉ nói "thiếu bảng PRODUCTS" — đúng
+      // với một file danh mục hỏng, nhưng vô nghĩa với một file đơn Shopee.
+      //
+      // Có danh sách cột thì màn hình mời được người bán chỉ cột, và **bản đồ
+      // đầu tiên** ra đời. Thiếu bước này thì bản đồ chỉ dùng được cho người
+      // đã có bản đồ — một tính năng không ai bắt đầu được.
+      final headers = <String>[
+        for (final rows in sheets.values)
+          if (rows.isNotEmpty) ...rows.first,
+      ];
       return CommerceImportPreview.rejected(
         sourceName: fileName,
         issue: const ImportIssue(
@@ -85,6 +99,7 @@ class XlsxCommerceSource implements CommerceImportSource {
           subject: 'PRODUCTS',
           detail: 'File không có bảng sản phẩm nào tên PRODUCTS.',
         ),
+        unrecognisedHeaders: headers,
       );
     }
 

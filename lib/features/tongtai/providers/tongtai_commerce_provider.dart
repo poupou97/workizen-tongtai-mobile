@@ -13,6 +13,7 @@ import '../commerce/attributes/attribute_repository.dart';
 import '../commerce/attributes/product_attribute_enricher.dart';
 import '../commerce/attributes/product_attribute_view.dart';
 import '../commerce/import/commerce_import.dart';
+import '../commerce/import/import_column_map_repository.dart';
 import '../commerce/import/commerce_importer.dart';
 import '../commerce/import/xlsx_commerce_source.dart';
 import '../finance/settlement_repository.dart';
@@ -46,6 +47,11 @@ final settlementRepositoryProvider = Provider<SettlementRepository>(
 
 final shipmentRepositoryProvider = Provider<ShipmentRepository>(
   (ref) => ShipmentRepository(ref.watch(tongtaiDatabaseProvider)),
+);
+
+/// Bản đồ cột người bán tự chỉ — WTM-443.
+final importColumnMapRepositoryProvider = Provider<ImportColumnMapRepository>(
+  (ref) => DriftImportColumnMapRepository(ref.watch(tongtaiDatabaseProvider)),
 );
 
 /// Chuyến giao hàng đáng nhắc — Rule Twin, chạy không cần mạng (WTM-323).

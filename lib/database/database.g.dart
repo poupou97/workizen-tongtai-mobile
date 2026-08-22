@@ -12568,6 +12568,402 @@ class ConnectionsTableCompanion extends UpdateCompanion<ConnectionsTableData> {
   }
 }
 
+class $ImportColumnMapsTableTable extends ImportColumnMapsTable
+    with TableInfo<$ImportColumnMapsTableTable, ImportColumnMapsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImportColumnMapsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _businessIdMeta = const VerificationMeta(
+    'businessId',
+  );
+  @override
+  late final GeneratedColumn<String> businessId = GeneratedColumn<String>(
+    'business_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES businesses_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
+  @override
+  late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
+    'vendor',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fileKindMeta = const VerificationMeta(
+    'fileKind',
+  );
+  @override
+  late final GeneratedColumn<String> fileKind = GeneratedColumn<String>(
+    'file_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _columnsMeta = const VerificationMeta(
+    'columns',
+  );
+  @override
+  late final GeneratedColumn<String> columns = GeneratedColumn<String>(
+    'columns',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    businessId,
+    vendor,
+    fileKind,
+    columns,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'import_column_maps_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ImportColumnMapsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('business_id')) {
+      context.handle(
+        _businessIdMeta,
+        businessId.isAcceptableOrUnknown(data['business_id']!, _businessIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_businessIdMeta);
+    }
+    if (data.containsKey('vendor')) {
+      context.handle(
+        _vendorMeta,
+        vendor.isAcceptableOrUnknown(data['vendor']!, _vendorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_vendorMeta);
+    }
+    if (data.containsKey('file_kind')) {
+      context.handle(
+        _fileKindMeta,
+        fileKind.isAcceptableOrUnknown(data['file_kind']!, _fileKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fileKindMeta);
+    }
+    if (data.containsKey('columns')) {
+      context.handle(
+        _columnsMeta,
+        columns.isAcceptableOrUnknown(data['columns']!, _columnsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_columnsMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {businessId, vendor, fileKind};
+  @override
+  ImportColumnMapsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImportColumnMapsTableData(
+      businessId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}business_id'],
+      )!,
+      vendor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vendor'],
+      )!,
+      fileKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_kind'],
+      )!,
+      columns: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}columns'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ImportColumnMapsTableTable createAlias(String alias) {
+    return $ImportColumnMapsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ImportColumnMapsTableData extends DataClass
+    implements Insertable<ImportColumnMapsTableData> {
+  final String businessId;
+
+  /// Mã sàn canonical, hoặc `marketplace_other` khi người bán nói *"sàn
+  /// khác"*. Cùng quy ước `orders_table.channelId`: một mã từ từ vựng đóng,
+  /// **không** phải khoá ngoại.
+  final String vendor;
+
+  /// `MarketplaceFileKind` — `orders` · `income`.
+  ///
+  /// Một sàn cần **hai** bản đồ, không phải một: file đơn và báo cáo thu nhập
+  /// là hai file khác nhau với hai bộ cột khác nhau. Gộp chúng lại là cách
+  /// chắc chắn để nhập được doanh thu mà không nhập được phí — tức là in ra
+  /// lợi nhuận đẹp hơn sự thật.
+  final String fileKind;
+
+  /// JSON — xem chú thích của lớp.
+  final String columns;
+
+  /// Lần cuối người bán xác nhận bản đồ này.
+  ///
+  /// Không phải trang trí: sàn đổi định dạng thì bản đồ cũ thành sai, và ngày
+  /// tháng là thứ duy nhất nói cho người bán biết bản đồ này đã bao lâu rồi.
+  final DateTime updatedAt;
+  const ImportColumnMapsTableData({
+    required this.businessId,
+    required this.vendor,
+    required this.fileKind,
+    required this.columns,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['business_id'] = Variable<String>(businessId);
+    map['vendor'] = Variable<String>(vendor);
+    map['file_kind'] = Variable<String>(fileKind);
+    map['columns'] = Variable<String>(columns);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ImportColumnMapsTableCompanion toCompanion(bool nullToAbsent) {
+    return ImportColumnMapsTableCompanion(
+      businessId: Value(businessId),
+      vendor: Value(vendor),
+      fileKind: Value(fileKind),
+      columns: Value(columns),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ImportColumnMapsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImportColumnMapsTableData(
+      businessId: serializer.fromJson<String>(json['businessId']),
+      vendor: serializer.fromJson<String>(json['vendor']),
+      fileKind: serializer.fromJson<String>(json['fileKind']),
+      columns: serializer.fromJson<String>(json['columns']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'businessId': serializer.toJson<String>(businessId),
+      'vendor': serializer.toJson<String>(vendor),
+      'fileKind': serializer.toJson<String>(fileKind),
+      'columns': serializer.toJson<String>(columns),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ImportColumnMapsTableData copyWith({
+    String? businessId,
+    String? vendor,
+    String? fileKind,
+    String? columns,
+    DateTime? updatedAt,
+  }) => ImportColumnMapsTableData(
+    businessId: businessId ?? this.businessId,
+    vendor: vendor ?? this.vendor,
+    fileKind: fileKind ?? this.fileKind,
+    columns: columns ?? this.columns,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ImportColumnMapsTableData copyWithCompanion(
+    ImportColumnMapsTableCompanion data,
+  ) {
+    return ImportColumnMapsTableData(
+      businessId: data.businessId.present
+          ? data.businessId.value
+          : this.businessId,
+      vendor: data.vendor.present ? data.vendor.value : this.vendor,
+      fileKind: data.fileKind.present ? data.fileKind.value : this.fileKind,
+      columns: data.columns.present ? data.columns.value : this.columns,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportColumnMapsTableData(')
+          ..write('businessId: $businessId, ')
+          ..write('vendor: $vendor, ')
+          ..write('fileKind: $fileKind, ')
+          ..write('columns: $columns, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(businessId, vendor, fileKind, columns, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportColumnMapsTableData &&
+          other.businessId == this.businessId &&
+          other.vendor == this.vendor &&
+          other.fileKind == this.fileKind &&
+          other.columns == this.columns &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ImportColumnMapsTableCompanion
+    extends UpdateCompanion<ImportColumnMapsTableData> {
+  final Value<String> businessId;
+  final Value<String> vendor;
+  final Value<String> fileKind;
+  final Value<String> columns;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ImportColumnMapsTableCompanion({
+    this.businessId = const Value.absent(),
+    this.vendor = const Value.absent(),
+    this.fileKind = const Value.absent(),
+    this.columns = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ImportColumnMapsTableCompanion.insert({
+    required String businessId,
+    required String vendor,
+    required String fileKind,
+    required String columns,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : businessId = Value(businessId),
+       vendor = Value(vendor),
+       fileKind = Value(fileKind),
+       columns = Value(columns),
+       updatedAt = Value(updatedAt);
+  static Insertable<ImportColumnMapsTableData> custom({
+    Expression<String>? businessId,
+    Expression<String>? vendor,
+    Expression<String>? fileKind,
+    Expression<String>? columns,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (businessId != null) 'business_id': businessId,
+      if (vendor != null) 'vendor': vendor,
+      if (fileKind != null) 'file_kind': fileKind,
+      if (columns != null) 'columns': columns,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ImportColumnMapsTableCompanion copyWith({
+    Value<String>? businessId,
+    Value<String>? vendor,
+    Value<String>? fileKind,
+    Value<String>? columns,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ImportColumnMapsTableCompanion(
+      businessId: businessId ?? this.businessId,
+      vendor: vendor ?? this.vendor,
+      fileKind: fileKind ?? this.fileKind,
+      columns: columns ?? this.columns,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (businessId.present) {
+      map['business_id'] = Variable<String>(businessId.value);
+    }
+    if (vendor.present) {
+      map['vendor'] = Variable<String>(vendor.value);
+    }
+    if (fileKind.present) {
+      map['file_kind'] = Variable<String>(fileKind.value);
+    }
+    if (columns.present) {
+      map['columns'] = Variable<String>(columns.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportColumnMapsTableCompanion(')
+          ..write('businessId: $businessId, ')
+          ..write('vendor: $vendor, ')
+          ..write('fileKind: $fileKind, ')
+          ..write('columns: $columns, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ExternalIdentitiesTableTable extends ExternalIdentitiesTable
     with TableInfo<$ExternalIdentitiesTableTable, ExternalIdentitiesTableData> {
   @override
@@ -27249,6 +27645,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ConnectionsTableTable connectionsTable = $ConnectionsTableTable(
     this,
   );
+  late final $ImportColumnMapsTableTable importColumnMapsTable =
+      $ImportColumnMapsTableTable(this);
   late final $ExternalIdentitiesTableTable externalIdentitiesTable =
       $ExternalIdentitiesTableTable(this);
   late final $IdentityLinkEventsTableTable identityLinkEventsTable =
@@ -27375,6 +27773,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final Index connectionsConnector = Index(
     'connections_connector',
     'CREATE INDEX connections_connector ON connections_table (connector_id)',
+  );
+  late final Index importColumnMapsBusinessId = Index(
+    'import_column_maps_business_id',
+    'CREATE INDEX import_column_maps_business_id ON import_column_maps_table (business_id)',
   );
   late final Index externalIdentitiesBusinessId = Index(
     'external_identities_business_id',
@@ -27572,6 +27974,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     alertsTable,
     aIChatTable,
     connectionsTable,
+    importColumnMapsTable,
     externalIdentitiesTable,
     identityLinkEventsTable,
     settlementLinesTable,
@@ -27615,6 +28018,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     transactionsDate,
     connectionsBusinessId,
     connectionsConnector,
+    importColumnMapsBusinessId,
     externalIdentitiesBusinessId,
     externalIdentitiesCustomerId,
     externalIdentitiesLookup,
@@ -27773,6 +28177,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('connections_table', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'businesses_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('import_column_maps_table', kind: UpdateKind.delete),
+      ],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -28245,6 +28658,32 @@ final class $$BusinessesTableTableReferences
 
     final cache = $_typedResult.readTableOrNull(
       _connectionsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ImportColumnMapsTableTable,
+    List<ImportColumnMapsTableData>
+  >
+  _importColumnMapsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.importColumnMapsTable,
+        aliasName:
+            'businesses_table__id__import_column_maps_table__business_id',
+      );
+
+  $$ImportColumnMapsTableTableProcessedTableManager
+  get importColumnMapsTableRefs {
+    final manager = $$ImportColumnMapsTableTableTableManager(
+      $_db,
+      $_db.importColumnMapsTable,
+    ).filter((f) => f.businessId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _importColumnMapsTableRefsTable($_db),
     );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
@@ -28981,6 +29420,32 @@ class $$BusinessesTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> importColumnMapsTableRefs(
+    Expression<bool> Function($$ImportColumnMapsTableTableFilterComposer f) f,
+  ) {
+    final $$ImportColumnMapsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.importColumnMapsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ImportColumnMapsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.importColumnMapsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 
@@ -29818,6 +30283,32 @@ class $$BusinessesTableTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> importColumnMapsTableRefs<T extends Object>(
+    Expression<T> Function($$ImportColumnMapsTableTableAnnotationComposer a) f,
+  ) {
+    final $$ImportColumnMapsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.importColumnMapsTable,
+          getReferencedColumn: (t) => t.businessId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ImportColumnMapsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.importColumnMapsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
   Expression<T> externalIdentitiesTableRefs<T extends Object>(
     Expression<T> Function($$ExternalIdentitiesTableTableAnnotationComposer a)
     f,
@@ -30210,6 +30701,7 @@ class $$BusinessesTableTableTableManager
             bool alertsTableRefs,
             bool aIChatTableRefs,
             bool connectionsTableRefs,
+            bool importColumnMapsTableRefs,
             bool externalIdentitiesTableRefs,
             bool identityLinkEventsTableRefs,
             bool settlementLinesTableRefs,
@@ -30319,6 +30811,7 @@ class $$BusinessesTableTableTableManager
                 alertsTableRefs = false,
                 aIChatTableRefs = false,
                 connectionsTableRefs = false,
+                importColumnMapsTableRefs = false,
                 externalIdentitiesTableRefs = false,
                 identityLinkEventsTableRefs = false,
                 settlementLinesTableRefs = false,
@@ -30350,6 +30843,7 @@ class $$BusinessesTableTableTableManager
                     if (alertsTableRefs) db.alertsTable,
                     if (aIChatTableRefs) db.aIChatTable,
                     if (connectionsTableRefs) db.connectionsTable,
+                    if (importColumnMapsTableRefs) db.importColumnMapsTable,
                     if (externalIdentitiesTableRefs) db.externalIdentitiesTable,
                     if (identityLinkEventsTableRefs) db.identityLinkEventsTable,
                     if (settlementLinesTableRefs) db.settlementLinesTable,
@@ -30670,6 +31164,27 @@ class $$BusinessesTableTableTableManager
                                 table,
                                 p0,
                               ).connectionsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.businessId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (importColumnMapsTableRefs)
+                        await $_getPrefetchedData<
+                          BusinessesTableData,
+                          $BusinessesTableTable,
+                          ImportColumnMapsTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$BusinessesTableTableReferences
+                              ._importColumnMapsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$BusinessesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).importColumnMapsTableRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.businessId == item.id,
@@ -31005,6 +31520,7 @@ typedef $$BusinessesTableTableProcessedTableManager =
         bool alertsTableRefs,
         bool aIChatTableRefs,
         bool connectionsTableRefs,
+        bool importColumnMapsTableRefs,
         bool externalIdentitiesTableRefs,
         bool identityLinkEventsTableRefs,
         bool settlementLinesTableRefs,
@@ -39641,6 +40157,347 @@ typedef $$ConnectionsTableTableProcessedTableManager =
       $$ConnectionsTableTableUpdateCompanionBuilder,
       (ConnectionsTableData, $$ConnectionsTableTableReferences),
       ConnectionsTableData,
+      PrefetchHooks Function({bool businessId})
+    >;
+typedef $$ImportColumnMapsTableTableCreateCompanionBuilder =
+    ImportColumnMapsTableCompanion Function({
+      required String businessId,
+      required String vendor,
+      required String fileKind,
+      required String columns,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ImportColumnMapsTableTableUpdateCompanionBuilder =
+    ImportColumnMapsTableCompanion Function({
+      Value<String> businessId,
+      Value<String> vendor,
+      Value<String> fileKind,
+      Value<String> columns,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$ImportColumnMapsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ImportColumnMapsTableTable,
+          ImportColumnMapsTableData
+        > {
+  $$ImportColumnMapsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $BusinessesTableTable _businessIdTable(_$AppDatabase db) =>
+      db.businessesTable.createAlias(
+        'import_column_maps_table__business_id__businesses_table__id',
+      );
+
+  $$BusinessesTableTableProcessedTableManager get businessId {
+    final $_column = $_itemColumn<String>('business_id')!;
+
+    final manager = $$BusinessesTableTableTableManager(
+      $_db,
+      $_db.businessesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_businessIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ImportColumnMapsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ImportColumnMapsTableTable> {
+  $$ImportColumnMapsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get vendor => $composableBuilder(
+    column: $table.vendor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fileKind => $composableBuilder(
+    column: $table.fileKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get columns => $composableBuilder(
+    column: $table.columns,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BusinessesTableTableFilterComposer get businessId {
+    final $$BusinessesTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableFilterComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ImportColumnMapsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ImportColumnMapsTableTable> {
+  $$ImportColumnMapsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get vendor => $composableBuilder(
+    column: $table.vendor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fileKind => $composableBuilder(
+    column: $table.fileKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get columns => $composableBuilder(
+    column: $table.columns,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BusinessesTableTableOrderingComposer get businessId {
+    final $$BusinessesTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ImportColumnMapsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ImportColumnMapsTableTable> {
+  $$ImportColumnMapsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get vendor =>
+      $composableBuilder(column: $table.vendor, builder: (column) => column);
+
+  GeneratedColumn<String> get fileKind =>
+      $composableBuilder(column: $table.fileKind, builder: (column) => column);
+
+  GeneratedColumn<String> get columns =>
+      $composableBuilder(column: $table.columns, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$BusinessesTableTableAnnotationComposer get businessId {
+    final $$BusinessesTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.businessId,
+      referencedTable: $db.businessesTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BusinessesTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.businessesTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ImportColumnMapsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ImportColumnMapsTableTable,
+          ImportColumnMapsTableData,
+          $$ImportColumnMapsTableTableFilterComposer,
+          $$ImportColumnMapsTableTableOrderingComposer,
+          $$ImportColumnMapsTableTableAnnotationComposer,
+          $$ImportColumnMapsTableTableCreateCompanionBuilder,
+          $$ImportColumnMapsTableTableUpdateCompanionBuilder,
+          (ImportColumnMapsTableData, $$ImportColumnMapsTableTableReferences),
+          ImportColumnMapsTableData,
+          PrefetchHooks Function({bool businessId})
+        > {
+  $$ImportColumnMapsTableTableTableManager(
+    _$AppDatabase db,
+    $ImportColumnMapsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImportColumnMapsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ImportColumnMapsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ImportColumnMapsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> businessId = const Value.absent(),
+                Value<String> vendor = const Value.absent(),
+                Value<String> fileKind = const Value.absent(),
+                Value<String> columns = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ImportColumnMapsTableCompanion(
+                businessId: businessId,
+                vendor: vendor,
+                fileKind: fileKind,
+                columns: columns,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String businessId,
+                required String vendor,
+                required String fileKind,
+                required String columns,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ImportColumnMapsTableCompanion.insert(
+                businessId: businessId,
+                vendor: vendor,
+                fileKind: fileKind,
+                columns: columns,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ImportColumnMapsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({businessId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (businessId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.businessId,
+                                referencedTable:
+                                    $$ImportColumnMapsTableTableReferences
+                                        ._businessIdTable(db),
+                                referencedColumn:
+                                    $$ImportColumnMapsTableTableReferences
+                                        ._businessIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ImportColumnMapsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ImportColumnMapsTableTable,
+      ImportColumnMapsTableData,
+      $$ImportColumnMapsTableTableFilterComposer,
+      $$ImportColumnMapsTableTableOrderingComposer,
+      $$ImportColumnMapsTableTableAnnotationComposer,
+      $$ImportColumnMapsTableTableCreateCompanionBuilder,
+      $$ImportColumnMapsTableTableUpdateCompanionBuilder,
+      (ImportColumnMapsTableData, $$ImportColumnMapsTableTableReferences),
+      ImportColumnMapsTableData,
       PrefetchHooks Function({bool businessId})
     >;
 typedef $$ExternalIdentitiesTableTableCreateCompanionBuilder =
@@ -49807,6 +50664,8 @@ class $AppDatabaseManager {
       $$AIChatTableTableTableManager(_db, _db.aIChatTable);
   $$ConnectionsTableTableTableManager get connectionsTable =>
       $$ConnectionsTableTableTableManager(_db, _db.connectionsTable);
+  $$ImportColumnMapsTableTableTableManager get importColumnMapsTable =>
+      $$ImportColumnMapsTableTableTableManager(_db, _db.importColumnMapsTable);
   $$ExternalIdentitiesTableTableTableManager get externalIdentitiesTable =>
       $$ExternalIdentitiesTableTableTableManager(
         _db,

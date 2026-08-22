@@ -11,6 +11,9 @@ import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../commerce/commerce_models.dart';
 import '../../commerce/import/commerce_import.dart';
 import '../../commerce/import/commerce_source_resolver.dart';
+import '../../commerce/import/import_column_map.dart';
+import '../../commerce/import/marketplace_profile.dart';
+import '../../profile/business_profile.dart' show SalesChannel;
 import '../../core/screen_data_controller.dart';
 import '../../providers/tongtai_commerce_provider.dart';
 import '../../providers/tongtai_inventory_provider.dart';
@@ -63,6 +66,13 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
   CommerceImportPreview? _preview;
   CommerceImportResult? _result;
 
+  /// File vừa chọn, giữ lại để **đọc lại** sau khi người bán ghép cột.
+  ///
+  /// Không giữ thì bước ghép cột phải bắt họ chọn file lần nữa — và một người
+  /// vừa bị app nói *"chưa nhận ra file này"* mà còn bị bắt chọn lại file thì
+  /// sẽ bỏ cuộc ở đó.
+  PickedImportFile? _picked;
+
   /// `true` khi bộ đang xem trước là bộ mẫu — quyết định cờ `isDemo` của lần
   /// nhập. Cờ nằm ở **lần nhập**, không ở từng dòng.
 
@@ -84,6 +94,7 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
       () async {
         final picked = await (widget.pickFile ?? _defaultPick)();
         if (picked == null) return;
+        _picked = picked;
 
         // App tự nhận file danh mục hay file sàn (WTM-322). Bắt người bán tự
         // khai loại file là đẩy việc phân loại sang người ít có khả năng phân
@@ -97,6 +108,12 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
             for (final o in await ref.read(orderRepositoryProvider).loadAll())
               o.id,
           },
+          // Bản đồ người bán đã tự chỉ trước đây (WTM-443). Truyền vào
+          // **resolver**, không chỉ vào bộ đọc: cổng định tuyến cũng phải biết,
+          // nếu không thì file sàn lạ không bao giờ tới được bộ đọc.
+          savedMaps: await ref
+              .read(importColumnMapRepositoryProvider)
+              .loadAll(),
         );
         preview = await source.read();
       },
@@ -110,6 +127,49 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
       if (preview != null) {
         _preview = preview;
       }
+    });
+    if (failure != null) showTongtaiFailure(context, failure);
+  }
+
+  /// Lưu bản đồ người bán vừa chỉ, rồi **đọc lại chính file đó** — WTM-443.
+  ///
+  /// Đọc lại chứ không "áp bản đồ vào bản xem trước đang có": bản xem trước
+  /// hiện tại là một lời từ chối, nó không mang dòng dữ liệu nào. Chỉ có đường
+  /// đọc thật mới cho ra đơn hàng, và đi lại đúng đường ấy nghĩa là mọi luật
+  /// đã có — khớp SKU, chống trùng, cảnh báo thiếu báo cáo thu nhập — vẫn chạy
+  /// nguyên vẹn, không có nhánh tắt nào cho file đã ghép tay.
+  Future<void> _saveMapAndReread(ImportColumnMap map) async {
+    final picked = _picked;
+    if (_busy || picked == null) return;
+    setState(() => _busy = true);
+
+    CommerceImportPreview? preview;
+    final failure = await runTongtaiAction(
+      () async {
+        await ref.read(importColumnMapRepositoryProvider).upsert(map);
+        final source = CommerceSourceResolver.resolve(
+          bytes: picked.bytes,
+          fileName: picked.name,
+          now: DateTime.now(),
+          knownProducts: await ref.read(productRepositoryProvider).loadAll(),
+          existingOrderIds: {
+            for (final o in await ref.read(orderRepositoryProvider).loadAll())
+              o.id,
+          },
+          savedMaps: await ref
+              .read(importColumnMapRepositoryProvider)
+              .loadAll(),
+        );
+        preview = await source.read();
+      },
+      telemetry: () => ref.read(tongtaiTelemetryProvider),
+      screen: 'import',
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (preview != null) _preview = preview;
     });
     if (failure != null) showTongtaiFailure(context, failure);
   }
@@ -238,6 +298,16 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
             if (preview != null) ...[
               const SizedBox(height: 16),
               _PreviewCard(preview: preview, busy: _busy, onImport: _import),
+            ],
+            // Chưa hiểu file ⇒ mời người bán chỉ cột, thay vì dừng ở lời từ
+            // chối (WTM-443).
+            if (preview != null && preview.unrecognisedHeaders.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _ColumnMappingCard(
+                headers: preview.unrecognisedHeaders,
+                busy: _busy,
+                onSave: _saveMapAndReread,
+              ),
             ],
             if (_result != null) ...[
               const SizedBox(height: 16),
@@ -569,4 +639,222 @@ class _JobRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// **Người bán tự chỉ cột** — WTM-443 (Epic WTM-440).
+///
+/// ## Vì sao bước này tồn tại
+///
+/// Sáu `MarketplaceProfile` đoán tên cột từ tài liệu sàn, **chưa đối chiếu file
+/// thật nào**. Kế hoạch đối chiếu ("xin một file xuất thật") hỏng vì file đơn
+/// của sàn mang tên · số điện thoại · địa chỉ của **khách hàng người ta**.
+///
+/// Nên app không đi tìm file nữa: nó đoán trước, người bán sửa nếu sai, và app
+/// nhớ. **File không bao giờ rời máy họ.**
+///
+/// ## Ngôn ngữ nghiệp vụ, không phải ngôn ngữ ETL (§27)
+///
+/// Câu hỏi là *"File này của sàn nào?"*, không phải *"map source columns to
+/// canonical fields"*. Vai trò hiện bằng tên người bán đọc được — *"Mã đơn
+/// hàng"*, không phải `orderId`.
+class _ColumnMappingCard extends StatefulWidget {
+  const _ColumnMappingCard({
+    required this.headers,
+    required this.busy,
+    required this.onSave,
+  });
+
+  final List<String> headers;
+  final bool busy;
+  final Future<void> Function(ImportColumnMap) onSave;
+
+  @override
+  State<_ColumnMappingCard> createState() => _ColumnMappingCardState();
+}
+
+class _ColumnMappingCardState extends State<_ColumnMappingCard> {
+  String _vendor = ImportColumnMap.kOtherMarketplaceVendor;
+  MarketplaceFileKind _kind = MarketplaceFileKind.orders;
+  final Map<MarketplaceField, String> _columns = {};
+
+  /// Vai trò hiện ra để ghép: bắt buộc trước, rồi vài vai trò hay dùng.
+  ///
+  /// Không hiện **cả 16** vai trò: một bảng 16 dòng ô chọn là thứ khiến người
+  /// bán đóng app. Vai trò bắt buộc là thứ chặn việc đọc file; phần còn lại
+  /// thiếu thì app vẫn đọc được và **nói ra là thiếu**.
+  List<MarketplaceField> get _fields {
+    final required = ImportColumnMap.requiredFor(_kind).toList();
+    final extra = _kind == MarketplaceFileKind.orders
+        ? const [
+            MarketplaceField.orderDate,
+            MarketplaceField.productName,
+            MarketplaceField.buyerName,
+          ]
+        : const [
+            MarketplaceField.commission,
+            MarketplaceField.transactionFee,
+            MarketplaceField.shippingFee,
+            MarketplaceField.payout,
+          ];
+    return [...required, ...extra];
+  }
+
+  ImportColumnMap get _map =>
+      ImportColumnMap(vendor: _vendor, kind: _kind, columns: _columns);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final missing = _map.missingRequired;
+
+    return Container(
+      key: const Key('import-column-map'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: TtColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: TtColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.importMapTitle,
+            key: const Key('import-column-map-title'),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: TtColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.importMapIntro,
+            style: const TextStyle(fontSize: 13, color: TtColors.textSecondary),
+          ),
+          const SizedBox(height: 16),
+          _Labelled(
+            label: l10n.importMapVendor,
+            child: DropdownButton<String>(
+              key: const Key('import-column-map-vendor'),
+              value: _vendor,
+              isExpanded: true,
+              items: [
+                for (final p in MarketplaceProfile.all)
+                  DropdownMenuItem(value: p.vendor, child: Text(p.displayName)),
+                DropdownMenuItem(
+                  value: ImportColumnMap.kOtherMarketplaceVendor,
+                  child: Text(
+                    l10n.profileChannel(SalesChannel.marketplaceOther.code),
+                  ),
+                ),
+              ],
+              onChanged: widget.busy
+                  ? null
+                  : (v) => setState(() => _vendor = v ?? _vendor),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _Labelled(
+            label: l10n.importMapKind,
+            child: DropdownButton<MarketplaceFileKind>(
+              key: const Key('import-column-map-kind'),
+              value: _kind,
+              isExpanded: true,
+              items: [
+                DropdownMenuItem(
+                  value: MarketplaceFileKind.orders,
+                  child: Text(l10n.importMapKindOrders),
+                ),
+                DropdownMenuItem(
+                  value: MarketplaceFileKind.income,
+                  child: Text(l10n.importMapKindIncome),
+                ),
+              ],
+              onChanged: widget.busy
+                  ? null
+                  : (v) => setState(() {
+                      _kind = v ?? _kind;
+                      // Vai trò của hai loại file khác nhau; giữ lại lựa chọn
+                      // cũ sẽ mang cột "phí sàn" sang file đơn hàng.
+                      _columns.clear();
+                    }),
+            ),
+          ),
+          const SizedBox(height: 16),
+          for (final field in _fields) ...[
+            _Labelled(
+              label: l10n.importMapField(field.name),
+              child: DropdownButton<String?>(
+                key: Key('import-column-map-field-${field.name}'),
+                value: _columns[field],
+                isExpanded: true,
+                items: [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text(l10n.importMapUnset),
+                  ),
+                  for (final h in widget.headers)
+                    DropdownMenuItem(value: h, child: Text(h)),
+                ],
+                onChanged: widget.busy
+                    ? null
+                    : (v) => setState(() {
+                        if (v == null) {
+                          _columns.remove(field);
+                        } else {
+                          _columns[field] = v;
+                        }
+                      }),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (missing.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              l10n.importMapMissing(
+                missing.map((f) => l10n.importMapField(f.name)).join(', '),
+              ),
+              key: const Key('import-column-map-missing'),
+              style: const TextStyle(fontSize: 13, color: TtColors.warning),
+            ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const Key('import-column-map-save'),
+              // Thiếu vai trò bắt buộc ⇒ **chặn**. Nhập nửa vời tệ hơn không
+              // nhập: một đơn không có mã thì lần nhập sau đếm nó lần nữa.
+              onPressed: widget.busy || missing.isNotEmpty
+                  ? null
+                  : () => widget.onSave(_map),
+              child: Text(l10n.importMapSave),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Một nhãn nhỏ trên một ô chọn.
+class _Labelled extends StatelessWidget {
+  const _Labelled({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: const TextStyle(fontSize: 12, color: TtColors.textSecondary),
+      ),
+      child,
+    ],
+  );
 }

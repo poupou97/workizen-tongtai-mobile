@@ -1248,6 +1248,36 @@ abstract class AppStrings {
   /// "… và 12 dòng nữa".
   String importMoreIssues(int count);
 
+  // ── WTM-443 · người bán tự chỉ cột ─────────────────────────────────────
+
+  /// Tiêu đề bước ghép cột.
+  String get importMapTitle;
+
+  /// Câu giải thích — vì sao app hỏi, và điều gì xảy ra sau đó.
+  String get importMapIntro;
+
+  /// Nhãn ô chọn sàn.
+  String get importMapVendor;
+
+  /// Nhãn ô chọn loại file.
+  String get importMapKind;
+
+  String get importMapKindOrders;
+  String get importMapKindIncome;
+
+  /// Mục "chưa ghép cột nào" trong danh sách chọn cột.
+  String get importMapUnset;
+
+  /// Nút lưu bản đồ rồi đọc lại file.
+  String get importMapSave;
+
+  /// "Còn thiếu: Mã đơn, Số lượng" — nói rõ thiếu VAI TRÒ gì, không nói
+  /// "thiếu cột": người bán có cột, họ chỉ chưa chỉ nó vào đâu.
+  String importMapMissing(String roles);
+
+  /// Nhãn một vai trò canonical — `orderId` ⇒ "Mã đơn hàng".
+  String importMapField(String field);
+
   /// "196 bản ghi" — tổng của một lần nhập.
   String importRecordCount(int count);
 
@@ -2672,6 +2702,7 @@ class AppStringsVi extends AppStrings {
     'amazon' => 'Amazon',
     'shopify' => 'Cửa hàng Shopify',
     'lazada' => 'Lazada',
+    'marketplace_other' => 'Sàn khác',
     // WTM-232: trước đây nhánh này là `_ => 'Bán sỉ'`, nên MỌI mã mới thêm
     // vào sẽ âm thầm hiện thành "Bán sỉ" — một nhãn sai mà không gì báo. Nay
     // mọi mã đều được liệt kê, và mã lạ (từ bản dựng mới hơn) nói thật rằng
@@ -3396,6 +3427,49 @@ class AppStringsVi extends AppStrings {
   String get importRunning => 'Đang nhập…';
   @override
   String importDone(int count) => 'Đã nhập $count sản phẩm vào cửa hàng.';
+
+  @override
+  String get importMapTitle => 'File này của sàn nào?';
+  @override
+  String get importMapIntro =>
+      'Ứng dụng chưa nhận ra file này. Chỉ giúp cột nào là cột nào — lần sau '
+      'không phải làm lại.';
+  @override
+  String get importMapVendor => 'Sàn';
+  @override
+  String get importMapKind => 'Loại file';
+  @override
+  String get importMapKindOrders => 'File đơn hàng';
+  @override
+  String get importMapKindIncome => 'Báo cáo thu nhập';
+  @override
+  String get importMapUnset => 'Chưa chọn';
+  @override
+  String get importMapSave => 'Lưu và đọc lại';
+  @override
+  String importMapMissing(String roles) => 'Còn thiếu: $roles';
+  @override
+  String importMapField(String field) => switch (field) {
+    'orderId' => 'Mã đơn hàng',
+    'orderDate' => 'Ngày đặt',
+    'status' => 'Trạng thái',
+    'sku' => 'Mã hàng (SKU)',
+    'productName' => 'Tên sản phẩm',
+    'quantity' => 'Số lượng',
+    'unitPrice' => 'Đơn giá',
+    'buyerName' => 'Tên người mua',
+    'buyerId' => 'Mã người mua',
+    'commission' => 'Hoa hồng sàn',
+    'transactionFee' => 'Phí thanh toán',
+    'serviceFee' => 'Phí dịch vụ',
+    'shippingFee' => 'Phí vận chuyển',
+    'voucher' => 'Voucher người bán trả',
+    'platformVoucher' => 'Voucher sàn tài trợ',
+    'payout' => 'Tiền thực nhận',
+    // Vai trò từ một bản dựng mới hơn: hiện đúng mã thay vì mượn tên một vai
+    // trò có thật — cùng kỷ luật `_ => 'Kênh khác'` của `profileChannel`.
+    _ => field,
+  };
   @override
   String get importNothing => 'Không có gì để nhập từ file này.';
   @override
@@ -4932,6 +5006,7 @@ class AppStringsEn extends AppStrings {
     'amazon' => 'Amazon',
     'shopify' => 'Shopify store',
     'lazada' => 'Lazada',
+    'marketplace_other' => 'Other marketplace',
     // See the Vietnamese twin: this used to be `_ => 'Wholesale'`, which
     // silently mislabelled every code added afterwards (WTM-232).
     _ => 'Other channel',
@@ -5652,6 +5727,48 @@ class AppStringsEn extends AppStrings {
   String get importRunning => 'Importing…';
   @override
   String importDone(int count) => 'Imported $count products into your shop.';
+
+  @override
+  String get importMapTitle => 'Which marketplace is this file from?';
+  @override
+  String get importMapIntro =>
+      'This file was not recognised. Point out which column is which — you '
+      'will not have to do it again.';
+  @override
+  String get importMapVendor => 'Marketplace';
+  @override
+  String get importMapKind => 'File type';
+  @override
+  String get importMapKindOrders => 'Order file';
+  @override
+  String get importMapKindIncome => 'Income report';
+  @override
+  String get importMapUnset => 'Not set';
+  @override
+  String get importMapSave => 'Save and read again';
+  @override
+  String importMapMissing(String roles) => 'Still missing: $roles';
+  @override
+  String importMapField(String field) => switch (field) {
+    'orderId' => 'Order number',
+    'orderDate' => 'Order date',
+    'status' => 'Status',
+    'sku' => 'SKU',
+    'productName' => 'Product name',
+    'quantity' => 'Quantity',
+    'unitPrice' => 'Unit price',
+    'buyerName' => 'Buyer name',
+    'buyerId' => 'Buyer id',
+    'commission' => 'Marketplace commission',
+    'transactionFee' => 'Payment fee',
+    'serviceFee' => 'Service fee',
+    'shippingFee' => 'Shipping fee',
+    'voucher' => 'Seller-funded voucher',
+    'platformVoucher' => 'Platform-funded voucher',
+    'payout' => 'Amount received',
+    // See the Vietnamese twin.
+    _ => field,
+  };
   @override
   String get importNothing => 'Nothing to import from this file.';
   @override
