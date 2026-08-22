@@ -295,12 +295,25 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
                 child: Text(l10n.importPickFile),
               ),
             ),
-            if (preview != null) ...[
-              const SizedBox(height: 16),
-              _PreviewCard(preview: preview, busy: _busy, onImport: _import),
-            ],
-            // Chưa hiểu file ⇒ mời người bán chỉ cột, thay vì dừng ở lời từ
-            // chối (WTM-443).
+            // ⭐ MỘT trong hai thẻ, không bao giờ cả hai — WTM-446.
+            //
+            // Bản đầu hiện cả hai, và trên máy thật nó thành ra nói với người
+            // bán hai điều trái ngược theo đúng thứ tự tệ nhất:
+            //
+            //   trên  → "Không có gì để nhập từ file này."   (ngõ cụt)
+            //   dưới  → "Chỉ giúp cột nào là cột nào…"       (phải cuộn mới thấy)
+            //
+            // Người ta đọc từ trên xuống, gặp ngõ cụt, rồi đóng app. Lời mời ở
+            // dưới không bao giờ được đọc.
+            //
+            // Thẻ ngõ cụt ấy cũng **sai về sự thật**: có thứ để nhập, chỉ là
+            // app chưa biết cột nào là cột nào. Và câu "File không có bảng sản
+            // phẩm nào tên PRODUCTS" là từ vựng của bộ đọc danh mục rò ra màn
+            // hình — vô nghĩa với người vừa xuất file đơn từ Shopee (§27).
+            //
+            // ⚠️ Sửa bằng cách ĐỔI THỨ TỰ ưu tiên, không đổi câu chữ: câu lỗi
+            // kia vẫn đúng khi người bán thật sự đưa vào một file danh mục
+            // hỏng. Lỗi nằm ở chỗ hai thẻ cùng hiện.
             if (preview != null && preview.unrecognisedHeaders.isNotEmpty) ...[
               const SizedBox(height: 16),
               _ColumnMappingCard(
@@ -308,6 +321,9 @@ class _TongtaiImportScreenState extends ConsumerState<TongtaiImportScreen> {
                 busy: _busy,
                 onSave: _saveMapAndReread,
               ),
+            ] else if (preview != null) ...[
+              const SizedBox(height: 16),
+              _PreviewCard(preview: preview, busy: _busy, onImport: _import),
             ],
             if (_result != null) ...[
               const SizedBox(height: 16),
