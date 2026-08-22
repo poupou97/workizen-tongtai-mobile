@@ -16,6 +16,8 @@ import '../commerce/commerce_models.dart';
 import '../commerce/commerce_repository.dart';
 import '../commerce/attributes/attribute_models.dart';
 import '../commerce/attributes/attribute_repository.dart';
+import '../commerce/import/import_column_map.dart';
+import '../commerce/import/import_column_map_repository.dart';
 import '../consumer/customer.dart';
 import '../consumer/customer_repository.dart';
 import '../finance/finance_repository.dart';
@@ -73,6 +75,7 @@ class TongtaiBackupRepositories {
     this.businessInputs,
     this.commerce,
     this.attributes,
+    this.importColumnMaps,
   });
 
   /// Needed for the single transaction that makes Replace atomic — the one
@@ -112,6 +115,9 @@ class TongtaiBackupRepositories {
   /// bốn dataset thuộc tính không được sao lưu và không được khôi phục — và mọi
   /// `.ttbk` phát hành trước v27 đúng là không có chúng.
   final AttributeRepository? attributes;
+
+  /// WTM-445 — bản đồ cột người bán tự chỉ.
+  final ImportColumnMapRepository? importColumnMaps;
 }
 
 /// The decoded, type-checked contents of a backup.
@@ -135,6 +141,7 @@ class BackupContents {
     this.attributeValues = const [],
     this.attributeGroups = const [],
     this.attributeGroupItems = const [],
+    this.importColumnMaps = const [],
   });
 
   final List<Customer> customers;
@@ -171,6 +178,9 @@ class BackupContents {
   final List<AttributeValue> attributeValues;
   final List<AttributeGroup> attributeGroups;
   final List<AttributeGroupItem> attributeGroupItems;
+
+  /// Bản đồ cột người bán tự chỉ — WTM-445. Chỉ tên cột, không ô dữ liệu nào.
+  final List<ImportColumnMap> importColumnMaps;
 
   Map<String, int> get counts => {
     BackupDatasets.customers: customers.length,
@@ -472,6 +482,11 @@ class TongtaiBackupService {
             for (final i in contents.attributeGroupItems)
               BackupCodec.encodeAttributeGroupItem(i),
           ],
+        if (contents.importColumnMaps.isNotEmpty)
+          BackupDatasets.importColumnMaps: [
+            for (final m in contents.importColumnMaps)
+              BackupCodec.encodeImportColumnMap(m),
+          ],
         BackupDatasets.favourites: [
           for (final f in contents.favourites) BackupCodec.encodeFavourite(f),
         ],
@@ -515,6 +530,8 @@ class TongtaiBackupService {
         if (contents.attributeGroups.isNotEmpty) BackupDatasets.attributeGroups,
         if (contents.attributeGroupItems.isNotEmpty)
           BackupDatasets.attributeGroupItems,
+        if (contents.importColumnMaps.isNotEmpty)
+          BackupDatasets.importColumnMaps,
       ],
       redaction: BackupRedaction.none,
     );
@@ -542,6 +559,8 @@ class TongtaiBackupService {
     attributeGroups: await repositories.attributes?.loadAllGroups() ?? const [],
     attributeGroupItems:
         await repositories.attributes?.loadAllGroupItems() ?? const [],
+    importColumnMaps:
+        await repositories.importColumnMaps?.loadAll() ?? const [],
   );
 
   // ── validate ─────────────────────────────────────────────────────────────
@@ -834,6 +853,14 @@ class TongtaiBackupService {
                 const <Map<String, Object?>>[])
           ?BackupCodec.decodeAttributeGroupItem(raw),
       ],
+      // Vắng mặt ⇒ danh sách rỗng, KHÔNG phải lỗi: mọi `.ttbk` phát hành
+      // trước v28 đều không có dataset này (ADR-TON-018 tu chính 1).
+      importColumnMaps: [
+        for (final raw
+            in payload.datasets[BackupDatasets.importColumnMaps] ??
+                const <Map<String, Object?>>[])
+          ?BackupCodec.decodeImportColumnMap(raw),
+      ],
     );
   }
 
@@ -978,6 +1005,13 @@ class TongtaiBackupService {
           values: contents.attributeValues,
           groupItems: contents.attributeGroupItems,
         );
+        // Restore = Replace (ADR-TON-018): xoá sạch rồi ghi lại, TRONG cùng
+        // transaction với mọi miền khác. Bản đồ cũ sót lại sau khôi phục sẽ
+        // khớp nhầm một file của bản sao lưu khác.
+        await repositories.importColumnMaps?.deleteAll();
+        for (final map in contents.importColumnMaps) {
+          await repositories.importColumnMaps?.upsert(map);
+        }
         await repositories.opportunityReactions?.replaceAll(
           contents.opportunityReactions,
         );
