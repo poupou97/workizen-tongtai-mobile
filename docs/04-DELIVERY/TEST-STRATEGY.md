@@ -31,3 +31,12 @@
 - Lỗi hạ tầng (network/sqlite3 download) ≠ lỗi code — chạy lại trên môi trường
   mạng ổn trước khi kết luận FAIL.
 - Chạy: `flutter test` (tất cả) · `flutter test test/features/tongtai/x_test.dart` (1 file).
+
+## Kịch bản chưa tự động được
+
+Thứ hôm nay còn phải có người ngồi kiểm — file sàn thật, thiết bị thật, đối
+chiếu concept — nằm ở [TEST-CASE-REGISTRY.md](TEST-CASE-REGISTRY.md), kèm
+**điều kiện cụ thể để tự động hoá** từng mục.
+
+Sổ ấy **không** chép lại test đã có trong `test/`. Một bản sao của suite sẽ hết
+hạn ngay ngày hôm sau.

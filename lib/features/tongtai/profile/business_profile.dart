@@ -120,7 +120,21 @@ enum SalesChannel {
   shopify('shopify'),
 
   /// Lazada.
-  lazada('lazada');
+  lazada('lazada'),
+
+  /// **Một sàn nào đó app chưa có hồ sơ** — Temu, Sendo, một sàn nội địa
+  /// (WTM-443).
+  ///
+  /// ⚠️ Đây KHÔNG phải nhánh mặc định trá hình. Nó là **một lời khai tường
+  /// minh của người bán**: *"đơn này bán qua một sàn, tôi không thấy tên sàn
+  /// trong danh sách."* Khác hẳn với `null` (chưa ghi kênh) và khác hẳn với
+  /// việc lặng lẽ xếp vào `shop`.
+  ///
+  /// Nó có [chargesPlatformFee] = `true`, và đó là toàn bộ lý do nó tồn tại:
+  /// biết *có sàn ở giữa* là đủ để đòi dòng đối soát, dù không biết sàn nào.
+  /// Thiếu mã này thì đơn từ sàn lạ sẽ rơi vào một kênh không phí, rồi app in
+  /// ra lợi nhuận đẹp hơn sự thật — đúng khuyết tật P-47 vừa gỡ.
+  marketplaceOther('marketplace_other');
 
   const SalesChannel(this.code);
 
@@ -153,7 +167,8 @@ enum SalesChannel {
     SalesChannel.appStore ||
     SalesChannel.ebay ||
     SalesChannel.amazon ||
-    SalesChannel.lazada => true,
+    SalesChannel.lazada ||
+    SalesChannel.marketplaceOther => true,
 
     // Storefront của chính người bán: không sàn nào ăn hoa hồng, nhưng cổng
     // thanh toán vẫn cắt phần trăm trước khi tiền về. Với câu hỏi mà cờ này

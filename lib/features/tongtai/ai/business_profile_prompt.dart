@@ -65,6 +65,7 @@ String _channelLabel(SalesChannel channel) => switch (channel) {
   SalesChannel.amazon => 'Amazon',
   SalesChannel.shopify => 'cửa hàng Shopify',
   SalesChannel.lazada => 'Lazada',
+  SalesChannel.marketplaceOther => 'một sàn khác',
 };
 
 String _seasonalityLabel(BusinessSeasonality seasonality) =>

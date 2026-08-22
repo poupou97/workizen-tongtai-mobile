@@ -212,7 +212,11 @@ void main() {
       //
       // Ngày nào một mã mới KHÔNG qua được ba câu trên thì việc phải làm là
       // giữ nó ngoài prompt, chứ không phải tăng con số này.
-      expect(SalesChannel.values.length, 14);
+      // WTM-443: 14 → 15 (`marketplace_other`). Rà theo đúng ba câu ghi ở
+      // trên: nó nói *"bán qua một sàn nào đó"* — phân loại doanh nghiệp, mờ
+      // hơn `shopee` chứ không riêng tư hơn; không định danh được ai; chữ
+      // thường ASCII.
+      expect(SalesChannel.values.length, 15);
       expect(BusinessSeasonality.values.length, 5);
       // WTM-228: loại hình kinh doanh cũng nằm trong vựng từ rời máy.
       expect(BusinessType.values.length, 4);

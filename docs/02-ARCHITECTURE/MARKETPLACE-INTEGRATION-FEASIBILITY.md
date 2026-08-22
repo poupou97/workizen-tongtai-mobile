@@ -64,7 +64,24 @@ biết mình từ đâu ra"*. **Điều đó đã hết đúng.**
 | 2 · Connection + credentialRef | chưa có | ✅ `connections.dart` · `connection_credential_store.dart` · `connection_catalog.dart` |
 | 3 · CustomerIdentity + confidence | chưa có | ✅ bảng `external_identities` |
 | 4 · Fee/Refund/Payout gắn Order | chưa có | ✅ bảng `payouts` · `settlement.dart` · `SettlementLine` |
-| — | `integrations_table` chết | ❌ **vẫn chết** — quyết định **D-2** chưa thi hành |
+| — | `integrations_table` chết | ✅ **đã gỡ** ở schema **v18** (WTM-283) — xem đính chính bên dưới |
+
+> ### ⚠️ Đính chính 2026-08-22 — bản đầu của tài liệu này ghi SAI
+>
+> Bản đầu viết *"`integrations_table` vẫn chết — D-2 chưa thi hành"*. **Sai.**
+> `tongtai_migrations.dart:588` chạy `DROP TABLE IF EXISTS integrations_table`
+> ở bước v18, và `tables/connections.dart:7` nói thẳng nó **thay** bảng ấy.
+> ⇒ **Quyết định D-2 đã được thi hành**, không còn chờ Founder.
+>
+> Sai vì đâu: tôi `grep` `integrationsTable` trong `lib/`, thấy **rỗng**, rồi
+> đọc kết quả rỗng ấy thành *"bảng còn đó mà không ai dùng"*. Sự thật là
+> *"bảng không còn"*. Cùng một dấu hiệu, hai kết luận trái ngược — và tôi chọn
+> cái khớp với thứ tài liệu cũ đã nói.
+>
+> Đây là **lần thứ tư trong ngày** cùng một hình dạng: một phép đo trả lời
+> chính xác câu hỏi của nó, không phải câu tôi tưởng mình đang hỏi (P-45,
+> P-46). Chữa nó không phải bằng grep cẩn thận hơn, mà bằng **đo lần thứ hai
+> bằng thứ khác** — ở đây là đọc chuỗi migration thay vì đếm chỗ tham chiếu.
 
 ⇒ Điều kiện *"bốn thứ phải xong trước connector đầu tiên"* **đã thoả**. Cản trở
 còn lại không phải kiến trúc, mà là **tài khoản và một điểm HTTPS**.

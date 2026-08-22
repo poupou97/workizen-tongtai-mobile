@@ -104,7 +104,7 @@ void main() {
     });
 
     test('schema version constant advanced in lock-step', () {
-      expect(kTongtaiSchemaVersion, 27);
+      expect(kTongtaiSchemaVersion, 28);
       // v12 (WTM-209): orders_table rebuilt without the channel_id FK — it
       //                pointed at channels_table, a dead v1 table nothing ever
       //                wrote, so every real channel code failed the constraint.
@@ -134,7 +134,15 @@ void main() {
       // v27 (WTM-334): tầng thuộc tính động — attribute_definitions/values/
       //                groups/group_items. Bốn bảng, thuần thêm; `.ttbk` mang
       //                bốn dataset OPTIONAL, backup cũ vẫn restore.
-      expect(db.schemaVersion, 27);
+      // v28 (WTM-443): import_column_maps_table — bản đồ cột người bán tự chỉ
+      //                khi nhập file sàn. Một bảng, thuần thêm, khoá tự nhiên
+      //                (business_id, vendor, file_kind).
+      //                ⚠️ CHƯA vào `.ttbk`: bảng này cố ý **chưa** có dataset
+      //                nào trong `BackupDatasets` — khai một tên mà chưa nối
+      //                đường đọc/ghi thì schema nói dối về thứ nó hỗ trợ, đúng
+      //                khuyết tật của `integrations_table` đã xoá ở v18. Nối
+      //                backup là vé riêng.
+      expect(db.schemaVersion, 28);
     });
   });
 

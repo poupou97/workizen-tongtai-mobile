@@ -62,10 +62,38 @@ void main() {
         );
   }
 
-  group('lược đồ v24→v27', () {
-    test('phiên bản hiện tại là 27', () {
-      expect(kTongtaiSchemaVersion, 27);
-      expect(db.schemaVersion, 27);
+  group('lược đồ v24→v28', () {
+    test('phiên bản hiện tại là 28', () {
+      // WTM-443: 27 → 28 (`import_column_maps_table`). Con số này là cổng
+      // ratchet — đổi nó nghĩa là đã thêm một bước migration và đã kiểm bước
+      // ấy chạy được cả trên máy nâng cấp lẫn máy cài mới.
+      expect(kTongtaiSchemaVersion, 28);
+      expect(db.schemaVersion, 28);
+    });
+
+    test('bảng bản đồ cột có chỉ mục (P-32) — WTM-443', () async {
+      const table = 'import_column_maps_table';
+      final rows = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+            variables: [Variable(table)],
+          )
+          .get();
+      expect(rows, hasLength(1), reason: 'thiếu bảng $table');
+
+      final indexes = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=?",
+            variables: [Variable(table)],
+          )
+          .get();
+      expect(
+        indexes,
+        isNotEmpty,
+        reason:
+            '`createTable` KHÔNG tạo chỉ mục (P-32); máy nâng cấp sẽ mất chỉ '
+            'mục mà máy cài mới vẫn có',
+      );
     });
 
     test('ba bảng mới tồn tại và có chỉ mục (P-32)', () async {
@@ -118,7 +146,7 @@ void main() {
   });
 
   group('nâng cấp từ v23 thật', () {
-    test('dữ liệu v23 sống sót qua v24 · v25 · v26 · v27', () async {
+    test('dữ liệu v23 sống sót qua v24 · v25 · v26 · v27 · v28', () async {
       final dir = await Directory.systemTemp.createTemp('tongtai-v23-');
       final file = File('${dir.path}/tongtai.db');
       addTearDown(() async {
@@ -157,7 +185,11 @@ void main() {
       final version = await upgraded
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(version.data.values.first, 27);
+      // WTM-443: 27 → 28. Điểm của test này không phải con số, mà là **dữ
+      // liệu v23 còn nguyên sau khi chạy hết chuỗi** — kiểm ở các `expect` ở
+      // trên. Con số chỉ xác nhận chuỗi đã chạy tới cuối chứ không dừng giữa
+      // chừng (bài học v14: dừng giữa chừng ⇒ lần mở sau chạy lại từ đầu).
+      expect(version.data.values.first, 28);
     });
   });
 
