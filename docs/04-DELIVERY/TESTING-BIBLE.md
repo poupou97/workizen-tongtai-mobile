@@ -1118,6 +1118,82 @@ trả lời hai câu:
 * **Cổng tiền cảnh trước VÀ sau mỗi tap**, không chỉ lúc mở app. Rơi khỏi app
   giữa chừng thì mọi ảnh chụp sau đó là ảnh của máy người khác đang dùng.
 
+## P-47 · Nhánh `_ =>` mặc định luôn ngã về **hướng dễ chịu**
+
+**Root-Cause.** WTM-442 thêm bốn kênh bán (`ebay` · `amazon` · `shopify` ·
+`lazada`). Luật *"kênh nào giữ lại tiền trước khi trả người bán"* viết:
+
+```dart
+bool get chargesPlatformFee => switch (this) {
+  SalesChannel.shopee || SalesChannel.tiktok || SalesChannel.appStore => true,
+  _ => false,          // ⬅️ bốn kênh mới rơi vào đây
+};
+```
+
+Quên phân loại một kênh ⇒ app kết luận đơn kênh ấy **không có phí sàn** ⇒ lấy
+doanh thu trừ giá vốn và in ra một con số **luôn đẹp hơn sự thật**.
+
+**Regression.** Cùng họ với [P-31] và [P-27]/[P-28], nhưng nguy hiểm hơn vì
+**hướng sai không đối xứng**. Một mặc định sai theo hướng bi quan sẽ bị người
+dùng phàn nàn trong ngày (*"sao lời của tôi thấp thế"*). Một mặc định sai theo
+hướng **tâng bốc** thì không ai đi kiểm — nó cho đúng thứ người đọc muốn thấy.
+
+Ba dấu hiệu của cùng khuyết tật này, cả ba đều gặp thật trong repo:
+
+| Chỗ | Mặc định cũ | Hậu quả khi quên |
+|---|---|---|
+| `chargesPlatformFee` | `_ => false` | lợi nhuận tính thừa |
+| `profileChannel` (l10n) | `_ => 'Bán sỉ'` (WTM-232) | kênh mới **mượn tên** kênh có thật |
+| `ProvenanceSource.fromCode` | *(đã đúng)* `null` | — |
+
+`fromCode` làm đúng từ đầu và ghi rõ lý do: *"rơi về `manual` sẽ biến một bản
+ghi từ sàn thành 'người bán tự nhập' — tức là nói dối đúng theo hướng nguy hiểm
+nhất."* Đó là chuẩn để so.
+
+**Test Pattern.** Có hai mức, dùng mức mạnh khi kiểu dữ liệu cho phép.
+
+*Mức 1 — cổng cơ học (ưu tiên).* Bỏ nhánh `_` khỏi switch trên enum. Dart bắt
+buộc vét cạn, nên thêm một giá trị mà không phân loại là **lỗi biên dịch**:
+
+```dart
+bool get chargesPlatformFee => switch (this) {
+  SalesChannel.shopee || … || SalesChannel.lazada => true,
+  SalesChannel.shop || … || SalesChannel.direct => false,
+  // không có `_` — quên một giá trị là analyzer đỏ
+};
+```
+
+*Mức 2 — test đứng thay khi kiểu không chặn được.* `profileChannel(String code)`
+nhận chuỗi, nên trình biên dịch bó tay. Test phải duyệt **toàn bộ enum** và
+khẳng định không giá trị nào rơi vào nhánh mặc định:
+
+```dart
+for (final channel in SalesChannel.values) {
+  expect(AppStringsVi().profileChannel(channel.code), isNot('Kênh khác'));
+  expect(AppStringsEn().profileChannel(channel.code), isNot('Other channel'));
+}
+```
+
+⚠️ **Test "hai bên đồng ý với nhau" KHÔNG thay được test "phân loại đúng".**
+Khi hai chỗ cùng uỷ quyền về một nguồn, đột biến ở nguồn làm **cả hai** đổi
+theo, nên cổng đồng-thuận vẫn xanh. Cần cả hai:
+
+* *đồng thuận* — bắt hai bản chép lệch nhau;
+* *phân loại* — bắt nguồn duy nhất khai sai.
+
+Đã kiểm bằng đột biến: sửa `shopify => false` thì cổng **phân loại** đỏ còn
+cổng **đồng thuận** vẫn xanh.
+
+**Prevention Rule.** Trước khi viết `_ =>` trong một switch trên enum, hỏi:
+
+1. *Giá trị chưa tồn tại rơi vào đây sẽ sai về hướng nào?* Sai về hướng tâng
+   bốc ⇒ **cấm dùng `_`**, vét cạn hoặc trả `null`.
+2. *Kiểu dữ liệu có ép được vét cạn không?* Có ⇒ dùng mức 1. Không (tham số là
+   `String`) ⇒ **bắt buộc** có test mức 2 duyệt toàn enum.
+3. Thêm một giá trị vào enum ⇒ `grep` mọi `switch` chạm enum ấy, đừng tin vào
+   việc analyzer sẽ nhắc — nó chỉ nhắc ở nơi không có `_`.
+
+
 ## Khi sửa bug mới — checklist
 
 1. Reproduce trên **đúng môi trường người dùng gặp** (release/máy thật nếu cần).
