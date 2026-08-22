@@ -94,7 +94,33 @@ enum SalesChannel {
   appStore('app_store'),
 
   /// Bán trực tiếp / theo hợp đồng — dịch vụ, B2B.
-  direct('direct');
+  direct('direct'),
+
+  // ── Sàn quốc tế + storefront (WTM-442, Epic WTM-440) ────────────────────
+  // Thêm mã ở đây là **cộng thêm**, không phải migration: `orders.channelId`
+  // là TEXT nullable và `channels_table` đã bị bỏ từ schema v12. Một mã mới
+  // chỉ là một chuỗi hợp lệ mới.
+  //
+  // Đề xuất D-5 cũ (`INTEGRATION-ROADMAP-AND-DECISIONS.md`) khuyên *chưa thêm,
+  // tách Channel/Store trước*. Nó viết 2026-08-02, khi File Bridge cho sàn
+  // chưa tồn tại; giờ `MarketplaceProfile` bắt buộc có `channel`, nên không
+  // thêm mã thì không viết được hồ sơ nào. Việc tách Store (một người bán có
+  // **hai cửa hàng Shopee**) vẫn là gap thật, nằm ở vé riêng.
+  /// Sàn eBay.
+  ebay('ebay'),
+
+  /// Amazon — bán qua Seller Central.
+  amazon('amazon'),
+
+  /// Cửa hàng Shopify của chính người bán.
+  ///
+  /// Không phải sàn: không ai xếp hạng, không ai điều lưu lượng. Nhưng tiền
+  /// vẫn **bị giữ lại một phần** trước khi về tài khoản (phí cổng thanh toán),
+  /// nên nó vẫn thuộc nhóm [chargesPlatformFee] — xem lý do ở đó.
+  shopify('shopify'),
+
+  /// Lazada.
+  lazada('lazada');
 
   const SalesChannel(this.code);
 
@@ -109,9 +135,39 @@ enum SalesChannel {
   ///
   /// `appStore` nằm trong nhóm này: Apple và Google cũng cắt phần trăm, và một
   /// doanh nghiệp số quên điều đó sai y hệt một người bán quên phí Shopee.
+  /// ⚠️ **Switch này CỐ Ý không có nhánh `_`.**
+  ///
+  /// Bản trước viết `_ => false`, và cái mặc định ấy sai đúng theo hướng nguy
+  /// hiểm nhất: thêm `ebay` mà quên phân loại thì app kết luận đơn eBay **không
+  /// có phí sàn**, rồi lấy doanh thu trừ giá vốn ra một con số lúc nào cũng đẹp
+  /// hơn sự thật. Không màn nào đỏ, không test nào hỏng — chỉ có người bán tin
+  /// một con số sai.
+  ///
+  /// Bỏ nhánh `_` biến điều đó thành **lỗi biên dịch**: thêm một kênh mà không
+  /// nói nó có bị giữ tiền hay không thì analyzer chặn ngay. Đây là cổng cơ
+  /// học, thay cho một câu bình luận nhắc nhở mà không ai bị chặn khi quên.
   bool get chargesPlatformFee => switch (this) {
-    SalesChannel.shopee || SalesChannel.tiktok || SalesChannel.appStore => true,
-    _ => false,
+    // Sàn giữ lại hoa hồng / phí trước khi trả tiền về.
+    SalesChannel.shopee ||
+    SalesChannel.tiktok ||
+    SalesChannel.appStore ||
+    SalesChannel.ebay ||
+    SalesChannel.amazon ||
+    SalesChannel.lazada => true,
+
+    // Storefront của chính người bán: không sàn nào ăn hoa hồng, nhưng cổng
+    // thanh toán vẫn cắt phần trăm trước khi tiền về. Với câu hỏi mà cờ này
+    // phục vụ — *"đã tính đủ khoản bị giữ lại chưa"* — câu trả lời vẫn là có.
+    SalesChannel.shopify => true,
+
+    // Bán tại chỗ / trực tiếp: tiền về đủ, không ai giữ phần nào.
+    SalesChannel.shop ||
+    SalesChannel.market ||
+    SalesChannel.facebook ||
+    SalesChannel.zalo ||
+    SalesChannel.wholesale ||
+    SalesChannel.website ||
+    SalesChannel.direct => false,
   };
 
   static SalesChannel? fromCode(String? code) {

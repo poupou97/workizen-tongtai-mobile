@@ -107,6 +107,25 @@ void main() {
       expect(AppStringsVi().profileChannel('website'), 'Website của mình');
     });
 
+    test('⭐ WTM-442 · MỌI kênh có nhãn thật, cả hai locale', () {
+      // `profileChannel` nhận `String`, không nhận enum — nên trình biên dịch
+      // KHÔNG chặn được việc thêm một kênh mà quên nhãn. Kênh ấy sẽ lặng lẽ
+      // hiện "Kênh khác": trung thực về việc app không biết, nhưng sai, vì
+      // app biết rõ. Test này thay chỗ cho cái gate mà kiểu dữ liệu không cho.
+      for (final channel in SalesChannel.values) {
+        expect(
+          AppStringsVi().profileChannel(channel.code),
+          isNot('Kênh khác'),
+          reason: 'Thiếu nhãn VI cho kênh "${channel.code}".',
+        );
+        expect(
+          AppStringsEn().profileChannel(channel.code),
+          isNot('Other channel'),
+          reason: 'Thiếu nhãn EN cho kênh "${channel.code}".',
+        );
+      }
+    });
+
     test('onboarding mời ĐỦ mọi kênh mô hình giữ được', () {
       // Danh sách chép tay trong kịch bản vừa để sót ba kênh mới; nay suy
       // thẳng từ enum nên không thể lệch lần nữa.

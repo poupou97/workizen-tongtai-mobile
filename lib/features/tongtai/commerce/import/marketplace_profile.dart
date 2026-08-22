@@ -190,6 +190,178 @@ class MarketplaceProfile {
         MarketplaceField.payout: ['Settlement Amount', 'Số tiền quyết toán'],
       },
     ),
+
+    // ── WTM-442 · bốn sàn thêm theo yêu cầu Founder 2026-08-22 ────────────
+    //
+    // ⚠️ Y HỆT Shopee/TikTok ở trên: **chưa đối chiếu với file thật nào.** Bí
+    // danh dưới đây đến từ tài liệu nhà bán và các bản xuất công khai. Ghi ra
+    // đây để người sau không tưởng đây là danh sách đã kiểm.
+    //
+    // Mỗi hồ sơ cố ý mang vài cột **chỉ sàn đó mới có** — `Sales Record
+    // Number` của eBay, `amazon-order-id`, `Lineitem sku` của Shopify,
+    // `sellerSku`/`orderItemId` của Lazada. Không có chúng thì sáu hồ sơ chỉ
+    // còn phân biệt nhau bằng `Order ID` với `Quantity`, và mọi file tiếng Anh
+    // sẽ khớp với hồ sơ nào đứng đầu danh sách.
+    MarketplaceProfile(
+      vendor: 'ebay',
+      displayName: 'eBay',
+      channel: SalesChannel.ebay,
+      orderColumns: {
+        // `Sales Record Number` là số eBay cấp cho mỗi giao dịch — không sàn
+        // nào khác dùng cụm này.
+        MarketplaceField.orderId: [
+          'Order Number',
+          'Sales Record Number',
+          'Order ID',
+        ],
+        MarketplaceField.orderDate: [
+          'Sale Date',
+          'Transaction Creation Date',
+          'Paid On Date',
+        ],
+        MarketplaceField.status: ['Order Status', 'Status'],
+        // eBay gọi SKU là **Custom Label** — người bán quen tên đó, không quen
+        // chữ "SKU".
+        MarketplaceField.sku: ['Custom Label', 'Custom Label (SKU)', 'SKU'],
+        MarketplaceField.productName: ['Item Title', 'Title'],
+        MarketplaceField.quantity: ['Quantity', 'Quantity Sold'],
+        MarketplaceField.unitPrice: ['Sold For', 'Item Price', 'Price'],
+        MarketplaceField.buyerName: ['Buyer Username', 'Buyer Name'],
+        MarketplaceField.buyerId: ['Buyer User ID', 'Item Number'],
+      },
+      incomeColumns: {
+        MarketplaceField.orderId: [
+          'Order Number',
+          'Sales Record Number',
+          'Reference ID',
+        ],
+        // `Final Value Fee` chính là hoa hồng eBay — tên riêng của nền tảng.
+        MarketplaceField.commission: [
+          'Final Value Fee',
+          'Final Value Fee Fixed',
+        ],
+        MarketplaceField.transactionFee: [
+          'Payment Processing Fee',
+          'Transaction Fee',
+        ],
+        MarketplaceField.serviceFee: [
+          'Insertion Fee',
+          'Store Subscription Fee',
+          'Regulatory Operating Fee',
+        ],
+        MarketplaceField.shippingFee: ['Shipping Label Cost', 'Postage'],
+        MarketplaceField.voucher: ['Seller Discount', 'Promotional Discount'],
+        MarketplaceField.platformVoucher: [
+          'eBay Coupon',
+          'eBay Funded Discount',
+        ],
+        MarketplaceField.payout: ['Net Amount', 'Payout Amount'],
+      },
+    ),
+    MarketplaceProfile(
+      vendor: 'amazon',
+      displayName: 'Amazon',
+      channel: SalesChannel.amazon,
+      orderColumns: {
+        // Amazon xuất tên cột kiểu `chữ-thường-nối-gạch`. `_normalise()` bỏ
+        // gạch nối, nên `amazon-order-id` và `Amazon Order Id` về cùng một mã.
+        MarketplaceField.orderId: ['amazon-order-id', 'Amazon Order Id'],
+        MarketplaceField.orderDate: ['purchase-date', 'Purchase Date'],
+        MarketplaceField.status: ['order-status', 'Order Status'],
+        MarketplaceField.sku: ['sku', 'seller-sku'],
+        MarketplaceField.productName: ['product-name', 'Product Name'],
+        MarketplaceField.quantity: ['quantity-purchased', 'quantity-shipped'],
+        MarketplaceField.unitPrice: ['item-price', 'Item Price'],
+        MarketplaceField.buyerName: ['buyer-name', 'Buyer Name'],
+        MarketplaceField.buyerId: ['buyer-email', 'Buyer Email'],
+      },
+      // ⚠️ Báo cáo đối soát thật của Amazon là **dạng dài** — mỗi dòng một
+      // khoản (`amount-type` · `amount-description` · `amount`), không phải
+      // mỗi phí một cột. Bộ bí danh dưới đây giả định bản xuất **dạng rộng**.
+      // Gặp file thật dạng dài thì cần một reader riêng, không phải sửa vài
+      // tên cột. Ghi ra vì đây là khoảng cách lớn nhất trong hồ sơ này.
+      incomeColumns: {
+        MarketplaceField.orderId: ['order-id', 'amazon-order-id'],
+        MarketplaceField.commission: ['Commission', 'Referral Fee'],
+        MarketplaceField.transactionFee: ['transaction-fee', 'Transaction Fee'],
+        MarketplaceField.serviceFee: [
+          'FBA Fees',
+          'Fulfilment Fee',
+          'Subscription Fee',
+        ],
+        MarketplaceField.shippingFee: ['shipping-price', 'Shipping Chargeback'],
+        MarketplaceField.voucher: ['promotion-discount', 'Seller Discount'],
+        MarketplaceField.platformVoucher: ['Amazon Funded Discount'],
+        MarketplaceField.payout: ['total-amount', 'Net Proceeds'],
+      },
+    ),
+    MarketplaceProfile(
+      vendor: 'shopify',
+      displayName: 'Shopify',
+      channel: SalesChannel.shopify,
+      orderColumns: {
+        // Shopify đặt tên cột đơn hàng là `Name` (giá trị kiểu `#1001`) — rất
+        // dễ trùng, nên bốn cột `Lineitem *` mới là thứ nhận dạng thật.
+        MarketplaceField.orderId: ['Name', 'Order Name'],
+        MarketplaceField.orderDate: ['Created at', 'Processed at'],
+        MarketplaceField.status: ['Financial Status', 'Fulfillment Status'],
+        MarketplaceField.sku: ['Lineitem sku'],
+        MarketplaceField.productName: ['Lineitem name'],
+        MarketplaceField.quantity: ['Lineitem quantity'],
+        MarketplaceField.unitPrice: ['Lineitem price'],
+        MarketplaceField.buyerName: ['Billing Name', 'Shipping Name'],
+        MarketplaceField.buyerId: ['Email', 'Customer ID'],
+      },
+      // Shopify là cửa hàng của chính người bán: **không có voucher do sàn tài
+      // trợ**, nên `platformVoucher` cố ý vắng mặt. Vắng ở đây nghĩa là *nền
+      // tảng không có khái niệm này*, không phải *chưa kịp điền*.
+      incomeColumns: {
+        MarketplaceField.orderId: ['Order', 'Order Name'],
+        MarketplaceField.commission: ['Fee', 'Application Fee'],
+        MarketplaceField.transactionFee: ['Processing Fee'],
+        MarketplaceField.serviceFee: ['Adjustment'],
+        MarketplaceField.shippingFee: ['Shipping'],
+        MarketplaceField.voucher: ['Discount', 'Discount Code'],
+        MarketplaceField.payout: ['Net', 'Payout Amount'],
+      },
+    ),
+    MarketplaceProfile(
+      vendor: 'lazada',
+      displayName: 'Lazada',
+      channel: SalesChannel.lazada,
+      orderColumns: {
+        MarketplaceField.orderId: [
+          'orderNumber',
+          'Order Number',
+          'Mã đơn hàng',
+        ],
+        MarketplaceField.orderDate: [
+          'createTime',
+          'Order Time',
+          'Thời gian tạo đơn',
+        ],
+        MarketplaceField.status: ['status', 'Order Status', 'Trạng thái'],
+        MarketplaceField.sku: ['sellerSku', 'Seller SKU'],
+        MarketplaceField.productName: ['itemName', 'Product Name'],
+        MarketplaceField.quantity: ['Quantity', 'Số lượng'],
+        MarketplaceField.unitPrice: ['paidPrice', 'unitPrice', 'Đơn giá'],
+        MarketplaceField.buyerName: ['customerName', 'Customer Name'],
+        MarketplaceField.buyerId: ['orderItemId', 'lazadaId'],
+      },
+      incomeColumns: {
+        MarketplaceField.orderId: ['orderNumber', 'Order No.'],
+        MarketplaceField.commission: ['Commission', 'Hoa hồng'],
+        MarketplaceField.transactionFee: ['Payment Fee', 'Phí thanh toán'],
+        MarketplaceField.serviceFee: ['Service Fee', 'Phí dịch vụ'],
+        MarketplaceField.shippingFee: ['Shipping Fee', 'Phí vận chuyển'],
+        MarketplaceField.voucher: ['Seller Voucher', 'Voucher người bán'],
+        MarketplaceField.platformVoucher: [
+          'Lazada Voucher',
+          'Platform Voucher',
+        ],
+        MarketplaceField.payout: ['Payout', 'Số tiền thực nhận'],
+      },
+    ),
   ];
 
   static MarketplaceProfile? byVendor(String vendor) {
@@ -260,7 +432,27 @@ class MarketplaceMatch {
   /// bất kỳ có cột tên "Số lượng".
   bool get isConfident => score >= 4;
 
-  /// Tìm hồ sơ khớp nhất cho một bộ tiêu đề. `null` = không nhận ra.
+  /// Tìm hồ sơ khớp nhất cho một bộ tiêu đề. `null` = **không dám kết luận**.
+  ///
+  /// ## Vì sao hoà điểm giữa hai sàn ⇒ `null` (WTM-442)
+  ///
+  /// Bản trước lấy điểm cao nhất và, khi hoà, **giữ hồ sơ gặp trước** — tức là
+  /// hồ sơ đứng đầu `all`. Với hai hồ sơ thì gần như không xảy ra. Với sáu, và
+  /// bốn trong số đó xuất tiếng Anh, chuyện đổi hẳn: `Order ID` · `Quantity` ·
+  /// `SKU` · `Order Status` có mặt ở nhiều sàn, nên một file eBay thật có thể
+  /// hoà điểm với Shopee — và Shopee đứng trước.
+  ///
+  /// Hậu quả không phải "đọc sai file". Nó là **gán sai kênh cho đơn hàng**:
+  /// đơn eBay vào sổ mang nhãn Shopee, rồi doanh thu theo kênh sai vĩnh viễn
+  /// mà không ai thấy gì bất thường.
+  ///
+  /// Nên hoà điểm giữa **hai vendor khác nhau** được coi là *chưa nhận ra*, và
+  /// rơi vào đúng đường đã có: kể lại những cột nó nhìn thấy để người bán tự
+  /// nói file này của sàn nào. Đoán bừa rồi im lặng là lựa chọn duy nhất không
+  /// được phép.
+  ///
+  /// Hoà giữa `orders` và `income` **của cùng một sàn** thì không phải mơ hồ về
+  /// danh tính — giữ nguyên hành vi cũ.
   static MarketplaceMatch? detect(List<String> headers) {
     MarketplaceMatch? best;
     for (final profile in MarketplaceProfile.all) {
@@ -276,6 +468,16 @@ class MarketplaceMatch {
         }
       }
     }
-    return best != null && best.isConfident ? best : null;
+    if (best == null || !best.isConfident) return null;
+
+    final tied = <String>{};
+    for (final profile in MarketplaceProfile.all) {
+      for (final kind in MarketplaceFileKind.values) {
+        if (profile.scoreFor(headers, kind) == best.score) {
+          tied.add(profile.vendor);
+        }
+      }
+    }
+    return tied.length > 1 ? null : best;
   }
 }

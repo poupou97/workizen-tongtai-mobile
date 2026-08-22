@@ -168,15 +168,27 @@ class CommerceProfitContext {
 
   final DateTime observedAt;
 
-  /// Kênh này có thu phí sàn không.
+  /// Kênh này có thu phí sàn không — **hỏi lại `SalesChannel`, không tự trả lời**.
   ///
-  /// Danh sách đóng, và nó là **dữ liệu nghiệp vụ** chứ không phải chi tiết
-  /// kỹ thuật: thêm một sàn mới là thêm một dòng ở đây, và quên thêm nghĩa là
-  /// lợi nhuận của sàn đó bị tính thừa mà không ai báo.
-  static bool _chargesPlatformFees(SalesChannel? channel) => switch (channel) {
-    SalesChannel.shopee || SalesChannel.tiktok || SalesChannel.appStore => true,
-    _ => false,
-  };
+  /// ## Vì sao bản chép ở đây bị gỡ (WTM-442)
+  ///
+  /// Trước đây chỗ này giữ một bản sao của cùng luật ấy, kèm đúng câu cảnh báo
+  /// này: *"thêm một sàn mới là thêm một dòng ở đây, và quên thêm nghĩa là lợi
+  /// nhuận của sàn đó bị tính thừa mà không ai báo."*
+  ///
+  /// Lời cảnh báo đúng — và nó thành sự thật ngay lần đầu có người thêm sàn.
+  /// Lúc thêm `ebay`/`amazon`/`shopify`/`lazada`, chỉ cần sửa **một** trong hai
+  /// bản là hai bên lệch nhau lặng lẽ: `SalesChannel` nói có phí, chỗ này nói
+  /// không, và lợi nhuận sai theo hướng dễ chịu.
+  ///
+  /// Một khái niệm một chủ (P-27/P-28). `SalesChannel.chargesPlatformFee` là
+  /// chủ, và switch bên đó **không có nhánh `_`** nên quên phân loại là lỗi
+  /// biên dịch, không phải một con số sai âm thầm.
+  ///
+  /// `null` = kênh **chưa ghi**, không phải "không có phí": không biết thì
+  /// không đòi được dòng đối soát nào.
+  static bool _chargesPlatformFees(SalesChannel? channel) =>
+      channel?.chargesPlatformFee ?? false;
 
   /// Sản phẩm **doanh thu dương nhưng lời thật âm** — thứ không ai nhìn thấy
   /// nếu chỉ đọc bảng doanh thu.

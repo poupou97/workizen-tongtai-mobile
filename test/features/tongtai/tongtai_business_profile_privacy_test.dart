@@ -199,7 +199,20 @@ void main() {
       // WTM-232: 7 → 10. Ba kênh số thêm vào CÓ CHỦ Ý (website · app_store ·
       // direct) — vẫn là sự thật phân loại về doanh nghiệp, không phải dữ liệu
       // cá nhân, nên vẫn được phép đi vào prompt.
-      expect(SalesChannel.values.length, 10);
+      //
+      // WTM-442: 10 → 14 (ebay · amazon · shopify · lazada). Con số này KHÔNG
+      // phải thứ để chỉnh cho test xanh — sửa nó là **làm lại đúng việc rà
+      // soát** mà test này tồn tại để ép. Bốn mã mới đã rà:
+      //
+      //   · cùng loại với `shopee`/`tiktok` đã cho phép — chúng nói *người bán
+      //     bán ở đâu*, một sự thật phân loại về doanh nghiệp;
+      //   · không mã nào mang tên người, số điện thoại, mã đơn hay tên cửa
+      //     hàng cụ thể — biết ai đó bán trên eBay không định danh được họ;
+      //   · vẫn là chữ thường ASCII, nên sống sót qua một lần đổi ngôn ngữ.
+      //
+      // Ngày nào một mã mới KHÔNG qua được ba câu trên thì việc phải làm là
+      // giữ nó ngoài prompt, chứ không phải tăng con số này.
+      expect(SalesChannel.values.length, 14);
       expect(BusinessSeasonality.values.length, 5);
       // WTM-228: loại hình kinh doanh cũng nằm trong vựng từ rời máy.
       expect(BusinessType.values.length, 4);
