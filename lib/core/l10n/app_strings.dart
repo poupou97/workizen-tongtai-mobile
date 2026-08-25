@@ -730,6 +730,11 @@ abstract class AppStrings {
   String get invOverviewTitle;
   String get invOverviewProducts;
   String get invOverviewValue;
+
+  /// Phần **chưa tính được** vào [invOverviewValue] vì thiếu giá vốn (WTM-455).
+  /// Câu chữ MỜI khai, không trách — cùng giọng `invTiedUpUnknownCost`.
+  String invOverviewUnknownCost(int count);
+
   String get invLowStockSection;
   String get invViewAll;
   String supplierReviewCount(int count);
@@ -2508,6 +2513,9 @@ class AppStringsVi extends AppStrings {
   String get invOverviewProducts => 'Tổng sản phẩm';
   @override
   String get invOverviewValue => 'Giá trị tồn kho';
+  @override
+  String invOverviewUnknownCost(int count) =>
+      'Chưa tính $count sản phẩm thiếu giá vốn';
   @override
   String get invLowStockSection => 'Sản phẩm sắp hết hàng';
   @override
@@ -4812,6 +4820,9 @@ class AppStringsEn extends AppStrings {
   String get invOverviewProducts => 'Products';
   @override
   String get invOverviewValue => 'Stock value';
+  @override
+  String invOverviewUnknownCost(int count) =>
+      '$count products not counted (no cost price)';
   @override
   String get invLowStockSection => 'Products running low';
   @override

@@ -244,7 +244,6 @@ class Product {
     return cost == null ? null : pricePerUnit - cost;
   }
 
-  /// Total on-hand value = unit price × quantity (in đồng).
   /// Lãi trên **một đơn vị bán ra**, hoặc `null` khi chưa nhập chi phí.
   ///
   /// Dogfood đặt câu hỏi này: *"lợi nhuận của một sản phẩm số tính bằng gì khi
@@ -287,10 +286,29 @@ class Product {
       stockStatus == StockStatus.lowStock ||
       stockStatus == StockStatus.outOfStock;
 
-  /// Tiền đang nằm trong kho. Sản phẩm không có tồn kho đóng góp **0** — đây
-  /// là sự thật, không phải giá trị mặc định: một phần mềm không có đồng vốn
-  /// nào nằm trong kho.
-  double get stockValue => pricePerUnit * (quantity ?? 0);
+  /// **Giá vốn** đang nằm trong kho — `costPrice × quantity`, KHÔNG phải giá
+  /// bán (WTM-455). Giá bán là doanh thu *kỳ vọng*; tiền thật đang đọng là giá
+  /// vốn — đúng cách ERPNext định giá tồn. Trước WTM-455 công thức lấy
+  /// [pricePerUnit], trái hẳn dòng docstring này hứa "tiền nằm trong kho".
+  ///
+  /// Trả `null` = **chưa tính được**, không phải 0: mặt hàng còn tồn nhưng chưa
+  /// khai `costPrice`. `null ≠ 0` (ADR-TON-022) — cộng thành 0 sẽ cho một tổng
+  /// *thấp hơn sự thật* khiến người bán yên tâm nhầm, còn mượn [pricePerUnit]
+  /// thay thế thì in ra đồng vốn chưa từng bỏ. `InventorySummary` đếm những
+  /// dòng này ra `unknownCostCount` thay vì nuốt vào tổng — cùng kỷ luật
+  /// `SlowMovingCapital` (WTM-411) đã theo.
+  ///
+  /// Trả `0` khi **không có gì để định giá**: loại không giữ tồn kho
+  /// (ADR-TON-023) hoặc số lượng ≤ 0 — không đồng vốn nào nằm trong kho, và đó
+  /// là sự thật đã biết, không phải khoảng trống dữ liệu.
+  double? get stockValue {
+    if (!kind.tracksStock) return 0;
+    final onHand = quantity ?? 0;
+    if (onHand <= 0) return 0;
+    final cost = costPrice;
+    if (cost == null) return null;
+    return cost * onHand;
+  }
 
   @override
   bool operator ==(Object other) =>

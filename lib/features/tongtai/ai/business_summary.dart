@@ -52,7 +52,11 @@ String businessContextPromptText(
       '- Kho: ${ctx.inventory.productCount} sản phẩm'
       ' · sắp hết: ${ctx.inventory.lowStockCount}'
       ' · hết: ${ctx.inventory.outOfStockCount}'
-      ' · giá trị tồn: ${TongtaiFormatters.vnd(ctx.inventory.stockValue)}',
+      // Giá VỐN, không phải giá bán (WTM-455). Nói rõ phần chưa tính được để AI
+      // không coi đây là tổng đủ rồi suy ra con số sai.
+      ' · giá trị tồn (giá vốn): '
+      '${TongtaiFormatters.vnd(ctx.inventory.stockValue)}'
+      '${ctx.inventory.unknownCostCount > 0 ? ' (chưa tính ${ctx.inventory.unknownCostCount} SP thiếu giá vốn)' : ''}',
     )
     ..writeln('- Cơ hội đang mở: ${ctx.opportunity.total}')
     ..writeln(

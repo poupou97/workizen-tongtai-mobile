@@ -12,6 +12,7 @@ class InventorySummary {
     required this.lowStockCount,
     required this.outOfStockCount,
     required this.stockValue,
+    required this.unknownCostCount,
   });
 
   static const InventorySummary empty = InventorySummary(
@@ -19,21 +20,45 @@ class InventorySummary {
     lowStockCount: 0,
     outOfStockCount: 0,
     stockValue: 0,
+    unknownCostCount: 0,
   );
 
   final int productCount;
   final int lowStockCount;
   final int outOfStockCount;
 
-  /// On-hand stock value in đồng (Σ price × quantity).
+  /// **Giá vốn** đang nằm trong kho, tính bằng đồng — Σ `costPrice × quantity`
+  /// của những mặt hàng **đã khai giá vốn** (WTM-455). KHÔNG dùng giá bán: giá
+  /// bán là doanh thu kỳ vọng, không phải tiền đang đọng.
+  ///
+  /// Con số này có thể **thấp hơn sự thật** khi còn mặt hàng chưa khai giá vốn
+  /// — xem [unknownCostCount] để biết còn thiếu bao nhiêu. Cấm cộng chúng thành
+  /// 0 (ADR-TON-022: `null ≠ 0`).
   final double stockValue;
+
+  /// Số mặt hàng **còn tồn mà chưa khai giá vốn** ⇒ không tính được vào
+  /// [stockValue]. Đếm ra thay vì nuốt vào tổng, để giao diện nói thẳng phần
+  /// chưa tính (WTM-455) — cùng kỷ luật `SlowMovingCapital`. `0` ⇒ tổng đã đủ.
+  final int unknownCostCount;
+
+  /// Tổng [stockValue] đang **thiếu** một phần vì còn mặt hàng chưa khai giá vốn.
+  bool get isPartial => unknownCostCount > 0;
 
   factory InventorySummary.from(List<Product> products) {
     var low = 0;
     var out = 0;
+    var unknownCost = 0;
     var value = 0.0;
     for (final p in products) {
-      value += p.stockValue;
+      // `null` = còn tồn nhưng chưa khai giá vốn ⇒ chưa tính được, đếm riêng
+      // (WTM-455). Không cộng thành 0: một tổng thiếu trông như tổng đủ sẽ làm
+      // người bán yên tâm nhầm. `0` (hết tồn / loại không giữ kho) vẫn vào tổng.
+      final v = p.stockValue;
+      if (v == null) {
+        unknownCost += 1;
+      } else {
+        value += v;
+      }
       switch (p.stockStatus) {
         case StockStatus.lowStock:
           low += 1;
@@ -52,6 +77,7 @@ class InventorySummary {
       lowStockCount: low,
       outOfStockCount: out,
       stockValue: value,
+      unknownCostCount: unknownCost,
     );
   }
 }

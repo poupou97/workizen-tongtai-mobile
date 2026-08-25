@@ -457,6 +457,23 @@ class _OverviewCard extends StatelessWidget {
                         value: TongtaiFormatters.vndShort(summary.stockValue),
                         label: l10n.invOverviewValue,
                       ),
+                      // Lời thú nhận rằng con số trên **chưa đủ** (WTM-455):
+                      // giá trị tồn tính theo giá vốn, nên mặt hàng chưa khai
+                      // giá vốn không vào tổng. Bỏ dòng này thì một tổng thiếu
+                      // trông như tổng đủ — cùng luật thẻ vốn chậm bán.
+                      if (summary.unknownCostCount > 0) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.invOverviewUnknownCost(summary.unknownCostCount),
+                          key: const Key('inventory-overview-unknown-cost'),
+                          // textSecondary, không textTertiary: dòng này nằm trên
+                          // nền `surfaceSecondary` (~6,4:1), còn textTertiary chỉ
+                          // ~2,5:1 — trượt cổng tương phản WTM-167.
+                          style: TtType.caption.copyWith(
+                            color: TtColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -36,6 +36,7 @@ void main() {
     required int quantity,
     int reorderLevel = 10,
     double price = 100000,
+    double? costPrice,
   }) {
     return Product(
       id: id,
@@ -45,6 +46,7 @@ void main() {
       quantity: quantity,
       pricePerUnit: price,
       reorderLevel: reorderLevel,
+      costPrice: costPrice,
       updatedAt: DateTime(2026, 1, 1),
     );
   }
@@ -103,6 +105,65 @@ void main() {
       await pumpInventory(tester, const []);
 
       expect(find.byKey(const Key('inventory-overview')), findsNothing);
+    });
+  });
+
+  group('stock value tells the truth about uncounted items (WTM-455)', () {
+    testWidgets('value is cost-based and sub-line names the uncounted items', (
+      tester,
+    ) async {
+      await pumpInventory(tester, [
+        // Có giá vốn ⇒ vào tổng theo GIÁ VỐN (không phải giá bán).
+        product(
+          id: 'a',
+          name: 'Has cost',
+          quantity: 10,
+          price: 100000,
+          costPrice: 40000,
+        ),
+        // Còn tồn, thiếu giá vốn ⇒ không vào tổng, đếm ra.
+        product(id: 'b', name: 'No cost', quantity: 5, price: 100000),
+        product(id: 'c', name: 'No cost 2', quantity: 8, price: 100000),
+      ]);
+
+      final line = tester.widget<Text>(
+        find.byKey(const Key('inventory-overview-unknown-cost')),
+      );
+      expect(line.data, contains('2')); // b + c chưa tính được
+
+      // Giá trị hiển thị = 10 × 40.000 giá vốn (400k) — KHÔNG phải giá bán.
+      final summary = InventorySummary.from([
+        product(
+          id: 'a',
+          name: 'Has cost',
+          quantity: 10,
+          price: 100000,
+          costPrice: 40000,
+        ),
+        product(id: 'b', name: 'No cost', quantity: 5, price: 100000),
+        product(id: 'c', name: 'No cost 2', quantity: 8, price: 100000),
+      ]);
+      expect(summary.stockValue, 400000);
+      expect(summary.unknownCostCount, 2);
+    });
+
+    testWidgets('sub-line hidden when every product has a cost price', (
+      tester,
+    ) async {
+      await pumpInventory(tester, [
+        product(
+          id: 'a',
+          name: 'Has cost',
+          quantity: 10,
+          price: 100000,
+          costPrice: 40000,
+        ),
+      ]);
+
+      expect(
+        find.byKey(const Key('inventory-overview-unknown-cost')),
+        findsNothing,
+      );
     });
   });
 
