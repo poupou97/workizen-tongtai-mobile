@@ -1283,7 +1283,8 @@ riêng của test ấy. Và biết rằng cổng đọc code bằng regex: file 
 chạm* là bị quét lại toàn bộ, nên nợ kiểu này nằm im cho đến đúng cái story
 chạm vào file — rồi nổ ở retry, không phải ở lần viết. Quét một lần toàn
 `test/` (2026-08-25) còn **14 điểm tiềm ẩn** ở 10 file chưa-bị-chạm — đã báo
-bug cho repo runtime (dò bằng parser hoặc nhận diện helper `expect*`), **không**
+bug **AWR-223** cho repo runtime (dò bằng parser hoặc nhận diện helper
+`expect*`), **không**
 đi sửa 14 test thật để chiều một máy quét; nếu story tương lai chạm các file ấy
 trước khi cổng được sửa, sửa theo pattern này.
 
