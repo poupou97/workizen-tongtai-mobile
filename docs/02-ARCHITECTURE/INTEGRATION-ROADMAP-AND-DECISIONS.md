@@ -92,11 +92,16 @@ capability cho SME) · Gmail (thay bằng Share Sheet) · toàn bộ Wave 2–5.
 | # | Quyết định | Tôi đề xuất | Vì sao cần anh |
 |---|---|---|---|
 | **D-1** | Có dựng **Optional Integration Runtime** cho RevenueCat không? | **Có** — 1 service Cloud Run, trong hạn mức miễn phí | Đây là lần đầu Tổng Tài có thành phần chạy ngoài máy người dùng |
-| **D-2** | Xử lý `integrations_table` chết | **Xoá**, viết lại thành `Connection` không cột token | Đụng schema (v17) và một bảng có từ bootstrap |
+| **D-2** ✅ | Xử lý `integrations_table` chết | **Xoá**, viết lại thành `Connection` không cột token | **✅ ĐÃ THI HÀNH — schema v18 (WTM-283)**, không còn chờ Founder. Bằng chứng: `tongtai_migrations.dart:588` (`DROP TABLE IF EXISTS integrations_table`), `tables/connections.dart:7` (bảng thay thế) |
 | **D-3** | Làm **N0 (bốn thứ nền)** trước, hay làm connector trước cho nhanh thấy kết quả? | **N0 trước** | Đi ngược lại cảm giác "muốn thấy dữ liệu ngay"; là đánh đổi tốc độ, anh nên biết |
 | **D-4** | Gmail: chốt **Share Sheet**, không dùng Gmail API cho sản phẩm? | **Chốt** | Đóng một hướng sản phẩm; nếu sau này cần thì mở lại bằng ADR |
 | **D-5** | Có thêm `lazada/amazon/ebay/etsy/shopify/woocommerce` vào `SalesChannel` ngay không? | **Chưa** — sửa cấu trúc (tách Channel/Store) trước, thêm mã sau | Thêm mã bây giờ thì sau này phải migrate lần hai |
 | **D-6** | Ghi ngược lên nền tảng (pause campaign, đổi giá) — có nằm trong tầm nhìn không? | Có, nhưng **sau** N3 | Quyết định phạm vi sản phẩm, không phải kỹ thuật |
+
+> **Kiểm lại 2026-08-25 (WTM-459):** D-2 đã xong từ v18; các dòng khác giữ
+> nguyên trạng thái chờ (D-1/D-3/D-4/D-5/D-6 vẫn cần Founder thật). Đối chiếu:
+> [MARKETPLACE-INTEGRATION-FEASIBILITY.md](MARKETPLACE-INTEGRATION-FEASIBILITY.md)
+> (đính chính 2026-08-22).
 
 ---
 
