@@ -374,6 +374,11 @@ class BackupCodec {
           'unit': item.unit,
           'quantity': item.quantity,
           'unitPrice': item.unitPrice,
+          // WTM-454 — COGS snapshot at sale time. Nullable and absent on files
+          // from builds before WTM-454; the same lesson `paymentStatus` taught
+          // (a domain field the codec forgot silently erases it on restore), so
+          // the wiring test walks this field too.
+          'costPrice': item.costPrice,
         },
     ],
   };
@@ -405,6 +410,10 @@ class BackupCodec {
       final unit = _str(raw['unit']);
       final quantity = _int(raw['quantity']);
       final unitPrice = _double(raw['unitPrice']);
+      // WTM-454 — optional: `null` when the key is absent (a backup from before
+      // WTM-454) or not a number. Deliberately NOT part of the rejection guard
+      // below, so an older `.ttbk` still restores every line.
+      final costPrice = _double(raw['costPrice']);
       if (productId == null ||
           productName == null ||
           sku == null ||
@@ -423,6 +432,7 @@ class BackupCodec {
           unit: unit,
           quantity: quantity,
           unitPrice: unitPrice,
+          costPrice: costPrice,
         ),
       );
     }

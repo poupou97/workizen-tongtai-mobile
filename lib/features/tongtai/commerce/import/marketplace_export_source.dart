@@ -277,6 +277,10 @@ class MarketplaceExportSource implements CommerceImportSource {
             unitPrice:
                 table.number(row, column(MarketplaceField.unitPrice)) ??
                 product.pricePerUnit,
+            // WTM-454 — snapshot the matched product's cost at import time. The
+            // marketplace file carries no cost, so the current inventory cost is
+            // the best snapshot available; `null` if that product has no cost.
+            costPrice: product.costPrice,
           ),
         );
       }

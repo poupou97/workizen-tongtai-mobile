@@ -137,6 +137,7 @@ void main() {
           unit: 'gói',
           quantity: 3,
           unitPrice: 85000.5,
+          costPrice: 42000.25, // WTM-454
         ),
       ],
     );
@@ -147,6 +148,11 @@ void main() {
       (encoded['items'] as List).first,
       containsPair('productId', 'p1'),
       reason: 'without this the Inventory↔Orders link cannot be rebuilt',
+    );
+    expect(
+      (encoded['items'] as List).first,
+      containsPair('costPrice', 42000.25),
+      reason: 'WTM-454 — COGS snapshot must be in the backup, not dropped',
     );
     expect(
       encoded['status'],
@@ -164,6 +170,34 @@ void main() {
     expect(decoded.items.single.sku, 'SKU-1');
     expect(decoded.items.single.unit, 'gói');
     expect(decoded.items.single.unitPrice, 85000.5);
+    expect(decoded.items.single.costPrice, 42000.25);
+  });
+
+  test('WTM-454 · a backup from before costPrice restores it as null', () {
+    // An order map written by a build that never knew about costPrice: the key
+    // is simply absent. Restore must accept the line and read costPrice = null,
+    // never reject the item and never invent a 0 cost.
+    final decoded = BackupCodec.decodeOrder({
+      'id': 'o1',
+      'customerId': 'c1',
+      'orderNumber': 'DH-1',
+      'date': '2026-07-22T14:05:00.000Z',
+      'status': 'shipped',
+      'items': const [
+        {
+          'productId': 'p1',
+          'productName': 'Cà phê',
+          'sku': 'SKU-1',
+          'category': 'Đồ uống',
+          'unit': 'gói',
+          'quantity': 3,
+          'unitPrice': 85000.5,
+          // costPrice deliberately absent
+        },
+      ],
+    })!;
+    expect(decoded.items.single.unitPrice, 85000.5);
+    expect(decoded.items.single.costPrice, isNull);
   });
 
   test('goal and transaction round-trip with canonical enum codes', () {

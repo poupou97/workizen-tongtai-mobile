@@ -100,7 +100,15 @@ class CommerceProfitContext {
 
         // Khoá gồm mã đơn: hai đơn cùng sản phẩm là **hai** khoản giá vốn, và
         // gộp chúng lại sẽ tính thiếu vốn cho sản phẩm bán nhiều nhất.
-        final cost = costOf[item.productId];
+        //
+        // Giá vốn ưu tiên **snapshot chốt lúc bán** trên dòng (WTM-454): lời
+        // thật của một đơn CŨ không được đổi khi người bán sửa giá vốn sản phẩm
+        // hôm nay — đó là một con số lịch sử. `item.costPrice == null` = đơn
+        // tạo TRƯỚC WTM-454 (chưa có snapshot) ⇒ fallback TƯỜNG MINH sang
+        // `Product.costPrice` hiện tại (hành vi cũ). Đơn cũ vẫn trôi theo giá
+        // vốn hiện tại vì không có gì để giữ; đây là fallback có chủ ý, không
+        // phải một lần đọc nhầm im lặng.
+        final cost = item.costPrice ?? costOf[item.productId];
         itemCosts['${order.id}:${item.productId}'] = cost == null
             ? null
             : cost * item.quantity;

@@ -160,6 +160,7 @@ void main() {
             unit: 'gói',
             quantity: 3,
             unitPrice: 85000.5,
+            costPrice: 42000.25, // WTM-454 — COGS snapshot must survive restore
           ),
         ],
       );
@@ -290,6 +291,13 @@ void main() {
       expect(first.items.single.sku, 'SKU-p1');
       expect(first.items.single.unit, 'gói');
       expect(first.items.single.unitPrice, 85000.5);
+      expect(
+        first.items.single.costPrice,
+        42000.25,
+        reason:
+            'WTM-454 — a domain field the codec forgets erases it on '
+            'restore, the paymentStatus lesson',
+      );
 
       expect(goals.single.type, GoalType.revenue);
       expect(goals.single.notes, 'Đẩy mạnh kênh online');

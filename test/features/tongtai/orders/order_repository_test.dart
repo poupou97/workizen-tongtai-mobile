@@ -355,13 +355,44 @@ void main() {
           unit: 'hộp',
           quantity: 2,
           unitPrice: 1500,
+          costPrice: 900, // WTM-454 — cost snapshot survives the round trip
         ),
       ];
       final decoded = decodeOrderItems(encodeOrderItems(items));
       expect(decoded, items);
+      expect(decoded.single.costPrice, 900);
     });
 
-    test('OrderItem.fromProduct snapshots the product + sold price', () {
+    test('WTM-454 · a null costPrice round-trips as null, never 0', () {
+      const items = [
+        OrderItem(
+          productId: 'p9',
+          productName: 'A',
+          category: 'Home',
+          quantity: 1,
+          unitPrice: 1500,
+          // costPrice omitted ⇒ null ("not recorded at sale").
+        ),
+      ];
+      final decoded = decodeOrderItems(encodeOrderItems(items)).single;
+      expect(decoded.costPrice, isNull);
+      expect(decoded, items.single);
+    });
+
+    test(
+      'WTM-454 · a blob written before WTM-454 decodes costPrice as null',
+      () {
+        // Legacy line: has unitPrice but no costPrice key at all.
+        final decoded = decodeOrderItems(
+          '[{"productId":"p1","productName":"Old","sku":"S","category":"Home",'
+          '"unit":"cái","quantity":2,"unitPrice":5000}]',
+        ).single;
+        expect(decoded.unitPrice, 5000);
+        expect(decoded.costPrice, isNull); // not back-filled, not 0
+      },
+    );
+
+    test('OrderItem.fromProduct snapshots the product + sold price + cost', () {
       final product = Product(
         id: 'p1',
         sku: 'SKU-EL-001',
@@ -369,6 +400,7 @@ void main() {
         category: 'Electronics',
         quantity: 10,
         pricePerUnit: 89000,
+        costPrice: 52000,
         reorderLevel: 2,
         updatedAt: DateTime(2026, 7, 1),
       );
@@ -383,9 +415,28 @@ void main() {
       expect(line.category, 'Electronics');
       expect(line.quantity, 3);
       expect(line.unitPrice, 80000); // sold price overrides the default
+      expect(line.costPrice, 52000); // WTM-454 — cost snapshot at sale time
       // Default sold price falls back to the inventory price.
       expect(OrderItem.fromProduct(product, quantity: 1).unitPrice, 89000);
     });
+
+    test(
+      'WTM-454 · fromProduct snapshots a null cost when none is recorded',
+      () {
+        final product = Product(
+          id: 'p2',
+          sku: 'SKU-EL-002',
+          name: 'Sạc',
+          category: 'Electronics',
+          quantity: 5,
+          pricePerUnit: 120000,
+          // costPrice omitted ⇒ null.
+          reorderLevel: 1,
+          updatedAt: DateTime(2026, 7, 1),
+        );
+        expect(OrderItem.fromProduct(product, quantity: 1).costPrice, isNull);
+      },
+    );
 
     test('decode is tolerant of null', () {
       expect(decodeOrderItems(null), isEmpty);

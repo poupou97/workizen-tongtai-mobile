@@ -529,6 +529,9 @@ class XlsxCommerceSource implements CommerceImportSource {
               category: product.category,
               quantity: quantity,
               unitPrice: unitPrice,
+              // WTM-454 — snapshot the matched product's cost at import time
+              // (the sheet carries no per-line cost); `null` if not recorded.
+              costPrice: product.costPrice,
             ),
           ],
           channel: SalesChannel.fromCode(sheet.cell(row, 'channel')),
