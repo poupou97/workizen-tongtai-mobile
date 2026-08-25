@@ -223,6 +223,49 @@ void main() {
     expect(o.items[1].unitPrice, 0);
   });
 
+  group('WTM-457 · a corrupt stored status surfaces, never masquerades', () {
+    test('an unrecognised status decodes to unknown, not pending', () async {
+      await seedCustomer('c1');
+      // A status code no build ever wrote (DB corruption, a hand-edited row, or
+      // a status a newer build knows and this one does not). Before WTM-457 this
+      // read back as `pending` — a broken order looking ready to fulfil.
+      await insertRawOrder(
+        id: 'corrupt',
+        customerId: 'c1',
+        status: 'teleported',
+        items: '[]',
+      );
+      final o = (await DriftOrderRepository(db).loadAll()).single;
+      // The order is NOT dropped (no silent data loss) and NOT disguised.
+      expect(o.id, 'corrupt');
+      expect(o.status, OrderStatus.unknown);
+      expect(o.status, isNot(OrderStatus.pending));
+    });
+
+    test('valid stored statuses keep their exact meaning', () async {
+      await seedCustomer('c1');
+      for (final s in OrderStatus.selectable) {
+        await insertRawOrder(
+          id: 'o-${s.name}',
+          customerId: 'c1',
+          status: s.name,
+          items: '[]',
+        );
+      }
+      final byId = {
+        for (final o in await DriftOrderRepository(db).loadAll())
+          o.id: o.status,
+      };
+      for (final s in OrderStatus.selectable) {
+        expect(
+          byId['o-${s.name}'],
+          s,
+          reason: 'only garbage may change destination',
+        );
+      }
+    });
+  });
+
   test(
     'business isolation: loadAll only returns the local business rows',
     () async {

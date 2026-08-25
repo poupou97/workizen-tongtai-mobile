@@ -78,9 +78,31 @@ void main() {
       expect(OrderStatus.shipped.label('vi'), 'Đang giao');
     });
 
-    test('unknown OrderStatus falls back to pending', () {
-      expect(OrderStatus.fromStorage('garbage'), OrderStatus.pending);
-      expect(OrderStatus.fromStorage(null), OrderStatus.pending);
+    // WTM-457 (ADR-TON-018): an unrecognised code is a corrupt record, not a
+    // business default. It used to decode to `pending` — a delivered order
+    // silently reading as "waiting to be handled".
+    test('unknown OrderStatus surfaces as unknown, never a real status', () {
+      expect(OrderStatus.fromStorage('garbage'), OrderStatus.unknown);
+      expect(OrderStatus.fromStorage(null), OrderStatus.unknown);
+      expect(OrderStatus.fromStorage('garbage'), isNot(OrderStatus.pending));
+    });
+
+    test('the unknown marker is labelled, never a blank chip', () {
+      expect(OrderStatus.unknown.label('en'), 'Unrecognized');
+      expect(OrderStatus.unknown.label('vi'), 'Không nhận ra');
+    });
+
+    test('unknown is a decode marker, not a status a seller can pick', () {
+      expect(OrderStatus.selectable, isNot(contains(OrderStatus.unknown)));
+      // Every real lifecycle state is still offered.
+      expect(OrderStatus.selectable, hasLength(OrderStatus.values.length - 1));
+    });
+
+    test('valid stored codes keep their meaning (no drift)', () {
+      // The point of WTM-457: only garbage changes destination.
+      for (final s in OrderStatus.values) {
+        expect(OrderStatus.fromStorage(s.name), s);
+      }
     });
 
     test('JourneyStatus round-trips and localizes', () {
@@ -88,10 +110,38 @@ void main() {
       expect(JourneyStatus.blocked.labelVi, 'Bị chặn');
     });
 
+    // WTM-457: nullable, so a corrupt journey code cannot inherit `notStarted`.
+    test('unknown JourneyStatus is null, never a real status', () {
+      expect(JourneyStatus.fromStorage('garbage'), isNull);
+      expect(JourneyStatus.fromStorage(null), isNull);
+    });
+
     test('OpportunityType localizes', () {
       expect(OpportunityType.crossBorder.labelEn, 'Cross-border');
       expect(OpportunityType.crossBorder.labelVi, 'Xuyên biên giới');
       expect(OpportunityType.fromStorage('seasonal'), OpportunityType.seasonal);
+    });
+
+    // WTM-457: nullable, so a corrupt opportunity code cannot inherit `trend`.
+    test('unknown OpportunityType is null, never a real type', () {
+      expect(OpportunityType.fromStorage('garbage'), isNull);
+      expect(OpportunityType.fromStorage(null), isNull);
+    });
+
+    test('TransactionType parses storage strings and localizes', () {
+      expect(TransactionType.fromStorage('income'), TransactionType.income);
+      expect(TransactionType.income.label('en'), 'Income');
+      expect(TransactionType.expense.label('vi'), 'Chi');
+    });
+
+    // WTM-457: was `expense`, silently turning a corrupt income row into a cost.
+    test('unknown TransactionType surfaces as unknown, never a real type', () {
+      expect(TransactionType.fromStorage('garbage'), TransactionType.unknown);
+      expect(TransactionType.fromStorage(null), TransactionType.unknown);
+      expect(
+        TransactionType.fromStorage('garbage'),
+        isNot(TransactionType.expense),
+      );
     });
   });
 }
