@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../commerce/commerce_models.dart';
+import '../../core/tongtai_formatters.dart';
 import '../../inventory/product.dart';
 import '../../inventory/inventory_tone.dart';
 import '../../inventory/product_category.dart';
 import '../../inventory/product_catalog_controller.dart';
 import '../../inventory/product_image_source.dart';
+import '../../inventory/reorder_advice.dart';
 import '../../inventory/stock_alert.dart';
 import '../../inventory/stock_alert_service.dart';
 import 'tongtai_product_form_screen.dart';
@@ -14,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/design/tt.dart';
 import '../../opportunity/opportunity.dart';
 import '../../opportunity/opportunity_for.dart';
+import '../../providers/tongtai_commerce_provider.dart';
 import '../../providers/tongtai_context_provider.dart';
 import 'tongtai_opportunity_detail_screen.dart';
 
@@ -54,6 +58,12 @@ class TongtaiStockAlertsScreen extends ConsumerWidget {
     final generated =
         ref.watch(generatedOpportunitiesProvider).value ??
         const <Opportunity>[];
+    // WTM-456: báo giá NCC đã lưu (WTM-327) để cảnh báo nói thêm "đặt bao nhiêu
+    // · chờ bao lâu". Chưa tải xong / chưa có báo giá ⇒ map rỗng ⇒ hàng giữ
+    // nguyên hành vi cũ (không suy diễn khi thiếu).
+    final quotesByProduct =
+        ref.watch(quotesByProductProvider).value ??
+        const <String, List<SupplierQuote>>{};
     return Scaffold(
       backgroundColor: TtColors.surfaceSecondary,
       appBar: AppBar(
@@ -68,7 +78,10 @@ class TongtaiStockAlertsScreen extends ConsumerWidget {
           builder: (context, _) {
             final service = StockAlertService(catalog.products);
             if (!service.hasAlerts) return const _HealthyState();
-            final alerts = service.alerts;
+            final alerts = service.alertsWithReorder(
+              quotesByProduct,
+              now: DateTime.now(),
+            );
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -294,6 +307,11 @@ class _AlertRow extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    // WTM-456: khi có báo giá, cảnh báo nói thêm đặt bao nhiêu ·
+                    // chờ bao lâu · tuổi báo giá. Không có báo giá ⇒ khối này
+                    // biến mất, hàng đọc y như trước.
+                    if (alert.reorder case final advice?)
+                      _ReorderAdviceLines(product: product, advice: advice),
                   ],
                 ),
               ),
@@ -354,6 +372,45 @@ class _AlertRow extends StatelessWidget {
       alert.shortfall > 0
       ? l10n.stockRestockBy(alert.shortfall)
       : l10n.stockRestockNeeded;
+}
+
+/// The WTM-456 restock detail lines: how much to order, how long to wait, and
+/// the age of the quote they came from. Rendered only when a qualifying supplier
+/// quote exists — a product with no quote never reaches here.
+class _ReorderAdviceLines extends StatelessWidget {
+  const _ReorderAdviceLines({required this.product, required this.advice});
+
+  final Product product;
+  final ReorderAdvice advice;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final style = TtType.caption.copyWith(color: TtColors.textSecondary);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: TtSpace.x1),
+        Text(
+          key: Key('stock-reorder-qty-${product.id}'),
+          l10n.stockReorderQuantity(
+            TongtaiFormatters.compact(advice.orderQuantity),
+          ),
+          style: style,
+        ),
+        Text(
+          key: Key('stock-reorder-lead-${product.id}'),
+          l10n.stockReorderLeadTime(advice.leadTimeDays),
+          style: style,
+        ),
+        Text(
+          key: Key('stock-reorder-age-${product.id}'),
+          l10n.stockReorderQuoteAge(advice.quoteAgeDays),
+          style: style,
+        ),
+      ],
+    );
+  }
 }
 
 class _HealthyState extends StatelessWidget {

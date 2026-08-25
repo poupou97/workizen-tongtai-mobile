@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'product.dart';
+import 'reorder_advice.dart';
 
 /// Severity of a stock-level alert (WTM-70). Ordered most-urgent first so the
 /// enum index doubles as the sort key: an out-of-stock product is more urgent
@@ -33,13 +34,27 @@ enum StockAlertLevel {
 /// alert engine, screens and (later) a notification scheduler can all reuse it.
 @immutable
 class StockAlert {
-  const StockAlert({required this.product, required this.level});
+  const StockAlert({required this.product, required this.level, this.reorder});
 
   /// The product that triggered the alert.
   final Product product;
 
   /// How urgent the alert is (out of stock vs. merely low).
   final StockAlertLevel level;
+
+  /// Reorder advice built from the product's best supplier quote (WTM-456), or
+  /// `null` when the product has no qualifying quote — then the alert reads
+  /// exactly as it did before, with nothing invented. The quotes are joined in
+  /// by [StockAlertService], not by [forProduct], so the product→alert rule
+  /// itself stays free of the commerce domain.
+  final ReorderAdvice? reorder;
+
+  /// A copy of this alert carrying [advice] (or clearing it with `null`). Its
+  /// identity is unchanged — a stock alert is the same alert whether or not a
+  /// supplier quote has been found for it — so [==]/[hashCode] deliberately
+  /// ignore [reorder].
+  StockAlert withReorder(ReorderAdvice? advice) =>
+      StockAlert(product: product, level: level, reorder: advice);
 
   /// The threshold this alert was raised against — the product's own
   /// [Product.reorderLevel], forwarded. There is no other threshold: "sắp hết

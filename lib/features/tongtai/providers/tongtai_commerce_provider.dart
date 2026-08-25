@@ -145,6 +145,22 @@ final commerceOpportunitiesProvider = FutureProvider<List<BriefItem>>((
   );
 });
 
+/// Báo giá của **mọi** sản phẩm, gom theo `productId` — nguồn cho cảnh báo tồn
+/// kho gợi ý *đặt bao nhiêu · chờ bao lâu* (WTM-456).
+///
+/// Sản phẩm không có key trong map ⇒ chưa có báo giá ⇒ cảnh báo giữ nguyên như
+/// hôm nay (không suy diễn khi thiếu). Đọc từ CÙNG một `CommerceRepository` như
+/// phần còn lại của miền, nên không có nguồn báo giá thứ hai.
+final quotesByProductProvider =
+    FutureProvider<Map<String, List<SupplierQuote>>>((ref) async {
+      final quotes = await ref.watch(commerceRepositoryProvider).loadQuotes();
+      final byProduct = <String, List<SupplierQuote>>{};
+      for (final quote in quotes) {
+        (byProduct[quote.productId] ??= <SupplierQuote>[]).add(quote);
+      }
+      return byProduct;
+    });
+
 /// So sánh nhà cung cấp cho **một** sản phẩm — use case P0 (§17).
 final supplierComparisonProvider =
     FutureProvider.family<SupplierComparison, String>((ref, productId) async {

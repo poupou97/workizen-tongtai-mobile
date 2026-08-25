@@ -366,6 +366,12 @@ abstract class AppStrings {
   String get productCategoryHint;
   String get stockRestockNeeded;
   String stockRestockBy(int quantity);
+
+  /// WTM-456 — cảnh báo tồn kho học từ báo giá NCC đã lưu: đặt bao nhiêu, chờ
+  /// bao lâu, và tuổi báo giá (báo giá cũ là báo giá sai).
+  String stockReorderQuantity(String quantity);
+  String stockReorderLeadTime(int days);
+  String stockReorderQuoteAge(int days);
   String get supplierNoFavoritesMatch;
   String get supplierNoSearchMatch;
   String get supplierFavoritesHint;
@@ -1884,6 +1890,13 @@ class AppStringsVi extends AppStrings {
   String get stockRestockNeeded => 'Cần nhập thêm';
   @override
   String stockRestockBy(int quantity) => 'Nhập thêm ít nhất $quantity';
+  @override
+  String stockReorderQuantity(String quantity) => 'Nên đặt $quantity';
+  @override
+  String stockReorderLeadTime(int days) => 'Giao khoảng $days ngày';
+  @override
+  String stockReorderQuoteAge(int days) =>
+      days <= 0 ? 'Báo giá hôm nay' : 'Báo giá $days ngày trước';
   @override
   String get supplierNoFavoritesMatch =>
       'Không có nhà cung cấp yêu thích nào khớp';
@@ -4192,6 +4205,13 @@ class AppStringsEn extends AppStrings {
   String get stockRestockNeeded => 'Restock needed';
   @override
   String stockRestockBy(int quantity) => 'Restock $quantity+ to clear';
+  @override
+  String stockReorderQuantity(String quantity) => 'Order $quantity';
+  @override
+  String stockReorderLeadTime(int days) => '$days days to arrive';
+  @override
+  String stockReorderQuoteAge(int days) =>
+      days <= 0 ? 'Quoted today' : 'Quoted $days days ago';
   @override
   String get supplierNoFavoritesMatch => 'No favourite suppliers match';
   @override
