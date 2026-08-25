@@ -68,6 +68,52 @@ void main() {
       final reloaded = await DriftFinanceRepository(db).loadAll();
       expect(reloaded.map((t) => t.id), ['t1']);
     });
+
+    group('WTM-457 · a corrupt stored type surfaces, never masquerades', () {
+      Future<void> insertRawTransaction({
+        required String id,
+        required String type,
+        double amount = 1000000,
+      }) async {
+        final biz = await const LocalWorkspace().ensureBusinessId(db);
+        await db
+            .into(db.transactionsTable)
+            .insert(
+              TransactionsTableCompanion.insert(
+                id: id,
+                businessId: biz,
+                type: type,
+                amount: amount,
+                date: DateTime(2026, 7, 10),
+              ),
+            );
+      }
+
+      test('an unrecognised type decodes to unknown, not expense', () async {
+        // Before WTM-457 this read back as `expense` — a corrupt income row
+        // silently understating the seller's own revenue.
+        await insertRawTransaction(id: 'corrupt', type: 'teleported');
+        final t = (await DriftFinanceRepository(db).loadAll()).single;
+        // Not dropped (no silent loss), not disguised.
+        expect(t.id, 'corrupt');
+        expect(t.type, TransactionType.unknown);
+        expect(t.type, isNot(TransactionType.expense));
+        // Counted as neither: you cannot total money you cannot classify.
+        expect(t.isIncome, isFalse);
+        expect(t.isExpense, isFalse);
+      });
+
+      test('valid stored types keep their exact meaning', () async {
+        await insertRawTransaction(id: 'in', type: 'income');
+        await insertRawTransaction(id: 'out', type: 'expense');
+        final byId = {
+          for (final t in await DriftFinanceRepository(db).loadAll())
+            t.id: t.type,
+        };
+        expect(byId['in'], TransactionType.income);
+        expect(byId['out'], TransactionType.expense);
+      });
+    });
   });
 
   group('SampleFinanceRepository (demo, read-only)', () {

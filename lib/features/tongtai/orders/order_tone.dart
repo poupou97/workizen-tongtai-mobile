@@ -14,4 +14,7 @@ TtStatus tongtaiOrderStatusTone(OrderStatus status) => switch (status) {
   OrderStatus.confirmed || OrderStatus.shipped => TtStatus.info,
   OrderStatus.delivered => TtStatus.success,
   OrderStatus.cancelled => TtStatus.danger,
+  // A corrupt/unrecognised status is a data problem to flag, not a lifecycle
+  // state — `warning`, same tone as "needs attention" (WTM-457).
+  OrderStatus.unknown => TtStatus.warning,
 };

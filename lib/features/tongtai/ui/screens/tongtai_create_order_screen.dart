@@ -347,7 +347,10 @@ class _StatusRow extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  for (final s in OrderStatus.values)
+                  // `selectable`, not `values`: [OrderStatus.unknown] is a
+                  // decode marker for corrupt records, never a choice a seller
+                  // makes when creating an order (WTM-457).
+                  for (final s in OrderStatus.selectable)
                     Padding(
                       padding: const EdgeInsets.only(right: TtSpace.x2),
                       child: ChoiceChip(

@@ -265,10 +265,40 @@ void main() {
         }),
         isNull,
         reason:
-            'OrderStatus.fromStorage defaults unknown values to pending — a '
-            'backup must NOT: silently changing a delivered order to pending '
-            'is data loss wearing a default',
+            'A code no build ever wrote (`teleported`) is a malformed backup '
+            'row: the codec rejects it via `_enum`, never coercing it to a '
+            'lifecycle state (WTM-457 · ADR-TON-018).',
       );
+    });
+
+    // WTM-457: `unknown` IS a canonical code (the corrupt-record marker on the
+    // live DB path), so unlike garbage it must survive a lossless round-trip —
+    // ADR-TON-018 forbids the backup from either dropping it or promoting it to
+    // a real status.
+    test('the unknown-status marker round-trips losslessly', () {
+      final encoded = BackupCodec.encodeOrder(
+        CustomerOrder(
+          id: 'o1',
+          customerId: 'c1',
+          orderNumber: 'DH-1',
+          date: DateTime(2026, 7, 22),
+          status: OrderStatus.unknown,
+          items: const [
+            OrderItem(
+              productName: 'X',
+              category: 'Home',
+              quantity: 1,
+              unitPrice: 1000,
+            ),
+          ],
+        ),
+      );
+      expect(
+        encoded['status'],
+        'unknown',
+        reason: 'canonical code, not a label',
+      );
+      expect(BackupCodec.decodeOrder(encoded)!.status, OrderStatus.unknown);
     });
 
     test('a missing required field is rejected', () {
