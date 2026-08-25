@@ -7,9 +7,11 @@ import '../../finance/finance_category.dart';
 import '../../../../core/telemetry/tongtai_telemetry.dart';
 import '../../core/screen_data_controller.dart';
 import '../../core/tongtai_formatters.dart';
+import '../../finance/fee_coexistence.dart';
 import '../../finance/finance_controller.dart';
 import '../../finance/finance_summary.dart';
 import '../../finance/finance_transaction.dart';
+import '../../providers/tongtai_commerce_provider.dart';
 import '../../providers/tongtai_finance_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_screen_data.dart';
@@ -56,7 +58,12 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
       _ownsController = false;
     } else {
       // Real app: persistent Drift ledger (WTM-120), starts empty for new users.
-      _controller = FinanceController(ref.read(financeRepositoryProvider));
+      // The settlement book rides along read-only so the dashboard can flag
+      // platform fees that sit in both books (WTM-460 / ADR-TON-024 §2).
+      _controller = FinanceController(
+        ref.read(financeRepositoryProvider),
+        settlements: ref.read(settlementRepositoryProvider),
+      );
       _ownsController = true;
     }
     _clock = widget.clock ?? DateTime.now;
@@ -143,6 +150,7 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
             emptyBuilder: (_) => const _FinanceEmptyState(),
             builder: (context, ledger) => _FinanceBody(
               summary: ledger.summaryAsOf(_clock()),
+              coexistence: ledger.feeCoexistenceAsOf(_clock()),
               recent: ledger.recent(),
             ),
           ),
@@ -153,9 +161,14 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
 }
 
 class _FinanceBody extends StatelessWidget {
-  const _FinanceBody({required this.summary, required this.recent});
+  const _FinanceBody({
+    required this.summary,
+    required this.coexistence,
+    required this.recent,
+  });
 
   final FinanceSummary summary;
+  final FeeCoexistence coexistence;
   final List<FinanceTransaction> recent;
 
   @override
@@ -274,6 +287,39 @@ class _FinanceBody extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: TtSpace.x6),
+        ],
+
+        // ── Fee coexistence (WTM-460) — only when both books hold a fee ──
+        // ADR-TON-024 §2 keeps the seller's own `platform_fee` row in Finance
+        // and never moves it into Settlement; when reconciliation brings the
+        // same kind of fee in too, the seller can read a doubled total with no
+        // clue. This says so — with counts, never a guessed duplicate pair.
+        if (coexistence.isCoexisting) ...[
+          Container(
+            key: const Key('finance-fee-coexistence'),
+            padding: const EdgeInsets.all(TtSpace.x4),
+            decoration: BoxDecoration(
+              color: TtColors.info.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(TtRadius.md),
+              border: Border.all(color: TtColors.info.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: TtColors.infoOnLight),
+                const SizedBox(width: TtSpace.x3),
+                Expanded(
+                  child: Text(
+                    context.l10n.financeFeeCoexistence(
+                      coexistence.reconciledFeeCount,
+                      coexistence.recordedFeeCount,
+                    ),
+                    style: TtType.body.copyWith(color: TtColors.textPrimary),
                   ),
                 ),
               ],
