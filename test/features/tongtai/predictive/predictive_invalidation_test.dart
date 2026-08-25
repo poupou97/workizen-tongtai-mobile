@@ -7,6 +7,7 @@ import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/producer/business_input_repository.dart';
 import 'package:tongtai/features/tongtai/predictive/rule_twin.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_capability_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
@@ -58,6 +59,7 @@ void main() {
     late InMemoryOrderRepository orders;
     late InMemoryBusinessGoalRepository goals;
     late InMemoryFinanceRepository finance;
+    late InMemoryBusinessInputRepository businessInputs;
 
     /// The PRODUCTION wiring — the real `sampleDataSeederProvider`,
     /// `historicalDataSeederProvider`, capability providers and Rule Twins, with
@@ -69,6 +71,10 @@ void main() {
       orders = InMemoryOrderRepository();
       goals = InMemoryBusinessGoalRepository();
       finance = InMemoryFinanceRepository();
+      // WTM-461: the sample seeder now seeds the Business Input domain too, so
+      // its provider is part of the production graph — swap it for an in-memory
+      // seam like the others, else it reaches the real (path_provider) database.
+      businessInputs = InMemoryBusinessInputRepository();
       final c = ProviderContainer(
         overrides: [
           customerRepositoryProvider.overrideWithValue(customers),
@@ -76,6 +82,7 @@ void main() {
           orderRepositoryProvider.overrideWithValue(orders),
           businessGoalRepositoryProvider.overrideWithValue(goals),
           financeRepositoryProvider.overrideWithValue(finance),
+          businessInputRepositoryProvider.overrideWithValue(businessInputs),
         ],
       );
       addTearDown(c.dispose);

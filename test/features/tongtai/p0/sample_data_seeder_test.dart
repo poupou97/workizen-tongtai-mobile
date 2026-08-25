@@ -11,6 +11,8 @@ import 'package:tongtai/features/tongtai/journey/business_goal.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/producer/business_input.dart';
+import 'package:tongtai/features/tongtai/producer/business_input_repository.dart';
 import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
 
 /// P0 §1 (WTM-144/ADR-TON-014) — the sample-data lifecycle over the
@@ -22,6 +24,7 @@ void main() {
   late InMemoryOrderRepository orders;
   late InMemoryBusinessGoalRepository goals;
   late InMemoryFinanceRepository finance;
+  late InMemoryBusinessInputRepository businessInputs;
   late SampleDataSeeder seeder;
 
   setUp(() {
@@ -30,12 +33,14 @@ void main() {
     orders = InMemoryOrderRepository();
     goals = InMemoryBusinessGoalRepository();
     finance = InMemoryFinanceRepository();
+    businessInputs = InMemoryBusinessInputRepository();
     seeder = SampleDataSeeder(
       customers: customers,
       products: products,
       orders: orders,
       goals: goals,
       finance: finance,
+      businessInputs: businessInputs,
     );
   });
 
@@ -47,10 +52,46 @@ void main() {
     expect(await orders.loadAll(), hasLength(kSampleCustomerOrders.length));
     expect(await goals.loadAll(), hasLength(kSampleBusinessGoals.length));
     expect(await finance.loadAll(), hasLength(kSampleTransactions.length));
+    // WTM-461: Producer is a first-class sample domain now, prefixed like the
+    // rest so removeAll/hasSamples cover it.
+    expect(
+      await businessInputs.loadAll(),
+      hasLength(kSampleBusinessInputs.length),
+    );
+    for (final i in await businessInputs.loadAll()) {
+      expect(i.id, startsWith(kSampleIdPrefix));
+    }
 
     for (final c in await customers.loadAll()) {
       expect(c.id, startsWith(kSampleIdPrefix));
     }
+    expect(await seeder.hasSamples(), isTrue);
+  });
+
+  test(
+    'WTM-461 — removeAll sweeps the input domain; hasSamples reflects it',
+    () async {
+      await seeder.seed();
+      expect(await businessInputs.loadAll(), isNotEmpty);
+
+      await seeder.removeAll();
+      expect(await businessInputs.loadAll(), isEmpty);
+      expect(await seeder.hasSamples(), isFalse);
+    },
+  );
+
+  test('WTM-461 — a lone seeded input still reports hasSamples', () async {
+    // Only the input domain has a sample row: hasSamples must still see it,
+    // or "Xóa dữ liệu mẫu" would hide and orphan it.
+    await businessInputs.upsert(
+      const BusinessInput(
+        id: '${kSampleIdPrefix}input-lone',
+        name: 'Máy chủ VPS',
+        kind: BusinessInputKind.infrastructure,
+        cadence: InputCadence.monthly,
+        expectedAmount: 250000,
+      ),
+    );
     expect(await seeder.hasSamples(), isTrue);
   });
 

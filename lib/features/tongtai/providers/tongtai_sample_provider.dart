@@ -5,6 +5,7 @@ import 'tongtai_commerce_provider.dart';
 import '../sample/sample_business_seeder.dart';
 import '../sample/sample_data_seeder.dart';
 import 'tongtai_consumer_provider.dart';
+import 'tongtai_context_provider.dart';
 import 'tongtai_finance_provider.dart';
 import 'tongtai_inventory_provider.dart';
 import 'tongtai_journey_provider.dart';
@@ -20,6 +21,10 @@ final sampleDataSeederProvider = Provider<SampleDataSeeder>(
     orders: ref.watch(orderRepositoryProvider),
     goals: ref.watch(businessGoalRepositoryProvider),
     finance: ref.watch(financeRepositoryProvider),
+    // WTM-461 — miền nguồn đầu vào vào cùng vòng đời `sample-`: gieo khi "Xem
+    // thử Demo", xoá khi "Xóa dữ liệu mẫu", để Home đếm ô "Nguồn hàng" bằng
+    // đúng repo màn đích đọc thay vì favourites.
+    businessInputs: ref.watch(businessInputRepositoryProvider),
   ),
 );
 

@@ -30,7 +30,6 @@ import '../../providers/tongtai_context_provider.dart';
 import '../../providers/tongtai_data_invalidation.dart';
 import '../../providers/tongtai_journey_provider.dart';
 import '../../providers/tongtai_sample_provider.dart';
-import '../../providers/tongtai_search_provider.dart';
 import 'tongtai_chat_screen.dart';
 import 'tongtai_customer_list_screen.dart';
 import 'tongtai_goals_screen.dart';
@@ -152,12 +151,21 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
   Future<_HomeData> _read() async {
     // Home consumes the BusinessContext Aggregate Root (WTM-129) for its KPIs +
     // capability counts + health — the same seam AI reads. Journey (goals) and
-    // Producer (favourites) are not in the Phase-1 context yet, so they load
-    // alongside. Resolve every provider before the first await (the widget may be
-    // disposed mid-load).
+    // Producer (business inputs) are not in the Phase-1 context yet, so they
+    // load alongside. Resolve every provider before the first await (the widget
+    // may be disposed mid-load).
     final contextService = ref.read(businessContextServiceProvider);
     final goalRepo = ref.read(businessGoalRepositoryProvider);
-    final favoritesStore = ref.read(tongtaiSearchFavoritesStoreProvider);
+    // ⭐ WTM-461 — ô "Nguồn hàng" đếm **cùng repo với màn đích**.
+    //
+    // Ô này (`home-tile-producer`) mở `TongtaiBusinessInputsScreen` qua
+    // `onProducer`, và màn ấy đếm `businessInputRepository.loadAll()`. Trước đây
+    // Home lại đếm `favorites.length` từ search-favourites store — di sản Phase-1
+    // khi Producer còn là danh bạ nhà cung cấp. Hai nguồn cho MỘT khái niệm ⇒ ô
+    // nói "0 đầu vào" trong khi màn đích có N nguồn: đúng vi phạm "Summary Count
+    // == Domain Visible Records" (ADR-TON-015). Đếm từ chính repo màn đích đọc,
+    // không dựng một chủ thứ hai cho cùng con số.
+    final businessInputRepo = ref.read(businessInputRepositoryProvider);
     final seeder = ref.read(sampleDataSeederProvider);
     final opportunitiesFuture = ref.read(generatedOpportunitiesProvider.future);
     // WTM-404 — đường xu hướng trên thẻ KPI đọc **Capability Context** của
@@ -179,7 +187,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       await ref.read(orderRepositoryProvider).loadAll(),
       DateTime.now(),
     );
-    final favorites = await favoritesStore.loadAll();
+    final inputs = await businessInputRepo.loadAll();
     final List<Opportunity> generated = await opportunitiesFuture;
     // WTM-210: the mission block reads the journey — one source for "today's
     // work". The tiles used to render goals wearing a mission label, so Home
@@ -199,7 +207,7 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
       inventory: context.inventory.productCount,
       consumer: context.customers.total,
       goals: goals,
-      producers: favorites.length,
+      producers: inputs.length,
       opportunities: generated,
       hasSamples: await seeder.hasSamples(),
       hasData: context.hasData,

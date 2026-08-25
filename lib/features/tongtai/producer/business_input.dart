@@ -143,6 +143,19 @@ class BusinessInput {
     updatedAt: updatedAt ?? this.updatedAt,
   );
 
+  /// The same record under a different id — the sample-seeding remap hook
+  /// (WTM-144/ADR-TON-014), so `kSampleBusinessInputs` fixtures pick up the
+  /// `sample-` prefix at seed time exactly like every other sample domain.
+  BusinessInput withId(String newId) => BusinessInput(
+    id: newId,
+    name: name,
+    kind: kind,
+    cadence: cadence,
+    expectedAmount: expectedAmount,
+    note: note,
+    updatedAt: updatedAt,
+  );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) || (other is BusinessInput && other.id == id);
@@ -196,3 +209,82 @@ class BusinessInputSummary {
 
   bool get isComplete => unknownCount == 0;
 }
+
+/// Bộ **nguồn đầu vào mẫu** cho doanh nghiệp demo (WTM-461 / ADR-TON-014).
+///
+/// Dogfood máy thật (2026-08-15) hiện Home *"Nguồn hàng: 0 đầu vào"* cạnh Kho
+/// 114 sản phẩm: bộ dữ liệu mẫu chưa gieo miền Business Input nào, nên demo kể
+/// chuyện cụt — một AI Business OS mà không có lấy một đầu vào để nói về chi
+/// phí. Bộ này lấp đúng miền đó, **nối logic với chi phí mẫu đã gieo**:
+///
+/// * `supplier` — nhà cung cấp hàng hoá, tiền nhập hàng (`productCost`, biến
+///   đổi theo doanh thu ⇒ `usageBased`, không phải cam kết cố định).
+/// * `provider` — AI trả theo token (`usageBased` ⇒ cam kết `null`, đúng kỷ
+///   luật *"chưa đủ dữ liệu để cộng"* của màn Nguồn hàng).
+/// * `infrastructure` — VPS hằng tháng + tên miền hằng năm.
+/// * `tooling` — Workspace hằng tháng + Canva hằng năm.
+/// * `people` — cộng tác viên đóng gói, ứng với chi phí nhân sự (`staff`).
+///
+/// Đủ **cả năm loại** [BusinessInputKind] và cả bốn nhịp [InputCadence], nên màn
+/// Nguồn hàng có một tổng cam kết thật **kèm** hai nguồn theo mức dùng chưa cộng
+/// vào — chính câu chuyện màn ấy được dựng để kể.
+///
+/// Id để **trần** (`input-…`); [SampleDataSeeder] gắn tiền tố `sample-` lúc gieo
+/// qua [BusinessInput.withId], y như mọi miền mẫu khác — một vòng đời, một
+/// đường xoá.
+const List<BusinessInput> kSampleBusinessInputs = [
+  BusinessInput(
+    id: 'input-supplier-xuong-may',
+    name: 'Xưởng may Thành Phát',
+    kind: BusinessInputKind.supplier,
+    cadence: InputCadence.usageBased,
+    note: 'Nhập hàng theo đơn — chi phí đổi theo lượng đặt, không cố định.',
+  ),
+  BusinessInput(
+    id: 'input-provider-workizen-ai',
+    name: 'Workizen AI (token)',
+    kind: BusinessInputKind.provider,
+    cadence: InputCadence.usageBased,
+    note: 'Trả theo lượng token dùng mỗi tháng.',
+  ),
+  BusinessInput(
+    id: 'input-infra-vps',
+    name: 'Máy chủ VPS',
+    kind: BusinessInputKind.infrastructure,
+    cadence: InputCadence.monthly,
+    expectedAmount: 250000,
+    note: 'Hạ tầng chạy nền cho cửa hàng online.',
+  ),
+  BusinessInput(
+    id: 'input-infra-domain',
+    name: 'Tên miền cửa hàng (.vn)',
+    kind: BusinessInputKind.infrastructure,
+    cadence: InputCadence.yearly,
+    expectedAmount: 850000,
+    note: 'Gia hạn tên miền hằng năm.',
+  ),
+  BusinessInput(
+    id: 'input-tooling-workspace',
+    name: 'Google Workspace',
+    kind: BusinessInputKind.tooling,
+    cadence: InputCadence.monthly,
+    expectedAmount: 150000,
+    note: 'Email và lưu trữ theo chỗ ngồi.',
+  ),
+  BusinessInput(
+    id: 'input-tooling-canva',
+    name: 'Canva Pro',
+    kind: BusinessInputKind.tooling,
+    cadence: InputCadence.yearly,
+    expectedAmount: 1200000,
+    note: 'Thiết kế ảnh sản phẩm, trả theo năm.',
+  ),
+  BusinessInput(
+    id: 'input-people-dong-goi',
+    name: 'Cộng tác viên đóng gói',
+    kind: BusinessInputKind.people,
+    cadence: InputCadence.monthly,
+    expectedAmount: 3000000,
+    note: 'Đóng gói và giao hàng cuối tuần.',
+  ),
+];

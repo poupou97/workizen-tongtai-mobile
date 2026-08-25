@@ -10,6 +10,8 @@ import '../journey/business_goal.dart' show kSampleBusinessGoals;
 import '../journey/business_goal_repository.dart';
 import '../orders/order.dart' show kSampleCustomerOrders;
 import '../orders/order_repository.dart';
+import '../producer/business_input.dart' show kSampleBusinessInputs;
+import '../producer/business_input_repository.dart';
 
 /// Every seeded sample record carries this id prefix (WTM-144/ADR-TON-014) —
 /// user-created records use UUIDs, so the prefix can never collide and
@@ -40,6 +42,7 @@ class SampleDataSeeder {
     required this.orders,
     required this.goals,
     required this.finance,
+    this.businessInputs,
   });
 
   final CustomerRepository customers;
@@ -47,6 +50,14 @@ class SampleDataSeeder {
   final OrderRepository orders;
   final BusinessGoalRepository goals;
   final FinanceRepository finance;
+
+  /// Miền **nguồn đầu vào** (Producer, ADR-TON-023) — WTM-461.
+  ///
+  /// Tuỳ chọn có chủ ý: hàng chục điểm dựng `SampleDataSeeder` trong test không
+  /// cần miền này, và bắt buộc chúng khai một repo chỉ để bỏ đi là churn thừa.
+  /// `null` ⇒ seed/xoá/đếm miền input **bỏ qua**; đường production
+  /// ([sampleDataSeederProvider]) luôn truyền repo thật nên demo được gieo đủ.
+  final BusinessInputRepository? businessInputs;
 
   static String _sampleId(String originalId) => '$kSampleIdPrefix$originalId';
 
@@ -85,6 +96,21 @@ class SampleDataSeeder {
     await finance.addAll([
       for (final t in kSampleTransactions) t.withId(_sampleId(t.id)),
     ]);
+    await seedBusinessInputs();
+  }
+
+  /// Gieo miền **nguồn đầu vào mẫu** (WTM-461). Tách riêng vì đường lịch sử
+  /// 12 tháng ([HistoricalDataSeeder]) gieo dữ liệu SINH RA của nó chứ không
+  /// gọi [seed], nên nó gọi thẳng hàm này để demo đủ miền — một chủ cho phép
+  /// gắn tiền tố `sample-`, tránh mỗi đường tự chép logic id.
+  ///
+  /// No-op khi [businessInputs] không được nối (setup test cũ/biên).
+  Future<void> seedBusinessInputs() async {
+    final repo = businessInputs;
+    if (repo == null) return;
+    await repo.upsertAll([
+      for (final i in kSampleBusinessInputs) i.withId(_sampleId(i.id)),
+    ]);
   }
 
   /// Removes every sample record across all repositories. User data (UUID ids)
@@ -114,6 +140,9 @@ class SampleDataSeeder {
     await products.deleteByIdPrefix(kSampleIdPrefix);
     await goals.deleteByIdPrefix(kSampleIdPrefix);
     await finance.deleteByIdPrefix(kSampleIdPrefix);
+    // Nguồn đầu vào mẫu không có khoá ngoại tới miền nào nên xoá lúc nào cũng
+    // được; giữ chung một lần quét `sample-` (WTM-461).
+    await businessInputs?.deleteByIdPrefix(kSampleIdPrefix);
   }
 
   /// Whether any sample record is currently present (drives the Home banner
@@ -125,6 +154,8 @@ class SampleDataSeeder {
     if (anySample(await products.loadAll())) return true;
     if (anySample(await orders.loadAll())) return true;
     if (anySample(await goals.loadAll())) return true;
-    return anySample(await finance.loadAll());
+    if (anySample(await finance.loadAll())) return true;
+    final inputs = businessInputs;
+    return inputs != null && anySample(await inputs.loadAll());
   }
 }

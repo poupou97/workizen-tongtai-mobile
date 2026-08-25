@@ -14,6 +14,11 @@ abstract class BusinessInputRepository {
   Future<void> upsertAll(Iterable<BusinessInput> inputs);
   Future<void> delete(String id);
 
+  /// Xoá mọi nguồn có id bắt đầu bằng [prefix] — đường xoá dữ liệu **mẫu**
+  /// (`sample-`) mà không đụng nguồn người bán tự nhập (id UUID). Cùng cơ chế
+  /// `deleteByIdPrefix` của các repository mẫu khác (ADR-TON-014 §4).
+  Future<void> deleteByIdPrefix(String prefix);
+
   /// Xoá sạch — dùng bởi Restore = Replace (ADR-TON-018).
   Future<void> deleteAll();
 }
@@ -86,6 +91,15 @@ class DriftBusinessInputRepository implements BusinessInputRepository {
   }
 
   @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    final businessId = await _workspace.ensureBusinessId(_db);
+    await (_db.delete(_db.businessInputsTable)..where(
+          (t) => t.businessId.equals(businessId) & t.id.like('$prefix%'),
+        ))
+        .go();
+  }
+
+  @override
   Future<void> deleteAll() async {
     final businessId = await _workspace.ensureBusinessId(_db);
     await (_db.delete(
@@ -132,6 +146,10 @@ class InMemoryBusinessInputRepository implements BusinessInputRepository {
   @override
   Future<void> delete(String id) async =>
       _inputs.removeWhere((i) => i.id == id);
+
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async =>
+      _inputs.removeWhere((i) => i.id.startsWith(prefix));
 
   @override
   Future<void> deleteAll() async => _inputs.clear();
