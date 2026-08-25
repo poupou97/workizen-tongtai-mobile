@@ -7,6 +7,13 @@ import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/orders/order.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
 
+/// Deliberately BRACE-UNBALANCED corrupt JSON (leading `}`). Lives at file
+/// scope, not inline in a test body: an unbalanced brace inside a string
+/// literal derails naive brace-matching scanners (the Runtime placebo scan)
+/// into truncating the test body mid-string and reading it as assertion-free
+/// (TESTING-BIBLE P-49).
+const corruptItemsJson = '}{ not json';
+
 /// WTM-125 — Orders (sales) persistence over Drift. Orders is an independent
 /// capability that OWNS revenue + line items (Founder G-2 / ADR-TON-010). Covers
 /// the Founder test set: round-trip, backward compatibility, corrupt-JSON
@@ -187,7 +194,7 @@ void main() {
 
   test('corrupt / empty items JSON never breaks a load', () async {
     await seedCustomer('c1');
-    await insertRawOrder(id: 'bad', customerId: 'c1', items: '}{ not json');
+    await insertRawOrder(id: 'bad', customerId: 'c1', items: corruptItemsJson);
     await insertRawOrder(id: 'empty', customerId: 'c1', items: '');
     await insertRawOrder(id: 'notarray', customerId: 'c1', items: '{"a":1}');
 

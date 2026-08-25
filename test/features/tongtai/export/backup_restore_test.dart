@@ -380,8 +380,11 @@ void main() {
     /// Seeds once, then proves a bad file changes nothing. Callers seed
     /// themselves when they need a backup of the seeded state first — finance
     /// is insert-only (`addAll`), so seeding twice is a UNIQUE violation, not
-    /// a no-op.
-    Future<void> expectUntouched(
+    /// a no-op. Returns the validation so each test ALSO asserts, in its own
+    /// body, WHICH problem the file was refused for — a test whose every
+    /// assertion hides inside a helper is illegible to review and to the
+    /// Runtime placebo scan alike (TESTING-BIBLE P-49).
+    Future<BackupValidation> expectUntouched(
       Future<BackupValidation> Function() run, {
       bool seed = true,
     }) async {
@@ -403,15 +406,27 @@ void main() {
         before,
         reason: 'restore must refuse a file that did not validate',
       );
+      return validation;
     }
 
     test('a v1 .ttbk is not a v2 backup', () async {
       final v1 = await fastCrypto.encryptArmored('id,ten\r\nc1,Lan\r\n', 'x');
-      await expectUntouched(() => service.validate(v1));
+      final validation = await expectUntouched(() => service.validate(v1));
+      // v1 has no v2 envelope — it must land in notABackup (on purpose, per
+      // the enum contract), not be half-parsed into something scarier.
+      expect(validation.firstProblem, BackupProblem.notABackup);
+      expect(
+        validation.manifest,
+        isNull,
+        reason: 'a v1 file has no v2 manifest to preview',
+      );
     });
 
     test('random text is not a backup', () async {
-      await expectUntouched(() => service.validate('xin chào'));
+      final validation = await expectUntouched(
+        () => service.validate('xin chào'),
+      );
+      expect(validation.firstProblem, BackupProblem.notABackup);
     });
 
     test('a newer format version is blocked, not guessed at', () async {
