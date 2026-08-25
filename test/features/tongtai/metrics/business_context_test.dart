@@ -66,6 +66,7 @@ void main() {
     int qty = 10,
     int reorder = 3,
     double price = 5000,
+    double? cost,
   }) => Product(
     id: id,
     sku: 'SKU-$id',
@@ -74,6 +75,7 @@ void main() {
     quantity: qty,
     pricePerUnit: price,
     reorderLevel: reorder,
+    costPrice: cost,
     updatedAt: DateTime(2026, 7, 1),
   );
 
@@ -168,17 +170,26 @@ void main() {
       expect(s.openCount, 2); // pending + confirmed
     });
 
-    test('InventorySummary counts stock health + value', () {
-      final s = InventorySummary.from([
-        product('p1', qty: 10, reorder: 3, price: 5000),
-        product('p2', qty: 2, reorder: 3, price: 1000),
-        product('p3', qty: 0, reorder: 3, price: 2000),
-      ]);
-      expect(s.productCount, 3);
-      expect(s.lowStockCount, 1);
-      expect(s.outOfStockCount, 1);
-      expect(s.stockValue, 52000);
-    });
+    test(
+      'InventorySummary counts stock health + cost-based value (WTM-455)',
+      () {
+        final s = InventorySummary.from([
+          product('p1', qty: 10, reorder: 3, price: 5000, cost: 3000), // 30000
+          product('p2', qty: 2, reorder: 3, price: 1000, cost: 400), //     800
+          product('p3', qty: 0, reorder: 3, price: 2000, cost: 500), //  hết → 0
+          product('p4', qty: 5, reorder: 3, price: 9000), //   thiếu giá vốn
+        ]);
+        expect(s.productCount, 4);
+        expect(s.lowStockCount, 1); // p2
+        expect(s.outOfStockCount, 1); // p3
+        // Giá VỐN, không phải giá bán: 10×3000 + 2×400 + 0 = 30800.
+        // Trước WTM-455 (giá bán) sẽ là 10×5000 + 2×1000 = 52000.
+        expect(s.stockValue, 30800);
+        // p4 còn tồn nhưng chưa khai giá vốn ⇒ đếm ra, KHÔNG nuốt vào tổng.
+        expect(s.unknownCostCount, 1);
+        expect(s.isPartial, isTrue);
+      },
+    );
 
     test(
       'OpportunitySummary counts active opportunities by rule-based signal',

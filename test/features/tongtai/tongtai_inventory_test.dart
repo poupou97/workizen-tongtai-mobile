@@ -16,6 +16,7 @@ void main() {
     int quantity = 10,
     double pricePerUnit = 1000,
     int reorderLevel = 5,
+    double? costPrice,
     DateTime? updatedAt,
   }) {
     return Product(
@@ -26,6 +27,7 @@ void main() {
       quantity: quantity,
       pricePerUnit: pricePerUnit,
       reorderLevel: reorderLevel,
+      costPrice: costPrice,
       updatedAt: updatedAt ?? DateTime(2026, 1, 1),
     );
   }
@@ -53,13 +55,42 @@ void main() {
       );
     });
 
-    test('stockValue is unit price times quantity', () {
-      expect(product(quantity: 4, pricePerUnit: 2500).stockValue, 10000);
-    });
-
     test('equality is by id', () {
       expect(product(id: 'same', name: 'A'), product(id: 'same', name: 'B'));
       expect(product(id: 'same').hashCode, product(id: 'same').hashCode);
+    });
+  });
+
+  group('Product.stockValue — giá VỐN, không phải giá bán (WTM-455)', () {
+    test('có giá vốn: costPrice × quantity, KHÔNG dùng giá bán', () {
+      expect(
+        product(quantity: 4, pricePerUnit: 2500, costPrice: 1500).stockValue,
+        6000, // 4 × 1500 giá vốn — trước WTM-455 công thức cho 4 × 2500 = 10000
+      );
+    });
+
+    test(
+      'còn tồn nhưng thiếu giá vốn: null (chưa tính được, KHÔNG phải 0)',
+      () {
+        expect(
+          product(quantity: 4, pricePerUnit: 2500).stockValue,
+          isNull,
+          reason:
+              'null ≠ 0: trả 0 sẽ khai khống một tổng thấp hơn sự thật, '
+              'mượn giá bán thì in ra vốn chưa từng bỏ (ADR-TON-022)',
+        );
+      },
+    );
+
+    test('hết tồn: 0 dù chưa khai giá vốn — 0 cái = 0 vốn, đã biết', () {
+      expect(product(quantity: 0, pricePerUnit: 2500).stockValue, 0);
+    });
+
+    test('giá vốn 0 (hàng tặng): vào tổng là 0, KHÔNG phải chưa-tính', () {
+      expect(
+        product(quantity: 5, pricePerUnit: 2500, costPrice: 0).stockValue,
+        0,
+      );
     });
   });
 
