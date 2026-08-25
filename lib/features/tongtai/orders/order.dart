@@ -21,12 +21,18 @@ class OrderItem {
     this.productId = '',
     this.sku = '',
     this.unit = '',
+    this.costPrice,
   });
 
   /// Builds a line from an inventory [product] (Founder WTM-126: order lines must
   /// reference an inventory product, never free text). Snapshots the product's
   /// identity and takes [soldPrice] — the *actual* sold price, which may override
   /// the inventory default [Product.pricePerUnit].
+  ///
+  /// Also snapshots [Product.costPrice] into [costPrice] at line-creation time
+  /// (WTM-454): the true profit of a historical order must not follow later
+  /// changes to the product's cost. If the product has no cost recorded, the
+  /// snapshot is `null` — "not recorded at sale", never `0`.
   factory OrderItem.fromProduct(
     Product product, {
     required int quantity,
@@ -40,6 +46,7 @@ class OrderItem {
     unit: unit,
     quantity: quantity,
     unitPrice: soldPrice ?? product.pricePerUnit,
+    costPrice: product.costPrice,
   );
 
   /// The inventory product this line references. Empty only for a legacy line
@@ -66,6 +73,22 @@ class OrderItem {
   /// immutable snapshot that never follows later inventory-price changes.
   final double unitPrice;
 
+  /// The product's **cost price per unit at sale time** (WTM-454) — the COGS
+  /// snapshot that makes a historical order's true profit immutable.
+  ///
+  /// **Nullable, and `null` means "not recorded at sale", never `0`** (the same
+  /// `null ≠ 0` discipline as [Product.costPrice], `paymentStatus` and
+  /// `channel`). It is `null` for:
+  /// - lines written before WTM-454 (decoded from disk/`.ttbk` with no key), and
+  /// - lines whose product had no cost recorded when the order was placed.
+  ///
+  /// Old orders are **not** back-filled: writing a guessed cost to disk would
+  /// turn a guess into a declaration (the WTM-282 provenance precedent). Consumers
+  /// (see `CommerceProfitContext.derive`) fall back to the *current*
+  /// [Product.costPrice] only when this snapshot is `null`, and that fallback is
+  /// explicit, not silent.
+  final double? costPrice;
+
   /// This line's total (quantity × sold price).
   double get lineTotal => quantity * unitPrice;
 
@@ -79,7 +102,8 @@ class OrderItem {
           other.category == category &&
           other.unit == unit &&
           other.quantity == quantity &&
-          other.unitPrice == unitPrice);
+          other.unitPrice == unitPrice &&
+          other.costPrice == costPrice);
 
   @override
   int get hashCode => Object.hash(
@@ -90,6 +114,7 @@ class OrderItem {
     unit,
     quantity,
     unitPrice,
+    costPrice,
   );
 }
 

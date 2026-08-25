@@ -258,7 +258,13 @@ class InMemoryOrderRepository implements OrderRepository {
 }
 
 /// Encodes order lines into the `orders_table.items` JSON array — the immutable
-/// business snapshot (productId/name/sku/unit/quantity/soldPrice) per line.
+/// business snapshot (productId/name/sku/unit/quantity/soldPrice/costPrice) per
+/// line.
+///
+/// `costPrice` (WTM-454) is a **new additive key**, not a schema migration: the
+/// column already stores JSON, so adding a key needs no `orders_table` change.
+/// The key is written even when `null` (a line with no cost snapshot) so the
+/// shape stays symmetric with the decoder; a `null` decodes back to `null`.
 String encodeOrderItems(List<OrderItem> items) => jsonEncode([
   for (final i in items)
     {
@@ -269,6 +275,7 @@ String encodeOrderItems(List<OrderItem> items) => jsonEncode([
       'unit': i.unit,
       'quantity': i.quantity,
       'unitPrice': i.unitPrice,
+      'costPrice': i.costPrice,
     },
 ]);
 
@@ -276,12 +283,17 @@ String encodeOrderItems(List<OrderItem> items) => jsonEncode([
 /// blobs and wrong element types — a bad blob yields `[]`, never a throw. New
 /// snapshot fields (productId/sku/unit) default to empty for legacy pre-WTM-126
 /// blobs, so old orders still load.
+///
+/// `costPrice` (WTM-454) decodes to `null` when the key is **absent** (a blob
+/// written before WTM-454) or not a number — "not recorded at sale", never `0`.
 List<OrderItem> decodeOrderItems(String? json) {
   if (json == null || json.isEmpty) return const [];
   try {
     final decoded = jsonDecode(json);
     if (decoded is! List) return const [];
     String str(Map e, String k) => e[k] is String ? e[k] as String : '';
+    double? dbl(Map e, String k) =>
+        e[k] is num ? (e[k] as num).toDouble() : null;
     return [
       for (final e in decoded)
         if (e is Map)
@@ -295,6 +307,7 @@ List<OrderItem> decodeOrderItems(String? json) {
             unitPrice: e['unitPrice'] is num
                 ? (e['unitPrice'] as num).toDouble()
                 : 0,
+            costPrice: dbl(e, 'costPrice'),
           ),
     ];
   } catch (_) {

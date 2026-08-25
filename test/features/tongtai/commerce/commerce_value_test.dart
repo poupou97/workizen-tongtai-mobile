@@ -227,6 +227,115 @@ void main() {
     });
   });
 
+  // ── WTM-454 · giá vốn chốt lúc bán (COGS snapshot) ────────────────────────
+
+  group('WTM-454 · costPrice snapshot on the order line', () {
+    // Một đơn với giá vốn ĐÃ chốt trên dòng — [snapshotCost] là con số lịch sử.
+    CustomerOrder orderWithSnapshot({
+      required String id,
+      required Product of,
+      required double? snapshotCost,
+    }) => CustomerOrder(
+      id: id,
+      customerId: 'c1',
+      orderNumber: id,
+      date: now.subtract(const Duration(days: 3)),
+      status: OrderStatus.delivered,
+      items: [
+        OrderItem(
+          productId: of.id,
+          productName: of.name,
+          sku: of.sku,
+          category: of.category,
+          quantity: 1,
+          unitPrice: of.pricePerUnit,
+          costPrice: snapshotCost,
+        ),
+      ],
+    );
+
+    double amountOf(CommerceProfitContext c) =>
+        (c.overall as ProfitKnown).amount;
+
+    test('sửa Product.costPrice KHÔNG đổi lời thật của đơn đã có snapshot', () {
+      // Bán khi giá vốn là 100.000 — dòng đơn giữ ảnh chụp đó.
+      final order = orderWithSnapshot(
+        id: 'o1',
+        of: product(id: 'p1'),
+        snapshotCost: 100000,
+      );
+
+      // Hôm nay người bán sửa giá vốn sản phẩm lên 240.000, rồi lên 999.000.
+      // Lời thật của đơn CŨ phải đứng yên theo ảnh chụp, không trôi theo.
+      final cheap = CommerceProfitContext.derive(
+        products: [product(id: 'p1', cost: 240000)],
+        orders: [order],
+        settlements: const [],
+        now: now,
+      );
+      final expensive = CommerceProfitContext.derive(
+        products: [product(id: 'p1', cost: 999000)],
+        orders: [order],
+        settlements: const [],
+        now: now,
+      );
+
+      // revenue 259.000 − COGS ĐÃ CHỐT 100.000 = 159.000, cả hai lần.
+      expect(amountOf(cheap), closeTo(159000, 1));
+      expect(amountOf(expensive), closeTo(159000, 1));
+      expect(
+        amountOf(cheap),
+        amountOf(expensive),
+        reason: 'giá vốn hiện tại đổi mà lời thật đơn cũ đổi theo = sai',
+      );
+    });
+
+    test(
+      'đơn CŨ (snapshot null) vẫn fallback sang Product.costPrice hiện tại',
+      () {
+        final legacyOrder = orderWithSnapshot(
+          id: 'o1',
+          of: product(id: 'p1'),
+          snapshotCost: null, // đơn tạo trước WTM-454
+        );
+
+        final context = CommerceProfitContext.derive(
+          products: [product(id: 'p1', cost: 240000)],
+          orders: [legacyOrder],
+          settlements: const [],
+          now: now,
+        );
+
+        // Không có ảnh chụp để giữ ⇒ dùng giá vốn hiện tại 240.000 (hành vi cũ).
+        expect(amountOf(context), closeTo(259000 - 240000, 1));
+      },
+    );
+
+    test(
+      'snapshot null + Product cũng không có giá vốn ⇒ vẫn TỪ CHỐI trả số',
+      () {
+        final context = CommerceProfitContext.derive(
+          products: [product(id: 'p1', cost: null)],
+          orders: [
+            orderWithSnapshot(
+              id: 'o1',
+              of: product(id: 'p1', cost: null),
+              snapshotCost: null,
+            ),
+          ],
+          settlements: const [],
+          now: now,
+        );
+
+        expect(context.overall, isA<ProfitInsufficient>());
+        expect(
+          (context.overall as ProfitInsufficient).blockers,
+          contains(ProfitBlocker.missingCost),
+        );
+      },
+    );
+  });
+
   // ── C5 · so sánh nhà cung cấp ────────────────────────────────────────────
 
   group('WTM-329 · so sánh nhà cung cấp', () {

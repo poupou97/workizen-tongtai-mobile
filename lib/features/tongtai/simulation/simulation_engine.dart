@@ -188,6 +188,9 @@ class SimulationEngine {
                   unitPrice:
                       (event.payload['unitPrice'] as num?)?.toDouble() ??
                       item.pricePerUnit,
+                  // WTM-454 — snapshot the catalogue product's cost so the demo's
+                  // true profit is realistic and stable; `null` if none recorded.
+                  costPrice: item.costPrice,
                 ),
               ],
               provenance: const Provenance.declared(ProvenanceSource.sample),

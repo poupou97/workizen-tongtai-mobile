@@ -1246,6 +1246,51 @@ dùng nó để chứng minh *sự vắng mặt* là biến một khẳng địn
 3. Ngược lại, `findsOneWidget` sau `pumpUntilFound`/`scrollUntilVisible` thì an
    toàn — cuộn tới được nghĩa là có thật.
 
+## P-49 · Test THẬT bị máy quét đọc thành placebo — assertion phải **hiện trong thân test**
+
+**Root-Cause.** Cổng placebo của Runtime (`ai-wf-runtime/src/evidence/placebo.ts`)
+quét **toàn bộ nội dung** mỗi file test *đã đổi* — không chỉ dòng thêm mới — và
+đọc Dart bằng regex + đếm ngoặc, không phải bằng parser. Hai vùng mù:
+
+1. **Assertion nằm trọn trong helper.** Thân test chỉ gọi
+   `expectUntouched(...)`; regex của cổng chỉ nhận
+   `expect(`/`verify(`/`expectLater(`/`throwsA(` **trực tiếp trong thân** ⇒
+   test bị đọc là "không có assertion".
+2. **Ngoặc lệch trong string literal.** Bộ đếm ngoặc không biết string:
+   `items: '}{ not json'` — dấu `}` *trong chuỗi* đóng thân test sớm, phần
+   được trích chỉ còn tới giữa chuỗi ⇒ cũng "không có assertion".
+
+**Regression.** WTM-454 chạm 4 file test (toàn test thật, có assertion) — verdict
+**FAIL, 3 placebo finding**: 2 test `expectUntouched` trong
+`backup_restore_test.dart` (vùng mù 1) + test corrupt-JSON trong
+`order_repository_test.dart` (vùng mù 2). Cả 3 đều là test **cũ** — file chỉ cần
+*bị chạm* là toàn bộ nội dung bị quét lại.
+
+**Test Pattern.** Sửa theo hướng làm test **mạnh hơn**, không phải lách cổng:
+
+* Helper khẳng định hộ nhiều test ⇒ cho helper **trả về** giá trị nó đã kiểm,
+  và mỗi thân test khẳng định thêm điều **riêng** của nó
+  (`expect(validation.firstProblem, BackupProblem.notABackup)`). Thân test tự
+  nói nó kiểm gì — người review đọc được, máy quét đọc được.
+* Literal cố ý lệch ngoặc (corrupt JSON, mẫu hỏng) ⇒ đưa ra **hằng file-scope**
+  có doc comment giải thích, thân test tham chiếu tên hằng.
+* Trước khi push file test: replay detector (chép 4 regex từ `placebo.ts` —
+  script mẫu đã dùng ở WTM-454) trên **mọi file test bị chạm**, phải ra 0.
+
+**Prevention Rule.** Một test mà **mọi** assertion đều khuất sau helper thì mù
+với cả người lẫn máy — luôn giữ ít nhất một `expect` *trong thân* nói lên điều
+riêng của test ấy. Và biết rằng cổng đọc code bằng regex: file test chỉ cần *bị
+chạm* là bị quét lại toàn bộ, nên nợ kiểu này nằm im cho đến đúng cái story
+chạm vào file — rồi nổ ở retry, không phải ở lần viết. Quét một lần toàn
+`test/` (2026-08-25) còn **14 điểm tiềm ẩn** ở 10 file chưa-bị-chạm — đã báo
+bug **AWR-223** cho repo runtime (dò bằng parser hoặc nhận diện helper
+`expect*`), **không**
+đi sửa 14 test thật để chiều một máy quét; nếu story tương lai chạm các file ấy
+trước khi cổng được sửa, sửa theo pattern này.
+
+Cùng họ P-45 (*cổng chỉ bắt thứ nó được viết để tìm*) — nhưng chiều ngược:
+P-45 là cổng **bỏ lọt** thứ xấu viết khác đi; P-49 là cổng **bắn nhầm** thứ tốt
+nó không đọc nổi. Cả hai đều là một máy đọc code bằng regex thay vì parser.
 
 ## Khi sửa bug mới — checklist
 
