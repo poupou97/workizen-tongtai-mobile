@@ -95,7 +95,8 @@ void main() {
       expect(find.text('28'), findsOneWidget); // products (seeded)
       // Journey tile: 2 seeded goals.
       expect(find.text('2'), findsWidgets);
-      // Producer counts persisted favourites — none seeded → 0 real.
+      // WTM-461: Producer counts Business Inputs now (the domain the tile
+      // opens) — none in this in-memory harness → 0 real, tile still renders.
       expect(find.text('Producer'), findsOneWidget);
     });
 

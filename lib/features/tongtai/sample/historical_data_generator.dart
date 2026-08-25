@@ -1727,6 +1727,12 @@ class HistoricalDataSeeder {
     await sampleSeeder.orders.upsertAll(data.orders);
     await sampleSeeder.goals.upsertAll(data.goals);
     await sampleSeeder.finance.addAll(data.transactions);
+    // WTM-461 — miền **nguồn đầu vào** không phải chuỗi thời gian nên bộ sinh
+    // không dựng nó; nó là các cam kết hiện tại (hạ tầng, công cụ, AI provider,
+    // người) đứng SAU cấu trúc chi phí vừa gieo ở trên. Đường lịch sử này bỏ
+    // qua `sampleSeeder.seed()`, nên phải gọi thẳng để demo "một nút" có đủ
+    // miền — nếu không, Home đếm đúng repo rồi vẫn hiện "0 đầu vào".
+    await sampleSeeder.seedBusinessInputs();
   }
 
   /// Removes every sample row — hand-written fixtures and generated history

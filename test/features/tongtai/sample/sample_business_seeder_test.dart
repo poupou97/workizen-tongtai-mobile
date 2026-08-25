@@ -17,6 +17,8 @@ import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/logistics/shipment_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/producer/business_input.dart';
+import 'package:tongtai/features/tongtai/producer/business_input_repository.dart';
 import 'package:tongtai/features/tongtai/sample/historical_data_generator.dart';
 import 'package:tongtai/features/tongtai/sample/sample_business_seeder.dart';
 import 'package:tongtai/features/tongtai/sample/sample_data_seeder.dart';
@@ -34,18 +36,21 @@ void main() {
   late DriftProductRepository products;
   late DriftCustomerRepository customers;
   late CommerceRepository commerce;
+  late DriftBusinessInputRepository businessInputs;
 
   setUp(() {
     db = AppDatabase.forExecutor(NativeDatabase.memory());
     products = DriftProductRepository(db);
     customers = DriftCustomerRepository(db);
     commerce = CommerceRepository(db);
+    businessInputs = DriftBusinessInputRepository(db);
     final samples = SampleDataSeeder(
       customers: customers,
       products: products,
       orders: DriftOrderRepository(db),
       goals: DriftBusinessGoalRepository(db),
       finance: DriftFinanceRepository(db),
+      businessInputs: businessInputs,
     );
     seeder = SampleBusinessSeeder(
       history: HistoricalDataSeeder(sampleSeeder: samples),
@@ -94,6 +99,55 @@ void main() {
       expect(all.where((p) => p.importJobId != null), hasLength(100));
       // …và báo giá nhà cung cấp, thứ mà lớp lịch sử KHÔNG sinh ra.
       expect(await commerce.loadQuotes(), isNotEmpty);
+    },
+  );
+
+  test(
+    '⭐ WTM-461 — nút demo gieo miền NGUỒN ĐẦU VÀO, đủ loại ADR-TON-023',
+    () async {
+      // Dogfood máy thật: Kho 114 sản phẩm mà Home hiện "Nguồn hàng: 0 đầu vào".
+      // Nguyên nhân là bộ mẫu chưa gieo BusinessInput nào — gate này chặn tái
+      // phạm: một nút demo mà không có lấy một đầu vào là demo kể chuyện cụt.
+      await seeder.seed();
+
+      final seeded = await businessInputs.loadAll();
+      expect(seeded, isNotEmpty, reason: 'demo phải có nguồn đầu vào');
+      // Mọi bản ghi mang tiền tố mẫu ⇒ "Xóa dữ liệu mẫu" gỡ đúng chúng.
+      for (final input in seeded) {
+        expect(input.id, startsWith(kSampleIdPrefix));
+      }
+      // Đủ CẢ NĂM loại (ADR-TON-023) — không loại nào rơi vào "Khác", đúng vấn
+      // đề dogfood tìm ra.
+      final kinds = {for (final i in seeded) i.kind};
+      expect(kinds, containsAll(BusinessInputKind.values));
+      // Câu chuyện tổng cam kết KÈM phần chưa biết: ít nhất một nguồn theo mức
+      // dùng (usageBased ⇒ không phải cam kết) để màn Nguồn hàng có "chưa tính".
+      final summary = BusinessInputSummary.from(seeded);
+      expect(summary.monthlyCommitment, greaterThan(0));
+      expect(summary.unknownCount, greaterThan(0));
+    },
+  );
+
+  test(
+    '⭐ WTM-461 — xoá mẫu gỡ luôn nguồn đầu vào, giữ nguồn người bán tự nhập',
+    () async {
+      await seeder.seed();
+      // Nguồn người bán tự nhập (id UUID, không tiền tố mẫu).
+      await businessInputs.upsert(
+        const BusinessInput(
+          id: 'a1b2c3d4-user-input',
+          name: 'Nhà cung cấp của tôi',
+          kind: BusinessInputKind.supplier,
+          cadence: InputCadence.monthly,
+          expectedAmount: 500000,
+        ),
+      );
+
+      await seeder.removeAll();
+
+      final remaining = await businessInputs.loadAll();
+      expect(remaining, hasLength(1));
+      expect(remaining.single.id, 'a1b2c3d4-user-input');
     },
   );
 

@@ -18,6 +18,7 @@ import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
 import 'package:tongtai/features/tongtai/inventory/product_repository.dart';
 import 'package:tongtai/features/tongtai/journey/business_goal_repository.dart';
 import 'package:tongtai/features/tongtai/orders/order_repository.dart';
+import 'package:tongtai/features/tongtai/producer/business_input_repository.dart';
 import 'package:tongtai/features/tongtai/producer/supplier_favorites_store.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_consumer_provider.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_context_provider.dart';
@@ -92,6 +93,7 @@ void main() {
       DriftBusinessGoalRepository goals,
       DriftFinanceRepository finance,
       SupplierFavoritesStore favorites,
+      DriftBusinessInputRepository businessInputs,
       SampleDataSeeder seeder,
     })
   >
@@ -105,6 +107,10 @@ void main() {
     final goals = DriftBusinessGoalRepository(database);
     final finance = DriftFinanceRepository(database);
     final favorites = DriftSupplierFavoritesStore(database);
+    // WTM-461: the Home producer tile reads businessInputRepositoryProvider,
+    // wired to tongtaiDatabaseProvider (memoryDb below). Seed through the SAME
+    // db so the tile, the domain screen and the repository are one source.
+    final businessInputs = DriftBusinessInputRepository(memoryDb());
     final app = ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(
@@ -139,12 +145,14 @@ void main() {
       goals: goals,
       finance: finance,
       favorites: favorites,
+      businessInputs: businessInputs,
       seeder: SampleDataSeeder(
         customers: customers,
         products: products,
         orders: orders,
         goals: goals,
         finance: finance,
+        businessInputs: businessInputs,
       ),
     );
   }
@@ -225,7 +233,12 @@ void main() {
     final expectedOrders = (await s1.orders.loadAll())
         .where((o) => o.status != OrderStatus.cancelled)
         .length;
+    // WTM-461: the producer tile counts Business Inputs (the domain its tap
+    // opens), not favourites — the seed populates them, so the tile is non-zero
+    // and equals the repository.
+    final expectedInputs = (await s1.businessInputs.loadAll()).length;
     expect(expectedCustomers, greaterThan(1)); // samples + user row
+    expect(expectedInputs, greaterThan(0)); // seed populates the input domain
 
     Future<void> verifyAllPairs(
       WidgetTester tester, {
@@ -238,7 +251,10 @@ void main() {
       expect(tileCount(tester, 'home-tile-consumer'), expectedCustomers);
       expect(tileCount(tester, 'home-tile-inventory'), expectedProducts);
       expect(tileCount(tester, 'home-tile-journey'), expectedGoals);
-      expect(tileCount(tester, 'home-tile-producer'), 1); // 1 favourite
+      // WTM-461: the producer tile == the Business Inputs it opens, NOT the
+      // favourites store (its old, Phase-1 source). The Producer NAV TAB below
+      // still shows favourites — that is a different screen from this tile.
+      expect(tileCount(tester, 'home-tile-producer'), expectedInputs);
       expect(
         find.descendant(
           of: find.byKey(const Key('home-kpi-orders')),
