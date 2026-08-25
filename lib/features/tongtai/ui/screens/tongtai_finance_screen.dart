@@ -13,6 +13,7 @@ import '../../finance/finance_summary.dart';
 import '../../finance/finance_transaction.dart';
 import '../../providers/tongtai_commerce_provider.dart';
 import '../../providers/tongtai_finance_provider.dart';
+import '../../providers/tongtai_orders_provider.dart';
 import '../widgets/tongtai_fox_mascot.dart';
 import '../widgets/tongtai_screen_data.dart';
 import '../widgets/tongtai_screen_header.dart';
@@ -60,9 +61,16 @@ class _TongtaiFinanceScreenState extends ConsumerState<TongtaiFinanceScreen> {
       // Real app: persistent Drift ledger (WTM-120), starts empty for new users.
       // The settlement book rides along read-only so the dashboard can flag
       // platform fees that sit in both books (WTM-460 / ADR-TON-024 §2).
+      //
+      // ⭐ WTM-462 — orders ride along too. Sales income + receivables are
+      // derived from orders (WTM-196/211), so a Finance screen without them read
+      // ₫0 income and never showed the receivables block — while Home's "Tài
+      // chính" tile, reading the same orders, showed a real receivables figure.
+      // One data path: the tile and the screen it opens now read one source.
       _controller = FinanceController(
         ref.read(financeRepositoryProvider),
         settlements: ref.read(settlementRepositoryProvider),
+        orders: ref.read(orderRepositoryProvider),
       );
       _ownsController = true;
     }
