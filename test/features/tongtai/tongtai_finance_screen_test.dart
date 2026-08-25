@@ -6,6 +6,7 @@ import 'package:tongtai/features/tongtai/core/tongtai_enums.dart';
 import 'package:tongtai/features/tongtai/finance/finance_controller.dart';
 import 'package:tongtai/features/tongtai/finance/finance_repository.dart';
 import 'package:tongtai/features/tongtai/finance/finance_transaction.dart';
+import 'package:tongtai/features/tongtai/finance/settlement.dart';
 import 'package:tongtai/features/tongtai/providers/tongtai_finance_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_finance_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_more_screen.dart';
@@ -161,5 +162,89 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  // ── WTM-460: platform fees living in both books at once ──────────────────
+  FinanceTransaction recordedFee() => FinanceTransaction(
+    id: 'f1',
+    type: TransactionType.expense,
+    category: FinanceCategory.platformFee,
+    amount: 300000,
+    date: DateTime(2026, 4, 20),
+    description: 'Phí sàn Shopee',
+  );
+
+  SettlementLine reconciledFee() => SettlementLine(
+    id: 's1',
+    orderId: 'o1',
+    kind: SettlementKind.platformFee,
+    direction: SettlementDirection.outbound,
+    amount: 50000,
+    currency: 'VND',
+    occurredAt: DateTime(2026, 4, 21),
+    fundedBy: FundingSource.seller,
+  );
+
+  testWidgets('flags platform fees sitting in both books (WTM-460)', (
+    tester,
+  ) async {
+    // A fee the seller typed in (Finance) *and* one from reconciliation
+    // (Settlement) in the same year — the coexistence the note must surface.
+    final controller = FinanceController.inMemory(
+      [recordedFee()],
+      [reconciledFee()],
+    );
+    addTearDown(controller.dispose);
+    await pump(tester, controller: controller);
+
+    final note = find.byKey(const Key('finance-fee-coexistence'));
+    await tester.scrollUntilVisible(
+      note,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(note, findsOneWidget);
+    // Counts, never a guessed duplicate pair (⛔ scope of WTM-460).
+    expect(
+      find.descendant(
+        of: note,
+        matching: find.textContaining('reconciliation'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('no coexistence note when only Finance holds a fee (WTM-460)', (
+    tester,
+  ) async {
+    final controller = FinanceController.inMemory([recordedFee()]);
+    addTearDown(controller.dispose);
+    await pump(tester, controller: controller);
+
+    expect(find.byKey(const Key('finance-fee-coexistence')), findsNothing);
+  });
+
+  testWidgets('no coexistence note when only reconciliation holds a fee', (
+    tester,
+  ) async {
+    // A settlement fee with no self-recorded fee: not a double-count, so
+    // silence. (The screen still needs some activity to leave the empty state,
+    // so pair it with a non-fee sale.)
+    final controller = FinanceController.inMemory(
+      [
+        FinanceTransaction(
+          id: 'sale',
+          type: TransactionType.income,
+          category: FinanceCategory.sales,
+          amount: 2000000,
+          date: DateTime(2026, 4, 10),
+        ),
+      ],
+      [reconciledFee()],
+    );
+    addTearDown(controller.dispose);
+    await pump(tester, controller: controller);
+
+    expect(find.byKey(const Key('finance-fee-coexistence')), findsNothing);
   });
 }

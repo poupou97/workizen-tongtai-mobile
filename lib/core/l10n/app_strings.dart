@@ -176,6 +176,10 @@ abstract class AppStrings {
   /// WTM-211 — money earned but not yet received.
   String get financeReceivablesTitle;
   String financeReceivablesBody(String amount, int debtors);
+
+  /// WTM-460 — platform fees sit in both books this period (reconciliation +
+  /// the seller's own rows). Says the counts; never guesses which pair overlaps.
+  String financeFeeCoexistence(int reconciled, int recorded);
   String get kpiExpense;
   String get kpiProfit;
   String get kpiMargin;
@@ -1557,6 +1561,10 @@ class AppStringsVi extends AppStrings {
   @override
   String financeReceivablesBody(String amount, int debtors) =>
       '$amount đang kẹt ở $debtors khách';
+  @override
+  String financeFeeCoexistence(int reconciled, int recorded) =>
+      'Kỳ này có $reconciled khoản phí sàn từ đối soát và $recorded khoản phí '
+      'sàn anh tự ghi — kiểm tra xem có trùng không.';
   @override
   String get kpiExpense => 'Chi phí';
   @override
@@ -3873,6 +3881,10 @@ class AppStringsEn extends AppStrings {
   @override
   String financeReceivablesBody(String amount, int debtors) =>
       '$amount stuck across $debtors customers';
+  @override
+  String financeFeeCoexistence(int reconciled, int recorded) =>
+      'This period has $reconciled platform fees from reconciliation and '
+      '$recorded you recorded yourself — check whether they overlap.';
   @override
   String get kpiExpense => 'Expense';
   @override

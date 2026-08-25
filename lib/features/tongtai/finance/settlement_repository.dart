@@ -251,3 +251,81 @@ class DriftSettlementRepository implements SettlementRepository {
     provenance: Provenance.fromStored(code: row.provenanceCode, id: row.id),
   );
 }
+
+/// In-memory source for tests (mutable, no database) — mirrors
+/// [InMemoryFinanceRepository]. Stores **exactly** what it is given; like every
+/// [SettlementRepository] it never spreads one line across items (ADR-TON-024
+/// §2, `settlement_no_derived_write_governance_test`).
+class InMemorySettlementRepository implements SettlementRepository {
+  InMemorySettlementRepository([
+    Iterable<SettlementLine> lines = const [],
+    Iterable<Payout> payouts = const [],
+  ]) : _lines = [...lines],
+       _payouts = [...payouts];
+
+  final List<SettlementLine> _lines;
+  final List<Payout> _payouts;
+
+  @override
+  Future<List<SettlementLine>> loadAll() async => List.of(_lines);
+
+  @override
+  Future<List<SettlementLine>> loadForOrder(String orderId) async =>
+      _lines.where((l) => l.orderId == orderId).toList();
+
+  @override
+  Future<List<SettlementLine>> loadForPayout(String payoutId) async =>
+      _lines.where((l) => l.payoutId == payoutId).toList();
+
+  @override
+  Future<void> upsert(SettlementLine line) async {
+    _lines
+      ..removeWhere((l) => l.id == line.id)
+      ..add(line);
+  }
+
+  @override
+  Future<void> upsertAll(Iterable<SettlementLine> lines) async {
+    for (final l in lines) {
+      await upsert(l);
+    }
+  }
+
+  @override
+  Future<List<Payout>> loadPayouts() async => List.of(_payouts);
+
+  @override
+  Future<void> upsertPayout(Payout payout) async {
+    _payouts
+      ..removeWhere((p) => p.id == payout.id)
+      ..add(payout);
+  }
+
+  @override
+  Future<void> recordReconciliation(String payoutId, double delta) async {
+    final index = _payouts.indexWhere((p) => p.id == payoutId);
+    if (index == -1) return;
+    final p = _payouts[index];
+    _payouts[index] = Payout(
+      id: p.id,
+      connectionId: p.connectionId,
+      amount: p.amount,
+      currency: p.currency,
+      settledAt: p.settledAt,
+      reconciledDelta: delta,
+      provenance: p.provenance,
+    );
+  }
+
+  @override
+  Future<void> deleteByIdPrefix(String prefix) async {
+    _lines.removeWhere((l) => l.id.startsWith(prefix));
+    _payouts.removeWhere((p) => p.id.startsWith(prefix));
+  }
+
+  @override
+  Future<void> deleteAll() async {
+    _lines.clear();
+    _payouts.clear();
+  }
+}
