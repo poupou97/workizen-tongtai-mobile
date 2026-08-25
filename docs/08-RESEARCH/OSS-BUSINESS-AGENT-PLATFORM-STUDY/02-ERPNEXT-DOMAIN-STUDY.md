@@ -211,13 +211,28 @@ Không có đường nào đi ngược.
   theo tổ hợp (`item_code`, `price_list`, `uom`, `packing_unit`,
   `customer`/`supplier`, `valid_from`/`valid_upto`, `batch_no` — đọc từ
   `item_price.json`). Price List mang cờ `buying`/`selling` + `currency`.
+- Chi tiết đáng chú ý (trace bổ sung): Item Price **không có `min_qty`** — bậc
+  thang theo số lượng là việc của Pricing Rule (`min_qty`/`max_qty` trên
+  `accounts/doctype/pricing_rule/`); `packing_unit` là *bội số đóng gói* (giá
+  chỉ áp khi `qty % packing_unit == 0` — `check_packing_list`,
+  get_item_details.py:1410). Đường đọc giá khi tạo chứng từ:
+  `get_item_details()` (get_item_details.py:80) → `get_price_list_rate()`
+  (:1135) → `get_price_list_rate_for()` (:1364) → `get_item_price()` (:1292),
+  có **fallback lên giá của template** khi variant chưa có giá riêng, rồi mới
+  tới Pricing Rule (`get_pricing_rule_for_item`, pricing_rule.py:412).
+- Pricing Rule resolve theo thứ tự **Item Code → Item Group → Brand** (cụ thể
+  thắng chung — `get_pricing_rules`, pricing_rule/utils.py:26), rule ở node
+  cha của cây Item Group lan xuống con qua `_get_tree_conditions()` (utils.py:187,
+  khai thác lft/rgt NestedSet), mặc định **đúng một rule thắng** trừ khi mọi
+  rule bật `apply_multiple_pricing_rules`. Công thức chốt trong
+  `taxes_and_totals.py`: `rate = price_list_rate × (1 + margin%) − discount_amount`
+  (`get_rate_with_margin`, taxes_and_totals.py:1227).
 - **CONCLUSION:** "giá" trong ERP không phải một cột trên Item — nó là **một bản
-  ghi có ngữ cảnh** (mua hay bán, cho ai, đơn vị nào, hiệu lực bao giờ). Giá
-  mua theo cặp item–supplier của Supplier Quotation và Item Price
+  ghi có ngữ cảnh** (mua hay bán, cho ai, đơn vị nào, hiệu lực bao giờ), và giá
+  cuối cùng là một **pipeline có thứ tự cố định**: Item Price → fallback
+  template → fallback default price list → Pricing Rule → margin → discount.
+  Giá mua theo cặp item–supplier của Supplier Quotation và Item Price
   (`supplier` field) là hai lớp của cùng nguyên tắc.
-- ⚠️ chưa trace sâu: `erpnext/stock/get_item_details.py` (thứ tự ưu tiên
-  price list → pricing rule khi điền giá vào chứng từ) và toàn bộ
-  `pricing_rule/` (discount theo nhóm/brand/số lượng).
 
 ## 4. Stock — sổ kho bất biến và mọi thứ khác là dẫn xuất
 
@@ -317,11 +332,28 @@ Không có đường nào đi ngược.
   `update_prevdoc_status()` (đẩy per_billed về SO/DN) → nếu `update_stock == 1`
   thì `update_stock_ledger()` (POS/bán lẻ: **hoá đơn kiêm xuất kho, không cần
   DN**) → `make_gl_entries()` → `repost_future_sle_and_gle()`.
-- Trả hàng: chứng từ mang `is_return` + `return_against` (thấy trong cả hai
-  status_map); qty buộc **âm** khi `is_return` (`validate_qty`,
-  status_updater.py:295). ⚠️ chưa trace sâu:
-  `erpnext/controllers/sales_and_purchase_return.py` (`make_return_doc`, chặn
-  trả quá số đã mua) và credit limit của Customer.
+- Chi tiết đo lường: `per_billed` tính theo **amount** (`Sales Invoice Item.amount`
+  → `Sales Order Item.billed_amt` — cấu hình `status_updater` trong
+  `SalesInvoice.__init__`, sales_invoice.py:263), còn `per_delivered` tính theo
+  **qty** (`DeliveryNote.__init__`, delivery_note.py:160) — giao là chuyện *số
+  lượng*, thu tiền là chuyện *giá trị*, hai đơn vị đo khác nhau cho hai nghĩa vụ.
+  Phần trăm dùng `min(done, ordered)` nên over-delivery không đẩy vượt 100
+  (`_calculate_target_parent_percentage`, status_updater.py:607).
+- SO/DN có **bắt buộc hay không là chính sách**: `SalesInvoice.so_dn_required()`
+  (sales_invoice.py:859) chỉ chặn khi `Selling Settings.so_required/dn_required
+  == "Yes"` — **mặc định "No"** (`setup/setup_wizard/operations/install_fixtures.py:366`),
+  và từng Customer override được (`Customer.so_required/dn_required`).
+- Trả hàng (`erpnext/controllers/sales_and_purchase_return.py`): return dùng
+  **cùng doctype** với bản gốc, `is_return=1` + **qty buộc âm**
+  (`validate_quantity`, dòng 192 — `StockOverReturnError` khi |qty| vượt
+  `qty gốc − đã trả`); `return_against` là **tuỳ chọn** — có thì validate chặt
+  (party khớp, posting date sau bản gốc, cùng exchange rate), không có thì là
+  credit note tự do; return luôn `ignore_pricing_rule=1` (`make_return_doc`,
+  dòng 450→468).
+- Credit limit: **không phải một cột trên Customer** — child table
+  `Customer Credit Limit` per-company, cascade ba tầng Customer → Customer
+  Group → Company (`get_credit_limit`, selling/doctype/customer/customer.py:801);
+  `check_credit_limit` (customer.py:514) chạy ở on_submit của cả SO, DN và SI.
 - Payment: xem §6 — điểm cốt lõi là hoá đơn **không giữ** số tiền đã thu; nó chỉ
   có `outstanding_amount` là **cache dẫn xuất từ sổ**.
 - **CONCLUSION:** cả trả hàng lẫn thu tiền đều là **chứng từ mới trỏ về chứng từ
@@ -377,10 +409,14 @@ Không có đường nào đi ngược.
   `voucher` vs `against_voucher`, `amount`) — sinh tự động **bên trong**
   `make_gl_entries` (dòng 56-64), tồn tại để truy vấn công nợ nhanh;
   `update_voucher_outstanding()` (accounts/utils.py:2175) đọc nó qua
-  `QueryPaymentLedger`. Payment Entry phân bổ tiền vào từng hoá đơn qua child
-  table `references` (allocated_amount) ⇒ đổ về GL với `against_voucher` ⇒
-  outstanding tự đổi. ⚠️ chưa trace sâu: Payment Reconciliation UI-flow
-  (`payment_reconciliation.py` — đã thấy `get_unreconciled_entries()`).
+  `QueryPaymentLedger`. CALL PATH tự động đầy đủ: `PaymentEntry.on_submit()`
+  (payment_entry.py:203) → `make_gl_entries()` →
+  `create_payment_ledger_entry()` → hook `PaymentLedgerEntry.on_update()`
+  (payment_ledger_entry.py:158) → `update_voucher_outstanding()` →
+  `ref_doc.set_status(update=True)` — trạng thái Paid/Partly Paid/Unpaid của
+  hoá đơn **kéo theo từ sổ**, không ai đặt tay. Payment Entry phân bổ tiền vào
+  từng hoá đơn qua child table `references` (`allocated_amount`, chi tiết tới
+  mức Payment Term), và `on_submit` **throw nếu `difference_amount != 0`**.
 - **CONCLUSION:** ERPNext chống "Business Truth thứ hai" bằng đúng một nguyên
   tắc lặp đi lặp lại: **sổ là sự thật, mọi con số tiện dụng (outstanding, Bin,
   per_billed, status) là cache dẫn xuất có công thức và có đường tính lại từ
@@ -420,10 +456,20 @@ Không có đường nào đi ngược.
 
 ## 9. Ghi chú điều tra
 
-- Ở SHA này ERPNext đang refactor GL/SLE composition ra tầng service
-  (`erpnext/stock/services/`, `erpnext/accounts/services/base_gl_composer.py`) —
-  tài liệu cộng đồng cũ mô tả `get_gl_entries` nằm thẳng trong từng doctype;
-  **code tại SHA thắng** (đúng luật "live system wins").
-- Các vùng đánh dấu ⚠️ (pricing rule, taxes_and_totals, return internals,
-  credit limit, RFQ→SQ map, Payment Reconciliation flow) chưa trace sâu — kết
-  luận nào trong `03-` cần tới chúng đều đã ghi kèm giới hạn này.
+- Ở SHA này ERPNext đang refactor lớn (kiểu v16-dev): GL/SLE composition tách ra
+  tầng service (`erpnext/stock/services/`,
+  `erpnext/accounts/services/base_gl_composer.py`), và **các hàm map `make_*`
+  tách khỏi file doctype sang `mapper.py` cùng thư mục** — ví dụ
+  `make_delivery_note` nằm ở `selling/doctype/sales_order/mapper.py:232`,
+  `make_sales_invoice` ở `mapper.py:432`, không còn trong `sales_order.py`.
+  Tài liệu cộng đồng cũ mô tả khác; **code tại SHA thắng** (đúng luật "live
+  system wins").
+- Inclusive tax (thuế nằm trong giá in): `determine_exclusive_rate()`
+  (taxes_and_totals.py:308) **giải ngược hệ affine**
+  `amount = net × (1 + slope) + intercept` để bóc thuế ra khỏi giá — thứ tự
+  pipeline `determine_exclusive_rate → calculate_net_total → calculate_taxes`
+  là bắt buộc. Ghi nhận để hiểu độ sâu của bài toán thuế; ngoài phạm vi SME
+  Phase 2.
+- Vùng còn đánh dấu ⚠️ chưa trace sâu: hàm map RFQ→Supplier Quotation và
+  Payment Reconciliation UI-flow — không kết luận nào trong `03-` đứng trên
+  hai vùng này.

@@ -81,25 +81,25 @@ nộp kèm `snapshotId` — lệnh trên snapshot cũ bị từ chối
 title: "SOURCE EVIDENCE — TaskRunExecutionStatus state machine (run-engine @ cc69ff4)"
 ---
 stateDiagram-v2
-    [*] --> RUN_CREATED: engine.trigger()\nindex.ts:813
-    RUN_CREATED --> QUEUED: enqueueSystem.enqueueRun\n(snapshot QUEUED, consts.ts)
-    RUN_CREATED --> DELAYED: delayUntil set\ndelayedRunSystem
-    DELAYED --> QUEUED: job enqueueDelayedRun\n(redis-worker)
-    QUEUED --> PENDING_EXECUTING: dequeueSystem.dequeueFromWorkerQueue\n(supervisor long-poll)
-    PENDING_EXECUTING --> EXECUTING: runAttemptSystem.startRunAttempt\n(attempt+1 + snapshot CÙNG 1 tx)
-    PENDING_EXECUTING --> QUEUED: heartbeat timeout 60s\n#handleStalledSnapshot → tryNackAndRequeue
+    [*] --> RUN_CREATED: engine.trigger() — index.ts:813
+    RUN_CREATED --> QUEUED: enqueueSystem.enqueueRun — snapshot QUEUED (consts.ts)
+    RUN_CREATED --> DELAYED: delayUntil set — delayedRunSystem
+    DELAYED --> QUEUED: job enqueueDelayedRun (redis-worker)
+    QUEUED --> PENDING_EXECUTING: dequeueSystem.dequeueFromWorkerQueue — supervisor long-poll
+    PENDING_EXECUTING --> EXECUTING: runAttemptSystem.startRunAttempt — attempt+1 và snapshot CÙNG 1 tx
+    PENDING_EXECUTING --> QUEUED: heartbeat timeout 60s — handleStalledSnapshot → tryNackAndRequeue
     EXECUTING --> EXECUTING_WITH_WAITPOINTS: waitpointSystem.blockRunWithWaitpoint
-    EXECUTING_WITH_WAITPOINTS --> EXECUTING: continueRunIfUnblocked\n(còn warm, notify worker)
-    EXECUTING_WITH_WAITPOINTS --> SUSPENDED: checkpointSystem.createCheckpoint\n(CPU/RAM snapshot đã lưu ngoài DB)
-    SUSPENDED --> QUEUED: continueRunIfUnblocked\n(re-enqueue để restore)
-    QUEUED_EXECUTING --> EXECUTING: dequeue tiếp tục run\ndequeueSystem (không lấy được concurrency thì xếp lại hàng)
-    EXECUTING --> QUEUED: attemptFailed → retry\nmethod="queue" (retrying.ts)
-    EXECUTING --> EXECUTING: attemptFailed → retry\nmethod="immediate"
-    EXECUTING --> PENDING_CANCEL: cancelRun (đang chạy)\n+ sendNotificationToWorker
-    PENDING_CANCEL --> FINISHED: worker báo đã kill\ncompleteRunAttempt
-    EXECUTING --> FINISHED: attemptSucceeded\n(COMPLETED_SUCCESSFULLY)
-    EXECUTING --> FINISHED: attemptFailed → fail_run\n(#permanentlyFailRun)
-    QUEUED --> FINISHED: ttlSystem.expireRun\n(EXPIRED) / cancelRun khi chưa chạy
+    EXECUTING_WITH_WAITPOINTS --> EXECUTING: continueRunIfUnblocked — còn warm, notify worker
+    EXECUTING_WITH_WAITPOINTS --> SUSPENDED: checkpointSystem.createCheckpoint — CPU/RAM snapshot đã lưu ngoài DB
+    SUSPENDED --> QUEUED: continueRunIfUnblocked — re-enqueue để restore
+    QUEUED_EXECUTING --> EXECUTING: dequeue tiếp tục run — dequeueSystem
+    EXECUTING --> QUEUED: attemptFailed → retry method queue (retrying.ts)
+    EXECUTING --> EXECUTING: attemptFailed → retry method immediate
+    EXECUTING --> PENDING_CANCEL: cancelRun khi đang chạy + sendNotificationToWorker
+    PENDING_CANCEL --> FINISHED: worker báo đã kill — completeRunAttempt
+    EXECUTING --> FINISHED: attemptSucceeded — COMPLETED_SUCCESSFULLY
+    EXECUTING --> FINISHED: attemptFailed → fail_run — permanentlyFailRun
+    QUEUED --> FINISHED: ttlSystem.expireRun (EXPIRED) hoặc cancelRun khi chưa chạy
     FINISHED --> [*]
 ```
 
