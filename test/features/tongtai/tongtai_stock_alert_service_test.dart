@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/commerce/commerce_models.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_inventory_service.dart';
 import 'package:tongtai/features/tongtai/inventory/stock_alert_service.dart';
@@ -129,5 +130,97 @@ void main() {
     // p03 (qty 0), p09 (qty 0), p16 (qty 0), p25 (qty 0) are out of stock.
     expect(service.outOfStockCount, 4);
     expect(service.totalCount, greaterThan(service.outOfStockCount));
+  });
+
+  group('alertsWithReorder (WTM-456)', () {
+    final now = DateTime(2026, 8, 25);
+
+    SupplierQuote quote({
+      required String id,
+      required String productId,
+      required double unitCost,
+      int? leadTimeDays = 7,
+      double? minimumOrderQuantity = 10,
+      DateTime? quotedAt,
+    }) => SupplierQuote(
+      id: id,
+      productId: productId,
+      supplierName: 'Nguồn $id',
+      unitCost: unitCost,
+      leadTimeDays: leadTimeDays,
+      minimumOrderQuantity: minimumOrderQuantity,
+      quotedAt: quotedAt ?? DateTime(2026, 8, 10),
+    );
+
+    test('same set and order as alerts, regardless of quotes', () {
+      final service = StockAlertService([
+        product(id: 'out', quantity: 0, reorderLevel: 10),
+        product(id: 'low', quantity: 5, reorderLevel: 10),
+      ]);
+      final enriched = service.alertsWithReorder(const {}, now: now);
+      expect(
+        enriched.map((a) => a.product.id).toList(),
+        service.alerts.map((a) => a.product.id).toList(),
+      );
+    });
+
+    test('a product with a qualifying quote carries reorder advice', () {
+      final service = StockAlertService([
+        product(id: 'low', quantity: 4, reorderLevel: 10), // shortfall 6
+      ]);
+      final enriched = service.alertsWithReorder({
+        'low': [
+          quote(id: 'q1', productId: 'low', unitCost: 100, leadTimeDays: 12),
+        ],
+      }, now: now);
+
+      final advice = enriched.single.reorder;
+      expect(advice, isNotNull);
+      // shortfall 6 < MOQ 10 ⇒ lifted to the MOQ.
+      expect(advice!.orderQuantity, 10);
+      expect(advice.leadTimeDays, 12);
+      expect(advice.quoteAgeDays, 15); // 2026-08-10 → 2026-08-25
+    });
+
+    test(
+      'a product with NO quote keeps the bare alert (behaviour unchanged)',
+      () {
+        final service = StockAlertService([
+          product(id: 'low', quantity: 4, reorderLevel: 10),
+        ]);
+        final enriched = service.alertsWithReorder(const {}, now: now);
+        expect(enriched.single.reorder, isNull);
+        // Identity and the fields the old screen read are untouched.
+        expect(enriched.single, service.alerts.single);
+        expect(enriched.single.shortfall, 6);
+      },
+    );
+
+    test('a product whose only quote is incomplete keeps the bare alert', () {
+      final service = StockAlertService([
+        product(id: 'low', quantity: 4, reorderLevel: 10),
+      ]);
+      final enriched = service.alertsWithReorder({
+        'low': [
+          quote(id: 'q1', productId: 'low', unitCost: 100, leadTimeDays: null),
+        ],
+      }, now: now);
+      expect(enriched.single.reorder, isNull);
+    });
+
+    test('quotes are matched to their own product, not shared', () {
+      final service = StockAlertService([
+        product(id: 'a', quantity: 0, reorderLevel: 5),
+        product(id: 'b', quantity: 2, reorderLevel: 5),
+      ]);
+      // Only product 'a' has a quote; 'b' must not borrow it.
+      final enriched = service.alertsWithReorder({
+        'a': [quote(id: 'qa', productId: 'a', unitCost: 100)],
+      }, now: now);
+
+      final byId = {for (final a in enriched) a.product.id: a};
+      expect(byId['a']!.reorder, isNotNull);
+      expect(byId['b']!.reorder, isNull);
+    });
   });
 }

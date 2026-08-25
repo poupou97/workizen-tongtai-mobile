@@ -1,4 +1,6 @@
+import '../commerce/commerce_models.dart';
 import 'product.dart';
+import 'reorder_advice.dart';
 import 'stock_alert.dart';
 
 /// Stock-level alert engine (WTM-70): given the current product catalog it
@@ -42,6 +44,30 @@ class StockAlertService {
     );
     if (byName != 0) return byName;
     return a.product.id.compareTo(b.product.id);
+  }
+
+  /// The same [alerts] — same set, same order — but each carries a
+  /// [ReorderAdvice] when a qualifying supplier quote exists for its product
+  /// (WTM-456). Products with no qualifying quote keep the bare alert unchanged:
+  /// no lead time borrowed from another product, none averaged across suppliers.
+  ///
+  /// [quotesByProduct] is keyed by `productId`; a missing key means "no quotes
+  /// for this product", which is not the same as an empty answer — it is why the
+  /// alert stays as it was. [now] is injected so the quote age is deterministic.
+  List<StockAlert> alertsWithReorder(
+    Map<String, List<SupplierQuote>> quotesByProduct, {
+    required DateTime now,
+  }) {
+    return [
+      for (final alert in alerts)
+        alert.withReorder(
+          ReorderAdvice.forShortfall(
+            alert.shortfall,
+            quotesByProduct[alert.product.id] ?? const [],
+            now: now,
+          ),
+        ),
+    ];
   }
 
   /// Alerts for products that are completely out of stock.

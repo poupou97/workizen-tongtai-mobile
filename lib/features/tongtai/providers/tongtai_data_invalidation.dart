@@ -106,6 +106,11 @@ final List<ProviderOrFamily> kBusinessDataProviders = <ProviderOrFamily>[
   // chú ý" cho tới lần mở app sau.
   commerceProfitProvider,
   commerceOpportunitiesProvider,
+  // Báo giá NCC gom theo sản phẩm (WTM-456) — nguồn cho gợi ý "đặt bao nhiêu ·
+  // chờ bao lâu" trên cảnh báo tồn kho. Một lần nhập, đặt lại demo hoặc restore
+  // đổi hết báo giá; thiếu ở đây thì cảnh báo tồn kho vẫn gợi ý theo báo giá cũ
+  // của doanh nghiệp trước cho tới lần mở app sau.
+  quotesByProductProvider,
   // Chuyến giao hàng (WTM-323) — một lần nhập hoặc một lần đặt lại demo đổi
   // hết. Thiếu ở đây thì sau khi nhập, brief vẫn nói kiện cũ đứng im.
   shipmentConcernsProvider,

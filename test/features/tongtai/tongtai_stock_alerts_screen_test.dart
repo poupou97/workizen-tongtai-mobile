@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tongtai/features/tongtai/commerce/commerce_models.dart';
 import 'package:tongtai/features/tongtai/inventory/inventory_tone.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tongtai/features/tongtai/inventory/product.dart';
 import 'package:tongtai/features/tongtai/inventory/product_catalog_controller.dart';
 import 'package:tongtai/features/tongtai/inventory/product_image_source.dart';
 import 'package:tongtai/features/tongtai/inventory/stock_alert.dart';
+import 'package:tongtai/features/tongtai/providers/tongtai_commerce_provider.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_inventory_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_product_form_screen.dart';
 import 'package:tongtai/features/tongtai/ui/screens/tongtai_stock_alerts_screen.dart';
@@ -50,7 +52,17 @@ void main() {
   // WTM-225: the screen reads the generated opportunities so a low-stock row
   // can lead on to the restock case the engine already made — so it is a
   // Consumer now and needs a scope.
-  Widget alertsHost(ProductCatalogController catalog) => ProviderScope(
+  Widget alertsHost(
+    ProductCatalogController catalog, {
+    Map<String, List<SupplierQuote>>? quotesByProduct,
+  }) => ProviderScope(
+    overrides: [
+      // Deterministic quote source (WTM-456): the default provider would read
+      // the real database, so tests pin it — an empty map means "no quotes".
+      quotesByProductProvider.overrideWith(
+        (ref) async => quotesByProduct ?? const {},
+      ),
+    ],
     child: MaterialApp(
       home: TongtaiStockAlertsScreen(
         catalog: catalog,
@@ -217,6 +229,96 @@ void main() {
     expect(find.byKey(const Key('inventory-open-stock-alerts')), findsNothing);
     expect(find.byKey(const Key('inventory-lowstock-ok')), findsNothing);
   });
+
+  testWidgets(
+    'a low-stock row with a qualifying quote shows reorder advice (WTM-456)',
+    (tester) async {
+      useTallViewport(tester);
+      final catalog = ProductCatalogController.inMemory([
+        // shortfall 7; MOQ 10 ⇒ order lifted to 10.
+        product(id: 'low', name: 'Low Item', quantity: 3, reorderLevel: 10),
+      ]);
+      await catalog.hydrate();
+      await tester.pumpWidget(
+        alertsHost(
+          catalog,
+          quotesByProduct: {
+            'low': [
+              SupplierQuote(
+                id: 'q1',
+                productId: 'low',
+                supplierName: 'Xưởng A',
+                unitCost: 100,
+                leadTimeDays: 12,
+                minimumOrderQuantity: 10,
+                quotedAt: DateTime(2026, 8, 10),
+              ),
+            ],
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // All three learnt facts are on the row, each keyed to the product.
+      expect(find.byKey(const Key('stock-reorder-qty-low')), findsOneWidget);
+      expect(find.byKey(const Key('stock-reorder-lead-low')), findsOneWidget);
+      expect(find.byKey(const Key('stock-reorder-age-low')), findsOneWidget);
+      // The deterministic ones (age depends on the wall clock) read as expected.
+      expect(find.text('Order 10'), findsOneWidget);
+      expect(find.text('12 days to arrive'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'a low-stock row with no quote shows no reorder advice (unchanged)',
+    (tester) async {
+      useTallViewport(tester);
+      final catalog = ProductCatalogController.inMemory([
+        product(id: 'low', name: 'Low Item', quantity: 3, reorderLevel: 10),
+      ]);
+      await catalog.hydrate();
+      // Empty quote map ⇒ the row must read exactly as it did before WTM-456.
+      await tester.pumpWidget(alertsHost(catalog, quotesByProduct: const {}));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Low Item'), findsOneWidget);
+      expect(find.byKey(const Key('stock-reorder-qty-low')), findsNothing);
+      expect(find.byKey(const Key('stock-reorder-lead-low')), findsNothing);
+      expect(find.byKey(const Key('stock-reorder-age-low')), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'an incomplete quote (missing lead time) yields no advice (WTM-456)',
+    (tester) async {
+      useTallViewport(tester);
+      final catalog = ProductCatalogController.inMemory([
+        product(id: 'low', name: 'Low Item', quantity: 3, reorderLevel: 10),
+      ]);
+      await catalog.hydrate();
+      await tester.pumpWidget(
+        alertsHost(
+          catalog,
+          quotesByProduct: {
+            'low': [
+              SupplierQuote(
+                id: 'q1',
+                productId: 'low',
+                supplierName: 'Xưởng A',
+                unitCost: 100,
+                leadTimeDays: null, // half a quote ⇒ not a candidate
+                minimumOrderQuantity: 10,
+                quotedAt: DateTime(2026, 8, 10),
+              ),
+            ],
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('stock-reorder-qty-low')), findsNothing);
+    },
+  );
 
   test('tongtaiStockAlertColor maps each level to its token', () {
     expect(
