@@ -24,7 +24,7 @@
 | Models | `app/Models/` | People · Company · Opportunity/Deal · Task … |
 | Actions/Services | `app/Actions/` · `app/Services/` | write path |
 | Policies | `app/Policies/` | permission |
-| Custom fields | `packages/` | kiểm package custom-fields |
+| Custom fields | composer vendor `relaticle/custom-fields` ^3.8.0 | ⚠️ KHÔNG nằm trong `packages/` như bản đầu đoán — vendor không có trong clone, nên phần custom-field chỉ verify được ở tầng app (17 loại) |
 | Routes | `routes/` | REST + MCP endpoint |
 
 ## Trigger.dev (`trigger-dev/` · Apache-2.0 root · TS monorepo)
