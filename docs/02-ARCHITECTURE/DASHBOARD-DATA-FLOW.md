@@ -64,3 +64,46 @@ need no change — only their data source (the repository) is swapped.
 
 **No code change is required by this ticket** — it is a review + the seam map
 above. The repository introduction is a separate, prioritizable story.
+
+---
+
+## WTM-462 — Home tile ⇄ destination screen source audit (2026-08-25)
+
+> Follow-up to **WTM-461** (PR #298, `f5bab0b`), which found the Home "Nguồn
+> hàng" tile counting the **favourites** store while its tap opened the
+> Business-Inputs screen — a summary tile reading a **different source** than
+> the screen it opens (the [[P-50]] shape). WTM-461 fixed only the Producer
+> tile; this audit checks the same shape on the other four and locks all five
+> with a gate (`test/features/tongtai/p0/home_tiles_one_path_test.dart`).
+
+Contract (ADR-TON-015): **Summary Count == Domain Visible Records** — the number
+on a Home capability tile must come from the *same source* the screen its tap
+opens reads, so the two can never contradict each other.
+
+| Tile (`Key`) | Tile reads | Destination screen | Screen reads | Same source? |
+|---|---|---|---|---|
+| `home-tile-producer` | `businessInputRepository.loadAll().length` — `tongtai_home_screen.dart:190,210` | `TongtaiBusinessInputsScreen` | `businessInputRepository.loadAll()` — `tongtai_business_inputs_screen.dart` | ✅ same (fixed in WTM-461) |
+| `home-tile-inventory` | `context.inventory.productCount` — `tongtai_home_screen.dart:207` → `InventorySummary.from(productRepository.loadAll())` `inventory_context.dart:94` | `TongtaiInventoryScreen` | `productRepositoryProvider` via `ProductCatalogController` — `tongtai_inventory_screen.dart:101` | ✅ same |
+| `home-tile-consumer` | `context.customers.total` — `tongtai_home_screen.dart:208` → `CustomerSummary.from(customerRepository.loadAll())` `customer_context.dart:39` | `TongtaiCustomerListScreen` | `customerRepositoryProvider` via `CustomerDirectoryController` — `tongtai_customer_list_screen.dart:116` | ✅ same |
+| `home-tile-journey` | `goals.length` — `tongtai_home_screen.dart:110,185` → `deriveGoalsProgress(businessGoalRepository.loadAll(), …)` | ~~`TongtaiJourneyScreen`~~ → **`TongtaiGoalsScreen`** (`onJourney` `tongtai_home_screen.dart:672`) | `businessGoalRepositoryProvider` via `BusinessGoalController` — `tongtai_goals_screen.dart:82` | ❌→✅ **was different** (`journeyRepository`, a different domain); **fixed** by opening the Goals list |
+| `home-tile-finance` | `FinanceService(financeRepository, orders: orderRepository).summaryAsOf(now).receivables` — `tongtai_home_screen.dart:200-203` | `TongtaiFinanceScreen` | `FinanceController(financeRepository, orders: orderRepository)` → `FinanceService(_txns, orders: _sales)` — `finance_controller.dart` | ❌→✅ **was different** (controller built `FinanceService(_txns)` with **no orders** ⇒ receivables always 0, block never rendered); **fixed** by wiring `orderRepository` into the controller |
+
+**Two divergences fixed (like Producer, to One Data Path):**
+
+1. **Journey** — the tile's number is a **goals** count (unit "mục tiêu",
+   `count_list_contract_test` gates it against `businessGoalRepository`), but the
+   tap opened the Journey **plan** screen, which reads `journeyRepository`. A
+   seller with 3 goals and no journey saw "3" then an empty "no journey" screen.
+   `onJourney` now opens `TongtaiGoalsScreen`, which lists exactly those goals.
+   The Journey plan stays one tap away via the "Nhiệm vụ hôm nay" section
+   (`home-open-journey`, kept green by `nav_availability_test`).
+2. **Finance** — the tile shows **receivables**, derived from unpaid **orders**
+   (WTM-211). The Finance screen's `FinanceController` built its `FinanceService`
+   with `orders: const []`, so `receivables` (and `salesIncome`, WTM-196) were
+   always 0 — the receivables block (`finance-receivables`) never rendered while
+   the tile showed a real figure. `FinanceController` now reads the order
+   repository, exactly as `FinanceContextProvider` already did.
+
+Inventory and Consumer were already one-source (both the tile — via
+`BusinessContext` — and the screen read the same repository); the gate now locks
+that too, so a future refactor cannot silently split them.

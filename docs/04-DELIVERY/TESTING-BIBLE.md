@@ -1292,6 +1292,51 @@ Cùng họ P-45 (*cổng chỉ bắt thứ nó được viết để tìm*) — 
 P-45 là cổng **bỏ lọt** thứ xấu viết khác đi; P-49 là cổng **bắn nhầm** thứ tốt
 nó không đọc nổi. Cả hai đều là một máy đọc code bằng regex thay vì parser.
 
+## P-50 · Ô tóm tắt đọc NGUỒN KHÁC màn nó MỞ RA — cổng đếm một màn không bao giờ thấy
+
+**Root-Cause.** Một ô tóm tắt trên Trang chủ công bố một con số, và cú chạm của
+nó mở một màn. Khi con số ấy đến từ **một nguồn** còn màn kia đọc **nguồn khác**,
+người bán thấy ô nói "N" rồi chạm vào gặp màn nói "0" (hoặc trống). Ba lần trong
+sản phẩm này:
+
+* **Producer (WTM-461).** Ô `home-tile-producer` đếm `favorites.length`
+  (search-favourites, di sản Phase-1) trong khi tap mở màn đếm
+  `businessInputRepository.loadAll()`. "0 đầu vào" đứng cạnh một màn có N nguồn.
+* **Journey (WTM-462).** Ô `home-tile-journey` đếm **mục tiêu**
+  (`businessGoalRepository`) nhưng mở màn **kế hoạch Hành trình** (đọc
+  `journeyRepository` — một miền khác). Người bán có 3 mục tiêu mà chưa lập hành
+  trình thấy "3" rồi gặp màn trống *"chưa có hành trình"*.
+* **Finance (WTM-462).** Ô `home-tile-finance` hiện **công nợ**, dẫn xuất từ đơn
+  chưa trả (`orders`). Nhưng `FinanceController` của màn Tài chính dựng
+  `FinanceService(_txns)` **không có orders** ⇒ `receivables` **luôn 0**, khối
+  `finance-receivables` không bao giờ hiện — ô nói có công nợ, màn nói không.
+
+**Regression.** ~2900 test xanh khi WTM-461 nổ; con số Finance/Journey sống sót
+thêm một vòng nữa. Mỗi ô có test, mỗi màn có test, và mỗi cái **đúng với nguồn
+của riêng nó** — y hệt [[P-44]]. Khác P-44 ở chỗ hai con số không nằm cùng một
+màn: chúng cách nhau **một cú chạm điều hướng**, nên ngay cả một test dựng đúng
+một màn rồi đọc lại chính nó (kiểu `count_list_contract`) cũng không thấy — nó
+không bao giờ mở **màn thứ hai** để so.
+
+**Test Pattern.** `home_tiles_one_path_test.dart` — kiểm **hai vế** qua production
+wiring, cho **cả năm** ô cùng lúc: (1) con số trên ô == repo mà **ô** đọc, và
+(2) chạm vào ô, mở màn đích, và đúng những bản ghi/figure ấy **hiện ra ở đó**.
+Mấu chốt: **mở màn thứ hai và so**, không dừng ở "ô đọc đúng repo". Gài **mồi**
+để bắt tái phát về nguồn cũ — favourites nhiều hơn số inputs (Producer); đơn
+chưa trả **nhưng không có giao dịch tài chính nào** (Finance: nếu màn vẫn bỏ qua
+orders thì thu nhập = 0 ⇒ màn về trạng thái rỗng ⇒ khối công nợ biến mất). Sửa
+lệch **về One Data Path**: đổi *nguồn* ô về đúng repo màn đọc (Producer), hoặc
+đổi *cửa* ô về đúng màn liệt kê thứ nó đếm (Journey → Goals), hoặc nối *nguồn*
+còn thiếu vào màn (Finance → orders).
+
+**Prevention Rule.** Với **mọi** ô tóm tắt có cú chạm dẫn đi đâu đó, hỏi:
+*"màn nó mở ra có đọc đúng cái repo tạo ra con số này không, và nó có hiện ra
+đúng những bản ghi ấy không?"* — nếu chưa có test **mở màn đích rồi so**, chưa
+có cổng nào cả. Con số trên ô và danh sách ở màn đích phải cùng **một chủ**
+(ADR-TON-015). Cùng họ [[P-44]] (hai con số một màn) và [[P-27]] (hai bên tự
+nhất quán vẫn nói hai sự thật) — P-50 là biến thể **qua điều hướng**: cái mồ côi
+không phải một con số bên cạnh, mà là **màn ở đầu kia cú chạm**.
+
 ## Khi sửa bug mới — checklist
 
 1. Reproduce trên **đúng môi trường người dùng gặp** (release/máy thật nếu cần).

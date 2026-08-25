@@ -655,7 +655,21 @@ class _TongtaiHomeScreenState extends ConsumerState<TongtaiHomeScreen> {
                 _push(context, const TongtaiBusinessInputsScreen()),
             onInventory: () => _push(context, const TongtaiInventoryScreen()),
             onConsumer: () => _push(context, const TongtaiCustomerListScreen()),
-            onJourney: () => _push(context, const TongtaiJourneyScreen()),
+            // ⭐ WTM-462 — ô này đếm **mục tiêu** (`_journey == goals.length`,
+            // đơn vị "mục tiêu"), nên cú chạm phải mở màn **liệt kê mục tiêu**
+            // (`TongtaiGoalsScreen`), không phải màn kế hoạch Hành trình.
+            //
+            // Trước đây nó mở `TongtaiJourneyScreen` — màn đọc
+            // `journeyRepository` (kế hoạch đang chạy), một **nguồn khác** với
+            // con số trên ô (`businessGoalRepository`). Người bán có 3 mục tiêu
+            // mà chưa lập hành trình sẽ thấy ô "3" rồi chạm vào gặp màn trống
+            // "chưa có hành trình": đúng hình dạng WTM-461 (ô đọc nguồn khác màn
+            // nó mở). Nay ô đếm mục tiêu và mở đúng danh sách mục tiêu ấy —
+            // "Summary Count == Domain Visible Records" (ADR-TON-015) giữ được.
+            //
+            // Màn Hành trình KHÔNG bị chôn: mục "Nhiệm vụ hôm nay" phía trên vẫn
+            // mở nó qua `home-open-journey` (khoá `nav_availability_test` canh).
+            onJourney: () => _push(context, const TongtaiGoalsScreen()),
             onFinance: () => _push(context, const TongtaiFinanceScreen()),
           ),
           const SizedBox(height: 24),
