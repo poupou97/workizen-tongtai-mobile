@@ -4,6 +4,18 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:xml/xml.dart';
 
+/// Đọc bytes của một file dạng bảng thành `{tên sheet: các dòng}` — WTM-463.
+///
+/// File Bridge nhận **hai định dạng bảng**: `.xlsx` (ZIP+XML) và `.csv` (văn
+/// bản). Trước WTM-463 chỉ có [XlsxReader], nên một bản xuất **products của
+/// Shopify** — vốn luôn là `.csv` — không có đường vào. Tách một giao diện
+/// mỏng để [MarketplaceExportSource] đọc được cả hai mà không cần biết đang cầm
+/// định dạng nào; mọi luật nhận dạng/gom dòng phía sau dùng chung một đường.
+abstract interface class TabularReader {
+  /// Đọc thành `{tên sheet: các dòng}`. `.csv` chỉ có một "sheet".
+  Map<String, List<List<String>>> read(Uint8List bytes);
+}
+
 /// Đọc `.xlsx` — WTM-326 (C2 · Epic WTM-324).
 ///
 /// ## Vì sao tự viết thay vì dùng gói `excel`
@@ -33,13 +45,14 @@ import 'package:xml/xml.dart';
 ///    Đọc thẳng sẽ ra "42" thay vì "Áo thun".
 /// 3. **Chuỗi nội tuyến** (`t="inlineStr"`) — một số công cụ xuất kiểu này
 ///    thay vì dùng bảng chung.
-class XlsxReader {
+class XlsxReader implements TabularReader {
   const XlsxReader();
 
   /// Đọc toàn bộ workbook thành `{tên sheet: các dòng}`.
   ///
   /// Ném [XlsxException] khi file không phải `.xlsx` đọc được — chỗ gọi biến
   /// nó thành một câu tiếng Việt, không phải một stack trace.
+  @override
   Map<String, List<List<String>>> read(Uint8List bytes) {
     final Archive archive;
     try {

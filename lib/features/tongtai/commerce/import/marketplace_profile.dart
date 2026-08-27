@@ -34,6 +34,7 @@ class MarketplaceProfile {
     required this.channel,
     required this.orderColumns,
     required this.incomeColumns,
+    this.productColumns = const {},
   });
 
   /// Mã canonical — khớp `ConnectionCatalog` và `ActionVendor`.
@@ -50,15 +51,31 @@ class MarketplaceProfile {
   /// Bí danh cột của **báo cáo thu nhập**.
   final Map<MarketplaceField, List<String>> incomeColumns;
 
+  /// Bí danh cột của **file danh mục sản phẩm** — WTM-463.
+  ///
+  /// Trước đây file này **không có đường vào**: hồ sơ chỉ khai order/income, nên
+  /// một bản xuất products của Shopify (giá vốn · SKU · tồn theo biến thể) rơi
+  /// hết. Rỗng ở đây nghĩa là *sàn này chưa có hồ sơ danh mục*, không phải
+  /// *chưa kịp điền* — chỉ Shopify khai bộ này vì đó là file thật đầu tiên
+  /// Founder đưa vào.
+  final Map<MarketplaceField, List<String>> productColumns;
+
+  /// Bộ cột theo loại file — một chỗ ánh xạ, để `scoreFor`/`columnFor` không
+  /// mỗi hàm tự viết lại cái `switch` này (P-27).
+  Map<MarketplaceField, List<String>> _columnsFor(MarketplaceFileKind kind) =>
+      switch (kind) {
+        MarketplaceFileKind.orders => orderColumns,
+        MarketplaceFileKind.income => incomeColumns,
+        MarketplaceFileKind.products => productColumns,
+      };
+
   /// Điểm khớp của một bộ tiêu đề với hồ sơ này, cho một loại file.
   ///
   /// Không phải "khớp hết hay không": file thật luôn có cột thừa và đôi khi
   /// thiếu cột phụ. Điểm số cho phép chọn hồ sơ **gần nhất** rồi nói ra phần
   /// chưa khớp, thay vì từ chối cả file.
   int scoreFor(List<String> headers, MarketplaceFileKind kind) {
-    final columns = kind == MarketplaceFileKind.orders
-        ? orderColumns
-        : incomeColumns;
+    final columns = _columnsFor(kind);
     final normalised = headers.map(_normalise).toSet();
     var score = 0;
     for (final aliases in columns.values) {
@@ -78,9 +95,7 @@ class MarketplaceProfile {
     MarketplaceField field,
     MarketplaceFileKind kind,
   ) {
-    final aliases = (kind == MarketplaceFileKind.orders
-        ? orderColumns
-        : incomeColumns)[field];
+    final aliases = _columnsFor(kind)[field];
     if (aliases == null) return null;
     for (final header in headers) {
       for (final alias in aliases) {
@@ -324,6 +339,31 @@ class MarketplaceProfile {
         MarketplaceField.voucher: ['Discount', 'Discount Code'],
         MarketplaceField.payout: ['Net', 'Payout Amount'],
       },
+      // ── WTM-463 · file danh mục products (bản xuất THẬT của Founder) ────────
+      //
+      // Đây là bộ cột đầu tiên **đối chiếu với một file xuất thật** (Shopify
+      // "products_export.csv", store demo Nova Furniture) — khác mọi bí danh
+      // order/income ở trên vốn đến từ tài liệu. Tên cột dưới đây là tên Shopify
+      // xuất ra, không phải phỏng đoán.
+      //
+      // `Handle` là khoá gom: một sản phẩm trải trên nhiều dòng (dòng tiêu đề +
+      // mỗi biến thể một dòng + các dòng chỉ-ảnh), tất cả chung một Handle. Đây
+      // là thứ order/income không có, nên nó cũng là dấu nhận dạng chắc chắn
+      // nhất của một file products.
+      productColumns: {
+        MarketplaceField.productHandle: ['Handle'],
+        MarketplaceField.productName: ['Title'],
+        MarketplaceField.sku: ['Variant SKU'],
+        MarketplaceField.unitPrice: ['Variant Price'],
+        MarketplaceField.costPrice: ['Cost per item'],
+        MarketplaceField.quantity: ['Variant Inventory Qty'],
+        MarketplaceField.option1Name: ['Option1 Name'],
+        MarketplaceField.option1Value: ['Option1 Value'],
+        MarketplaceField.vendor: ['Vendor'],
+        MarketplaceField.productCategory: ['Product Category'],
+        MarketplaceField.status: ['Status'],
+        MarketplaceField.imageSrc: ['Image Src'],
+      },
     ),
     MarketplaceProfile(
       vendor: 'lazada',
@@ -396,6 +436,33 @@ enum MarketplaceField {
   platformVoucher,
 
   payout,
+
+  // ── vai trò của file danh mục products — WTM-463 ─────────────────────────
+  //
+  // Chỉ dùng cho `MarketplaceFileKind.products`. Tách khỏi các vai trò
+  // order/income ở trên để một file products không vô tình khớp điểm với một
+  // hồ sơ đơn hàng.
+  /// Khoá gom biến thể về sản phẩm — Shopify `Handle`.
+  productHandle,
+
+  /// **Chi phí biến đổi mỗi đơn vị** — Shopify `Cost per item`. Trống ⇒ `null`,
+  /// KHÔNG rơi về 0 (ADR-TON-022).
+  costPrice,
+
+  /// Tên nhóm tuỳ chọn thứ nhất — `Option1 Name` ("Color", "Material"…).
+  option1Name,
+
+  /// Giá trị tuỳ chọn thứ nhất — `Option1 Value`, thứ phân biệt biến thể.
+  option1Value,
+
+  /// Nhà cung cấp/thương hiệu — Shopify `Vendor`.
+  vendor,
+
+  /// Danh mục sản phẩm ở nguồn — Shopify `Product Category`.
+  productCategory,
+
+  /// URL ảnh — Shopify `Image Src`; dòng chỉ có cột này là dòng ảnh phụ.
+  imageSrc,
 }
 
 /// File này là loại gì.
@@ -404,7 +471,10 @@ enum MarketplaceFileKind {
   orders('orders'),
 
   /// Báo cáo thu nhập — phí · hoa hồng · vận chuyển · voucher · payout.
-  income('income');
+  income('income'),
+
+  /// Danh mục sản phẩm — SKU · giá vốn · tồn theo biến thể (WTM-463).
+  products('products');
 
   const MarketplaceFileKind(this.code);
 

@@ -70,6 +70,15 @@ class ImportColumnMap {
         // vào đơn hàng. Từng loại phí thì tuỳ sàn có hay không, và thiếu một
         // loại phí là chuyện bình thường, không phải file hỏng.
         MarketplaceFileKind.income => const {MarketplaceField.orderId},
+        // File danh mục bắt buộc **Handle** (khoá gom biến thể), **tên** và
+        // **giá bán** — thiếu chúng thì không dựng nổi một sản phẩm bán được.
+        // Giá vốn/SKU thiếu là bình thường (đó chính là lỗ WTM-463 phát hiện),
+        // nên không nằm trong bộ bắt buộc.
+        MarketplaceFileKind.products => const {
+          MarketplaceField.productHandle,
+          MarketplaceField.productName,
+          MarketplaceField.unitPrice,
+        },
       };
 
   /// Vai trò bắt buộc mà bản đồ này **chưa** chỉ được cột nào.
@@ -90,13 +99,22 @@ class ImportColumnMap {
       for (final e in columns.entries)
         if (e.value.trim().isNotEmpty) e.key: [e.value],
     };
-    final isOrders = kind == MarketplaceFileKind.orders;
+    // Bản đồ tay chỉ điền đúng bộ cột của loại file người bán khai; hai bộ còn
+    // lại giữ nguyên hồ sơ nền (nếu có). Điền nhầm bộ sẽ mang cột "phí sàn"
+    // sang vai trò đơn hàng — nhập ra doanh thu bịa.
     return MarketplaceProfile(
       vendor: vendor,
       displayName: base?.displayName ?? vendor,
       channel: base?.channel ?? SalesChannel.marketplaceOther,
-      orderColumns: isOrders ? mapped : (base?.orderColumns ?? const {}),
-      incomeColumns: isOrders ? (base?.incomeColumns ?? const {}) : mapped,
+      orderColumns: kind == MarketplaceFileKind.orders
+          ? mapped
+          : (base?.orderColumns ?? const {}),
+      incomeColumns: kind == MarketplaceFileKind.income
+          ? mapped
+          : (base?.incomeColumns ?? const {}),
+      productColumns: kind == MarketplaceFileKind.products
+          ? mapped
+          : (base?.productColumns ?? const {}),
     );
   }
 
