@@ -11,22 +11,11 @@ plugins {
 // Google Services plugin is applied ONLY when the Founder-provided config file
 // exists. Without android/app/google-services.json the app still builds and
 // telemetry silently no-ops (see lib/core/telemetry/).
-// WTM-341 (E5 · Epic WTM-336): bản demo cho Founder chơi cài **song song**,
-// không đè lên app thật.
-//
-// Lý do là một ràng buộc thật, không phải tiện tay: khoá ký đã đổi (WTM-332),
-// nên cài đè bất khả thi, mà gỡ app thì mất dữ liệu kinh doanh thật của
-// Founder — và Founder đã chốt GIỮ DỮ LIỆU. Một applicationId khác giải đúng
-// bài đó: hai app, hai kho dữ liệu, không đụng gì nhau.
-//
-// Bật bằng biến môi trường chứ không phải flavor: một flavor sẽ nhân đôi mọi
-// biến thể build cho một nhu cầu dùng vài lần.
-val demoInstall = System.getenv("TONGTAI_DEMO_INSTALL") == "true"
-
-// google-services.json chỉ khai `com.workizen.tongtai`. Bản demo mang id khác
-// nên plugin sẽ ném "No matching client found" — bỏ qua Firebase ở bản demo,
-// và telemetry tự no-op (lib/core/telemetry/).
-if (file("google-services.json").exists() && !demoInstall) {
+// WTM-464: biến thể cài đặt `.demo` (WTM-341) đã bị KHAI TỬ. Nó giải bài
+// keystore-đổi-mà-phải-giữ-dữ-liệu của một thời điểm, nhưng để lại hai app
+// Tổng Tài trên máy — Founder nhắc nhiều lần "chỉ MỘT app". Đường demo duy
+// nhất là seed `sample-` TRONG app thật (ADR-TON-014). Đừng đem nó trở lại.
+if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
     // Must accompany google-services whenever firebase_crashlytics is in the
     // dependency tree: the plugin injects the Crashlytics build ID; without
@@ -63,16 +52,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        if (demoInstall) {
-            applicationIdSuffix = ".demo"
-            versionNameSuffix = "-demo"
-            // Nhãn khác trên màn hình chính. Hai biểu tượng giống hệt nhau là
-            // cách chắc chắn nhất để Founder mở nhầm app rồi kết luận dữ liệu
-            // thật đã mất.
-            manifestPlaceholders["appLabel"] = "Tổng Tài DEMO"
-        } else {
-            manifestPlaceholders["appLabel"] = "Tổng Tài"
-        }
+        manifestPlaceholders["appLabel"] = "Tổng Tài"
     }
 
     signingConfigs {
