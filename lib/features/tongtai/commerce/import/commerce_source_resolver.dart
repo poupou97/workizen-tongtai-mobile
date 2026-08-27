@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import '../../inventory/product.dart';
 import 'commerce_import.dart';
+import 'csv_reader.dart';
 import 'import_column_map.dart';
 import 'marketplace_export_source.dart';
 import 'marketplace_profile.dart';
@@ -34,17 +35,30 @@ abstract final class CommerceSourceResolver {
     Set<String> existingOrderIds = const {},
     List<ImportColumnMap> savedMaps = const [],
     XlsxReader reader = const XlsxReader(),
+    CsvReader csvReader = const CsvReader(),
   }) {
+    MarketplaceExportSource marketplace(TabularReader r) =>
+        MarketplaceExportSource(
+          bytes: bytes,
+          fileName: fileName,
+          now: now,
+          knownProducts: knownProducts,
+          existingOrderIds: existingOrderIds,
+          savedMaps: savedMaps,
+          reader: r,
+        );
+
     if (_looksLikeMarketplaceExport(bytes, reader, savedMaps)) {
-      return MarketplaceExportSource(
-        bytes: bytes,
-        fileName: fileName,
-        now: now,
-        knownProducts: knownProducts,
-        existingOrderIds: existingOrderIds,
-        savedMaps: savedMaps,
-        reader: reader,
-      );
+      return marketplace(reader);
+    }
+    // ⭐ WTM-463 — đường `.csv`. Bản xuất **products của Shopify** LUÔN là
+    // `.csv`, mà `XlsxReader` ném ngay ở byte đầu (không phải ZIP) nên phép thử
+    // trên trả `false`. Không có nhánh này thì file products của Shopify không
+    // bao giờ tới được `MarketplaceExportSource` — đúng lỗ WTM-463 vá. Thử CSV
+    // sau XLSX vì phép thử XLSX chặt hơn (một file `.xlsx` thật không bao giờ
+    // đọc-lầm-thành CSV rồi khớp điểm).
+    if (_looksLikeMarketplaceExport(bytes, csvReader, savedMaps)) {
+      return marketplace(csvReader);
     }
     return XlsxCommerceSource(bytes: bytes, fileName: fileName, now: now);
   }
@@ -60,7 +74,7 @@ abstract final class CommerceSourceResolver {
   /// chế **chạy được**, không chứng minh nó **tới được**.
   static bool _looksLikeMarketplaceExport(
     Uint8List bytes,
-    XlsxReader reader,
+    TabularReader reader,
     List<ImportColumnMap> savedMaps,
   ) {
     try {
